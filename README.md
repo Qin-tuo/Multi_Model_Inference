@@ -110,6 +110,12 @@
 - 容器必须匹配 `linux/arm64`/aarch64 与 JetPack/L4T，不能直接使用 x86_64 镜像。
 - 所有外部文档的兼容性结论都带核验日期；真正开工前仍要复核目标 tag/release。
 
+## 外部资料使用原则
+
+- 产品兼容性、安装和 API 语义优先采用 [NVIDIA 官方资料](references/official-resources.md)。
+- [GitHub 项目清单](references/github-projects.md) 区分可直接实操、辅助工具和源码研读，不把活跃 `main` 当作稳定 release。
+- 社区课程如 [lyy-ai/ai_infra](https://github.com/lyy-ai/ai_infra) 用于建立知识地图；其代码、环境、license 和平台结论需独立检查，不能覆盖官方支持矩阵。
+
 ## 后续代码目录触发条件
 
 当第一个里程碑“单 CV 模型 + telemetry + benchmark harness”确定后，再添加：
