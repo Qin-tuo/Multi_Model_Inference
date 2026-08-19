@@ -204,7 +204,7 @@
 每次引入仓库时记录：
 
 ```text
-repository: https://github.com/<owner>/<repo>
+repository: <full GitHub repository URL>
 revision: <git commit SHA>
 release/tag: <tag or none>
 checked_at: 2026-08-19
@@ -214,4 +214,3 @@ purpose: <what this revision is used for>
 local_changes: <patch list or none>
 license_review: <result>
 ```
-

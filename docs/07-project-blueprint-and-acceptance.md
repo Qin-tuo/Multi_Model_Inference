@@ -432,7 +432,7 @@ repeatability:
 - 真实业务流量回放、容量和灾难恢复；
 - carrier board/摄像头/电源/EMC 等产品验证。
 
-因此本项目不把“Demo 成功”包装成“生产级已完成”。它的价值是提供可审计的工程证据和一条到生产的清晰路径。
+因此本项目不把“Demo 成功”包装成已经达到生产等级。它的价值是提供可审计的工程证据和一条到生产的清晰路径。
 
 ## 最终交付清单
 
@@ -445,4 +445,3 @@ repeatability:
 - isolated/concurrent/thermal/quality 对照；
 - reproducibility、operations 和 known limitations；
 - 一份能被面试官逐项追问的技术报告。
-
