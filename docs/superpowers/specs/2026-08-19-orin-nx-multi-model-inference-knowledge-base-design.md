@@ -20,6 +20,7 @@ Create a Chinese-language technical knowledge base that:
 - explains the Orin NX hardware and software stack;
 - distinguishes Linux kernel work from CUDA kernels and model operators;
 - documents multi-model concurrency, scheduling, isolation, and measurement;
+- provides a reproducible host-to-Orin learning environment installation guide;
 - curates official documentation and useful open-source repositories;
 - defines a four-to-five-month learning roadmap and a future flagship project;
 - can later grow into an implementation repository without premature empty
@@ -38,6 +39,7 @@ Orin_NX_Multi_Model_Inference/
 │   ├── 05-multi-model-concurrency-architecture.md
 │   ├── 06-learning-roadmap.md
 │   ├── 07-project-blueprint-and-acceptance.md
+│   ├── 08-environment-setup.md
 │   └── superpowers/specs/
 │       └── 2026-08-19-orin-nx-multi-model-inference-knowledge-base-design.md
 └── references/
@@ -93,6 +95,16 @@ TensorRT/CUDA, quantization, multi-model scheduling, serving, profiling, and
 stability testing. The project blueprint must define measurable acceptance
 criteria rather than claim production readiness from a successful demo.
 
+### Learning Environment Setup
+
+Provide two explicit setup paths: a native JetPack baseline and an isolated
+container-based workspace. Cover the Ubuntu x86_64 host, SDK Manager/direct
+flash, Orin post-flash verification, storage planning, version pinning, Python
+environment boundaries, container runtime, profiling tools, optional serving
+components, and health checks. Commands must be labeled by execution location
+(`Host` or `Orin`) and must not assume that x86_64 packages or containers run on
+the aarch64 target.
+
 ### References
 
 Separate official documentation from GitHub projects. Every external resource
@@ -134,4 +146,3 @@ Implementation directories are added only after selecting the first bounded
 milestone. The recommended first milestone is a reproducible Orin baseline with
 one TensorRT CV engine, device telemetry, and a benchmark harness. Multi-model
 scheduling follows only after the single-model baseline is stable and measured.
-
