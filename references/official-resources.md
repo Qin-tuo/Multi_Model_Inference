@@ -62,14 +62,21 @@
 
 - [Nsight Systems Documentation](https://docs.nvidia.com/nsight-systems/)
 - [Installation Guide](https://docs.nvidia.com/nsight-systems/InstallationGuide/index.html)
+- [User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html)
 - 用途：Host/target 区分、Tegra Embedded Platforms Edition、CPU/CUDA 时间线、NVTX。
 - 注意：Jetson 使用与 JetPack 匹配的 target package；最新 Workstation package 不自动匹配 Tegra target。
 
 ### Nsight Compute
 
 - [Nsight Compute Documentation](https://docs.nvidia.com/nsight-compute/)
+- [Nsight Compute User Guide](https://docs.nvidia.com/nsight-compute/NsightCompute/index.html)
 - 用途：热点 CUDA kernel 的 memory、occupancy、warp stall 和 roofline 分析。
 - 顺序：先用 Systems 找热点，再用 Compute 深入。
+
+### CUDA 正确性检查
+
+- [Compute Sanitizer Documentation](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)
+- 用途：检查 CUDA kernel 的越界、race、初始化和同步问题；先保证 correctness，再讨论性能。
 
 ## TensorRT
 
@@ -173,4 +180,3 @@
 [ ] 文档 latest 是否已经超出 JetPack 自带 major version？
 [ ] 性能结论是否来自当前 target，而不是官方服务器数字？
 ```
-

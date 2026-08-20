@@ -451,9 +451,30 @@ tensorrt-edgellm-quantize --help
 
 ```bash
 nsys --version 2>/dev/null || true
+nsys status -e 2>/dev/null || true
 ```
 
-可以在 Orin CLI 采集 `.nsys-rep`，复制到 Host GUI 查看；也可以按当前 Nsight Systems/JetPack 文档配置远程 target。采集时加入 NVTX 标记，区分排队、预处理、enqueue、后处理和响应。
+Nsight 的 GUI 可以在 Host 上运行，但采集器必须在 Orin target 上运行。Host 和 Orin 通过 SSH 远程启动时，程序路径、工作目录和环境变量都必须是 Orin 上的路径；Host-only trace 不能作为 Orin 性能证据。Jetson 应使用与 JetPack 匹配的 Tegra/Embedded Platforms target package。
+
+**Orin：**
+
+```bash
+mkdir -p ~/profiles
+nsys profile \
+  --trace=cuda,nvtx,osrt \
+  --output=~/profiles/multi_model \
+  --force-overwrite=true \
+  ./your_application
+```
+
+**Host：**
+
+```bash
+scp <orin-user>@<orin-ip>:~/profiles/multi_model.nsys-rep .
+nsys-ui multi_model.nsys-rep
+```
+
+也可以直接在 Host 的 `nsys-ui` 中添加 Tegra/Jetson SSH 连接，由 GUI 部署 target 工具并回传报告。采集时使用 NVTX 区分 queue、preprocess、enqueue、postprocess 和 response。
 
 ### Nsight Compute
 
@@ -465,7 +486,9 @@ nsys --version 2>/dev/null || true
 ncu --version 2>/dev/null || true
 ```
 
-若 target CLI 未安装，使用 JetPack 匹配的 Host/target 工具组合。profile 权限、驱动和工具版本不匹配时先修环境，不要根据空报告优化。
+若 target CLI 未安装，使用 JetPack 匹配的 Host/target 工具组合。Host GUI 可以通过 SSH 远程启动 Orin 上的 `ncu`，也可以在 Orin 生成 `.ncu-rep` 后复制回 Host。profile 权限、驱动和工具版本不匹配时先修环境，不要根据空报告优化。
+
+完整的双主线工具链和 Host/Orin 分工见[双主线工具链与技能栈](09-dual-track-toolchain-and-skill-stack.md)。
 
 ### 社区 telemetry 工具
 
@@ -559,4 +582,3 @@ experiment:
 - 没有把 x86 主机结果标成 Orin 实测。
 
 完成这些检查后，才开始 [4-5 个月学习路线](06-learning-roadmap.md) 的单模型基线阶段。
-

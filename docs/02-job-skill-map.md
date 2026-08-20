@@ -16,11 +16,11 @@
 
 | 岗位族 | 核心产出 | 高频技术 | 与你的匹配度 |
 | --- | --- | --- | --- |
-| 边缘部署与性能 | 单机/板端模型落地、端到端延迟、资源和稳定性 | C++、TensorRT、DeepStream、CUDA、Linux、容器 | **最高，当前主线** |
-| 推理框架研发 | runtime、调度器、算子、内存管理和框架功能 | C++/Python、CUDA、PyTorch、vLLM/SGLang/TRT-LLM | 中高，可由边缘项目逐步深入 |
+| 边缘部署与性能 | 单机/板端模型落地、端到端延迟、资源和稳定性 | C++、TensorRT、DeepStream、CUDA、Linux、容器 | **主攻方向一** |
+| 推理框架研发 | runtime、调度器、算子、内存管理和框架功能 | C++/Python、CUDA、PyTorch、vLLM/SGLang/TRT-LLM | **主攻方向二** |
 | 集群推理平台 | 多 GPU/多节点服务、资源调度、SLO、容量和高可用 | Kubernetes、NCCL、Ray/Dynamo、可观测性、存储/网络 | 中低，先理解概念，后续按岗位扩展 |
 
-Orin 项目能直接证明第一类能力，也能覆盖第二类的缩小版问题：execution context、KV cache、队列、batching、内存预算和 CUDA kernel。它无法单独证明多机并行和大规模平台经验。
+你的目标是同时投递前两类岗位。Orin 项目直接证明边缘端到端能力，也能覆盖推理框架研发的缩小版问题：execution context、KV cache、队列、batching、内存预算和 CUDA kernel。它无法单独证明多机并行和大规模平台经验。统一工具链和双主线证据见[双主线工具链与技能栈](09-dual-track-toolchain-and-skill-stack.md)。
 
 ## 技术栈全景
 
@@ -143,17 +143,12 @@ Orin 项目能直接证明第一类能力，也能覆盖第二类的缩小版问
 - 把 Docker、Triton 或 DeepStream 当作自动优化器；
 - 把服务器 GPU 文档中的精度和吞吐结论直接套到 Orin。
 
-## 对学习优先级的最终建议
+## 对双主线学习优先级的最终建议
 
 ```text
-C++/Linux 工程能力
-  -> TensorRT + ONNX + benchmark
-  -> Nsight + CUDA 实用编程
-  -> DeepStream 实时 CV
-  -> Edge-LLM + KV cache/量化
-  -> 多模型调度/服务/稳定性
-  -> vLLM/TRT-LLM/CUTLASS 按岗位深入
+C++/Linux + 模型/Benchmark/Profiling 共享基础
+  ├─ 边缘主线：TensorRT -> DeepStream -> Edge-LLM -> Orin 多模型稳定性
+  └─ 框架主线：CUDA -> Plugin -> scheduler/KV Cache -> vLLM/TRT-LLM/CUTLASS
 ```
 
-这条路线既能承接嵌入式经验，也能逐步靠近 JD 中的推理框架、CUDA 和 Serving 要求。
-
+两条主线共享一个 Orin 旗舰项目，但要分别整理板端系统证据和 runtime/调度/kernel 证据。这样既承接嵌入式经验，也能同时靠近 JD 中的边缘部署、推理框架和 CUDA 要求。具体工具、深度和 20 周交付物见[双主线工具链与技能栈](09-dual-track-toolchain-and-skill-stack.md)。

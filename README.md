@@ -35,19 +35,21 @@
 
 1. [方向定位与目标](docs/01-positioning-and-goals.md)
 2. [岗位 JD 与技术栈映射](docs/02-job-skill-map.md)
-3. [Orin NX 平台与 NVIDIA 推理栈](docs/03-orin-platform-and-stack.md)
-4. [学习环境安装](docs/08-environment-setup.md)
-5. [CUDA Kernel、算子与 Plugin](docs/04-cuda-kernel-and-operator-optimization.md)
-6. [多模型并发架构](docs/05-multi-model-concurrency-architecture.md)
-7. [4-5 个月学习路线](docs/06-learning-roadmap.md)
-8. [项目蓝图与验收标准](docs/07-project-blueprint-and-acceptance.md)
-9. [GitHub 项目清单](references/github-projects.md)
-10. [官方资料索引](references/official-resources.md)
+3. [双主线工具链与技能栈](docs/09-dual-track-toolchain-and-skill-stack.md)
+4. [Orin NX 平台与 NVIDIA 推理栈](docs/03-orin-platform-and-stack.md)
+5. [学习环境安装](docs/08-environment-setup.md)
+6. [CUDA Kernel、算子与 Plugin](docs/04-cuda-kernel-and-operator-optimization.md)
+7. [多模型并发架构](docs/05-multi-model-concurrency-architecture.md)
+8. [4-5 个月学习路线](docs/06-learning-roadmap.md)
+9. [项目蓝图与验收标准](docs/07-project-blueprint-and-acceptance.md)
+10. [GitHub 项目清单](references/github-projects.md)
+11. [官方资料索引](references/official-resources.md)
 
 按问题快速阅读：
 
 | 你当前的问题 | 先看 |
 | --- | --- |
+| 两类岗位如何同时准备 | `09`，再看 `02` 和 `06` |
 | 我是否应该学 CUDA | `04`，再看 `02` |
 | Linux kernel 和 CUDA kernel 有什么区别 | `04` |
 | Triton 是什么、是否适合 Orin | `03` 和 `05` |

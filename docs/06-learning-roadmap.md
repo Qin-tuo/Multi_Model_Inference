@@ -15,6 +15,17 @@
 
 这不是“20 周精通所有 AI Infra”。目标是形成边缘异构推理系统的完整闭环，并建立继续深入 vLLM、TensorRT-LLM、CUDA kernel 或 Serving 的基础。
 
+## 双主线交付方式
+
+本路线同时服务两个主攻岗位：边缘推理性能和推理框架研发。每个阶段都保留同一个 Orin 项目 baseline，但分别产出两类证据：
+
+| 轨道 | 关注点 | 典型交付 |
+| --- | --- | --- |
+| 边缘推理性能 | Orin 端到端延迟、吞吐、功耗、温度、内存、实时性和故障恢复 | TensorRT/DeepStream/Edge-LLM 多模型系统、Nsight/`tegrastats` 报告、soak 和过载记录 |
+| 推理框架研发 | runtime 生命周期、CUDA、Plugin、scheduler、batching、KV Cache 和内存管理 | C++ worker/context pool、融合 kernel 或 Plugin、scheduler 原型、源码机制实验 |
+
+前 4-5 个月的共享基础是 C++/Linux、ONNX、TensorRT、Benchmark 和 Nsight Systems；之后再按两个轨道分别增加 DeepStream/Edge-LLM 与 CUDA/Plugin/框架源码深度。不要把两个轨道拆成两套互不相干的项目，也不要为了“覆盖全面”提前引入 Kubernetes、多节点和分布式训练。统一工具链见[双主线工具链与技能栈](09-dual-track-toolchain-and-skill-stack.md)。
+
 ## 时间使用原则
 
 - 70%：在目标硬件写代码、跑实验、排错；
@@ -368,4 +379,3 @@ Kubernetes、多节点、复杂公平算法、自动扩缩容、分布式 KV cac
 ### 集群 AI Infra 方向
 
 补多 GPU/NCCL、Kubernetes、Dynamo/Ray、KV cache 分层与容量治理。此时 Orin 项目提供端到端性能工程基础，但仍需独立的集群项目证据。
-
