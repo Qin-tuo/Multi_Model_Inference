@@ -1,0 +1,9 @@
+[submodule "references/repo/accelerated-computing-hub"]
+	path = references/repo/accelerated-computing-hub
+	url = https://github.com/NVIDIA/accelerated-computing-hub.git
+[submodule "references/repo/cuda-course"]
+	path = references/repo/cuda-course
+	url = https://github.com/Infatoshi/cuda-course.git
+[submodule "references/repo/mnist-cuda"]
+	path = references/repo/mnist-cuda
+	url = https://github.com/Infatoshi/mnist-cuda.git

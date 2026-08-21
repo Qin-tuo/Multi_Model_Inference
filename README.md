@@ -44,6 +44,11 @@
 9. [项目蓝图与验收标准](docs/07-project-blueprint-and-acceptance.md)
 10. [GitHub 项目清单](references/github-projects.md)
 11. [官方资料索引](references/official-resources.md)
+12. [汽车/机器人/视觉端侧多生态总路线](references/EDGE_AI_MULTI_ECOSYSTEM_ROADMAP.md)
+13. [地瓜 BPU / Horizon RDK 路线](references/EXTERNAL_FREE_BILINGUAL_HORIZON_BPU_ROADMAP.md)
+14. [瑞芯微 RKNN / RKNPU2 / RKNN3 双并行路线](references/EXTERNAL_FREE_BILINGUAL_ROCKCHIP_RKNN_ROADMAP.md)
+
+多生态路线的推荐顺序是：**NVIDIA 主路线 -> 地瓜 Horizon BPU -> 瑞芯微生态 -> 跨平台项目**；进入瑞芯微后，RKNN2 视觉主线与 RKNN3 协处理器线是并行分支，建议先用 RKNN2 建立视觉基线，再切入 RKNN3。NVIDIA 主路线仍然是 CUDA、TensorRT、Jetson 和 profiling 的底座，国产生态文档负责 BPU/NPU、机器人视觉、媒体链路、协处理器和板卡适配。
 
 按问题快速阅读：
 
@@ -57,6 +62,8 @@
 | SDK Manager 后还要装什么 | `08` |
 | vLLM、TensorRT-LLM、Edge-LLM 如何选择 | `03` |
 | 先读哪些开源项目 | `references/github-projects.md` |
+
+RKNN3 快速入口：[RK1828 + RK3588 并行路线](references/EXTERNAL_FREE_BILINGUAL_ROCKCHIP_RKNN_ROADMAP.md)
 
 ## 范围
 
