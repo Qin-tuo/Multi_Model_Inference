@@ -7,3 +7,15 @@
 [submodule "references/repo/mnist-cuda"]
 	path = references/repo/mnist-cuda
 	url = https://github.com/Infatoshi/mnist-cuda.git
+[submodule "references/repo/how-to-optim-algorithm-in-cuda"]
+	path = references/repo/how-to-optim-algorithm-in-cuda
+	url = https://github.com/BBuf/how-to-optim-algorithm-in-cuda.git
+[submodule "references/repo/LeetCUDA"]
+	path = references/repo/LeetCUDA
+	url = https://github.com/xlite-dev/LeetCUDA.git
+[submodule "references/repo/nano-vllm"]
+	path = references/repo/nano-vllm
+	url = https://github.com/GeeeekExplorer/nano-vllm.git
+[submodule "references/repo/mini-sglang"]
+	path = references/repo/mini-sglang
+	url = https://github.com/sgl-project/mini-sglang.git
