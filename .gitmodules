@@ -4,6 +4,7 @@
 [submodule "references/repo/cuda-course"]
 	path = references/repo/cuda-course
 	url = https://github.com/Infatoshi/cuda-course.git
+	ignore = dirty
 [submodule "references/repo/mnist-cuda"]
 	path = references/repo/mnist-cuda
 	url = https://github.com/Infatoshi/mnist-cuda.git
