@@ -969,8 +969,6 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 
 项目来源：[Triton Inference Server](https://github.com/triton-inference-server/server)、[Triton Tutorials](https://github.com/triton-inference-server/tutorials)、[Triton Quickstart](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/getting_started/quickstart.html)、[Backend Platform Support Matrix](https://github.com/triton-inference-server/backend/blob/main/docs/backend_platform_support_matrix.md)。
 
-主线归属：阶段六。
-
 任务：建立 model repository；用 TensorRT backend 提供一个图像分类或检测模型；配置 dynamic batching 和多个 model instance；使用官方 Triton HTTP client 和 unary gRPC client；加入 health、metrics、错误处理和超时；用 Perf Analyzer 测量 concurrency、latency 和 throughput；再做一个 ensemble，把预处理、推理、后处理串起来。不要求自建 gRPC server，也不要求实现 streaming RPC。
 
 验收：画出并发数、batch、p50/p95 延迟和吞吐之间的曲线，并说明哪一个配置适合 Orin 的内存和功耗约束。
