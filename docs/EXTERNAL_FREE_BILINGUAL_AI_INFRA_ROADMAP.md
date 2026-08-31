@@ -1100,7 +1100,7 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 ### Orin Edge AI Inference Platform
 
-最终项目建议做成一个可以公开展示的仓库，包含：
+主线毕业项目必须包含以下内容；建议整理成一个可以公开展示的仓库：
 
 - 一个 TensorRT FP16/INT8 图像模型：保留 PyTorch→ONNX 输出对齐、FP32/FP16/INT8 精度证据、校准设计、Engine 构建命令与版本，使 Engine 可重复构建。
 - 一个 Triton TensorRT backend 服务：使用官方 Triton HTTP client 和 unary gRPC client 发起请求，并提供 health 与 Prometheus metrics。
