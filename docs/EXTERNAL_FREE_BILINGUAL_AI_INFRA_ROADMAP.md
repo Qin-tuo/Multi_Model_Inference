@@ -112,7 +112,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 
 **Linux 用户态：**
 
-- 基础层主课：[MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（9 节约一周；Shell、管道、权限、脚本、SSH、Git、调试入门；英文原版见 [missing.csail.mit.edu](https://missing.csail.mit.edu/)）
+- 基础层主课：[MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（9 节；Shell、管道、权限、脚本、SSH、Git、调试入门；英文原版见 [missing.csail.mit.edu](https://missing.csail.mit.edu/)）
 - 系统层主课：[尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/)（文件 IO、进程线程、Socket、epoll 完整系列）
 - 辅助资料：[Pro Git](https://git-scm.com/book/en/v2)、[OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/)、[LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/)
 
@@ -330,6 +330,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 ### 课程与资料
 
 - 主课：**Deep Learning Specialization**（EN / Andrew Ng，保持课程连续性，只取训练与推理概念）：[deeplearning.ai](https://www.deeplearning.ai/courses/deep-learning-specialization/)。
+- 压缩前置复习（本阶段最小集，非第二门主课）：只补下面大纲列出的张量与网络结构术语，不改变 DLS 的主课归属。
 
 #### 当阶段课程大纲（★ = 本阶段必修）
 
@@ -341,15 +342,21 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - Course 3（跳过）
   - Course 4（移到视觉流媒体支线）
   - Course 5（仅作为阶段七查漏补缺）
+- **模型张量与压缩前置复习（限定范围）**：
+  - ★ dense / linear 与 convolution 运算的输入、权重和输出 shape
+  - ★ channel / filter / BatchNorm 的作用与相互关系
+  - ★ embedding 的查表过程与张量含义
+  - ★ 区分 weight / activation / gradient tensor；训练阶段三者都会出现，导出与推理不保留梯度和参数更新
 
 ### 学习方法与停止条件
 
 - **课程连续性**：按 Course 1 → Course 2 的概念顺序学习，不把训练流程拆成零散术语。必修概念演练：能以一个小型 MLP 为例，在纸上或口头追踪 forward → loss → backward，解释计算图、梯度流、参数更新，以及导出后保留的前向计算。
+- **压缩前置停止条件**：能根据 shape 解释 dense / convolution / BatchNorm / embedding 的输入输出，指出 channel 与 filter 的对应关系，并区分 weight、activation 和 gradient tensor 在训练与推理中的生命周期。
 - **停止条件**：能区分训练、验证、导出和推理的边界；能解释神经网络如何通过前向传播、损失、反向传播和参数更新完成训练，并指出优化器状态、梯度、反向传播、参数更新等训练专属状态或操作为何不出现在推理中。
 
 ### 阶段项目
 
-无必做阶段项目；可选：用 PyTorch 实现小型 MLP 的 forward/loss/backward，或提交一份书面的计算图与梯度流追踪记录。
+必做：提交一份书面的计算图，并以同一个小型网络完整解释训练 → 验证 → 导出 → 推理的数据、状态和操作变化。可选：用 PyTorch 实现小型 MLP 的 forward/loss/backward，对书面追踪做代码验证。
 
 ### 版本 / 边界注意
 
@@ -361,42 +368,40 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ### 目标
 
-本阶段建立完整的模型压缩概念与硬件约束。真实 ONNX/TensorRT 精度和速度验证在阶段五完成；更深入的剪枝训练与实验归入分支 B。参数量或 FLOPs 更小不等于已经证明加速。
+本阶段建立通用模型压缩概念与硬件约束。真实 ONNX/TensorRT 量化精度和速度验证在阶段五完成；剪枝训练、稀疏化实现与对应硬件实验归入分支 B。参数量或 FLOPs 更小不等于已经证明加速。
 
 ### 课程与资料
 
 - 主课：[MIT 6.5940 EfficientML 精译版（B 站）](https://www.bilibili.com/video/BV1c8wNe1ErX)（中文 / MIT，免费完整课程，含中英字幕；原版见 [efficientml.ai](https://efficientml.ai/)）
 - 落地文档：[NVIDIA TensorRT INT8/PTQ 文档](https://docs.nvidia.com/deeplearning/tensorrt/latest/)
-- 论文：[AWQ](https://arxiv.org/abs/2306.00978)、[GPTQ](https://arxiv.org/abs/2210.17323)、[SmoothQuant](https://arxiv.org/abs/2211.03602)、[LLM.int8()](https://arxiv.org/abs/2208.07339)
 - 工具文档：[Hugging Face Optimum 量化文档](https://huggingface.co/docs/optimum)
-- 剪枝选学：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)
+- 剪枝概念选段：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)（只理解方法与边界，实作归分支 B）
 
 #### 当阶段课程大纲（★ = 本阶段必修）
 
-- **MIT 6.5940 EfficientML、论文与配套文档** 大纲：
+- **MIT 6.5940 EfficientML 与配套文档** 大纲：
   - ★ PTQ、QAT、calibration、scale/zero-point
   - ★ per-tensor/per-channel、W8A8、W4A16
   - ★ structured/unstructured pruning、稀疏化和剪枝后微调
   - ★ 知识蒸馏
-  - ★ depthwise convolution、MobileNet 与轻量结构
-  - ★ EfficientML 高效 LLM：KV cache、W4/W8、GPTQ/AWQ/SmoothQuant/LLM.int8()
-- 《深度学习模型部署与剪枝优化实战》：稀疏化、L1 正则、通道筛选、参数迁移、剪枝后微调
+  - ★ 参数量、FLOPs、内存带宽、算子支持与硬件实际收益的边界
+- 《深度学习模型部署与剪枝优化实战》：只理解结构化/非结构化剪枝、稀疏化和剪枝后微调的目的与边界；通道筛选、参数迁移和训练实作留到分支 B
 - 旧 Jetson Nano、旧 TAO 和旧安装命令（跳过）
 
 ### 学习方法与停止条件
 
-- **量化关键字**：calibration 的 min-max / entropy / percentile 方法、outlier 与 clipping，以及 GPTQ（基于 Hessian）、AWQ（保护显著权重）和 SmoothQuant（迁移激活 outlier 到权重）的差异。
+- **量化关键字**：PTQ vs QAT、calibration 的 min-max / entropy / percentile 方法、scale / zero-point、per-tensor vs per-channel、outlier 与 clipping。
 - **硬件约束**：同时考虑算子支持、实际精度格式、内存带宽、结构化稀疏支持和 Engine tactic；参数量或 FLOPs 只能描述理论规模，不能单独证明目标硬件上的加速。
-- **阶段边界**：本阶段完成量化、剪枝、稀疏化、蒸馏和轻量结构的方案设计；阶段五再通过 ONNX/TensorRT 验证精度与速度，更深的剪枝训练和实验留到分支 B。
+- **阶段边界**：本阶段完成量化、剪枝、稀疏化和蒸馏的通用原理、方法选择与验证设计；阶段五只执行量化的 ONNX/TensorRT 精度和速度验证，剪枝与稀疏化实作留到分支 B，轻量模型结构归阶段五，LLM 专属量化与缓存概念归阶段八。
 - **停止条件**：能针对给定模型、硬件和精度目标提出量化/剪枝方案，说明风险，并定义验证方法。
 
 ### 阶段项目
 
-编写一份压缩验证方案：定义 accuracy delta、TensorRT Engine 构建日志与实际 tactics、延迟、吞吐和内存检查；由阶段五的项目 C 执行并记录结果。
+编写一份压缩验证方案：量化部分定义 accuracy delta、TensorRT Engine 构建日志与实际 tactics、延迟、吞吐和内存检查，由阶段五的项目 C 执行 FP32/FP16/INT8 验证；剪枝与稀疏化部分只定义理论风险和证据标准，实际训练与硬件实验由分支 B 执行。
 
 ### 版本 / 边界注意
 
-量化与 calibration 工具链以本机 TensorRT 10.16.2 为准；旧课程中的命令不得直接复制，必须按当前官方文档和本机版本校正。论文按需读摘要。
+量化与 calibration 工具链以本机 TensorRT 10.16.2 为准；旧课程中的命令不得直接复制，必须按当前官方文档和本机版本校正。
 
 ---
 
@@ -419,12 +424,12 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 文档：[TensorRT Documentation](https://docs.nvidia.com/deeplearning/tensorrt/latest/)、[TensorRT 10.x Quick Start](https://docs.nvidia.com/deeplearning/tensorrt/10.x.x/getting-started/quick-start-guide.html)、[TensorRT GitHub](https://github.com/NVIDIA/TensorRT)、[Torch-TensorRT](https://github.com/pytorch/TensorRT)
 - 中文入口：[TensorRT 中文入门](https://developer.nvidia.cn/tensorrt-getting-started)、[NVIDIA 中文超级训练](https://www.nvidia.cn/developer/online-training/super-training/)（只看概念，命令以英文最新文档为准）
 
-**GPU 预处理与 DALI：**
+**GPU 预处理（CV-CUDA 基线 / DALI 条件选学）：**
 
-- 主课文档：[NVIDIA DALI 文档与 Tutorials](https://docs.nvidia.com/deeplearning/dali/)、[DALI GitHub](https://github.com/NVIDIA/DALI)
-- 对比库：[CV-CUDA](https://github.com/CVCUDA/CV-CUDA)（推理专用预处理 GPU 加速）
-- 主课视频（需免费注册 NVIDIA Developer 后观看）：[GTC 2020 “Fast Data Pre-Processing with NVIDIA Data Loading Library (DALI)”](https://www.nvidia.com/en-us/on-demand/session/gtcsj20-s21139)
-- 补充免费视频（约 53 分钟，无需登录）：[NVIDIA DALI Data Loading Library 实战讲解](https://www.youtube.com/watch?v=PTWER9HIVHM)
+- 必修基线：[CV-CUDA](https://github.com/CVCUDA/CV-CUDA)（推理专用预处理 GPU 加速）、[CV-CUDA Installation Guide](https://cvcuda.github.io/CV-CUDA/installation.html)
+- 条件选学：[NVIDIA DALI 文档与 Tutorials](https://docs.nvidia.com/deeplearning/dali/)、[DALI Support Matrix](https://docs.nvidia.com/deeplearning/dali/main-user-guide/docs/support_matrix.html)、[DALI GitHub](https://github.com/NVIDIA/DALI)
+- 条件选学概念视频（需免费注册 NVIDIA Developer 后观看）：[GTC 2020 “Fast Data Pre-Processing with NVIDIA Data Loading Library (DALI)”](https://www.nvidia.com/en-us/on-demand/session/gtcsj20-s21139)
+- 条件选学实操视频（约 53 分钟，无需登录）：[NVIDIA DALI Data Loading Library 实战讲解](https://www.youtube.com/watch?v=PTWER9HIVHM)
 
 #### 当阶段课程大纲（★ = 本阶段必修）
 
@@ -432,6 +437,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ Module、参数、checkpoint 和模型结构读取
   - ★ MLP、CNN、BatchNorm、ResNet
   - ★ RNN/Seq2Seq、Attention、Transformer
+  - ★ depthwise convolution、MobileNet 与轻量模型结构，跟踪 channel、shape 和完整 forward 数据流
   - ★ tensor shape 和完整 forward 数据流
   - 优化算法、完整训练、Kaggle、检测/分割、GAN、推荐系统和分布式训练（跳过）
 - **NVIDIA TensorRT 教程 4 部分（B站）** 大纲：
@@ -444,35 +450,38 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ 环境准备与 ONNX 导入
   - ★ builder 配置、精度校准
   - ★ 性能分析与部署
-- **主课视频：GTC 2020 DALI talk** 大纲：
-  - ★ 为什么数据预处理成为 GPU 吞吐瓶颈（CPU 空泡）
-  - ★ DALI 是什么：GPU 加速的数据加载与增强库
-  - ★ DALI Pipeline 与 Operator 模型
-  - ★ 数据读取器：COCO / LMDB / TFRecord / Webdataset / NumPy
-  - ★ 解码与增强算子：nvJPEG、resize、normalize、color、augmentation gallery
-  - ★ 与 PyTorch / TensorFlow DataLoader 集成（iterator）
-  - ★ 异步 pipeline、prefetch 与 DALI↔TensorRT 直连
-  - ★ 性能分析：NVTX + Nsight Systems 看预处理空泡、多 GPU 数据并行
-  - ★ 案例：ResNet50 with DALI、推理预处理加速
-- **补充免费视频：DALI 实战讲解（YouTube）** 大纲（decode→resize→normalize pipeline 演示）：★ 全部章节本阶段必修。
-- **辅助文档（非视频）：** 使用上方 DALI 官方文档、Tutorials 与 GitHub；CV-CUDA 作为推理专用预处理的对比与扩展阅读。
+- **CV-CUDA Jetson-Orin GPU 预处理 pipeline（本机必修基线）** 大纲：
+  - ★ 先按当前 Installation Guide 核对 Jetson Orin 支持、依赖和 source build 路径，不假设未验证的 wheel 可用
+  - ★ 图像读取/解码后，在 GPU 完成 resize、normalize、color / layout 变换与 batch 拼接
+  - ★ 对接 PyTorch/TensorRT，并与同输入的 OpenCV/CPU pipeline 做端到端 benchmark
+- **GTC 2020 DALI talk（概念参考，非本机硬门槛）** 大纲：
+  - 为什么数据预处理成为 GPU 吞吐瓶颈（CPU 空泡）
+  - DALI Pipeline、Operator、数据读取器与增强算子
+  - 与 PyTorch / TensorFlow DataLoader 集成（iterator）
+  - 异步 pipeline、prefetch、DALI↔TensorRT 直连与 Nsight Systems 分析
+  - ResNet50 with DALI 与推理预处理加速案例
+- **补充免费视频：DALI 实战讲解（YouTube）** 大纲（decode→resize→normalize pipeline 演示）：仅在本机版本组合验证通过后选学和复现。
+- **辅助文档（非视频）：** CV-CUDA 实现与构建以当前 Installation Guide 为准；DALI 只按官方文档、Support Matrix、Tutorials 与 GitHub 做概念学习和条件验证。
 
 ### 学习方法与停止条件
 
 - **模型结构阅读 · 连续学习**：沿着 Module → 参数/checkpoint → tensor shape → 完整 forward 数据流阅读一个陌生模型，先解释每个阶段的输入输出和推理所需资产，再开始导出；只学上述 D2L 精选区块，不把它扩成完整训练课。
 - **ONNX/TensorRT · 看完即做**：PyTorch 导出 ONNX、ONNX Runtime 对齐、`trtexec` 构建 Engine、FP32/FP16/INT8、dynamic shape、warmup 后 benchmark。停止条件：能解释 Engine 为什么与目标 GPU/版本绑定，能报告 accuracy delta、p50/p95、throughput 和峰值内存。
-- **阶段四压缩方案验证 · 必修**：逐项执行阶段四提出的压缩验证方案，检查 PyTorch/ONNX 数值对齐、TensorRT 构建日志与实际 tactics、accuracy delta、延迟、吞吐和内存，并对比 FP32/FP16/INT8；适用时还要验证 structured sparsity。参数量或 FLOPs 降低只能说明理论规模变化，不能单独作为验收依据。
-- **GPU 预处理 · 必修关键字**：decode 卸载、pinned memory、异步 pipeline、zero-copy、host↔device 拷贝、batch 拼接、DALI ↔ TensorRT 直连、CPU 预处理导致的 GPU 空泡。看完即做：用 DALI 搭一个 decode + resize + normalize 的 GPU pipeline，喂给 TensorRT/PyTorch；与 OpenCV/CPU 版本在同一输入上对比端到端吞吐，并用 `nsys` 看预处理阶段是否还占 GPU 空泡。停止条件：能指出当前 pipeline 的预处理是否瓶颈、是否应上 DALI/CV-CUDA、pinned memory 与异步带来的提升。
+- **阶段四量化方案验证 · 必修**：执行阶段四方案中的量化部分，检查 PyTorch/ONNX 数值对齐、TensorRT 构建日志与实际 tactics、accuracy delta、延迟、吞吐和内存，并完整对比 FP32/FP16/INT8。剪枝与 2:4 稀疏执行不是阶段五门槛，只在分支 B 扩展。
+- **GPU 预处理 · 必修基线**：关键字包括 decode 边界、pinned memory、异步 pipeline、zero-copy、host↔device 拷贝、batch 拼接和 CPU 预处理导致的 GPU 空泡。先按当前安装文档验证 CV-CUDA 对 Jetson Orin 与本机版本组合的 source build / support，再用 CV-CUDA 搭建 GPU resize + normalize + color / layout pipeline，喂给 TensorRT/PyTorch；与 OpenCV/CPU 版本在同一输入上对比端到端吞吐，并用 `nsys` 检查预处理空泡。停止条件：能指出当前 pipeline 的瓶颈，以及 pinned memory、异步和 GPU 预处理带来的实际影响。
+- **DALI 条件边界**：当前 DALI Support Matrix 将 Orin 列为 CUDA 12.6 的 source-build-only；本机基线 JetPack 7.2.1 / CUDA 13.2.1 不属于该已列组合。因此 DALI 只作概念学习；只有按当前源码和支持矩阵验证构建、运行与算子可用性后，才作为额外 pipeline 与 CV-CUDA/CPU 比较，不假设官方 wheel 可用。
 - **阶段五停止条件**：能把一个陌生 PyTorch 模型转换为可复现构建的 TensorRT Engine，报告 accuracy、latency、throughput、memory 和预处理瓶颈，并给出输入、版本与 benchmark 条件。
 - **面试向**：INT8 对称 vs 非对称量化、per-channel 为什么更准、W4A16 是什么。
 
 ### 阶段项目
 
-项目 C（TensorRT 推理部署，见第 13 章）+ 一个 DALI GPU 预处理 pipeline 与 OpenCV/CPU 的吞吐对比；同时执行阶段四压缩方案的精度、tactics、性能与内存验证。
+项目 C（TensorRT 推理部署，见第 13 章）+ 一个已验证的 CV-CUDA Jetson-Orin GPU 预处理 pipeline 与 OpenCV/CPU 的吞吐对比；同时执行阶段四量化方案的 FP32/FP16/INT8 精度、tactics、性能与内存验证。DALI 仅在本机源码构建和运行验证通过后作为额外对比。
 
 ### 版本 / 边界注意
 
 **强版本警告**：视频基于 TensorRT 8.x，本机 10.16.2；概念照学，实现以 [TensorRT 10.x Quick Start](https://docs.nvidia.com/deeplearning/tensorrt/10.x.x/getting-started/quick-start-guide.html) 与当前 samples 为准。
+
+**预处理平台门槛**：CV-CUDA 必须先按当前安装文档验证 Jetson Orin 的支持或 source build，再作为必修实现；DALI 必须按当前 Support Matrix 和源码验证，不能声称未验证的 wheel 支持 JetPack 7.2.1 / CUDA 13.2.1。
 
 ---
 
@@ -599,6 +608,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 - 主课：[Stanford CS336 2026 Video Playlist](https://www.youtube.com/playlist?list=PLoROMvodv4rMqXOcazWaTUHhq-yembLCV)（EN / University，按模型结构、推理、评测与系统主题选学，重点第 10 讲）；作业与讲义见 [CS336 官方课程页](https://cs336.stanford.edu/)；[CS336 Lecture 10: Inference](https://www.youtube.com/watch?v=EfM546A79aM)
 - 中文补课：[大模型推理技术研究](https://www.bilibili.com/video/BV1k2L9zyEt7/)（KV cache、vLLM、SGLang 等 9 讲完整系列）
+- 量化论文：[AWQ](https://arxiv.org/abs/2306.00978)、[GPTQ](https://arxiv.org/abs/2210.17323)、[SmoothQuant](https://arxiv.org/abs/2211.03602)、[LLM.int8()](https://arxiv.org/abs/2208.07339)
 
 **边缘 LLM 运行时选型：**
 
@@ -622,8 +632,11 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - **大模型推理技术研究（B站 9 讲）** 大纲：
   - ★ KV cache、PagedAttention
   - ★ continuous batching、vLLM、SGLang
-  - ★ 量化（INT4/AWQ/GPTQ）、speculative decoding
+  - ★ 量化（INT4/AWQ/GPTQ/SmoothQuant/LLM.int8()）、speculative decoding
   - ★ RadixAttention 与上下文管理
+- **LLM 量化论文与运行时兼容性** 大纲：
+  - ★ GPTQ（基于 Hessian）、AWQ（保护显著权重）、SmoothQuant（迁移激活 outlier 到权重）与 LLM.int8()（outlier-aware mixed precision）的目标和格式差异
+  - ★ weight-only 与 weight-activation 量化的边界，以及 checkpoint / quantization format 是否受目标 runtime 和支持矩阵支持
 - **主课视频：Run GenAI Locally on NVIDIA Jetson** 大纲：
   - ★ 为何在 Jetson 上本地跑 LLM/VLM（延迟、隐私、带宽）
   - ★ Ollama 快速实验
@@ -643,8 +656,8 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 ### 学习方法与停止条件
 
 - **LLM 推理 · 看完即做**：用同一小模型和固定 prompt，对 batch、concurrency、queueing、context length 和量化方式做可复现 benchmark。停止条件：能严格区分 TTFT、TPOT、端到端 latency、tokens/s、单请求延迟和系统 throughput，并解释 prefill/decode 的瓶颈差异，以及 KV cache、continuous batching、PagedAttention 如何改变内存与调度。框架关系：vLLM、SGLang、TensorRT-LLM/Edge-LLM 是 LLM runtime/engine 路线；Triton 是可选的通用服务层，二者不是同一个层级。
-- **量化与内存预算**：对比 FP16 与 INT4/AWQ/GPTQ，按权重、KV cache、临时 buffer 和 context length 估算 unified memory；把精度变化、OOM 边界和可用上下文写入报告。
-- **运行时选型 · 必修关键字**：GGUF vs safetensors、weight-only 量化格式、runtime 对 AWQ/GPTQ 的支持、CUDA vs CPU offload、KV cache 管理、OpenAI-compatible API、易用性 vs 峰值性能 vs 内存占用。看完即做：在 TensorRT-Edge-LLM、llama.cpp、MLC-LLM、ExecuTorch 中按模型格式与支持矩阵选择，并让同一小模型（如 Qwen3 0.6B）至少在两个运行时（建议 TensorRT-Edge-LLM + llama.cpp）上跑；固定 prompt 与上下文，测量 TTFT、TPOT、tokens/s、峰值 unified memory 与量化格式。停止条件：交付一张选型表，标明每个运行时在 Orin 上的适用场景（快速验证 / 最高吞吐 / 最低内存 / 跨平台），并说明为何落地仍优先 TensorRT-Edge-LLM 但不排斥其他。
+- **量化与内存预算**：对比 FP16 与 INT4/AWQ/GPTQ/SmoothQuant/LLM.int8() 的适用边界，按权重、KV cache、临时 buffer 和 context length 估算 unified memory；把精度变化、格式兼容性、OOM 边界和可用上下文写入报告。
+- **运行时选型 · 必修关键字**：GGUF vs safetensors、weight-only / weight-activation 量化格式、runtime 对 AWQ/GPTQ/SmoothQuant/LLM.int8() 的支持、CUDA vs CPU offload、KV cache 管理、OpenAI-compatible API、易用性 vs 峰值性能 vs 内存占用。看完即做：在 TensorRT-Edge-LLM、llama.cpp、MLC-LLM、ExecuTorch 中按模型格式与支持矩阵选择，并让同一小模型（如 Qwen3 0.6B）至少在两个运行时（建议 TensorRT-Edge-LLM + llama.cpp）上跑；固定 prompt 与上下文，测量 TTFT、TPOT、tokens/s、峰值 unified memory 与量化格式。停止条件：交付一张选型表，标明每个运行时在 Orin 上的适用场景（快速验证 / 最高吞吐 / 最低内存 / 跨平台），并说明为何落地仍优先 TensorRT-Edge-LLM 但不排斥其他。
 - **Edge LLM · 看完即做**：从支持矩阵内的小模型开始，先 FP16 基线，再 INT4/AWQ；在 Orin 上提供可重复启动的简单 API 服务，测 TTFT、TPOT、tokens/s、throughput、concurrency/queueing、峰值 unified memory、功耗、温度和 context length。停止条件：连续请求无 OOM，报告包含 runtime、service、模型、量化、内存预算、功耗、性能、并发和版本选择。资料现实：截至 2026-08-21，还没有一门公开、完整且与当前 TensorRT-Edge-LLM release 同步的官方专项视频课；这里用最新 Jetson 完整视频系列建立工作流，代码只跟 [TensorRT-Edge-LLM 官方安装与教程](https://nvidia.github.io/TensorRT-Edge-LLM/user_guide/getting_started/installation.html)，不拿旧 TensorRT-LLM 服务器课程冒充 Orin 课程。
 - **阶段八停止条件**：能在 Orin 部署一个小模型服务，并根据支持矩阵与测量结果说明 runtime、quantization、memory、power 和 performance 选择。
 - **面试向**：KV cache 为什么省算力；prefill 与 decode 的瓶颈差异；continuous batching 解决什么问题。
@@ -717,14 +730,14 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ### 分支 B：模型压缩实战
 
-**进入条件**：完成阶段五，并先建立可复现的未剪枝 TensorRT baseline；固定模型、数据集、输入 shape、精度、功耗模式、warmup 和测量方法，记录 baseline 的 accuracy、latency、throughput 与 memory。
+**进入条件**：完成阶段五的项目 C，并保留其可复现的未剪枝 TensorRT FP32/FP16/INT8 baseline；本支线重访并扩展项目 C，固定模型、数据集、输入 shape、精度、功耗模式、warmup 和测量方法，再选择 channel / filter pruning 或 2:4 structured sparsity 路径，记录 baseline 的 accuracy、latency、throughput 与 memory。
 
 #### 课程与资料
 
 - 主课选段：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)（只学更深入的剪枝实现单元）
 - 官方文档：[TensorRT Documentation](https://docs.nvidia.com/deeplearning/tensorrt/latest/)、[TensorRT 10.x Structured Sparsity](https://docs.nvidia.com/deeplearning/tensorrt/10.x.x/inference-library/io-formats-sparsity.html)
 
-#### 分支课程大纲（★ = 本支线必修）
+#### 分支课程大纲（两条路径二选一；★ = 所选路径内必做）
 
 - **路径一：channel / filter pruning（改变模型结构）**
   - ★ 通道 / filter 筛选、参数迁移与 post-pruning finetuning；这种剪枝会改变网络通道数或层结构
@@ -736,13 +749,13 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ 运行 `polygraphy inspect sparsity model.onnx`，验证 ONNX 权重确实满足 2:4 sparsity pattern
   - ★ 使用 TensorRT 支持的 FP16 或 INT8 precision，并通过 `trtexec --sparsity=enable` 或等价 TensorRT builder flag 启用 sparse tactics
   - ★ 保存 verbose build log，明确区分哪些 layer 具备 sparse tactic 资格，以及 builder 最终实际选择了哪些 sparse tactics
-- **两条路径共同验收**：★ 在相同目标硬件与测量条件下对比剪枝前后的 accuracy、latency、throughput、memory
+- **任选路径的共同验收**：★ 在相同目标硬件与测量条件下对比剪枝前后的 accuracy、latency、throughput、memory
 
 #### 学习方法与停止条件
 
 从未剪枝 TensorRT baseline 开始，只改变一个剪枝变量，并明确选择 channel / filter pruning 或 Ampere 2:4 structured sparsity 路径。前者按结构变化 → finetuning → ONNX export → 普通 TensorRT benchmark 验证；后者按 2:4 sparse training → finetuning → ONNX export → sparsity inspection → sparse-enabled TensorRT build 与 benchmark 验证。参数量或 FLOPs 更小只说明理论规模变化，不是实际加速证明。
 
-停止条件：两条路径都必须展示目标硬件上的端到端 accuracy、latency、throughput 和 memory 影响。channel / filter pruning 以普通 TensorRT benchmark 为准，不以 sparse tactic 为验收条件；2:4 路径还必须用 verbose build log 证明 eligible layer 是否实际选用了预期 sparse tactic。若剪枝后端到端没有收益，或 2:4 路径未选 sparse tactic，也要明确记录 no-benefit 结果、构建日志和原因分析，不能只汇报参数量或 FLOPs。
+停止条件：无论选择哪条路径，都必须展示目标硬件上的端到端 accuracy、latency、throughput 和 memory 影响。channel / filter pruning 以普通 TensorRT benchmark 为准，不以 sparse tactic 为验收条件；2:4 路径还必须用 verbose build log 证明 eligible layer 是否实际选用了预期 sparse tactic。若剪枝后端到端没有收益，或 2:4 路径未选 sparse tactic，也要明确记录 no-benefit 结果、构建日志和原因分析，不能只汇报参数量或 FLOPs。
 
 ### 分支 C：Triton Language、CUTLASS 和 CuTe
 
@@ -949,11 +962,11 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 
 项目来源：[NVIDIA TensorRT](https://github.com/NVIDIA/TensorRT)、[TensorRT Quick Start](https://docs.nvidia.com/deeplearning/tensorrt/latest/getting-started/quick-start-guide.html)、[TensorRT Benchmarking](https://docs.nvidia.com/deeplearning/tensorrt/latest/performance/benchmarking.html)。
 
-主线归属：阶段五；本项目负责执行阶段四设计的量化、剪枝与稀疏化硬件验证方案。
+主线归属：阶段五；本项目负责执行阶段四设计的量化硬件验证方案，建立可复现的未剪枝 TensorRT baseline。剪枝与 2:4 稀疏执行不属于主线验收，由分支 B 选择性重访并扩展本项目。
 
 任务：1. 训练或选择一个小模型；2. 导出 ONNX 并验证输出；3. 用 trtexec 或 Python/C++ API 构建 Engine；4. 比较 FP32、FP16、INT8；5. 加入 dynamic shape；6. 对不支持的算子尝试 plugin 或改图。
 
-验收指标：PyTorch/ONNX/TensorRT 数值对齐与 accuracy delta、真实 TensorRT Engine 构建日志和实际 tactics、engine build 是否可复现、warmup 后 p50/p95 latency、throughput、峰值 unified memory、输入 shape 和 batch 的影响，并完整比较 FP32、FP16、INT8。若测试 2:4 structured sparsity，必须沿用分支 B 的证据标准：用 verbose build log 区分具备 sparse tactic 资格（eligible）的 layer 与 builder 最终实际选中的 sparse tactic（selected）；任意剪枝、参数量或 FLOPs 降低都不能单独证明加速。
+验收指标：PyTorch/ONNX/TensorRT 数值对齐与 accuracy delta、真实 TensorRT Engine 构建日志和实际 tactics、engine build 是否可复现、warmup 后 p50/p95 latency、throughput、峰值 unified memory、输入 shape 和 batch 的影响，并完整比较 FP32、FP16、INT8。可选分支 B 扩展：若选择 2:4 structured sparsity，必须用 verbose build log 区分具备 sparse tactic 资格（eligible）的 layer 与 builder 最终实际选中的 sparse tactic（selected）；任意剪枝、参数量或 FLOPs 降低都不能单独证明加速。
 
 ### 项目 D：Jetson 多路视频推理（分支 A 可选视觉项目，非主线）
 
@@ -1123,13 +1136,17 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 ### 工程与 CUDA 基础
 
 - [ ] 完成阶段一的 Python `venv`、NumPy、PyTorch/ONNX、C++、Linux、Git 和 CMake 基础，并交付 `model-tools`。
+- [ ] 完成 C++17 + CMake CPU GEMM，使用随机输入校验正确性并记录耗时。
+- [ ] 交付 Shell 监控脚本和可并发处理请求的 C/C++ TCP 小服务。
 - [ ] 掌握 Docker 基础，能构建和运行开发镜像，并明确 ARM64 镜像与 x86 镜像不可混用。
 - [ ] 完成 CUDA 编译与 `deviceQuery`，实现并验证 vector add、transpose、reduction 和 GEMM。
+- [ ] 完成阶段二的 MNIST CUDA 逐级优化项目，并解释 PyTorch、C/CUDA、cuBLAS、streams/fusion 与 FP16/TF32 版本的变化。
 - [ ] 使用 Compute Sanitizer 检查正确性，用 Nsight Systems 定位流水线瓶颈、Nsight Compute 分析热点 Kernel，并提交优化前后报告。
 
 ### 模型原理与压缩
 
 - [ ] 完成 Deep Learning Specialization 主线基础，能区分训练、验证、导出和推理，并解释各阶段的数据与指标。
+- [ ] 提交阶段三的书面计算图，以及训练 → 验证 → 导出 → 推理的数据、状态和操作变化说明。
 - [ ] 掌握量化原理，设计具有代表性的校准集、校准流程与精度验收标准。
 - [ ] 理解剪枝、稀疏化和蒸馏的目标与边界，并为压缩前后设计精度、性能和硬件收益验证。
 
@@ -1138,7 +1155,7 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 - [ ] 连贯学习 D2L 选定模型结构，能跟踪关键模块的 shape 变化并解释 `forward` 数据流。
 - [ ] 完成 PyTorch→ONNX 导出与输出对齐，记录算子、动态维度和误差证据。
 - [ ] 构建并对比 TensorRT FP32/FP16/INT8 Engine，理解 tactics、dynamic shapes、校准、精度、延迟和内存折中。
-- [ ] 使用 DALI 实现 GPU 预处理 pipeline，并与 CPU 预处理做固定条件 benchmark；可再用 CV-CUDA 做额外对比或扩展。
+- [ ] 按当前安装文档验证并使用 CV-CUDA 实现 Jetson-Orin GPU 预处理 pipeline，与 CPU 预处理做固定条件 benchmark；DALI 仅在本机源码构建和运行验证通过后作为额外对比。
 
 ### 推理服务
 
@@ -1150,6 +1167,7 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 - [ ] 完成 CS224n Lecture 7–11 的 Transformer、自注意力、预训练与生成核心概念。
 - [ ] 解释 prefill/decode、KV cache 与调度关系，并分别测量 TTFT、TPOT、tokens/s、吞吐、峰值内存和上下文长度。
+- [ ] 区分 AWQ、GPTQ、SmoothQuant 与 LLM.int8() 的目标和量化格式，并按目标 runtime 支持矩阵验证兼容性。
 - [ ] 用同一小模型比较至少两个运行时，依据模型格式与支持矩阵完成选型，并交付可重复启动的 TensorRT-Edge-LLM 服务。
 
 ### 按岗位选择支线
