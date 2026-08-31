@@ -330,7 +330,10 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 ### 课程与资料
 
 - 主课：**Deep Learning Specialization**（EN / Andrew Ng，保持课程连续性，只取训练与推理概念）：[deeplearning.ai](https://www.deeplearning.ai/courses/deep-learning-specialization/)。
-- 压缩前置复习（本阶段最小集，非第二门主课）：只补下面大纲列出的张量与网络结构术语，不改变 DLS 的主课归属。
+
+**压缩前置定向补充（官方 PyTorch 参考，非第二门主课）：**
+
+- [PyTorch `torch.nn` 官方参考](https://docs.pytorch.org/docs/stable/nn.html)：只查 `Linear`、`Conv2d`、`BatchNorm2d`、`Embedding` 及 weight / activation / gradient tensor 角色；不扩展为完整模型结构课，不提前替代阶段五的 D2L 主课。
 
 #### 当阶段课程大纲（★ = 本阶段必修）
 
@@ -342,7 +345,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - Course 3（跳过）
   - Course 4（移到视觉流媒体支线）
   - Course 5（仅作为阶段七查漏补缺）
-- **模型张量与压缩前置复习（限定范围）**：
+- **模型张量与压缩前置定向补充（限定范围）**：
   - ★ dense / linear 与 convolution 运算的输入、权重和输出 shape
   - ★ channel / filter / BatchNorm 的作用与相互关系
   - ★ embedding 的查表过程与张量含义
@@ -351,7 +354,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 ### 学习方法与停止条件
 
 - **课程连续性**：按 Course 1 → Course 2 的概念顺序学习，不把训练流程拆成零散术语。必修概念演练：能以一个小型 MLP 为例，在纸上或口头追踪 forward → loss → backward，解释计算图、梯度流、参数更新，以及导出后保留的前向计算。
-- **压缩前置停止条件**：能根据 shape 解释 dense / convolution / BatchNorm / embedding 的输入输出，指出 channel 与 filter 的对应关系，并区分 weight、activation 和 gradient tensor 在训练与推理中的生命周期。
+- **定向补充停止条件**：能根据 shape 解释 dense / convolution / BatchNorm / embedding 的输入输出，指出 channel 与 filter 的对应关系，并区分 weight、activation 和 gradient tensor 在训练与推理中的生命周期。
 - **停止条件**：能区分训练、验证、导出和推理的边界；能解释神经网络如何通过前向传播、损失、反向传播和参数更新完成训练，并指出优化器状态、梯度、反向传播、参数更新等训练专属状态或操作为何不出现在推理中。
 
 ### 阶段项目
@@ -726,7 +729,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 - **可选视觉项目**：项目 D（Jetson 多路视频推理），见第 13 章；入门先用 `jetson-inference` 跑通三类任务。
 - **版本警告**：课程中的 Jetson Nano / JetPack 4 命令全部忽略；本机边界是 JetPack 7.2.1、DeepStream 9.1，旧课安装命令、插件字段和 Python binding 不可复制，从 [NVIDIA/DeepStream](https://github.com/NVIDIA/DeepStream) 当前 release 开始。
-- **与阶段五的关系**：DeepStream 的 NVMM 零拷贝与阶段五 DALI 的 zero-copy 是同一类减少数据搬运的思想；这里把它落到视频 decode、batch 和推理 pipeline。
+- **与阶段五的关系**：DeepStream 的 NVMM 零拷贝与阶段五 GPU 预处理 / CV-CUDA 的 zero-copy 是同一类减少数据搬运的思想；这里把它落到视频 decode、batch 和推理 pipeline。
 
 ### 分支 B：模型压缩实战
 
