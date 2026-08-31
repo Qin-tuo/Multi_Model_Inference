@@ -462,7 +462,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - **模型结构阅读 · 连续学习**：沿着 Module → 参数/checkpoint → tensor shape → 完整 forward 数据流阅读一个陌生模型，先解释每个阶段的输入输出和推理所需资产，再开始导出；只学上述 D2L 精选区块，不把它扩成完整训练课。
 - **ONNX/TensorRT · 看完即做**：PyTorch 导出 ONNX、ONNX Runtime 对齐、`trtexec` 构建 Engine、FP32/FP16/INT8、dynamic shape、warmup 后 benchmark。停止条件：能解释 Engine 为什么与目标 GPU/版本绑定，能报告 accuracy delta、p50/p95、throughput 和峰值内存。
 - **阶段四压缩方案验证 · 必修**：逐项执行阶段四提出的压缩验证方案，检查 PyTorch/ONNX 数值对齐、TensorRT 构建日志与实际 tactics、accuracy delta、延迟、吞吐和内存，并对比 FP32/FP16/INT8；适用时还要验证 structured sparsity。参数量或 FLOPs 降低只能说明理论规模变化，不能单独作为验收依据。
-- **GPU 预处理 · 必修关键字**：decode 卸载、pinned memory、异步 pipeline、zero-copy、host↔device 拷贝、batch 拼接、DALI ↔ TensorRT 直连、CPU 预处理导致的 GPU 空泡。看完即做：用 DALI 搭一个 decode + resize + normalize 的 GPU pipeline，喂给 TensorRT/PyTorch；与 OpenCV/CPU 版本在同一输入上对比端到端吞吐，并用 `nsys` 看预处理阶段是否还占 GPU 空泡。停止条件：能指出当前 pipeline 的预处理是否瓶颈、是否应上 DALI/CV-CUDA、pinned memory 与异步带来的提升；知道 DeepStream（阶段五完成后进入的视觉分支）的 NVMM 零拷贝正是同一思想的硬件实现。
+- **GPU 预处理 · 必修关键字**：decode 卸载、pinned memory、异步 pipeline、zero-copy、host↔device 拷贝、batch 拼接、DALI ↔ TensorRT 直连、CPU 预处理导致的 GPU 空泡。看完即做：用 DALI 搭一个 decode + resize + normalize 的 GPU pipeline，喂给 TensorRT/PyTorch；与 OpenCV/CPU 版本在同一输入上对比端到端吞吐，并用 `nsys` 看预处理阶段是否还占 GPU 空泡。停止条件：能指出当前 pipeline 的预处理是否瓶颈、是否应上 DALI/CV-CUDA、pinned memory 与异步带来的提升。
 - **阶段五停止条件**：能把一个陌生 PyTorch 模型转换为可复现构建的 TensorRT Engine，报告 accuracy、latency、throughput、memory 和预处理瓶颈，并给出输入、版本与 benchmark 条件。
 - **面试向**：INT8 对称 vs 非对称量化、per-channel 为什么更准、W4A16 是什么。
 
