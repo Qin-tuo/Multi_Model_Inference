@@ -121,7 +121,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 - 英文主课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
 - 中文补课：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Python 主课（freeCodeCamp）** 大纲：
   - ★ 语法、条件/循环、函数、作用域
@@ -157,7 +157,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
   - ★ 进程与线程（fork、pthread）
   - ★ Socket 网络编程
   - ★ epoll 多路复用
-  - 内核/驱动部分（留到分支 A）
+  - 内核/驱动部分（留到分支 D）
 - **Docker 入门** 大纲：
   - ★ image、container 与 registry 的边界
   - ★ `docker pull/run/exec/logs/inspect`
@@ -264,7 +264,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 进阶：[GPU MODE Lectures](https://www.youtube.com/playlist?list=PLjG_zIhhamWJRAuxYNBI0QvVE0dmwNQLL)（EN / Open，[GPU Mode GitHub](https://github.com/gpu-mode)）
 - 文档：[Compute Sanitizer](https://docs.nvidia.com/compute-sanitizer/)、[Nsight Systems](https://docs.nvidia.com/nsight-systems/)、[Nsight Compute](https://docs.nvidia.com/nsight-compute/)、[CUDA Binary Utilities](https://docs.nvidia.com/cuda/cuda-binary-utilities/)、[PTX ISA](https://docs.nvidia.com/cuda/parallel-thread-execution/contents.html)、[CUDA Toolkit 中文入口](https://developer.nvidia.cn/cuda-toolkit)
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **NVIDIA Modern CUDA C++（官方 playlist）** 大纲：
   - ★ 环境搭建与第一个 Kernel（write/compile/run GPU code）
@@ -277,7 +277,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ C/C++ review、setup、first kernels
   - ★ global/shared/register memory、error check
   - ★ streams、events、matrix multiplication
-  - ★ PyTorch extension / Triton 章（仅了解，深入留到分支 B）
+  - ★ PyTorch extension / Triton 章（仅了解，深入留到分支 C）
 - **Stanford CS149 Parallel Computing 2023** 大纲：
   - ★ 并行计算导论与 work distribution
   - ★ GPU 体系结构（SM、warp、内存层次）
@@ -331,7 +331,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 - 主课：**Deep Learning Specialization**（EN / Andrew Ng，保持课程连续性，只取训练与推理概念）：[deeplearning.ai](https://www.deeplearning.ai/courses/deep-learning-specialization/)。
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Deep Learning Specialization**：
   - ★ Course 1：参数、层、激活、损失、前向/反向传播、计算图和向量化
@@ -371,7 +371,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 工具文档：[Hugging Face Optimum 量化文档](https://huggingface.co/docs/optimum)
 - 剪枝选学：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **MIT 6.5940 EfficientML、论文与配套文档** 大纲：
   - ★ PTQ、QAT、calibration、scale/zero-point
@@ -487,7 +487,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 **Docker：**
 
 - 阶段一已完成 Docker 初学内容；这里仅按需回看英文课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
-- 中文补课：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
+- 中文课同样仅按需回看：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
 
 **HTTP / gRPC：**
 
