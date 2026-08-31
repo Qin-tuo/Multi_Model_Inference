@@ -933,45 +933,53 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 
 ## 13. 真实公开项目阶梯
 
-### 项目 A：CUDA 基础 Kernel 仓库
+### 项目 A：CUDA 基础 Kernel 仓库（阶段二主线）
 
 项目来源：[NVIDIA CUDA Samples](https://github.com/NVIDIA/cuda-samples)、[NVIDIA CUDALibrarySamples](https://github.com/NVIDIA/CUDALibrarySamples)。
 
 你要自己维护一个小仓库，至少包含：vector add / SAXPY、transpose、reduction、tiled GEMM、stream overlap、sanitizer 和 benchmark 脚本。验收：每个例子有 CPU reference、正确性测试、数据规模和性能记录。
 
-### 项目 B：MNIST CUDA 逐级优化
+### 项目 B：MNIST CUDA 逐级优化（阶段二主线）
 
 项目来源：[Infatoshi/mnist-cuda](https://github.com/Infatoshi/mnist-cuda)、[Infatoshi/cuda-course](https://github.com/Infatoshi/cuda-course)。
 
 验收：完成 PyTorch → C/CUDA → cuBLAS → streams/fusion → FP16 或 TF32 的至少四个版本，并解释每次变化。
 
-### 项目 C：TensorRT 推理部署
+### 项目 C：TensorRT 推理部署（阶段五主线）
 
 项目来源：[NVIDIA TensorRT](https://github.com/NVIDIA/TensorRT)、[TensorRT Quick Start](https://docs.nvidia.com/deeplearning/tensorrt/latest/getting-started/quick-start-guide.html)、[TensorRT Benchmarking](https://docs.nvidia.com/deeplearning/tensorrt/latest/performance/benchmarking.html)。
 
+主线归属：阶段五；本项目负责执行阶段四设计的量化、剪枝与稀疏化硬件验证方案。
+
 任务：1. 训练或选择一个小模型；2. 导出 ONNX 并验证输出；3. 用 trtexec 或 Python/C++ API 构建 Engine；4. 比较 FP32、FP16、INT8；5. 加入 dynamic shape；6. 对不支持的算子尝试 plugin 或改图。
 
-验收指标：accuracy delta、engine build 是否可复现、warmup 后 p50/p95 latency、throughput、峰值 unified memory、输入 shape 和 batch 的影响。
+验收指标：PyTorch/ONNX/TensorRT 数值对齐与 accuracy delta、真实 TensorRT Engine 构建日志和实际 tactics、engine build 是否可复现、warmup 后 p50/p95 latency、throughput、峰值 unified memory、输入 shape 和 batch 的影响，并完整比较 FP32、FP16、INT8。若测试 2:4 structured sparsity，必须沿用分支 B 的证据标准：用 verbose build log 区分具备 sparse tactic 资格（eligible）的 layer 与 builder 最终实际选中的 sparse tactic（selected）；任意剪枝、参数量或 FLOPs 降低都不能单独证明加速。
 
-### 项目 D：Jetson 多路视频推理
+### 项目 D：Jetson 多路视频推理（分支 A 可选视觉项目，非主线）
 
 项目来源：[NVIDIA DeepStream](https://github.com/NVIDIA/DeepStream)、[DeepStream Documentation](https://docs.nvidia.com/metropolis/deepstream/dev-guide/)、[DeepStream Python Apps](https://github.com/NVIDIA-AI-IOT/deepstream_python_apps)。
+
+项目归属：分支 A 的可选视觉项目，不属于主线；完成阶段五后按方向进入。
 
 任务：先跑单路文件或 USB 摄像头；再扩展为 4 路文件/RTSP 输入；加入 decode、nvinfer、tracker、tiler、OSD 和 metadata；对比 OpenCV/Python 串行实现与 DeepStream pipeline；用 tegrastats 和 Nsight Systems 观察 CPU、GPU、内存、解码和推理。
 
 验收：在固定功耗和输入条件下，报告每路 FPS、端到端延迟、GPU 利用率、内存、温度和降频情况。注意：旧的 [deepstream_reference_apps](https://github.com/NVIDIA-AI-IOT/deepstream_reference_apps) 仓库已经停止更新；当前新项目优先从 [NVIDIA/DeepStream](https://github.com/NVIDIA/DeepStream) 主仓库和对应 release 开始。
 
-### 项目 E：Triton 模型服务
+### 项目 E：Triton 模型服务（阶段六主线）
 
 项目来源：[Triton Inference Server](https://github.com/triton-inference-server/server)、[Triton Tutorials](https://github.com/triton-inference-server/tutorials)、[Triton Quickstart](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/getting_started/quickstart.html)、[Backend Platform Support Matrix](https://github.com/triton-inference-server/backend/blob/main/docs/backend_platform_support_matrix.md)。
 
-任务：建立 model repository；用 TensorRT backend 提供一个图像分类或检测模型；配置 dynamic batching 和多个 model instance；写 HTTP 和 gRPC client；加入 health、metrics、错误处理和超时；用 Perf Analyzer 测量 concurrency、latency 和 throughput；再做一个 ensemble，把预处理、推理、后处理串起来。
+主线归属：阶段六。
+
+任务：建立 model repository；用 TensorRT backend 提供一个图像分类或检测模型；配置 dynamic batching 和多个 model instance；使用官方 Triton HTTP client 和 unary gRPC client；加入 health、metrics、错误处理和超时；用 Perf Analyzer 测量 concurrency、latency 和 throughput；再做一个 ensemble，把预处理、推理、后处理串起来。不要求自建 gRPC server，也不要求实现 streaming RPC。
 
 验收：画出并发数、batch、p50/p95 延迟和吞吐之间的曲线，并说明哪一个配置适合 Orin 的内存和功耗约束。
 
-### 项目 F：Orin 上的 Edge LLM
+### 项目 F：Orin 上的 Edge LLM（阶段八主线）
 
 项目来源：[TensorRT-Edge-LLM](https://github.com/NVIDIA/TensorRT-Edge-LLM)、[TensorRT-Edge-LLM Support Matrix](https://nvidia.github.io/TensorRT-Edge-LLM/user_guide/getting_started/support-matrix.html)、[Jetson AI Lab Edge-LLM Tutorial](https://github.com/NVIDIA-AI-IOT/jetson-ai-lab/blob/main/src/content/tutorials/model-optimization/tensorrt-edge-llm.mdx)。
+
+主线归属：阶段八；阶段七的 Transformer 与 LLM 概念是本项目的前置必修。
 
 建议 capstone：选择支持矩阵中的 Qwen3 小模型，优先从 0.6B、1.7B 或 4B 级别开始；先做 FP16 可运行基线，再尝试 INT4/AWQ；用一个简单 HTTP API 包装推理；测量 TTFT、TPOT、tokens/s、峰值内存、上下文长度和连续请求行为。
 
@@ -991,6 +999,8 @@ TensorRT 解决的是模型图优化、Kernel 选择、精度、Engine 构建和
 
 Triton 提供：model repository、多种 backend、HTTP/gRPC、dynamic batching、concurrent model execution、ensemble、health 和 metrics。
 
+本节的 Triton 指 Triton Inference Server，不是用于编写 GPU Kernel 的 Triton Language；后者不在本节展开。
+
 因此，**LLM serving 可以使用 Triton，但 LLM serving 不等于 Triton**。Triton 是一个通用 serving layer；模型运行时可能是 TensorRT、PyTorch、ONNX Runtime、Python backend 或其他 backend。
 
 ### 14.3 vLLM、TensorRT-LLM、Edge-LLM 的定位
@@ -1000,7 +1010,7 @@ Triton 提供：model repository、多种 backend、HTTP/gRPC、dynamic batching
 - **TensorRT-Edge-LLM**：面向 Jetson/边缘设备的路线；对当前 Orin NX 更有现实意义。
 - **Triton**：可以承载多种模型和 backend，是服务编排与推理 API 层；是否适合某个 Jetson backend 必须查平台矩阵。
 
-推荐顺序：1. TensorRT 单模型运行；2. Triton + TensorRT backend；3. 在服务器 GPU 上理解 vLLM/TensorRT-LLM 的 serving 概念；4. 在 Orin 上使用 TensorRT-Edge-LLM 的支持矩阵内路径。
+推荐顺序：1. TensorRT 单模型运行；2. Docker 化并使用 Triton + TensorRT backend；3. 补齐 Transformer/LLM 概念；4. 理解 vLLM/TensorRT-LLM 等服务器运行时；5. 在 Orin 上使用 TensorRT-Edge-LLM 支持矩阵内路径。GStreamer/DeepStream 属于阶段五后的视觉支线，不是 Triton 或 LLM 的前置。
 
 Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用，尤其不要默认 Python backend 的 GPU 能力与 x86 服务器一致；以 [官方 backend platform matrix](https://github.com/triton-inference-server/backend/blob/main/docs/backend_platform_support_matrix.md) 为准。
 
