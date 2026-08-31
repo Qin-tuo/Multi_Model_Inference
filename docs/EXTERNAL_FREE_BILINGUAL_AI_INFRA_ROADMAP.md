@@ -831,13 +831,13 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 
 ---
 
-## 12. 六周 CUDA 冲刺
+## 12. CUDA 专项执行清单
 
 起点视频：[NVIDIA Modern CUDA C++ Playlist](https://www.youtube.com/playlist?list=PL5B692fm6--vWLhYPqLcEu6RF3hXjEyJr)（主课）+ [freeCodeCamp CUDA Course](https://www.youtube.com/watch?v=86FAWCzIe_4)（补充），代码仓库 [Infatoshi/cuda-course](https://github.com/Infatoshi/cuda-course)。
 
-**两个视频足够启动，不够形成完整能力**；缺口（官方编程模型、Best Practices、Sanitizer/Nsight、架构分析、TensorRT、Jetson 项目）由下面六周补齐。每周节奏：**视频章节 → 当天复现 → 改一处 → 查文档 → 写一页结果**。
+**两个视频足够启动，不够形成完整能力**；缺口（官方编程模型、Best Practices、Sanitizer/Nsight、架构分析、TensorRT、Jetson 项目）由下面六个步骤补齐。执行节奏：**视频章节 → 当天复现 → 改一处 → 查文档 → 写一页结果**。
 
-### 第 1 周：能编译、能运行、能解释线程层次
+### 步骤一：能编译、能运行、能解释线程层次
 
 关键字：nvcc、host code、device code、kernel launch、grid、block、thread、global memory、device synchronization、error checking。
 
@@ -852,7 +852,7 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 
 过关标准：能画出 grid → block → thread 的索引关系；能说明 kernel launch 是异步的，以及何时需要同步；能解释 unified memory 不是免费高速显存。
 
-### 第 2 周：内存访问和常见基础 Kernel
+### 步骤二：内存访问和常见基础 Kernel
 
 关键字：coalesced access、stride、shared memory、bank conflict、register、occupancy、warp divergence、transpose、reduction。
 
@@ -867,7 +867,7 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 
 过关标准：不用“GPU 更快”解释结果，而是能从访存、并行度、同步和算术强度解释结果；能看懂一个 sample 的 launch configuration 和 memory layout。
 
-### 第 3 周：Streams、Events 和 CPU/GPU 重叠
+### 步骤三：Streams、Events 和 CPU/GPU 重叠
 
 关键字：cudaStream、cudaEvent、pinned host memory、pageable memory、overlap、double buffering、CUDA Graph、asynchronous copy。
 
@@ -882,7 +882,7 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 
 过关标准：能用 timeline 证明是否真的发生了重叠；能区分 API 调用耗时、kernel 执行耗时和端到端延迟。
 
-### 第 4 周：矩阵乘法、cuBLAS 和真实小项目
+### 步骤四：矩阵乘法、cuBLAS 和真实小项目
 
 关键字：tiled GEMM、arithmetic intensity、cuBLAS、cuBLASLt、FP32、FP16、TF32、WMMA、Tensor Core。
 
@@ -896,7 +896,7 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 
 过关标准：有一张表记录每个版本的准确率、p50/p95 延迟、吞吐和峰值内存；能说明为什么自写 Kernel 不一定比 cuBLAS 快。
 
-### 第 5 周：正确性、系统级 Profile、Kernel Profile
+### 步骤五：正确性、系统级 Profile、Kernel Profile
 
 工具顺序必须固定为：
 
@@ -908,7 +908,7 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 视频与查询顺序：
 
 1. 完整看 [NVIDIA CUDA Developer Tools Tutorials](https://www.youtube.com/playlist?list=PL5B692fm6--ukF8S7ul5NmceZhXLRv_lR)，或使用[同课中文镜像](https://www.bilibili.com/video/BV14RU6BmE5u/)。
-2. 立刻对第 4 周项目执行 Sanitizer、`nsys` 和 `ncu`，不要先背指标。
+2. 立刻对步骤四项目执行 Sanitizer、`nsys` 和 `ncu`，不要先背指标。
 3. 采集遇到疑问后，再查 [Compute Sanitizer](https://docs.nvidia.com/compute-sanitizer/)、[Nsight Systems](https://docs.nvidia.com/nsight-systems/)、[Nsight Compute](https://docs.nvidia.com/nsight-compute/)。
 4. 最后查 [CUDA Binary Utilities](https://docs.nvidia.com/cuda/cuda-binary-utilities/) 和 [PTX ISA](https://docs.nvidia.com/cuda/parallel-thread-execution/contents.html) 核对反汇编结果。
 
@@ -916,7 +916,7 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 
 必须交付：一份优化前/后报告；一张 Nsight Systems timeline；一张 Nsight Compute 热点指标截图或导出结果；一次 Compute Sanitizer 结果；一段由 profile 数据支持的优化结论。
 
-### 第 6 周：CUDA 图、协作组、Tensor Core 与 PTX/SASS
+### 步骤六：CUDA 图、协作组、Tensor Core 与 PTX/SASS
 
 关键字：cooperative groups、CUDA Graph、warp shuffle、WMMA、Tensor Core、PTX、SASS、sm_87、fatbin。
 
@@ -1014,33 +1014,33 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 ---
 
-## 15. 24 周执行节奏
+## 15. 阶段执行与复习原则
 
-假设每周投入 10-12 小时；每周只有 5-6 小时时，把日历时间大约翻倍。
+路线按完成条件推进，不绑定周数或课时。已有能力只能通过对应交付物和停止条件跳过，不能以“看过课程”代替验收。
 
-如果已经能独立完成 C++17/CMake 小程序，能创建可复现的 Python `venv`、使用 NumPy 和 PyTorch 处理 tensor，并熟悉 Shell、进程、权限、SSH 和 `gdb`，才可以跳过第 1-2 周；否则先完成阶段一的 Python + PyTorch `model-tools` 和 C++ 项目。遇到基础问题时再回看阶段一对应章节。
+### 每阶段执行闭环
 
-| 周数 | 主线 | 交付物 |
-|---:|---|---|
-| 1-2 | Python、PyTorch、C++、Linux、Git、CMake、venv、NumPy、ONNX、gdb | `model-tools` + CPU 矩阵乘法和 Git 记录 |
-| 3 | CUDA 编程模型与第一个 Kernel | vector add/SAXPY |
-| 4 | 内存层次、transpose、reduction | 两个正确且可 benchmark 的 Kernel |
-| 5 | streams、events、pinned memory | overlap 实验和时间线 |
-| 6 | tiled GEMM、cuBLAS、FP16/TF32 概念 | GEMM 对比表 |
-| 7 | MNIST CUDA 项目 | baseline 与 naive CUDA |
-| 8 | Sanitizer、Nsight Systems、Nsight Compute | 优化前后报告 |
-| 9-10 | ONNX、TensorRT、trtexec | 第一个可复现 Engine |
-| 11 | dynamic shape、FP16、INT8 | 精度/延迟/内存比较 |
-| 12 | plugin、Polygraphy、Torch-TensorRT | 一个不支持算子的处理记录 |
-| 13-14 | GStreamer、Jetson 视频输入、DeepStream 基础 | 单路视频推理 |
-| 15-16 | 多路、tracker、metadata、tegrastats | 4 路视频报告 |
-| 17 | HTTP/gRPC、Docker 基础 | 一个健康检查和推理 API |
-| 18 | Triton model repository 和 TensorRT backend | 单模型 Triton 服务 |
-| 19 | batching、ensemble、metrics、Perf Analyzer | 并发/延迟曲线 |
-| 20-21 | Edge-LLM、量化、KV cache、服务指标 | Orin 上的小模型基线 |
-| 22 | INT4/AWQ 和 API 包装 | LLM 服务 demo |
-| 23 | 端到端整合和故障处理 | 可重复启动的项目 |
-| 24 | 性能回归、文档、演示 | 完整技术报告和 benchmark |
+1. **系统学习**：按连续知识块完成主课，建立术语、因果关系和边界。
+2. **阶段项目**：立即用代码、实验、图或报告调用所学内容。
+3. **间隔复习**：进入后续阶段时闭卷解释前置知识，不清楚时定点回补，不重看整门课。
+4. **证据验收**：以正确性、性能、版本、功耗、内存和可复现记录决定是否进入下一阶段。
+
+### 主线与支线纪律
+
+- 主线一次只推进一个阶段；支线必须满足进入条件。
+- 支线不替代主线交付物，也不因课程有趣而提前插入。
+- DeepStream、深度剪枝、Triton Language、驱动和编译器均按目标岗位选择。
+
+### 回补规则
+
+- 工程工具问题回补阶段一。
+- Kernel 正确性或性能解释问题回补阶段二。
+- 模型训练与推理边界问题回补阶段三。
+- 量化、剪枝和稀疏化问题回补阶段四。
+- 模型结构、shape、导出或 Engine 问题回补阶段五。
+- API、容器、并发、batching 或监控问题回补阶段六。
+- Transformer、预训练或生成问题回补阶段七。
+- KV cache、LLM runtime、量化格式或服务指标问题回补阶段八。
 
 ---
 
