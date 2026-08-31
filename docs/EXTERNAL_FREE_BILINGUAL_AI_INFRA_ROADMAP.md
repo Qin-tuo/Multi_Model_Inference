@@ -835,7 +835,7 @@ freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文�
 
 起点视频：[NVIDIA Modern CUDA C++ Playlist](https://www.youtube.com/playlist?list=PL5B692fm6--vWLhYPqLcEu6RF3hXjEyJr)（主课）+ [freeCodeCamp CUDA Course](https://www.youtube.com/watch?v=86FAWCzIe_4)（补充），代码仓库 [Infatoshi/cuda-course](https://github.com/Infatoshi/cuda-course)。
 
-**两个视频足够启动，不够形成完整能力**；缺口（官方编程模型、Best Practices、Sanitizer/Nsight、架构分析、TensorRT、Jetson 项目）由下面六个步骤补齐。执行节奏：**视频章节 → 当天复现 → 改一处 → 查文档 → 写一页结果**。
+**两个视频足够启动，不够形成完整能力**；阶段二 CUDA 执行与性能分析的缺口（官方编程模型、Best Practices、Sanitizer/Nsight、架构分析）由下面六个步骤补齐。TensorRT 在阶段五完成，Jetson 视觉项目在视觉流媒体支线完成。执行节奏：**视频章节 → 复现 → 修改一处参数 → 查文档 → 记录结果**。
 
 ### 步骤一：能编译、能运行、能解释线程层次
 
@@ -1036,11 +1036,11 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 - 工程工具问题回补阶段一。
 - Kernel 正确性或性能解释问题回补阶段二。
 - 模型训练与推理边界问题回补阶段三。
-- 量化、剪枝和稀疏化问题回补阶段四。
-- 模型结构、shape、导出或 Engine 问题回补阶段五。
+- 量化、剪枝和稀疏化原理、方法选择和验证设计问题回补阶段四。
+- 模型结构、shape、ONNX 导出、校准与精度对齐、TensorRT tactics/Engine 和预处理问题回补阶段五。
 - API、容器、并发、batching 或监控问题回补阶段六。
 - Transformer、预训练或生成问题回补阶段七。
-- KV cache、LLM runtime、量化格式或服务指标问题回补阶段八。
+- KV cache、LLM runtime、LLM 量化格式与 runtime 兼容性或服务指标问题回补阶段八。
 
 ---
 
