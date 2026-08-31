@@ -1102,59 +1102,71 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 最终项目建议做成一个可以公开展示的仓库，包含：
 
-- 一个 TensorRT FP16/INT8 图像模型。
-- 一个 DeepStream 多路视频 pipeline。
-- 一个 Triton TensorRT backend 服务，或在 Jetson 支持范围内的等价服务。
-- 一个 TensorRT-Edge-LLM 小模型服务。
-- HTTP/gRPC API、健康检查和 Prometheus 指标。
-- Nsight Systems/Compute 报告。
-- tegrastats 采样、功耗/温度记录和内存预算。
-- 一键启动、固定版本、固定输入和可重复 benchmark。
+- 一个 TensorRT FP16/INT8 图像模型：保留 PyTorch→ONNX 输出对齐、FP32/FP16/INT8 精度证据、校准设计、Engine 构建命令与版本，使 Engine 可重复构建。
+- 一个 Triton TensorRT backend 服务：使用官方 Triton HTTP client 和 unary gRPC client 发起请求，并提供 health 与 Prometheus metrics。
+- 一个支持矩阵内的 TensorRT-Edge-LLM 小模型服务。
+- 一份 Nsight Systems 流水线证据和一份 Nsight Compute 热点 Kernel 证据，包含优化前后对比。
+- `tegrastats` 采样，以及功耗、温度、unified memory 峰值和 JetPack/L4T/CUDA/TensorRT/运行时版本记录。
+- 提供可重复的一键启动和一键 benchmark 命令，并固定模型、输入、shape、batch、并发、功耗模式和 warmup 条件。
 
-最终报告至少回答：1. 哪些计算由现成库完成，哪些 Kernel 是自己写的？2. 哪个热点经过了 Profile，优化前后改变了什么？3. TensorRT 的精度、延迟和内存折中是什么？4. DeepStream 相比普通 OpenCV pipeline 的收益在哪里？5. Triton 在这里解决了什么，哪些问题它没有解决？6. Orin 上的 LLM 与服务器 GPU 上的 vLLM/TensorRT-LLM 有哪些限制差异？7. 在 25W、16GB unified memory 下，系统的实际上限是什么？
+### 可选视觉扩展（完成分支 A 时）
+
+- 增加 DeepStream 多路视频 pipeline，并记录每路 FPS、端到端延迟、解码/推理资源占用、功耗、温度和内存。
+- 仅在选择分支 A 时，最终报告额外回答：DeepStream 相比普通 OpenCV pipeline 的收益和约束是什么？
+
+主线最终报告至少回答：1. 哪些计算由现成库完成，哪些 Kernel 是自己写的？2. 哪个热点经过了 Profile，如何定位，优化前后改变了什么？3. TensorRT 的精度、延迟、内存和 Engine 构建折中是什么？4. Triton 作为服务层解决了什么，哪些问题仍由模型运行时或客户端承担？5. Orin 上的 TensorRT-Edge-LLM 与服务器 GPU 上的 vLLM/TensorRT-LLM 有哪些运行时和资源限制差异？6. 在 25W、16GB unified memory 下，系统的实际上限是什么？
 
 ---
 
 ## 21. 一页式执行清单
 
-### 现在
+### 工程与 CUDA 基础
 
-- [ ] 安装并确认 Python `venv`、NumPy、PyTorch/ONNX 工具链，完成阶段一的 `model-tools`。
-- [ ] 安装并确认 CUDA 编译链，运行 deviceQuery。
-- [ ] 开始 NVIDIA Modern CUDA C++ Playlist。
-- [ ] 跟完一个视频章节就复现并修改对应代码。
-- [ ] 只在索引、API 或异步语义不清楚时，定点查询 CUDA Programming Guide。
-- [ ] 建立自己的 CUDA 实验仓库。
-- [ ] 完成 vector add、transpose、reduction。
+- [ ] 完成阶段一的 Python `venv`、NumPy、PyTorch/ONNX、C++、Linux、Git 和 CMake 基础，并交付 `model-tools`。
+- [ ] 掌握 Docker 基础，能构建和运行开发镜像，并明确 ARM64 镜像与 x86 镜像不可混用。
+- [ ] 完成 CUDA 编译与 `deviceQuery`，实现并验证 vector add、transpose、reduction 和 GEMM。
+- [ ] 使用 Compute Sanitizer 检查正确性，用 Nsight Systems 定位流水线瓶颈、Nsight Compute 分析热点 Kernel，并提交优化前后报告。
 
-### CUDA 基础过关后
+### 模型原理与压缩
 
-- [ ] 完成 MNIST CUDA 的至少四级实现。
-- [ ] 用 Compute Sanitizer 检查。
-- [ ] 用 Nsight Systems 找流水线瓶颈。
-- [ ] 用 Nsight Compute 分析一个热点 Kernel。
-- [ ] 写出一份优化前后报告。
+- [ ] 完成 Deep Learning Specialization 主线基础，能区分训练、验证、导出和推理，并解释各阶段的数据与指标。
+- [ ] 掌握量化原理，设计具有代表性的校准集、校准流程与精度验收标准。
+- [ ] 理解剪枝、稀疏化和蒸馏的目标与边界，并为压缩前后设计精度、性能和硬件收益验证。
 
-### 进入部署
+### 模型部署
 
-- [ ] ONNX → TensorRT Engine。
-- [ ] FP32/FP16/INT8 对比。
-- [ ] 单路 → 4 路 DeepStream。
-- [ ] Triton TensorRT backend + metrics。
-- [ ] 支持矩阵内的 Edge-LLM 小模型。
+- [ ] 连贯学习 D2L 选定模型结构，能跟踪关键模块的 shape 变化并解释 `forward` 数据流。
+- [ ] 完成 PyTorch→ONNX 导出与输出对齐，记录算子、动态维度和误差证据。
+- [ ] 构建并对比 TensorRT FP32/FP16/INT8 Engine，理解 tactics、dynamic shapes、校准、精度、延迟和内存折中。
+- [ ] 使用 DALI 或 CV-CUDA 实现 GPU 预处理，并与 CPU 预处理做固定条件 benchmark。
 
-### 再进入高级分支
+### 推理服务
 
-- [ ] Linux module/driver/device tree。
-- [ ] Triton DSL、CUTLASS/CuTe。
-- [ ] TVM、MLIR。
-- [ ] 更复杂的 LLM scheduler、KV cache 和多模型资源管理。
+- [ ] 掌握 Docker 进阶构建、GPU runtime、health check 和容器网络，确认镜像与 Jetson ARM64/JetPack 兼容。
+- [ ] 使用官方 Triton HTTP client 和 unary gRPC client 完成请求、超时与错误处理；不自建 gRPC server。
+- [ ] 部署 Triton TensorRT backend，实验 dynamic batching、多个 model instance 和 ensemble，接入 health/metrics，并用 Perf Analyzer 测量并发、延迟和吞吐。
+
+### LLM 推理
+
+- [ ] 完成 CS224n Lecture 7–11 的 Transformer、自注意力、预训练与生成核心概念。
+- [ ] 解释 prefill/decode、KV cache 与调度关系，并分别测量 TTFT、TPOT、tokens/s、吞吐、峰值内存和上下文长度。
+- [ ] 用同一小模型比较至少两个运行时，依据模型格式与支持矩阵完成选型，并交付可重复启动的 TensorRT-Edge-LLM 服务。
+
+### 按岗位选择支线
+
+- [ ] 视觉流媒体：分支 A，GStreamer/DeepStream 多路视频 pipeline。
+- [ ] 剪枝实现：分支 B，结构化/非结构化剪枝、稀疏训练与硬件收益验证。
+- [ ] Kernel DSL/算子：分支 C，Triton Language、CUTLASS 和 CuTe。
+- [ ] 驱动/BSP：分支 D，Linux module、device tree、Jetson BSP 与调试。
+- [ ] 编译器：分支 E，TVM、MLIR 与图/算子编译实验。
 
 ---
 
 ## 22. 学完之后：能力定位与岗位
 
-完成全部阶段项目与毕业项目后，定位是**具备端到端 GPU 推理与边缘 AI 系统能力的初级到初中级工程师**。
+完成主线阶段项目与毕业项目后，定位是**具备通用 GPU 推理、推理服务和 Orin Edge-LLM 落地能力的初级到初中级工程师**：能够完成 CUDA 性能分析、模型导出与 TensorRT 优化、Triton 服务化，以及支持矩阵内的小模型部署与资源测量。
+
+可选支线不要求全部完成；根据目标岗位选择后，可分别深化视觉流媒体、模型压缩、Kernel DSL/算子与编译器，或 Linux 驱动/Jetson BSP 能力。
 ---
 
 ## 23. 关键链接索引
@@ -1177,18 +1189,21 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 - [Jetson Docs](https://docs.nvidia.com/jetson/index.html)
 - [TensorRT Docs](https://docs.nvidia.com/deeplearning/tensorrt/latest/)
 - [TensorRT GitHub](https://github.com/NVIDIA/TensorRT)
-- [DeepStream Docs](https://docs.nvidia.com/metropolis/deepstream/dev-guide/)
-- [DeepStream GitHub](https://github.com/NVIDIA/DeepStream)
+- [DeepStream Docs（视觉分支 A）](https://docs.nvidia.com/metropolis/deepstream/dev-guide/)
+- [DeepStream GitHub（视觉分支 A）](https://github.com/NVIDIA/DeepStream)
 - [Jetson AI Lab](https://www.jetson-ai-lab.com/tutorials/)
 - [TensorRT-Edge-LLM](https://nvidia.github.io/TensorRT-Edge-LLM/)
 
-### Serving / Compiler
+### Serving / LLM
 
 - [Triton Docs](https://docs.nvidia.com/deeplearning/triton-inference-server/)
 - [Triton Server](https://github.com/triton-inference-server/server)
 - [Triton Tutorials](https://github.com/triton-inference-server/tutorials)
 - [vLLM](https://github.com/vllm-project/vllm)
 - [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM)
+
+### Kernel DSL / Compiler
+
 - [Triton Language](https://triton-lang.org/main/)
 - [Apache TVM](https://tvm.apache.org/docs/)
 - [MLIR Tutorials](https://mlir.llvm.org/docs/Tutorials/)
