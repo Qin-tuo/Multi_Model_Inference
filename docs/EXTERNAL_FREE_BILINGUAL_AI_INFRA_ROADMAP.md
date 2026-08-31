@@ -659,19 +659,132 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ---
 
-## 11. 可选分支（驱动 / 算子 DSL / 编译器）
+## 11. 可选支线（视觉 / 压缩 / 算子 / 驱动 / 编译器）
 
-### 分支 A：Linux 驱动 / BSP
+### 分支 A：视觉流媒体（Jetson / GStreamer / DeepStream）
 
-**进入时间**：CUDA/Nsight 主线完成后；除非目标岗位就是 BSP/驱动，否则每周并行 2 小时即可。主线位置：Linux 用户态 → module → 字符设备 → ioctl/poll/mmap → DMA/中断 → device tree → Jetson BSP → 调试与性能。
+**进入条件**：完成阶段五后再进入。本支线是可选视觉方向，主线不要求完成；Deep Learning Specialization Course 4 只作为本支线的可选先修或 CNN 概念补课，不是主线必修。
 
-**课程与资料：**
+#### 课程与资料
+
+**Jetson AI 基础：**
+
+- 主课：[NVIDIA Jetson AI Fundamentals](https://www.youtube.com/playlist?list=PL5B692fm6--uQRRDTPsJDp4o0xbzkoyf8)（EN / Official，完整系列）；同课中文镜像 [BV1EGSmBWErR](https://www.bilibili.com/video/BV1EGSmBWErR/)
+- 中文补课：[NVIDIA Jetson 边缘 AI 快速上手系列](https://www.bilibili.com/video/BV1yEzBYQEMt/)（Seeed Studio，完整系列）
+- 项目起点：[dusty-nv/jetson-inference](https://github.com/dusty-nv/jetson-inference)
+- 可选先修 / 补课：[Deep Learning Specialization Course 4: Convolutional Neural Networks](https://www.deeplearning.ai/courses/deep-learning-specialization/)（只在 CNN、classification、detection、segmentation 概念不牢时学习）
+
+**GStreamer 与 DeepStream：**
+
+- 主课：[Create Vision AI Applications With DeepStream](https://www.nvidia.com/en-us/on-demand/session/gtc26-dlit81879/?playlistId=gtc26-computer-vision-and-video-analytics)（EN / NVIDIA，2026，2 小时完整 workshop）
+- 中文补课：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)（只选 GStreamer / DeepStream 单元）
+- 文档：[DeepStream Documentation](https://docs.nvidia.com/metropolis/deepstream/dev-guide/)、[DeepStream GitHub](https://github.com/NVIDIA/DeepStream)、[DeepStream Python Apps](https://github.com/NVIDIA-AI-IOT/deepstream_python_apps)、[DeepStream 中文开发入口](https://developer.nvidia.cn/deepstream-sdk)、[Jetson AI Lab](https://www.jetson-ai-lab.com/tutorials/)
+
+#### 分支课程大纲（★ = 本支线必修）
+
+- **Deep Learning Specialization Course 4（可选先修 / 补课）** 大纲：
+  - CNN、卷积 / 池化、经典视觉网络的基本概念
+  - classification、detection、segmentation 的任务差异
+- **NVIDIA Jetson AI Fundamentals（官方 playlist）** 大纲：
+  - ★ Hello AI World 与 jetson-inference 安装（忽略 Nano/JetPack 4 命令）
+  - ★ 图像分类 classification
+  - ★ 目标检测 detection
+  - ★ 语义分割 segmentation
+  - ★ 摄像头与实时推理、训练与迁移学习（PyTorch）
+  - ★ `tegrastats` 与各阶段耗时拆解（模型加载 / 预处理 / 推理 / 后处理 / 捕获 / 显示）
+- **Seeed Jetson 边缘 AI 快速上手系列（B站）** 大纲：
+  - ★ Jetson 上手、摄像头与边缘 AI 工作流
+  - 进阶项目（按需）
+- **Create Vision AI Applications With DeepStream（2026 GTC workshop）** 大纲：
+  - ★ GStreamer 基础与 pipeline 概念（caps、buffer、metadata）
+  - ★ DeepStream 插件：`nvinfer` / tracker / tiler / metadata
+  - ★ 文件、RTSP 与摄像头输入，单路 pipeline → 多路 pipeline
+  - ★ 性能与功耗测量（FPS、延迟、温度、内存）
+- **深度学习模型部署与剪枝优化实战（B站）** 大纲：
+  - ★ GStreamer / DeepStream 相关单元
+  - 其它通用部署与剪枝内容（转到分支 B 或按需）
+
+#### 学习方法与停止条件
+
+- **Jetson 基础 · 看完即做**：用 `jetson-inference` 依次跑 classification、detection、segmentation，再接 USB/CSI 摄像头。停止条件：能区分模型加载 / 预处理 / 推理 / 后处理 / 捕获 / 显示耗时，并记录 `tegrastats`。
+- **DeepStream · 免费边界**：On-Demand 视频免费观看；要登录只注册免费账号，不买 DLI。看完即做：文件单路 → 摄像头单路 → 4 路文件/RTSP；加入 decode、mux、`nvinfer`、tracker、tiler、metadata、sink。停止条件：能画出 pipeline，解释 caps / buffer / metadata / batch / zero-copy，并报告每路 FPS、端到端延迟、温度、功耗和内存。
+
+#### 项目与版本边界
+
+- **可选视觉项目**：项目 D（Jetson 多路视频推理），见第 13 章；入门先用 `jetson-inference` 跑通三类任务。
+- **版本警告**：课程中的 Jetson Nano / JetPack 4 命令全部忽略；本机边界是 JetPack 7.2.1、DeepStream 9.1，旧课安装命令、插件字段和 Python binding 不可复制，从 [NVIDIA/DeepStream](https://github.com/NVIDIA/DeepStream) 当前 release 开始。
+- **与阶段五的关系**：DeepStream 的 NVMM 零拷贝与阶段五 DALI 的 zero-copy 是同一类减少数据搬运的思想；这里把它落到视频 decode、batch 和推理 pipeline。
+
+### 分支 B：模型压缩实战
+
+**进入条件**：完成阶段五，并先建立可复现的未剪枝 TensorRT baseline；固定模型、数据集、输入 shape、精度、功耗模式、warmup 和测量方法，记录 baseline 的 accuracy、latency、throughput 与 memory。
+
+#### 课程与资料
+
+- 主课选段：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)（只学更深入的剪枝实现单元）
+- 官方文档：[TensorRT Documentation](https://docs.nvidia.com/deeplearning/tensorrt/latest/)、[TensorRT 10.x Structured Sparsity](https://docs.nvidia.com/deeplearning/tensorrt/10.x.x/inference-library/io-formats-sparsity.html)
+
+#### 分支课程大纲（★ = 本支线必修）
+
+- ★ sparse training 与稀疏度调度，理解 L1 正则的作用与局限
+- ★ structured pruning：通道 / filter 筛选、结构化稀疏约束与参数迁移
+- ★ post-pruning finetuning，并记录恢复前后的 accuracy
+- ★ 导出 ONNX，完成 PyTorch → ONNX Runtime 数值对齐
+- ★ 运行 `polygraphy inspect sparsity model.onnx` 检查 ONNX 权重是否真正满足 TensorRT 稀疏要求
+- ★ 构建 TensorRT Engine，保存完整 build log，并检查 layer/tactic profiling 中是否实际选择 sparse tactic
+- ★ 在相同目标硬件与测量条件下对比剪枝前后的 accuracy、latency、throughput、memory
+
+#### 学习方法与停止条件
+
+从未剪枝 TensorRT baseline 开始，只改变一个剪枝变量；依次完成 sparse training → structured pruning → post-pruning finetuning → ONNX export → sparsity inspection → TensorRT build 与 benchmark。参数量或 FLOPs 更小只说明理论规模变化，不是实际加速证明。
+
+停止条件：必须在目标硬件上证明实际选用了预期 sparse tactic，并展示端到端 accuracy、latency、throughput 和 memory 的真实影响；若 TensorRT 未选 sparse tactic 或端到端没有收益，也要明确记录 no-benefit 结果、构建日志和原因分析，不能只汇报参数量或 FLOPs。
+
+### 分支 C：Triton Language、CUTLASS 和 CuTe
+
+**进入条件**：完成阶段二后可进入算子分支。这里的 Triton 是 Kernel DSL，不是阶段六的 Triton Inference Server；CS336 Lecture 6 专属本支线，不放入主线课程。
+
+#### 课程与资料
+
+- 主课：[Triton 从入门到大师](https://www.bilibili.com/video/BV1fMyWBgERM/)（中文，10 讲完整课）
+- 专题：[Stanford CS336 2026 Lecture 6: Kernels, Triton, XLA](https://www.youtube.com/watch?v=xnDHaNUvHBg)（EN / University）
+- 代码：[triton_docs_tutorials](https://github.com/evintunador/triton_docs_tutorials)
+- 高级系列：[GPU MODE Lectures](https://www.youtube.com/playlist?list=PLjG_zIhhamWJRAuxYNBI0QvVE0dmwNQLL)（CUTLASS/CuTe 讲次）
+- 官方文档：[Triton Language](https://triton-lang.org/main/)、[Triton Tutorials](https://triton-lang.org/main/getting-started/tutorials/)、[Triton GitHub](https://github.com/triton-lang/triton)、[CuTe tutorial](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/00_quickstart.html)、[CUTLASS](https://github.com/NVIDIA/cutlass)
+
+#### 分支课程大纲（★ = 本支线必修）
+
+- **Triton 从入门到大师（B站 10 讲）** 大纲：
+  - ★ Triton 编程模型与 program instance
+  - ★ vector add → fused softmax → matmul → layer norm
+  - ★ autotune 与 tile
+  - ★ 与 CUDA 版本做正确性 / 性能 / 可读性对比
+- **CS336 Lecture 6: Kernels, Triton, XLA** 大纲：
+  - ★ kernel 实现视角下的 Triton / XLA
+  - ★ 写算子时配套观看
+- **GPU MODE Lectures（CUTLASS / CuTe 讲次）** 大纲：
+  - ★ CUDA / Triton / CUTLASS / CuTe 相关讲次
+  - ★ GEMM tile / layout / MMA 与 CUTLASS profiler
+  - ★ CuTe GEMM 实战理解 layout / tile / MMA
+- **CuTe tutorial（官方文档）** 大纲：
+  - ★ CuTe 快速上手与 layout 概念
+  - ★ 一个 CuTe GEMM 项目
+
+#### 学习方法与停止条件
+
+Triton 课后项目：vector add → fused softmax → matmul → layer norm；与 CUDA 版本做 correctness、性能和可读性对比。CUTLASS/CuTe 以 GPU MODE 为完整课程载体，再进入官方 CuTe tutorial 做项目。停止条件：能解释 program instance、tile、layout、MMA、autotune 的边界，并知道何时选 CUDA、Triton 或 CUTLASS。Triton 适合在 x86 NVIDIA GPU 或公开 notebook 环境学习；不要默认当前 Triton、PyTorch 和 ARM64 Jetson 组合可原生安装。
+
+### 分支 D：Linux 驱动 / BSP
+
+**进入条件**：完成阶段二后再进入。主线位置：Linux 用户态 → module → 字符设备 → ioctl/poll/mmap → DMA/中断 → device tree → Jetson BSP → 调试与性能。
+
+#### 课程与资料
 
 - 英文主课：[Linux Device Drivers Development](https://www.youtube.com/watch?v=iSiyDHobXHA)（freeCodeCamp，约 5 小时）
 - 中文主课：[韦东山：嵌入式 Linux 驱动开发基础](https://www.bilibili.com/video/BV14f4y1Q7ti/)（50 讲、约 17 小时）
 - 文档：[LFD103 Kernel Development](https://training.linuxfoundation.org/training/a-beginners-guide-to-linux-kernel-development-lfd103/)、[Bootlin Training Materials](https://bootlin.com/docs/)、[Bootlin Kernel Training](https://bootlin.com/training/kernel/)、[Kernel Driver API](https://www.kernel.org/doc/html/latest/driver-api/index.html)、[Linux Kernel Labs 中文翻译](https://github.com/linux-kernel-labs-zh/docs-linux-kernel-labs-zh-cn)、[Linux 内核文档中文版](https://docs.linuxkernel.org.cn/)、[TinyLab 内核文档中文版](https://tinylab-1.gitbook.io/linux-doc/zh-cn)
 
-**当阶段课程大纲（★ = 本阶段必修）**
+#### 分支课程大纲（★ = 本支线必修）
 
 - **Linux Device Drivers Development（freeCodeCamp，约 5 小时）** 大纲：
   - ★ 内核模块 module 编写与加载
@@ -683,51 +796,21 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ GPIO、中断、设备树匹配
   - ★ 不要在 Orin 启动链上直接试验
 
-**学习方法与停止条件**：freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文课补 GPIO、字符设备、中断、工作队列和 `mmap`。看完即做：在 VM、QEMU 或可恢复开发板完成 hello module、字符设备、ioctl、poll 和 mmap。停止条件：能从 device tree 匹配到 driver/probe，能用 `dmesg`、ftrace/perf 定位一次问题。不要先改 Orin 启动链或 NVIDIA GPU 驱动。项目：编译并加载 hello module；读懂一个字符设备驱动；能解释设备树、module、用户态/内核态。
+#### 学习方法、项目与安全边界
 
-### 分支 B：Triton Language、CUTLASS 和 CuTe
+freeCodeCamp 5 小时快速建立 module、syscall、`/proc`；韦东山中文课补 GPIO、字符设备、中断、工作队列和 `mmap`。看完即做：在 VM、QEMU 或可恢复开发板完成 hello module、字符设备、ioctl、poll 和 mmap。停止条件：能从 device tree 匹配到 driver/probe，能用 `dmesg`、ftrace/perf 定位一次问题。不要先改 Orin 启动链或 NVIDIA GPU 驱动。项目：编译并加载 hello module；读懂一个字符设备驱动；能解释设备树、module、用户态/内核态。
 
-**进入时间**：只有阶段三已通过，才进入算子分支。这里的 Triton 是 Kernel DSL，不是 Triton Inference Server。
+### 分支 E：TVM 和 MLIR
 
-**课程与资料：**
+**进入条件**：完成 Triton Language 或同等 Kernel 项目后再学；它不是 TensorRT 前置课。
 
-- 主课：[Triton 从入门到大师](https://www.bilibili.com/video/BV1fMyWBgERM/)（中文，10 讲完整课）
-- 专题：[Stanford CS336 2026 Lecture 6: Kernels, Triton, XLA](https://www.youtube.com/watch?v=xnDHaNUvHBg)（EN / University）
-- 代码：[triton_docs_tutorials](https://github.com/evintunador/triton_docs_tutorials)
-- 高级系列：[GPU MODE Lectures](https://www.youtube.com/playlist?list=PLjG_zIhhamWJRAuxYNBI0QvVE0dmwNQLL)（CUTLASS/CuTe 讲次）
-- 官方文档：[Triton Language](https://triton-lang.org/main/)、[Triton Tutorials](https://triton-lang.org/main/getting-started/tutorials/)、[Triton GitHub](https://github.com/triton-lang/triton)、[CuTe tutorial](https://docs.nvidia.com/cutlass/latest/media/docs/cpp/cute/00_quickstart.html)、[CUTLASS](https://github.com/NVIDIA/cutlass)
-
-**当阶段课程大纲（★ = 本阶段必修）**
-
-- **Triton 从入门到大师（B站 10 讲）** 大纲：
-  - ★ Triton 编程模型与 program instance
-  - ★ vector add → fused softmax → matmul → layer norm
-  - ★ autotune 与 tile
-  - ★ 与 CUDA 版本做正确性/性能/可读性对比
-- **CS336 Lecture 6: Kernels, Triton, XLA** 大纲：
-  - ★ kernel 实现视角下的 Triton / XLA
-  - ★ 写算子时配套观看
-- **分支 B2 — GPU MODE Lectures（CUTLASS / CuTe 讲次）** 大纲：
-  - ★ CUDA / Triton / CUTLASS / CuTe 相关讲次
-  - ★ GEMM tile / layout / MMA 与 CUTLASS profiler
-  - ★ CuTe GEMM 实战理解 layout / tile / MMA
-- **CuTe tutorial（官方文档）** 大纲：
-  - ★ CuTe 快速上手与 layout 概念
-  - ★ 一个 CuTe GEMM 项目
-
-**学习方法与停止条件**：Triton 课后项目：vector add → fused softmax → matmul → layer norm；与 CUDA 版本做 correctness、性能和可读性对比。CUTLASS/CuTe 以 GPU MODE 为完整课程载体，再进入官方 CuTe tutorial 做项目。停止条件：能解释 program instance、tile、layout、MMA、autotune 的边界，并知道何时选 CUDA、Triton 或 CUTLASS。Triton 适合在 x86 NVIDIA GPU 或公开 notebook 环境学习；不要默认当前 Triton、PyTorch 和 ARM64 Jetson 组合可原生安装。
-
-### 分支 C：TVM 和 MLIR
-
-**进入时间**：Triton Kernel 项目完成后再学；它不是 TensorRT 前置课。
-
-**课程与资料：**
+#### 课程与资料
 
 - 主课：[MLC 机器学习编译](https://www.bilibili.com/video/BV15v4y1g7EU)（陈天奇课程，10 讲完整系列）；[中英文课程页](https://mlc.ai/summer22-zh/schedule)
 - 专题：[LLVM MLIR Tutorial](https://www.youtube.com/watch?v=Y4SvqTtOIDk)（EN / LLVM Official，完整 workshop）
 - 文档：[Apache TVM Documentation](https://tvm.apache.org/docs/)、[TVM End-to-End Optimization Tutorial](https://tvm.apache.org/docs/how_to/tutorials/e2e_opt_model.html)、[MLIR Toy Tutorial](https://mlir.llvm.org/docs/Tutorials/Toy/)
 
-**当阶段课程大纲（★ = 本阶段必修）**
+#### 分支课程大纲（★ = 本支线必修）
 
 - **MLC 机器学习编译（陈天奇课程，B站 10 讲）** 大纲：
   - ★ TVM/MLC 概览与安装
@@ -738,7 +821,9 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ MLIR Toy dialect：AST → dialect → passes → lowering → LLVM
   - ★ dialect / pass / lowering 概念
 
-**学习方法与停止条件**：完整学 MLC 10 讲及配套课程页，再看 LLVM MLIR workshop。看完即做：完成 TensorIR schedule/自动优化 notebook；再走一遍 MLIR Toy 的 AST → dialect → passes → lowering → LLVM。停止条件：能解释 graph optimization、tensor program、IR、dialect、pass、lowering、runtime 的层级关系，并能把一个优化落到可运行代码。不要在 CUDA 基础没掌握时从 MLIR 开始。
+#### 学习方法与停止条件
+
+完整学 MLC 10 讲及配套课程页，再看 LLVM MLIR workshop。看完即做：完成 TensorIR schedule/自动优化 notebook；再走一遍 MLIR Toy 的 AST → dialect → passes → lowering → LLVM。停止条件：能解释 graph optimization、tensor program、IR、dialect、pass、lowering、runtime 的层级关系，并能把一个优化落到可运行代码。不要在 CUDA 基础没掌握时从 MLIR 开始。
 
 ---
 
