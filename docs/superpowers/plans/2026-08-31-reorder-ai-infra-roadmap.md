@@ -1,12 +1,28 @@
 # Dependency-Ordered AI Infra Roadmap Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax and are completed (`- [x]`) below.
 
 **Goal:** Reorder the AI Infra roadmap into eight dependency-driven main stages, move directional topics into prerequisite-gated branches, and remove calendar-based schedules.
 
 **Architecture:** Keep the roadmap as one canonical Markdown document, but update it in independently verifiable logical sections. Preserve valid resource links and version boundaries while changing course ownership, stage cross-references, project requirements, and execution guidance to match the approved design.
 
 **Tech Stack:** Markdown, ripgrep, Git
+
+**Plan Status:** Completed at final HEAD after all review amendments; all tracking steps below are marked complete.
+
+## Final Review Amendments (Normative)
+
+This section supersedes conflicting task text below. Historical task details remain for execution traceability, but the following rules define the completed repository state:
+
+- The canonical stage-four title is **模型压缩原理与设计**. Stage four owns only generic quantization, pruning, sparsity, distillation, hardware constraints, and validation design.
+- Stage three keeps Deep Learning Specialization as its main course, adds only the bounded official PyTorch `torch.nn` supplement for `Linear`, `Conv2d`, `BatchNorm2d`, `Embedding`, and tensor roles, and requires a written computation graph plus training -> validation -> export -> inference explanation.
+- Stage five uses the [official D2L course page](https://courses.d2l.ai/zh-v2/), Bilibili official [“跟李沐学AI” series](https://space.bilibili.com/1567748478/lists/358497?type=series), and [Chinese textbook](https://zh-v2.d2l.ai/). The invalid aggregate BVID is removed. D2L remains the coherent model-structure course; `BV1Sw411y7Hs` P109-P121 is only the MobileNet/lightweight-structure supplement.
+- Stage five executes the TensorRT FP32/FP16/INT8 quantization baseline and does not require pruning or 2:4 execution. Branch B revisits Project C and owns the selected pruning/2:4 experiment.
+- A validated CV-CUDA Jetson-Orin pipeline is the required GPU-preprocessing path. DALI is conceptual and conditional on its support matrix plus a validated source build for the JetPack 7.2.1 / CUDA 13.2.1 baseline; no wheel support is assumed.
+- Stage eight owns KV cache and the AWQ, GPTQ, SmoothQuant, and LLM.int8() method/format/runtime-compatibility details.
+- DeepStream remains optional in branch A/project D/optional capstone. The stage-five zero-copy comparison is implementation-neutral or CV-CUDA-based.
+- The unavailable CUDA Developer Tools Chinese mirror is removed; the NVIDIA official English playlist remains.
+- The final checklist includes stage-one CPU GEMM and Shell/TCP deliverables, stage-two MNIST CUDA, the stage-three written artifact, stage-five CV-CUDA validation, and conditional DALI comparison.
 
 ---
 
@@ -16,7 +32,7 @@
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:5-30`
 - Reference: `docs/superpowers/specs/2026-08-31-roadmap-stage-reordering-design.md:1`
 
-- [ ] **Step 1: Capture the stale overview as the failing documentation check**
+- [x] **Step 1: Capture the stale overview as the failing documentation check**
 
 Run:
 
@@ -26,12 +42,12 @@ rg -n "阶段二 · 模型概念底座|阶段六 · Jetson 与视频推理|阶�
 
 Expected: all four stale labels match.
 
-- [ ] **Step 2: Replace the directory and introductory dependency text**
+- [x] **Step 2: Replace the directory and introductory dependency text**
 
 Use this directory sequence:
 
 ```markdown
-**目录**：1 总览 · 2 个人收藏区 · 3 工程与工具基础 · 4 CUDA 与 GPU 性能 · 5 深度学习基础原理 · 6 模型压缩与高效网络 · 7 模型结构、转换与推理引擎 · 8 容器化与推理服务 · 9 Transformer 与 LLM 概念 · 10 LLM 推理与 Edge-LLM · 11 可选支线 · 12 CUDA 专项执行清单 · 13 项目阶梯 · 14 概念澄清 · 15 阶段执行与复习原则 · 16 验收标准 · 17 版本纪律 · 18 中文资料用法 · 19 排除项 · 20 毕业项目 · 21 执行清单 · 22 能力与岗位 · 23 链接索引
+**目录**：1 总览 · 2 个人收藏区 · 3 工程与工具基础 · 4 CUDA 与 GPU 性能 · 5 深度学习基础原理 · 6 模型压缩原理与设计 · 7 模型结构、转换与推理引擎 · 8 容器化与推理服务 · 9 Transformer 与 LLM 概念 · 10 LLM 推理与 Edge-LLM · 11 可选支线 · 12 CUDA 专项执行清单 · 13 项目阶梯 · 14 概念澄清 · 15 阶段执行与复习原则 · 16 验收标准 · 17 版本纪律 · 18 中文资料用法 · 19 排除项 · 20 毕业项目 · 21 执行清单 · 22 能力与岗位 · 23 链接索引
 ```
 
 Replace the old “阶段二可选前置” paragraph with text that states:
@@ -43,7 +59,7 @@ Replace the old “阶段二可选前置” paragraph with text that states:
 Use this exact main dependency chain:
 
 ```markdown
-**Python / PyTorch / C++ / Linux / Docker 基础 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩与高效网络 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
+**Python / PyTorch / C++ / Linux / Docker 基础 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩原理与设计 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
 ```
 
 Use this exact branch summary:
@@ -52,7 +68,7 @@ Use this exact branch summary:
 **视觉流媒体（分支 A）**、**模型压缩实战（分支 B）**、**Triton Language → CUTLASS / CuTe（分支 C）**、**Linux 驱动 / BSP（分支 D）**、**TVM / MLIR（分支 E）**。
 ```
 
-- [ ] **Step 3: Replace the eight-stage map**
+- [x] **Step 3: Replace the eight-stage map**
 
 Use this exact table:
 
@@ -62,14 +78,14 @@ Use this exact table:
 | 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + 基础开发镜像 |
 | 阶段二 · CUDA 与 GPU 性能 | 性能必修 | CUDA Kernel 仓库 + MNIST CUDA + Sanitizer/Nsight 报告 |
 | 阶段三 · 深度学习基础原理 | 原理必修 | 神经网络训练、导出与推理流程说明 |
-| 阶段四 · 模型压缩与高效网络 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
+| 阶段四 · 模型压缩原理与设计 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
 | 阶段五 · 模型结构、转换与推理引擎 | 部署必修 | PyTorch→ONNX→TensorRT + GPU 预处理 pipeline |
 | 阶段六 · 容器化与推理服务 | Serving 必修 | TensorRT backend Triton 服务 + HTTP/unary gRPC client |
 | 阶段七 · Transformer 与 LLM 概念 | LLM 前置必修 | Transformer 与预训练/后训练知识图 |
 | 阶段八 · LLM 推理与 Edge-LLM | 本机目标必修 | Orin Edge-LLM 服务 + 运行时选型表 |
 ```
 
-- [ ] **Step 4: Verify the overview**
+- [x] **Step 4: Verify the overview**
 
 Run:
 
@@ -80,7 +96,7 @@ rg -n "阶段一 · 工程与工具基础|阶段二 · CUDA 与 GPU 性能|阶�
 
 Expected: the directory, dependency chain, five branches, and all eight new rows agree.
 
-- [ ] **Step 5: Commit the overview**
+- [x] **Step 5: Commit the overview**
 
 ```bash
 git add docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md
@@ -93,7 +109,7 @@ git commit -m "docs: reorder AI infra roadmap overview"
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:87-400`
 - Reference: `docs/superpowers/specs/2026-08-31-roadmap-stage-reordering-design.md:22-84`
 
-- [ ] **Step 1: Add Docker basics to stage one**
+- [x] **Step 1: Add Docker basics to stage one**
 
 Rename the heading to:
 
@@ -113,7 +129,7 @@ Move the existing Docker course links into a new `**Docker 入门：**` resource
 
 Add a stage project requirement that packages the existing PyTorch/ONNX command-line inference tool in a basic ARM64-aware development image. Do not remove the existing Python, PyTorch, C++, Linux, `model-tools`, CPU GEMM, Shell, or TCP service requirements.
 
-- [ ] **Step 2: Replace the old stage-two block with the current CUDA block**
+- [x] **Step 2: Replace the old stage-two block with the current CUDA block**
 
 The new heading must be:
 
@@ -123,7 +139,7 @@ The new heading must be:
 
 Move the complete CUDA resources, outlines, learning method, projects A/B, and version boundary from the old stage-three block. Change internal references from “阶段三” to “阶段二”, including the CS149 description in the personal collection. Preserve Modern CUDA C++, freeCodeCamp CUDA, CS149, PMPP, Sanitizer/Nsight, GPU MODE, `sm_87`, and all existing Kernel completion criteria.
 
-- [ ] **Step 3: Replace the old stage-three block with DLS fundamentals**
+- [x] **Step 3: Replace the old stage-three block with DLS fundamentals**
 
 The new heading and scope are:
 
@@ -150,12 +166,12 @@ Keep only Deep Learning Specialization as the main resource. The required outlin
 
 Completion criterion: explain how a neural network trains and which training-only state or operations are absent from inference. No stage project is required; a small MLP forward/backward trace is optional.
 
-- [ ] **Step 4: Expand stage four from quantization into model efficiency**
+- [x] **Step 4: Expand stage four from quantization into model efficiency**
 
 Use this heading:
 
 ```markdown
-## 6. 阶段四 · 模型压缩与高效网络基础
+## 6. 阶段四 · 模型压缩原理与设计
 ```
 
 Keep MIT 6.5940 EfficientML, TensorRT quantization docs, AWQ/GPTQ/SmoothQuant/LLM.int8(), and Optimum. Add the existing Bilibili course `BV1Sw411y7Hs` as a selected pruning resource. The required concept sequence is:
@@ -173,7 +189,7 @@ Keep MIT 6.5940 EfficientML, TensorRT quantization docs, AWQ/GPTQ/SmoothQuant/LL
 
 State explicitly that real ONNX/TensorRT precision and speed validation occurs in stage five and deeper pruning training belongs to branch B. Replace the current calibration-only project with a compression proposal that defines accuracy, Engine tactic, latency, throughput, and memory checks; the actual experiment is consumed by project C.
 
-- [ ] **Step 5: Verify stage ownership and commit**
+- [x] **Step 5: Verify stage ownership and commit**
 
 Run:
 
@@ -194,7 +210,7 @@ git commit -m "docs: rebuild foundational and compression stages"
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:401-658`
 - Reference: `docs/superpowers/specs/2026-08-31-roadmap-stage-reordering-design.md:86-145`
 
-- [ ] **Step 1: Add the D2L model-structure block to stage five**
+- [x] **Step 1: Add the D2L model-structure block to stage five**
 
 Rename stage five to:
 
@@ -214,7 +230,7 @@ Before the existing ONNX/TensorRT and DALI/CV-CUDA resources, add D2L as a conti
 
 Preserve the current ONNX/TensorRT and GPU preprocessing material. Add a required “compression validation” subsection that checks stage-four proposals through ONNX numerical alignment, TensorRT build logs/tactics, accuracy delta, latency, throughput, and memory. Project C must include FP32/FP16/INT8 and, when applicable, structured-sparsity comparisons.
 
-- [ ] **Step 2: Replace stage six with containerized serving**
+- [x] **Step 2: Replace stage six with containerized serving**
 
 Use this heading:
 
@@ -235,7 +251,7 @@ Move the old stage-seven Docker/gRPC/Triton resources here, but split the learni
 
 Remove the custom gRPC predict-server requirement. Project E must package the Triton TensorRT backend service and exercise both official clients.
 
-- [ ] **Step 3: Replace stage seven with the LLM concept bridge**
+- [x] **Step 3: Replace stage seven with the LLM concept bridge**
 
 Use this heading:
 
@@ -260,7 +276,7 @@ Use the pinned Bilibili collection `BV163Jc6pENx` and this exact required range:
 
 No training project is required. The output is a Transformer/generation data-flow diagram and a comparison of BERT/GPT and pretraining/post-training.
 
-- [ ] **Step 4: Tighten stage eight around inference**
+- [x] **Step 4: Tighten stage eight around inference**
 
 Rename the heading to:
 
@@ -270,7 +286,7 @@ Rename the heading to:
 
 Preserve current runtime selection, Edge-LLM resources, metrics, project F, and platform constraints. Keep CS336 model structure, inference, evaluation, and system material here, but move Lecture 6 Kernels/Triton/XLA exclusively to branch C. Ensure the stage explicitly covers prefill/decode, KV cache, continuous batching, PagedAttention, TTFT, TPOT, INT4/AWQ/GPTQ, context/memory budgeting, and runtime selection.
 
-- [ ] **Step 5: Verify stage ownership and commit**
+- [x] **Step 5: Verify stage ownership and commit**
 
 Run:
 
@@ -291,7 +307,7 @@ git commit -m "docs: rebuild deployment serving and LLM stages"
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:659-741`
 - Reference: `docs/superpowers/specs/2026-08-31-roadmap-stage-reordering-design.md:147-170`
 
-- [ ] **Step 1: Replace the branch heading and ordering**
+- [x] **Step 1: Replace the branch heading and ordering**
 
 Use this branch order:
 
@@ -305,11 +321,11 @@ Use this branch order:
 ### 分支 E：TVM 和 MLIR
 ```
 
-- [ ] **Step 2: Move the complete visual material into branch A**
+- [x] **Step 2: Move the complete visual material into branch A**
 
 Move the old stage-six Jetson, GStreamer, DeepStream resources, outlines, method, project D reference, and version warning into branch A. Set its entry condition to completion of stage five. Move DLS Course 4 here. Preserve the current NVIDIA/Seeed/DeepStream links, NVMM/zero-copy explanation, single-to-multistream workflow, and `tegrastats` measurements. Mark project D optional.
 
-- [ ] **Step 3: Add branch B for pruning implementation**
+- [x] **Step 3: Add branch B for pruning implementation**
 
 Use this content:
 
@@ -323,11 +339,11 @@ Use this content:
 
 Route the deeper selected pruning units from `BV1Sw411y7Hs` here.
 
-- [ ] **Step 4: Relabel and update the existing technical branches**
+- [x] **Step 4: Relabel and update the existing technical branches**
 
 Move current Triton Language/CUTLASS/CuTe to branch C and change its entry condition from stage three to stage two. Move Linux Driver/BSP to branch D and change its entry condition to stage two without a weekly time recommendation. Move TVM/MLIR to branch E and require a completed Triton Language or equivalent Kernel project.
 
-- [ ] **Step 5: Verify branch separation and commit**
+- [x] **Step 5: Verify branch separation and commit**
 
 Run:
 
@@ -347,7 +363,7 @@ git commit -m "docs: move directional topics into roadmap branches"
 **Files:**
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:842-915`
 
-- [ ] **Step 1: Update project ownership and requirements**
+- [x] **Step 1: Update project ownership and requirements**
 
 Keep projects A-F identifiers stable. Apply these ownership rules:
 
@@ -361,7 +377,7 @@ Keep projects A-F identifiers stable. Apply these ownership rules:
 
 Project C acceptance must mention accuracy delta, actual Engine tactics, latency, throughput, memory, and shape/batch. Project D text remains technically intact but is explicitly optional. Project E retains model repository, backend, batching, ensemble, metrics, timeouts, and Perf Analyzer.
 
-- [ ] **Step 2: Update the TensorRT/Triton/LLM recommended sequence**
+- [x] **Step 2: Update the TensorRT/Triton/LLM recommended sequence**
 
 Use this exact sequence in section 14:
 
@@ -371,7 +387,7 @@ Use this exact sequence in section 14:
 
 Keep the existing runtime-layer distinctions and Jetson backend support warning.
 
-- [ ] **Step 3: Verify and commit**
+- [x] **Step 3: Verify and commit**
 
 Run:
 
@@ -392,7 +408,7 @@ git commit -m "docs: align roadmap projects with new stages"
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:742-841`
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:917-946`
 
-- [ ] **Step 1: Convert the CUDA sprint into an ordered checklist**
+- [x] **Step 1: Convert the CUDA sprint into an ordered checklist**
 
 Rename section 12 to:
 
@@ -402,7 +418,7 @@ Rename section 12 to:
 
 Rename “第 1 周” through “第 6 周” to “步骤一” through “步骤六”. Preserve the current technical progression and commands: compile/run/indexing; memory/coalescing; streams/overlap; GEMM/cuBLAS; Sanitizer/Nsight; CUDA Graph/cooperative groups/Tensor Core/PTX-SASS. Remove duration promises and weekly wording.
 
-- [ ] **Step 2: Replace the 24-week table with stage execution principles**
+- [x] **Step 2: Replace the 24-week table with stage execution principles**
 
 Use this complete replacement:
 
@@ -436,7 +452,7 @@ Use this complete replacement:
 - KV cache、LLM runtime、量化格式或服务指标问题回补阶段八。
 ```
 
-- [ ] **Step 3: Verify calendar language is gone and commit**
+- [x] **Step 3: Verify calendar language is gone and commit**
 
 Run:
 
@@ -457,7 +473,7 @@ git commit -m "docs: replace roadmap calendars with stage gates"
 **Files:**
 - Modify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md:963-1108`
 
-- [ ] **Step 1: Make DeepStream optional in the capstone**
+- [x] **Step 1: Make DeepStream optional in the capstone**
 
 The main capstone must require:
 
@@ -470,7 +486,7 @@ The main capstone must require:
 
 Move the multistream DeepStream pipeline to an explicitly labeled optional visual extension. Make the corresponding final-report question conditional on selecting branch A.
 
-- [ ] **Step 2: Replace the one-page checklist with stage-ordered groups**
+- [x] **Step 2: Replace the one-page checklist with stage-ordered groups**
 
 Use these group headings and required checklist topics:
 
@@ -496,11 +512,11 @@ Use these group headings and required checklist topics:
 
 Do not leave DeepStream in a mainline checklist group.
 
-- [ ] **Step 3: Update late-document cross-references and indexes**
+- [x] **Step 3: Update late-document cross-references and indexes**
 
 Keep the Orin version discipline and all current official links. Update stage names/numbers in capability text and link descriptions. In the key-link index, label DeepStream as visual-branch material and keep Triton Server separate from Triton Language. Do not modify the hardware/software baseline at the top of the document.
 
-- [ ] **Step 4: Verify and commit**
+- [x] **Step 4: Verify and commit**
 
 Run:
 
@@ -521,7 +537,7 @@ git commit -m "docs: align capstone and checklist with roadmap stages"
 - Modify if needed: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md`
 - Verify: `docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_ROADMAP.md`
 
-- [ ] **Step 1: Verify the exact eight-stage order**
+- [x] **Step 1: Verify the exact eight-stage order**
 
 Run:
 
@@ -531,7 +547,7 @@ rg -n "^## (3|4|5|6|7|8|9|10)\. 阶段" docs/EXTERNAL_FREE_BILINGUAL_AI_INFRA_RO
 
 Expected, in order: engineering/tools; CUDA; DL fundamentals; compression; model structure/conversion/engine; containerized serving; Transformer/LLM concepts; LLM inference/Edge-LLM.
 
-- [ ] **Step 2: Verify course and technology ownership**
+- [x] **Step 2: Verify course and technology ownership**
 
 Run:
 
@@ -541,7 +557,7 @@ rg -n "Deep Learning Specialization|D2L|CS224n Spring 2024|Triton Inference Serv
 
 Expected: DLS main content is stage three, D2L main content stage five, CS224n stage seven, Triton Server stage six, Triton Language branch C, and DeepStream branch A/project D/optional capstone only.
 
-- [ ] **Step 3: Reject stale stage and calendar labels**
+- [x] **Step 3: Reject stale stage and calendar labels**
 
 Run:
 
@@ -551,7 +567,7 @@ if rg -n "阶段二 · 模型概念底座|阶段三 · CUDA|阶段六 · Jetson|
 
 Expected: exit status 0 with no output.
 
-- [ ] **Step 4: Inspect all remaining stage references and Markdown health**
+- [x] **Step 4: Inspect all remaining stage references and Markdown health**
 
 Run:
 
@@ -563,7 +579,7 @@ git status --short
 
 Expected: every cross-reference matches the approved ownership; no whitespace errors; unrelated pre-existing user changes remain untouched.
 
-- [ ] **Step 5: Commit any final consistency corrections**
+- [x] **Step 5: Commit any final consistency corrections**
 
 Only if step 4 required edits:
 
