@@ -1138,7 +1138,7 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 - [ ] 连贯学习 D2L 选定模型结构，能跟踪关键模块的 shape 变化并解释 `forward` 数据流。
 - [ ] 完成 PyTorch→ONNX 导出与输出对齐，记录算子、动态维度和误差证据。
 - [ ] 构建并对比 TensorRT FP32/FP16/INT8 Engine，理解 tactics、dynamic shapes、校准、精度、延迟和内存折中。
-- [ ] 使用 DALI 或 CV-CUDA 实现 GPU 预处理，并与 CPU 预处理做固定条件 benchmark。
+- [ ] 使用 DALI 实现 GPU 预处理 pipeline，并与 CPU 预处理做固定条件 benchmark；可再用 CV-CUDA 做额外对比或扩展。
 
 ### 推理服务
 
@@ -1196,9 +1196,9 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 ### Serving / LLM
 
-- [Triton Docs](https://docs.nvidia.com/deeplearning/triton-inference-server/)
+- [Triton Server Docs](https://docs.nvidia.com/deeplearning/triton-inference-server/)
 - [Triton Server](https://github.com/triton-inference-server/server)
-- [Triton Tutorials](https://github.com/triton-inference-server/tutorials)
+- [Triton Server Tutorials](https://github.com/triton-inference-server/tutorials)
 - [vLLM](https://github.com/vllm-project/vllm)
 - [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM)
 
