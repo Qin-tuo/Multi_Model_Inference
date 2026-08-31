@@ -2,7 +2,7 @@
 
 **本机基线**：Jetson Orin NX 16GB（sm_87，unified memory）· JetPack 7.2.1 / L4T R39.2.1 · CUDA 13.2.1 · TensorRT 10.16.2 · DeepStream 9.1 · Ubuntu 24.04。核验日期 2026-08-21；版本敏感命令执行前必须复核官方兼容矩阵。
 
-**目录**：1 总览 · 2 个人收藏区 · 3 工程与工具基础 · 4 CUDA 与 GPU 性能 · 5 深度学习基础原理 · 6 模型压缩与高效网络 · 7 模型结构、转换与推理引擎 · 8 容器化与推理服务 · 9 Transformer 与 LLM 概念 · 10 LLM 推理与 Edge-LLM · 11 可选支线 · 12 CUDA 专项执行清单 · 13 项目阶梯 · 14 概念澄清 · 15 阶段执行与复习原则 · 16 验收标准 · 17 版本纪律 · 18 中文资料用法 · 19 排除项 · 20 毕业项目 · 21 执行清单 · 22 能力与岗位 · 23 链接索引
+**目录**：1 总览 · 2 个人收藏区 · 3 工程与工具基础 · 4 CUDA 与 GPU 性能 · 5 深度学习基础原理 · 6 模型压缩与高效网络基础 · 7 模型结构、转换与推理引擎 · 8 容器化与推理服务 · 9 Transformer 与 LLM 概念 · 10 LLM 推理与 Edge-LLM · 11 可选支线 · 12 CUDA 专项执行清单 · 13 项目阶梯 · 14 概念澄清 · 15 阶段执行与复习原则 · 16 验收标准 · 17 版本纪律 · 18 中文资料用法 · 19 排除项 · 20 毕业项目 · 21 执行清单 · 22 能力与岗位 · 23 链接索引
 
 ## 1. 总览：学习路径与阶段地图
 
@@ -10,9 +10,9 @@
 
 主线依赖关系：
 
-**Python / PyTorch / C++ / Linux / Docker 基础 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩与高效网络 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
+**Python / PyTorch / C++ / Linux / Docker 基础 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩与高效网络基础 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
 
-高级分支（见第 11 章）：
+可选支线（见第 11 章）：
 
 **视觉流媒体（分支 A）**、**模型压缩实战（分支 B）**、**Triton Language → CUTLASS / CuTe（分支 C）**、**Linux 驱动 / BSP（分支 D）**、**TVM / MLIR（分支 E）**。
 
@@ -23,7 +23,7 @@
 | 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + 基础开发镜像 |
 | 阶段二 · CUDA 与 GPU 性能 | 性能必修 | CUDA Kernel 仓库 + MNIST CUDA + Sanitizer/Nsight 报告 |
 | 阶段三 · 深度学习基础原理 | 原理必修 | 神经网络训练、导出与推理流程说明 |
-| 阶段四 · 模型压缩与高效网络 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
+| 阶段四 · 模型压缩与高效网络基础 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
 | 阶段五 · 模型结构、转换与推理引擎 | 部署必修 | PyTorch→ONNX→TensorRT + GPU 预处理 pipeline |
 | 阶段六 · 容器化与推理服务 | Serving 必修 | TensorRT backend Triton 服务 + HTTP/unary gRPC client |
 | 阶段七 · Transformer 与 LLM 概念 | LLM 前置必修 | Transformer 与预训练/后训练知识图 |
