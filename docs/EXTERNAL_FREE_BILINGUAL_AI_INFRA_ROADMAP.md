@@ -235,7 +235,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 
 - **李沐 动手学深度学习 D2L v2**（中文 / Open，含 PyTorch 代码，完整系列）：[B站 BV1Z5411n7RB](https://www.bilibili.com/video/BV1Z5411n7RB/)；教材见 [d2l.ai](https://d2l.ai/)。
 - **Deep Learning Specialization**（EN / Andrew Ng，概念向，跳过调参实战）：[deeplearning.ai](https://www.deeplearning.ai/courses/deep-learning-specialization/)。
-- **Stanford CS224n**（EN / University，只取 **L10–L13、L15**：Transformer / 自注意力、BERT / 预训练、上下文表示、NLG；其余讲次跳过）：[web.stanford.edu/class/cs224n](https://web.stanford.edu/class/cs224n/)。
+- **Stanford CS224n Spring 2024**（EN / University，固定使用此 B 站合集；只取 **L7–L11**：Attention / LLM Intro、Self-Attention / Transformer、Pretraining、Post-training、NLG；其余讲次跳过）：[B站 BV163Jc6pENx](https://www.bilibili.com/video/BV163Jc6pENx/)。
 
 ##### 当阶段课程大纲（★ = 本阶段必修）
 
@@ -252,13 +252,13 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
   - ★ Course 4 卷积神经网络
   - ★ Course 5 序列模型中的 RNN/注意力概念
   - Course 2/3 调参与 ML 项目实战（跳过）
-- **CS224n** 大纲（只取 **L10–L13、L15**，其余跳过）：
-  - ★ L10 注意力机制 Attention、Self-Attention
-  - ★ L11 Transformer 架构、BERT 与预训练
-  - ★ L12 Finetuning、Prompting、NLG
-  - ★ L13 上下文表示（ELMo / BERT / T5）
-  - ★ L15 自然语言生成与预训练（衔接阶段八的 LLM 原理）
-  - L1–L9、L14、L16–L19（词向量 / 句法分析 / 共指 / 解析等 NLP 任务）：全部跳过
+- **CS224n Spring 2024** 大纲（固定使用上述 B 站合集，只取 **L7–L11**，其余跳过）：
+  - ★ L7 Attention、LLM Introduction
+  - ★ L8 Self-Attention and Transformers
+  - ★ L9 Pretraining
+  - ★ L10 Post-training
+  - ★ L11 Natural Language Generation（衔接阶段八的 LLM 原理）
+  - L1–L6、L12–L19 与 Python / PyTorch / Hugging Face Tutorial：全部跳过
 
 ### 学习方法与停止条件
 
