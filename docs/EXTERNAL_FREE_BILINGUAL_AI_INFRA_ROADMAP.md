@@ -726,19 +726,23 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 #### 分支课程大纲（★ = 本支线必修）
 
-- ★ sparse training 与稀疏度调度，理解 L1 正则的作用与局限
-- ★ structured pruning：通道 / filter 筛选、结构化稀疏约束与参数迁移
-- ★ post-pruning finetuning，并记录恢复前后的 accuracy
-- ★ 导出 ONNX，完成 PyTorch → ONNX Runtime 数值对齐
-- ★ 运行 `polygraphy inspect sparsity model.onnx` 检查 ONNX 权重是否真正满足 TensorRT 稀疏要求
-- ★ 构建 TensorRT Engine，保存完整 build log，并检查 layer/tactic profiling 中是否实际选择 sparse tactic
-- ★ 在相同目标硬件与测量条件下对比剪枝前后的 accuracy、latency、throughput、memory
+- **路径一：channel / filter pruning（改变模型结构）**
+  - ★ 通道 / filter 筛选、参数迁移与 post-pruning finetuning；这种剪枝会改变网络通道数或层结构
+  - ★ 导出新结构的 ONNX，完成 PyTorch → ONNX Runtime 数值对齐，再按普通 TensorRT 流程构建和 benchmark
+  - ★ 不把通道 / filter pruning 当作 2:4 权重稀疏，也不要求或暗示它会触发 sparse tactic
+- **路径二：Ampere 2:4 structured sparsity（保持可稀疏加速的权重模式）**
+  - ★ sparse training 与稀疏度调度，理解 L1 正则的作用与局限，并让权重满足 TensorRT 要求的 2:4 pattern
+  - ★ post-pruning finetuning 后导出 ONNX，完成 PyTorch → ONNX Runtime 数值对齐
+  - ★ 运行 `polygraphy inspect sparsity model.onnx`，验证 ONNX 权重确实满足 2:4 sparsity pattern
+  - ★ 使用 TensorRT 支持的 FP16 或 INT8 precision，并通过 `trtexec --sparsity=enable` 或等价 TensorRT builder flag 启用 sparse tactics
+  - ★ 保存 verbose build log，明确区分哪些 layer 具备 sparse tactic 资格，以及 builder 最终实际选择了哪些 sparse tactics
+- **两条路径共同验收**：★ 在相同目标硬件与测量条件下对比剪枝前后的 accuracy、latency、throughput、memory
 
 #### 学习方法与停止条件
 
-从未剪枝 TensorRT baseline 开始，只改变一个剪枝变量；依次完成 sparse training → structured pruning → post-pruning finetuning → ONNX export → sparsity inspection → TensorRT build 与 benchmark。参数量或 FLOPs 更小只说明理论规模变化，不是实际加速证明。
+从未剪枝 TensorRT baseline 开始，只改变一个剪枝变量，并明确选择 channel / filter pruning 或 Ampere 2:4 structured sparsity 路径。前者按结构变化 → finetuning → ONNX export → 普通 TensorRT benchmark 验证；后者按 2:4 sparse training → finetuning → ONNX export → sparsity inspection → sparse-enabled TensorRT build 与 benchmark 验证。参数量或 FLOPs 更小只说明理论规模变化，不是实际加速证明。
 
-停止条件：必须在目标硬件上证明实际选用了预期 sparse tactic，并展示端到端 accuracy、latency、throughput 和 memory 的真实影响；若 TensorRT 未选 sparse tactic 或端到端没有收益，也要明确记录 no-benefit 结果、构建日志和原因分析，不能只汇报参数量或 FLOPs。
+停止条件：两条路径都必须展示目标硬件上的端到端 accuracy、latency、throughput 和 memory 影响。channel / filter pruning 以普通 TensorRT benchmark 为准，不以 sparse tactic 为验收条件；2:4 路径还必须用 verbose build log 证明 eligible layer 是否实际选用了预期 sparse tactic。若剪枝后端到端没有收益，或 2:4 路径未选 sparse tactic，也要明确记录 no-benefit 结果、构建日志和原因分析，不能只汇报参数量或 FLOPs。
 
 ### 分支 C：Triton Language、CUTLASS 和 CuTe
 
@@ -776,7 +780,7 @@ Triton 课后项目：vector add → fused softmax → matmul → layer norm；�
 
 ### 分支 D：Linux 驱动 / BSP
 
-**进入条件**：完成阶段二后再进入。主线位置：Linux 用户态 → module → 字符设备 → ioctl/poll/mmap → DMA/中断 → device tree → Jetson BSP → 调试与性能。
+**进入条件**：完成阶段二后再进入。仅面向驱动 / BSP 岗位选择本支线；除非岗位明确要求，否则它不是主线。支线内顺序：Linux 用户态 → module → 字符设备 → ioctl/poll/mmap → DMA/中断 → device tree → Jetson BSP → 调试与性能。
 
 #### 课程与资料
 
