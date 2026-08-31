@@ -44,7 +44,7 @@
 
 **GPU / 并行 / 系统**
 
-- [斯坦福 CS149 并行计算 2023（中英字幕）](https://www.bilibili.com/video/BV1du17YfE5G/)：并行硬件、GPU 体系结构、性能优化（阶段三主课的 B 站版）
+- [斯坦福 CS149 并行计算 2023（中英字幕）](https://www.bilibili.com/video/BV1du17YfE5G/)：并行硬件、GPU 体系结构、性能优化（阶段二主课的 B 站版）
 - [伯克利 CS267 并行计算应用 2022（中英字幕）](https://www.bilibili.com/video/BV1PS421978D/)：roofline、共享/分布式内存、MPI、GPU 编程
 - [伯克利 CS162 操作系统](https://www.bilibili.com/video/BV1ab4y1b7BU/)：进程、虚存、并发、文件系统
 - [斯坦福 CS107 计算机组织与系统 2016（中英字幕）](https://www.bilibili.com/video/BV1Nr421c7YB/)：C 与汇编、内存布局
@@ -84,11 +84,11 @@
 
 ---
 
-## 3. 阶段一 · 基础工具（Python / PyTorch / C++ / Linux）
+## 3. 阶段一 · 工程与工具基础（Python / PyTorch / C++ / Linux / Docker）
 
 ### 目标
 
-Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户端）；PyTorch = 训练资产 → ONNX/TensorRT 的桥梁；C++ = Kernel 与服务底座；Linux 用户态 = 开发排障前提。四条线都必须完成。
+Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户端）；PyTorch = 训练资产 → ONNX/TensorRT 的桥梁；C++ = Kernel 与服务底座；Linux 用户态 = 开发排障前提；Docker = 环境封装与可复现工具。五条线都必须完成。
 
 ### 课程与资料
 
@@ -115,6 +115,11 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 - 基础层主课：[MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（9 节约一周；Shell、管道、权限、脚本、SSH、Git、调试入门；英文原版见 [missing.csail.mit.edu](https://missing.csail.mit.edu/)）
 - 系统层主课：[尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/)（文件 IO、进程线程、Socket、epoll 完整系列）
 - 辅助资料：[Pro Git](https://git-scm.com/book/en/v2)、[OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/)、[LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/)
+
+**Docker 入门：**
+
+- 英文主课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
+- 中文补课：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
 
 ##### 当阶段课程大纲（★ = 本阶段必修）
 
@@ -153,6 +158,12 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
   - ★ Socket 网络编程
   - ★ epoll 多路复用
   - 内核/驱动部分（留到分支 A）
+- **Docker 入门** 大纲：
+  - ★ image、container 与 registry 的边界
+  - ★ `docker pull/run/exec/logs/inspect`
+  - ★ volume、端口、环境变量和基础 Dockerfile
+  - ★ `linux/arm64` 与 Jetson 基础镜像识别
+  - Compose、network、healthcheck、multi-stage 和 GPU runtime 留到阶段六
 
 ### 学习方法与停止条件
 
@@ -160,6 +171,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 - **PyTorch 停止条件**：能加载公开 checkpoint 在固定输入上稳定得结果；能解释一次 shape/dtype/device/layout 错误；能用 `eval()` 和 `inference_mode()` 完成推理并正确处理 warmup 与 CUDA 同步；能把 PyTorch 模型导出 ONNX 并与 PyTorch 输出做容差比较；能说明训练、模型导出、TensorRT 构建和板端 Runtime 各自处于哪一层。
 - **C++ 停止条件**：能解释值/引用/指针、对象生命周期、编译与链接，并能定位一次段错误。只抓 pointer/reference/stack-heap/RAII/class/template/STL/lambda/CMake/gdb。
 - **Linux 停止条件**：能使用权限、管道、重定向、进程信号、日志、SSH、`gdb`、`strace`；知道 syscall、用户态和内核态的边界。CentOS 视频中的 `yum`、旧网络服务命令不复制到本机 Ubuntu 24.04；只迁移稳定概念。
+- **Docker 停止条件**：能使用适配 `linux/arm64` 的基础镜像，把现有 PyTorch/ONNX CLI 推理工具封装为一个可复现的基础开发镜像，并在容器中运行。
 - **阶段一基础停止条件**：能从零创建隔离环境并在另一台机器按文档复现；能读写常见模型/图像/JSON 文件；能解释 NumPy 的 shape/dtype/stride 与 PyTorch tensor 的关系；能把一次模型导出、校验和 benchmark 写成命令行工具；能定位依赖版本、路径、dtype 或 shape 错误。
 
 ### 阶段项目
@@ -173,7 +185,8 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 - 导出一个简单 PyTorch 模型到 ONNX，并用 ONNX Runtime 做结果校验；
 - 用 `subprocess` 调用外部 benchmark，输出 JSON/CSV；
 - 用 logging 记录版本、输入 shape、随机种子和失败样本；
-- 至少 5 个 pytest，覆盖空目录、错误路径、shape 和数值容差。
+- 至少 5 个 pytest，覆盖空目录、错误路径、shape 和数值容差；
+- 用基础 Dockerfile 将现有 PyTorch/ONNX CLI 推理工具打包为一个 ARM64-aware 开发镜像。
 
 同时完成 C++17 + CMake CPU 矩阵乘法，随机输入校验并输出耗时；以及 Shell 监控脚本（采集 CPU、内存、温度、进程状态）+ 一个可并发处理请求的 C/C++ TCP 小服务。
 
@@ -225,58 +238,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 
 ---
 
-## 4. 阶段二 · 模型概念底座（可选前置）
-
-### 目标
-
-主线是部署 / 推理 / infra；本阶段只建立“模型是什么”的直觉。看概念、不写训练项目，不碰调参 / 分布式训练 / DeepSpeed。
-
-### 课程与资料
-
-- **李沐 动手学深度学习 D2L v2**（中文 / Open，含 PyTorch 代码，完整系列）：[B站 BV1Z5411n7RB](https://www.bilibili.com/video/BV1Z5411n7RB/)；教材见 [d2l.ai](https://d2l.ai/)。
-- **Deep Learning Specialization**（EN / Andrew Ng，概念向，跳过调参实战）：[deeplearning.ai](https://www.deeplearning.ai/courses/deep-learning-specialization/)。
-- **Stanford CS224n Spring 2024**（EN / University，固定使用此 B 站合集；只取 **L7–L11**：Attention / LLM Intro、Self-Attention / Transformer、Pretraining、Post-training、NLG；其余讲次跳过）：[B站 BV163Jc6pENx](https://www.bilibili.com/video/BV163Jc6pENx/)。
-
-##### 当阶段课程大纲（★ = 本阶段必修）
-
-- **李沐 动手学深度学习 D2L v2（B站）** 大纲：
-  - ★ 线性回归与 softmax 回归（建立“模型 = 可学习参数 + 前向计算”直觉）
-  - ★ 多层感知机 MLP（层、激活、前向/反向的概念）
-  - ★ 卷积神经网络 CNN：从 LeNet 到 ResNet 的结构概念
-  - ★ 循环神经网络 RNN / LSTM（序列建模用途）
-  - ★ 注意力机制与 Transformer（Q/K/V 与 attention 的 shape 流）
-  - 模型选择 / 过拟合 / 优化算法（可选，略读）
-  - 目标检测 / 语义分割 / GAN / 分布式训练（偏离主线，跳过）
-- **吴恩达 Deep Learning Specialization** 大纲（只取概念章）：
-  - ★ Course 1 神经网络与深度学习（NN/CNN 是什么）
-  - ★ Course 4 卷积神经网络
-  - ★ Course 5 序列模型中的 RNN/注意力概念
-  - Course 2/3 调参与 ML 项目实战（跳过）
-- **CS224n Spring 2024** 大纲（固定使用上述 B 站合集，只取 **L7–L11**，其余跳过）：
-  - ★ L7 Attention、LLM Introduction
-  - ★ L8 Self-Attention and Transformers
-  - ★ L9 Pretraining
-  - ★ L10 Post-training
-  - ★ L11 Natural Language Generation（衔接阶段八的 LLM 原理）
-  - L1–L6、L12–L19 与 Python / PyTorch / Hugging Face Tutorial：全部跳过
-
-### 学习方法与停止条件
-
-- **明确不学**：吴恩达 Machine Learning Specialization、fast.ai、LangChain / RAG / Agents 短课。
-- **停止条件**：能口头解释 tensor / 层 / 前向传播、CNN 与 RNN 的用途差异、attention 里 Q/K/V 的作用；知道“训练出的模型”和“部署跑的引擎”不是一回事。
-- **CS336 留到阶段八**，不要提前。
-
-### 阶段项目
-
-不写训练项目；可选：用 PyTorch 复现一个 Transformer 前向并解释 Q/K/V 与 attention 的 shape 流。
-
-### 版本 / 边界注意
-
-纯概念，无版本绑定。
-
----
-
-## 5. 阶段三 · CUDA 与 GPU 性能
+## 4. 阶段二 · CUDA 与 GPU 性能
 
 ### 目标
 
@@ -359,11 +321,47 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ---
 
-## 6. 阶段四 · 量化理论基础
+## 5. 阶段三 · 深度学习基础原理
 
 ### 目标
 
-只补“为什么量化、怎么量化”，不写训练代码；支撑阶段五 INT8 与阶段八 INT4/AWQ，先于两者学习。
+建立训练模型、导出资产和部署推理之间的完整概念链，为阶段四的压缩方法和阶段五的模型结构/转换做准备。本阶段理解训练，但不开展大型训练或调参项目。
+
+### 课程与资料
+
+- 主课：**Deep Learning Specialization**（EN / Andrew Ng，保持课程连续性，只取训练与推理概念）：[deeplearning.ai](https://www.deeplearning.ai/courses/deep-learning-specialization/)。
+
+##### 当阶段课程大纲（★ = 本阶段必修）
+
+- **Deep Learning Specialization**：
+  - ★ Course 1：参数、层、激活、损失、前向/反向传播、计算图和向量化
+  - ★ Course 2：初始化、正则化和优化算法原理
+  - ★ batch、训练/验证/导出/推理的区别
+  - Course 2 调参实战和大型编程作业（跳过）
+  - Course 3（跳过）
+  - Course 4（移到视觉流媒体支线）
+  - Course 5（仅作为阶段七查漏补缺）
+
+### 学习方法与停止条件
+
+- **课程连续性**：按 Course 1 → Course 2 的概念顺序学习，不把训练流程拆成零散术语；用一个小型 MLP 逐步追踪参数、前向计算、损失、反向传播和参数更新，再标出导出后保留的计算。
+- **停止条件**：能解释神经网络如何完成训练，以及推理时不存在的训练专属状态或操作。
+
+### 阶段项目
+
+无必做阶段项目；可选：完成一次小型 MLP 的前向/反向概念追踪。
+
+### 版本 / 边界注意
+
+纯概念，无版本绑定。
+
+---
+
+## 6. 阶段四 · 模型压缩与高效网络基础
+
+### 目标
+
+本阶段建立完整的模型压缩概念与硬件约束。真实 ONNX/TensorRT 精度和速度验证在阶段五完成；更深入的剪枝训练与实验归入分支 B。参数量或 FLOPs 更小不等于已经证明加速。
 
 ### 课程与资料
 
@@ -371,30 +369,34 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 落地文档：[NVIDIA TensorRT INT8/PTQ 文档](https://docs.nvidia.com/deeplearning/tensorrt/latest/)
 - 论文：[AWQ](https://arxiv.org/abs/2306.00978)、[GPTQ](https://arxiv.org/abs/2210.17323)、[SmoothQuant](https://arxiv.org/abs/2211.03602)、[LLM.int8()](https://arxiv.org/abs/2208.07339)
 - 工具文档：[Hugging Face Optimum 量化文档](https://huggingface.co/docs/optimum)
+- 剪枝选学：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)
 
 ##### 当阶段课程大纲（★ = 本阶段必修）
 
-- **MIT 6.5940 EfficientML 精译版（B站）** 大纲：
-  - ★ Lecture 1 课程导论与高效 AI 计算动机
-  - 深度学习基础（★ 快速回顾）
-  - ★ Lecture 量化 I：PTQ、线性/k-means 量化、per-tensor vs per-channel、calibration
-  - ★ Lecture 量化 II：QAT、高级 PTQ、outlier 与 clipping
-  - 剪枝 / NAS / 知识蒸馏（可选，概念了解）
-  - ★ 高效 LLM：KV cache、W4/W8、GPTQ/AWQ/SmoothQuant/LLM.int8()
-  - 端侧部署（★ 与本路线 Edge 目标相关）
+- **MIT 6.5940 EfficientML、论文与配套文档** 大纲：
+  - ★ PTQ、QAT、calibration、scale/zero-point
+  - ★ per-tensor/per-channel、W8A8、W4A16
+  - ★ structured/unstructured pruning、稀疏化和剪枝后微调
+  - ★ 知识蒸馏
+  - ★ depthwise convolution、MobileNet 与轻量结构
+  - ★ EfficientML 高效 LLM：KV cache、W4/W8、GPTQ/AWQ/SmoothQuant/LLM.int8()
+- 《深度学习模型部署与剪枝优化实战》：稀疏化、L1 正则、通道筛选、参数迁移、剪枝后微调
+- 旧 Jetson Nano、旧 TAO 和旧安装命令（跳过）
 
 ### 学习方法与停止条件
 
-- **必修关键字**：PTQ vs QAT、calibration（min-max / entropy / percentile）、per-tensor vs per-channel、weight-only（W4 / W8）vs weight-activation（W8A8）、scale/zero-point、outlier 与 clipping、GPTQ（基于 Hessian）vs AWQ（保护显著权重）vs SmoothQuant（迁移激活 outlier 到权重）。
-- **停止条件**：能解释 INT8 精度损失来源、为何 LLM 需要 W4/AWQ 而非 W8A8、calibration 数据量与分布的影响。
+- **量化关键字**：calibration 的 min-max / entropy / percentile 方法、outlier 与 clipping，以及 GPTQ（基于 Hessian）、AWQ（保护显著权重）和 SmoothQuant（迁移激活 outlier 到权重）的差异。
+- **硬件约束**：同时考虑算子支持、实际精度格式、内存带宽、结构化稀疏支持和 Engine tactic；参数量或 FLOPs 只能描述理论规模，不能单独证明目标硬件上的加速。
+- **阶段边界**：本阶段完成量化、剪枝、稀疏化、蒸馏和轻量结构的方案设计；阶段五再通过 ONNX/TensorRT 验证精度与速度，更深的剪枝训练和实验留到分支 B。
+- **停止条件**：能针对给定模型、硬件和精度目标提出量化/剪枝方案，说明风险，并定义验证方法。
 
 ### 阶段项目
 
-用 TensorRT/PyTorch 对一个 INT8 小模型做 calibration，对比有/无校准精度 delta 与 per-tensor / per-channel 差异。
+编写一份压缩验证方案：定义 accuracy delta、TensorRT Engine 构建日志与实际 tactics、延迟、吞吐和内存检查；由阶段五的项目 C 执行并记录结果。
 
 ### 版本 / 边界注意
 
-calibration 工具链以本机 TensorRT 10.16.2 为准；论文按需读摘要。
+量化与 calibration 工具链以本机 TensorRT 10.16.2 为准；旧课程中的命令不得直接复制，必须按当前官方文档和本机版本校正。论文按需读摘要。
 
 ---
 
