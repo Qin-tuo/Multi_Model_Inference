@@ -2,32 +2,32 @@
 
 **本机基线**：Jetson Orin NX 16GB（sm_87，unified memory）· JetPack 7.2.1 / L4T R39.2.1 · CUDA 13.2.1 · TensorRT 10.16.2 · DeepStream 9.1 · Ubuntu 24.04。核验日期 2026-08-21；版本敏感命令执行前必须复核官方兼容矩阵。
 
-**目录**：1 总览 · 2 个人收藏区 · 3 基础工具 · 4 概念底座 · 5 CUDA 与 GPU 性能 · 6 量化理论 · 7 转换与预处理 · 8 Jetson 视频推理 · 9 容器与服务化 · 10 LLM 推理与服务 · 11 可选分支 · 12 六周 CUDA 冲刺 · 13 项目阶梯 · 14 概念澄清 · 15 24 周节奏 · 16 验收标准 · 17 版本纪律 · 18 中文资料用法 · 19 排除项 · 20 毕业项目 · 21 执行清单 · 22 能力与岗位 · 23 链接索引
+**目录**：1 总览 · 2 个人收藏区 · 3 工程与工具基础 · 4 CUDA 与 GPU 性能 · 5 深度学习基础原理 · 6 模型压缩与高效网络 · 7 模型结构、转换与推理引擎 · 8 容器化与推理服务 · 9 Transformer 与 LLM 概念 · 10 LLM 推理与 Edge-LLM · 11 可选支线 · 12 CUDA 专项执行清单 · 13 项目阶梯 · 14 概念澄清 · 15 阶段执行与复习原则 · 16 验收标准 · 17 版本纪律 · 18 中文资料用法 · 19 排除项 · 20 毕业项目 · 21 执行清单 · 22 能力与岗位 · 23 链接索引
 
 ## 1. 总览：学习路径与阶段地图
 
-你当前可以直接从 **阶段三（CUDA C++）** 开始，但阶段一（Python、PyTorch 与 C++ 基础）是必修底座。阶段一里的 Linux 用户态可以按经验补课；当你在指针、引用、编译链接、虚拟环境、NumPy、tensor、Shell、进程或权限上卡住时，先回补对应章节。**阶段二（模型概念底座）是可选前置**：放在基础工具之后，配合 PyTorch 代码建立“模型 / Transformer 是什么”的直觉，目标是能看懂后面要部署的模型结构，不要求写训练项目；已有模型基础的人可跳过，直接进阶段三。
+阶段一是工程底座，阶段二建立 CUDA 与 GPU 性能能力；阶段三到阶段五依次建立深度学习原理、模型压缩和模型部署闭环；阶段六学习通用推理服务；阶段七紧邻阶段八补齐 Transformer/LLM 概念。主线面向通用 GPU 推理与 Serving，LLM 推理必修；视觉流媒体、深度剪枝、算子 DSL、驱动和编译器按进入条件走支线。
 
 主线依赖关系：
 
-**Python / PyTorch / C++ / Linux → CUDA 编程 → GPU 架构与 Kernel 优化 → Sanitizer / Nsight / PTX-SASS → ONNX / TensorRT → Jetson / DeepStream → Docker / gRPC → Triton Server → LLM Inference → Orin Edge LLM**
+**Python / PyTorch / C++ / Linux / Docker 基础 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩与高效网络 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
 
 高级分支（见第 11 章）：
 
-**Linux 驱动（分支 A）**，或 **Triton Language → CUTLASS / CuTe（分支 B） → TVM / MLIR（分支 C）**
+**视觉流媒体（分支 A）**、**模型压缩实战（分支 B）**、**Triton Language → CUTLASS / CuTe（分支 C）**、**Linux 驱动 / BSP（分支 D）**、**TVM / MLIR（分支 E）**。
 
 八阶段地图一览：
 
-| 阶段 | 原节点 | 属性 | 唯一阶段项目 |
-|---|---|---|---|
-| 阶段一 · 基础工具 | 0 + 1 | 基础必修 | model-tools + C++17/CMake CPU GEMM + Shell/TCP 服务 |
-| 阶段二 · 模型概念底座 | -1 | 可选前置，概念层 | 不写训练项目；可选 PyTorch 复现 Transformer 前向 |
-| 阶段三 · CUDA 与 GPU 性能 | 2 + 3 + 4 | 必修 | vector add/SAXPY/transpose/reduction/tiled GEMM + Sanitizer/Nsight 报告 |
-| 阶段四 · 量化理论基础 | 4.5 | 概念必修 | 一个 INT8 小模型 calibration 对比 |
-| 阶段五 · 模型转换与预处理 | 5 + 5.5 | 部署必修 | PyTorch→ONNX→TensorRT + DALI GPU pipeline |
-| 阶段六 · Jetson 与视频推理 | 6A + 6B | 视觉方向必修 | 单路→4 路 DeepStream pipeline |
-| 阶段七 · 容器与服务化 | 7A + 7B + 8 | Serving 必修 | TensorRT backend Triton 服务 + gRPC/HTTP |
-| 阶段八 · LLM 推理与服务 | 9 + 9.5 + 10 | 本机目标必修 | Orin 上 Edge-LLM 小模型服务 + 选型表 |
+| 阶段 | 属性 | 核心交付 |
+|---|---|---|
+| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + 基础开发镜像 |
+| 阶段二 · CUDA 与 GPU 性能 | 性能必修 | CUDA Kernel 仓库 + MNIST CUDA + Sanitizer/Nsight 报告 |
+| 阶段三 · 深度学习基础原理 | 原理必修 | 神经网络训练、导出与推理流程说明 |
+| 阶段四 · 模型压缩与高效网络 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
+| 阶段五 · 模型结构、转换与推理引擎 | 部署必修 | PyTorch→ONNX→TensorRT + GPU 预处理 pipeline |
+| 阶段六 · 容器化与推理服务 | Serving 必修 | TensorRT backend Triton 服务 + HTTP/unary gRPC client |
+| 阶段七 · Transformer 与 LLM 概念 | LLM 前置必修 | Transformer 与预训练/后训练知识图 |
+| 阶段八 · LLM 推理与 Edge-LLM | 本机目标必修 | Orin Edge-LLM 服务 + 运行时选型表 |
 
 ---
 
