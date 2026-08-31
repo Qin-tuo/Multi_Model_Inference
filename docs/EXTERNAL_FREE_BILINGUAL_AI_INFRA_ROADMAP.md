@@ -426,7 +426,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 主课视频（需免费注册 NVIDIA Developer 后观看）：[GTC 2020 “Fast Data Pre-Processing with NVIDIA Data Loading Library (DALI)”](https://www.nvidia.com/en-us/on-demand/session/gtcsj20-s21139)
 - 补充免费视频（约 53 分钟，无需登录）：[NVIDIA DALI Data Loading Library 实战讲解](https://www.youtube.com/watch?v=PTWER9HIVHM)
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **李沐 动手学深度学习 D2L v2（连续精选区块，不学完整系列）** 大纲：
   - ★ Module、参数、checkpoint 和模型结构读取
@@ -455,7 +455,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ 性能分析：NVTX + Nsight Systems 看预处理空泡、多 GPU 数据并行
   - ★ 案例：ResNet50 with DALI、推理预处理加速
 - **补充免费视频：DALI 实战讲解（YouTube）** 大纲（decode→resize→normalize pipeline 演示）：★ 全部章节本阶段必修。
-- **辅助文档（非视频）：** NVIDIA DALI 官方文档与 Tutorials（https://docs.nvidia.com/deeplearning/dali/）、[DALI GitHub](https://github.com/NVIDIA/DALI)；CV-CUDA（https://github.com/CVCUDA/CV-CUDA）用于推理专用预处理（crop/normalize/color 的 GPU 算子），★ 作为对比与扩展阅读。
+- **辅助文档（非视频）：** 使用上方 DALI 官方文档、Tutorials 与 GitHub；CV-CUDA 作为推理专用预处理的对比与扩展阅读。
 
 ### 学习方法与停止条件
 
@@ -500,7 +500,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 补课：[Getting Started with NVIDIA Triton](https://www.youtube.com/watch?v=NQDtfSi5QF4)（EN / NVIDIA，完整入门专题）
 - 文档：[Triton Server Docs](https://docs.nvidia.com/deeplearning/triton-inference-server/)、[Triton Tutorials](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/tutorials/README.html)、[Triton Server](https://github.com/triton-inference-server/server)、[Triton Tutorials Repo](https://github.com/triton-inference-server/tutorials)、[NVIDIA 中文 TensorRT/Triton 课程入口](https://www.nvidia.cn/developer/online-training/super-training/)
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Docker 进阶（阶段一已学入门）** 大纲：
   - ★ multi-stage Dockerfile 与 Docker Compose
@@ -556,7 +556,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 闭卷回顾：阶段五的 [D2L Attention / Transformer](https://d2l.ai/) 内容，只画图和复述，不重看完整课程。
 - 查漏补缺：[Deep Learning Specialization Course 5](https://www.deeplearning.ai/courses/deep-learning-specialization/) 只作为序列模型基础薄弱时的补课。
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Stanford CS224n Spring 2024** 大纲：
   - ★ L7 Attention / LLM Introduction
@@ -613,7 +613,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 - 补课：[Getting Started with Edge AI on NVIDIA Jetson](https://www.youtube.com/watch?v=t2Ecuu2FdC8)（EN / NVIDIA，完整直播课）
 - 落地文档：[TensorRT-Edge-LLM 官方安装与教程](https://nvidia.github.io/TensorRT-Edge-LLM/user_guide/getting_started/installation.html)
 
-##### 当阶段课程大纲（★ = 本阶段必修）
+#### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Stanford CS336 2026** 大纲：
   - ★ 模型结构与推理所需训练资产（承接阶段七，不重复学习 Transformer 入门）
