@@ -400,13 +400,17 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ---
 
-## 7. 阶段五 · 模型转换与预处理（ONNX/TensorRT + DALI）
+## 7. 阶段五 · 模型结构、转换与推理引擎
 
 ### 目标
 
-ONNX/TensorRT 转换 + GPU 预处理，共同决定端到端可部署吞吐。
+先读懂陌生 PyTorch 模型的 Module、参数、checkpoint、tensor shape 和完整 forward 数据流，再把模型结构阅读、ONNX/TensorRT 转换与 GPU 预处理串成一个可复现的部署闭环。
 
 ### 课程与资料
+
+**模型结构阅读：**
+
+- **李沐 动手学深度学习 D2L v2**（中文 / Open，含 PyTorch 代码）：[B站 BV1Z5411n7RB](https://www.bilibili.com/video/BV1Z5411n7RB/)；教材见 [d2l.ai](https://d2l.ai/)。本阶段按下面大纲连续学习一个精选区块，不重看完整系列。
 
 **ONNX 与 TensorRT：**
 
@@ -424,6 +428,12 @@ ONNX/TensorRT 转换 + GPU 预处理，共同决定端到端可部署吞吐。
 
 ##### 当阶段课程大纲（★ = 本阶段必修）
 
+- **李沐 动手学深度学习 D2L v2（连续精选区块，不学完整系列）** 大纲：
+  - ★ Module、参数、checkpoint 和模型结构读取
+  - ★ MLP、CNN、BatchNorm、ResNet
+  - ★ RNN/Seq2Seq、Attention、Transformer
+  - ★ tensor shape 和完整 forward 数据流
+  - 优化算法、完整训练、Kaggle、检测/分割、GAN、推荐系统和分布式训练（跳过）
 - **NVIDIA TensorRT 教程 4 部分（B站）** 大纲：
   - ★ builder / runtime / parser 工作流
   - ★ 精度：FP32 / FP16 / INT8 与 calibration
@@ -449,13 +459,16 @@ ONNX/TensorRT 转换 + GPU 预处理，共同决定端到端可部署吞吐。
 
 ### 学习方法与停止条件
 
+- **模型结构阅读 · 连续学习**：沿着 Module → 参数/checkpoint → tensor shape → 完整 forward 数据流阅读一个陌生模型，先解释每个阶段的输入输出和推理所需资产，再开始导出；只学上述 D2L 精选区块，不把它扩成完整训练课。
 - **ONNX/TensorRT · 看完即做**：PyTorch 导出 ONNX、ONNX Runtime 对齐、`trtexec` 构建 Engine、FP32/FP16/INT8、dynamic shape、warmup 后 benchmark。停止条件：能解释 Engine 为什么与目标 GPU/版本绑定，能报告 accuracy delta、p50/p95、throughput 和峰值内存。
-- **GPU 预处理 · 必修关键字**：decode 卸载、pinned memory、异步 pipeline、zero-copy、host↔device 拷贝、batch 拼接、DALI ↔ TensorRT 直连、CPU 预处理导致的 GPU 空泡。看完即做：用 DALI 搭一个 decode + resize + normalize 的 GPU pipeline，喂给 TensorRT/PyTorch；与 OpenCV/CPU 版本在同一输入上对比端到端吞吐，并用 `nsys` 看预处理阶段是否还占 GPU 空泡。停止条件：能指出当前 pipeline 的预处理是否瓶颈、是否应上 DALI/CV-CUDA、pinned memory 与异步带来的提升；知道 DeepStream（阶段六）的 NVMM 零拷贝正是同一思想的硬件实现。
+- **阶段四压缩方案验证 · 必修**：逐项执行阶段四提出的压缩验证方案，检查 PyTorch/ONNX 数值对齐、TensorRT 构建日志与实际 tactics、accuracy delta、延迟、吞吐和内存，并对比 FP32/FP16/INT8；适用时还要验证 structured sparsity。参数量或 FLOPs 降低只能说明理论规模变化，不能单独作为验收依据。
+- **GPU 预处理 · 必修关键字**：decode 卸载、pinned memory、异步 pipeline、zero-copy、host↔device 拷贝、batch 拼接、DALI ↔ TensorRT 直连、CPU 预处理导致的 GPU 空泡。看完即做：用 DALI 搭一个 decode + resize + normalize 的 GPU pipeline，喂给 TensorRT/PyTorch；与 OpenCV/CPU 版本在同一输入上对比端到端吞吐，并用 `nsys` 看预处理阶段是否还占 GPU 空泡。停止条件：能指出当前 pipeline 的预处理是否瓶颈、是否应上 DALI/CV-CUDA、pinned memory 与异步带来的提升；知道 DeepStream（阶段五完成后进入的视觉分支）的 NVMM 零拷贝正是同一思想的硬件实现。
+- **阶段五停止条件**：能把一个陌生 PyTorch 模型转换为可复现构建的 TensorRT Engine，报告 accuracy、latency、throughput、memory 和预处理瓶颈，并给出输入、版本与 benchmark 条件。
 - **面试向**：INT8 对称 vs 非对称量化、per-channel 为什么更准、W4A16 是什么。
 
 ### 阶段项目
 
-项目 C（TensorRT 推理部署，见第 13 章）+ 一个 DALI GPU 预处理 pipeline 与 OpenCV/CPU 的吞吐对比。
+项目 C（TensorRT 推理部署，见第 13 章）+ 一个 DALI GPU 预处理 pipeline 与 OpenCV/CPU 的吞吐对比；同时执行阶段四压缩方案的精度、tactics、性能与内存验证。
 
 ### 版本 / 边界注意
 
@@ -463,80 +476,23 @@ ONNX/TensorRT 转换 + GPU 预处理，共同决定端到端可部署吞吐。
 
 ---
 
-## 8. 阶段六 · Jetson 与视频推理
+## 8. 阶段六 · 容器化与推理服务（Docker / HTTP / gRPC / Triton Server）
 
 ### 目标
 
-Jetson AI 基础 + GStreamer/DeepStream 流水线；从单路扩到多路，测真实 FPS / 延迟 / 功耗。
-
-### 课程与资料
-
-**Jetson AI 基础：**
-
-- 主课：[NVIDIA Jetson AI Fundamentals](https://www.youtube.com/playlist?list=PL5B692fm6--uQRRDTPsJDp4o0xbzkoyf8)（EN / Official，完整系列）；同课中文镜像 [BV1EGSmBWErR](https://www.bilibili.com/video/BV1EGSmBWErR/)
-- 中文补课：[NVIDIA Jetson 边缘 AI 快速上手系列](https://www.bilibili.com/video/BV1yEzBYQEMt/)（Seeed Studio，完整系列）
-- 项目起点：[dusty-nv/jetson-inference](https://github.com/dusty-nv/jetson-inference)
-
-**GStreamer 与 DeepStream：**
-
-- 主课：[Create Vision AI Applications With DeepStream](https://www.nvidia.com/en-us/on-demand/session/gtc26-dlit81879/?playlistId=gtc26-computer-vision-and-video-analytics)（EN / NVIDIA，2026，2 小时完整 workshop）
-- 中文补课：[深度学习模型部署与剪枝优化实战](https://www.bilibili.com/video/BV1Sw411y7Hs/)（学习其中 GStreamer / DeepStream 单元）
-- 文档：[DeepStream Documentation](https://docs.nvidia.com/metropolis/deepstream/dev-guide/)、[DeepStream GitHub](https://github.com/NVIDIA/DeepStream)、[DeepStream Python Apps](https://github.com/NVIDIA-AI-IOT/deepstream_python_apps)、[DeepStream 中文开发入口](https://developer.nvidia.cn/deepstream-sdk)、[Jetson AI Lab](https://www.jetson-ai-lab.com/tutorials/)
-
-##### 当阶段课程大纲（★ = 本阶段必修）
-
-- **NVIDIA Jetson AI Fundamentals（官方 playlist）** 大纲：
-  - ★ Hello AI World 与 jetson-inference 安装（忽略 Nano/JetPack4 命令）
-  - ★ 图像分类 classification
-  - ★ 目标检测 detection
-  - ★ 语义分割 segmentation
-  - ★ 摄像头与实时推理、训练与迁移学习（PyTorch）
-  - ★ `tegrastats` 与各阶段耗时拆解（模型加载/预处理/推理/后处理/捕获/显示）
-- **Seeed Jetson 边缘 AI 快速上手系列（B站）** 大纲：
-  - ★ Jetson 上手、摄像头与边缘 AI 工作流
-  - 进阶项目（按需）
-- **Create Vision AI Applications With DeepStream（2026 GTC workshop）** 大纲：
-  - ★ GStreamer 基础与 pipeline 概念（caps、buffer、metadata）
-  - ★ DeepStream 插件：nvinfer / tracker / tiler / metadata
-  - ★ 文件源与 RTSP/摄像头源、单路→多路
-  - ★ 性能与功耗测量（FPS、延迟、温度、内存）
-- **深度学习模型部署与剪枝优化实战（B站）** 大纲：
-  - ★ GStreamer / DeepStream 相关单元
-  - ★ 模型剪枝优化基础
-  - 其它通用部署内容（按需）
-
-### 学习方法与停止条件
-
-- **Jetson 基础 · 看完即做**：jetson-inference 依次跑 classification、detection、segmentation，再接 USB/CSI 摄像头。停止条件：能区分模型加载 / 预处理 / 推理 / 后处理 / 捕获 / 显示耗时，并记录 `tegrastats`。
-- **DeepStream · 免费边界**：On-Demand 视频免费观看；要登录只注册免费账号，不买 DLI。看完即做：文件单路 → 摄像头单路 → 4 路文件/RTSP；加入 decode、mux、`nvinfer`、tracker、tiler、metadata、sink。停止条件：能画出 pipeline，解释 caps / buffer / metadata / batch / zero-copy，报告每路 FPS、端到端延迟、温度、功耗、内存。
-
-### 阶段项目
-
-项目 D（Jetson 多路视频推理），见第 13 章；入门先用 `jetson-inference` 跑通三类任务。
-
-### 版本 / 边界注意
-
-课程中 Nano/JetPack 4 命令全部忽略；本机 JetPack 7.2.1、DeepStream 9.1，旧课安装命令 / 插件字段 / Python binding 不可复制，从 [NVIDIA/DeepStream](https://github.com/NVIDIA/DeepStream) 当前 release 开始。DeepStream 的 NVMM 零拷贝与阶段五 DALI 的 zero-copy 同源。
-
----
-
-## 9. 阶段七 · 容器与服务化（Docker / gRPC / Triton）
-
-### 目标
-
-Docker + gRPC + Triton。Triton 解决服务层问题（batching / ensemble / metrics），不替代 TensorRT 的 Kernel/runtime。
+在阶段一 Docker 入门基础上补齐容器化部署、HTTP/unary gRPC 客户端语义和 Triton Server 服务层，形成 TensorRT Engine → Triton backend → 可观测客户端 benchmark 的完整服务链。Triton 解决 batching、ensemble、metrics 等服务层问题，不替代 TensorRT runtime/Kernel。
 
 ### 课程与资料
 
 **Docker：**
 
-- 英文主课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
+- 阶段一已完成 Docker 初学内容；这里仅按需回看英文课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
 - 中文补课：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
 
 **HTTP / gRPC：**
 
 - 英文主课：[Getting Started With gRPC: Hands-On Codelab](https://www.youtube.com/watch?v=kAuK6VcAR10)（CNCF，约 75 分钟）
-- 中文补课：[手把手 gRPC 基础教程](https://www.bilibili.com/video/BV1QT411H7ds/)（14 讲完整系列）
+- 中文选修：[手把手 gRPC 基础教程](https://www.bilibili.com/video/BV1QT411H7ds/)（14 讲完整系列；需要自建完整 server 或学习流式 RPC 时再看）
 
 **Triton Inference Server：**
 
@@ -546,20 +502,22 @@ Docker + gRPC + Triton。Triton 解决服务层问题（batching / ensemble / me
 
 ##### 当阶段课程大纲（★ = 本阶段必修）
 
-- **Docker（freeCodeCamp / 尚硅谷）** 大纲：
-  - ★ 镜像与容器概念、Dockerfile（multi-stage）
-  - ★ volume、network、healthcheck
-  - ★ Docker Compose 服务编排
-  - ★ 确认基础镜像支持 `linux/arm64`（Jetson 部署）
-- **gRPC（CNCF codelab / 手把手 gRPC 14 讲）** 大纲：
-  - ★ `.proto` 定义与 RPC 语义
+- **Docker 进阶（阶段一已学入门）** 大纲：
+  - ★ multi-stage Dockerfile 与 Docker Compose
+  - ★ network、healthcheck 与 GPU runtime
+  - ★ 构建并确认支持 `linux/arm64` 的镜像（Jetson 部署）
+- **HTTP 最小集** 大纲：
+  - ★ request/response、status 与 JSON/binary tensor
+  - ★ timeout 与 health check
+- **gRPC 最小集（CNCF codelab）** 大纲：
+  - ★ `.proto`、生成 stub 与 RPC 语义
   - ★ unary RPC
-  - ★ server streaming / client streaming / bidirectional streaming
-  - ★ 错误处理、deadline/timeout、health check
+  - ★ deadline/timeout 与 error codes
+  - 自己实现完整 gRPC server、server/client/bidirectional streaming，以及中文 14 讲完整课程（选修）
 - **NVIDIA Triton 从入门到精通（B站 20 讲）** 大纲：
   - ★ 概念与 model repository
-  - ★ backend：TensorRT / ONNX / PyTorch
-  - ★ HTTP / gRPC client
+  - ★ TensorRT backend
+  - ★ 官方 Triton HTTP client 与 unary gRPC client
   - ★ dynamic batching、instance group
   - ★ ensemble、metrics
   - ★ Perf Analyzer 与并发/延迟曲线（架构概念可学；配置字段以当前 Triton 文档为准）
@@ -569,16 +527,16 @@ Docker + gRPC + Triton。Triton 解决服务层问题（batching / ensemble / me
 
 ### 学习方法与停止条件
 
-- **Docker**：二选一完整课。完成 multi-stage Dockerfile、volume、network、healthcheck、Compose，并确认基础镜像支持 `linux/arm64`。
-- **gRPC**：先 CNCF codelab，中文 14 讲补 unary、server/client streaming 和双向流。语言不同不影响理解 `.proto` 和 RPC 语义。
-- **Triton 看完即做**：model repository、TensorRT backend、HTTP/gRPC client、dynamic batching、instance group、ensemble、metrics、Perf Analyzer。停止条件：画出 concurrency/batch 与 p50/p95/throughput 曲线，并能说明 Triton 解决的是服务层问题，不是替代 TensorRT Kernel/runtime。
-- **阶段七停止条件**：能解释镜像与容器、host/container 文件和端口、HTTP 与 gRPC、deadline、错误码和流式请求；并把 TensorRT demo 包成有 `/health` 的容器服务，写一个 gRPC predict 接口。
+- **Docker**：回看阶段一，不把镜像/容器初学内容当作新基础；本阶段完成 multi-stage Dockerfile、Compose、network、healthcheck、GPU runtime，并确认基础镜像支持 `linux/arm64`。
+- **HTTP / gRPC 最小实践**：分别用官方 Triton HTTP client 和 unary gRPC client 发送推理请求；覆盖 JSON/binary tensor、status、health check、timeout/deadline 与 error codes。无需实现自定义 gRPC predict server，也无需掌握三种 streaming RPC。
+- **Triton 看完即做**：model repository、TensorRT backend、dynamic batching、instance group、ensemble、metrics、Perf Analyzer。停止条件：画出 concurrency/batch 与 p50/p95/throughput 曲线，并能说明 Triton 解决的是服务层问题，不是替代 TensorRT runtime/Kernel。
+- **阶段六停止条件**：能解释容器内外文件与端口映射、HTTP 与 unary gRPC 的差异、deadline/timeout 与错误处理，以及 Triton 的 backend、调度、batching、ensemble 和 metrics 行为。
 - **版本注意**：中文 Triton 课基于 2022 年版本，架构概念仍可学；容器 tag、backend 支持和配置字段查当前 [Triton tutorials repo](https://github.com/triton-inference-server/tutorials) 与 Jetson platform matrix。2026 官方页面也可能使用 Dynamo-Triton 名称。
 - **面试向**：TCP 三次握手/四次挥手与 TIME_WAIT；gRPC 为什么快（HTTP/2 多路复用 + protobuf）；Docker 隔离原理（namespace/cgroup）。
 
 ### 阶段项目
 
-项目 E（Triton 模型服务），见第 13 章；前置完成 ARM64 镜像 + Compose、gRPC predict 接口。
+项目 E（Triton 模型服务，见第 13 章）：把 TensorRT backend 服务打包进适配 ARM64/GPU runtime 的容器，用官方 Triton HTTP client 和 unary gRPC client 完成请求，提供 health、metrics 与 timeout/deadline 行为，并测量 concurrency、batching、latency 和 throughput。
 
 ### 版本 / 边界注意
 
@@ -586,17 +544,60 @@ Docker + gRPC + Triton。Triton 解决服务层问题（batching / ensemble / me
 
 ---
 
-## 10. 阶段八 · LLM 推理与服务
+## 9. 阶段七 · Transformer 与 LLM 概念
 
 ### 目标
 
-LLM 原理（CS336）→ 运行时横向选型（不绑一家）→ Orin Edge LLM 落地。全程在支持矩阵内做可重复 benchmark。
+集中建立 Transformer、预训练、后训练与自回归生成的概念链，理解训练资产如何成为可部署的推理模型；本阶段不做训练项目。
+
+### 课程与资料
+
+- 主课：**Stanford CS224n Spring 2024**（EN / University，固定使用此 B 站合集）：[B站 BV163Jc6pENx](https://www.bilibili.com/video/BV163Jc6pENx/)。只连续学习 L7–L11；其余讲次和教程按下面边界处理。
+- 闭卷回顾：阶段五的 [D2L Attention / Transformer](https://d2l.ai/) 内容，只画图和复述，不重看完整课程。
+- 查漏补缺：[Deep Learning Specialization Course 5](https://www.deeplearning.ai/courses/deep-learning-specialization/) 只作为序列模型基础薄弱时的补课。
+
+##### 当阶段课程大纲（★ = 本阶段必修）
+
+- **Stanford CS224n Spring 2024** 大纲：
+  - ★ L7 Attention / LLM Introduction
+  - ★ L8 Self-Attention and Transformers
+  - ★ L9 Pretraining
+  - ★ L10 Post-training
+  - ★ L11 Natural Language Generation
+  - ★ tokenizer、embedding、encoder/decoder 补充
+  - ★ BERT vs GPT、pretraining vs post-training
+  - L5–L6：仅在 RNN/Seq2Seq/Attention 前置薄弱时补看
+  - 其它 lectures/tutorials（跳过或选修）；benchmarking lecture 可选
+- **D2L Attention / Transformer**：闭卷画出 Q/K/V、multi-head attention、残差与 encoder/decoder 数据流；卡住时只查对应教材，不重看完整课程。
+- **Deep Learning Specialization Course 5**：仅查漏补缺，不作为第二门主课。
+
+### 学习方法与停止条件
+
+- **概念输出**：画出 Transformer 架构和 tokenizer → embedding → attention/MLP → logits → decoding 的生成流，逐层标注 tensor shape、训练资产与推理状态。
+- **对比输出**：用同一张表解释 BERT 与 GPT、encoder 与 decoder、pretraining 与 post-training 的目标和推理方式差异。
+- **阶段七停止条件**：能解释训练得到的 tokenizer、权重、配置和精度格式如何组成推理模型，并完整说明 Transformer 架构与自回归生成流；不以训练或调参项目作为验收。
+
+### 阶段项目
+
+无训练项目；提交 Transformer 与生成流图，以及 BERT/GPT、pretraining/post-training 对比表。
+
+### 版本 / 边界注意
+
+纯概念，无版本绑定；仅固定使用上述 Stanford CS224n Spring 2024 B 站合集，避免讲次错位。
+
+---
+
+## 10. 阶段八 · LLM 推理与 Edge-LLM
+
+### 目标
+
+在阶段七概念基础上学习 LLM 推理系统（CS336）→ 横向选择运行时（不绑一家）→ 在 Orin 部署小模型服务，并在支持矩阵内完成可复现的内存、功耗与性能测量。
 
 ### 课程与资料
 
 **LLM 推理原理：**
 
-- 主课：[Stanford CS336 2026 Video Playlist](https://www.youtube.com/playlist?list=PLoROMvodv4rMqXOcazWaTUHhq-yembLCV)（EN / University，完整课程；重点第 6、10 讲）；作业与讲义见 [CS336 官方课程页](https://cs336.stanford.edu/)；[CS336 Lecture 10: Inference](https://www.youtube.com/watch?v=EfM546A79aM)、[CS336 Lecture 6: Kernels, Triton, XLA](https://www.youtube.com/watch?v=xnDHaNUvHBg)
+- 主课：[Stanford CS336 2026 Video Playlist](https://www.youtube.com/playlist?list=PLoROMvodv4rMqXOcazWaTUHhq-yembLCV)（EN / University，按模型结构、推理、评测与系统主题选学，重点第 10 讲）；作业与讲义见 [CS336 官方课程页](https://cs336.stanford.edu/)；[CS336 Lecture 10: Inference](https://www.youtube.com/watch?v=EfM546A79aM)
 - 中文补课：[大模型推理技术研究](https://www.bilibili.com/video/BV1k2L9zyEt7/)（KV cache、vLLM、SGLang 等 9 讲完整系列）
 
 **边缘 LLM 运行时选型：**
@@ -615,11 +616,9 @@ LLM 原理（CS336）→ 运行时横向选型（不绑一家）→ Orin Edge LL
 ##### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Stanford CS336 2026** 大纲：
-  - ★ 大模型概览、Tokenizer
-  - ★ 模型架构与训练数据
-  - ★ Lecture 6：Kernels / Triton / XLA（需要写算子时看）
+  - ★ 模型结构与推理所需训练资产（承接阶段七，不重复学习 Transformer 入门）
   - ★ Lecture 10：Inference（prefill/decode、KV cache、continuous batching）
-  - 评测与系统（★ 关注推理相关）
+  - ★ 推理 evaluation、benchmarking 与 systems 内容
 - **大模型推理技术研究（B站 9 讲）** 大纲：
   - ★ KV cache、PagedAttention
   - ★ continuous batching、vLLM、SGLang
@@ -643,9 +642,11 @@ LLM 原理（CS336）→ 运行时横向选型（不绑一家）→ Orin Edge LL
 
 ### 学习方法与停止条件
 
-- **LLM 原理 · 看完即做**：用同一小模型和固定 prompt，对 batch、并发、上下文长度、量化方式做可复现 benchmark。停止条件：能严格区分 TTFT、TPOT、端到端延迟、tokens/s、单请求延迟和系统吞吐，并解释 prefill/decode 的瓶颈差异。框架关系：vLLM、SGLang、TensorRT-LLM/Edge-LLM 是 LLM runtime/engine 路线；Triton 是可选的通用服务层，二者不是同一个层级。
-- **运行时选型 · 必修关键字**：GGUF vs safetensors、weight-only 量化格式、runtime 对 AWQ/GPTQ 的支持、CUDA vs CPU offload、KV cache 管理、OpenAI-compatible API、易用性 vs 峰值性能 vs 内存占用。看完即做：选同一小模型（如 Qwen3 0.6B）在至少两个运行时（建议 TensorRT-Edge-LLM + llama.cpp）上跑，固定 prompt 与上下文，测量 TTFT、TPOT、tokens/s、峰值 unified memory 与量化格式。停止条件：交付一张选型表，标明每个运行时在 Orin 上的适用场景（快速验证 / 最高吞吐 / 最低内存 / 跨平台），并说明为何落地仍优先 TensorRT-Edge-LLM 但不排斥其他。
-- **Edge LLM · 看完即做**：从支持矩阵内的小模型开始，先 FP16 基线，再 INT4/AWQ；提供简单 API，测 TTFT、TPOT、tokens/s、峰值 unified memory 和上下文长度。停止条件：服务可重复启动，连续请求无 OOM，报告中包含功耗、温度、量化、上下文、并发和版本。资料现实：截至 2026-08-21，还没有一门公开、完整且与当前 TensorRT-Edge-LLM release 同步的官方专项视频课；这里用最新 Jetson 完整视频系列建立工作流，代码只跟 [TensorRT-Edge-LLM 官方安装与教程](https://nvidia.github.io/TensorRT-Edge-LLM/user_guide/getting_started/installation.html)，不拿旧 TensorRT-LLM 服务器课程冒充 Orin 课程。
+- **LLM 推理 · 看完即做**：用同一小模型和固定 prompt，对 batch、concurrency、queueing、context length 和量化方式做可复现 benchmark。停止条件：能严格区分 TTFT、TPOT、端到端 latency、tokens/s、单请求延迟和系统 throughput，并解释 prefill/decode 的瓶颈差异，以及 KV cache、continuous batching、PagedAttention 如何改变内存与调度。框架关系：vLLM、SGLang、TensorRT-LLM/Edge-LLM 是 LLM runtime/engine 路线；Triton 是可选的通用服务层，二者不是同一个层级。
+- **量化与内存预算**：对比 FP16 与 INT4/AWQ/GPTQ，按权重、KV cache、临时 buffer 和 context length 估算 unified memory；把精度变化、OOM 边界和可用上下文写入报告。
+- **运行时选型 · 必修关键字**：GGUF vs safetensors、weight-only 量化格式、runtime 对 AWQ/GPTQ 的支持、CUDA vs CPU offload、KV cache 管理、OpenAI-compatible API、易用性 vs 峰值性能 vs 内存占用。看完即做：在 TensorRT-Edge-LLM、llama.cpp、MLC-LLM、ExecuTorch 中按模型格式与支持矩阵选择，并让同一小模型（如 Qwen3 0.6B）至少在两个运行时（建议 TensorRT-Edge-LLM + llama.cpp）上跑；固定 prompt 与上下文，测量 TTFT、TPOT、tokens/s、峰值 unified memory 与量化格式。停止条件：交付一张选型表，标明每个运行时在 Orin 上的适用场景（快速验证 / 最高吞吐 / 最低内存 / 跨平台），并说明为何落地仍优先 TensorRT-Edge-LLM 但不排斥其他。
+- **Edge LLM · 看完即做**：从支持矩阵内的小模型开始，先 FP16 基线，再 INT4/AWQ；在 Orin 上提供可重复启动的简单 API 服务，测 TTFT、TPOT、tokens/s、throughput、concurrency/queueing、峰值 unified memory、功耗、温度和 context length。停止条件：连续请求无 OOM，报告包含 runtime、service、模型、量化、内存预算、功耗、性能、并发和版本选择。资料现实：截至 2026-08-21，还没有一门公开、完整且与当前 TensorRT-Edge-LLM release 同步的官方专项视频课；这里用最新 Jetson 完整视频系列建立工作流，代码只跟 [TensorRT-Edge-LLM 官方安装与教程](https://nvidia.github.io/TensorRT-Edge-LLM/user_guide/getting_started/installation.html)，不拿旧 TensorRT-LLM 服务器课程冒充 Orin 课程。
+- **阶段八停止条件**：能在 Orin 部署一个小模型服务，并根据支持矩阵与测量结果说明 runtime、quantization、memory、power 和 performance 选择。
 - **面试向**：KV cache 为什么省算力；prefill 与 decode 的瓶颈差异；continuous batching 解决什么问题。
 
 ### 阶段项目
@@ -654,7 +655,7 @@ LLM 原理（CS336）→ 运行时横向选型（不绑一家）→ Orin Edge LL
 
 ### 版本 / 边界注意
 
-本机 Orin NX 16GB、JetPack 7.2.1；Edge-LLM 代码以 TensorRT-Edge-LLM 当前 release 为准。先选支持矩阵内小模型（Qwen3 0.6B/1.7B/4B），不盲目移植 14B 以上；不把 server GPU 上的 vLLM/TRT-LLM 命令直接复制到 Jetson。
+本机 Orin NX 16GB、JetPack 7.2.1；Edge-LLM 代码以 TensorRT-Edge-LLM 当前 release 为准。先选支持矩阵内小模型（Qwen3 0.6B/1.7B/4B），不盲目移植 14B 以上；不把 server GPU 上的 vLLM/TRT-LLM 命令直接复制到 Jetson。CS336 Lecture 6（Kernels / Triton / XLA）不在本阶段课程大纲内，专属分支 C。
 
 ---
 
