@@ -11,4 +11,7 @@
 
 ## 2026-09-01
 
-- ☑ MIT Missing Semester— 第 2、3、4 节已完成
+- ☑ MIT Missing Semester — 第 2、3、4、5 讲（4 讲完成）
+  - 学到：第 2 讲 Shell 工具与 Bash 脚本、第 3 讲 Vim 编辑器基础、第 4 讲数据整理与管道处理、第 5 讲命令行环境优化（作业控制、别名、dotfiles、SSH 等）
+- ☑ Python Full Course for free — 第 3-10 节（累计完成第 1-10 节）
+  - 学到：类型转换、用户输入、Mad Libs 小项目、算术与数学函数、if 条件判断、计算器程序、重量转换、温度转换

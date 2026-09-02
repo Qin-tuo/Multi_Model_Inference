@@ -93,8 +93,7 @@ Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户�
 ### 课程与资料
 
 **Python：**
-
-- 英文主课：[Python Full Course for free](https://www.youtube.com/watch?v=ix9cRaBkVe0)（freeCodeCamp，完整零基础课程）
+- 英文主课(B站翻译版): [Python full course for free](https://www.bilibili.com/video/BV1wr5T6bEN4/?spm_id_from=333.337.search-card.all.click&vd_source=7cbf3a27f03424d92741ec64128cb48f)(freecodecamp)
 - 中文速成（可选）：[3小时超快速入门 Python（动画教学，2026 新版）](https://www.bilibili.com/video/BV1Jgf6YvE8e/)（林粒粒呀，零基础动画课）
 - 官方资料：[Python 官方教程](https://docs.python.org/3/tutorial/)、[venv 官方文档](https://docs.python.org/3/library/venv.html)、[Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/installing-packages/)、[NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html)
 
