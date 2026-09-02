@@ -1,0 +1,219 @@
+#!/usr/bin/env node
+"use strict";
+
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { execFileSync } = require("node:child_process");
+
+const INJECTED_SCRIPT_TAG = '<script type="module" src="./codex-keyboard-tools.js"></script>';
+const HOME_SOURCE_SCRIPT = path.join(
+    os.homedir(),
+    ".local",
+    "share",
+    "codex-webview-keyboard-tools",
+    "codex-keyboard-tools.js",
+);
+const LOCAL_SOURCE_SCRIPT = path.join(__dirname, "codex-keyboard-tools.js");
+const SOURCE_SCRIPT = process.env.CODEX_KEYBOARD_TOOLS_SOURCE
+    ? path.resolve(process.env.CODEX_KEYBOARD_TOOLS_SOURCE)
+    : fs.existsSync(LOCAL_SOURCE_SCRIPT)
+        ? LOCAL_SOURCE_SCRIPT
+        : HOME_SOURCE_SCRIPT;
+
+function patchIndexHtml(html) {
+    if (html.includes(INJECTED_SCRIPT_TAG)) return html;
+
+    const mainScriptPattern = /^(\s*)<script type="module" crossorigin src="\.\/assets\/index-[^"]+\.js"><\/script>/m;
+    const match = html.match(mainScriptPattern);
+    if (!match) {
+        throw new Error("Codex Webview main module tag was not found; extension layout changed");
+    }
+
+    const indentation = match[1] ?? "";
+    return html.replace(
+        mainScriptPattern,
+        `${indentation}${INJECTED_SCRIPT_TAG}\n${match[0]}`,
+    );
+}
+
+function activeExtensionVersion() {
+    const output = execFileSync(
+        "code",
+        ["--list-extensions", "--show-versions"],
+        { encoding: "utf8" },
+    );
+    const entry = output
+        .split(/\r?\n/)
+        .find((line) => line.toLowerCase().startsWith("openai.chatgpt@"));
+
+    if (!entry) throw new Error("The openai.chatgpt VS Code extension is not installed");
+    return entry.slice(entry.indexOf("@") + 1).trim();
+}
+
+function findExtensionDirectory(version) {
+    const extensionsRoot = path.join(os.homedir(), ".vscode", "extensions");
+    const prefix = `openai.chatgpt-${version}`;
+    const candidates = fs.readdirSync(extensionsRoot, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && entry.name.startsWith(prefix))
+        .map((entry) => path.join(extensionsRoot, entry.name));
+
+    for (const candidate of candidates) {
+        const manifestPath = path.join(candidate, "package.json");
+        if (!fs.existsSync(manifestPath)) continue;
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        if (String(manifest.publisher).toLowerCase() === "openai"
+            && manifest.name === "chatgpt"
+            && manifest.version === version) {
+            return candidate;
+        }
+    }
+
+    throw new Error(`Installed extension directory for openai.chatgpt@${version} was not found`);
+}
+
+function validateExtensionDirectory(extensionDirectory, version) {
+    const manifestPath = path.join(extensionDirectory, "package.json");
+    if (!fs.existsSync(manifestPath)) {
+        throw new Error(`Codex extension manifest is missing: ${manifestPath}`);
+    }
+
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    if (String(manifest.publisher).toLowerCase() !== "openai"
+        || manifest.name !== "chatgpt"
+        || manifest.version !== version) {
+        throw new Error(`Extension identity mismatch at ${extensionDirectory}`);
+    }
+}
+
+function atomicWrite(filePath, content) {
+    const temporaryPath = `${filePath}.codex-keyboard-tools.tmp-${process.pid}`;
+    try {
+        fs.writeFileSync(temporaryPath, content);
+        if (fs.existsSync(filePath)) {
+            fs.chmodSync(temporaryPath, fs.statSync(filePath).mode);
+        }
+        fs.renameSync(temporaryPath, filePath);
+    } finally {
+        if (fs.existsSync(temporaryPath)) fs.unlinkSync(temporaryPath);
+    }
+}
+
+function extensionPaths(extensionDirectory) {
+    const webviewDirectory = path.join(extensionDirectory, "webview");
+    const indexPath = path.join(webviewDirectory, "index.html");
+    return {
+        backupPath: `${indexPath}.codex-keyboard-tools.original`,
+        indexPath,
+        installedScriptPath: path.join(webviewDirectory, "codex-keyboard-tools.js"),
+    };
+}
+
+function unpatchIndexHtml(html) {
+    const linePattern = new RegExp(`^\\s*${INJECTED_SCRIPT_TAG.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\r?\\n?`, "m");
+    return html.replace(linePattern, "");
+}
+
+function installIntoExtension(extensionDirectory, version, sourceScript = SOURCE_SCRIPT) {
+    validateExtensionDirectory(extensionDirectory, version);
+    if (!fs.existsSync(sourceScript)) {
+        throw new Error(`Enhancement source is missing: ${sourceScript}`);
+    }
+
+    const { backupPath, indexPath, installedScriptPath } = extensionPaths(extensionDirectory);
+
+    if (!fs.existsSync(indexPath)) {
+        throw new Error(`Codex Webview index is missing: ${indexPath}`);
+    }
+
+    const sourceContent = fs.readFileSync(sourceScript);
+    const currentIndex = fs.readFileSync(indexPath, "utf8");
+    const currentIsPatched = currentIndex.includes(INJECTED_SCRIPT_TAG);
+    const cleanCurrentIndex = currentIsPatched ? unpatchIndexHtml(currentIndex) : currentIndex;
+    const patchedIndex = patchIndexHtml(cleanCurrentIndex);
+
+    if (!currentIsPatched || !fs.existsSync(backupPath)) {
+        atomicWrite(backupPath, cleanCurrentIndex);
+    } else {
+        const backupIndex = fs.readFileSync(backupPath, "utf8");
+        if (backupIndex.includes(INJECTED_SCRIPT_TAG)) {
+            throw new Error(`Codex Webview backup is already patched: ${backupPath}`);
+        }
+        patchIndexHtml(backupIndex);
+    }
+
+    atomicWrite(installedScriptPath, sourceContent);
+    if (patchedIndex !== currentIndex) atomicWrite(indexPath, patchedIndex);
+
+    return {
+        backupPath,
+        extensionDirectory,
+        indexPath,
+        installedScriptPath,
+        version,
+    };
+}
+
+function restoreFromExtension(extensionDirectory, version) {
+    validateExtensionDirectory(extensionDirectory, version);
+    const { backupPath, indexPath, installedScriptPath } = extensionPaths(extensionDirectory);
+    if (!fs.existsSync(backupPath)) {
+        throw new Error(`Codex Webview backup is missing: ${backupPath}`);
+    }
+
+    const backupIndex = fs.readFileSync(backupPath, "utf8");
+    if (backupIndex.includes(INJECTED_SCRIPT_TAG)) {
+        throw new Error(`Codex Webview backup is already patched: ${backupPath}`);
+    }
+    patchIndexHtml(backupIndex);
+    atomicWrite(indexPath, backupIndex);
+    if (fs.existsSync(installedScriptPath)) fs.unlinkSync(installedScriptPath);
+
+    return {
+        backupPath,
+        extensionDirectory,
+        indexPath,
+        installedScriptPath,
+        version,
+    };
+}
+
+function resolveActiveExtension() {
+    const version = activeExtensionVersion();
+    return { extensionDirectory: findExtensionDirectory(version), version };
+}
+
+function install() {
+    const { extensionDirectory, version } = resolveActiveExtension();
+    return installIntoExtension(extensionDirectory, version);
+}
+
+function restore() {
+    const { extensionDirectory, version } = resolveActiveExtension();
+    return restoreFromExtension(extensionDirectory, version);
+}
+
+if (require.main === module) {
+    try {
+        const restoring = process.argv.includes("--restore");
+        const result = restoring ? restore() : install();
+        console.log(`${restoring ? "Restored" : "Patched"} openai.chatgpt@${result.version}`);
+        console.log(`Extension: ${result.extensionDirectory}`);
+        console.log(`Backup: ${result.backupPath}`);
+    } catch (error) {
+        console.error(error instanceof Error ? error.message : error);
+        process.exitCode = 1;
+    }
+}
+
+module.exports = {
+    INJECTED_SCRIPT_TAG,
+    SOURCE_SCRIPT,
+    activeExtensionVersion,
+    findExtensionDirectory,
+    install,
+    installIntoExtension,
+    patchIndexHtml,
+    restore,
+    restoreFromExtension,
+};
