@@ -302,17 +302,20 @@ local function check_external_reqs()
 end
 ```
 
-- [ ] **Step 5: 注册 the new modules and run syntax checks**
+- [ ] **Step 5: 保持插件注册顺序可启动并运行语法检查**
 
-Add `require 'mars.plugins.codecompanion'` and
-`require 'mars.plugins.git-workbench'` to the plugin list in `nvim/init.lua`.
-Run:
+Do not require plugin modules before their files exist. Task 3 should only update
+the existing compatibility settings. Task 5 registers
+`require 'mars.plugins.codecompanion'` immediately after creating that file, and
+Task 6 registers `require 'mars.plugins.git-workbench'` immediately after creating
+that file. Run the syntax check after the existing configuration edits:
 
 ```bash
 NVIM_BIN=/home/barry/.local/bin/nvim ./tests/smoke.sh
 ```
 
-Expected: failure only because Tasks 4-6 have not yet registered the commands.
+Expected at this point: the Neovim version assertion passes, while the future
+`:CodeCompanionCLI`, `:AI` and `:Git` assertions remain red until Tasks 5-6.
 
 - [ ] **Step 6: Commit compatibility changes**
 
