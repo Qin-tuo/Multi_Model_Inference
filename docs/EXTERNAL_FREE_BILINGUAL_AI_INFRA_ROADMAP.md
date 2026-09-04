@@ -108,7 +108,7 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 | 资源 | 课程角色 | 当前状态/证据 | 选段与边界 |
 |---|---|---|---|
 | [Bro Code - Python Full Course for free 2024](https://www.bilibili.com/video/BV1wr5T6bEN4/)（B站 AI 翻译版；[原版](https://www.youtube.com/watch?v=ix9cRaBkVe0)） | 条件回补 | 未记录完整完成；按缺口触发 | P21 `lists, sets, and tuples`；P34-P35 `args & kwargs`/`iterables`；P39-P41 `modules`/`scope resolution`/`if __name__ == "__main__"`；P59-P61 `file detection`/`writing files`/`reading files`。原作者 Bro Code，不是 freeCodeCamp。 |
-| [3小时超快速入门 Python（动画教学，2026 新版）](https://www.bilibili.com/video/BV1Jgf6YvE8e/)（林粒粒呀） | 主线必修 | **已完成可验收**：学习日志记录基础速成；实验仍须复查 | 语法、类、文件、异常和 `unittest`；不重复通刷 Bro Code。 |
+| [3小时超快速入门 Python（动画教学，2026 新版）](https://www.bilibili.com/video/BV1Jgf6YvE8e/)（林粒粒呀） | 主线必修 | **已完成，待证据验收**：学习日志记录基础速成；manifest/测试实验仍须复查 | 语法、类、文件、异常和 `unittest`；不重复通刷 Bro Code。 |
 | [尚硅谷 Python数据分析教程 (NumPy/Pandas/Matplotlib)](https://www.bilibili.com/video/BV1D9GLzyEL6/) | 主线必修 | 未记录完整完成；仅 NumPy 选段进入阶段一 | P6-P21 `NumPy`（重点 P7-P18，P20-P21 练习；详见下方选段索引）；Pandas/Matplotlib 在首份 benchmark CSV/JSON 后触发，属延后阶段。 |
 | [Python 官方教程](https://docs.python.org/3/tutorial/)、[venv](https://docs.python.org/3/library/venv.html)、[PyPA](https://packaging.python.org/en/latest/tutorials/installing-packages/)、[NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html) | 专题必修 | 执行规范，不以阅读计完成 | 工程化、隔离环境、数组语义和当前 API 校正；不替代实验。 |
 | [mrdbourke《Learn PyTorch for Deep Learning in a Day》](https://www.bilibili.com/video/BV1kx4y1r79d/)（B站，中英字幕；[配套仓库](https://github.com/mrdbourke/pytorch-deep-learning)） | 主线必修 | 未记录完整完成；按选段实验验收 | P15-P28、P33-P36、P42、P64-P65、P77/P80-P84；对应标题见下方选段索引；不通刷 93 节。 |
@@ -143,27 +143,220 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 - **尚硅谷 Linux 强化（TCP P114-P117、多路复用）**：P114 `114_TCP_使用可视化工具查看连接`；P115 `115_TCP_多连接的服务端代码编写`；P116 `116_TCP_多连接的客户端代码及测试`；P117 `117_TCP_多进程实现多连接的案例`；P128 `128_IO多路复用_原理介绍`；P129 `129_IO多路复用_功能展示`。
 - **尚硅谷 Docker**：P2 `基础 - Docker架构与容器化`；P6 `命令 - 镜像操作`；P7 `命令 - 容器操作`；P8 `命令 - run细节`；P10 `命令 - 分享镜像`；P12 `存储 - 目录挂载`；P13 `存储 - 卷映射`；P14 `网络 - 自定义网络`；P16 `最佳实践`；P20 `Dockerfile - 制作镜像`；P21 `Dockerfile - 镜像分层机制`。
 
-#### 当阶段课程大纲（★ = 本阶段必修）
+### 模块二：Python 基础与工程化
 
-- **Python 能力目标（不等同于单门课程覆盖）**：
-  - ★ 语法、条件/循环、函数、作用域
-  - ★ 字符串、列表/字典/集合/元组
-  - ★ 类与 dataclass、异常、模块/包
-  - ★ 文件、路径、JSON/CSV
-  - ★ 虚拟环境 venv、pip、requirements、版本锁定
-  - ★ 命令行：argparse、环境变量、logging、subprocess
-  - ★ NumPy：dtype/shape/stride/broadcast/向量化/矩阵乘
-  - ★ OpenCV/PIL 图像读写、resize、批量遍历
-  - ★ pytest、断言、随机种子、可复现 benchmark 输出
-  - Web/爬虫/数据分析（跳过）
-- **PyTorch（mrdbourke B站版 / 刘二）** 大纲：
-  - ★ tensor 的 shape/dtype/device/layout/contiguous
-  - ★ 索引与 reshape/permute、nn.Module/forward
-  - ★ eval()、no_grad()/inference_mode()
-  - ★ state_dict、checkpoint 加载、CPU/CUDA 转移
-  - ★ Dataset/DataLoader
-  - ★ ONNX 导出与 dynamic shape、数值对齐
-  - 完整训练大型模型（略，本阶段只做推理/导出）
+#### 前置与去重
+
+Python 基础课二选一，不双刷。当前学习者已经完成林粒粒 3 小时课程，但仍需用
+实验和可复查证据确认掌握，因此不再重复通刷；Bro Code 只作条件回补：
+
+- P21 `lists, sets, and tuples`；
+- P34-P35 `args & kwargs`、`iterables`；
+- P39-P41 `modules`、`scope resolution`、`if __name__ == "__main__"`；
+- P59-P61 `file detection`、`writing files`、`reading files`。
+
+游戏、GUI（含 PyQt）、天气/API 应用和不必要的 Web/爬虫内容明确跳过。多线程只在
+需要理解 Python 客户端并发时条件回补，不作为阶段一 Python 门槛。
+
+#### 专题必修
+
+主课未覆盖的内容按项目顺序补齐：
+
+1. `pathlib`、JSON/CSV、`hashlib` 和排序稳定的文件 manifest；
+2. `dataclass`、`typing` 类型标注、模块/包与 `pyproject.toml`；
+3. `uv init/add/sync/run/tree/lock`、平台约束和依赖复现；
+4. `argparse`、环境变量和约定退出码；
+5. `logging` 和可机器读取的结构化日志；
+6. `subprocess.run` 的参数列表、退出码、timeout、stdout/stderr；默认禁止
+   `shell=True`，只有明确解释边界时才可例外；
+7. `time.perf_counter`、随机种子、软件/输入/模型元数据和 benchmark 记录；
+8. pytest fixture、参数化、异常断言和数值断言。
+
+官方 Python、PyPA、uv 和 pytest 文档是专题执行规范，不额外增加一门综合 Python
+视频课。
+
+#### 最小实验与停止条件
+
+- 实现 `model-tools manifest`：扫描图片/视频，输出排序稳定且含 hash 的 manifest；
+- 正常目录、空目录、错误路径和不可读文件都有稳定、可记录的退出码；
+- `uv sync --locked` 后测试通过，依赖树和锁文件可复现；
+- 结构化日志包含工具版本、输入路径、参数、随机种子和失败样本；
+- 至少 5 个 pytest，覆盖正常、边界、错误路径和数值容差。
+
+### 模块三：NumPy、图像数组与数值验证
+
+#### 课程与取舍
+
+- 主线必修：尚硅谷数据分析课 P6-P21 NumPy，重点 P7-P18，完成 P20-P21 练习；
+- 条件回补：若能直接完成本模块实验，可用官方 NumPy fundamentals 定点查漏，
+  不要求完整看课；
+- 延后触发：Pandas、Matplotlib 和房价数据分析项目不随 NumPy 顺序通刷。
+
+#### 专题必修
+
+视频章节不足以替代以下数组语义和数值专题：
+
+- `shape`、`axis`、`dtype`、casting、溢出和显式转换；
+- 基础/高级索引，view 与 copy、所有权与别名；
+- `reshape`、`transpose`、`stack`/`concatenate` 和 broadcasting；
+- `strides`、C-contiguous 与 `ascontiguousarray`；
+- `asarray`、`frombuffer` 及零拷贝/复制边界；
+- `matmul`、非方阵和 batched GEMM；
+- `default_rng` 与固定随机种子；
+- `allclose`、`assert_allclose`、`rtol`、`atol`；
+- `.npy`/`.npz` 与原始二进制数组的适用边界。
+
+#### 最小实验与停止条件
+
+- 图像实验的可执行默认契约：从 OpenCV 读取 BGR `HWC uint8`，转换为 RGB，resize
+  到固定 `224x224`（若选定模型要求其它输入则以模型 shape 为准并记录），转为
+  `float32`、归一化到 `[0, 1]`，增加 batch 维并转成 contiguous `NCHW`；默认单图
+  输出为 `(1, 3, 224, 224)`。只有启用图像实验时才在 `pyproject.toml`/`uv.lock`
+  中加入并锁定 `opencv-python`，平台无兼容 wheel 时可声明 Pillow fallback；纯数组/
+  GEMM 实验不引入图像依赖。
+- 该实验必须明确完成 `HWC uint8 BGR -> contiguous float32 NCHW RGB`，并记录每一
+  步的 shape、dtype、stride、数值范围和是否共享内存；
+- 用 NumPy 实现 CPU GEMM，覆盖非方阵、batched GEMM、空/最小/边界 shape；
+- 以 PyTorch CPU reference 对齐，使用显式 `rtol/atol` 并报告最大误差；
+- 能解释 broadcasting 何时不复制、何时会产生大型临时数组。
+
+### 模块四：PyTorch Tensor、模型资产与推理
+
+#### 课程选段与边界
+
+mrdbourke B站版按连续能力块选学：
+
+- P15-P28：Tensor 创建、属性、运算、矩阵乘、reshape/permute、索引、NumPy
+  互操作、随机性、GPU 与 device-agnostic code；
+- P33-P36：`nn.Module`、模型内部、预测与推理入口；
+- P42：保存和加载模型；P37-P41 只在无法理解 checkpoint 如何产生时回补；
+- P64-P65：mini-batch 与 DataLoader；
+- P77、P80-P84：自定义图片数据到 Tensor、Dataset 和 DataLoader。
+
+分类器训练、调参和完整训练循环（P44-P58）延后阶段三；CNN 结构与训练、炮哥
+课程经典 CNN 主体延后阶段五；数据增强、过拟合和大型训练项目按后续项目条件回补。
+刘二课程只保留 P8 作为 DataLoader 中文回补，其余训练原理延后阶段三/五。
+
+#### 专题必修
+
+- Tensor view、storage、stride、storage offset、contiguous 与 memory format；
+- `torch.layout` 只描述 storage layout kind（如 `strided`/`sparse`）；NCHW/NHWC
+  只描述维度顺序，memory format 描述偏好的物理排列，三者不能混为同一概念；
+- `model.eval()`、`no_grad()`、`inference_mode()` 的正交关系；
+- `torch.load(..., weights_only=True, map_location=...)`、随后
+  `model.load_state_dict(..., strict=True)` 的 state_dict 加载链和跨设备加载；
+- Dataset/DataLoader 的 batch、shuffle、`num_workers`、`pin_memory` 和
+  `non_blocking`，性能结论必须实测；
+- CUDA 计时的 warmup、异步执行和同步边界，只建立正确性意识，深入分析留阶段二。
+
+#### 最小实验与停止条件
+
+- `permute` 后证明 Tensor 非 contiguous 且共享 storage，调用 `contiguous()` 后
+  再 `view`；
+- 使用含 Dropout/BatchNorm 的小模型，分别实验 `eval()`、`no_grad()` 和
+  `inference_mode()`，说明行为与 autograd 状态的区别；
+- 从 CPU 保存 state dict，调用 `torch.load(..., weights_only=True,
+  map_location=...)`，再调用 `model.load_state_dict(..., strict=True)` 加载到 CPU
+  和 CUDA（若可用），确认无 missing/unexpected keys；同输入用
+  `torch.testing.assert_close(..., rtol=1e-5, atol=1e-6)`（若调整须记录理由）；
+- 自定义 Dataset/DataLoader 的样本总数、batch shape/dtype 正确；比较
+  `num_workers=0/2`、pinning 和 `non_blocking`，只记录实测结果，不预设收益；
+- benchmark 分离首次加载、warmup 和同步边界，输出 p50/p95、设备和软件版本。
+
+### 模块五：ONNX 与 ONNX Runtime 最小闭环
+
+#### 定位与边界
+
+ONNX 不由现有三门 PyTorch 视频负责，必须作为独立专题。阶段一只建立一个 toy/simple
+model baseline 的“可导出、可检查、可执行、可对齐”最小闭环；陌生模型、复杂动态
+shape、控制流、custom op、图修改、TensorRT engine/profile 和插件留到阶段五。
+
+#### 专题必修
+
+1. ONNX graph、node、tensor、initializer、input/output、opset、IR 和 shape 概念；
+2. 使用当前安装版本的 PyTorch `torch.onnx` exporter，参数和推荐路径一律以执行日
+   官方文档为准，不复制旧 API。一个需要实际跑通并记录的动态 batch smoke path 是：
+   ```python
+   torch.onnx.export(
+       model,
+       (sample_input,),
+       "toy.onnx",
+       input_names=["input"],
+       dynamo=True,
+       dynamic_shapes=({0: torch.export.Dim("batch", min=1)},),
+   )
+   ```
+   `dynamo`、`dynamic_shapes`、`torch.export.Dim`、输入命名和 exporter 签名均可能随
+   版本变化；记录实际 PyTorch/API 版本和最终调用，必要时按当前文档采用等价路径。
+   若改用 dict 形式，键必须是 `forward` 参数名；`input_names` 只是 ONNX graph label；
+3. `onnx.checker`、模型输入输出契约和 Netron 阅读；
+4. 阶段一必须显式传入 ONNX Runtime `providers=["CPUExecutionProvider"]` 并与
+   PyTorch 输出做数值对齐；只有存在可用 GPU 时，才条件测试 CUDA provider 和
+   host/device transfer，这些测试不阻塞 CPU/headless 完成。最小执行入口为
+   `ort.InferenceSession("toy.onnx", providers=["CPUExecutionProvider"])`；
+5. 只做简单动态 batch；动态空间维、复杂控制流和自定义算子不作为阶段一门槛。
+
+#### 最小实验与停止条件
+
+- 按上面的 toy/simple dynamic-batch path 导出模型，记录 PyTorch、ONNX、opset/IR、
+  provider 和平台版本；
+- `onnx.checker.check_model(..., full_check=True)` 通过；
+- 对同一个导出 artifact，固定 shape 和至少两个未参与导出的合法 batch shape 均能
+  运行；这些测试必须走上面的 dynamic-batch path，而不是另导出静态模型；
+- 所有输出使用明确 `rtol/atol` 对齐，并记录最大绝对/相对误差；
+- 对错误 dtype、rank 或 shape 写负例测试，得到可诊断错误，而不是静默转换。
+
+### 按需性能报告补课
+
+Pandas 和 Matplotlib 不作为阶段一前置课程。第一次产生真实 benchmark CSV/JSON 后
+再触发：
+
+- Pandas：尚硅谷数据分析课 P34-P38、P43、P49；P45-P46 按需补；
+- Matplotlib：P54-P55、P57-P59、P68；
+- 必补 API：`read_csv`/`read_json`、筛选、`groupby`/`agg`、`quantile`、concat、
+  `plot`/`scatter`/`hist`/`boxplot`/`subplots`、轴单位、legend、log scale 和
+  `savefig`。
+
+触发实验为：读取 benchmark 数据，按 precision/batch/concurrency 分组，计算
+p50/p95/p99、throughput、memory、power、temperature 汇总表，绘图并保存报告。它最迟
+在阶段二性能报告前完成，但不要求先看完整数据分析课。
+
+### 阶段一官方专题补充（模块二至模块五）
+
+视频负责建立连续认识，官方文档负责当前语义、安装命令和 API 校正：
+
+- [Python `dataclasses`](https://docs.python.org/3/library/dataclasses.html)、
+  [Python `pathlib`](https://docs.python.org/3/library/pathlib.html)、
+  [Python `argparse`](https://docs.python.org/3/library/argparse.html)、
+  [Python Logging HOWTO](https://docs.python.org/3/howto/logging.html)、
+  [Python `subprocess`](https://docs.python.org/3/library/subprocess.html)；
+- [Python `time.perf_counter`](https://docs.python.org/3/library/time.html#time.perf_counter)、
+  [Python random reproducibility notes](https://docs.python.org/3/library/random.html#notes-on-reproducibility)、
+  [PyTorch reproducibility notes](https://docs.pytorch.org/docs/stable/notes/randomness.html)；
+- [Python Packaging User Guide](https://packaging.python.org/)、
+  [uv projects](https://docs.astral.sh/uv/guides/projects/)、
+  [pytest Get Started](https://docs.pytest.org/en/stable/getting-started.html)；
+- [NumPy fundamentals](https://numpy.org/doc/stable/user/basics)、
+  [NumPy copies and views](https://numpy.org/doc/stable/user/basics.copies.html)、
+  [NumPy broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html)、
+  [`ndarray.strides`](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.strides.html)、
+  [`numpy.testing.assert_allclose`](https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html)；
+- [PyTorch Tensor Views](https://docs.pytorch.org/docs/stable/tensor_view.html)、
+  [Autograd mechanics](https://docs.pytorch.org/docs/stable/notes/autograd.html)、
+  [Saving and Loading Models](https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html)、
+  [DataLoader](https://docs.pytorch.org/docs/stable/data.html)、
+  [Benchmark recipe](https://docs.pytorch.org/tutorials/recipes/recipes/benchmark.html)；
+- [ONNX Concepts](https://onnx.ai/onnx/intro/concepts.html)、
+  [ONNX simple export tutorial](https://docs.pytorch.org/tutorials/beginner/onnx/export_simple_model_to_onnx_tutorial.html)、
+  [current `torch.onnx` API](https://docs.pytorch.org/docs/stable/onnx.html)、
+  [ONNX Runtime documentation](https://onnxruntime.ai/docs/)、
+  [ONNX Runtime Python API](https://onnxruntime.ai/docs/api/python/api_summary.html)；
+- [Pandas getting started](https://pandas.pydata.org/docs/getting_started/index.html)、
+  [Pandas API reference](https://pandas.pydata.org/docs/reference/index.html)、
+  [Matplotlib quick start](https://matplotlib.org/stable/users/explain/quick_start.html)。
+
+### 其余阶段一课程大纲（C++ / Linux / Docker；后续模块整理）
+
 - **C++ 主课（freeCodeCamp）** 大纲：
   - ★ pointer、reference、stack/heap
   - ★ RAII、class、template、STL、lambda
@@ -189,8 +382,7 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 
 ### 学习方法与停止条件
 
-- **明确不学**：Django/Flask 全栈、爬虫、异步 Web、数据分析可视化、分布式训练、DeepSpeed。必修范围见上方大纲。
-- **PyTorch 停止条件**：能加载公开 checkpoint 在固定输入上稳定得结果；能解释一次 shape/dtype/device/layout 错误；能用 `eval()` 和 `inference_mode()` 完成推理并正确处理 warmup 与 CUDA 同步；能把 PyTorch 模型导出 ONNX 并与 PyTorch 输出做容差比较；能说明训练、模型导出、TensorRT 构建和板端 Runtime 各自处于哪一层。
+- **明确不学**：Django/Flask 全栈、爬虫、异步 Web、完整数据分析可视化课、分布式训练、DeepSpeed。Pandas/Matplotlib 只按首次 benchmark 数据触发的 mini-lab 学习。
 - **C++ 停止条件**：能解释值/引用/指针、对象生命周期、编译与链接，并能定位一次段错误。只抓 pointer/reference/stack-heap/RAII/class/template/STL/lambda/CMake/gdb。
 - **Linux 停止条件**：能使用权限、管道、重定向、进程信号、日志、SSH、`gdb`、`strace`；知道 syscall、用户态和内核态的边界。CentOS 视频中的 `yum`、旧网络服务命令不复制到本机 Ubuntu 24.04；只迁移稳定概念。
 - **Docker 停止条件**：能使用适配 `linux/arm64` 的基础镜像，把现有 PyTorch/ONNX CLI 推理工具封装为一个可复现的基础开发镜像，并在容器中运行。
@@ -200,10 +392,13 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 
 在阶段一建立一个独立的 `model-tools` 目录，至少包含：
 
-- `venv` 创建、依赖文件和一键运行说明；
+- 推荐用 `.python-version`（或显式固定的 Python 解释器）与 `pyproject.toml` +
+  `uv.lock`：前者固定 Python，后两者固定依赖；通过 `uv sync --locked` 从 clean
+  environment 重建并提供一键运行说明。旧环境若只能使用 `venv`/`pip`，必须记录
+  解释器版本和 documented fallback，不得绕过锁文件静默混用 API；
 - 用 `argparse` 扫描图片/视频数据集，生成带 hash 的 manifest；
 - 用 NumPy 实现 CPU GEMM，并与 PyTorch 输出和耗时对齐；
-- 读取图像并统一完成 RGB/BGR、resize、dtype 和 batch 处理；
+- 读取图像并统一完成 RGB/BGR、resize、dtype 和 batch 处理（模块三要求 `HWC uint8 BGR -> contiguous float32 NCHW RGB`）；
 - 导出一个简单 PyTorch 模型到 ONNX，并用 ONNX Runtime 做结果校验；
 - 用 `subprocess` 调用外部 benchmark，输出 JSON/CSV；
 - 用 logging 记录版本、输入 shape、随机种子和失败样本；
@@ -237,9 +432,9 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
   - `view` / `reshape` / `contiguous` 与广播规则
   - `state_dict` 保存加载与 device 迁移
   - DataLoader：`num_workers` / `pin_memory`
-  - AMP 混合精度：`autocast` / `GradScaler`
+  - AMP 混合精度：`autocast` / `GradScaler`（阶段三/五或按项目条件回补）
   - 常见内存泄漏：持有计算图引用、中间 tensor 累积
-  - DDP 原理（进程级并行、梯度 all-reduce）；`torch.compile` 是什么
+  - DDP 原理（进程级并行、梯度 all-reduce）和 `torch.compile`（阶段三/五延后，按需回补）
 - **Linux 高频**
   - 进程 / 线程 / 协程区别与适用场景
   - 进程间通信：管道、共享内存、消息队列、socket、信号
@@ -252,11 +447,18 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 - **手写题（面试常考）**
   - C++：简化版 `shared_ptr`、线程安全单例、实现 String 类（Rule of Five）
   - Python：带参数装饰器、生成器实现生产者-消费者
-  - PyTorch：完整训练循环、Multi-Head Attention 前向、自定义 `autograd.Function`
+  - PyTorch：完整训练循环、Multi-Head Attention 前向、自定义 `autograd.Function`（阶段三/五，不是阶段一门槛）
 
 ### 版本 / 边界注意
 
-无强版本绑定；后续容器 / wheel 都要面向 ARM64/JetPack 7.2.1 验证。
+概念（shape、graph、layout 和 provider）相对稳定，但项目执行不是无版本绑定：
+
+- `.python-version`（或显式固定的 Python 解释器）固定 Python；`pyproject.toml` 与
+  `uv.lock` 固定 PyTorch、ONNX、ONNX Runtime 及直接/传递依赖版本，并记录 exporter
+  调用、opset/IR、provider 和平台信息；
+- 旧环境若只能使用 documented fallback，必须单独记录兼容路径和 API 版本；不得把
+  不同版本的 exporter、ORT provider 或依赖接口静默混用；
+- 后续容器 / wheel 仍要面向 ARM64/JetPack 7.2.1 验证。
 
 ---
 
