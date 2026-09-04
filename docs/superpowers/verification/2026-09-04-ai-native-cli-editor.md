@@ -67,10 +67,16 @@ Markdown lint 在 `markdownlint`/`markdownlint-cli2` 不存在时跳过，不阻
 ## 合并探针
 
 实现分支已 fast-forward 合并到 `/home/barry/.config/mars.nvim` 的 `main`，合并
-结果为 `c340ef9`，隔离 worktree 和 feature branch 随后清理。使用临时 `CODEX_HOME`
+结果先为 `c340ef9`，随后补充默认 session 目录修复，当前 `main` HEAD 为 `9bf0794`；
+隔离 worktree 和 feature branch 随后清理。使用临时 `CODEX_HOME`
 启动合并后的真实配置并调用 `require('mars.ai').toggle()`：成功创建 live
 `codecompanion_cli` terminal，项目 root marker 正确，`require('mars.ai').reset_session()`
 完成生命周期清理，结果为 `MERGED_PANEL_PASS`。
+
+post-resume 修复后再次执行全部 `tests/*.sh`、静态检查、smoke 和面板探针，分别得到
+`POST_RESUME_ALL_TESTS_PASS`、`POST_RESUME_STATIC_PASS`、`POST_RESUME_SMOKE_PASS` 和
+`POST_RESUME_PANEL_PASS`。启动器默认读取 `$HOME/.codex/sessions`，并覆盖了未设置
+`CODEX_HOME` 的回归场景。
 
 ## ACP 探测
 
