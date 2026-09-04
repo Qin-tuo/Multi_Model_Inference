@@ -8,6 +8,22 @@
 
 **Tech Stack:** Neovim 0.12.5、lazy.nvim、CodeCompanion.nvim、Snacks.nvim、Codex CLI 0.152.x、Python/Pyright/Ruff/pytest/debugpy、C++/CUDA/clangd/CMake/GDB、Git/Neogit/gitsigns/Fugitive。
 
+## 执行状态（2026-09-04）
+
+实现分支已经完成 MVP-0、MVP-1 和 MVP-2 的配置与自动化回归：Neovim 0.12.5、
+Python/C++/CUDA LSP/格式化/DAP、常驻 Codex CLI 面板、项目级恢复、Git/Snacks
+入口、Markdown/项目搜索和安全边界均已实现。关键提交从 `5eced5b` 到
+`477698c`，另有上下文/键盘闭环提交 `8eb76dc`。
+
+已知环境差异：系统 `apt` 因 sudo 需要密码未执行，clangd、clang-format、debugpy、
+fd 和 lazygit 使用用户级二进制；`leap.nvim` 固定到最后一个有实现的提交。ACP
+只完成 initialize 探测，仍未替换 CLI provider。完整命令输出和限制记录在
+`docs/superpowers/verification/2026-09-04-ai-native-cli-editor.md`。
+
+剩余交付步骤只有在实际 Mars.nvim 主仓库执行 fast-forward 合并，并在用户项目中
+手动确认真实 Codex 审批、文件修改 diff、pytest/CMake 失败回传和 DAP 会话；这些
+步骤不由无头 mock 测试冒充完成。
+
 ---
 
 ## 工作目录与文件边界
@@ -33,9 +49,14 @@
 - Modify: `nvim/init.lua` 中的 Supermaven 依赖，避免第二个默认 AI 入口抢占补全。
 - Create: `nvim/lua/mars/plugins/codecompanion.lua`，常驻 Codex CLI 面板和 AI 命令。
 - Create: `nvim/lua/mars/ai.lua`，项目根目录、Markdown 搜索和上下文发送辅助函数。
+- Modify: `nvim/lua/mars/plugins/debug.lua`，Python debugpy 和 C/C++/CUDA GDB DAP。
+- Modify: `nvim/lua/mars/plugins/greeter.lua`，从模块自身定位本地插件目录。
+- Create: `nvim/lua/mars/bin/mars-codex`，按项目恢复 Codex session 的安全启动器。
 - Create: `nvim/lua/mars/plugins/git-workbench.lua`，Fugitive 和 Snacks lazygit 入口。
 - Create: `tests/smoke.sh`，配置、命令和外部工具的无网络冒烟测试。
 - Create: `tests/context.sh`，临时 Git 仓库中的 Markdown 搜索集成测试。
+- Create: `tests/ai_helper.sh`、`tests/git_workbench.sh`、`tests/resume.sh`、`tests/debug_workbench.sh`，AI/Git/恢复/DAP 回归测试。
+- Create: `docs/superpowers/verification/2026-09-04-ai-native-cli-editor.md`，版本和验收记录。
 - Modify: `README.md`、`README_zh.md`，记录安装顺序、快捷键和故障排查。
 
 不修改当前主项目中已有的学习记录、模型代码或未提交文件。
