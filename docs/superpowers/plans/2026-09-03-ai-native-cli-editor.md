@@ -10,10 +10,11 @@
 
 ## 执行状态（2026-09-04）
 
-实现分支已经完成 MVP-0、MVP-1 和 MVP-2 的配置与自动化回归：Neovim 0.12.5、
+实现分支（当前 HEAD `c340ef9`）已经完成 MVP-0、MVP-1 和 MVP-2 的配置与自动化回归：Neovim 0.12.5、
 Python/C++/CUDA LSP/格式化/DAP、常驻 Codex CLI 面板、项目级恢复、Git/Snacks
 入口、Markdown/项目搜索和安全边界均已实现。关键提交从 `5eced5b` 到
-`477698c`，另有上下文/键盘闭环提交 `8eb76dc`。
+`477698c`，另有上下文/键盘闭环提交 `8eb76dc`、安全与原生命令守卫提交
+`29f3a3b`、`7ccc1ee` 和 `1fb18ac`。
 
 已知环境差异：系统 `apt` 因 sudo 需要密码未执行，clangd、clang-format、debugpy、
 fd 和 lazygit 使用用户级二进制；`leap.nvim` 固定到最后一个有实现的提交。ACP

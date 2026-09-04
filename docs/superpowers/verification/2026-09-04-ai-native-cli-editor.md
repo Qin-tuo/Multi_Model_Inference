@@ -30,6 +30,7 @@ bash tests/ai_helper.sh                       -> AI helper checks passed
 bash tests/git_workbench.sh                   -> Git workbench checks passed
 bash tests/resume.sh                          -> Codex resume checks passed
 bash tests/debug_workbench.sh                 -> Debug workbench checks passed
+bash tests/lint_workbench.sh                  -> Lint workbench checks passed
 bash -n tests/*.sh                            -> pass
 git diff --check                              -> pass
 NVIM_BIN=/home/barry/.local/bin/nvim \
@@ -53,6 +54,15 @@ GDB 15.1 的 `--interpreter=dap` 也返回 initialize/initialized 响应。缺�
 Codex 启动器会先检查 `$CODEX_HOME/sessions` 中当前项目的 `session_meta.payload.cwd`：
 有匹配历史才执行 `resume --last`，resume 错误码原样返回；无历史或设置
 `MARS_CODEX_NEW=1` 时才启动新会话。
+
+原生 `:CodeCompanionCLI` 已由 Mars wrapper 接管：它先执行项目根/会话校验，拒绝
+跨项目复用，并把视觉命令的 range 传给 CodeCompanion。项目外当前 buffer 的自动
+`#{buffer}`、`#{this}`、`#{selection}` 和诊断标签会被省略；显式用户文件引用不受影响。
+Markdown lint 在 `markdownlint`/`markdownlint-cli2` 不存在时跳过，不阻塞编辑。
+
+`MARS_SMOKE=1` 同时关闭 Treesitter 自动下载和 lazy 缺失插件安装；插件缓存不完整
+时会快速失败而不会隐式联网。当前 smoke 使用已同步的用户级插件缓存，真实工作流
+仍通过 `:Lazy sync` 完成首次安装。
 
 ## ACP 探测
 
