@@ -20,7 +20,7 @@
 
 | 阶段 | 属性 | 核心交付 |
 |---|---|---|
-| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + 基础开发镜像 |
+| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + Shell telemetry + 基础开发镜像 |
 | 阶段二 · CUDA 与 GPU 性能 | 性能必修 | CUDA Kernel 仓库 + MNIST CUDA + Sanitizer/Nsight 报告 |
 | 阶段三 · 深度学习基础原理 | 原理必修 | 神经网络训练、导出与推理流程说明 |
 | 阶段四 · 模型压缩原理与设计 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
@@ -96,7 +96,8 @@
 
 ```text
 Linux Shell/Git -> Python engineering/uv -> NumPy -> PyTorch -> ONNX/ORT -> model-tools -> Docker CPU/headless
-C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/thread/socket -> TCP strengthening
+C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/thread -> Stage 1 core
+systems/framework strengthening: socket/TCP -> epoll -> TCP service
 ```
 
 排序规则：两条链可并行学习；Docker 必须跟在一个已经能运行的 CLI 后；已有能力只有通过实验和证据验收后才能跳过重复课程，只回补未覆盖的缺口。
@@ -115,15 +116,17 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 | [Pytorch框架与经典卷积神经网络与实战](https://www.bilibili.com/video/BV1e34y1M7wR/)（炮哥带你学） | 条件回补 | 未记录完成；仅在 Tensor/Module 缺口时触发 | P1 `1.1、课程先导`、P2 `2.1、全连接神经网络整体结构`；经典 CNN 与训练内容延后阶段（详见下方选段索引）。 |
 | [PyTorch深度学习实践 完结合集（刘二大人）](https://www.bilibili.com/video/BV1Y7411d7Ys/) | 条件回补 | 未记录完成；按需回补 | 仅 P8 `08.加载数据集` 作 DataLoader 中文回补；训练原理延后阶段（详见下方选段索引）。 |
 | [PyTorch 官方教程](https://docs.pytorch.org/tutorials/)、[ONNX 教程](https://docs.pytorch.org/tutorials/beginner/onnx/index.html) | 专题必修 | 执行规范，不以阅读计完成 | 校正 Tensor Views、保存加载、benchmark、ONNX/ORT API；以当前官方文档为准。 |
-| [C++ Programming Course: Beginner to Advanced](https://www.youtube.com/watch?v=8jLOx1hD3_o)（freeCodeCamp） | 主线必修 | 未记录完成；按语言基础验收 | 只承担语法、指针、引用、生命周期和 STL 基础；复杂模板与深 OOP 明确跳过。 |
+| [C++ Programming Course: Beginner to Advanced](https://www.youtube.com/watch?v=8jLOx1hD3_o)（freeCodeCamp） | 主线必修 | 未记录完成；按语言基础验收 | 只承担语言基础：语法、指针/引用、stack/heap、函数、lambda、模板、类和多文件；不提供完整 RAII、STL、CMake 或 GDB 覆盖。复杂模板元编程、C++20 Concepts 和深 OOP 明确跳过或条件回补。 |
 | [LearnCpp](https://www.learncpp.com/) | 专题必修 | 未记录完成；按缺口查阅 | 补 RAII、智能指针、编译链接和现代 C++ 实践。 |
-| [MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（[2026 原版](https://missing.csail.mit.edu/2026/)） | 主线必修 | **已完成可验收**：学习日志记录 9 讲；telemetry/命令行证据待验收 | P1-P6、P9；P7-P8（智能体编程、代码之外）明确跳过；各标题见下方选段索引。 |
+| [MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（[2026 原版](https://missing.csail.mit.edu/2026/)） | 主线必修（P1-P2/P4-P6/P9） | **已记录 9 个讲次，编号映射待核对；telemetry/命令行实验仍须验收** | 主线 P1-P2/P4-P6/P9；P3 `Development Environment and Tools` 条件回补；P7-P8（智能体编程、代码之外）明确跳过；各标题见下方选段索引。 |
 | [Pro Git](https://git-scm.com/book/en/v2) | 专题必修 | 未记录完成；按 Git 缺口查阅 | 只补 status/diff/log/branch/commit 和可恢复撤销。 |
 | [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/) | 延后阶段 | 阶段一不验收 | 操作系统理论不阻塞阶段一工程交付。 |
 | [LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/) | 条件回补 | 未记录完成；仅在基础不足时触发 | Ubuntu、权限和包管理查阅。 |
 | [尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/) | 专题必修 | 未记录完成；按核心/岗位强化验收 | 核心：P9-P14、P29-P33、P35-P40、P42/P44/P54、P55-P56/P62-P63/P68-P69、P83-P84/P87-P88/P91-P93；强化：P76-P77、P98-P117、P128-P129；各段主题/标题见下方选段索引。 |
 | [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud 旧版） | 条件回补 | 旧版仅参考，不作为命令证据 | 只查镜像/容器概念；旧命令、Compose、Swarm/Kubernetes 明确跳过。 |
 | [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；各 P 标题见下方选段索引；Compose 与业务案例延后阶段。 |
+
+> 编号说明：B站 P 编号/标题按当前视频页面核验；学习日志中的“第 N 讲”可能沿用官方讲次或观看记录，不等同于 B站 P N；完成状态按主题和实验证据核对。
 
 #### 选段索引（B站 P 号；核验日期：2026-09-04）
 
@@ -133,7 +136,7 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 - **mrdbourke P33-P42**：P33 `38. Creating our first PyTorch model`；P34 `40. Discussing important model building classes`；P35 `41. Checking out the internals of our model`；P36 `42. Making predictions with our model`；P42 `51. Saving-loading a model`。
 - **mrdbourke P64-P65/P77/P80-P84**：P64 `98. Mini-batches`；P65 `99. Creating DataLoaders`；P77 `126. Introduction to custom datasets`；P80 `132. Turning images into tensors`；P81 `136. Creating image DataLoaders`；P82 `137. Creating a custom dataset class (overview)`；P83 `139. Writing a custom dataset class from scratch`；P84 `142. Turning custom datasets into DataLoaders`。
 - **炮哥 / 刘二**：炮哥 P1 `1.1、课程先导`、P2 `2.1、全连接神经网络整体结构`；刘二 P8 `08.加载数据集`。
-- **MIT Missing Semester**：P1 `课程概览与Shell入门`；P2 `命令行环境`；P3 `开发环境与工具`；P4 `调试与性能分析`；P5 `版本控制与Git`；P6 `代码打包与分发`；P7 `智能体编程`（明确跳过）；P8 `代码之外`（明确跳过）；P9 `代码质量`。
+- **MIT Missing Semester**：P1 `课程概览与Shell入门`；P2 `命令行环境`；P3 `开发环境与工具`（条件回补）；P4 `调试与性能分析`；P5 `版本控制与Git`；P6 `代码打包与分发`；P7 `智能体编程`（明确跳过）；P8 `代码之外`（明确跳过）；P9 `代码质量`。主线集合为 P1-P2/P4-P6/P9。
 - **尚硅谷 Linux 核心（编译、fd、进程）**：P9 `09_C语言开发_GCC编译整体流程介绍`；P10 `10_C语言编译流程_预处理`；P11 `11_C语言编译流程_编译`；P12 `12_C语言编译流程_汇编`；P13 `13_C语言编译流程_汇编补充说明`；P14 `14_C语言编译流程_链接`；P29 `29_系统调用_open打开文件`；P30 `30_系统调用_其他常用的系统调用`；P31 `31_系统调用_综合案例`；P32 `32_文件描述符_结构图概念介绍`；P33 `33_文件描述符_总结图示`。
 - **尚硅谷 Linux 核心（进程、信号、线程）**：P35 `35_进程处理_fork创建子进程`；P36 `36_进程处理_使用fork复制文件描述符`；P37 `37_进程处理_execve及具体案例`；P38 `38_进程处理_waitpid介绍及案例`；P39 `39_进程处理_进程树`；P40 `40_进程处理_孤儿进程`；P42 `42_进程通信_打印错误及错误编号`；P44 `44_进程通讯_匿名管道通讯`；P54 `54_进程通讯_信号处理介绍`；P55 `55_线程处理_线程简介`；P56 `56_线程处理_线程创建的基础代码`；P62 `62_线程同步_竞态条件和锁`；P63 `63_线程同步_互斥锁介绍`；P68 `68_线程同步_条件变量原理介绍`；P69 `69_线程同步_条件变量功能演示`。
 - **尚硅谷 Linux 核心（内核边界）**：P83 `83_内核原理_虚拟内存相关介绍`；P84 `84_内核原理_物理内存和虚拟内存映射`；P87 `87_内核原理_fork调用执行原理`；P88 `88_内核原理_execve调用执行原理`；P91 `91_内核原理_系统调用和库函数`；P92 `92_内核管理_进程和线程的区别和联系`；P93 `93_内核管理_线程特点及内核线程`。
@@ -142,6 +145,39 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/th
 - **尚硅谷 Linux 强化（TCP P106-P113）**：P106 `106_TCP_使用socket常用函数介绍`；P107 `107_TCP_网络字节序和主机字节序转换`；P108 `108_TCP_网络字节序和主机字节序数字转换`；P109 `109_TCP_网络地址填写案例`；P110 `110_TCP_服务端打开代码编写`；P111 `111_TCP_服务端使用连接代码编写`；P112 `112_TCP_客户端代码编写及测试`；P113 `113_TCP_缓冲机制介绍`。
 - **尚硅谷 Linux 强化（TCP P114-P117、多路复用）**：P114 `114_TCP_使用可视化工具查看连接`；P115 `115_TCP_多连接的服务端代码编写`；P116 `116_TCP_多连接的客户端代码及测试`；P117 `117_TCP_多进程实现多连接的案例`；P128 `128_IO多路复用_原理介绍`；P129 `129_IO多路复用_功能展示`。
 - **尚硅谷 Docker**：P2 `基础 - Docker架构与容器化`；P6 `命令 - 镜像操作`；P7 `命令 - 容器操作`；P8 `命令 - run细节`；P10 `命令 - 分享镜像`；P12 `存储 - 目录挂载`；P13 `存储 - 卷映射`；P14 `网络 - 自定义网络`；P16 `最佳实践`；P20 `Dockerfile - 制作镜像`；P21 `Dockerfile - 镜像分层机制`。
+
+### 模块一：Shell、Git 与开发环境交接
+
+#### 目标与课程边界
+
+在 Ubuntu 主机和远程 ARM64 设备上可靠地导航、搜索、组合命令、管理任务、检查
+身份与权限、阅读日志，并把命令和环境信息交接给后续 Python/C++/Linux 模块。
+
+- 主线必修：Missing Semester 2026 P1-P2/P4-P6/P9（Shell、Command-line Environment、
+  Debugging and Profiling、Version Control、Packaging and Shipping Code、Code Quality）。
+- 条件回补：P3 `Development Environment and Tools`，仅在编辑器、SSH 或构建工具链
+  不熟时定点回看，不把它当作所有学习者的硬门槛。
+- 已完成可验收：当前学习者已有该课程 9 个讲次的观看记录，编号映射待核对；本模块
+  采用主线 P1-P2/P4-P6/P9，telemetry 与命令行操作证据尚未完成，不要求重看已记录讲次。
+- 明确跳过：P7 Agentic Coding、P8 Beyond the Code 不作为阶段一 Linux 基础门槛。
+
+#### 专题必修
+
+- Shell 引号、变量展开、glob、管道、stdin/stdout/stderr、退出码、`&&`/`||`；
+- `set -euo pipefail` 的作用、边界和失败传播，ShellCheck；
+- `rg`、`find`、`jq`、`ps`、`pgrep`、`ss`、`lsof`、`journalctl`、`strace`；
+- SSH、任务控制、长任务会话和开发环境交接；
+- Git `status`、`diff`、`log`、`branch`、`commit` 以及可恢复撤销。
+
+#### 最小实验与停止条件
+
+- 编写 Shell telemetry 脚本，连续采集 **60 samples** 的 CPU、内存、目标进程状态和
+  可用温度节点，输出带时间戳和主机/命令元数据的 JSONL 或 CSV；
+- 目标进程不存在、温度/资源节点缺失、权限不足和命令失败时，保留可诊断错误或
+  明确的 missing-resource/permission 状态，不静默伪造数值；
+- ShellCheck 通过，路径和变量正确引用，能解释 `set -euo pipefail` 的已知例外；
+- 能用 `pgrep`、`ss`、`journalctl`、`strace` 各定位一次人为构造的问题，并保存命令
+  与输出作为后续模块的交接证据。
 
 ### 模块二：Python 基础与工程化
 
@@ -355,70 +391,191 @@ p50/p95/p99、throughput、memory、power、temperature 汇总表，绘图并保
   [Pandas API reference](https://pandas.pydata.org/docs/reference/index.html)、
   [Matplotlib quick start](https://matplotlib.org/stable/users/explain/quick_start.html)。
 
-### 其余阶段一课程大纲（C++ / Linux / Docker；后续模块整理）
+### 模块六：现代 C++17、CMake 与调试
 
-- **C++ 主课（freeCodeCamp）** 大纲：
-  - ★ pointer、reference、stack/heap
-  - ★ RAII、class、template、STL、lambda
-  - ★ CMake、gdb、编译与链接
-  - 复杂模板元编程/全栈（跳过）
-- **MIT Missing Semester（基础层）** 大纲：
-  - ★ Shell 与管道、权限
-  - ★ Shell 脚本（写监控脚本）
-  - ★ 命令行环境：SSH、任务控制
-  - ★ Git 与调试入门（`gdb` / `strace` / profiling）
-- **尚硅谷 Linux 应用层开发（系统层）** 大纲：
-  - ★ 文件 IO（open/read/write、缓冲）
-  - ★ 进程与线程（fork、pthread）
-  - ★ Socket 网络编程
-  - ★ epoll 多路复用
-  - 内核/驱动部分（留到分支 D）
-- **Docker 入门** 大纲：
-  - ★ image、container 与 registry 的边界
-  - ★ `docker pull/run/exec/logs/inspect`
-  - ★ volume、端口、环境变量和基础 Dockerfile
-  - ★ `linux/arm64` 与 Jetson 基础镜像识别
-  - Compose、network、healthcheck、multi-stage 和 GPU runtime 留到阶段六
+#### 课程边界与学习顺序
+
+freeCodeCamp 的 31 小时视频只提供语言基础，不是完整的现代 C++ 工程课：它可用于
+语法、指针/引用、stack/heap、函数、lambda、模板、类和多文件基础，但不完整覆盖
+RAII、所有权、STL、CMake 或 GDB。按能力缺口定点学习，不把看完视频当作工程验收。
+
+阶段一按以下顺序推进：
+
+```text
+syntax -> pointers/references -> lifetime/RAII -> STL/smart pointers
+       -> compile/link -> target-based CMake/CTest -> GDB
+       -> ASan/UBSan -> CPU GEMM
+```
+
+- 主线语言选段：变量、控制流、数组、指针、引用、函数参数与返回、lambda、函数
+  模板、类、构造/析构和多文件编译；
+- 明确跳过或条件回补：C++20 Concepts、深 OOP/完整继承层次、复杂模板元编程；
+- 所有 C++ 项目和示例统一以 `-std=c++17` 或 CMake `cxx_std_17` 构建。
+
+#### 专题必修
+
+- 对象生命周期、所有权、RAII、Rule of Zero/Five 和移动语义；
+- `unique_ptr` 优先，理解 `shared_ptr`/`weak_ptr` 的使用边界；
+- 基础并发学习：`std::thread`、`std::mutex`/`std::lock_guard` 和
+  `std::condition_variable` 的同步语义、join/stop 与对象生命周期；集成有界队列、
+  Linux fd 和信号清理的验收统一在模块七。
+- `vector`、`array`、`string`、`string_view`、map/unordered_map 的基本选型；
+- 迭代器、`algorithm`、`chrono`、`filesystem`、const correctness，以及异常和状态码边界；
+- 编译、汇编、链接，静态/动态库、符号、ABI 与 C ABI；
+- target-based CMake：library/executable、PUBLIC/PRIVATE/INTERFACE、`cxx_std_17`、
+  Debug/Release、CTest、`find_package` 和 Presets；
+- GDB 的 breakpoint、run、next/step、print、backtrace 和 core；
+- ASan/UBSan；只有系统/框架强化实验才增加 TSan。
+
+#### 官方参考
+
+- [LearnCpp](https://www.learncpp.com/)；[C++ Core Guidelines: resource management](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource)；
+- [CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html)；[CTest documentation](https://cmake.org/cmake/help/latest/manual/ctest.1.html)；
+- [GDB documentation](https://sourceware.org/gdb/current/onlinedocs/gdb.html/)；
+- [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)；[UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)。
+
+#### 最小实验与停止条件
+
+- `cpp-gemm` 拆成 library/test/benchmark 三个 CMake targets；
+- Debug/Release fresh configure/build 均成功；
+- CTest 覆盖空/最小输入、非方阵、边界 shape 和 fixed-seed 随机输入，误差阈值明确；
+- ASan/UBSan 零报告；
+- warmup 后重复计时，输出 compiler/flags/shape/median/p95 JSON 原始证据；
+- deliberate OOB 后用 GDB backtrace 定位，修复后增加回归测试；
+- deliberate missing `.so`/symbol 后，使用 `nm -C`、`readelf` 或 `ldd` 给出诊断证据。
+
+### 模块七：Linux 用户态与 POSIX 系统编程
+
+#### 前置与课程职责
+
+先完成 C/C++ 指针、生命周期、编译链接和基础调试，再进入本模块。Missing Semester
+负责命令行、调试和开发工作流；尚硅谷 130-P 课程负责 C/POSIX API。二者都不是
+C++/CMake 课程，也不能互相替代。
+
+#### 核心选段
+
+- P9-P14：GCC 编译流程与链接，和模块六的 C++/CMake 目标互相验证；
+- P29-P33：`open`、系统调用和文件描述符；
+- P35-P40：`fork`、`exec`、`wait`、进程树和孤儿进程；
+- P42、P44、P54：`errno`、匿名管道和信号；
+- P55-P56、P62-P63、P68-P69：线程、竞态、mutex 和 condition variable；
+- P83-P84、P87-P88、P91-P93：虚拟内存、fork/exec、系统调用与进程/线程边界，
+  只学稳定概念。
+
+#### 系统/框架岗位强化选段
+
+- P76-P77：线程池；
+- P98-P117：TCP、socket 和多连接；
+- P128-P129：I/O 多路复用与 epoll。
+
+Windows/VS、Makefile 细枝末节、`system()`、异步线程取消、spinlock、完整 SysV
+IPC/信号量、UDP、链路层和手写 daemon 不作为阶段一主线。
+
+#### 专题必修与官方参考
+
+核心 fd API 还需用 man-pages 补齐：partial read/write、EOF、`EINTR`、`EAGAIN`、
+nonblocking 和 CLOEXEC。
+
+- [Linux `read(2)`](https://man7.org/linux/man-pages/man2/read.2.html)；
+  [Linux `epoll(7)`](https://man7.org/linux/man-pages/man7/epoll.7.html)；
+  [Linux dynamic linker `ld.so(8)`](https://man7.org/linux/man-pages/man8/ld.so.8.html)；
+- [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/)（操作系统理论延后，按问题查阅）。
+
+#### 停止条件
+
+核心 Linux 门槛：
+
+- 能解释 fd、进程、线程、虚拟内存、系统调用与库函数边界；
+- 能用 `gdb`、`strace`、`lsof` 和 `/proc` 定位一次文件、进程或 fd 问题；
+- 本模块的集成核心实验（所有学习者、也是并发/fd 的唯一阶段一 gate）：用
+  `std::thread`、`mutex`/`lock_guard` 和
+  `condition_variable` 实现有界进程内队列，并正确 join/停止；使用 Linux fd 做
+  partial read/write、EOF/`EINTR` 处理，验证 `CLOEXEC`，再用 graceful SIGTERM
+  触发文件描述符清理并保留命令/输出证据；
+- 模块一 telemetry 脚本通过目标进程不存在、资源缺失和权限不足等异常场景测试。
+
+系统/框架岗位强化交付（非所有方向的阶段一或阶段二 gate）：
+
+- 使用 `ss`/`lsof` 观察 socket 生命周期，并验证断连后的 socket 清理；
+- 强化 man-page 主题：TCP 无消息边界、长度前缀 framing、backpressure、SIGPIPE 和
+  epoll LT/ET；
+- 实现长度前缀 TCP 协议和有界工作队列；
+- 覆盖拆包/粘包、partial I/O、断连、超长输入和背压；
+- 并发压测无错误、无 fd 增长，graceful SIGTERM 可停止接收并清理连接；
+- ASan/UBSan/TSan 零报告。
+
+完整长度前缀 TCP 服务、并发 stress、epoll 事件循环和 TSan 是系统/框架岗位的
+strengthening deliverable，不是通用阶段一或进入阶段二的硬门槛；上述基础线程、fd、
+partial I/O 和 SIGTERM 实验仍是所有学习者的核心证据。
+
+### Docker 课程占位（后续模块整理）
+
+- image、container、registry、`docker pull/run/exec/logs/inspect`、volume、端口、
+  环境变量和基础 Dockerfile 仍按现有课程选段保留；
+- `linux/arm64` 与 Jetson GPU 兼容、Compose、network、healthcheck、multi-stage 和
+  GPU runtime 的边界与停止条件留给 Docker 模块后续整理，本处不改写。
 
 ### 学习方法与停止条件
 
-- **明确不学**：Django/Flask 全栈、爬虫、异步 Web、完整数据分析可视化课、分布式训练、DeepSpeed。Pandas/Matplotlib 只按首次 benchmark 数据触发的 mini-lab 学习。
-- **C++ 停止条件**：能解释值/引用/指针、对象生命周期、编译与链接，并能定位一次段错误。只抓 pointer/reference/stack-heap/RAII/class/template/STL/lambda/CMake/gdb。
-- **Linux 停止条件**：能使用权限、管道、重定向、进程信号、日志、SSH、`gdb`、`strace`；知道 syscall、用户态和内核态的边界。CentOS 视频中的 `yum`、旧网络服务命令不复制到本机 Ubuntu 24.04；只迁移稳定概念。
-- **Docker 停止条件**：能使用适配 `linux/arm64` 的基础镜像，把现有 PyTorch/ONNX CLI 推理工具封装为一个可复现的基础开发镜像，并在容器中运行。
-- **阶段一基础停止条件**：能从零创建隔离环境并在另一台机器按文档复现；能读写常见模型/图像/JSON 文件；能解释 NumPy 的 shape/dtype/stride 与 PyTorch tensor 的关系；能把一次模型导出、校验和 benchmark 写成命令行工具；能定位依赖版本、路径、dtype 或 shape 错误。
+- 视频观看进度只记录在学习日志；每个模块都必须以可运行产物、命令和原始输出验收。
+- 阶段一核心交付是四个独立 artifact：`model-tools`、`cpp-gemm`、`telemetry` 和
+  `container`；TCP 仅在系统/框架岗位强化清单中验收。
+- Python/NumPy/PyTorch/ONNX 的核心条件沿用模块二至模块五；Docker 条件沿用上面的
+  占位并在 Docker 模块整理时更新。未完成证据不能因“看完课程”而豁免。
+- 进入阶段二前，至少应能从 clean environment 重建 Python 工具，完成 C++17 GEMM
+  的 CTest/Sanitizer/benchmark 证据，完成 60-sample telemetry，并区分 Host、QEMU
+  和 Orin 的平台证据。
 
-### 阶段项目
+### 阶段一项目交付
 
-在阶段一建立一个独立的 `model-tools` 目录，至少包含：
+阶段一交付拆成相互独立但可汇合的四项：
 
-- 推荐用 `.python-version`（或显式固定的 Python 解释器）与 `pyproject.toml` +
-  `uv.lock`：前者固定 Python，后两者固定依赖；通过 `uv sync --locked` 从 clean
-  environment 重建并提供一键运行说明。旧环境若只能使用 `venv`/`pip`，必须记录
-  解释器版本和 documented fallback，不得绕过锁文件静默混用 API；
-- 用 `argparse` 扫描图片/视频数据集，生成带 hash 的 manifest；
-- 用 NumPy 实现 CPU GEMM，并与 PyTorch 输出和耗时对齐；
-- 读取图像并统一完成 RGB/BGR、resize、dtype 和 batch 处理（模块三要求 `HWC uint8 BGR -> contiguous float32 NCHW RGB`）；
-- 导出一个简单 PyTorch 模型到 ONNX，并用 ONNX Runtime 做结果校验；
-- 用 `subprocess` 调用外部 benchmark，输出 JSON/CSV；
-- 用 logging 记录版本、输入 shape、随机种子和失败样本；
-- 至少 5 个 pytest，覆盖空目录、错误路径、shape 和数值容差；
-- 用基础 Dockerfile 将现有 PyTorch/ONNX CLI 推理工具打包为一个 ARM64-aware 开发镜像。
+1. `model-tools`：manifest、preprocess、export、validate、benchmark/report；
+2. `cpp-gemm`：C++17/CMake library、tests、benchmark 和调试证据；
+3. `telemetry`：Shell 采集工具及异常场景测试；
+4. `container`：只封装 `model-tools`，不把 C++ GEMM、监控或 TCP 服务强行装入同一镜像。
 
-同时完成 C++17 + CMake CPU 矩阵乘法，随机输入校验并输出耗时；以及 Shell 监控脚本（采集 CPU、内存、温度、进程状态）+ 一个可并发处理请求的 C/C++ TCP 小服务。
+`model-tools` 至少提供以下子命令或等价入口：
+
+```text
+manifest   -> 扫描输入并产生稳定 hash 清单
+preprocess -> 统一颜色、shape、dtype、layout 和 batch
+export     -> PyTorch 模型导出 ONNX
+validate   -> PyTorch 与 ORT 数值对齐
+benchmark  -> 正确 warmup/计时并输出原始 JSONL/CSV
+report     -> 生成最小汇总；复杂画图按需补课后加入
+```
+
+`model-tools` 的实现清单仍包括：
+
+- `.python-version`（或等价的固定解释器）与 `pyproject.toml`/`uv.lock`，可在 clean
+  environment 以 `uv sync --locked` 重建；旧环境的 `venv`/`pip` fallback 必须记录；
+- `argparse` manifest、NumPy CPU GEMM、`HWC uint8 BGR -> contiguous float32 NCHW RGB`
+  preprocess，以及 PyTorch/ONNX Runtime 数值校验；
+- `subprocess` benchmark、结构化 logging、JSON/CSV 原始结果和至少 5 个 pytest，
+  覆盖空目录、错误路径、shape 与数值容差；
+- CPU/headless 基础镜像的封装由 Docker 模块负责，模型/输入保持只读，输出使用独立
+  可写路径。
+
+C++ GEMM、telemetry 和 TCP 不再作为 `model-tools` 单目录或单镜像的隐含子任务。
 
 ### 面试向补充（独立于主线项目，求职前集中攻）
 
+面试块只保留超出模块六、七实践门槛的深挖。RAII、所有权、基础 `std::thread`/
+`mutex`/`condition_variable`、fd 处理、partial I/O 和 graceful SIGTERM 属于实践
+模块证据，不再作为只背概念的面试要求。
+
 - **C++ 高频**
-  - 智能指针：`unique_ptr` / `shared_ptr` / `weak_ptr`、引用计数原理、循环引用
-  - 虚函数与 vtable：多态实现、纯虚函数、为什么基类析构要虚
-  - 内存管理：new/delete vs malloc/free、内存泄漏定位、RAII
-  - 移动语义：右值引用、`std::move` / `std::forward`、拷贝构造/赋值、Rule of Three/Five
+  - 智能指针实现：`shared_ptr` 简化版、引用计数和循环引用；基础 `unique_ptr`/
+    `shared_ptr`/`weak_ptr` 用法已在模块六实践验收
+  - 虚函数与 vtable：多态实现、纯虚函数、为什么基类析构要虚，以及对象布局
+  - 内存管理深挖：new/delete vs malloc/free、泄漏定位、移动语义、Rule of Three/Five
   - STL 底层：vector 扩容、map（红黑树）vs unordered_map（哈希）、迭代器失效
-  - 关键字：`const` / `static` / `inline`
-  - 多线程：`thread` / `mutex` / `condition_variable` / `atomic`、死锁四条件
-  - 编译链接：四阶段、静态库 vs 动态库、`extern "C"`
-  - 追问级：lambda 引用捕获悬垂、虚继承与对象内存布局（概念级）
+  - 关键字与 ABI：`const` / `static` / `inline`、四阶段编译、静态库 vs 动态库、
+    `extern "C"`
+  - 并发追问：`atomic`、复杂 memory ordering、死锁四条件；基础 thread/mutex/CV
+    属于模块七核心实践，面试块只追问超出该证据的部分
+  - C++20 Concepts、深 OOP 和复杂模板元编程只按岗位问题条件回补，不是阶段一门槛
 - **Python 高频**
   - GIL 与多线程 / 多进程 / 协程选型
   - 装饰器、生成器与迭代器、上下文管理器（`with`）
@@ -436,14 +593,12 @@ p50/p95/p99、throughput、memory、power、temperature 汇总表，绘图并保
   - 常见内存泄漏：持有计算图引用、中间 tensor 累积
   - DDP 原理（进程级并行、梯度 all-reduce）和 `torch.compile`（阶段三/五延后，按需回补）
 - **Linux 高频**
-  - 进程 / 线程 / 协程区别与适用场景
-  - 进程间通信：管道、共享内存、消息队列、socket、信号
+  - 追问级进程与线程模型：fork COW、页表、用户态/内核态和系统调用边界
   - I/O 多路复用：select / poll / epoll、LT vs ET（ET 为何必须配非阻塞 fd）
-  - 虚拟内存、页表、fork 写时复制（COW）
-  - 用户态 / 内核态与系统调用
-  - 零拷贝：`mmap` / `sendfile`（与 GPU 部署的 zero-copy 呼应）
-  - 文件描述符与 `ulimit`
-  - 排查链：CPU 100% / 内存泄漏怎么用 `top` / `ps` / `perf` / `valgrind`
+  - IPC 与网络扩展：共享内存、消息队列、socket、信号；零拷贝 `mmap`/`sendfile`
+  - 文件描述符与 `ulimit`，以及用 `top`/`ps`/`perf`/`valgrind` 组织排查链
+  - 基础 fd、partial I/O 和 SIGTERM 已在模块七核心；socket、背压和并发 TCP 属于
+    系统/框架岗位强化交付
 - **手写题（面试常考）**
   - C++：简化版 `shared_ptr`、线程安全单例、实现 String 类（Rule of Five）
   - Python：带参数装饰器、生成器实现生产者-消费者
@@ -1366,7 +1521,8 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 - [ ] 完成阶段一的 Python `venv`、NumPy、PyTorch/ONNX、C++、Linux、Git 和 CMake 基础，并交付 `model-tools`。
 - [ ] 完成 C++17 + CMake CPU GEMM，使用随机输入校验正确性并记录耗时。
-- [ ] 交付 Shell 监控脚本和可并发处理请求的 C/C++ TCP 小服务。
+- [ ] 完成 Shell telemetry 核心实验（60 samples、JSONL/CSV、缺失资源/权限场景），作为阶段一核心 gate。
+- [ ] （系统/框架岗位强化，可选）交付可并发处理请求的 C/C++ TCP 小服务；TCP 不作为通用阶段一/阶段二 gate。
 - [ ] 掌握 Docker 基础，能构建和运行开发镜像，并明确 ARM64 镜像与 x86 镜像不可混用。
 - [ ] 完成 CUDA 编译与 `deviceQuery`，实现并验证 vector add、transpose、reduction 和 GEMM。
 - [ ] 完成阶段二的 MNIST CUDA 逐级优化项目，并解释 PyTorch、C/CUDA、cuBLAS、streams/fusion 与 FP16/TF32 版本的变化。
