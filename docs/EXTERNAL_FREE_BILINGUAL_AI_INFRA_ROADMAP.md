@@ -20,7 +20,7 @@
 
 | 阶段 | 属性 | 核心交付 |
 |---|---|---|
-| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + Shell telemetry + 基础开发镜像 |
+| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + Shell telemetry + CPU/headless model-tools 容器 |
 | 阶段二 · CUDA 与 GPU 性能 | 性能必修 | CUDA Kernel 仓库 + MNIST CUDA + Sanitizer/Nsight 报告 |
 | 阶段三 · 深度学习基础原理 | 原理必修 | 神经网络训练、导出与推理流程说明 |
 | 阶段四 · 模型压缩原理与设计 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
@@ -111,7 +111,7 @@ systems/framework strengthening: socket/TCP -> epoll -> TCP service
 | [Bro Code - Python Full Course for free 2024](https://www.bilibili.com/video/BV1wr5T6bEN4/)（B站 AI 翻译版；[原版](https://www.youtube.com/watch?v=ix9cRaBkVe0)） | 条件回补 | 未记录完整完成；按缺口触发 | P21 `lists, sets, and tuples`；P34-P35 `args & kwargs`/`iterables`；P39-P41 `modules`/`scope resolution`/`if __name__ == "__main__"`；P59-P61 `file detection`/`writing files`/`reading files`。原作者 Bro Code，不是 freeCodeCamp。 |
 | [3小时超快速入门 Python（动画教学，2026 新版）](https://www.bilibili.com/video/BV1Jgf6YvE8e/)（林粒粒呀） | 主线必修 | **已完成，待证据验收**：学习日志记录基础速成；manifest/测试实验仍须复查 | 语法、类、文件、异常和 `unittest`；不重复通刷 Bro Code。 |
 | [尚硅谷 Python数据分析教程 (NumPy/Pandas/Matplotlib)](https://www.bilibili.com/video/BV1D9GLzyEL6/) | 主线必修 | 未记录完整完成；仅 NumPy 选段进入阶段一 | P6-P21 `NumPy`（重点 P7-P18，P20-P21 练习；详见下方选段索引）；Pandas/Matplotlib 在首份 benchmark CSV/JSON 后触发，属延后阶段。 |
-| [Python 官方教程](https://docs.python.org/3/tutorial/)、[venv](https://docs.python.org/3/library/venv.html)、[PyPA](https://packaging.python.org/en/latest/tutorials/installing-packages/)、[NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html) | 专题必修 | 执行规范，不以阅读计完成 | 工程化、隔离环境、数组语义和当前 API 校正；不替代实验。 |
+| [Python 官方教程](https://docs.python.org/3/tutorial/)、[uv projects](https://docs.astral.sh/uv/guides/projects/)、[PyPA](https://packaging.python.org/en/latest/tutorials/installing-packages/)、[NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html) | 专题必修 | 执行规范，不以阅读计完成 | 工程化、uv 锁文件、隔离环境、数组语义和当前 API 校正；不替代实验。 |
 | [mrdbourke《Learn PyTorch for Deep Learning in a Day》](https://www.bilibili.com/video/BV1kx4y1r79d/)（B站，中英字幕；[配套仓库](https://github.com/mrdbourke/pytorch-deep-learning)） | 主线必修 | 未记录完整完成；按选段实验验收 | P15-P28、P33-P36、P42、P64-P65、P77/P80-P84；对应标题见下方选段索引；不通刷 93 节。 |
 | [Pytorch框架与经典卷积神经网络与实战](https://www.bilibili.com/video/BV1e34y1M7wR/)（炮哥带你学） | 条件回补 | 未记录完成；仅在 Tensor/Module 缺口时触发 | P1 `1.1、课程先导`、P2 `2.1、全连接神经网络整体结构`；经典 CNN 与训练内容延后阶段（详见下方选段索引）。 |
 | [PyTorch深度学习实践 完结合集（刘二大人）](https://www.bilibili.com/video/BV1Y7411d7Ys/) | 条件回补 | 未记录完成；按需回补 | 仅 P8 `08.加载数据集` 作 DataLoader 中文回补；训练原理延后阶段（详见下方选段索引）。 |
@@ -123,8 +123,8 @@ systems/framework strengthening: socket/TCP -> epoll -> TCP service
 | [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/) | 延后阶段 | 阶段一不验收 | 操作系统理论不阻塞阶段一工程交付。 |
 | [LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/) | 条件回补 | 未记录完成；仅在基础不足时触发 | Ubuntu、权限和包管理查阅。 |
 | [尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/) | 专题必修 | 未记录完成；按核心/岗位强化验收 | 核心：P9-P14、P29-P33、P35-P40、P42/P44/P54、P55-P56/P62-P63/P68-P69、P83-P84/P87-P88/P91-P93；强化：P76-P77、P98-P117、P128-P129；各段主题/标题见下方选段索引。 |
-| [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud 旧版） | 条件回补 | 旧版仅参考，不作为命令证据 | 只查镜像/容器概念；旧命令、Compose、Swarm/Kubernetes 明确跳过。 |
-| [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；各 P 标题见下方选段索引；Compose 与业务案例延后阶段。 |
+| [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud 2019 旧版） | 条件回补 | 只作概念参考，不作为命令证据 | 只查 image/container/registry 概念；旧安装、legacy links、旧 Compose、Python 2、Swarm/Kubernetes 和旧命令明确跳过。 |
+| [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 中文选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；P14 只承担基础网络/隔离，Compose、服务网络/DNS、healthcheck、multi-stage、Buildx 和 GPU runtime 延后阶段六；云服务器购买、Redis 主从、WordPress、Java 中间件、批量部署和 `docker commit` 明确跳过。 |
 
 > 编号说明：B站 P 编号/标题按当前视频页面核验；学习日志中的“第 N 讲”可能沿用官方讲次或观看记录，不等同于 B站 P N；完成状态按主题和实验证据核对。
 
@@ -508,37 +508,120 @@ nonblocking 和 CLOEXEC。
 strengthening deliverable，不是通用阶段一或进入阶段二的硬门槛；上述基础线程、fd、
 partial I/O 和 SIGTERM 实验仍是所有学习者的核心证据。
 
-### Docker 课程占位（后续模块整理）
+### 模块八：Docker 单容器与架构边界
 
-- image、container、registry、`docker pull/run/exec/logs/inspect`、volume、端口、
-  环境变量和基础 Dockerfile 仍按现有课程选段保留；
-- `linux/arm64` 与 Jetson GPU 兼容、Compose、network、healthcheck、multi-stage 和
-  GPU runtime 的边界与停止条件留给 Docker 模块后续整理，本处不改写。
+#### 课程与取舍
+
+- 主线必修：尚硅谷《Docker教程，3小时速通，docker部署到实战！》只选 P2、
+  P6-P8、P10、P12-P14、P16、P20-P21。P14 只用于 bridge、基础端口映射和
+  `--network none` 的单容器隔离实验，不覆盖跨容器 DNS/服务发现或 Compose。
+- 条件回补：2019 freeCodeCamp/KodeKloud《Docker Tutorial for Beginners》只作
+  image/container/registry 等概念参考；旧安装命令、legacy links、旧 Compose、
+  Python 2 示例、Swarm/Kubernetes 和其它版本敏感操作全部跳过。
+- 明确跳过：中文课的云服务器购买、Redis 主从、WordPress、Java 中间件、批量
+  中间件部署；`docker commit` 只认识其用途，不把它作为可复现构建方法。
+- 延后阶段：Compose/Compose Spec、服务网络与 DNS、healthcheck、multi-stage、
+  Buildx/多平台发布、资源限制、NVIDIA GPU runtime 和设备注入统一由阶段六负责。
+
+#### 专题必修
+
+- image、container、registry、tag、digest、layer 及其边界；
+- `docker pull`、`run`、`ps`、`exec`、`logs`、`inspect`、`stop`、`rm`、`build`；
+- `env`/环境变量、bind mount、named volume、基础端口映射和挂载权限；
+- Dockerfile 的 `FROM`、`WORKDIR`、`COPY`、`RUN`、`ENV`、`USER`、
+  `ENTRYPOINT`、`CMD`；
+- exec form 与信号传递、非 root UID/GID、容器内用户和宿主挂载权限；
+- build context、`.dockerignore`、层顺序、cache/缓存命中和固定基础镜像 digest；
+- OCI `linux/amd64` 与 `linux/arm64` 的 manifest/平台选择；
+- 阶段一的基础网络/隔离：只验证 bridge、基础端口映射和 `--network none` 的单容器
+  隔离；不学习跨容器 DNS、服务发现或 Compose，这些统一延后阶段六；
+- `linux/arm64` 只证明 CPU ISA，不证明 Jetson CUDA、TensorRT 或摄像头兼容；
+  容器不打包宿主 kernel、BSP、firmware 或 kernel GPU driver（内核态 GPU 驱动）。
+
+#### 阶段一边界与停止条件
+
+阶段一只封装 **CPU/headless `model-tools` 单容器**，不要求 GPU runtime、Compose
+或任何 Jetson 摄像头/X11 能力。验收必须留下可复查的命令和原始输出：
+
+- 在 Host `linux/amd64` 完成 fresh clone 后的构建与运行；基础镜像使用 pinned
+  digest，Python/直接与传递依赖使用 `pyproject.toml`/`uv.lock` 锁定；
+- 检查所选镜像的 `linux/arm64` manifest。第二平台首选真实 Orin 原生
+  `linux/arm64` **CPU** smoke（与 Host `linux/amd64` 配对）；没有 Orin 时，等价的
+  declared-compatible 原生 arm64 CI/host 可以替代。QEMU-only 结果只能标记为构建/
+  仿真证据，不是完成证据，不能证明 Jetson GPU、CUDA、TensorRT 或摄像头可用；
+- 容器以声明的非 root UID 运行；模型和输入以只读挂载提供，输出使用单独的可写
+  挂载，验证 UID/GID 和目录权限；
+- 用 `docker run --rm --network none` 执行固定 CPU/ONNX Runtime 推理，证明基础
+  网络隔离仍能完成离线任务；
+- 宿主与容器的 `input-manifest hash` 必须一致（它是 `model-tools` 输入清单的 hash）；
+  OCI image 的 `image digest` 单独记录，不能与输入清单 hash 混用。PyTorch 与 ORT
+  输出通过明确的 `rtol`/`atol`；
+- JSON minimum fields 至少包括 `git_sha`、`image_digest`、`platform`/`arch`、
+  `python_version`、`dependency_versions` 和 `input_manifest_hash`；存在模型/输入
+  artifact 时再记录 `model_hash`/`input_hash`；
+- 第二个 native 平台不可用时必须记录 `platform-unverified`，阶段一不得标记 fully
+  complete；仍要明确区分 Host、arm64、QEMU 和 Orin 的证据类型。
+
+#### 阶段一 artifact 表（canonical）
+
+后续项目、毕业项目和清单均按此表执行；本表是 Stage 1 四项 artifact 的唯一公共
+边界和元数据来源。
+
+| Artifact | 范围 | 必要的阶段一证据 |
+|---|---|---|
+| `model-tools` | manifest、preprocess、export、validate、benchmark/report | `input-manifest hash`；使用模型时记录 `model_hash`/`input_hash`；固定依赖、测试和原始 JSON/CSV |
+| `cpp-gemm` | C++17/CMake library、CTest、Sanitizer、CPU benchmark | fixed-seed 正确性、误差阈值、median/p95 原始结果；不虚构模型/输入 hash |
+| `telemetry` | Shell 采集工具与异常场景测试 | 60 samples、missing-resource/permission 结果、ShellCheck 和原始 JSONL/CSV；不虚构模型/输入 hash |
+| `container` | 只封装 CPU/headless `model-tools` | OCI `image digest`、platform/arch、非 root、只读模型/输入与独立可写输出、`--network none` CPU/ORT smoke；存在挂载 artifact 时记录对应 model/input hash |
+
+四项 artifact 均保留 `git SHA`、`versions`、`platform/arch` 和原始结果；hash 字段只
+按上表适用范围记录。若第二 native 平台不可用，表中平台证据状态必须写
+`platform-unverified`，不能用 QEMU-only 结果冒充完成。
+
+#### 官方参考
+
+- [Docker Get Started](https://docs.docker.com/get-started/)；
+  [Dockerfile best practices](https://docs.docker.com/build/building/best-practices/)；
+  [Docker Build checks](https://docs.docker.com/reference/build-checks/)；
+- [Docker multi-platform builds](https://docs.docker.com/build/building/multi-platform/)；
+  [Docker storage](https://docs.docker.com/engine/storage/)；
+  [Docker runtime resource constraints](https://docs.docker.com/engine/containers/resource_constraints/)
+  （阶段六边界参考，不是阶段一必学）；
+- [NVIDIA Container Toolkit architecture](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/arch-overview.html)
+  （阶段六边界参考，不是阶段一必学）；
+  [TensorRT engine compatibility](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/engine-compatibility.html)
+  （阶段六边界参考，不是阶段一必学）。
+
+#### 阶段一明确跳过
+
+阶段一不把 Django/Flask、其它 Web 框架与网页/爬虫开发设为前置；不通刷完整
+Pandas/Matplotlib/Seaborn 数据分析可视化课程；不做分布式训练、DDP 或 DeepSpeed。
+这些主题只有在后续项目或岗位触发时定点回补。
 
 ### 学习方法与停止条件
 
 - 视频观看进度只记录在学习日志；每个模块都必须以可运行产物、命令和原始输出验收。
-- 阶段一核心交付是四个独立 artifact：`model-tools`、`cpp-gemm`、`telemetry` 和
-  `container`；TCP 仅在系统/框架岗位强化清单中验收。
-- Python/NumPy/PyTorch/ONNX 的核心条件沿用模块二至模块五；Docker 条件沿用上面的
-  占位并在 Docker 模块整理时更新。未完成证据不能因“看完课程”而豁免。
+- 阶段一核心交付按模块八的“阶段一 artifact 表（canonical）”执行；四项 artifact
+  为 `model-tools`、`cpp-gemm`、`telemetry` 和 `container`，TCP 仅在系统/框架岗位
+  强化清单中验收。
+- Python/NumPy/PyTorch/ONNX 的核心条件沿用模块二至模块五；Docker 条件沿用模块八
+  的 CPU/headless、锁版本、非 root、只读输入和隔离网络验收。未完成证据不能因
+  “看完课程”而豁免。
 - 进入阶段二前，至少应能从 clean environment 重建 Python 工具，完成 C++17 GEMM
-  的 CTest/Sanitizer/benchmark 证据，完成 60-sample telemetry，并区分 Host、QEMU
-  和 Orin 的平台证据。
+  的 CTest/Sanitizer/benchmark 证据，完成 60-sample telemetry，并完成模块八的单容器
+  CPU/ORT smoke。平台优先用 Host `linux/amd64` + Orin 原生 `linux/arm64`；无第二
+  native 平台时必须留下 `platform-unverified`，不得把 QEMU-only 当作完整阶段证据。
 
 ### 阶段一项目交付
 
-阶段一交付拆成相互独立但可汇合的四项：
-
-1. `model-tools`：manifest、preprocess、export、validate、benchmark/report；
-2. `cpp-gemm`：C++17/CMake library、tests、benchmark 和调试证据；
-3. `telemetry`：Shell 采集工具及异常场景测试；
-4. `container`：只封装 `model-tools`，不把 C++ GEMM、监控或 TCP 服务强行装入同一镜像。
+阶段一交付边界和公共元数据按模块八的“阶段一 artifact 表（canonical）”执行；本处
+只列四项入口：`model-tools`、`cpp-gemm`、`telemetry`、`container`。各项可以协同
+维护但必须独立验收，TCP 不并入这些 artifact。
 
 `model-tools` 至少提供以下子命令或等价入口：
 
 ```text
-manifest   -> 扫描输入并产生稳定 hash 清单
+manifest   -> 扫描输入并产生稳定 input-manifest hash 清单
 preprocess -> 统一颜色、shape、dtype、layout 和 batch
 export     -> PyTorch 模型导出 ONNX
 validate   -> PyTorch 与 ORT 数值对齐
@@ -550,7 +633,7 @@ report     -> 生成最小汇总；复杂画图按需补课后加入
 
 - `.python-version`（或等价的固定解释器）与 `pyproject.toml`/`uv.lock`，可在 clean
   environment 以 `uv sync --locked` 重建；旧环境的 `venv`/`pip` fallback 必须记录；
-- `argparse` manifest、NumPy CPU GEMM、`HWC uint8 BGR -> contiguous float32 NCHW RGB`
+- `argparse` manifest（含 input-manifest hash）、NumPy CPU GEMM、`HWC uint8 BGR -> contiguous float32 NCHW RGB`
   preprocess，以及 PyTorch/ONNX Runtime 数值校验；
 - `subprocess` benchmark、结构化 logging、JSON/CSV 原始结果和至少 5 个 pytest，
   覆盖空目录、错误路径、shape 与数值容差；
@@ -873,14 +956,22 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ### 目标
 
-阶段一只覆盖已有可运行 CLI 之后的 CPU/headless 单容器基础；阶段六在此基础上补齐高级 Docker、HTTP/unary gRPC 客户端语义和 Triton Server Serving，形成 TensorRT Engine → Triton backend → 可观测客户端 benchmark 的完整服务链。Triton 解决 batching、ensemble、metrics 等服务层问题，不替代 TensorRT runtime/Kernel。
+阶段一只覆盖已有可运行 CLI 之后的 CPU/headless 单容器基础；阶段六在此基础上增加
+高级 Docker 与 Serving：multi-stage、Compose Spec/`docker compose`、服务网络/DNS、
+healthcheck/restart/PID1/signals、Buildx/多平台构建、资源限制，以及 NVIDIA Container
+Toolkit 的 CDI/device-library 注入。阶段六还负责 NGC/Triton 镜像的 release/tag/digest
+选择、backend/platform matrix 核验和 HTTP/gRPC/Triton Serving，形成 TensorRT Engine
+→ Triton backend → 可观测客户端 benchmark 的完整服务链。不要把相机/X11 塞进核心
+Serving；它们仍属于视觉分支 A。Triton 解决 batching、ensemble、metrics 等服务层
+问题，不替代 TensorRT runtime/Kernel。
 
 ### 课程与资料
 
 **Docker：**
 
-- 阶段一仅覆盖可运行 CLI 后的 CPU/headless 单容器基础；这里按需回看旧版英文概念课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud，约 2 小时 10 分；旧命令不作规范）
-- 中文选段回看：[尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)（Compose、网络和业务案例在本阶段补齐或按需选学）
+- 阶段一基线仅作前置回顾：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud，约 2 小时 10 分；旧命令不作规范）
+- 中文选段回看：[尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)；本阶段选取 Compose 相关 P17 `Docker Compose - 安装wordpress`、P18 `Docker Compose - 语法`、P19 `Docker Compose - 其他`，以及服务网络/DNS、healthcheck、multi-stage 的相关材料，并按当前版本校正命令；P14 仍只承担阶段一基础隔离。
+- Buildx、多平台、资源限制、NVIDIA Container Toolkit/CDI、NGC/Triton release/tag/digest 和 backend/platform matrix 由官方文档负责，并由阶段六验收逐项核对，以当前支持矩阵为准。
 
 **HTTP / gRPC：**
 
@@ -896,12 +987,16 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 #### 当阶段课程大纲（★ = 本阶段必修）
 
 - **Docker 进阶（阶段六新增）** 大纲：
-  - ★ multi-stage Dockerfile 与 Docker Compose
-  - ★ network、healthcheck 与 GPU runtime
-  - ★ 构建并确认支持 `linux/arm64` 的镜像（Jetson 部署）
+  - ★ multi-stage Dockerfile、Compose Spec 与 `docker compose`
+  - ★ 服务网络/DNS、Docker/Compose `HEALTHCHECK`/`healthcheck`、restart policy、PID1 与 Unix signal 处理
+  - ★ Buildx、多平台构建/发布与资源限制（CPU、内存、PID）
+  - ★ NVIDIA Container Toolkit、CDI 和 device/library injection；NGC/Triton 镜像
+    的 release/tag/digest 与 backend/platform matrix 核验
+  - ★ 构建并确认支持 `linux/arm64` 的镜像（Jetson 部署）；相机/X11 只在视觉分支 A
 - **HTTP 最小集** 大纲：
   - ★ request/response、status 与 JSON/binary tensor
-  - ★ timeout 与 health check
+  - ★ client timeout/deadline 与 health semantics；这不同于 Docker `HEALTHCHECK`/`healthcheck`
+    和 Triton `/v2/health/*` 探针
 - **gRPC 最小集（CNCF codelab）** 大纲：
   - ★ `.proto`、生成 stub 与 RPC 语义
   - ★ unary RPC
@@ -911,6 +1006,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
   - ★ 概念与 model repository
   - ★ TensorRT backend
   - ★ 官方 Triton HTTP client 与 unary gRPC client
+  - ★ Triton `/v2/health/live`、`/v2/health/ready` 与 metrics
   - ★ dynamic batching、instance group
   - ★ ensemble、metrics
   - ★ Perf Analyzer 与并发/延迟曲线（架构概念可学；配置字段以当前 Triton 文档为准）
@@ -920,20 +1016,49 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ### 学习方法与停止条件
 
-- **Docker**：回看阶段一，不把镜像/容器初学内容当作新基础；本阶段完成 multi-stage Dockerfile、Compose、network、healthcheck、GPU runtime，并确认基础镜像支持 `linux/arm64`。
-- **HTTP / gRPC 最小实践**：分别用官方 Triton HTTP client 和 unary gRPC client 发送推理请求；覆盖 JSON/binary tensor、status、health check、timeout/deadline 与 error codes。无需实现自定义 gRPC predict server，也无需掌握三种 streaming RPC。
+- **Docker**：回看阶段一的单容器证据，不把基础命令当作新门槛；本阶段完成
+  multi-stage Dockerfile、Compose Spec/`docker compose`、服务网络/DNS、healthcheck、
+  restart/PID1/signals、Buildx/多平台、资源限制和 NVIDIA Container Toolkit/CDI/
+  device-library injection。NGC/Triton image 的 release/tag/digest、backend/platform
+  matrix、JetPack/L4T/Orin 目标支持必须逐项核验；不存在“一条 generic latest tag 到处可用”
+  的假设。相机/X11 仍由视觉分支 A 验收。
+- **HTTP / gRPC 最小实践**：分别用官方 Triton HTTP client 和 unary gRPC client 发送推理请求；覆盖 JSON/binary tensor、status、client timeout/deadline 与 error codes。Docker `HEALTHCHECK`/`healthcheck` 负责容器探活，Triton `/v2/health/live`/`/v2/health/ready` 负责服务探活，三者不互相替代。无需实现自定义 gRPC predict server，也无需掌握三种 streaming RPC。
 - **Triton 看完即做**：model repository、TensorRT backend、dynamic batching、instance group、ensemble、metrics、Perf Analyzer。停止条件：画出 concurrency/batch 与 p50/p95/throughput 曲线，并能说明 Triton 解决的是服务层问题，不是替代 TensorRT runtime/Kernel。
-- **阶段六停止条件**：能解释容器内外文件与端口映射、HTTP 与 unary gRPC 的差异、deadline/timeout 与错误处理，以及 Triton 的 backend、调度、batching、ensemble 和 metrics 行为。
-- **版本注意**：中文 Triton 课基于 2022 年版本，架构概念仍可学；容器 tag、backend 支持和配置字段查当前 [Triton tutorials repo](https://github.com/triton-inference-server/tutorials) 与 Jetson platform matrix。2026 官方页面也可能使用 Dynamo-Triton 名称。
+- **阶段六停止条件**：能解释容器内外文件与端口映射、HTTP 与 unary gRPC 的差异、Docker `HEALTHCHECK`/`healthcheck`、Triton `/v2/health/live`/`/v2/health/ready`、client deadline/timeout 与错误处理，以及 Triton 的 backend、调度、batching、ensemble 和 metrics 行为。
+- **版本注意**：中文 Triton 课基于 2022 年版本，架构概念仍可学；容器 release/tag/digest、
+  backend 支持和配置字段查当前 [Triton tutorials repo](https://github.com/triton-inference-server/tutorials)
+  与 Jetson platform matrix。必须按 JetPack/L4T/Orin 目标核验，不声称一个 generic
+  `latest` tag 适用于所有平台；2026 官方页面也可能使用 Dynamo-Triton 名称。
 - **面试向**：TCP 三次握手/四次挥手与 TIME_WAIT；gRPC 为什么快（HTTP/2 多路复用 + protobuf）；Docker 隔离原理（namespace/cgroup）。
 
 ### 阶段项目
 
-项目 E（Triton 模型服务，见第 13 章）：把 TensorRT backend 服务打包进适配 ARM64/GPU runtime 的容器，用官方 Triton HTTP client 和 unary gRPC client 完成请求，提供 health、metrics 与 timeout/deadline 行为，并测量 concurrency、batching、latency 和 throughput。
+项目 E（Triton 模型服务，见第 13 章）仍归阶段六：把 TensorRT backend 服务打包进经
+目标 JetPack/L4T/Orin 支持矩阵核验的 ARM64/GPU runtime 容器，用官方 Triton HTTP
+client 和 unary gRPC client 完成请求，提供 Docker `HEALTHCHECK`、Triton
+`/v2/health/live`/`/v2/health/ready` 和 client timeout/deadline 证据，并测量
+concurrency、batching、latency 和 throughput；支持矩阵不匹配时按下方回退路径验收。
+
+#### 支持矩阵不匹配时的可执行回退
+
+- 首选：使用官方支持的 ARM64/GPU Triton container，并逐项核验目标 JetPack/L4T/Orin、
+  backend/platform matrix、release、tag 和 `image digest`；只有核验通过才在目标端
+  安装和运行。
+- 若没有匹配 artifact，禁止在 Orin 上安装或运行不支持的 image。先在 Host 上完成
+  reference Triton service（可用官方支持的 CPU/x86 路径）和 HTTP/unary gRPC client
+  smoke；再在目标端完成 TensorRT/engine smoke，或使用官方明确支持的 non-container
+  package，并保存相同模型/输入与版本证据。
+- 将状态写为 `unsupported-for-target`，记录精确的 matrix URL、release/tag/`image
+  digest`、backend、JetPack/L4T/Orin 信息及 Host/target 输出；不得把 Host/reference
+  结果宣称为 Orin Triton serving。
 
 ### 版本 / 边界注意
 
-确认基础镜像支持 `linux/arm64`。Triton 的 backend/platform 组合不是全部在 Jetson 可用，尤其不要默认 Python backend 的 GPU 能力与 x86 服务器一致；以 [官方 backend platform matrix](https://github.com/triton-inference-server/backend/blob/main/docs/backend_platform_support_matrix.md) 为准。
+确认具体 NGC/Triton image 的 release/tag/digest、基础镜像 `linux/arm64` manifest、
+JetPack/L4T/Orin 目标支持和 NVIDIA Container Toolkit/CDI 注入路径；Triton 的
+backend/platform 组合不是全部在 Jetson 可用，尤其不要默认 Python backend 的 GPU
+能力与 x86 服务器一致。以 [官方 backend platform matrix](https://github.com/triton-inference-server/backend/blob/main/docs/backend_platform_support_matrix.md)
+为准，不把 generic `latest` 当作兼容性证明。
 
 ---
 
@@ -1330,6 +1455,13 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 
 ## 13. 真实公开项目阶梯
 
+### 阶段一项目组：四个独立 artifact（阶段一主线）
+
+阶段一四项 artifact 按模块八的“阶段一 artifact 表（canonical）”交付；本节只补
+项目阶梯的组合关系。各项可以在一个仓库中协同维护，但必须独立验收，不把所有内容
+拼成一个“大而全”的服务。并发 TCP 服务仍是系统/框架岗位的可选 strengthening，
+不并入 `model-tools` 或 `container`，也不阻塞其它方向进入阶段二。
+
 ### 项目 A：CUDA 基础 Kernel 仓库（阶段二主线）
 
 项目来源：[NVIDIA CUDA Samples](https://github.com/NVIDIA/cuda-samples)、[NVIDIA CUDALibrarySamples](https://github.com/NVIDIA/CUDALibrarySamples)。
@@ -1366,9 +1498,19 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 
 项目来源：[Triton Inference Server](https://github.com/triton-inference-server/server)、[Triton Tutorials](https://github.com/triton-inference-server/tutorials)、[Triton Quickstart](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/getting_started/quickstart.html)、[Backend Platform Support Matrix](https://github.com/triton-inference-server/backend/blob/main/docs/backend_platform_support_matrix.md)。
 
-任务：建立 model repository；用 TensorRT backend 提供一个图像分类或检测模型；配置 dynamic batching 和多个 model instance；使用官方 Triton HTTP client 和 unary gRPC client；加入 health、metrics、错误处理和超时；用 Perf Analyzer 测量 concurrency、latency 和 throughput；再做一个 ensemble，把预处理、推理、后处理串起来。不要求自建 gRPC server，也不要求实现 streaming RPC。
+任务：建立 model repository；用 TensorRT backend 提供一个图像分类或检测模型；配置 dynamic batching 和多个 model instance；使用官方 Triton HTTP client 和 unary gRPC client；分别验证 Docker `HEALTHCHECK`、Triton `/v2/health/live`/`/v2/health/ready` 与 client timeout/deadline/health semantics；用 Perf Analyzer 测量 concurrency、latency 和 throughput；再做一个 ensemble，把预处理、推理、后处理串起来。不要求自建 gRPC server，也不要求实现 streaming RPC。
 
 验收：画出并发数、batch、p50/p95 延迟和吞吐之间的曲线，并说明哪一个配置适合 Orin 的内存和功耗约束。
+
+项目 E 的验收分支必须可执行：
+
+- `supported-for-target`：使用已核验的 ARM64/GPU image，完成 Triton backend、Docker
+  `HEALTHCHECK`、`/v2/health/live`/`/v2/health/ready`、HTTP/unary gRPC、dynamic
+  batching、metrics 和 Perf Analyzer 证据，并记录 release/tag/`image digest` 与
+  JetPack/L4T/Orin/backend matrix。
+- `unsupported-for-target`：不安装不匹配 image；按阶段六回退路径完成 Host/reference
+  Triton client smoke 与目标端 TensorRT/engine smoke（或官方支持的 non-container
+  package），记录精确 matrix 证据和状态，不宣称 Orin Triton serving。
 
 ### 项目 F：Orin 上的 Edge LLM（阶段八主线）
 
@@ -1488,6 +1630,8 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 - 仅针对 H100/Hopper 的高级课程作为 CUDA 入门。
 - 旧版 DeepStream/Triton 教程中的固定安装命令。
 - 未说明来源、版本和许可证的课程搬运或代码集合。
+- 阶段一明确跳过 Django/Flask、其它 Web/爬虫开发、完整数据分析可视化（Pandas/
+  Matplotlib/Seaborn 通刷）、分布式训练/DDP 和 DeepSpeed；只有后续项目触发时才回补。
 
 例如，H100 专用课程 [H100-Course](https://github.com/cudacourseh100/H100-Course) 可以在以后有 Hopper 机器时选修，但不适合作为 Orin SM87 的当前主线。
 
@@ -1499,8 +1643,13 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 主线毕业项目必须包含以下内容；建议整理成一个可以公开展示的仓库：
 
+- 先按模块八的“阶段一 artifact 表（canonical）”提交四个独立前置 artifact；毕业
+  仓库只汇总它们的状态和链接，不重新定义公共字段。TCP 仍是可选系统/框架强化交付。
 - 一个 TensorRT FP16/INT8 图像模型：保留 PyTorch→ONNX 输出对齐、FP32/FP16/INT8 精度证据、校准设计、Engine 构建命令与版本，使 Engine 可重复构建。
-- 一个 Triton TensorRT backend 服务：使用官方 Triton HTTP client 和 unary gRPC client 发起请求，并提供 health 与 Prometheus metrics。
+- 一个 Triton TensorRT backend 服务：按项目 E 的 `supported-for-target` 或
+  `unsupported-for-target` 分支验收；使用官方 Triton HTTP client 和 unary gRPC client，
+  区分 Docker `HEALTHCHECK`、Triton `/v2/health/*` 与 client timeout/deadline，并提供
+  Prometheus metrics。
 - 一个支持矩阵内的 TensorRT-Edge-LLM 小模型服务。
 - 一份 Nsight Systems 流水线证据和一份 Nsight Compute 热点 Kernel 证据，包含优化前后对比。
 - `tegrastats` 采样，以及功耗、温度、unified memory 峰值和 JetPack/L4T/CUDA/TensorRT/运行时版本记录。
@@ -1519,11 +1668,20 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 ### 工程与 CUDA 基础
 
-- [ ] 完成阶段一的 Python `venv`、NumPy、PyTorch/ONNX、C++、Linux、Git 和 CMake 基础，并交付 `model-tools`。
+- [ ] 完成阶段一的 Python/uv（`pyproject.toml` + `uv.lock`，`uv sync --locked`）、NumPy、PyTorch/ONNX、C++、Linux、Git 和 CMake 基础，并交付 `model-tools`。
 - [ ] 完成 C++17 + CMake CPU GEMM，使用随机输入校验正确性并记录耗时。
 - [ ] 完成 Shell telemetry 核心实验（60 samples、JSONL/CSV、缺失资源/权限场景），作为阶段一核心 gate。
 - [ ] （系统/框架岗位强化，可选）交付可并发处理请求的 C/C++ TCP 小服务；TCP 不作为通用阶段一/阶段二 gate。
-- [ ] 掌握 Docker 基础，能构建和运行开发镜像，并明确 ARM64 镜像与 x86 镜像不可混用。
+- [ ] 按模块八的“阶段一 artifact 表（canonical）”保留四个相互独立的 artifact：
+  `model-tools`、`cpp-gemm`、`telemetry`、`container`；TCP 只在系统/框架岗位强化区交付。
+- [ ] 完成模块八 Docker CPU/headless 验收：Host `linux/amd64` fresh clone 用锁定的
+  基础镜像 `image digest` 和 `uv.lock` 构建，检查 `linux/arm64` manifest；首选真实
+  Orin 原生 arm64 CPU smoke，等价 declared-compatible 原生 arm64 CI/host 也可；
+  QEMU-only 只记为构建/仿真证据，不要求 GPU runtime，也不能标记完成。
+- [ ] 若没有第二 native 平台，记录 `platform-unverified`，阶段一保持未完全完成；
+  按 artifact 表记录非 root、只读模型/输入、独立可写输出、`docker run --rm --network none`
+  CPU/ORT 推理，以及 `git SHA`、`image digest`、`platform/arch`、`versions`、
+  `input-manifest hash` 和适用时的 `model/input hash`，再在第二 native 平台复现。
 - [ ] 完成 CUDA 编译与 `deviceQuery`，实现并验证 vector add、transpose、reduction 和 GEMM。
 - [ ] 完成阶段二的 MNIST CUDA 逐级优化项目，并解释 PyTorch、C/CUDA、cuBLAS、streams/fusion 与 FP16/TF32 版本的变化。
 - [ ] 使用 Compute Sanitizer 检查正确性，用 Nsight Systems 定位流水线瓶颈、Nsight Compute 分析热点 Kernel，并提交优化前后报告。
@@ -1544,9 +1702,14 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 ### 推理服务
 
-- [ ] 掌握 Docker 进阶构建、GPU runtime、health check 和容器网络，确认镜像与 Jetson ARM64/JetPack 兼容。
-- [ ] 使用官方 Triton HTTP client 和 unary gRPC client 完成请求、超时与错误处理；不自建 gRPC server。
-- [ ] 部署 Triton TensorRT backend，实验 dynamic batching、多个 model instance 和 ensemble，接入 health/metrics，并用 Perf Analyzer 测量并发、延迟和吞吐。
+- [ ] 完成阶段六 Docker 进阶门槛（详见上方“Docker 进阶”）：Compose Spec/`docker compose`、service networking/DNS（服务网络/DNS）、healthcheck、restart/PID1/signals、Buildx/多平台构建，以及 CPU/memory/PID resource limits。
+- [ ] 完成 NVIDIA Container Toolkit/CDI/device-library injection；固定 NGC/Triton release/tag/digest，并按 backend/platform matrix 核验 JetPack/L4T/Orin 支持；不把 generic `latest` 当作兼容性证明。
+- [ ] 若 matrix 不匹配，按项目 E 回退路径记录 `unsupported-for-target`：不安装不支持的 image，完成 Host/reference Triton client smoke 与目标端 TensorRT/engine smoke（或官方支持的 non-container package），并保留精确 matrix 证据。
+- [ ] 使用官方 Triton HTTP client 和 unary gRPC client 完成请求；分别验证 Docker/Compose
+  `HEALTHCHECK`/`healthcheck`、Triton `/v2/health/live`/`/v2/health/ready` 和 client
+  timeout/deadline/health semantics；不自建 gRPC server。
+- [ ] 部署 Triton TensorRT backend，实验 dynamic batching、多个 model instance 和 ensemble，
+  接入 Triton metrics，并用 Perf Analyzer 测量并发、延迟和吞吐。
 
 ### LLM 推理
 
@@ -1596,6 +1759,17 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 - [DeepStream GitHub（视觉分支 A）](https://github.com/NVIDIA/DeepStream)
 - [Jetson AI Lab](https://www.jetson-ai-lab.com/tutorials/)
 - [TensorRT-Edge-LLM](https://nvidia.github.io/TensorRT-Edge-LLM/)
+
+### Docker / NVIDIA Container Runtime
+
+- [Docker Get Started](https://docs.docker.com/get-started/)
+- [Dockerfile best practices](https://docs.docker.com/build/building/best-practices/)
+- [Docker Build checks](https://docs.docker.com/reference/build-checks/)
+- [Docker multi-platform builds](https://docs.docker.com/build/building/multi-platform/)
+- [Docker storage](https://docs.docker.com/engine/storage/)
+- [Docker runtime resource constraints](https://docs.docker.com/engine/containers/resource_constraints/)
+- [NVIDIA Container Toolkit architecture](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/arch-overview.html)
+- [TensorRT engine compatibility](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/engine-compatibility.html)
 
 ### Serving / LLM
 
