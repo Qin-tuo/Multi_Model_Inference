@@ -20,7 +20,7 @@
 
 | 阶段 | 属性 | 核心交付 |
 |---|---|---|
-| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM + Shell telemetry + CPU/headless model-tools 容器 |
+| 阶段一 · 工程与工具基础 | 基础必修 | model-tools + C++17/CMake CPU GEMM/posix-smoke + Shell telemetry + CPU/headless model-tools 容器 |
 | 阶段二 · CUDA 与 GPU 性能 | 性能必修 | CUDA Kernel 仓库 + MNIST CUDA + Sanitizer/Nsight 报告 |
 | 阶段三 · 深度学习基础原理 | 原理必修 | 神经网络训练、导出与推理流程说明 |
 | 阶段四 · 模型压缩原理与设计 | 优化必修 | 量化/剪枝方案与硬件验证设计 |
@@ -106,7 +106,7 @@ C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM
     -> [系统/框架岗位可选] 完整 TCP framing/multi-connection -> epoll service
 
 汇合：
-model-tools + cpp-gemm + telemetry + container
+model-tools + cpp-gemm（含独立 posix-smoke）+ telemetry + container
     -> Stage 1 acceptance
     -> Stage 2 CUDA 与 GPU 性能
 ```
@@ -135,7 +135,7 @@ model-tools + cpp-gemm + telemetry + container
 | [LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/) | 条件回补 | 未记录完成；仅在基础不足时触发 | Ubuntu、权限和包管理查阅。 |
 | [尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/) | 专题必修 | 未记录完成；按核心/岗位强化验收 | 核心：P9-P14、P29-P33、P35-P40、P42/P44/P54、P55-P56/P62-P63/P68-P69、P83-P84/P87-P88/P91-P93、P104-P105；强化：P76-P77、P98-P103、P106-P117、P128-P129；各段主题/标题见下方选段索引。 |
 | [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud 2019 旧版） | 条件回补 | 只作概念参考，不作为命令证据 | 只查 image/container/registry 概念；旧安装、legacy links、旧 Compose、Python 2、Swarm/Kubernetes 和旧命令明确跳过。 |
-| [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 中文选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；P14 只承担基础网络/隔离，Compose、服务网络/DNS、healthcheck、multi-stage、Buildx 和 GPU runtime 延后阶段六；云服务器购买、Redis 主从、WordPress、Java 中间件、批量部署和 `docker commit` 明确跳过。 |
+| [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 中文选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；P14 只承担 bridge/基础端口映射，`--network none` 为补充隔离实验；Compose、服务网络/DNS、healthcheck、multi-stage、Buildx 和 GPU runtime 延后阶段六；云服务器购买、Redis 主从、WordPress、Java 中间件、批量部署和 `docker commit` 明确跳过。 |
 
 > 编号说明：B站 P 编号/标题按当前视频页面核验；学习日志中的“第 N 讲”可能沿用官方讲次或观看记录，不等同于 B站 P N；完成状态按主题和实验证据核对。
 
@@ -503,8 +503,10 @@ nonblocking 和 CLOEXEC。
 
 - 能解释 fd、进程、线程、虚拟内存、系统调用与库函数边界；
 - 能用 `gdb`、`strace`、`lsof` 和 `/proc` 定位一次文件、进程或 fd 问题；
-- 能解释 socket 与 fd 的关系，并用 `ss`/`lsof` 对给定或实验提供的 socket 端点完成
-  状态、监听和清理诊断；不要求编写 TCP 服务；
+- 能解释 socket 与 fd 的关系，并用 `ss`/`lsof` 对固定 loopback 夹具完成状态、监听
+  和清理诊断；默认夹具命令为 `python3 -m http.server 18080 --bind 127.0.0.1`，
+  必须记录 PID、端口和启动/停止命令（夹具只用于 socket 诊断，不学习 HTTP 服务）；
+  不要求编写 TCP 服务；
 - 本模块的集成核心实验（所有学习者、也是并发/fd 的唯一阶段一 gate）：用
   `std::thread`、`mutex`/`lock_guard` 和
   `condition_variable` 实现有界进程内队列，并正确 join/停止；使用 Linux fd 做
@@ -532,8 +534,8 @@ partial I/O 和 SIGTERM 实验仍是所有学习者的核心证据。
 #### 课程与取舍
 
 - 主线必修：尚硅谷《Docker教程，3小时速通，docker部署到实战！》只选 P2、
-  P6-P8、P10、P12-P14、P16、P20-P21。P14 只用于 bridge、基础端口映射和
-  `--network none` 的单容器隔离实验，不覆盖跨容器 DNS/服务发现或 Compose。
+  P6-P8、P10、P12-P14、P16、P20-P21。P14 只用于 bridge 和基础端口映射；
+  `--network none` 是本模块补充的单容器隔离实验，不覆盖跨容器 DNS/服务发现或 Compose。
 - 条件回补：2019 freeCodeCamp/KodeKloud《Docker Tutorial for Beginners》只作
   image/container/registry 等概念参考；旧安装命令、legacy links、旧 Compose、
   Python 2 示例、Swarm/Kubernetes 和其它版本敏感操作全部跳过。
@@ -589,13 +591,16 @@ partial I/O 和 SIGTERM 实验仍是所有学习者的核心证据。
 | Artifact | 范围 | 必要的阶段一证据 |
 |---|---|---|
 | `model-tools` | manifest、preprocess、export、validate、benchmark/report | `input-manifest hash`；使用模型时记录 `model_hash`/`input_hash`；固定依赖、测试和原始 JSON/CSV |
-| `cpp-gemm` | C++17/CMake library、CTest、Sanitizer、CPU benchmark | fixed-seed 正确性、误差阈值、median/p95 原始结果；不虚构模型/输入 hash |
+| `cpp-gemm` | C++17/CMake library、CTest、Sanitizer、CPU benchmark；独立 `posix-smoke` target | fixed-seed 正确性、误差阈值、median/p95 原始结果；`posix-smoke` 验证 bounded queue、fd partial I/O/EOF/`EINTR`/CLOEXEC、graceful SIGTERM 清理和基础 socket/`ss` 诊断；不虚构模型/输入 hash |
 | `telemetry` | Shell 采集工具与异常场景测试 | 60 samples、missing-resource/permission 结果、ShellCheck 和原始 JSONL/CSV；不虚构模型/输入 hash |
 | `container` | 只封装 CPU/headless `model-tools` | OCI `image digest`、platform/arch、非 root、只读模型/输入与独立可写输出、`--network none` CPU/ORT smoke；存在挂载 artifact 时记录对应 model/input hash |
 
 四项 artifact 均保留 `git SHA`、`versions`、`platform/arch` 和原始结果；hash 字段只
 按上表适用范围记录。若第二 native 平台不可用，表中平台证据状态必须写
 `platform-unverified`，不能用 QEMU-only 结果冒充完成。
+
+`posix-smoke` 是 `cpp-gemm` 工程内独立的 CMake target/evidence bundle，不把系统实验
+代码并入 GEMM library，也不新增第五项主 artifact。
 
 #### 官方参考
 
@@ -621,21 +626,23 @@ Pandas/Matplotlib/Seaborn 数据分析可视化课程；不做分布式训练、
 
 - 视频观看进度只记录在学习日志；每个模块都必须以可运行产物、命令和原始输出验收。
 - 阶段一核心交付按模块八的“阶段一 artifact 表（canonical）”执行；四项 artifact
-  为 `model-tools`、`cpp-gemm`、`telemetry` 和 `container`，TCP 仅在系统/框架岗位
-  强化清单中验收。
+  为 `model-tools`、`cpp-gemm`（含独立 `posix-smoke` evidence）、`telemetry` 和
+  `container`，TCP 仅在系统/框架岗位强化清单中验收。
 - Python/NumPy/PyTorch/ONNX 的核心条件沿用模块二至模块五；Docker 条件沿用模块八
   的 CPU/headless、锁版本、非 root、只读输入和隔离网络验收。未完成证据不能因
   “看完课程”而豁免。
 - 进入阶段二前，至少应能从 clean environment 重建 Python 工具，完成 C++17 GEMM
-  的 CTest/Sanitizer/benchmark 证据，完成 60-sample telemetry，并完成模块八的单容器
-  CPU/ORT smoke。平台优先用 Host `linux/amd64` + Orin 原生 `linux/arm64`；无第二
+  的 CTest/Sanitizer/benchmark 证据，并完成 `cpp-gemm` 的独立 `posix-smoke` 核心证据；
+  完成 60-sample telemetry，并完成模块八的单容器 CPU/ORT smoke。平台优先用 Host
+  `linux/amd64` + Orin 原生 `linux/arm64`；无第二
   native 平台时必须留下 `platform-unverified`，不得把 QEMU-only 当作完整阶段证据。
 
 ### 阶段一项目交付
 
 阶段一交付边界和公共元数据按模块八的“阶段一 artifact 表（canonical）”执行；本处
-只列四项入口：`model-tools`、`cpp-gemm`、`telemetry`、`container`。各项可以协同
-维护但必须独立验收，TCP 不并入这些 artifact。
+只列四项入口：`model-tools`、`cpp-gemm`、`telemetry`、`container`。`cpp-gemm` 必须
+链接独立的 `posix-smoke` target/evidence；各项可以协同维护但必须独立验收，TCP 不
+并入这些 artifact。
 
 `model-tools` 至少提供以下子命令或等价入口：
 
@@ -659,7 +666,7 @@ report     -> 生成最小汇总；复杂画图按需补课后加入
 - CPU/headless 基础镜像的封装由 Docker 模块负责，模型/输入保持只读，输出使用独立
   可写路径。
 
-C++ GEMM、telemetry 和 TCP 不再作为 `model-tools` 单目录或单镜像的隐含子任务。
+C++ GEMM、POSIX smoke、telemetry 和 TCP 不再作为 `model-tools` 单目录或单镜像的隐含子任务。
 
 ### 面试向补充（独立于主线项目，求职前集中攻）
 
@@ -989,7 +996,7 @@ Serving；它们仍属于视觉分支 A。Triton 解决 batching、ensemble、me
 **Docker：**
 
 - 阶段一基线仅作前置回顾：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud，约 2 小时 10 分；旧命令不作规范）
-- 中文选段回看：[尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)；本阶段选取 Compose 相关 P17 `Docker Compose - 安装wordpress`、P18 `Docker Compose - 语法`、P19 `Docker Compose - 其他`，以及服务网络/DNS、healthcheck、multi-stage 的相关材料，并按当前版本校正命令；P14 仍只承担阶段一基础隔离。
+- 中文选段回看：[尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)；本阶段选取 Compose 相关 P17 `Docker Compose - 安装wordpress`（只抽取 Compose 文件/生命周期概念，跳过 WordPress 业务部署）、P18 `Docker Compose - 语法`、P19 `Docker Compose - 其他`，以及服务网络/DNS、healthcheck、multi-stage 的相关材料，并按当前版本校正命令；P14 仍只承担阶段一基础隔离。
 - Buildx、多平台、资源限制、NVIDIA Container Toolkit/CDI、NGC/Triton release/tag/digest 和 backend/platform matrix 由官方文档负责，并由阶段六验收逐项核对，以当前支持矩阵为准。
 
 **HTTP / gRPC：**
@@ -1477,7 +1484,8 @@ Jetson 使用方式：Jetson 是 target；Nsight Systems / Nsight Compute 的图
 ### 阶段一项目组：四个独立 artifact（阶段一主线）
 
 阶段一四项 artifact 按模块八的“阶段一 artifact 表（canonical）”交付；本节只补
-项目阶梯的组合关系。各项可以在一个仓库中协同维护，但必须独立验收，不把所有内容
+项目阶梯的组合关系。`cpp-gemm` 项目同时提供独立的 `posix-smoke` target/evidence，
+但不把系统实验代码并入 GEMM library。各项可以在一个仓库中协同维护，但必须独立验收，不把所有内容
 拼成一个“大而全”的服务。并发 TCP 服务仍是系统/框架岗位的可选 strengthening，
 不并入 `model-tools` 或 `container`，也不阻塞其它方向进入阶段二。
 
@@ -1689,10 +1697,12 @@ Jetson 平台特别注意：Triton 的 backend/platform 组合不是全部可用
 
 - [ ] 完成阶段一的 Python/uv（`pyproject.toml` + `uv.lock`，`uv sync --locked`）、NumPy、PyTorch/ONNX、C++、Linux、Git 和 CMake 基础，并交付 `model-tools`。
 - [ ] 完成 C++17 + CMake CPU GEMM，使用随机输入校验正确性并记录耗时。
+- [ ] 完成模块七 POSIX 核心 smoke：有界队列、fd partial I/O/EOF/`EINTR`/CLOEXEC、graceful SIGTERM 清理，以及固定 loopback 夹具的 `ss`/`lsof` 诊断；证据挂在 `cpp-gemm` 的独立 `posix-smoke` target/evidence，不要求 TCP 服务。
 - [ ] 完成 Shell telemetry 核心实验（60 samples、JSONL/CSV、缺失资源/权限场景），作为阶段一核心 gate。
 - [ ] （系统/框架岗位强化，可选）交付可并发处理请求的 C/C++ TCP 小服务；TCP 不作为通用阶段一/阶段二 gate。
 - [ ] 按模块八的“阶段一 artifact 表（canonical）”保留四个相互独立的 artifact：
-  `model-tools`、`cpp-gemm`、`telemetry`、`container`；TCP 只在系统/框架岗位强化区交付。
+  `model-tools`、`cpp-gemm`（含独立 `posix-smoke` evidence）、`telemetry`、`container`；
+  TCP 只在系统/框架岗位强化区交付。
 - [ ] 完成模块八 Docker CPU/headless 验收：Host `linux/amd64` fresh clone 用锁定的
   基础镜像 `image digest` 和 `uv.lock` 构建，检查 `linux/arm64` manifest；首选真实
   Orin 原生 arm64 CPU smoke，等价 declared-compatible 原生 arm64 CI/host 也可；
