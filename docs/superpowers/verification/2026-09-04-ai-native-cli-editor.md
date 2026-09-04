@@ -64,6 +64,14 @@ Markdown lint 在 `markdownlint`/`markdownlint-cli2` 不存在时跳过，不阻
 时会快速失败而不会隐式联网。当前 smoke 使用已同步的用户级插件缓存，真实工作流
 仍通过 `:Lazy sync` 完成首次安装。
 
+## 合并探针
+
+实现分支已 fast-forward 合并到 `/home/barry/.config/mars.nvim` 的 `main`，合并
+结果为 `c340ef9`，隔离 worktree 和 feature branch 随后清理。使用临时 `CODEX_HOME`
+启动合并后的真实配置并调用 `require('mars.ai').toggle()`：成功创建 live
+`codecompanion_cli` terminal，项目 root marker 正确，`require('mars.ai').reset_session()`
+完成生命周期清理，结果为 `MERGED_PANEL_PASS`。
+
 ## ACP 探测
 
 在临时 `CODEX_HOME` 和 `NO_BROWSER=1` 环境中向 `codex-acp` 发送 newline-delimited

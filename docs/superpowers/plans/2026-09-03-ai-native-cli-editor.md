@@ -10,7 +10,7 @@
 
 ## 执行状态（2026-09-04）
 
-实现分支（当前 HEAD `c340ef9`）已经完成 MVP-0、MVP-1 和 MVP-2 的配置与自动化回归：Neovim 0.12.5、
+实现分支（已于 2026-09-04 合并为 Mars.nvim `main` HEAD `c340ef9`）已经完成 MVP-0、MVP-1 和 MVP-2 的配置与自动化回归：Neovim 0.12.5、
 Python/C++/CUDA LSP/格式化/DAP、常驻 Codex CLI 面板、项目级恢复、Git/Snacks
 入口、Markdown/项目搜索和安全边界均已实现。关键提交从 `5eced5b` 到
 `477698c`，另有上下文/键盘闭环提交 `8eb76dc`、安全与原生命令守卫提交
@@ -21,9 +21,9 @@ fd 和 lazygit 使用用户级二进制；`leap.nvim` 固定到最后一个有�
 只完成 initialize 探测，仍未替换 CLI provider。完整命令输出和限制记录在
 `docs/superpowers/verification/2026-09-04-ai-native-cli-editor.md`。
 
-剩余交付步骤只有在实际 Mars.nvim 主仓库执行 fast-forward 合并，并在用户项目中
-手动确认真实 Codex 审批、文件修改 diff、pytest/CMake 失败回传和 DAP 会话；这些
-步骤不由无头 mock 测试冒充完成。
+自动化交付已完成；仍建议在用户项目中手动确认真实 Codex 审批、文件修改 diff、
+pytest/CMake 失败回传和 DAP 会话。这些体验依赖用户的项目、凭据和终端状态，不能
+由无头 mock 测试冒充完成。
 
 ---
 
