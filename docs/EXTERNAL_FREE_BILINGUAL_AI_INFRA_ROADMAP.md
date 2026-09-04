@@ -10,7 +10,7 @@
 
 主线依赖关系：
 
-**Python / PyTorch / C++ / Linux / Docker 基础 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩原理与设计 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
+**Python / PyTorch / C++ / Linux / Docker 基础 → 阶段一验收 → CUDA 与 GPU 性能 → 深度学习基础原理 → 模型压缩原理与设计 → 模型结构 / ONNX / TensorRT / GPU 预处理 → Docker Serving / HTTP / gRPC / Triton Server → Transformer 与 LLM 概念 → LLM Inference → Orin Edge-LLM**
 
 可选支线（见第 11 章）：
 
@@ -92,12 +92,23 @@
 
 ### 能力依赖与先后顺序
 
-两条链可以交错推进，最后在阶段一验收汇合：
+两条核心链可以交错推进；基础 socket/`ss` 诊断属于系统链核心门槛，高级 TCP
+服务保留为系统/框架岗位可选强化。两条链最后以四项 Stage 1 artifact 汇合：
 
 ```text
-Linux Shell/Git -> Python engineering/uv -> NumPy -> PyTorch -> ONNX/ORT -> model-tools -> Docker CPU/headless
-C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/thread -> Stage 1 core
-systems/framework strengthening: socket/TCP -> epoll -> TCP service
+工程与模型链：
+Linux Shell/Git -> Python engineering/uv -> NumPy -> PyTorch -> ONNX/ORT
+    -> model-tools -> Docker CPU/headless
+
+系统与运行时链：
+C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM
+    -> POSIX fd/process/thread -> 基础 socket/ss 诊断
+    -> [系统/框架岗位可选] 完整 TCP framing/multi-connection -> epoll service
+
+汇合：
+model-tools + cpp-gemm + telemetry + container
+    -> Stage 1 acceptance
+    -> Stage 2 CUDA 与 GPU 性能
 ```
 
 排序规则：两条链可并行学习；Docker 必须跟在一个已经能运行的 CLI 后；已有能力只有通过实验和证据验收后才能跳过重复课程，只回补未覆盖的缺口。
@@ -122,7 +133,7 @@ systems/framework strengthening: socket/TCP -> epoll -> TCP service
 | [Pro Git](https://git-scm.com/book/en/v2) | 专题必修 | 未记录完成；按 Git 缺口查阅 | 只补 status/diff/log/branch/commit 和可恢复撤销。 |
 | [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/) | 延后阶段 | 阶段一不验收 | 操作系统理论不阻塞阶段一工程交付。 |
 | [LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/) | 条件回补 | 未记录完成；仅在基础不足时触发 | Ubuntu、权限和包管理查阅。 |
-| [尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/) | 专题必修 | 未记录完成；按核心/岗位强化验收 | 核心：P9-P14、P29-P33、P35-P40、P42/P44/P54、P55-P56/P62-P63/P68-P69、P83-P84/P87-P88/P91-P93；强化：P76-P77、P98-P117、P128-P129；各段主题/标题见下方选段索引。 |
+| [尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/) | 专题必修 | 未记录完成；按核心/岗位强化验收 | 核心：P9-P14、P29-P33、P35-P40、P42/P44/P54、P55-P56/P62-P63/P68-P69、P83-P84/P87-P88/P91-P93、P104-P105；强化：P76-P77、P98-P103、P106-P117、P128-P129；各段主题/标题见下方选段索引。 |
 | [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud 2019 旧版） | 条件回补 | 只作概念参考，不作为命令证据 | 只查 image/container/registry 概念；旧安装、legacy links、旧 Compose、Python 2、Swarm/Kubernetes 和旧命令明确跳过。 |
 | [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 中文选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；P14 只承担基础网络/隔离，Compose、服务网络/DNS、healthcheck、multi-stage、Buildx 和 GPU runtime 延后阶段六；云服务器购买、Redis 主从、WordPress、Java 中间件、批量部署和 `docker commit` 明确跳过。 |
 
@@ -141,7 +152,8 @@ systems/framework strengthening: socket/TCP -> epoll -> TCP service
 - **尚硅谷 Linux 核心（进程、信号、线程）**：P35 `35_进程处理_fork创建子进程`；P36 `36_进程处理_使用fork复制文件描述符`；P37 `37_进程处理_execve及具体案例`；P38 `38_进程处理_waitpid介绍及案例`；P39 `39_进程处理_进程树`；P40 `40_进程处理_孤儿进程`；P42 `42_进程通信_打印错误及错误编号`；P44 `44_进程通讯_匿名管道通讯`；P54 `54_进程通讯_信号处理介绍`；P55 `55_线程处理_线程简介`；P56 `56_线程处理_线程创建的基础代码`；P62 `62_线程同步_竞态条件和锁`；P63 `63_线程同步_互斥锁介绍`；P68 `68_线程同步_条件变量原理介绍`；P69 `69_线程同步_条件变量功能演示`。
 - **尚硅谷 Linux 核心（内核边界）**：P83 `83_内核原理_虚拟内存相关介绍`；P84 `84_内核原理_物理内存和虚拟内存映射`；P87 `87_内核原理_fork调用执行原理`；P88 `88_内核原理_execve调用执行原理`；P91 `91_内核原理_系统调用和库函数`；P92 `92_内核管理_进程和线程的区别和联系`；P93 `93_内核管理_线程特点及内核线程`。
 - **尚硅谷 Linux 强化（线程池）**：P76 `76_线程池_原理及api介绍`；P77 `77_线程池_使用案例演示`。
-- **尚硅谷 Linux 强化（TCP P98-P105）**：P98 `98_TCP_什么是TCP协议`；P99 `99_TCP_报文段格式介绍`；P100 `100_TCP_三次握手`；P101 `101_TCP_四次挥手`；P102 `102_TCP_有效传输和接收窗口`；P103 `103_TCP_拥塞控制和发送窗口`；P104 `104_TCP_套接字介绍`；P105 `105_TCP_创建socket常用函数介绍`。
+- **尚硅谷 Linux 核心（基础 socket）**：P104 `104_TCP_套接字介绍`；P105 `105_TCP_创建socket常用函数介绍`。只承担 socket/fd 关系和生命周期概念，不要求实现 TCP 服务。
+- **尚硅谷 Linux 强化（TCP P98-P103）**：P98 `98_TCP_什么是TCP协议`；P99 `99_TCP_报文段格式介绍`；P100 `100_TCP_三次握手`；P101 `101_TCP_四次挥手`；P102 `102_TCP_有效传输和接收窗口`；P103 `103_TCP_拥塞控制和发送窗口`。
 - **尚硅谷 Linux 强化（TCP P106-P113）**：P106 `106_TCP_使用socket常用函数介绍`；P107 `107_TCP_网络字节序和主机字节序转换`；P108 `108_TCP_网络字节序和主机字节序数字转换`；P109 `109_TCP_网络地址填写案例`；P110 `110_TCP_服务端打开代码编写`；P111 `111_TCP_服务端使用连接代码编写`；P112 `112_TCP_客户端代码编写及测试`；P113 `113_TCP_缓冲机制介绍`。
 - **尚硅谷 Linux 强化（TCP P114-P117、多路复用）**：P114 `114_TCP_使用可视化工具查看连接`；P115 `115_TCP_多连接的服务端代码编写`；P116 `116_TCP_多连接的客户端代码及测试`；P117 `117_TCP_多进程实现多连接的案例`；P128 `128_IO多路复用_原理介绍`；P129 `129_IO多路复用_功能展示`。
 - **尚硅谷 Docker**：P2 `基础 - Docker架构与容器化`；P6 `命令 - 镜像操作`；P7 `命令 - 容器操作`；P8 `命令 - run细节`；P10 `命令 - 分享镜像`；P12 `存储 - 目录挂载`；P13 `存储 - 卷映射`；P14 `网络 - 自定义网络`；P16 `最佳实践`；P20 `Dockerfile - 制作镜像`；P21 `Dockerfile - 镜像分层机制`。
@@ -461,11 +473,14 @@ C++/CMake 课程，也不能互相替代。
 - P55-P56、P62-P63、P68-P69：线程、竞态、mutex 和 condition variable；
 - P83-P84、P87-P88、P91-P93：虚拟内存、fork/exec、系统调用与进程/线程边界，
   只学稳定概念。
+- P104-P105：套接字 endpoint/fd 关系和创建函数，只掌握基础 socket 概念与生命周期，
+  不要求实现 TCP 服务。
 
 #### 系统/框架岗位强化选段
 
 - P76-P77：线程池；
-- P98-P117：TCP、socket 和多连接；
+- P98-P103、P106-P117：TCP 协议细节、字节序、客户端/服务端和多连接（P104-P105
+  的基础 socket 概念已列入核心选段）；
 - P128-P129：I/O 多路复用与 epoll。
 
 Windows/VS、Makefile 细枝末节、`system()`、异步线程取消、spinlock、完整 SysV
@@ -477,6 +492,7 @@ IPC/信号量、UDP、链路层和手写 daemon 不作为阶段一主线。
 nonblocking 和 CLOEXEC。
 
 - [Linux `read(2)`](https://man7.org/linux/man-pages/man2/read.2.html)；
+  [Linux `ss(8)`](https://man7.org/linux/man-pages/man8/ss.8.html)；
   [Linux `epoll(7)`](https://man7.org/linux/man-pages/man7/epoll.7.html)；
   [Linux dynamic linker `ld.so(8)`](https://man7.org/linux/man-pages/man8/ld.so.8.html)；
 - [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/)（操作系统理论延后，按问题查阅）。
@@ -487,6 +503,8 @@ nonblocking 和 CLOEXEC。
 
 - 能解释 fd、进程、线程、虚拟内存、系统调用与库函数边界；
 - 能用 `gdb`、`strace`、`lsof` 和 `/proc` 定位一次文件、进程或 fd 问题；
+- 能解释 socket 与 fd 的关系，并用 `ss`/`lsof` 对给定或实验提供的 socket 端点完成
+  状态、监听和清理诊断；不要求编写 TCP 服务；
 - 本模块的集成核心实验（所有学习者、也是并发/fd 的唯一阶段一 gate）：用
   `std::thread`、`mutex`/`lock_guard` 和
   `condition_variable` 实现有界进程内队列，并正确 join/停止；使用 Linux fd 做
@@ -496,7 +514,8 @@ nonblocking 和 CLOEXEC。
 
 系统/框架岗位强化交付（非所有方向的阶段一或阶段二 gate）：
 
-- 使用 `ss`/`lsof` 观察 socket 生命周期，并验证断连后的 socket 清理；
+- 在基础 socket/`ss` 诊断之上，对自己实现的并发服务使用 `ss`/`lsof` 观察 socket
+  生命周期，并验证断连后的 socket 清理；
 - 强化 man-page 主题：TCP 无消息边界、长度前缀 framing、backpressure、SIGPIPE 和
   epoll LT/ET；
 - 实现长度前缀 TCP 协议和有界工作队列；
