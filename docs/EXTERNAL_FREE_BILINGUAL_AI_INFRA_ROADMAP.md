@@ -86,43 +86,66 @@
 
 ## 3. 阶段一 · 工程与工具基础（Python / PyTorch / C++ / Linux / Docker）
 
-### 目标
+### 目标与执行契约
 
-Python = 部署侧胶水语言（导出、校准、benchmark、日志、客户端）；PyTorch = 训练资产 → ONNX/TensorRT 的桥梁；C++ = Kernel 与服务底座；Linux 用户态 = 开发排障前提；Docker = 环境封装与可复现工具。五条线都必须完成。
+阶段一是工程底座：Python 是部署侧胶水语言（导出、校准、benchmark、日志、客户端），PyTorch 是训练资产到 ONNX/TensorRT 的桥梁，C++ 是 Kernel 与服务底座，Linux 用户态是开发排障前提，Docker 是环境封装与可复现工具。每个能力单元都按 **能力目标 -> 课程选段 -> 专题补缺 -> 实验 -> 证据验收** 推进；看完课程不等于完成阶段。
 
-### 课程与资料
+### 能力依赖与先后顺序
 
-**Python：**
-- 英文主课(B站翻译版): [Python full course for free](https://www.bilibili.com/video/BV1wr5T6bEN4/?spm_id_from=333.337.search-card.all.click&vd_source=7cbf3a27f03424d92741ec64128cb48f)(freecodecamp)
-- 中文速成（可选）：[3小时超快速入门 Python（动画教学，2026 新版）](https://www.bilibili.com/video/BV1Jgf6YvE8e/)（林粒粒呀，零基础动画课）
-- 官方资料：[Python 官方教程](https://docs.python.org/3/tutorial/)、[venv 官方文档](https://docs.python.org/3/library/venv.html)、[Python Packaging User Guide](https://packaging.python.org/en/latest/tutorials/installing-packages/)、[NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html)
+两条链可以交错推进，最后在阶段一验收汇合：
 
-**PyTorch：**
+```text
+Linux Shell/Git -> Python engineering/uv -> NumPy -> PyTorch -> ONNX/ORT -> model-tools -> Docker CPU/headless
+C++ basics -> RAII/STL -> CMake/GDB/Sanitizer -> CPU GEMM -> POSIX fd/process/thread/socket -> TCP strengthening
+```
 
-- 主课（B站，中英字幕）：[mrdbourke《Learn PyTorch for Deep Learning in a Day》](https://www.bilibili.com/video/BV1kx4y1r79d/)（93 节，约 25.5 小时；配套代码见 [mrdbourke/pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning)）
-- 专题（只学前两节：1.1 课程先导、2.1 全连接神经网络整体结构）：[Pytorch框架与经典卷积神经网络与实战](https://www.bilibili.com/video/BV1e34y1M7wR/)（炮哥带你学）
-- 原理补充：[PyTorch深度学习实践 完结合集（刘二大人）](https://www.bilibili.com/video/BV1Y7411d7Ys/)（B站，全部 13 讲）
-- 官方校正：[Introduction to PyTorch on YouTube](https://docs.pytorch.org/tutorials/beginner/introyt/)、[PyTorch Tutorials](https://docs.pytorch.org/tutorials/)、[PyTorch ONNX Tutorials](https://docs.pytorch.org/tutorials/beginner/onnx/index.html)
+排序规则：两条链可并行学习；Docker 必须跟在一个已经能运行的 CLI 后；已有能力只有通过实验和证据验收后才能跳过重复课程，只回补未覆盖的缺口。
 
-**C++：**
+### 课程与资料（角色标签；核验日期：2026-09-04）
 
-- 英文主课：[C++ Programming Course: Beginner to Advanced](https://www.youtube.com/watch?v=8jLOx1hD3_o)（freeCodeCamp）
-- 辅助资料：[LearnCpp](https://www.learncpp.com/)
+角色标签：**主线必修**（阶段一必做）、**专题必修**（主课缺口）、**条件回补**（触发时定点学习）、**延后阶段**（交给后续阶段）、**明确跳过**（当前目标不需要）；**已完成可验收**只记录在当前状态/证据栏，不能替代课程角色。
 
-**Linux 用户态：**
+| 资源 | 课程角色 | 当前状态/证据 | 选段与边界 |
+|---|---|---|---|
+| [Bro Code - Python Full Course for free 2024](https://www.bilibili.com/video/BV1wr5T6bEN4/)（B站 AI 翻译版；[原版](https://www.youtube.com/watch?v=ix9cRaBkVe0)） | 条件回补 | 未记录完整完成；按缺口触发 | P21 `lists, sets, and tuples`；P34-P35 `args & kwargs`/`iterables`；P39-P41 `modules`/`scope resolution`/`if __name__ == "__main__"`；P59-P61 `file detection`/`writing files`/`reading files`。原作者 Bro Code，不是 freeCodeCamp。 |
+| [3小时超快速入门 Python（动画教学，2026 新版）](https://www.bilibili.com/video/BV1Jgf6YvE8e/)（林粒粒呀） | 主线必修 | **已完成可验收**：学习日志记录基础速成；实验仍须复查 | 语法、类、文件、异常和 `unittest`；不重复通刷 Bro Code。 |
+| [尚硅谷 Python数据分析教程 (NumPy/Pandas/Matplotlib)](https://www.bilibili.com/video/BV1D9GLzyEL6/) | 主线必修 | 未记录完整完成；仅 NumPy 选段进入阶段一 | P6-P21 `NumPy`（重点 P7-P18，P20-P21 练习；详见下方选段索引）；Pandas/Matplotlib 在首份 benchmark CSV/JSON 后触发，属延后阶段。 |
+| [Python 官方教程](https://docs.python.org/3/tutorial/)、[venv](https://docs.python.org/3/library/venv.html)、[PyPA](https://packaging.python.org/en/latest/tutorials/installing-packages/)、[NumPy Quickstart](https://numpy.org/doc/stable/user/quickstart.html) | 专题必修 | 执行规范，不以阅读计完成 | 工程化、隔离环境、数组语义和当前 API 校正；不替代实验。 |
+| [mrdbourke《Learn PyTorch for Deep Learning in a Day》](https://www.bilibili.com/video/BV1kx4y1r79d/)（B站，中英字幕；[配套仓库](https://github.com/mrdbourke/pytorch-deep-learning)） | 主线必修 | 未记录完整完成；按选段实验验收 | P15-P28、P33-P36、P42、P64-P65、P77/P80-P84；对应标题见下方选段索引；不通刷 93 节。 |
+| [Pytorch框架与经典卷积神经网络与实战](https://www.bilibili.com/video/BV1e34y1M7wR/)（炮哥带你学） | 条件回补 | 未记录完成；仅在 Tensor/Module 缺口时触发 | P1 `1.1、课程先导`、P2 `2.1、全连接神经网络整体结构`；经典 CNN 与训练内容延后阶段（详见下方选段索引）。 |
+| [PyTorch深度学习实践 完结合集（刘二大人）](https://www.bilibili.com/video/BV1Y7411d7Ys/) | 条件回补 | 未记录完成；按需回补 | 仅 P8 `08.加载数据集` 作 DataLoader 中文回补；训练原理延后阶段（详见下方选段索引）。 |
+| [PyTorch 官方教程](https://docs.pytorch.org/tutorials/)、[ONNX 教程](https://docs.pytorch.org/tutorials/beginner/onnx/index.html) | 专题必修 | 执行规范，不以阅读计完成 | 校正 Tensor Views、保存加载、benchmark、ONNX/ORT API；以当前官方文档为准。 |
+| [C++ Programming Course: Beginner to Advanced](https://www.youtube.com/watch?v=8jLOx1hD3_o)（freeCodeCamp） | 主线必修 | 未记录完成；按语言基础验收 | 只承担语法、指针、引用、生命周期和 STL 基础；复杂模板与深 OOP 明确跳过。 |
+| [LearnCpp](https://www.learncpp.com/) | 专题必修 | 未记录完成；按缺口查阅 | 补 RAII、智能指针、编译链接和现代 C++ 实践。 |
+| [MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（[2026 原版](https://missing.csail.mit.edu/2026/)） | 主线必修 | **已完成可验收**：学习日志记录 9 讲；telemetry/命令行证据待验收 | P1-P6、P9；P7-P8（智能体编程、代码之外）明确跳过；各标题见下方选段索引。 |
+| [Pro Git](https://git-scm.com/book/en/v2) | 专题必修 | 未记录完成；按 Git 缺口查阅 | 只补 status/diff/log/branch/commit 和可恢复撤销。 |
+| [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/) | 延后阶段 | 阶段一不验收 | 操作系统理论不阻塞阶段一工程交付。 |
+| [LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/) | 条件回补 | 未记录完成；仅在基础不足时触发 | Ubuntu、权限和包管理查阅。 |
+| [尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/) | 专题必修 | 未记录完成；按核心/岗位强化验收 | 核心：P9-P14、P29-P33、P35-P40、P42/P44/P54、P55-P56/P62-P63/P68-P69、P83-P84/P87-P88/P91-P93；强化：P76-P77、P98-P117、P128-P129；各段主题/标题见下方选段索引。 |
+| [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud 旧版） | 条件回补 | 旧版仅参考，不作为命令证据 | 只查镜像/容器概念；旧命令、Compose、Swarm/Kubernetes 明确跳过。 |
+| [尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/) | 主线必修 | 未记录完成；须以 CPU/headless CLI smoke 作为证据 | 选段：P2、P6-P8、P10、P12-P14、P16、P20-P21；各 P 标题见下方选段索引；Compose 与业务案例延后阶段。 |
 
-- 基础层主课：[MIT Missing Semester（B站，中英字幕，IAP 2026）](https://www.bilibili.com/video/BV1CkArz1E4o/)（9 节；Shell、管道、权限、脚本、SSH、Git、调试入门；英文原版见 [missing.csail.mit.edu](https://missing.csail.mit.edu/)）
-- 系统层主课：[尚硅谷 Linux 应用层开发](https://www.bilibili.com/video/BV1DJ4m1M77z/)（文件 IO、进程线程、Socket、epoll 完整系列）
-- 辅助资料：[Pro Git](https://git-scm.com/book/en/v2)、[OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/)、[LFS101 Introduction to Linux](https://training.linuxfoundation.org/training/introduction-to-linux/)
+#### 选段索引（B站 P 号；核验日期：2026-09-04）
 
-**Docker 入门：**
-
-- 英文主课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
-- 中文补课：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
+- **Bro Code**：P21 `lists, sets, and tuples`；P34 `args & kwargs`；P35 `iterables`；P39 `modules`；P40 `scope resolution`；P41 `if name == 'main'`；P59 `file detection`；P60 `writing files`；P61 `reading files`。
+- **尚硅谷 NumPy**：P6 `numpy介绍`；P7 `ndarray的特性`；P8 `ndarray的属性`；P9-P11 `ndarray的创建1-3`；P12 `ndarray的数据类型`；P13 `索引与切片`；P14 `ndarray的运算`；P15 `基本数学函数`；P16 `统计函数`；P17 `比较函数`；P18 `排序函数`；P19 `本章小结`；P20-P21 `本章练习1-2`。
+- **mrdbourke P15-P28**：P15 `13. Introduction to tensors`；P16 `14. Creating tensors`；P17 `17. Tensor datatypes`；P18 `18. Tensor attributes (information about tensors)`；P19 `19. Manipulating tensors`；P20 `20. Matrix multiplication`；P21 `23. Finding the min, max, mean and sum`；P22 `25. Reshaping, viewing and stacking`；P23 `26. Squeezing, unsqueezing and permuting`；P24 `27. Selecting data (indexing)`；P25 `28. PyTorch and NumPy`；P26 `29. Reproducibility`；P27 `30. Accessing a GPU`；P28 `31. Setting up device agnostic code`。
+- **mrdbourke P33-P42**：P33 `38. Creating our first PyTorch model`；P34 `40. Discussing important model building classes`；P35 `41. Checking out the internals of our model`；P36 `42. Making predictions with our model`；P42 `51. Saving-loading a model`。
+- **mrdbourke P64-P65/P77/P80-P84**：P64 `98. Mini-batches`；P65 `99. Creating DataLoaders`；P77 `126. Introduction to custom datasets`；P80 `132. Turning images into tensors`；P81 `136. Creating image DataLoaders`；P82 `137. Creating a custom dataset class (overview)`；P83 `139. Writing a custom dataset class from scratch`；P84 `142. Turning custom datasets into DataLoaders`。
+- **炮哥 / 刘二**：炮哥 P1 `1.1、课程先导`、P2 `2.1、全连接神经网络整体结构`；刘二 P8 `08.加载数据集`。
+- **MIT Missing Semester**：P1 `课程概览与Shell入门`；P2 `命令行环境`；P3 `开发环境与工具`；P4 `调试与性能分析`；P5 `版本控制与Git`；P6 `代码打包与分发`；P7 `智能体编程`（明确跳过）；P8 `代码之外`（明确跳过）；P9 `代码质量`。
+- **尚硅谷 Linux 核心（编译、fd、进程）**：P9 `09_C语言开发_GCC编译整体流程介绍`；P10 `10_C语言编译流程_预处理`；P11 `11_C语言编译流程_编译`；P12 `12_C语言编译流程_汇编`；P13 `13_C语言编译流程_汇编补充说明`；P14 `14_C语言编译流程_链接`；P29 `29_系统调用_open打开文件`；P30 `30_系统调用_其他常用的系统调用`；P31 `31_系统调用_综合案例`；P32 `32_文件描述符_结构图概念介绍`；P33 `33_文件描述符_总结图示`。
+- **尚硅谷 Linux 核心（进程、信号、线程）**：P35 `35_进程处理_fork创建子进程`；P36 `36_进程处理_使用fork复制文件描述符`；P37 `37_进程处理_execve及具体案例`；P38 `38_进程处理_waitpid介绍及案例`；P39 `39_进程处理_进程树`；P40 `40_进程处理_孤儿进程`；P42 `42_进程通信_打印错误及错误编号`；P44 `44_进程通讯_匿名管道通讯`；P54 `54_进程通讯_信号处理介绍`；P55 `55_线程处理_线程简介`；P56 `56_线程处理_线程创建的基础代码`；P62 `62_线程同步_竞态条件和锁`；P63 `63_线程同步_互斥锁介绍`；P68 `68_线程同步_条件变量原理介绍`；P69 `69_线程同步_条件变量功能演示`。
+- **尚硅谷 Linux 核心（内核边界）**：P83 `83_内核原理_虚拟内存相关介绍`；P84 `84_内核原理_物理内存和虚拟内存映射`；P87 `87_内核原理_fork调用执行原理`；P88 `88_内核原理_execve调用执行原理`；P91 `91_内核原理_系统调用和库函数`；P92 `92_内核管理_进程和线程的区别和联系`；P93 `93_内核管理_线程特点及内核线程`。
+- **尚硅谷 Linux 强化（线程池）**：P76 `76_线程池_原理及api介绍`；P77 `77_线程池_使用案例演示`。
+- **尚硅谷 Linux 强化（TCP P98-P105）**：P98 `98_TCP_什么是TCP协议`；P99 `99_TCP_报文段格式介绍`；P100 `100_TCP_三次握手`；P101 `101_TCP_四次挥手`；P102 `102_TCP_有效传输和接收窗口`；P103 `103_TCP_拥塞控制和发送窗口`；P104 `104_TCP_套接字介绍`；P105 `105_TCP_创建socket常用函数介绍`。
+- **尚硅谷 Linux 强化（TCP P106-P113）**：P106 `106_TCP_使用socket常用函数介绍`；P107 `107_TCP_网络字节序和主机字节序转换`；P108 `108_TCP_网络字节序和主机字节序数字转换`；P109 `109_TCP_网络地址填写案例`；P110 `110_TCP_服务端打开代码编写`；P111 `111_TCP_服务端使用连接代码编写`；P112 `112_TCP_客户端代码编写及测试`；P113 `113_TCP_缓冲机制介绍`。
+- **尚硅谷 Linux 强化（TCP P114-P117、多路复用）**：P114 `114_TCP_使用可视化工具查看连接`；P115 `115_TCP_多连接的服务端代码编写`；P116 `116_TCP_多连接的客户端代码及测试`；P117 `117_TCP_多进程实现多连接的案例`；P128 `128_IO多路复用_原理介绍`；P129 `129_IO多路复用_功能展示`。
+- **尚硅谷 Docker**：P2 `基础 - Docker架构与容器化`；P6 `命令 - 镜像操作`；P7 `命令 - 容器操作`；P8 `命令 - run细节`；P10 `命令 - 分享镜像`；P12 `存储 - 目录挂载`；P13 `存储 - 卷映射`；P14 `网络 - 自定义网络`；P16 `最佳实践`；P20 `Dockerfile - 制作镜像`；P21 `Dockerfile - 镜像分层机制`。
 
 #### 当阶段课程大纲（★ = 本阶段必修）
 
-- **Python 主课（freeCodeCamp）** 大纲：
+- **Python 能力目标（不等同于单门课程覆盖）**：
   - ★ 语法、条件/循环、函数、作用域
   - ★ 字符串、列表/字典/集合/元组
   - ★ 类与 dataclass、异常、模块/包
@@ -493,14 +516,14 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 ### 目标
 
-在阶段一 Docker 入门基础上补齐容器化部署、HTTP/unary gRPC 客户端语义和 Triton Server 服务层，形成 TensorRT Engine → Triton backend → 可观测客户端 benchmark 的完整服务链。Triton 解决 batching、ensemble、metrics 等服务层问题，不替代 TensorRT runtime/Kernel。
+阶段一只覆盖已有可运行 CLI 之后的 CPU/headless 单容器基础；阶段六在此基础上补齐高级 Docker、HTTP/unary gRPC 客户端语义和 Triton Server Serving，形成 TensorRT Engine → Triton backend → 可观测客户端 benchmark 的完整服务链。Triton 解决 batching、ensemble、metrics 等服务层问题，不替代 TensorRT runtime/Kernel。
 
 ### 课程与资料
 
 **Docker：**
 
-- 阶段一已完成 Docker 初学内容；这里仅按需回看英文课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp，约 2 小时 10 分）
-- 中文课同样仅按需回看：[尚硅谷 Docker 与微服务实战 2024](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)
+- 阶段一仅覆盖可运行 CLI 后的 CPU/headless 单容器基础；这里按需回看旧版英文概念课：[Docker Tutorial for Beginners](https://www.youtube.com/watch?v=fqMOX6JJhGo)（freeCodeCamp/KodeKloud，约 2 小时 10 分；旧命令不作规范）
+- 中文选段回看：[尚硅谷 Docker教程，3小时速通，docker部署到实战！](https://www.bilibili.com/video/BV1Zn4y1X7AZ/)（Compose、网络和业务案例在本阶段补齐或按需选学）
 
 **HTTP / gRPC：**
 
@@ -515,7 +538,7 @@ CUDA 是整条路线的性能底座：写对 Kernel → 用架构知识解释快
 
 #### 当阶段课程大纲（★ = 本阶段必修）
 
-- **Docker 进阶（阶段一已学入门）** 大纲：
+- **Docker 进阶（阶段六新增）** 大纲：
   - ★ multi-stage Dockerfile 与 Docker Compose
   - ★ network、healthcheck 与 GPU runtime
   - ★ 构建并确认支持 `linux/arm64` 的镜像（Jetson 部署）
