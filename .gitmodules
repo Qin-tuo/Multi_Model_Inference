@@ -20,3 +20,9 @@
 [submodule "references/repo/mini-sglang"]
 	path = references/repo/mini-sglang
 	url = https://github.com/sgl-project/mini-sglang.git
+[submodule "references/repo/pytorch-deep-learning"]
+	path = references/repo/pytorch-deep-learning
+	url = https://github.com/mrdbourke/pytorch-deep-learning.git
+[submodule "references/repo/SGEMM_CUDA"]
+	path = references/repo/SGEMM_CUDA
+	url = https://github.com/siboehm/SGEMM_CUDA.git
