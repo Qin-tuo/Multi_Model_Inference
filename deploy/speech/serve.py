@@ -13,6 +13,8 @@ from tools.project import CACHE, DATA, sha256, write_json
 
 
 def main():
+    from deploy.resource_guard import hold_model_lease
+    model_lease = hold_model_lease()
     upstream = CACHE / "upstreams/openvoicestream"
     actual = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=upstream, text=True).strip()
     if actual != "18a459761647a641926f04d7d36c17035c11f8b7":

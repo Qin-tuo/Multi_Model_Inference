@@ -72,6 +72,10 @@ def main():
             "rgb_camera.color_profile:=640x480x30", "depth_module.depth_profile:=640x480x30",
             "align_depth.enable:=true", "enable_sync:=true", "pointcloud.enable:=false"]
     else:
+        model_lease = None
+        if not args.render_only:
+            from deploy.resource_guard import hold_model_lease
+            model_lease = hold_model_lease()
         namespace, params = parameters(args.component)
         path = DATA / "config" / f"ros-{args.component}.json"
         write_json(path, params)

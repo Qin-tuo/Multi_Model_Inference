@@ -69,6 +69,8 @@ def claim_build(cache):
         except OSError: continue
         if b"--build-ort" in argv and any(arg.endswith(b"deploy/vision/prepare.py") for arg in argv):
             raise RuntimeError(f"ORT build is already live at PID {proc.name}; resume observing that process")
+        if argv and (argv[0].endswith(b"/llama-server") or any(arg.endswith(b"deploy/speech/serve.py") for arg in argv)):
+            raise RuntimeError(f"A model service is still live at PID {proc.name}; stop model services before heavy compilation")
     owner = open(cache / "ort-build.owner.lock", "a+b")
     try: fcntl.flock(owner, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:

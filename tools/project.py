@@ -338,6 +338,10 @@ def smoke(args):
 
 
 def serve(args):
+    model_lease = None
+    if args.component in {"llama", "asr", "speech", "vision", "pose"}:
+        from deploy.resource_guard import hold_model_lease
+        model_lease = hold_model_lease()
     if args.component in {"camera", "vision", "pose"}:
         component = "detection" if args.component == "vision" else args.component
         command = [sys.executable, str(ROOT / "deploy/vision/serve.py"), component]
@@ -404,8 +408,22 @@ def main():
     notifications.add_argument("--user", default="owner")
     notifications.add_argument("--data-dir", type=Path, default=DATA)
     notifications.add_argument("--seconds", type=float, default=0)
+    for action in ("up", "down", "status", "install-services"):
+        lifecycle = sub.add_parser(action, help="Managed backend lifecycle via user systemd")
+        lifecycle.add_argument("--components", default="all")
+        lifecycle.add_argument("--timeout", type=float, default=300)
+    logs = sub.add_parser("logs", help="Read one managed backend's rotated log")
+    logs.add_argument("--component", choices=["llama", "asr", "speech", "camera", "vision", "pose"], required=True)
+    logs.add_argument("--lines", type=int, default=50)
     args = parser.parse_args()
     try:
+        if args.action == "logs":
+            from deploy.services import main as services_main
+            return services_main(["logs", "--components", args.component, "--lines", str(args.lines)])
+        if args.action in {"up", "down", "status", "install-services"}:
+            from deploy.services import main as services_main
+            return services_main(["install" if args.action == "install-services" else args.action,
+                                  "--components", args.components, "--timeout", str(args.timeout)])
         if args.action == "notifications":
             return subprocess.call([str(ROOT / ".venv/bin/python"), "-m", "app.reminder_console", "--user", args.user,
                                     "--data-dir", str(args.data_dir), "--seconds", str(args.seconds)], cwd=ROOT)

@@ -112,7 +112,7 @@ source /opt/ros/jazzy/setup.bash
 .venv/bin/python tools/vision_bridge_probe.py --launch-camera
 ```
 
-语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。语音服务与文件管线使用部署说明中的独立入口。`interact` 已实现文本入口；完整 `up/down/bench/acceptance` 命令仍待对应里程碑接入，当前不可作为已实现接口使用。
+语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。`interact` 已实现文本入口；`up/down/status/logs`通过systemd管理所选后端，使用方法见[后端生命周期说明](deploy/systemd/README.md)。`backend_status=READY`只表示后端接口就绪，完整助手与物理设备仍待验收。`bench/acceptance`完整入口尚未实现。
 
 ## 数据和上游
 

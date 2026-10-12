@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T15:27:59.052612+00:00",
+  "created_at": "2026-10-12T16:18:30.218937+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 66,
+  "tests_run": 71,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -205,6 +205,26 @@
       "status": "PASS"
     },
     {
+      "id": "test_service_config.ServiceConfigTests.test_dependencies_and_rejected_component_names",
+      "status": "PASS"
+    },
+    {
+      "id": "test_service_config.ServiceConfigTests.test_exec_arguments_are_literal_and_unit_newlines_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_service_config.ServiceConfigTests.test_model_lease_survives_exec_and_releases_on_process_exit",
+      "status": "PASS"
+    },
+    {
+      "id": "test_service_config.ServiceConfigTests.test_socket_ownership_requires_the_actual_process",
+      "status": "PASS"
+    },
+    {
+      "id": "test_service_config.ServiceConfigTests.test_unmanaged_unit_and_local_edits_are_preserved",
+      "status": "PASS"
+    },
+    {
       "id": "test_speech_transport.SpeechTransportTests.test_http_failure_has_no_audio_success",
       "status": "PASS"
     },
@@ -285,6 +305,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "12997cb508bdec0508687981e050d5b0caa97b44",
+  "source_commit": "defca5b3962ee23a12e2d620a8d7357c126ac4ef",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

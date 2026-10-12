@@ -1,0 +1,117 @@
+{
+  "created_at": "2026-10-12T16:08:06.011794+00:00",
+  "status": "PASS",
+  "scope": "real user systemd and camera lifecycle; readiness failure and hanging/restarting processes are labelled fixtures; no model inference, 8h or full assistant acceptance",
+  "checks": {
+    "real_camera_ready": true,
+    "preexisting_unit_preserved_on_failure": true,
+    "real_camera_group_empty_after_stop": true,
+    "new_unit_rolled_back_on_failure": true,
+    "fixture_parent_and_child_observed": true,
+    "bounded_force_stop_clears_children": true,
+    "restart_storm_limited": true,
+    "live_gpu_build_blocks_model_start": true
+  },
+  "camera_active": {
+    "created_at": "2026-10-12T16:07:58.802468+00:00",
+    "components": {
+      "camera": {
+        "MainPID": "142921",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 142921,
+        "cgroup_pids": [
+          142921,
+          142929,
+          142962
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 42.142837,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "camera_stopped": {
+    "created_at": "2026-10-12T16:08:00.787071+00:00",
+    "components": {
+      "camera": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "vision": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "pose": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      }
+    },
+    "backend_status": "STOPPED",
+    "health_checked": false,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "fixtures": {
+    "forced_stop_seconds": 2.1468120889985585,
+    "restart_stable_after_seconds": 0.8,
+    "restart_limit": {
+      "Restart": "on-failure",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "NRestarts": "3",
+      "ControlGroup": "",
+      "ActiveState": "failed",
+      "StartLimitBurst": "3"
+    }
+  }
+}
