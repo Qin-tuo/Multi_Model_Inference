@@ -1,7 +1,7 @@
 """Persistent reminders using APScheduler and SQLAlchemy, with a playback outbox.
 
 APScheduler owns timing and restart persistence. This adapter records durable
-business IDs and notification delivery state; audio is consumed by Pipecat later.
+business IDs, output attempts, expiration and confirmations from output adapters.
 DateTrigger uses UTC wall time. This module does not claim acoustic playback or
 monotonic-clock protection against system clock changes.
 """
@@ -13,7 +13,7 @@ import hashlib
 import json
 import threading
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -23,8 +23,8 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
 from sqlalchemy import (
-    Column, Integer, MetaData, String, Table, Text, and_, create_engine,
-    func, insert, select, update,
+    Column, Integer, MetaData, String, Table, Text, and_, create_engine, event,
+    func, insert, inspect, select, update,
 )
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
@@ -38,6 +38,7 @@ _REMINDERS = Table(
     Column("timezone", String(128), nullable=False),
     Column("status", String(24), nullable=False),
     Column("created_utc", String(40), nullable=False),
+    Column("expires_utc", String(40)),
 )
 _NOTIFICATIONS = Table(
     "assistant_notifications", _METADATA,
@@ -50,6 +51,13 @@ _NOTIFICATIONS = Table(
     Column("claimed_utc", String(40)),
     Column("played_utc", String(40)),
     Column("delivery_attempts", Integer, nullable=False, default=0),
+    Column("failure_count", Integer, nullable=False, default=0),
+    Column("attempt_id", String(64)),
+    Column("output_started_utc", String(40)),
+    Column("output_channel", String(24)),
+    Column("delivery_evidence", String(256)),
+    Column("next_attempt_utc", String(40)),
+    Column("delivered_utc", String(40)),
 )
 _OPERATIONS = Table(
     "assistant_reminder_operations", _METADATA,
@@ -57,6 +65,8 @@ _OPERATIONS = Table(
     Column("fingerprint", String(64), nullable=False),
     Column("result_json", Text, nullable=False),
 )
+_POLICY = Table("assistant_reminder_policy", _METADATA,
+    Column("user_id", String(256), primary_key=True), Column("muted", Integer, nullable=False))
 
 
 def _utc_now() -> str:
@@ -68,6 +78,10 @@ def _engine(database_path: str):
         "sqlite:///" + database_path,
         connect_args={"timeout": 10, "check_same_thread": False},
     )
+    @event.listens_for(engine, "connect")
+    def configure(connection, _record):
+        for pragma in ("journal_mode=WAL", "synchronous=FULL", "busy_timeout=10000"):
+            connection.execute("PRAGMA " + pragma)
     return engine
 
 
@@ -80,6 +94,10 @@ def _deliver_due(database_path: str, reminder_id: str) -> None:
                 select(_REMINDERS).where(_REMINDERS.c.id == reminder_id)
             ).mappings().first()
             if reminder is None or reminder["status"] != "active":
+                return
+            if reminder["expires_utc"] and reminder["expires_utc"] <= _utc_now():
+                connection.execute(update(_REMINDERS).where(_REMINDERS.c.id == reminder_id,
+                    _REMINDERS.c.status == "active").values(status="expired"))
                 return
             changed = connection.execute(
                 update(_REMINDERS)
@@ -107,14 +125,23 @@ def _validate_id(value: str, label: str) -> None:
 class ReminderService:
     """Single-owner APScheduler plugin with bounded pending work and CRUD tools."""
 
-    def __init__(self, database_path: Path | str, *, max_pending: int = 100):
+    def __init__(self, database_path: Path | str, *, max_pending: int = 100,
+                 notification_ttl_seconds: int = 3600, max_delivery_attempts: int = 3,
+                 retry_delay_seconds: float = 5):
         if max_pending <= 0:
             raise ValueError("max_pending must be positive")
         self.database_path = str(Path(database_path).resolve())
         Path(self.database_path).parent.mkdir(parents=True, exist_ok=True)
         self.max_pending = max_pending
+        if not 1 <= notification_ttl_seconds <= 86400 or not 1 <= max_delivery_attempts <= 10 or retry_delay_seconds < 0:
+            raise ValueError("Invalid notification TTL or retry limits")
+        self.notification_ttl_seconds = notification_ttl_seconds
+        self.max_delivery_attempts = max_delivery_attempts
+        self.retry_delay_seconds = retry_delay_seconds
         self._lock = threading.RLock()
         self._closed = False
+        self._live_attempts = {}
+        self._muted_profiles = {}
         self._owner_file = open(self.database_path + ".owner.lock", "a+b")
         try:
             fcntl.flock(self._owner_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -124,9 +151,12 @@ class ReminderService:
         try:
             self.engine = _engine(self.database_path)
             _METADATA.create_all(self.engine)
+            self._migrate_delivery_columns()
+            with self.engine.connect() as connection:
+                self._muted_profiles = {row.user_id: bool(row.muted) for row in connection.execute(select(_POLICY))}
             self.scheduler = BackgroundScheduler(
                 timezone=timezone.utc,
-                jobstores={"default": SQLAlchemyJobStore(url="sqlite:///" + self.database_path)},
+                jobstores={"default": SQLAlchemyJobStore(engine=self.engine)},
                 job_defaults={"misfire_grace_time": None, "coalesce": True, "max_instances": 1},
                 daemon=True,
             )
@@ -161,14 +191,38 @@ class ReminderService:
         if self._closed:
             raise RuntimeError("reminder service is closed")
 
+    def _migrate_delivery_columns(self):
+        # Additive, fixed-schema migration: existing reminder text and jobs stay
+        # intact. No user-controlled names or SQL fragments are accepted.
+        additions = {_REMINDERS.name: {"expires_utc": "VARCHAR(40)"}, _NOTIFICATIONS.name: {
+            "attempt_id": "VARCHAR(64)", "output_started_utc": "VARCHAR(40)", "output_channel": "VARCHAR(24)",
+            "delivery_evidence": "VARCHAR(256)", "next_attempt_utc": "VARCHAR(40)", "delivered_utc": "VARCHAR(40)",
+            "failure_count": "INTEGER NOT NULL DEFAULT 0"}}
+        for table, columns in additions.items():
+            existing = {column["name"] for column in inspect(self.engine).get_columns(table)}
+            with self.engine.begin() as connection:
+                for name, sql_type in columns.items():
+                    if name not in existing:
+                        connection.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}")
+
     def _recover(self) -> None:
         # The process ownership lock proves the previous consumer is gone.
         # An unacknowledged playback claim is retried with the same notice ID.
         with self.engine.begin() as connection:
+            # A crash after output began but before durable acknowledgment has
+            # an unknown delivery outcome. Never automatically play it again.
+            uncertain = select(_NOTIFICATIONS.c.reminder_id).where(_NOTIFICATIONS.c.status == "playing")
+            connection.execute(update(_REMINDERS).where(_REMINDERS.c.id.in_(uncertain)).values(status="uncertain"))
+            connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.status == "playing")
+                               .values(status="uncertain", delivery_evidence="process_restart_before_output_confirmation"))
             connection.execute(
                 update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.status == "claimed")
-                .values(status="pending", claimed_utc=None)
+                .values(status="pending", claimed_utc=None, attempt_id=None)
             )
+            legacy = connection.execute(select(_REMINDERS).where(_REMINDERS.c.expires_utc.is_(None))).mappings().all()
+            for row in legacy:
+                expiry = datetime.fromisoformat(row["due_utc"]) + timedelta(seconds=self.notification_ttl_seconds)
+                connection.execute(update(_REMINDERS).where(_REMINDERS.c.id == row["id"]).values(expires_utc=expiry.isoformat()))
             reminders = connection.execute(select(_REMINDERS)).mappings().all()
         active = {item["id"]: item for item in reminders if item["status"] == "active"}
         for job in self.scheduler.get_jobs():
@@ -236,7 +290,7 @@ class ReminderService:
                 else:
                     outstanding = connection.execute(
                         select(func.count()).select_from(_REMINDERS).where(
-                            and_(_REMINDERS.c.user_id == user_id, _REMINDERS.c.status.in_(["active", "fired"]))
+                            and_(_REMINDERS.c.user_id == user_id, _REMINDERS.c.status.in_(["active", "fired", "uncertain"]))
                         )
                     ).scalar_one()
                     if outstanding >= self.max_pending:
@@ -245,6 +299,7 @@ class ReminderService:
                         "id": uuid.uuid4().hex, "user_id": user_id, "text": text,
                         "due_utc": due_utc, "timezone": timezone_name,
                         "status": "active", "created_utc": _utc_now(),
+                        "expires_utc": (due_at.astimezone(timezone.utc) + timedelta(seconds=self.notification_ttl_seconds)).isoformat(),
                     }
                     connection.execute(insert(_REMINDERS).values(**reminder))
                     result = {"status": "scheduled", "reminder_id": reminder["id"], "due_utc": due_utc}
@@ -271,10 +326,11 @@ class ReminderService:
                 if reminder is None:
                     result = {"status": "not_found", "reminder_id": reminder_id}
                 else:
+                    self._live_attempts.pop(f"reminder:{reminder_id}:due", None)
                     connection.execute(update(_REMINDERS).where(_REMINDERS.c.id == reminder_id).values(status="cancelled"))
                     connection.execute(update(_NOTIFICATIONS).where(and_(
                         _NOTIFICATIONS.c.reminder_id == reminder_id,
-                        _NOTIFICATIONS.c.status.in_(["pending", "claimed"]),
+                        _NOTIFICATIONS.c.status.in_(["pending", "claimed", "playing", "uncertain", "failed"]),
                     )).values(status="cancelled"))
                     result = {"status": "cancelled", "reminder_id": reminder_id, "played_output_rolled_back": False}
                 connection.execute(insert(_OPERATIONS).values(
@@ -293,23 +349,33 @@ class ReminderService:
             self._check_open()
             statement = select(_REMINDERS).where(_REMINDERS.c.user_id == user_id)
             if not include_inactive:
-                statement = statement.where(_REMINDERS.c.status.in_(["active", "fired"]))
+                statement = statement.where(_REMINDERS.c.status.in_(["active", "fired", "uncertain", "failed"]))
             with self.engine.connect() as connection:
                 return [dict(row) for row in connection.execute(statement.order_by(_REMINDERS.c.due_utc)).mappings()]
 
     def claim_next(self, user_id: str, *, muted: bool = False, occupied: bool = False) -> dict[str, Any] | None:
         """Claim one notice only when Pipecat can play; no audio is emitted here."""
         _validate_id(user_id, "user_id")
-        if muted or occupied:
-            return None
         with self._lock:
             self._check_open()
+            with self.engine.begin() as connection:
+                expired = list(connection.execute(select(_REMINDERS.c.id).where(_REMINDERS.c.user_id == user_id,
+                    _REMINDERS.c.status == "fired", _REMINDERS.c.expires_utc <= _utc_now(),
+                    _REMINDERS.c.id.in_(select(_NOTIFICATIONS.c.reminder_id).where(_NOTIFICATIONS.c.status == "pending")))).scalars())
+                connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.reminder_id.in_(expired),
+                    _NOTIFICATIONS.c.status == "pending").values(status="expired"))
+                connection.execute(update(_REMINDERS).where(_REMINDERS.c.id.in_(expired)).values(status="expired"))
+            if muted or occupied or self.is_muted(user_id):
+                return None
             candidate = select(_NOTIFICATIONS.c.id).join(
                 _REMINDERS, _REMINDERS.c.id == _NOTIFICATIONS.c.reminder_id
             ).where(and_(
                 _NOTIFICATIONS.c.user_id == user_id,
                 _NOTIFICATIONS.c.status == "pending",
                 _REMINDERS.c.status == "fired",
+                _REMINDERS.c.expires_utc > _utc_now(),
+                (_NOTIFICATIONS.c.next_attempt_utc.is_(None) | (_NOTIFICATIONS.c.next_attempt_utc <= _utc_now())),
+                _NOTIFICATIONS.c.failure_count < self.max_delivery_attempts,
             )).order_by(_NOTIFICATIONS.c.created_utc, _NOTIFICATIONS.c.id).limit(1).scalar_subquery()
             with self.engine.begin() as connection:
                 row = connection.execute(update(_NOTIFICATIONS).where(and_(
@@ -317,51 +383,134 @@ class ReminderService:
                 )).values(
                     status="claimed", claimed_utc=_utc_now(),
                     delivery_attempts=_NOTIFICATIONS.c.delivery_attempts + 1,
+                    attempt_id=uuid.uuid4().hex, output_started_utc=None, output_channel=None, delivery_evidence=None,
                 ).returning(*_NOTIFICATIONS.c)).mappings().first()
-                return dict(row) if row is not None else None
+                if row is None: return None
+                notice = dict(row)
+                notice["expires_utc"] = connection.execute(select(_REMINDERS.c.expires_utc)
+                    .where(_REMINDERS.c.id == notice["reminder_id"])).scalar_one()
+            self._live_attempts[notice["id"]] = notice["attempt_id"]
+            return notice
 
-    def notification_allowed(self, notification_id: str) -> bool:
+    def is_muted(self, user_id: str) -> bool:
+        _validate_id(user_id, "user_id")
+        self._check_open()
+        return self._muted_profiles.get(user_id, False)
+
+    def set_muted(self, user_id: str, muted: bool) -> None:
+        _validate_id(user_id, "user_id")
+        if not isinstance(muted, bool): raise ValueError("muted must be boolean")
+        with self._lock:
+            self._check_open()
+            with self.engine.begin() as connection:
+                connection.execute(sqlite_insert(_POLICY).values(user_id=user_id, muted=int(muted))
+                    .on_conflict_do_update(index_elements=["user_id"], set_={"muted": int(muted)}))
+            self._muted_profiles[user_id] = muted
+
+    def attempt_active(self, notice) -> bool:
+        """Fast audio-path revocation check; this service is the sole DB owner.
+
+        Durable checks still happen at begin/ack. The output loop never waits
+        on a database lock merely to decide whether an old PCM chunk is valid.
+        """
+        return (not self._closed and self._live_attempts.get(notice["id"]) == notice["attempt_id"]
+                and not self._muted_profiles.get(notice["user_id"], False))
+
+    def _clear_attempt(self, notification_id, attempt_id):
+        if self._live_attempts.get(notification_id) == attempt_id:
+            self._live_attempts.pop(notification_id, None)
+
+    def notification_allowed(self, notification_id: str, attempt_id: str | None = None) -> bool:
         """Recheck immediately before playback; a later cancel blocks old claims."""
         with self._lock:
             self._check_open()
             with self.engine.connect() as connection:
-                return connection.execute(select(_NOTIFICATIONS.c.id).join(
+                statement = select(_NOTIFICATIONS.c.id).join(
                     _REMINDERS, _REMINDERS.c.id == _NOTIFICATIONS.c.reminder_id
                 ).where(and_(
                     _NOTIFICATIONS.c.id == notification_id,
-                    _NOTIFICATIONS.c.status == "claimed", _REMINDERS.c.status == "fired",
-                ))).first() is not None
+                    _NOTIFICATIONS.c.status.in_(["claimed", "playing"]), _REMINDERS.c.status == "fired",
+                    ((_NOTIFICATIONS.c.status == "playing") | (_REMINDERS.c.expires_utc > _utc_now())),
+                ))
+                if attempt_id is not None: statement = statement.where(_NOTIFICATIONS.c.attempt_id == attempt_id)
+                return connection.execute(statement).first() is not None
 
-    def release_notification(self, notification_id: str) -> bool:
+    def release_notification(self, notification_id: str, *, attempt_id: str) -> bool:
         """Return an unplayed claim to the outbox with the same notification ID."""
         with self._lock:
             self._check_open()
             with self.engine.begin() as connection:
                 result = connection.execute(update(_NOTIFICATIONS).where(and_(
                     _NOTIFICATIONS.c.id == notification_id, _NOTIFICATIONS.c.status == "claimed",
-                )).values(status="pending", claimed_utc=None))
+                    _NOTIFICATIONS.c.attempt_id == attempt_id,
+                )).values(status="pending", claimed_utc=None, attempt_id=None))
+                if result.rowcount == 1: self._clear_attempt(notification_id, attempt_id)
                 return result.rowcount == 1
 
-    def acknowledge_played(self, notification_id: str) -> bool:
-        """Call after actual playback confirmation, never merely after TTS submit."""
+    def release_unwritten_output(self, notification_id: str, *, attempt_id: str) -> bool:
+        """Only the live output adapter can prove no device write was attempted."""
+        with self._lock:
+            self._check_open()
+            with self.engine.begin() as connection:
+                changed = connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.id == notification_id,
+                    _NOTIFICATIONS.c.attempt_id == attempt_id, _NOTIFICATIONS.c.status == "playing")
+                    .values(status="pending", attempt_id=None, output_started_utc=None, output_channel=None,
+                            claimed_utc=None, delivery_evidence="deferred_before_any_output_write"))
+            if changed.rowcount: self._clear_attempt(notification_id, attempt_id)
+            return changed.rowcount == 1
+
+    def begin_output(self, notification_id: str, *, attempt_id: str, channel: str) -> bool:
+        if channel not in {"audio", "text", "fixture"}: raise ValueError("Unknown output channel")
+        with self._lock:
+            if not self.notification_allowed(notification_id, attempt_id): return False
+            with self.engine.begin() as connection:
+                changed = connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.id == notification_id,
+                    _NOTIFICATIONS.c.attempt_id == attempt_id, _NOTIFICATIONS.c.status == "claimed")
+                    .values(status="playing", output_started_utc=_utc_now(), output_channel=channel))
+                return changed.rowcount == 1
+
+    def fail_output(self, notification_id: str, *, attempt_id: str, reason: str) -> bool:
+        """Retry only when no output was admitted; partial/unknown output stays visible."""
+        with self._lock, self.engine.begin() as connection:
+            self._check_open()
+            row = connection.execute(select(_NOTIFICATIONS).where(_NOTIFICATIONS.c.id == notification_id,
+                _NOTIFICATIONS.c.attempt_id == attempt_id)).mappings().first()
+            if row is None or row["status"] not in {"claimed", "playing"}: return False
+            failures = row["failure_count"] + 1
+            status = "uncertain" if row["status"] == "playing" else ("failed" if failures >= self.max_delivery_attempts else "pending")
+            connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.id == notification_id)
+                .values(status=status, delivery_evidence=reason[:256], claimed_utc=None, failure_count=failures,
+                        next_attempt_utc=(datetime.now(timezone.utc) + timedelta(seconds=self.retry_delay_seconds)).isoformat()))
+            if status != "pending":
+                connection.execute(update(_REMINDERS).where(_REMINDERS.c.id == row["reminder_id"]).values(status=status))
+            self._clear_attempt(notification_id, attempt_id)
+            return True
+
+    def acknowledge_delivery(self, notification_id: str, *, attempt_id: str, evidence: str) -> bool:
+        """Confirm the same started attempt after its output sink has drained."""
+        if not evidence or len(evidence) > 256: raise ValueError("Delivery evidence is required")
         with self._lock:
             self._check_open()
             with self.engine.begin() as connection:
                 notification = connection.execute(select(_NOTIFICATIONS).where(
                     _NOTIFICATIONS.c.id == notification_id
                 )).mappings().first()
-                if notification is None:
+                if notification is None or notification["attempt_id"] != attempt_id:
                     return False
-                if notification["status"] == "played":
+                if notification["status"] in {"played", "displayed", "fixture_delivered"}:
                     return True
-                if notification["status"] != "claimed":
+                if notification["status"] != "playing":
                     return False
+                delivered_status = {"audio": "played", "text": "displayed", "fixture": "fixture_delivered"}[notification["output_channel"]]
                 changed = connection.execute(update(_NOTIFICATIONS).where(and_(
-                    _NOTIFICATIONS.c.id == notification_id, _NOTIFICATIONS.c.status == "claimed",
-                )).values(status="played", played_utc=_utc_now()))
+                    _NOTIFICATIONS.c.id == notification_id, _NOTIFICATIONS.c.status == "playing",
+                    _NOTIFICATIONS.c.attempt_id == attempt_id,
+                )).values(status=delivered_status, delivered_utc=_utc_now(), delivery_evidence=evidence,
+                          played_utc=_utc_now() if notification["output_channel"] == "audio" else None))
                 if changed.rowcount != 1:
                     return False
                 connection.execute(update(_REMINDERS).where(and_(
                     _REMINDERS.c.id == notification["reminder_id"], _REMINDERS.c.status == "fired",
                 )).values(status="delivered"))
+                self._clear_attempt(notification_id, attempt_id)
                 return True

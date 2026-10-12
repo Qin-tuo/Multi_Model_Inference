@@ -1,0 +1,41 @@
+{
+  "created_at": "2026-10-12T14:43:26.413970+00:00",
+  "status": "PASS",
+  "scope": "real APScheduler/SQLite and four separate text-output processes; no model, speaker, TTS quality or acoustic timing evidence",
+  "checks": {
+    "all_commands_succeeded": true,
+    "mute_persists_across_processes": true,
+    "owner_received_exactly_one_notice": true,
+    "completed_notice_not_repeated_after_restart": true,
+    "guest_received_only_guest_notice": true,
+    "expired_and_cancelled_reminders_not_delivered": true,
+    "text_delivery_not_labelled_acoustic_playback": true
+  },
+  "cases": [
+    {
+      "name": "muted_process",
+      "exit_code": 0,
+      "delivered": []
+    },
+    {
+      "name": "owner_delivery_process",
+      "exit_code": 0,
+      "delivered": [
+        "合成测试提醒：喝水"
+      ]
+    },
+    {
+      "name": "owner_restart_process",
+      "exit_code": 0,
+      "delivered": []
+    },
+    {
+      "name": "guest_delivery_process",
+      "exit_code": 0,
+      "delivered": [
+        "访客测试提醒：休息"
+      ]
+    }
+  ],
+  "notification_count": 2
+}

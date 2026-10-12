@@ -11,7 +11,7 @@
 | 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本会话、记忆/笔记工具、进程重启召回与逻辑取消通过初测；实时设备和语音工具整合继续推进 |
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
-| 提醒 | APScheduler 3.11.3 + SQLAlchemy | 持久调度、取消、去重、待播通知测试通过；播报消费待接入 |
+| 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；Pipecat音频完成协议通过夹具测试，实机播报待验证 |
 | 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 本机引擎与文件语音问答通过；真人/噪声/AEC待验证 |
 | 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | 对齐RGB-D采集、检测/姿态TensorRT FP32单图对齐通过；ROS五个包编译通过，完整GPU ORT与ROS运行验证仍待完成；FP16失败样例保留 |
 
@@ -37,7 +37,19 @@ python3 tools/project.py interact --user owner
 
 此入口复用一个持续运行的 Pipecat worker 和原生工具 continuation。模型请求及工具回传请求均经 llama.cpp 实际模板与 tokenizer 检查；优先移除旧轮次，当前问题过长则明确失败。默认会话文本保留7天，仅成功输出的完整文本进入已完成历史；更正/遗忘会清除相关来源和派生会话记录，并失效当前旧上下文。笔记和偏好分别从各自存储读取，购物笔记不作为偏好证据。用户明确操作最多修复重试一次，未实际成功时不会口头确认。
 
-当前取消验证覆盖原生 interruption、HTTP生成请求停止、服务slot空闲及下一轮恢复。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU资源释放。提醒可持久创建和查询，到期语音播报消费尚未接入。完整语音助手验收仍未完成。
+当前取消验证覆盖原生 interruption、HTTP生成请求停止、服务slot空闲及下一轮恢复。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU资源释放。到期提醒已在控制台按“提醒：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
+
+提醒静音使用 `/mute-reminders on`、`/mute-reminders off`，设置按档案持久保存。未开始输出的失败最多重试3次，默认间隔5秒；提醒到期后默认有效1小时，可在`configs/runtime.yaml`配置。已开始输出但未确认的提醒保留为`uncertain`，重启后不自动重播，可查询后取消或重新设置。文字显示与音频播放分开记录。
+
+模型服务不可用时，可独立运行文字提醒消费者：
+
+```bash
+python3 tools/project.py notifications --user owner
+```
+
+同一数据目录只运行一个消费者；`interact`已经包含通知消费。独立模式不需要加载语言模型。跨进程静音、过期、取消、主人/访客隔离及完成后不重播见[文字通知报告](benchmarks/results/reminder-delivery-smoke.json)。
+
+音频通知接入采用 Pipecat 原生 `TTSSpeakFrame` 和有序输出标记，记录实际输出尝试，等待输出设备排空后才确认；合成结束、普通停止讲话事件或部分音频写出都不能作为成功依据。LocalAudio适配提供PortAudio排空接口，但麦克风/扬声器未连接，当前只通过标明为fixture的队列与故障测试，尚未完成完整语音会话接入和声学验收。[PortAudio完成语义](https://portaudio.com/docs/v19-doxydocs/portaudio_8h.html)
 
 实际测试见[持续会话报告](benchmarks/results/session-smoke.json)、[独立进程与取消报告](benchmarks/results/application-smoke.json)。这些是合成开发样例；模型曾漏调用工具或把购物内容误当偏好，失败样例与校验修正已保留，不能以这几条通过替代完整工具质量集。
 

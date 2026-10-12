@@ -400,8 +400,15 @@ def main():
     interact.add_argument("--data-dir", type=Path, default=DATA)
     interact.add_argument("--session-id")
     interact.add_argument("--input-file", type=Path)
+    notifications = sub.add_parser("notifications", help="Text reminder delivery; independent of model services")
+    notifications.add_argument("--user", default="owner")
+    notifications.add_argument("--data-dir", type=Path, default=DATA)
+    notifications.add_argument("--seconds", type=float, default=0)
     args = parser.parse_args()
     try:
+        if args.action == "notifications":
+            return subprocess.call([str(ROOT / ".venv/bin/python"), "-m", "app.reminder_console", "--user", args.user,
+                                    "--data-dir", str(args.data_dir), "--seconds", str(args.seconds)], cwd=ROOT)
         if args.action == "interact":
             command = [str(ROOT / ".venv/bin/python"), "-m", "app.interact", "--user", args.user,
                        "--data-dir", str(args.data_dir)]

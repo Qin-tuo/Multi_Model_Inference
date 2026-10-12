@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T11:42:22.507148+00:00",
+  "created_at": "2026-10-12T14:49:21.230291+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 47,
+  "tests_run": 58,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -93,6 +93,30 @@
       "status": "PASS"
     },
     {
+      "id": "test_notification_pipeline.NotificationPipelineTests.test_ack_waits_for_native_audio_queue_and_output_drain",
+      "status": "PASS"
+    },
+    {
+      "id": "test_notification_pipeline.NotificationPipelineTests.test_cancel_while_drain_pending_rejects_late_receipt",
+      "status": "PASS"
+    },
+    {
+      "id": "test_notification_pipeline.NotificationPipelineTests.test_failed_device_write_is_not_played",
+      "status": "PASS"
+    },
+    {
+      "id": "test_notification_pipeline.NotificationPipelineTests.test_interruption_never_confirms_partial_output",
+      "status": "PASS"
+    },
+    {
+      "id": "test_notification_pipeline.NotificationPipelineTests.test_mute_and_foreground_hold_until_released",
+      "status": "PASS"
+    },
+    {
+      "id": "test_notification_pipeline.NotificationPipelineTests.test_tts_failure_has_no_audio_receipt_and_retries_are_finite",
+      "status": "PASS"
+    },
+    {
       "id": "test_persistent_session.PersistentSessionTests.test_failed_output_is_not_completed_history",
       "status": "PASS"
     },
@@ -145,6 +169,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_reminders.ReminderIntegrationTest.test_additive_migration_preserves_legacy_claim_and_text",
+      "status": "PASS"
+    },
+    {
       "id": "test_reminders.ReminderIntegrationTest.test_cancel_before_due_and_invalidate_already_claimed_notice",
       "status": "PASS"
     },
@@ -153,11 +181,27 @@
       "status": "PASS"
     },
     {
+      "id": "test_reminders.ReminderIntegrationTest.test_expired_misfire_has_no_output_and_pending_notice_expires",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_failed_unstarted_output_has_bounded_retries",
+      "status": "PASS"
+    },
+    {
       "id": "test_reminders.ReminderIntegrationTest.test_mute_and_occupied_keep_notice_unplayed",
       "status": "PASS"
     },
     {
       "id": "test_reminders.ReminderIntegrationTest.test_restart_recovers_missing_job_and_deduplicates_due_callback",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_stale_attempt_and_early_ack_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_started_unconfirmed_output_is_not_replayed_after_restart",
       "status": "PASS"
     },
     {
@@ -209,6 +253,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "44a172df041a0c3a2b59f32f6f277a66f3651d67",
+  "source_commit": "3dd20952a18667775a2f2d24f52745b781f21217",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

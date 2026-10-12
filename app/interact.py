@@ -14,6 +14,7 @@ from app.memory import Mem0Adapter
 from app.records import Records
 from app.reminders import ReminderService
 from app.session import AssistantSession
+from app.notifications import NotificationPump, TextNotificationSink
 from tools.project import CACHE, DATA, ROOT
 
 
@@ -23,7 +24,9 @@ async def console(args):
     with ExitStack() as stack:
         memory = stack.enter_context(Mem0Adapter(args.data_dir / "memory",
             bge_path=CACHE / "models/bge-small-zh-v1.5-onnx", embedding_backend="onnx"))
-        reminders = stack.enter_context(ReminderService(args.data_dir / "reminders.sqlite"))
+        reminder_options = {key: runtime["reminders"][key] for key in
+            ("notification_ttl_seconds", "max_delivery_attempts", "retry_delay_seconds") if key in runtime["reminders"]}
+        reminders = stack.enter_context(ReminderService(args.data_dir / "reminders.sqlite", **reminder_options))
         records = stack.enter_context(Records(args.data_dir / "records.sqlite",
             retention_days=runtime["memory"]["transcript_retention_days"]))
         session = AssistantSession(config, memory, reminders, records, user_id=args.user,
@@ -31,6 +34,14 @@ async def console(args):
         await session.start()
         pending = None
         errors = []
+
+        async def emit_notice(text):
+            print("提醒：" + text, flush=True)
+
+        occupied = lambda: session.busy.locked()
+        notifications = NotificationPump(reminders, args.user,
+            TextNotificationSink(reminders, emit_notice, occupied=occupied), occupied=occupied)
+        notification_task = asyncio.create_task(notifications.run())
 
         async def emit(text):
             print("助手：" + text, flush=True)
@@ -57,7 +68,11 @@ async def console(args):
                 print("正在回答；可输入 /stop 停止。", flush=True)
                 return True
             if line == "/help":
-                print("直接输入中文对话。命令：/new 新会话，/stop 停止，/memories 记忆，/notes 笔记，/reminders 提醒，/history 已输出历史，/quit 退出。", flush=True)
+                print("直接输入中文对话。命令：/new 新会话，/stop 停止，/memories 记忆，/notes 笔记，/reminders 提醒，/history 已输出历史，/mute-reminders on或off 提醒静音，/quit 退出。", flush=True)
+            elif line in {"/mute-reminders on", "/mute-reminders off"}:
+                muted = line.endswith(" on")
+                reminders.set_muted(args.user, muted)
+                print("提醒静音已开启。" if muted else "提醒静音已关闭。", flush=True)
             elif line == "/new":
                 await session.close()
                 session = await AssistantSession(config, memory, reminders, records, user_id=args.user,
@@ -92,6 +107,8 @@ async def console(args):
                 finally:
                     transport.close()
         finally:
+            await notifications.stop()
+            await notification_task
             if pending and not pending.done():
                 await session.cancel()
                 await pending

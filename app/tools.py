@@ -258,6 +258,7 @@ class ToolTurn:
         if name=="list_reminders": return {"items":self.reminders.list_reminders(self.user_id)}
         if name=="cancel_reminder":
             result=self.reminders.cancel(self.user_id,args["reminder_id"],request_id=request_id)
+            if result["status"] != "cancelled": raise ValueError("Reminder was not found in the selected profile")
             return {**result,"user_message":"提醒取消请求已处理。"}
         raise ValueError("Unregistered tool")
 

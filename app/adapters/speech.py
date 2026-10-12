@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from pipecat.frames.frames import ErrorFrame, Frame, TTSAudioRawFrame
+from pipecat.frames.frames import CancelFrame, ErrorFrame, Frame, InterruptionFrame, TTSAudioRawFrame, TTSSpeakFrame
 from pipecat.services.openai.stt import OpenAISTTService
 from pipecat.services.tts_service import TTSService
 from pipecat.services.settings import TTSSettings
@@ -60,12 +60,67 @@ class OVSTTSService(TTSService):
     This transport adapter preserves OVS's actual voice and audio format.
     """
 
-    def __init__(self):
+    def __init__(self, *, notification_sink=None):
         self._local_config = speech_settings()
-        super().__init__(sample_rate=16000, settings=TTSSettings(model=self._local_config["tts_model"], voice=self._local_config["voice"]))
+        self._notification_sink = notification_sink
+        self._notification_submission = None
+        self._notification_contexts = {}
+        super().__init__(sample_rate=16000, push_start_frame=True, push_stop_frames=True,
+                         max_consecutive_zero_audio_contexts=0,
+                         settings=TTSSettings(model=self._local_config["tts_model"], voice=self._local_config["voice"], language=None))
         self._http = httpx.AsyncClient(timeout=30, trust_env=False, limits=httpx.Limits(max_connections=1))
 
+    async def process_frame(self, frame, direction):
+        from app.notifications import NOTICE_TOKEN
+        token = frame.metadata.get(NOTICE_TOKEN) if isinstance(frame, TTSSpeakFrame) else None
+        if token and self._notification_sink is not None:
+            if not self._notification_sink.allowed(token): return
+            self._notification_submission = token
+            try: await super().process_frame(frame, direction)
+            finally:
+                if self._notification_submission == token: self._notification_submission = None
+        else:
+            await super().process_frame(frame, direction)
+            if isinstance(frame, (InterruptionFrame, CancelFrame)):
+                self._notification_contexts.clear()
+
+    async def on_turn_context_created(self, context_id):
+        if self._notification_submission:
+            self._notification_contexts[context_id] = self._notification_submission
+        await super().on_turn_context_created(context_id)
+
+    async def push_frame(self, frame, direction=None):
+        from app.notifications import NOTICE_TOKEN
+        from pipecat.processors.frame_processor import FrameDirection
+        context_id = getattr(frame, "context_id", None)
+        token = self._notification_contexts.get(context_id)
+        if token: frame.metadata[NOTICE_TOKEN] = token
+        await super().push_frame(frame, direction or FrameDirection.DOWNSTREAM)
+
+    async def push_error_frame(self, error, force_treat_as_permanent=False):
+        from app.notifications import NOTICE_TOKEN
+        token = self._notification_contexts.get(self.get_active_audio_context_id())
+        if token: error.metadata.setdefault(NOTICE_TOKEN, token)
+        await super().push_error_frame(error, force_treat_as_permanent=force_treat_as_permanent)
+
+    async def on_audio_context_completed(self, context_id):
+        self._notification_contexts.pop(context_id, None)
+        await super().on_audio_context_completed(context_id)
+
+    async def on_audio_context_interrupted(self, context_id):
+        self._notification_contexts.pop(context_id, None)
+        await super().on_audio_context_interrupted(context_id)
+
+    async def tts_process_generator(self, context_id, generator):
+        await super().tts_process_generator(context_id, generator)
+        # This is a finite HTTP response even when it failed or returned no
+        # PCM. The base heuristic otherwise treats zero-audio as a websocket
+        # context and waits for a timeout before closing it.
+        self._is_yielding_frames_synchronously = True
+
     async def run_tts(self, text: str, context_id: str) -> AsyncGenerator[Frame, None]:
+        from app.notifications import NOTICE_TOKEN
+        notice_token = self._notification_contexts.get(context_id)
         await self.start_ttfb_metrics()
         try:
             async with self._http.stream("POST", self._local_config["base_url"].rstrip("/") + "/audio/speech", json={
@@ -77,9 +132,13 @@ class OVSTTSService(TTSService):
                     if chunk:
                         if len(chunk) % 2: raise ValueError("OVS returned a partial PCM16 sample")
                         await self.stop_ttfb_metrics()
-                        yield TTSAudioRawFrame(chunk, 16000, 1, context_id=context_id)
+                        frame = TTSAudioRawFrame(chunk, 16000, 1, context_id=context_id)
+                        if notice_token: frame.metadata[NOTICE_TOKEN] = notice_token
+                        yield frame
         except (httpx.HTTPError, ValueError) as error:
-            yield ErrorFrame(error=f"Local OVS TTS failed: {error}")
+            frame = ErrorFrame(error=f"Local OVS TTS failed: {error}")
+            if notice_token: frame.metadata[NOTICE_TOKEN] = notice_token
+            yield frame
 
     async def cleanup(self):
         await self._http.aclose()

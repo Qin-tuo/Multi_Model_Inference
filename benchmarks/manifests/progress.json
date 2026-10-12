@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T12:45:19.778639+00:00",
+  "updated_at": "2026-10-12T14:49:08.288519+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -103,10 +103,14 @@
       "task_id": "J3.reminders",
       "status": "RUNNING",
       "artifacts": [
-        "app/reminders.py"
+        "app/reminders.py",
+        "app/notifications.py",
+        "app/reminder_console.py",
+        "benchmarks/results/reminder-delivery-smoke.json",
+        "tests/test_notification_pipeline.py"
       ],
-      "validation": "real APScheduler/SQLite plugin tests; audio consumption and acoustic timing pending; real model-selected create_reminder persisted and confirmed",
-      "next_action": "register framework tool handlers and deliver notifications via TTS"
+      "validation": "Real APScheduler/SQLite and four independent text-output processes pass mute/expiry/cancel/owner isolation/deduplication checks; native Pipecat output ordering tested with explicit audio fixtures, not hardware",
+      "next_action": "connect the audio notification adapter to the full voice conversation; verify ReSpeaker playback and 20 acoustic timing samples; test wall-clock changes"
     },
     {
       "task_id": "J2.6",
@@ -203,7 +207,8 @@
     "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
     "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
     "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending",
-    "Observed build-time OOM with compiler+VLM overlap; model services now remain stopped during the heavy ORT build. Full runtime capacity is not yet validated."
+    "Observed build-time OOM with compiler+VLM overlap; model services now remain stopped during the heavy ORT build. Full runtime capacity is not yet validated.",
+    "Notification audio completion is currently verified with labelled transport fixtures; optional LocalAudio adapter, real speaker drain/AEC and wall-clock jump behavior still require qualification"
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

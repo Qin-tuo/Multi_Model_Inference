@@ -39,7 +39,10 @@
   },
   "reminders": {
     "provider": "apscheduler",
-    "version": "3.11.3"
+    "version": "3.11.3",
+    "notification_ttl_seconds": 3600,
+    "max_delivery_attempts": 3,
+    "retry_delay_seconds": 5
   },
   "speech": {
     "base_url": "http://127.0.0.1:8621/v1",
