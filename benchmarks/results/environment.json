@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-12T07:27:29.103868+00:00",
+  "status": "PARTIAL",
+  "device_model": "NVIDIA Jetson Orin NX Engineering Reference Developer Kit",
+  "architecture": "aarch64",
+  "kernel": "6.8.12-1021-tegra",
+  "memory_bytes": {
+    "MemTotal": 16355569664,
+    "MemFree": 779141120,
+    "MemAvailable": 12265435136,
+    "Buffers": 308830208,
+    "Cached": 10900594688,
+    "SwapCached": 98304,
+    "Active": 2230378496,
+    "Inactive": 11949334528,
+    "Active(anon)": 9060352,
+    "Inactive(anon)": 3011809280,
+    "Active(file)": 2221318144,
+    "Inactive(file)": 8937525248,
+    "Unevictable": 28700672,
+    "Mlocked": 16384,
+    "SwapTotal": 2147479552,
+    "SwapFree": 2144858112,
+    "Dirty": 38477824,
+    "Writeback": 0,
+    "AnonPages": 2792538112,
+    "Mapped": 767406080,
+    "Shmem": 22437888,
+    "KReclaimable": 587104256,
+    "Slab": 777334784,
+    "SReclaimable": 587104256,
+    "SUnreclaim": 190230528,
+    "KernelStack": 14417920,
+    "PageTables": 35336192,
+    "SecPageTables": 0,
+    "NFS_Unstable": 0,
+    "Bounce": 0,
+    "WritebackTmp": 0,
+    "CommitLimit": 10325262336,
+    "Committed_AS": 8669282304,
+    "VmallocTotal": 136337025925120,
+    "VmallocUsed": 71348224,
+    "VmallocChunk": 0,
+    "Percpu": 5537792,
+    "HardwareCorrupted": 0,
+    "AnonHugePages": 1604321280,
+    "ShmemHugePages": 0,
+    "ShmemPmdMapped": 0,
+    "FileHugePages": 0,
+    "FilePmdMapped": 0,
+    "CmaTotal": 268435456,
+    "CmaFree": 9269248,
+    "HugePages_Total": 0,
+    "HugePages_Free": 0,
+    "HugePages_Rsvd": 0,
+    "HugePages_Surp": 0,
+    "Hugepagesize": 2097152,
+    "Hugetlb": 0
+  },
+  "disk": {
+    "total": 249326632960,
+    "used": 40293109760,
+    "free": 196293902336
+  },
+  "cuda_driver": {
+    "status": "PASS",
+    "devices": [
+      {
+        "name": "Orin",
+        "compute_capability": "8.7"
+      }
+    ],
+    "evidence": "CUDA driver enumeration; not yet a model/kernel test"
+  },
+  "ros": {
+    "jazzy_setup_exists": false
+  },
+  "gaps": [
+    "ROS 2 Jazzy not installed",
+    "physical audio capture/playback not verified"
+  ],
+  "package_versions": "libcudnn9-cuda-13\t9.20.0.46-1\nlibnvinfer10\t10.16.2.10-1+cuda13.2\nnvidia-l4t-core\t39.2.1-20260806224157\n"
+}

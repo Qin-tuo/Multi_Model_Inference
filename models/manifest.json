@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "models": {
+    "vlm": {
+      "role": "initial_functional_capacity_baseline",
+      "backend": "llama.cpp",
+      "repository": "ggml-org/Qwen2.5-VL-3B-Instruct-GGUF",
+      "revision": "5037fcf163dd95d1e41d1974465f0898ed108ca2",
+      "files": [
+        {
+          "name": "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+          "sha256": "d02fe9b69ad8cadbbd228e387667af66612c44bed29ffc8eb1e7caf9ac486c12",
+          "size": 1929901056
+        },
+        {
+          "name": "mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
+          "sha256": "b9160fe9d814d1fadf68395677468534778b39ac33c2e7561b7b218626e60d5e",
+          "size": 1338428128
+        }
+      ],
+      "context_tokens": 2048,
+      "max_output_tokens": 128,
+      "threads": 4,
+      "gpu_layers": 99,
+      "parallel": 1,
+      "server_model_id": "assistant-vlm"
+    },
+    "asr": {
+      "model": "Qwen3-ASR-0.6B",
+      "backend": "openvoicestream",
+      "status": "not_prepared"
+    },
+    "tts": {
+      "model": "Matcha",
+      "backend": "openvoicestream",
+      "status": "not_prepared"
+    },
+    "detection": {
+      "model": "YOLOv8n",
+      "backend": "TensorRT",
+      "status": "not_prepared"
+    },
+    "pose": {
+      "model": "YOLOv8n-pose",
+      "backend": "TensorRT",
+      "status": "not_prepared"
+    },
+    "vad": {
+      "model": "Silero VAD",
+      "backend": "onnxruntime_cpu",
+      "status": "not_prepared"
+    },
+    "embedding": {
+      "model": "BAAI/bge-small-zh-v1.5",
+      "backend": "onnxruntime_cpu",
+      "status": "not_prepared"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+[project]
+name = "multi-model-assistant"
+version = "0.1.0"
+description = "Local multimodal assistant on Jetson Orin"
+requires-python = ">=3.12"
+dependencies = [
+  "pipecat-ai[openai]==1.12.0",
+  "mem0ai==2.2.1",
+  "APScheduler==3.11.3",
+  "SQLAlchemy>=2.0,<3",
+]
+
+[project.optional-dependencies]
+memory = ["sentence-transformers>=5.2,<6", "onnxruntime>=1.23,<2"]
+
+[tool.ruff]
+target-version = "py312"
+

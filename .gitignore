@@ -1,1 +1,17 @@
 .worktrees/
+.venv/
+build/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.gguf
+*.onnx
+*.engine
+*.db
+*.db-wal
+*.db-shm
+*.wav
+*.pcm
+*.nsys-rep
+*.qdrep
+benchmarks/raw/

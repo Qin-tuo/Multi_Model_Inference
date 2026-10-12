@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-12T07:24:49.390626+00:00",
+  "status": "PASS",
+  "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
+  "embedding_input": "deterministic fixture; not BGE semantic verification",
+  "llm_input": "labelled Pipecat test processor; not real model inference",
+  "storage": "real temporary Qdrant and SQLite",
+  "scheduler": "real APScheduler",
+  "tests_run": 26,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "versions": {
+    "pipecat-ai": "1.12.0",
+    "mem0ai": "2.2.1",
+    "APScheduler": "3.11.3",
+    "SQLAlchemy": "2.1.4",
+    "qdrant-client": "1.19.1",
+    "onnxruntime": "1.24.4"
+  },
+  "cases": [
+    {
+      "id": "test_mem0_adapter.ConfigTests.test_config_pins_local_llm_cpu_embedding_and_persistent_paths",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_completed_barrier_filters_restored_old_vector",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_correction_invalidates_old_derived_summary",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_delete_failure_preserves_barrier_and_restarts_to_finish",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_export_uses_real_qdrant_cursor_across_pages",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_forget_erases_derived_summary",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_idempotency_survives_restart_and_argument_conflict",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_namespace_and_fixture_quality_are_explicit",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_old_background_generation_and_cancelled_turn_cannot_write",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_owner_check_precedes_every_id_update_or_delete",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_partial_sdk_add_failure_is_pending_and_retry_reconciles",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_purge_owner_message_scope_does_not_match_other_owner",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_purge_special_owner_scope_uses_upstream_delimiter_escaping",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_real_sdk_explicit_save_and_new_instance_recall",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_real_update_replay_preserves_new_version",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_sdk_delete_alone_retains_body_but_adapter_forget_purges_it",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_sdk_query_reports_actual_dense_fallback_and_fixture_scope",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_serialized_adapter_cas_has_one_winner",
+      "status": "PASS"
+    },
+    {
+      "id": "test_pipecat_pipeline.PipecatConfigurationTest.test_bounded_file_inputs",
+      "status": "PASS"
+    },
+    {
+      "id": "test_pipecat_pipeline.PipecatConfigurationTest.test_local_endpoint_and_manifest_model",
+      "status": "PASS"
+    },
+    {
+      "id": "test_pipecat_pipeline.PipecatPipelineTest.test_maintained_framework_objects",
+      "status": "PASS"
+    },
+    {
+      "id": "test_pipecat_pipeline.PipecatPipelineTest.test_native_runner_context_and_completion_path",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_cancel_before_due_and_invalidate_already_claimed_notice",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_duplicate_create_capacity_and_single_owner",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_mute_and_occupied_keep_notice_unplayed",
+      "status": "PASS"
+    },
+    {
+      "id": "test_reminders.ReminderIntegrationTest.test_restart_recovers_missing_job_and_deduplicates_due_callback",
+      "status": "PASS"
+    }
+  ],
+  "source_commit": "84babf0d07c3b0070dab3ac953496b37ad1c1578",
+  "source_state": "working tree; see checkpoint commit containing this report"
+}

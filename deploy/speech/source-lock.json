@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "url": "https://github.com/Seeed-Solution/openvoicestream.git",
+    "commit": "18a459761647a641926f04d7d36c17035c11f8b7",
+    "engine_submodule_commit": "e1d8d507300e329642937b8461ce03bbd2bd3a16"
+  },
+  "selection": {
+    "compose": "deploy/docker-compose.edgellm-v091-voice.yml",
+    "profile": "jetson-edgellm-v091-matcha",
+    "service": "speech",
+    "asr": "Qwen3-ASR-0.6B",
+    "tts": "Matcha icefall zh/en + Vocos",
+    "extra_llm": false,
+    "agent": false
+  },
+  "qualified_upstream_target": {
+    "sm": "87",
+    "jetpack": "6.2",
+    "cuda": "12.6",
+    "tensorrt": "10.3",
+    "onnxruntime": "1.23.2",
+    "python": "3.10"
+  },
+  "models": {
+    "qwen3-asr-0.6b": {
+      "repo": "harvestsu/qwen3-asr-0.6b-jetson-artifacts",
+      "revision": "9a82e1ae0fd8dce3ab090e66ae72e3b99ec9c9bf",
+      "payload_sha256": "b780bf42f97a279982adcf7cb7aa2abf2fbe9fa6983600db8d3384c78bed95f2",
+      "payload_size": 1827532800
+    },
+    "matcha-icefall-zh-en": {
+      "repo": "harvestsu/matcha-icefall-zh-en-jetson-artifacts",
+      "revision": "737422aea690cd7604eae893a2168d0840a094dc",
+      "payload_sha256": "3d4856abe3f71b07988cef816d49c81933ee96191819ef37af6c1c01193faf71",
+      "payload_size": 376135680
+    }
+  },
+  "status": "source_verified_host_port_required"
+}

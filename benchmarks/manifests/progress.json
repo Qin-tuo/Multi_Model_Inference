@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-12T07:24:40.481635+00:00",
+  "plan": "v1.1 (mature-framework revision of v1.0 scope)",
+  "overall_status": "RUNNING",
+  "tasks": [
+    {
+      "task_id": "J0.1",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/project.py",
+        "benchmarks/results/environment.json"
+      ],
+      "validation": "doctor reads current Orin/CUDA driver; complete BOM and power baseline pending",
+      "next_action": "refresh hardware enumeration and register deployment environment"
+    },
+    {
+      "task_id": "J0.2",
+      "status": "RUNNING",
+      "validation": "D435i now enumerates video nodes at USB2; ROS and real RGB-D/audio capture not verified",
+      "next_action": "install ROS 2 Jazzy and verify RealSense modes; identify physical audio I/O"
+    },
+    {
+      "task_id": "J0.3",
+      "status": "RUNNING",
+      "artifacts": [
+        "deploy/vision/prepare.py",
+        "deploy/vision/source-lock.json"
+      ],
+      "validation": "source inspection and SDK staging only",
+      "next_action": "build compatible ONNX Runtime/TRT EP and run YOLO"
+    },
+    {
+      "task_id": "J0.4",
+      "status": "RUNNING",
+      "artifacts": [
+        "models/manifest.json",
+        "deploy/upstreams.lock.json"
+      ],
+      "validation": "GGUF/projector SHA256 verified; CUDA87 build in progress",
+      "next_action": "complete build, then real text/image smoke and Pipecat pipeline"
+    },
+    {
+      "task_id": "J0.5",
+      "status": "RUNNING",
+      "artifacts": [
+        "deploy/speech/README.md",
+        "deploy/speech/prepare.py"
+      ],
+      "validation": "upstream target verifier rejects current CUDA/TRT/L4T; no speech engine inference yet",
+      "next_action": "port fixed OVS speech subset to host and rebuild model engines"
+    },
+    {
+      "task_id": "J0.6",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/memory.py",
+        "patches/mem0/purge_history.py"
+      ],
+      "validation": "real SDK lifecycle tests use fixture embeddings; BGE not deployed",
+      "next_action": "prepare BGE CPU model and verify semantic recall"
+    },
+    {
+      "task_id": "J1.framework",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/pipecat_bot.py",
+        "app/adapters/llama.py"
+      ],
+      "validation": "Pipecat native worker/context contract tests; real LLM path pending",
+      "next_action": "connect actual llama-server and then audio services"
+    },
+    {
+      "task_id": "J3.reminders",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/reminders.py"
+      ],
+      "validation": "real APScheduler/SQLite plugin tests; audio consumption and acoustic timing pending",
+      "next_action": "register framework tool handlers and deliver notifications via TTS"
+    }
+  ],
+  "acceptance": {
+    "JT-01": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-02": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-03": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-04": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-05": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-06": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-07": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-08": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-09": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-10": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-11": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-12": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "JT-13": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    }
+  }
+}

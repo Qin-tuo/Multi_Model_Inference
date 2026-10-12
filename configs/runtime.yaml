@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "profile": "assistant",
+  "owner": "owner",
+  "llama": {
+    "host": "127.0.0.1",
+    "port": 8088,
+    "context_tokens": 2048,
+    "max_output_tokens": 128,
+    "threads": 4,
+    "parallel": 1,
+    "gpu_layers": 99
+  },
+  "memory": {
+    "top_k": 5,
+    "context_token_limit": 512,
+    "embedding_threads": 2,
+    "transcript_retention_days": 7,
+    "provider": "mem0",
+    "vector_store": "qdrant_local"
+  },
+  "vision": {
+    "capture_hz": 30,
+    "effective_hz": 10,
+    "frame_window_seconds": 2,
+    "frame_bytes_limit": 134217728
+  },
+  "tools": {
+    "max_calls_per_turn": 2,
+    "max_repair_attempts": 1
+  },
+  "background": {
+    "max_in_flight": 1,
+    "max_pending": 100
+  },
+  "framework": {
+    "name": "pipecat",
+    "version": "1.12.0"
+  },
+  "reminders": {
+    "provider": "apscheduler",
+    "version": "3.11.3"
+  }
+}

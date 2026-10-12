@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "url": "https://github.com/mgonzs13/yolo_ros.git",
+    "commit": "7924a8be76c81f4051370e254677516ca696a272",
+    "package_version": "5.0.0",
+    "ros_distribution": "jazzy"
+  },
+  "onnxruntime": {
+    "version": "1.28.0",
+    "tag": "v1.28.0",
+    "tag_commit": "da9b5e364c465de65c49d91e696cd6485270757f",
+    "execution_providers": ["TensorRT", "CUDA", "CPU"],
+    "cuda_architecture": "87",
+    "parallel_build_jobs": 2,
+    "built": false
+  },
+  "models": {
+    "detection": "YOLOv8n",
+    "pose": "YOLOv8n-pose",
+    "artifact_status": "not_yet_exported_or_locked"
+  },
+  "status": "source_verified_dependencies_pending"
+}
