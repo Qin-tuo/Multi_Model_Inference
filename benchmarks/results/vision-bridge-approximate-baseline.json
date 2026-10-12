@@ -1,0 +1,292 @@
+{
+  "created_at": "2026-10-12T15:18:00.147396+00:00",
+  "status": "PASS",
+  "scope": "live RGB-D transport, byte ownership, source-time selection and Pipecat image-request frames; not visual inference, image QA, or JT-03 acceptance",
+  "raw_images_saved": false,
+  "requests": 20,
+  "responses": 20,
+  "errors": [],
+  "active": {
+    "state": "READY",
+    "epoch": "8a3ed970f12745328e7acda0afe78a25",
+    "frames": 57,
+    "resident_payload_bytes": 87552000,
+    "peak_payload_bytes": 90624000,
+    "max_payload_bytes": 117440512,
+    "leased_frames": 0,
+    "counts": {
+      "accepted": 133,
+      "expired": 76
+    },
+    "last_arrival_age_ms": 30.197641,
+    "ros_domain": 42,
+    "ros_failure": null,
+    "transport_reserve_bytes": 16777216,
+    "synchronizer_queue_depth": 3,
+    "dds_queue_depth": 2,
+    "rgbd_pair_delta_max_ms": 33.355469
+  },
+  "after_camera_stop": {
+    "state": "STALE",
+    "epoch": "8a3ed970f12745328e7acda0afe78a25",
+    "frames": 1,
+    "resident_payload_bytes": 1536000,
+    "peak_payload_bytes": 90624000,
+    "max_payload_bytes": 117440512,
+    "leased_frames": 0,
+    "counts": {
+      "accepted": 133,
+      "expired": 132
+    },
+    "last_arrival_age_ms": 1953.248504,
+    "ros_domain": 42,
+    "ros_failure": null,
+    "transport_reserve_bytes": 16777216,
+    "synchronizer_queue_depth": 3,
+    "dds_queue_depth": 2,
+    "rgbd_pair_delta_max_ms": 33.355469
+  },
+  "stale_frame_refused": true,
+  "samples": [
+    {
+      "request_id": "bc5c9387cf2249d2acd935e1915d2459",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818275950500000",
+      "capture_to_consumer_ms": 61.817925,
+      "question_frame_skew_ms": 60.145307,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "d0aa79e206fa4ffd9bf9fc8d4077dd8f",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276050572021",
+      "capture_to_consumer_ms": 62.362146,
+      "question_frame_skew_ms": 61.149348,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "47154e0e8704429b9ae0c62cc9a26ab4",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276150644043",
+      "capture_to_consumer_ms": 62.724794,
+      "question_frame_skew_ms": 61.691265,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "5d2afa597fca41a09930ca5156699c4c",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276250716064",
+      "capture_to_consumer_ms": 63.111764,
+      "question_frame_skew_ms": 62.089595,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "309862b9af854c35915ecc5c70fa1313",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276350787842",
+      "capture_to_consumer_ms": 63.412928,
+      "question_frame_skew_ms": 62.421191,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "c5d266ee880446c89caad8ce35ae7f1a",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276450859619",
+      "capture_to_consumer_ms": 64.696517,
+      "question_frame_skew_ms": 63.712045,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "a7a4ed31fc004872aa203bf169cbdb42",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276550931152",
+      "capture_to_consumer_ms": 66.006877,
+      "question_frame_skew_ms": 64.99674,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "547674bb3cb24fb0b81960c04ec97275",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276651002441",
+      "capture_to_consumer_ms": 66.350578,
+      "question_frame_skew_ms": 65.306808,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "f1710a64e0774941a00d54001c408285",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276751073975",
+      "capture_to_consumer_ms": 66.768756,
+      "question_frame_skew_ms": 65.690137,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "348028d7f8004c54abd552840227e73d",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276851145020",
+      "capture_to_consumer_ms": 67.189727,
+      "question_frame_skew_ms": 66.066691,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "b953475316ba42f1be1bebd5b27c7bff",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818276951216064",
+      "capture_to_consumer_ms": 67.517706,
+      "question_frame_skew_ms": 66.487376,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "7a4cf38fbad84958ba00c9e6fb3367f7",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277051287598",
+      "capture_to_consumer_ms": 67.852137,
+      "question_frame_skew_ms": 66.816976,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "a5e4990b47154024988fb5d02e74b75e",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277151358887",
+      "capture_to_consumer_ms": 68.228544,
+      "question_frame_skew_ms": 67.159782,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "c8e13980cc1c4a6daa542527b9a0fd94",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277251429932",
+      "capture_to_consumer_ms": 68.572875,
+      "question_frame_skew_ms": 67.541618,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "07e07266fb44479fb15f2dc2f4a76f9b",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277351500732",
+      "capture_to_consumer_ms": 68.840295,
+      "question_frame_skew_ms": 67.851823,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "3138320756164089a7d097ae5bc524bf",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277451571289",
+      "capture_to_consumer_ms": 70.26786,
+      "question_frame_skew_ms": 69.14764,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "fe36b3bbb3534aa792825f070ce62ad2",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277551641846",
+      "capture_to_consumer_ms": 70.625414,
+      "question_frame_skew_ms": 69.571852,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "91937ca7857a43eb9a982004d2f62c42",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277651712158",
+      "capture_to_consumer_ms": 70.940364,
+      "question_frame_skew_ms": 69.934804,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "628627a10d204e15bcc8887210a76c5b",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277751782227",
+      "capture_to_consumer_ms": 71.251782,
+      "question_frame_skew_ms": 70.249262,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    },
+    {
+      "request_id": "4453528f2d90480a95bbcc5df2b10db0",
+      "frame_id": "8a3ed970f12745328e7acda0afe78a25:1791818277851852051",
+      "capture_to_consumer_ms": 72.619118,
+      "question_frame_skew_ms": 71.558003,
+      "size": [
+        640,
+        480
+      ],
+      "bytes": 921600,
+      "format": "RGB"
+    }
+  ]
+}

@@ -103,6 +103,15 @@ python3 tools/project.py smoke --component memory
 
 音频设备确定为ReSpeaker Lite双麦，用户当前无法连接麦克风/扬声器，真机录播/AEC/打断列为待验证。D435i最新链路为5Gbps；早期USB2枚举仅保留为排查记录。
 
+视觉数据接入已完成真实D435i→ROS→有界RGB-D缓存→Pipecat图像请求帧的初测。缓存使用2秒窗口，128MiB总预算中为传输与转换预留16MiB；仍被消费者引用的帧继续计入缓存占用。按提问时刻选择150ms以内的画面，停止采集后拒绝旧画面，驱动重启会更换数据代次。21次图像请求及一次驱动重启检查见[视觉接入报告](benchmarks/results/vision-bridge-smoke.json)。本项未包含检测推理或VLM图像问答，不代表JT-03已通过。
+
+从项目根目录验证上述接入（脚本会启动、重启并关闭其拥有的相机进程，不保存原始图像）：
+
+```bash
+source /opt/ros/jazzy/setup.bash
+.venv/bin/python tools/vision_bridge_probe.py --launch-camera
+```
+
 语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。语音服务与文件管线使用部署说明中的独立入口。`interact` 已实现文本入口；完整 `up/down/bench/acceptance` 命令仍待对应里程碑接入，当前不可作为已实现接口使用。
 
 ## 数据和上游

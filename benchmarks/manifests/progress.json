@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T14:49:08.288519+00:00",
+  "updated_at": "2026-10-12T15:31:19.015986+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -123,6 +123,19 @@
       ],
       "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending",
       "next_action": "voice output evidence, timestamped historical retrieval, recovery fault coverage and larger independent corpus"
+    },
+    {
+      "task_id": "J1.2",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/vision_frames.py",
+        "app/adapters/vision.py",
+        "app/vision_snapshot.py",
+        "benchmarks/results/vision-bridge-smoke.json",
+        "tests/test_vision_frames.py"
+      ],
+      "validation": "Live D435i exact-time RGB-D pairs and 21 native Pipecat image-request frames PASS; byte accounting includes leased frames; actual driver stop/restart refuses stale/old-epoch frames; no VLM/visual-inference claim",
+      "next_action": "connect bounded image requests to the VLM with verified multimodal token limits; add real detector/pose event consumers and scenario traces"
     }
   ],
   "acceptance": {

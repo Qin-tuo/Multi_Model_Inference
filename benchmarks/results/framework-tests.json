@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T14:49:21.230291+00:00",
+  "created_at": "2026-10-12T15:27:59.052612+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 58,
+  "tests_run": 66,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -251,8 +251,40 @@
     {
       "id": "test_tool_handlers.ToolHandlerTests.test_reminder_words_inside_a_note_do_not_schedule_a_reminder",
       "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.SnapshotPipelineTests.test_interruption_is_immediate_but_owner_lives_until_packing_finishes",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.SnapshotPipelineTests.test_late_old_request_cannot_fail_or_modify_a_new_turn",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.SnapshotPipelineTests.test_native_image_request_preserves_metadata_and_explicit_lease",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.VisionCacheTests.test_age_and_question_skew_are_enforced",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.VisionCacheTests.test_capacity_counts_retired_but_leased_payloads",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.VisionCacheTests.test_epoch_reset_invalidates_lease_without_freeing_live_data",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.VisionCacheTests.test_invalid_payload_and_source_reset",
+      "status": "PASS"
+    },
+    {
+      "id": "test_vision_frames.VisionCacheTests.test_padding_and_bgr_conversion_preserve_pixels",
+      "status": "PASS"
     }
   ],
-  "source_commit": "3dd20952a18667775a2f2d24f52745b781f21217",
+  "source_commit": "12997cb508bdec0508687981e050d5b0caa97b44",
   "source_state": "working tree; see checkpoint commit containing this report"
 }
