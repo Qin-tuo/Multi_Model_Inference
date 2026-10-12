@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import shlex
 import socket
 import subprocess
 import sys
@@ -404,6 +405,7 @@ def main():
     interact.add_argument("--data-dir", type=Path, default=DATA)
     interact.add_argument("--session-id")
     interact.add_argument("--input-file", type=Path)
+    interact.add_argument("--no-vision", action="store_true")
     notifications = sub.add_parser("notifications", help="Text reminder delivery; independent of model services")
     notifications.add_argument("--user", default="owner")
     notifications.add_argument("--data-dir", type=Path, default=DATA)
@@ -432,7 +434,14 @@ def main():
                        "--data-dir", str(args.data_dir)]
             if args.session_id: command += ["--session-id", args.session_id]
             if args.input_file: command += ["--input-file", str(args.input_file)]
-            return subprocess.call(command, cwd=ROOT)
+            if args.no_vision:
+                command += ["--no-vision"]
+                return subprocess.call(command, cwd=ROOT)
+            from deploy.vision.serve import ros_environment
+            setup = Path("/opt/ros/jazzy/setup.bash")
+            if not setup.is_file(): raise RuntimeError("ROS is unavailable; use --no-vision for text-only operation")
+            script = "source " + shlex.quote(str(setup)) + " && exec " + shlex.join(command)
+            return subprocess.call(["bash", "-c", script], cwd=ROOT, env=ros_environment())
         return {"doctor": doctor, "prepare": prepare, "smoke": smoke, "test": tests, "serve": serve}[args.action](args)
     except (OSError, RuntimeError, TimeoutError, subprocess.CalledProcessError, ValueError) as e:
         print(json.dumps({"status": "FAIL", "error": str(e)}, ensure_ascii=False), file=sys.stderr)

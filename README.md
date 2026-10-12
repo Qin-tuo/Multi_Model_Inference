@@ -4,11 +4,11 @@
 
 ## 当前进度
 
-项目处于依赖核验与框架接入阶段。框架/插件76项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。真实Silero→ASR→LLM→TTS文件问答、时间查询、记忆写入及提醒创建已通过初测。完整模型质量、物理语音和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于依赖核验与框架接入阶段。框架/插件84项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机问答，并核对实际图文token用量；真实Silero→ASR→LLM→TTS文件问答、时间查询、记忆写入及提醒创建已通过初测。完整模型质量、物理语音和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
-| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本会话、记忆/笔记工具、进程重启召回与逻辑取消通过初测；实时设备和语音工具整合继续推进 |
+| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机会话、记忆/笔记工具、进程重启召回与逻辑取消通过初测；完整语音工具整合继续推进 |
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；Pipecat音频完成协议通过夹具测试，实机播报待验证 |
@@ -23,7 +23,7 @@ Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest]
 
 本机外部框架、模型、构建产物与 Python 环境统一放在 **`/home/nvidia/AI_Stack/`**。其中 `frameworks/llama.cpp/` 是 llama.cpp 源码，`builds/llama/bin/llama-server` 是服务程序。目录与版本入口见 [依赖目录说明](deploy/dependencies-layout.md)；本机总目录内还有 `README.md` 和完整 Python 依赖清单 `dependencies.json`。原缓存路径及项目 `.venv*` 保留为兼容链接。
 
-### 持续文本交互
+### 持续文本与相机交互
 
 先运行本地模型服务，再在另一终端开启会话：
 
@@ -35,11 +35,17 @@ python3 tools/project.py up --components llama
 python3 tools/project.py interact --user owner
 ```
 
+相机问答先运行 `python3 tools/project.py up --components camera`，然后在会话内输入 `/look`、`/look 这个物体是什么颜色？` 或“你现在看到了什么？”。`interact`默认订阅ROS对齐RGB-D；纯文本环境使用 `--no-vision`，视觉问题会明确提示不可用。相机订阅本身不会启动相机服务。
+
 可直接输入“请记住，我喜欢茉莉花茶。”“我喜欢喝什么茶？”“创建笔记，标题是采购，内容是周末买绿茶和杯子。”“请查询我的笔记。”或“五分钟后提醒我休息。”。`/new` 开启新会话，`/stop` 停止当前回答，`/memories`、`/notes`、`/reminders`、`/history` 查询实际记录，`/quit` 退出。`--user guest` 使用独立档案；`--session-id ID` 恢复指定档案已输出的会话上下文；`--input-file PATH` 顺序执行最多64KiB的文本脚本。
 
-此入口复用一个持续运行的 Pipecat worker 和原生工具 continuation。模型请求及工具回传请求均经 llama.cpp 实际模板与 tokenizer 检查；优先移除旧轮次，当前问题过长则明确失败。默认会话文本保留7天，仅成功输出的完整文本进入已完成历史；更正/遗忘会清除相关来源和派生会话记录，并失效当前旧上下文。笔记和偏好分别从各自存储读取，购物笔记不作为偏好证据。用户明确操作最多修复重试一次，未实际成功时不会口头确认。
+此入口复用一个持续运行的 Pipecat worker 和原生工具 continuation。模型请求及工具回传请求均通过 llama.cpp 原生 `/v1/chat/completions/input_tokens` 检查实际模板、文字和图像预处理token；优先移除旧轮次，当前问题过长则明确失败。[固定版本接口说明](https://github.com/ggml-org/llama.cpp/blob/08ffba21e5c2f1728b6b405c05ff3913f65706d4/tools/server/README.md#post-v1chatcompletionsinput_tokens-token-counting)。默认会话文本保留7天，仅成功输出的完整文本进入已完成历史；更正/遗忘会清除相关来源和派生会话记录，并失效当前旧上下文。笔记和偏好分别从各自存储读取，购物笔记不作为偏好证据。用户明确操作最多修复重试一次，未实际成功时不会口头确认。
 
-当前取消验证覆盖原生 interruption、HTTP生成请求停止、服务slot空闲及下一轮恢复。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU资源释放。到期提醒已在控制台按“提醒：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
+图像请求使用原生 `UserImageRequestFrame` / `UserImageRawFrame`。选择距离提问时间≤150ms的640×480帧，经Pipecat原生JPEG编码（Pillow默认quality75，不缩放）附在本轮消息中；首次提交模型前检查2秒保留期限，生成期间发生相机epoch变化或断流则拒绝消费旧答案。生成耗时可以超过帧缓存期限，同一轮图像始终绑定原始提问时间。完成或取消后释放图像引用并清除上下文中的图像数据URL，默认只持久化已输出文本。
+
+[真实图文会话初测](benchmarks/results/visual-session-smoke.json)覆盖三种已知颜色、图文后记忆召回、实时D435i输入、取消后恢复和断流拒绝；图文计数与实际模型usage一致。实时画面的目标准确率没有地面真值验证，完整JT质量集仍待完成。
+
+当前取消验证覆盖原生 interruption 到达管线末端的确认、HTTP生成请求停止、服务slot空闲及下一轮恢复。取消期间阻止新请求准入；视觉初测从取消到确认模型空闲约2.60秒，不代表声学停播时延。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU内存释放。到期提醒已在控制台按“提醒：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
 
 提醒静音使用 `/mute-reminders on`、`/mute-reminders off`，设置按档案持久保存。未开始输出的失败最多重试3次，默认间隔5秒；提醒到期后默认有效1小时，可在`configs/runtime.yaml`配置。已开始输出但未确认的提醒保留为`uncertain`，重启后不自动重播，可查询后取消或重新设置。文字显示与音频播放分开记录。
 

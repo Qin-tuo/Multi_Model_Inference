@@ -10,6 +10,7 @@ import sys
 
 from loguru import logger
 from app.adapters.llama import LlamaConfig
+from app.adapters.vision import RosVisionBridge
 from app.memory import Mem0Adapter
 from app.records import Records
 from app.reminders import ReminderService
@@ -22,6 +23,10 @@ async def console(args):
     config = LlamaConfig.from_manifest(ROOT / "models/manifest.json")
     runtime = json.loads((ROOT / "configs/runtime.yaml").read_text())
     with ExitStack() as stack:
+        vision = None
+        if not args.no_vision:
+            vision = RosVisionBridge.configured().start()
+            stack.callback(vision.close)
         memory = stack.enter_context(Mem0Adapter(args.data_dir / "memory",
             bge_path=CACHE / "models/bge-small-zh-v1.5-onnx", embedding_backend="onnx"))
         reminder_options = {key: runtime["reminders"][key] for key in
@@ -30,7 +35,8 @@ async def console(args):
         records = stack.enter_context(Records(args.data_dir / "records.sqlite",
             retention_days=runtime["memory"]["transcript_retention_days"]))
         session = AssistantSession(config, memory, reminders, records, user_id=args.user,
-            session_id=args.session_id, context_tokens=runtime["llama"]["context_tokens"])
+            session_id=args.session_id, context_tokens=runtime["llama"]["context_tokens"],
+            vision_frames=vision.frames if vision else None)
         await session.start()
         pending = None
         errors = []
@@ -46,9 +52,9 @@ async def console(args):
         async def emit(text):
             print("助手：" + text, flush=True)
 
-        async def answer(text):
+        async def answer(text, *, visual=None):
             try:
-                await session.ask(text, emit=emit)
+                await session.ask(text, emit=emit, visual=visual)
             except asyncio.CancelledError:
                 print("已停止本轮回答。已提交的操作可通过查询确认。", flush=True)
             except Exception as error:
@@ -68,7 +74,9 @@ async def console(args):
                 print("正在回答；可输入 /stop 停止。", flush=True)
                 return True
             if line == "/help":
-                print("直接输入中文对话。命令：/new 新会话，/stop 停止，/memories 记忆，/notes 笔记，/reminders 提醒，/history 已输出历史，/mute-reminders on或off 提醒静音，/quit 退出。", flush=True)
+                print("直接输入中文对话。命令：/look [问题] 看当前画面，/new 新会话，/stop 停止，/memories 记忆，/notes 笔记，/reminders 提醒，/history 已输出历史，/mute-reminders on或off 提醒静音，/quit 退出。", flush=True)
+            elif line == "/look" or line.startswith("/look "):
+                pending = asyncio.create_task(answer(line[5:].strip() or "你现在看到了什么？", visual=True))
             elif line in {"/mute-reminders on", "/mute-reminders off"}:
                 muted = line.endswith(" on")
                 reminders.set_muted(args.user, muted)
@@ -76,7 +84,7 @@ async def console(args):
             elif line == "/new":
                 await session.close()
                 session = await AssistantSession(config, memory, reminders, records, user_id=args.user,
-                    context_tokens=runtime["llama"]["context_tokens"]).start()
+                    context_tokens=runtime["llama"]["context_tokens"], vision_frames=vision.frames if vision else None).start()
                 print("已开启新会话。", flush=True)
             elif line in {"/memories", "/notes", "/reminders", "/history"}:
                 if line == "/memories": rows = memory.list_memories(args.user, limit=20)
@@ -122,6 +130,7 @@ def main(argv=None):
     parser.add_argument("--data-dir", type=Path, default=DATA)
     parser.add_argument("--session-id", help="Resume delivered text from this owner's session")
     parser.add_argument("--input-file", type=Path, help="Bounded local text script, executed sequentially")
+    parser.add_argument("--no-vision", action="store_true", help="Text-only operation without a ROS image subscription")
     args = parser.parse_args(argv)
     logger.remove()
     logger.add(sys.stderr, level="WARNING")

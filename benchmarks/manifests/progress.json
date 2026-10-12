@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T17:33:43.264808+00:00",
+  "updated_at": "2026-10-12T17:51:27.502453+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -102,10 +102,11 @@
         "app/session.py",
         "app/interact.py",
         "benchmarks/results/session-smoke.json",
-        "benchmarks/results/application-smoke.json"
+        "benchmarks/results/application-smoke.json",
+        "benchmarks/results/visual-session-smoke.json"
       ],
-      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending; real file speech pipeline passes with native Silero and turn handling; native Pipecat tool calls get_time/remember/create_reminder pass against real SDK stores, write-confirmation guard added; one long-lived native worker supports interactive text, real note/memory tools and token checks on initial and upstream continuation requests",
-      "next_action": "integrate voice transport, notification playback and ROS visual context; expand tool/grounding quality cases"
+      "validation": "Persistent native Pipecat worker supports real memory/note tools, text and live camera questions; native multimodal preflight counts match actual usage; cancellation waits for native pipeline interruption acknowledgement and provider slot idle; short file speech pipeline remains separate",
+      "next_action": "unify continuous/file voice with persistent memory/tools/visual conversation and ordered notification output; expand independent quality cases"
     },
     {
       "task_id": "J3.reminders",
@@ -129,7 +130,7 @@
         "tests/test_persistent_session.py",
         "benchmarks/results/application-smoke.json"
       ],
-      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending",
+      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending; raw image data URLs are removed from native context at turn end and never persisted in transcript fields; cancellation-during-preparation race covered",
       "next_action": "voice output evidence, timestamped historical retrieval, recovery fault coverage and larger independent corpus"
     },
     {
@@ -140,10 +141,16 @@
         "app/adapters/vision.py",
         "app/vision_snapshot.py",
         "benchmarks/results/vision-bridge-smoke.json",
-        "tests/test_vision_frames.py"
+        "tests/test_vision_frames.py",
+        "app/session.py",
+        "tests/test_visual_session.py",
+        "tests/test_prompt_budget.py",
+        "tools/visual_session_smoke.py",
+        "benchmarks/results/visual-session-smoke.json",
+        "benchmarks/results/visual-console-smoke.json"
       ],
-      "validation": "Live D435i exact-time RGB-D pairs and 21 native Pipecat image-request frames PASS; byte accounting includes leased frames; actual driver stop/restart refuses stale/old-epoch frames; no VLM/visual-inference claim",
-      "next_action": "connect bounded image requests to the VLM with verified multimodal token limits; add real detector/pose event consumers and scenario traces"
+      "validation": "Live exact-time RGB-D bridge and native Pipecat image requests PASS; same persistent conversation now runs real visual questions, native mtmd token counts equal actual usage, epoch/stale refusal and image release tested; three known colors and one live D435i answer verified for connectivity only",
+      "next_action": "consume detector/pose events and expand held-out visual scenarios, metadata and resource-release traces"
     },
     {
       "task_id": "J7.lifecycle",
@@ -244,7 +251,8 @@
     "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
     "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending",
     "Observed build-time OOM with compiler+VLM overlap retained; build now complete and six services restored under build/runtime exclusion leases. Short file-speech coexistence leaves 3.38GiB minimum available memory; full workload capacity and long-duration stability remain unverified.",
-    "Notification audio completion is currently verified with labelled transport fixtures; optional LocalAudio adapter, real speaker drain/AEC and wall-clock jump behavior still require qualification"
+    "Notification audio completion is currently verified with labelled transport fixtures; optional LocalAudio adapter, real speaker drain/AEC and wall-clock jump behavior still require qualification",
+    "Visual dialogue currently uses intent hints plus explicit /look, one 640x480 JPEG per question, and a 2K context; held-out grounding/OCR quality, deictic intent coverage, and voice/visual unification remain pending. One visual cancellation required 2.60s until provider slot idle, not acoustic interruption acceptance."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

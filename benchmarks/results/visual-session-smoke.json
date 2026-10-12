@@ -1,0 +1,253 @@
+{
+  "created_at": "2026-10-12T17:47:47.265312+00:00",
+  "status": "PASS",
+  "checks": {
+    "real_memory_tool_write": true,
+    "memory_recall_after_image_turns": true,
+    "text_turn_has_no_image": true,
+    "known_color_answers": true,
+    "actual_usage_matches_native_multimodal_count": true,
+    "images_released_after_answers": true,
+    "real_visual_cancellation": true,
+    "visual_turn_after_cancel": true,
+    "stale_source_refused": true,
+    "stale_source_never_admitted": true,
+    "no_raw_image_in_history": true,
+    "live_camera_model_response": true,
+    "live_usage_matches_native_count": true,
+    "live_image_released": true
+  },
+  "scope": "real Pipecat/llama/BGE/Mem0 image and text turns; synthetic color sanity plus live RGB-D connectivity; not held-out scene quality, acoustic cancellation or final JT acceptance",
+  "synthetic_cases": [
+    {
+      "turn_id": "3e1c9573dd264a9898e36913a87b8c93",
+      "session_id": "4892a380c7784b4f8d2b3a209150fe68",
+      "response": "图片中的主要颜色是红色。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [
+          "ebd1b745-af17-4884-a13f-6bdb17b101c1"
+        ],
+        "memory_tokens": 169,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 1045,
+        "memory_generation": 0,
+        "personal_recall": false,
+        "task_lookup": false
+      },
+      "prompt_tokens": [
+        1045
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "image": {
+        "frame_id": "385a383a13ea4044bead6408a278bcc3:52764553940658",
+        "worker_epoch": "385a383a13ea4044bead6408a278bcc3",
+        "capture_time_ns": 52764553940658,
+        "question_time_ns": 52764573570775,
+        "source_timestamp_ns": 52764553940658,
+        "size": [
+          640,
+          480
+        ],
+        "encoding": "Pipecat JPEG (Pillow default quality 75)",
+        "question_frame_skew_ms": 19.630117,
+        "capture_to_model_admission_ms": 111.291198
+      },
+      "model_usage": [
+        {
+          "prompt_tokens": 1045,
+          "completion_tokens": 8,
+          "total_tokens": 1053,
+          "cache_read_input_tokens": 64,
+          "cache_creation_input_tokens": null,
+          "reasoning_tokens": null,
+          "input_audio_tokens": null,
+          "output_audio_tokens": null,
+          "cache_read_input_audio_tokens": null
+        }
+      ],
+      "elapsed_seconds": 3.6179842490018927,
+      "input_kind": "synthetic_rgb_fixture",
+      "expected_color": "红"
+    },
+    {
+      "turn_id": "f8664d730d834bfab2684d97cef65664",
+      "session_id": "4892a380c7784b4f8d2b3a209150fe68",
+      "response": "图片中的主要颜色是绿色。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [
+          "ebd1b745-af17-4884-a13f-6bdb17b101c1"
+        ],
+        "memory_tokens": 169,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 1072,
+        "memory_generation": 0,
+        "personal_recall": false,
+        "task_lookup": false
+      },
+      "prompt_tokens": [
+        1072
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "image": {
+        "frame_id": "385a383a13ea4044bead6408a278bcc3:52768307964565",
+        "worker_epoch": "385a383a13ea4044bead6408a278bcc3",
+        "capture_time_ns": 52768307964565,
+        "question_time_ns": 52768318311418,
+        "source_timestamp_ns": 52768307964565,
+        "size": [
+          640,
+          480
+        ],
+        "encoding": "Pipecat JPEG (Pillow default quality 75)",
+        "question_frame_skew_ms": 10.346853,
+        "capture_to_model_admission_ms": 85.892826
+      },
+      "model_usage": [
+        {
+          "prompt_tokens": 1072,
+          "completion_tokens": 8,
+          "total_tokens": 1080,
+          "cache_read_input_tokens": 463,
+          "cache_creation_input_tokens": null,
+          "reasoning_tokens": null,
+          "input_audio_tokens": null,
+          "output_audio_tokens": null,
+          "cache_read_input_audio_tokens": null
+        }
+      ],
+      "elapsed_seconds": 3.0230720559993642,
+      "input_kind": "synthetic_rgb_fixture",
+      "expected_color": "绿"
+    },
+    {
+      "turn_id": "da5b4e20f31645e485c7113753c762bf",
+      "session_id": "4892a380c7784b4f8d2b3a209150fe68",
+      "response": "图片中的主要颜色是蓝色。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [
+          "ebd1b745-af17-4884-a13f-6bdb17b101c1"
+        ],
+        "memory_tokens": 169,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 1099,
+        "memory_generation": 0,
+        "personal_recall": false,
+        "task_lookup": false
+      },
+      "prompt_tokens": [
+        1099
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "image": {
+        "frame_id": "385a383a13ea4044bead6408a278bcc3:52771450313059",
+        "worker_epoch": "385a383a13ea4044bead6408a278bcc3",
+        "capture_time_ns": 52771450313059,
+        "question_time_ns": 52771467770827,
+        "source_timestamp_ns": 52771450313059,
+        "size": [
+          640,
+          480
+        ],
+        "encoding": "Pipecat JPEG (Pillow default quality 75)",
+        "question_frame_skew_ms": 17.457768,
+        "capture_to_model_admission_ms": 95.985725
+      },
+      "model_usage": [
+        {
+          "prompt_tokens": 1099,
+          "completion_tokens": 8,
+          "total_tokens": 1107,
+          "cache_read_input_tokens": 490,
+          "cache_creation_input_tokens": null,
+          "reasoning_tokens": null,
+          "input_audio_tokens": null,
+          "output_audio_tokens": null,
+          "cache_read_input_audio_tokens": null
+        }
+      ],
+      "elapsed_seconds": 3.0009960699972,
+      "input_kind": "synthetic_rgb_fixture",
+      "expected_color": "蓝"
+    }
+  ],
+  "cancellation": {
+    "backend_was_processing": true,
+    "cancelled": true,
+    "cancel_to_idle_seconds": 2.601684060995467,
+    "pipeline_interruption_acknowledged": true,
+    "backend_idle": true,
+    "emitted_count": 0,
+    "leased_frames": 0
+  },
+  "stale_refusal": "CAMERA_STREAM_STALE",
+  "live_camera": {
+    "input_kind": "live_d435i",
+    "image": {
+      "frame_id": "9190bc9e66a04c39804bf7de543c82d7:1791827261279891846",
+      "worker_epoch": "9190bc9e66a04c39804bf7de543c82d7",
+      "capture_time_ns": 52784966484103,
+      "question_time_ns": 52785006163346,
+      "source_timestamp_ns": 1791827261279891846,
+      "size": [
+        640,
+        480
+      ],
+      "encoding": "Pipecat JPEG (Pillow default quality 75)",
+      "question_frame_skew_ms": 39.679243,
+      "capture_to_model_admission_ms": 125.079124
+    },
+    "response_characters": 102,
+    "elapsed_seconds": 5.911847521994787,
+    "prompt_tokens": [
+      1018
+    ],
+    "model_usage": [
+      {
+        "prompt_tokens": 1018,
+        "completion_tokens": 53,
+        "total_tokens": 1071,
+        "cache_read_input_tokens": 433,
+        "cache_creation_input_tokens": null,
+        "reasoning_tokens": null,
+        "input_audio_tokens": null,
+        "output_audio_tokens": null,
+        "cache_read_input_audio_tokens": null
+      }
+    ],
+    "bridge_status": {
+      "state": "READY",
+      "epoch": "9190bc9e66a04c39804bf7de543c82d7",
+      "frames": 51,
+      "resident_payload_bytes": 78336000,
+      "peak_payload_bytes": 92160000,
+      "max_payload_bytes": 117440512,
+      "leased_frames": 0,
+      "counts": {
+        "accepted": 167,
+        "expired": 116
+      },
+      "last_arrival_age_ms": 12.441093,
+      "ros_domain": 42,
+      "ros_failure": null,
+      "transport_reserve_bytes": 16777216,
+      "synchronizer_queue_depth": 3,
+      "dds_queue_depth": 2,
+      "rgbd_pair_delta_max_ms": 0.0
+    },
+    "raw_image_saved": false,
+    "scene_description_in_public_report": false,
+    "transcript_storage": "isolated temporary database deleted after the probe"
+  }
+}
