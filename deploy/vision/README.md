@@ -1,6 +1,6 @@
 # 首版视觉服务的准备与构建
 
-固定 **YOLOv8n 检测 + YOLOv8n-pose 姿态**，接入 yolo_ros 5.0.0 的 C++/ONNX Runtime 管线，使用 TensorRT execution provider。姿态按计划在 J3 接入。当前完成两模型CPU导出回归及检测TensorRT执行；ROS模型整合仍待完成，ORT GPU依赖正在编译。
+固定 **YOLOv8n 检测 + YOLOv8n-pose 姿态**，接入 yolo_ros 5.0.0 的 C++/ONNX Runtime 管线，使用 TensorRT execution provider。GPU ORT及ROS包已编译完成，两个模型均已接收真实相机图像并在TensorRT执行。姿态事件与助手会话的整合按计划在 J3 继续推进。
 
 ## 已核验的版本与限制
 
@@ -14,11 +14,13 @@
 | YOLO ONNX 模型 | 两模型已固定权重哈希并导出640×640、opset17、无NMS的FP32图；CPU回归通过 |
 | 检测TensorRT引擎 | FP16单图框位置对齐失败已保留；FP32关闭/允许TF32两种配置均通过原0.98 IoU门槛，后续ROS采用FP32 |
 | 姿态TensorRT引擎 | FP32允许TF32实测通过：3人、可见关键点最大坐标差0.053像素以内；不是完整姿态质量验收 |
-| ROS构建 | 五个包已用同版本ORT核心SDK编译通过；完整GPU provider库仍在构建，尚未启动GPU ROS节点 |
+| ROS构建 | 五个包已针对完整GPU ORT安装前缀编译通过；检测和姿态节点均已运行 |
 
 上游 vendor 的 GPU 预编译 tarball 只支持 x64。aarch64 GPU 构建必须使用源码 ORT，并将 `-DONNXRUNTIME_ROOT` 指向编译输出。CUDA13 对应的上游选择为 ORT1.28.0。[固定版构建说明](https://github.com/mgonzs13/yolo_ros/blob/7924a8be76c81f4051370e254677516ca696a272/docs/build.md)
 
 `provider=tensorrt` 是显式选择，仍然存在 TensorRT → CUDA → CPU 回退。启动日志中仅看到接受 session 的主 provider 不能证明整个模型每个节点都在 TensorRT/GPU 上；需保存 ORT profiling 和实际运行证据。GPU 基线不能由 CPU 功能测试替代。
+
+本机[检测trace报告](../../benchmarks/results/vision-detection-provider.json)记录5219次完整模型TensorRT执行，[姿态报告](../../benchmarks/results/vision-pose-provider.json)记录2458次，两者均未观察到加权CPU算子。原始trace保存在 `~/AI_Stack/runtime-data/traces/`。这些证据验证执行位置；镜头未检出目标时的运行测量不能替代带标注的检测/姿态质量集。
 
 ## 可执行的准备与构建命令
 
@@ -38,6 +40,8 @@ python3 deploy/vision/prepare.py --build-ort
 ```
 
 脚本下载 ORT v1.28.0 及 submodules，校验 tag commit，使用 CUDA13.2、SM87、TensorRT/CUDNN SDK prefix 和 2 个并发编译任务。可选attention实现设为关闭，但该版CMake仍会编译其共用CUDA对象，不能据此宣称构建已裁剪。修复补丁和SHA256纳入[source-lock](source-lock.json)：可选注意力关闭时仍暴露原有mask常量、打包ORT1.28拆分的C API头文件，以及按需启用原生ORT profiler。补丁未改变mask常量的数值。
+
+CUDA13.2 CCCL模板特化兼容问题通过 `sdk/cuda-cccl-overlay/` 中的单文件覆盖层处理，使用 `NVCC_PREPEND_FLAGS` 引入；系统CUDA头文件保持原样。[NVIDIA上游问题](https://github.com/NVIDIA/cccl/issues/8833)。仅修改源码后续编译可用 `--build-ort --resume-ort`，要求已有CMake配置，并跳过 `--update`。实际失败过的CUDA编译单元随后构建成功，完整库与哈希见[ORT构建报告](../../benchmarks/results/ort-build.json)。
 
 构建目录迁移后，上游Python构建入口解析到新的规范路径，重新配置会使部分已有对象失效；保留目录不等同于保证所有对象可复用。已记录一次并行“ORT编译+ROS编译+驻留VLM”导致的[OOM失败](../../benchmarks/results/build-memory-failure.json)。当前`serve`在重型ORT构建存活时拒绝启动语言/语音模型服务；先完成重型构建，再测运行时容量和并发。该安装阶段故障不会被算成运行时验收通过。
 
@@ -61,7 +65,7 @@ python3 tools/project.py serve --component pose
 
 三项分别在独立终端前台运行。相机启用640×480、30Hz彩色与对齐深度。视觉节点复用上游Detection、ByteTrack、Detect3D插件，模型输入640×640、batch1、max_fps15，固定本地权重并禁用下载。ROS使用独立domain42及LOCALHOST发现范围；`ASSISTANT_ROS_DOMAIN_ID`可覆盖domain。彩色与深度的最新[对齐采集报告](../../benchmarks/results/camera-aligned-smoke.json)通过格式、坐标系、内参和时间戳配对检查，物理深度精度没有地面真值验证。
 
-检测/姿态参数生成在运行数据目录的`config/ros-*.json`。当前GPU ORT构建未完成时，后两项会明确拒绝启动。需要原始provider trace时直接使用`python3 deploy/vision/serve.py detection --profile`或`pose --profile`，并正常结束进程以刷新trace；默认不启用逐节点profiling。
+检测/姿态参数生成在运行数据目录的`config/ros-*.json`。启动入口检查完整GPU ORT产物。也可使用 `python3 tools/project.py up --components camera,vision,pose` 统一管理并复用已有服务。需要原始provider trace时，先停止对应受管理节点，再使用`python3 deploy/vision/serve.py detection --profile`或`pose --profile`，正常结束进程以刷新trace；默认不启用逐节点profiling。报告生成入口为 `tools/ort_profile_report.py`。
 
 ## 模型、相机与调度接入
 
@@ -87,4 +91,4 @@ python3 -m venv .venv-vision
 5. 上游已移除旧 `/yolo/enable` 服务，推理持续运行。图像准入应接入 `camera_streams.cpp` / detection plugin 输入，执行回调应围绕 `engine/model.cpp` 的实际 `Ort::Session::Run` 与同步完成边界补充。
 6. detection plugin 已有 latest-frame-wins 路径。接入 Pipecat 视觉桥接插件后同时记录丢帧原因、帧时间戳、开始/结束、provider 和 worker epoch，避免把“输入已丢弃”当作“GPU 已释放”。
 
-J0.3 通过要求：真实模型执行、实际 TensorRT/GPU 后端证据、真实相机图像、峰值内存与帧时效记录。当前只完成上述部分证据，未通过完整J0.3验收。
+J0.3 通过要求：真实模型执行、实际 TensorRT/GPU 后端证据、真实相机图像、峰值内存与帧时效记录。当前已有GPU执行、真实相机、短时帧时效及文件语音共存内存采样；完整负载与规定场景仍待验证。`tools/vision_runtime_probe.py` 先单独记录订阅就绪等待，再每50ms采样最新结果年龄；无结果时段纳入P95总体，不会从统计中消失。初次包含订阅发现的失败报告保留在 `vision-runtime-cold-subscription-baseline.json`，后续稳态初测不是完整JT-03验收。

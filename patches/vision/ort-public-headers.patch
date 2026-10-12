@@ -1,8 +1,25 @@
 diff --git a/yolo_onnxruntime_vendor/scripts/build_ort_from_source.sh b/yolo_onnxruntime_vendor/scripts/build_ort_from_source.sh
-index dba2320..6ca5bfd 100755
+index dba2320..6d5a009 100755
 --- a/yolo_onnxruntime_vendor/scripts/build_ort_from_source.sh
 +++ b/yolo_onnxruntime_vendor/scripts/build_ort_from_source.sh
-@@ -531,6 +531,8 @@ copy_header() {
+@@ -423,9 +423,15 @@ fi
+ 
+ # --- Assemble the build.sh command -------------------------------------------
+ build_cmd=(
+-  ./build.sh --config Release --update --build --build_shared_lib --skip_tests
++  ./build.sh --config Release --build --build_shared_lib --skip_tests
+   --skip_submodule_sync
+ )
++if [[ "${ORT_SKIP_UPDATE:-0}" != "1" ]]; then
++  build_cmd+=(--update)
++elif [[ ! -f "${SRC_DIR}/build/Linux/Release/CMakeCache.txt" ]]; then
++  echo "error: ORT_SKIP_UPDATE requires an existing configured build" >&2
++  exit 1
++fi
+ # Cap the compile jobs with ORT_PARALLEL (unset = build.sh's own default, all
+ # cores). CUDA provider builds are memory-hungry, so a lower cap avoids OOM.
+ if [[ -n "${ORT_PARALLEL:-}" ]]; then
+@@ -531,6 +537,8 @@ copy_header() {
  }
  
  copy_header onnxruntime_c_api.h required

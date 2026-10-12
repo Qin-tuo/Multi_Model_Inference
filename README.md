@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于 J0 依赖核验与框架接入阶段。框架/插件测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz。真实Silero→ASR→LLM→TTS文件问答已跑通；时间查询、记忆写入及提醒创建的真实模型工具测试已通过，并增加未实际执行写入时的回复校验。完整模型质量、物理语音、ROS视觉检测和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于依赖核验与框架接入阶段。框架/插件76项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。真实Silero→ASR→LLM→TTS文件问答、时间查询、记忆写入及提醒创建已通过初测。完整模型质量、物理语音和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -13,9 +13,11 @@
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；Pipecat音频完成协议通过夹具测试，实机播报待验证 |
 | 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 本机引擎与文件语音问答通过；真人/噪声/AEC待验证 |
-| 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | 对齐RGB-D采集、检测/姿态TensorRT FP32单图对齐通过；ROS五个包编译通过，完整GPU ORT与ROS运行验证仍待完成；FP16失败样例保留 |
+| 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | GPU ORT及ROS五个包编译完成；真实相机检测/姿态运行与逐节点TensorRT证据通过，约12.6～12.8Hz；完整场景质量待验证，FP16失败样例保留 |
 
 Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest](models/manifest.json)，框架适配通过配置读取；更换模型后重新验证质量、上下文预算和共存容量。Edge-LLM留到后续性能对比。
+
+六个后端已同时[就绪](benchmarks/results/full-backend-readiness.json)。持续视觉运行期间，5次[文件语音问答](benchmarks/results/concurrent-file-speech.json)全部识别、回答并回读正确，采样最低可用内存约3.38GiB；同期[40秒视觉测量](benchmarks/results/vision-with-file-speech.json)中，检测/姿态最新结果年龄P95约157/163ms。测量包含后续ASR回读请求；当前镜头没有检出目标，不能据此判断目标/关键点准确率。这是短时共存初测，物理播放、完整负载容量和GPU任务重叠trace仍待验证。
 
 ## 使用现有入口
 
@@ -25,10 +27,10 @@ Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest]
 
 先运行本地模型服务，再在另一终端开启会话：
 
-当前GPU版ORT仍在构建，语言/语音模型服务暂时关闭。发生过编译与驻留模型叠加引起的OOM，启动入口现会在重型ORT构建存活时明确拒绝启动模型；待构建结束后再使用下面的命令。
+GPU版ORT已完成构建，模型服务已恢复。启动命令会复用已就绪的受管理服务。构建与驻留模型曾叠加触发OOM，现通过互斥租约阻止重型ORT编译和模型服务同时运行。
 
 ```bash
-python3 tools/project.py serve --component llama
+python3 tools/project.py up --components llama
 # 另一个终端：
 python3 tools/project.py interact --user owner
 ```

@@ -20,6 +20,6 @@ python3 tools/project.py down --components camera
 
 后端日志位于`runtime-data/logs/backends/`，可通过`project.py logs`读取。它们使用Python标准库RotatingFileHandler，5MiB轮转阈值、4份备份、最多64KiB输入日志块；systemd继续负责实际监督，日志转发器不自行重启子进程。该设置不替代实验原始trace的单独配额。
 
-`backend_status=READY`只表示所选后端进程和接口已就绪。报告始终另列`assistant_acceptance=NOT_VERIFIED`；模型质量、实际GPU节点位置、物理语音和JT-01～JT-13需各自证据。当前GPU版ORT仍在构建，因此模型服务启动被拒绝，完整ROS GPU节点尚不能启动。
+`backend_status=READY`只表示所选后端进程和接口已就绪。报告始终另列`assistant_acceptance=NOT_VERIFIED`；模型质量、实际GPU节点位置、物理语音和JT-01～JT-13需各自证据。GPU版ORT已完成构建，六个后端同时就绪的记录见[全后端报告](../../benchmarks/results/full-backend-readiness.json)。持续视觉期间的5次文件语音问答已通过短时共存初测，完整负载、8小时稳定性和物理语音仍待验证。
 
 验证见[生命周期报告](../../benchmarks/results/service-lifecycle-smoke.json)：真实相机生命周期、带标记的就绪故障注入、拒绝SIGINT的父子进程强制清理、真实systemd重启限流。此检查不是8小时或完整故障矩阵验收。

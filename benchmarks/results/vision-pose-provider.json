@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-10-12T17:10:43.612547+00:00",
+  "status": "PASS",
+  "task": "pose",
+  "trace_sha256": "d3263ea007c2686d7dc9ba3e9a2e352d5df52ddf80c9497635fc271dee093c2c",
+  "providers": {
+    "TensorrtExecutionProvider": 2458
+  },
+  "operations": {
+    "TensorrtExecutionProvider:TRTKernel_graph_main_graph_11553024953600363046_0": 2458
+  },
+  "full_model_tensorrt_executions": 2458,
+  "weighted_cpu_operations": {},
+  "scope": "actual ORT per-node trace with model-shaped TensorRT boundaries; no quality/performance acceptance"
+}

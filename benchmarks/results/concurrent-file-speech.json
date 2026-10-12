@@ -1,0 +1,100 @@
+{
+  "created_at": "2026-10-12T17:24:49.944411+00:00",
+  "status": "PASS",
+  "scope": "five synthetic file-audio turns with visual services running; output readback is outside the measured workload; not physical playback/AEC, held-out quality, or GPU-overlap trace acceptance",
+  "checks": {
+    "five_real_file_turns": true,
+    "input_recognized": true,
+    "math_answers": true,
+    "output_content_readback": true,
+    "nonempty_audio": true
+  },
+  "cases": [
+    {
+      "status": "PASS",
+      "scope": "paced file-audio pipeline with real Silero/STT/LLM/TTS; physical playback/AEC not tested",
+      "framework": "pipecat-ai 1.12.0",
+      "transcripts": [
+        "一加一等于几？"
+      ],
+      "answer": "一加一等于二。",
+      "output_audio_seconds": 1.776,
+      "total_seconds": 3.3555341380051686,
+      "vad_stopped_to_first_pcm_seconds": 0.9157587739973678,
+      "output_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/concurrent-voice-0.wav",
+      "request_started_ns": 51394519126246,
+      "request_finished_ns": 51398159846553,
+      "output_audio_transcript": "一加一等于二。"
+    },
+    {
+      "status": "PASS",
+      "scope": "paced file-audio pipeline with real Silero/STT/LLM/TTS; physical playback/AEC not tested",
+      "framework": "pipecat-ai 1.12.0",
+      "transcripts": [
+        "一加一等于几？"
+      ],
+      "answer": "一加一等于二。",
+      "output_audio_seconds": 1.776,
+      "total_seconds": 3.2361013099944103,
+      "vad_stopped_to_first_pcm_seconds": 0.7936233400032506,
+      "output_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/concurrent-voice-1.wav",
+      "request_started_ns": 51398159936957,
+      "request_finished_ns": 51401576994831,
+      "output_audio_transcript": "一加一等于二。"
+    },
+    {
+      "status": "PASS",
+      "scope": "paced file-audio pipeline with real Silero/STT/LLM/TTS; physical playback/AEC not tested",
+      "framework": "pipecat-ai 1.12.0",
+      "transcripts": [
+        "一加一等于几？"
+      ],
+      "answer": "一加一等于二。",
+      "output_audio_seconds": 1.776,
+      "total_seconds": 3.2311004799994407,
+      "vad_stopped_to_first_pcm_seconds": 0.7862516630048049,
+      "output_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/concurrent-voice-2.wav",
+      "request_started_ns": 51401577089971,
+      "request_finished_ns": 51404989556685,
+      "output_audio_transcript": "一加一等于二。"
+    },
+    {
+      "status": "PASS",
+      "scope": "paced file-audio pipeline with real Silero/STT/LLM/TTS; physical playback/AEC not tested",
+      "framework": "pipecat-ai 1.12.0",
+      "transcripts": [
+        "一加一等于几？"
+      ],
+      "answer": "一加一等于二。",
+      "output_audio_seconds": 1.776,
+      "total_seconds": 3.216668003995437,
+      "vad_stopped_to_first_pcm_seconds": 0.7727322549981182,
+      "output_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/concurrent-voice-3.wav",
+      "request_started_ns": 51404989648017,
+      "request_finished_ns": 51408390067435,
+      "output_audio_transcript": "一加一等于二。"
+    },
+    {
+      "status": "PASS",
+      "scope": "paced file-audio pipeline with real Silero/STT/LLM/TTS; physical playback/AEC not tested",
+      "framework": "pipecat-ai 1.12.0",
+      "transcripts": [
+        "一加一等于几？"
+      ],
+      "answer": "一加一等于二。",
+      "output_audio_seconds": 1.776,
+      "total_seconds": 3.2193931889996747,
+      "vad_stopped_to_first_pcm_seconds": 0.7677790900052059,
+      "output_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/concurrent-voice-4.wav",
+      "request_started_ns": 51408390155503,
+      "request_finished_ns": 51411787820940,
+      "output_audio_transcript": "一加一等于二。"
+    }
+  ],
+  "memory": {
+    "sample_count": 166,
+    "minimum_available_bytes": 3631329280,
+    "swap_used_start_bytes": 1500667904,
+    "swap_used_end_bytes": 1500405760
+  }
+}

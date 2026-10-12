@@ -1,0 +1,65 @@
+{
+  "created_at": "2026-10-12T17:14:07.951197+00:00",
+  "status": "PASS",
+  "input_mode": "live_camera",
+  "seconds": 30.021662271,
+  "subscription_startup_seconds": 1.1751380799978506,
+  "scope": "Steady standalone visual pipeline after explicit subscriber readiness; no conversation or final JT-03 acceptance",
+  "age_measurement": "periodic latest-result age every50ms; missing periods explicitly included",
+  "checks": {
+    "camera_rate": true,
+    "vision_rates": true,
+    "vision_freshness": true
+  },
+  "streams": {
+    "camera": {
+      "received": 899,
+      "effective_hz": 29.94504407800251,
+      "latest_age_p95_ms": 71.660065,
+      "p95_has_no_finite_observation": false,
+      "latest_age_max_ms": 74.103174,
+      "no_result_fraction": 0.0,
+      "stale_over_200ms_fraction": 0.0,
+      "sample_count": 600,
+      "percentile_method": "nearest-rank; missing samples rank after all finite ages",
+      "invalid_source_clock_messages": 0,
+      "class_observations": {},
+      "tracked_observations": 0,
+      "positive_depth_observations": 0,
+      "observations_with_keypoints": 0
+    },
+    "detection": {
+      "received": 385,
+      "effective_hz": 12.824073381569486,
+      "latest_age_p95_ms": 159.03859,
+      "p95_has_no_finite_observation": false,
+      "latest_age_max_ms": 177.603269,
+      "no_result_fraction": 0.0,
+      "stale_over_200ms_fraction": 0.0,
+      "sample_count": 600,
+      "percentile_method": "nearest-rank; missing samples rank after all finite ages",
+      "invalid_source_clock_messages": 0,
+      "class_observations": {},
+      "tracked_observations": 0,
+      "positive_depth_observations": 0,
+      "observations_with_keypoints": 0
+    },
+    "pose": {
+      "received": 384,
+      "effective_hz": 12.790764100058915,
+      "latest_age_p95_ms": 159.038302,
+      "p95_has_no_finite_observation": false,
+      "latest_age_max_ms": 184.193631,
+      "no_result_fraction": 0.0,
+      "stale_over_200ms_fraction": 0.0,
+      "sample_count": 600,
+      "percentile_method": "nearest-rank; missing samples rank after all finite ages",
+      "invalid_source_clock_messages": 0,
+      "class_observations": {},
+      "tracked_observations": 0,
+      "positive_depth_observations": 0,
+      "observations_with_keypoints": 0
+    }
+  },
+  "scenario": "standalone"
+}

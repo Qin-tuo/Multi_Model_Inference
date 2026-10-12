@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T16:18:30.218937+00:00",
+  "created_at": "2026-10-12T16:50:26.669511+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 71,
+  "tests_run": 76,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -20,6 +20,18 @@
     "onnxruntime": "1.24.4"
   },
   "cases": [
+    {
+      "id": "test_measurement_metrics.MeasurementTests.test_empty_and_invalid_observations_cannot_pass",
+      "status": "PASS"
+    },
+    {
+      "id": "test_measurement_metrics.MeasurementTests.test_missing_and_stale_samples_share_the_same_percentile_population",
+      "status": "PASS"
+    },
+    {
+      "id": "test_measurement_metrics.MeasurementTests.test_more_than_five_percent_missing_has_no_finite_p95",
+      "status": "PASS"
+    },
     {
       "id": "test_mem0_adapter.ConfigTests.test_config_pins_local_llm_cpu_embedding_and_persistent_paths",
       "status": "PASS"
@@ -114,6 +126,14 @@
     },
     {
       "id": "test_notification_pipeline.NotificationPipelineTests.test_tts_failure_has_no_audio_receipt_and_retries_are_finite",
+      "status": "PASS"
+    },
+    {
+      "id": "test_ort_profile_evidence.ProfileEvidenceTests.test_partial_gpu_or_weighted_cpu_path_does_not_pass",
+      "status": "PASS"
+    },
+    {
+      "id": "test_ort_profile_evidence.ProfileEvidenceTests.test_provider_name_without_model_execution_does_not_pass",
       "status": "PASS"
     },
     {
@@ -305,6 +325,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "defca5b3962ee23a12e2d620a8d7357c126ac4ef",
+  "source_commit": "847b900ca7eb59e9c5158f9072e32bb381c648e9",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T16:22:09.445792+00:00",
+  "updated_at": "2026-10-12T17:33:43.264808+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -9,9 +9,10 @@
       "status": "RUNNING",
       "artifacts": [
         "tools/project.py",
-        "benchmarks/results/environment.json"
+        "benchmarks/results/environment.json",
+        "benchmarks/results/power-configuration.json"
       ],
-      "validation": "doctor reads current Orin/CUDA driver; complete BOM and power baseline pending",
+      "validation": "doctor reads current Orin/CUDA driver; read-only MAXN, CPU/GPU/EMC power baseline recorded; complete BOM pending",
       "next_action": "refresh hardware enumeration and register deployment environment"
     },
     {
@@ -36,10 +37,17 @@
         "benchmarks/results/yolo-engine-fp32_tf32-smoke.json",
         "benchmarks/results/yolo-pose-engine-fp32_tf32-smoke.json",
         "benchmarks/results/vision-build-probes.json",
-        "benchmarks/results/build-memory-failure.json"
+        "benchmarks/results/build-memory-failure.json",
+        "benchmarks/results/ort-build.json",
+        "benchmarks/results/cccl-compat-smoke.json",
+        "benchmarks/results/vision-detection-provider.json",
+        "benchmarks/results/vision-pose-provider.json",
+        "benchmarks/results/vision-runtime-smoke.json",
+        "benchmarks/results/vision-with-file-speech.json",
+        "benchmarks/results/concurrent-file-speech.json"
       ],
-      "validation": "FP16 detection failure retained; TensorRT FP32 detection and pose checks PASS against CPU reference; five ROS packages compile with core SDK; full GPU ORT build resumed after mask-symbol patch, no ROS GPU runtime claim",
-      "next_action": "finish full GPU ORT build; reconfigure ROS against final prefix; profile real detector/pose and capture-to-consumption age"
+      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending",
+      "next_action": "integrate visual context with the assistant and validate independent scene quality, workload capacity and GPU overlap traces"
     },
     {
       "task_id": "J0.4",
@@ -145,10 +153,12 @@
         "deploy/logged_service.py",
         "deploy/resource_guard.py",
         "deploy/systemd/backend.service.in",
-        "benchmarks/results/service-lifecycle-smoke.json"
+        "benchmarks/results/service-lifecycle-smoke.json",
+        "benchmarks/results/full-backend-readiness.json",
+        "benchmarks/results/concurrent-file-speech.json"
       ],
-      "validation": "User-systemd camera startup, fresh ROS readiness, stop/cgroup cleanup, existing-service preservation, rollback and bounded restart/forced-stop probes PASS; full model stack unavailable during GPU build",
-      "next_action": "start and qualify the full model/vision backend stack after build completion; integrate final voice application unit and run full redeploy/offline/fault acceptance"
+      "validation": "User-systemd camera lifecycle, rollback, cleanup and restart probes PASS; all six managed backends simultaneously READY with zero restart count at observation; five file speech turns coexist with visual services; full application/device acceptance pending",
+      "next_action": "integrate final voice application unit and run full redeploy/offline/fault acceptance"
     }
   ],
   "acceptance": {
@@ -233,7 +243,7 @@
     "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
     "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
     "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending",
-    "Observed build-time OOM with compiler+VLM overlap; model services now remain stopped during the heavy ORT build. Full runtime capacity is not yet validated.",
+    "Observed build-time OOM with compiler+VLM overlap retained; build now complete and six services restored under build/runtime exclusion leases. Short file-speech coexistence leaves 3.38GiB minimum available memory; full workload capacity and long-duration stability remain unverified.",
     "Notification audio completion is currently verified with labelled transport fixtures; optional LocalAudio adapter, real speaker drain/AEC and wall-clock jump behavior still require qualification"
   ],
   "dependency_root": "/home/nvidia/AI_Stack"

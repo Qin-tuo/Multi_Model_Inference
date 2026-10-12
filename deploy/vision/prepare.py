@@ -135,6 +135,7 @@ def main() -> int:
     parser.add_argument("--fetch", action="store_true", help="Acquire the pinned yolo_ros source")
     parser.add_argument("--stage-sdk", action="store_true", help="Create user-cache SDK symlinks; no system package changes")
     parser.add_argument("--build-ort", action="store_true", help="Start the heavy CUDA/TensorRT ONNX Runtime source build")
+    parser.add_argument("--resume-ort", action="store_true", help="With --build-ort, compile existing configuration without --update")
     parser.add_argument("--build-ros", action="store_true", help="Build yolo_ros after ROS/ORT prerequisites are present")
     parser.add_argument("--build-ros-prereqs", action="store_true", help="Build ROS messages/vendor while the GPU ORT build continues")
     parser.add_argument("--stage-ort-core", action="store_true", help="Stage a separate compile-only ORT SDK; does not make GPU services ready")
@@ -142,6 +143,7 @@ def main() -> int:
                         help="Isolated Python environment for future ORT build invocations")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.resume_ort and not args.build_ort: parser.error("--resume-ort requires --build-ort")
     # Keep the stable logical path used by existing CMake caches. The visible
     # AI_Stack directory is reached through compatibility aliases after relocation.
     source = args.source.expanduser().absolute()
@@ -189,6 +191,16 @@ def main() -> int:
         "ORT_CMAKE_EXTRA_DEFINES": "onnxruntime_USE_FLASH_ATTENTION=OFF onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION=OFF",
     }
     env.update(build_env)
+    if args.build_ort:
+        sys.path.insert(0, str(ROOT))
+        from deploy.vision.cccl_compat import prepare_overlay
+        overlay = prepare_overlay(cache)
+        if overlay:
+            env["NVCC_PREPEND_FLAGS"] = "-I" + shlex.quote(str(overlay))
+            build_env["NVCC_PREPEND_FLAGS"] = env["NVCC_PREPEND_FLAGS"]
+        if args.resume_ort:
+            env["ORT_SKIP_UPDATE"] = "1"
+            build_env["ORT_SKIP_UPDATE"] = "1"
     ort_cmd = ["bash", str(source / "yolo_onnxruntime_vendor/scripts/build_ort_from_source.sh"), version, str(ort_prefix), "--ep", "cuda", "--cuda-arch", LOCK["onnxruntime"]["cuda_architecture"]]
     ros_ws = cache / "workspaces/vision"
     ros_setup = Path("/opt/ros/jazzy/setup.bash")
