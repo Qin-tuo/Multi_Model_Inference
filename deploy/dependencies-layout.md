@@ -11,9 +11,9 @@
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |
 | `environments/vision/` | Ultralytics、PyTorch CPU、ONNX 等模型导出/验证环境 |
 | `environments/ort-build/` | ORT后续构建和上游lintrunner/clang-format检查的隔离开发环境 |
-| `installed/` | 自行编译的依赖安装前缀；正在构建的 ORT 完成后写入这里 |
+| `installed/` | 自行编译的依赖安装前缀；`onnxruntime-1.28.0-cuda13-sm87/` 包含已编译的 CUDA/TensorRT provider 库 |
 | `workspaces/` | ROS视觉工作区及colcon构建/安装目录 |
-| `sdk/` | 本机 CUDA 构建所需的 cuDNN/TensorRT 头文件和库链接布局 |
+| `sdk/` | 本机 CUDA 构建所需的 cuDNN/TensorRT 头文件和库链接布局，以及 CUDA 13.2 CCCL 兼容头文件覆盖层 |
 | `system/` | 系统 CUDA、TensorRT、cuDNN、ROS 2 Jazzy 的访问入口，实际文件由系统包管理器维护 |
 | `runtime-data/` | 本项目运行配置、测试输出与运行报告；后续持久记忆等用户状态也放在运行数据根目录下 |
 | `logs/` | 构建、安装、服务与验证日志 |
@@ -23,9 +23,25 @@
 | `archives/` | 已退出当前方案的原型归档 |
 | `cache/` | 旧缓存路径的兼容层与零散下载文件；内部目录链接到上述正式分类 |
 | `projects/` | 相关业务项目的目录入口 |
-| `dependencies.json` | 各 Python 环境内全部已安装发行包的名称、版本与位置，以及系统主要依赖版本 |
+| `references/` | 原项目参考资料的链接入口，保留原有 Git 子模块结构 |
+| `dependencies.json` | 框架实际路径与 Git commit、各 Python 环境全部已安装发行包的名称/版本/位置、系统主要依赖版本和参考仓库获取状态 |
 
 `frameworks/` 中，有些目录是 Git checkout，有些是指向已安装 Python 包的链接。包入口展示当前实际使用的实现代码；Git 源码及模型的锁定版本分别以项目 `deploy/upstreams.lock.json`、`models/manifest.json` 为准。运行入口使用各自环境的 `bin/python`；语音环境使用系统 TensorRT Python 包。
+
+常用框架的直接入口：
+
+| 框架 | 本机目录 | 形式 |
+|---|---|---|
+| llama.cpp | `frameworks/llama.cpp/` | Git 源码 |
+| Pipecat | `frameworks/pipecat/` | Git 源码；实际运行包在 `environments/assistant/` |
+| Mem0 / APScheduler / Qdrant client | `frameworks/mem0/`、`frameworks/apscheduler/`、`frameworks/qdrant-client/` | 指向实际使用的已安装包 |
+| OpenVoiceStream / voice-engine | `frameworks/openvoicestream/`、`frameworks/voice-engine/` | Git 源码及其子模块 |
+| yolo_ros / ONNX Runtime | `frameworks/yolo_ros/`、`frameworks/onnxruntime/` | Git 源码 |
+| Hugging Face C++ | `frameworks/huggingface-hub-cpp/` | 指向 ROS vendor 下载的 Git 源码 |
+| Ultralytics | `frameworks/ultralytics/` | 指向视觉环境已安装包 |
+| CUDA / TensorRT / ROS | `system/cuda/`、`system/tensorrt-sdk/`、`system/ros2-jazzy/` | 系统安装的访问入口 |
+
+原 `references/repo/` 的九个学习参考子模块当前尚未初始化；清单明确标记 `checkout_available=false`。这些参考仓库不参与助手运行，目录入口不代表源码已下载。系统依赖仍由包管理器维护，`system/` 为统一访问入口。
 
 为保持既有 CMake 配置、虚拟环境脚本及服务命令可用，以下旧路径保留为兼容链接：
 
@@ -37,11 +53,11 @@
 项目/.venv-vision                   -> ~/AI_Stack/environments/vision
 ```
 
-启动当前 llama.cpp 服务：
+通过 systemd 启动或复用当前 llama.cpp 服务：
 
 ```bash
 cd /home/nvidia/Multi_Model_Inference
-python3 tools/project.py serve --component llama
+python3 tools/project.py up --components llama
 ```
 
 整理脚本是项目中的 `tools/organize_dependencies.py`，重复运行不会覆盖已有目录。迁移时应先短暂暂停使用这些目录的构建/服务进程，完成迁移和路径检查后恢复；不要直接删除兼容链接，否则现有构建缓存和虚拟环境脚本可能失效。模型、框架源码、编译产物和环境不会上传业务仓库；GitHub 保存可以重建它们的脚本、锁文件和本文档。

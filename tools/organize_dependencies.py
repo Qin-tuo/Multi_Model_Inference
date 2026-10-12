@@ -6,6 +6,7 @@ window. System package installations are indexed, never relocated.
 from __future__ import annotations
 
 import argparse
+import configparser
 from datetime import datetime, timezone
 import json
 import os
@@ -43,6 +44,38 @@ def link(source: Path, target: Path):
         raise RuntimeError(f"Refusing to replace {source}")
     source.parent.mkdir(parents=True, exist_ok=True)
     source.symlink_to(target, target_is_directory=target.is_dir())
+
+
+def framework_inventory(root: Path):
+    entries = {}
+    for path in sorted((root / "frameworks").iterdir()):
+        target = path.resolve(strict=True)
+        entry = {"path": str(path), "resolved_path": str(target),
+                 "is_link": path.is_symlink()}
+        if (target / ".git").exists():
+            entry["kind"] = "git_checkout"
+            entry["commit"] = subprocess.check_output(
+                ["git", "-C", str(target), "rev-parse", "HEAD"], text=True).strip()
+        elif root / "environments" in target.parents:
+            entry["kind"] = "installed_python_package"
+        else:
+            entry["kind"] = "installed_dependency"
+        entries[path.name] = entry
+    return entries
+
+
+def reference_inventory():
+    """Index the preserved study references without initializing submodules."""
+    modules = configparser.ConfigParser(interpolation=None)
+    modules.read(PROJECT / ".gitmodules")
+    entries = []
+    for section in modules.sections():
+        relative = modules[section]["path"]
+        path = PROJECT / relative
+        entries.append({"path": str(path), "url": modules[section]["url"],
+                        "checkout_available": (path / ".git").exists(),
+                        "role": "preserved_reference_not_runtime_dependency"})
+    return entries
 
 
 def main():
@@ -96,7 +129,9 @@ def main():
         link(root / "frameworks" / name, sites[environment] / package)
     link(root / "frameworks/onnxruntime", root / "builds/onnxruntime-1.28.0/onnxruntime")
     link(root / "frameworks/voice-engine", root / "frameworks/openvoicestream/third_party/jetson-voice-engine")
+    link(root / "frameworks/huggingface-hub-cpp", root / "workspaces/vision/build/yolo_hfhub_vendor/_deps/yolo_hfhub-src")
     link(root / "frameworks/realsense-ros", Path("/opt/ros/jazzy/share/realsense2_camera"))
+    link(root / "references", PROJECT / "references")
     for executable in ("python3", "git", "cmake", "ninja", "g++", "nvcc", "gh"):
         binary = shutil.which(executable)
         if binary:
@@ -106,6 +141,7 @@ def main():
     inventory = {"created_at": datetime.now(timezone.utc).isoformat(), "root": str(root),
                  "project": str(PROJECT), "framework_lock": str(PROJECT / "deploy/upstreams.lock.json"),
                  "model_lock": str(PROJECT / "models/manifest.json"), "environments": installed_packages,
+                 "frameworks": framework_inventory(root), "references": reference_inventory(),
                  "compatibility": {str(cache): str(root / "cache"), str(data): str(root / "runtime-data")},
                  "system_packages_relocated": False}
     query = subprocess.run(["dpkg-query", "-W", "-f=${Package}\t${Version}\n",
