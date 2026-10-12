@@ -1,0 +1,171 @@
+{
+  "created_at": "2026-10-12T08:51:20.448625+00:00",
+  "status": "FAIL",
+  "scope": "three synthetic HTTP speech round trips; not held-out ASR quality or physical playback/AEC",
+  "capabilities": {
+    "object": "capabilities",
+    "schema_version": "1.0",
+    "api_versions": [
+      "legacy",
+      "v1",
+      "openai-audio"
+    ],
+    "tts": {
+      "model_id": "matcha-icefall-zh-en",
+      "ready": true,
+      "backend": "matcha_trt",
+      "capabilities": [
+        "basic_tts",
+        "multi_language",
+        "streaming"
+      ],
+      "audio": {
+        "sample_rate": 16000,
+        "channels": 1,
+        "sample_format": "pcm_s16le",
+        "response_formats": [
+          "wav",
+          "pcm"
+        ]
+      },
+      "languages": {
+        "mode": "multi_language",
+        "values": null,
+        "default": "auto"
+      },
+      "voices": {
+        "default": {
+          "speaker_id": 0,
+          "source": "preset"
+        },
+        "items": [
+          {
+            "id": 0,
+            "type": "preset",
+            "label": "Default",
+            "payload": "0",
+            "source": "model",
+            "model_id": "matcha-icefall-zh-en",
+            "compatible_models": [
+              "matcha-icefall-zh-en"
+            ],
+            "profile_type": null,
+            "sample_rate": null,
+            "source_meta": null
+          }
+        ],
+        "aliases": []
+      },
+      "cloning": {
+        "supported": false,
+        "modes": [],
+        "enrollment": {
+          "supported": false,
+          "methods": []
+        }
+      },
+      "controls": {
+        "speed": {
+          "supported": true,
+          "min": 0.25,
+          "max": 4.0,
+          "unit": null,
+          "implementation": "backend"
+        },
+        "pitch": {
+          "supported": true,
+          "min": -24,
+          "max": 24,
+          "unit": "semitone",
+          "implementation": "dsp"
+        },
+        "style": null
+      },
+      "streaming": {
+        "supported": true,
+        "native_wire_format": "u32le_sample_rate+pcm_s16le"
+      },
+      "concurrency": {
+        "backend_max_concurrent": 1,
+        "admission_limit": 1,
+        "active": 0,
+        "available": 1
+      },
+      "failure_class": null
+    },
+    "asr": {
+      "model_id": "qwen3-asr",
+      "ready": true,
+      "backend": "llama_qwen3_asr",
+      "capabilities": [
+        "language_id",
+        "multi_language",
+        "offline"
+      ],
+      "audio": {
+        "sample_rate": 16000,
+        "channels": 1,
+        "sample_format": "pcm_s16le",
+        "response_formats": [
+          "wav",
+          "pcm"
+        ]
+      },
+      "languages": {
+        "mode": "multi_language",
+        "values": null,
+        "default": "auto"
+      },
+      "streaming": {
+        "supported": false,
+        "native_wire_format": null
+      },
+      "concurrency": {
+        "backend_max_concurrent": 1,
+        "admission_limit": 1,
+        "active": 0,
+        "available": 1
+      },
+      "failure_class": null
+    },
+    "runtime_profile": null
+  },
+  "cases": [
+    {
+      "input": "一加一等于几？",
+      "transcript": "一加一等于几？",
+      "exact_normalized_match": true,
+      "tts_seconds": 0.07552307699734229,
+      "asr_seconds": 0.5305040140010533,
+      "audio_seconds": 1.92,
+      "sample_rate": 16000,
+      "channels": 1,
+      "fixture_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/roundtrip/request-0.wav",
+      "fixture_sha256": "344982ecdb9d887e5ea661dd5c53c3fa076020ff5b8556dfa60c807c85cc8c7f"
+    },
+    {
+      "input": "请记住我喜欢简短的中文回答。",
+      "transcript": "请记住，我喜欢简短的中文回答。",
+      "exact_normalized_match": true,
+      "tts_seconds": 0.09291709600074682,
+      "asr_seconds": 0.665260092002427,
+      "audio_seconds": 3.168,
+      "sample_rate": 16000,
+      "channels": 1,
+      "fixture_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/roundtrip/request-1.wav",
+      "fixture_sha256": "ca530492ccf2736303c6624522ffba967d2614538f5b38a3a56f90563e3149b9"
+    },
+    {
+      "input": "项目使用 Jetson 和 TensorRT。",
+      "transcript": "项目使用 Jackson 和 TensorFlow。",
+      "exact_normalized_match": false,
+      "tts_seconds": 0.10130780899999081,
+      "asr_seconds": 0.5347191319997364,
+      "audio_seconds": 3.328,
+      "sample_rate": 16000,
+      "channels": 1,
+      "fixture_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/roundtrip/request-2.wav",
+      "fixture_sha256": "8453c654c8e619ea61a12a0998f5bafc6dae6e298223188c11eb092d898e1185"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T07:57:58.896509+00:00",
+  "updated_at": "2026-10-12T09:30:30.007303+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -30,8 +30,8 @@
         "deploy/vision/prepare.py",
         "deploy/vision/source-lock.json"
       ],
-      "validation": "source inspection and SDK staging only",
-      "next_action": "build compatible ONNX Runtime/TRT EP and run YOLO"
+      "validation": "ORT1.28 CUDA/TRT source build reached compilation; stopped to release compiler RSS for speech integration",
+      "next_action": "resume same incremental ORT build after closing runtime probes"
     },
     {
       "task_id": "J0.4",
@@ -49,10 +49,15 @@
       "status": "RUNNING",
       "artifacts": [
         "deploy/speech/README.md",
-        "deploy/speech/prepare.py"
+        "deploy/speech/prepare.py",
+        "benchmarks/results/matcha-build.json",
+        "benchmarks/results/asr-probe.json",
+        "benchmarks/results/tts-smoke.json",
+        "benchmarks/results/speech-roundtrip.json",
+        "benchmarks/results/voice-file-smoke.json"
       ],
-      "validation": "upstream target verifier rejects current CUDA/TRT/L4T; no speech engine inference yet",
-      "next_action": "port fixed OVS speech subset to host and rebuild model engines"
+      "validation": "Matcha host TRT engines built; real OVS HTTP TTS/ASR and Pipecat Silero→STT→LLM→TTS file pipeline pass; physical ReSpeaker unavailable",
+      "next_action": "live audio transport/AEC after hardware arrives; broader independent audio quality tests"
     },
     {
       "task_id": "J0.6",
@@ -73,9 +78,11 @@
         "app/pipecat_bot.py",
         "app/adapters/llama.py",
         "benchmarks/results/pipecat-text-smoke.json",
-        "benchmarks/results/assistant-memory-smoke.json"
+        "benchmarks/results/assistant-memory-smoke.json",
+        "app/adapters/speech.py",
+        "app/voice_file.py"
       ],
-      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending",
+      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending; real file speech pipeline passes with native Silero and turn handling",
       "next_action": "add audio transport, tool handlers, vision events and bounded concurrency"
     },
     {
@@ -162,5 +169,10 @@
       ],
       "independent_work": "continue file ASR/TTS and framework integration"
     }
-  }
+  },
+  "known_gaps": [
+    "ReSpeaker Lite microphone/speaker not connected; physical audio/AEC/interruption acceptance blocked",
+    "ASR adapter currently supports utterance file requests, not partial transcription streaming",
+    "Generic live stream queue bounds, real resource release on cancellation, voice tool handlers and full quality/stability/performance acceptance remain pending"
+  ]
 }

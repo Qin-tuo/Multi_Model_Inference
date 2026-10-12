@@ -33,5 +33,26 @@
     "ros_base": "0.11.0-1noble.20261006.040749",
     "realsense2_camera": "4.58.4-1noble.20260921.001235",
     "status": "live_rgbd_capture_smoke_pass"
+  },
+  "openvoicestream": {
+    "url": "https://github.com/Seeed-Solution/openvoicestream",
+    "commit": "18a459761647a641926f04d7d36c17035c11f8b7",
+    "status": "host_http_speech_verified",
+    "runtime_extensions": [
+      "deploy/speech/llama_asr.py",
+      "deploy/speech/cuda_compat.py",
+      "deploy/speech/piper_compat.py"
+    ]
+  },
+  "voxedge": {
+    "version": "0.0.15a3",
+    "status": "host_matcha_tensorrt_verified"
+  },
+  "cuda_python": {
+    "version": "13.2.0"
+  },
+  "piper_phonemizer": {
+    "package": "piper-tts",
+    "version": "1.8.0"
   }
 }

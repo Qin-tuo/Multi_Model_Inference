@@ -93,6 +93,8 @@ JetPack 套件名称需通过本机包清单或 BSP 来源确认，不能只根�
 
 首版按上述路线推进，无需先做引擎选型竞赛。llama.cpp 的部署问题先定位并修复；必须变更组件时记录具体兼容性或容量证据。Edge-LLM 的性能对比按 J5.7 独立执行，不阻塞 J0–J4。
 
+本机实施更新：OVS旧ASR包仅含TRT10.3序列化engine，因此同一Qwen3-ASR-0.6B改由llama.cpp CUDA音频后端执行，经OVS后端注册接口接入；整句REST识别配合Pipecat真实Silero分句，暂不声明partial streaming。Matcha/Vocos使用原始ONNX在本机TRT10.16重建，文件合成/转写与Pipecat语音问答已验证。该兼容性修订单独锁定模型、精度和profile，不计作E1–E6性能收益；物理ReSpeaker录播/AEC及完整质量集仍未验收。详见[本机语音复现步骤](deploy/speech/README.md)。
+
 ### 3.1 首版依赖与接入边界
 
 | 项目 | 地位 | 复用内容 | 本项目增加的内容 |

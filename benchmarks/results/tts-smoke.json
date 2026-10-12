@@ -1,0 +1,84 @@
+{
+  "created_at": "2026-10-12T09:22:39.909018+00:00",
+  "status": "PASS",
+  "scope": "three synthetic Chinese TTS files; signal/format checks only, intelligibility and physical playback pending",
+  "backend": "voxedge_matcha_split_tensorrt",
+  "cuda_runtime": 13020,
+  "load_seconds": 4.0633799499992165,
+  "acoustic_mode": "split_trt",
+  "gpu_estimator_count": 3,
+  "results": [
+    {
+      "text": "你好，这是本地语音助手。",
+      "status": "PASS",
+      "wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/tts/matcha-0.wav",
+      "sample_rate": 16000,
+      "channels": 1,
+      "duration_seconds": 2.848,
+      "synthesis_seconds": 0.0637864910022472,
+      "rtf": 0.02239694206539579,
+      "rms": 0.11404592543840408,
+      "clip_fraction": 0.0,
+      "metadata": {
+        "duration": 2.848,
+        "inference_time": 0.063,
+        "rtf": 0.022,
+        "sample_rate": 16000,
+        "num_tokens": 12,
+        "text_ms": 0.3,
+        "encoder_ms": 47.5,
+        "estimator_ms": 0.0,
+        "vocos_ms": 5.6,
+        "language": "zh"
+      }
+    },
+    {
+      "text": "我已经记住你喜欢简短的中文回答。",
+      "status": "PASS",
+      "wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/tts/matcha-1.wav",
+      "sample_rate": 16000,
+      "channels": 1,
+      "duration_seconds": 3.488,
+      "synthesis_seconds": 0.0680472979984188,
+      "rtf": 0.01950897305000539,
+      "rms": 0.1364978700876236,
+      "clip_fraction": 0.0,
+      "metadata": {
+        "duration": 3.488,
+        "inference_time": 0.068,
+        "rtf": 0.019,
+        "sample_rate": 16000,
+        "num_tokens": 16,
+        "text_ms": 0.2,
+        "encoder_ms": 49.7,
+        "estimator_ms": 0.0,
+        "vocos_ms": 6.9,
+        "language": "zh"
+      }
+    },
+    {
+      "text": "五分钟后提醒你休息。",
+      "status": "PASS",
+      "wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/tts/matcha-2.wav",
+      "sample_rate": 16000,
+      "channels": 1,
+      "duration_seconds": 2.48,
+      "synthesis_seconds": 0.05855240299933939,
+      "rtf": 0.023609839919088466,
+      "rms": 0.1348562240600586,
+      "clip_fraction": 0.0,
+      "metadata": {
+        "duration": 2.48,
+        "inference_time": 0.058,
+        "rtf": 0.023,
+        "sample_rate": 16000,
+        "num_tokens": 10,
+        "text_ms": 0.1,
+        "encoder_ms": 45.2,
+        "estimator_ms": 0.0,
+        "vocos_ms": 4.8,
+        "language": "zh"
+      }
+    }
+  ]
+}

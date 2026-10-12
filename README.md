@@ -4,15 +4,15 @@
 
 ## 当前进度
 
-项目处于 J0 依赖核验与框架接入阶段。26项框架/插件测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz。完整模型质量、语音、视觉检测和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于 J0 依赖核验与框架接入阶段。框架/插件测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz。真实Silero→ASR→LLM→TTS文件问答已跑通；完整模型质量、物理语音、视觉检测和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
-| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 真实llama文本与记忆问答通过；音频链路待接入 |
+| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 真实文本、记忆与文件语音问答通过；实时设备与工具整合继续推进 |
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 持久调度、取消、去重、待播通知测试通过；播报消费待接入 |
-| 语音 | OVS Qwen3-ASR 0.6B + Matcha/Vocos | 上游旧engine与当前系统不匹配，需要移植和重建 |
+| 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 本机引擎与文件语音问答通过；真人/噪声/AEC待验证 |
 | 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | ROS/RGB-D采集通过；检测/姿态GPU模型尚未部署 |
 
 Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest](models/manifest.json)，框架适配通过配置读取；更换模型后重新验证质量、上下文预算和共存容量。Edge-LLM留到后续性能对比。
@@ -65,7 +65,7 @@ python3 tools/project.py smoke --component memory
 
 音频设备确定为ReSpeaker Lite双麦，用户当前无法连接麦克风/扬声器，真机录播/AEC/打断列为待验证。D435i最新链路为5Gbps；早期USB2枚举仅保留为排查记录。
 
-语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。完整 `up/down/interact/bench/acceptance` 命令将在对应里程碑接入，当前不可作为已实现接口使用。
+语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。语音服务与文件管线使用部署说明中的独立入口。完整 `up/down/interact/bench/acceptance` 命令将在对应里程碑接入，当前不可作为已实现接口使用。
 
 ## 数据和上游
 

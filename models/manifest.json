@@ -27,13 +27,32 @@
     },
     "asr": {
       "model": "Qwen3-ASR-0.6B",
-      "backend": "openvoicestream",
-      "status": "not_prepared"
+      "backend": "llama.cpp_cuda_via_ovs",
+      "repository": "ggml-org/Qwen3-ASR-0.6B-GGUF",
+      "revision": "928ab958557df9aa2ef1c93e0e83c7ad0933fae2",
+      "files": [
+        {
+          "name": "Qwen3-ASR-0.6B-Q8_0.gguf",
+          "size": 804749248,
+          "sha256": "bca259818b50ca7c4c05e9bdb35a5dc04fa039653a6d6f3f0f331f96f6aa1971"
+        },
+        {
+          "name": "mmproj-Qwen3-ASR-0.6B-bf16.gguf",
+          "size": 378575520,
+          "sha256": "dae36c855f9a82a8916bea2238b24bda69a39d8da8b2f46dee7c103775656039"
+        }
+      ],
+      "context_tokens": 2048,
+      "max_output_tokens": 256,
+      "port": 8089,
+      "status": "local_file_transcription_verified",
+      "reason": "OVS JP6.2 ASR artifact contains serialized TRT10.3 engines without rebuild ONNX; probe mature llama.cpp audio backend for same model"
     },
     "tts": {
       "model": "Matcha",
-      "backend": "openvoicestream",
-      "status": "not_prepared"
+      "backend": "ovs_voxedge_matcha_tensorrt_host",
+      "status": "host_build_and_file_synthesis_verified",
+      "source_revision": "737422aea690cd7604eae893a2168d0840a094dc"
     },
     "detection": {
       "model": "YOLOv8n",
@@ -46,9 +65,13 @@
       "status": "not_prepared"
     },
     "vad": {
-      "model": "Silero VAD",
+      "model": "Silero VAD bundled by Pipecat 1.12.0",
       "backend": "onnxruntime_cpu",
-      "status": "not_prepared"
+      "artifact_sha256": "597d30b3ec076608d059477bb14cfeffdf951bf5cae370d38f65d33bbfe82004",
+      "artifact_size": 2327524,
+      "sample_rate": 16000,
+      "stop_secs": 0.4,
+      "status": "real_file_vad_pipeline_verified"
     },
     "embedding": {
       "model": "BAAI/bge-small-zh-v1.5",

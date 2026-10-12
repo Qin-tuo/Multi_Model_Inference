@@ -1,0 +1,119 @@
+{
+  "created_at": "2026-10-12T08:28:19.278316+00:00",
+  "status": "built_not_speech_validated",
+  "input_revision": "737422aea690cd7604eae893a2168d0840a094dc",
+  "input_payload_sha256": "3d4856abe3f71b07988cef816d49c81933ee96191819ef37af6c1c01193faf71",
+  "export_source_commit": "e1d8d507300e329642937b8461ce03bbd2bd3a16",
+  "host_l4t": "# R39 (release), REVISION: 2.1, GCID: 46758480, BOARD: generic, EABI: aarch64, DATE: Fri Aug  7 05:54:22 AM UTC 2026",
+  "tensorrt": "10.16.2.10",
+  "engines": {
+    "matcha_estimator_step0_bf16.engine": {
+      "identity": {
+        "onnx_sha256": "5da91ecbc2f96e2694071431a934c7e0537f8dda8ce2edd2500c16369cd15bec",
+        "tensorrt": "10.16.2.10",
+        "precision": "bf16",
+        "shapes": {
+          "minShapes": "z:1x80x72,mu:1x80x72,mask:1x1x72",
+          "optShapes": "z:1x80x256,mu:1x80x256,mask:1x1x256",
+          "maxShapes": "z:1x80x600,mu:1x80x600,mask:1x1x600"
+        }
+      },
+      "engine_sha256": "657991c43b7b1435b2334509ad8f00c437bd9e4e65d2f17b7b398a222408cb05",
+      "bytes": 37630316,
+      "command": [
+        "trtexec",
+        "--onnx=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/onnx/matcha_estimator_step0_trt.onnx",
+        "--saveEngine=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/matcha_estimator_step0_bf16.engine.building",
+        "--bf16",
+        "--memPoolSize=workspace:1024",
+        "--skipInference",
+        "--minShapes=z:1x80x72,mu:1x80x72,mask:1x1x72",
+        "--optShapes=z:1x80x256,mu:1x80x256,mask:1x1x256",
+        "--maxShapes=z:1x80x600,mu:1x80x600,mask:1x1x600"
+      ],
+      "built_at": "2026-10-12T08:22:25.474168+00:00",
+      "status": "built_not_speech_validated"
+    },
+    "matcha_estimator_step1_bf16.engine": {
+      "identity": {
+        "onnx_sha256": "d50b33c009eaf887625fc305098a76428aa2e36451f479162c715cbaab7614de",
+        "tensorrt": "10.16.2.10",
+        "precision": "bf16",
+        "shapes": {
+          "minShapes": "z:1x80x72,mu:1x80x72,mask:1x1x72",
+          "optShapes": "z:1x80x256,mu:1x80x256,mask:1x1x256",
+          "maxShapes": "z:1x80x600,mu:1x80x600,mask:1x1x600"
+        }
+      },
+      "engine_sha256": "937931f0293eba0293c48a6016a99dd2140e8777083317018ad1312d075a18d3",
+      "bytes": 36181372,
+      "command": [
+        "trtexec",
+        "--onnx=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/onnx/matcha_estimator_step1_trt.onnx",
+        "--saveEngine=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/matcha_estimator_step1_bf16.engine.building",
+        "--bf16",
+        "--memPoolSize=workspace:1024",
+        "--skipInference",
+        "--minShapes=z:1x80x72,mu:1x80x72,mask:1x1x72",
+        "--optShapes=z:1x80x256,mu:1x80x256,mask:1x1x256",
+        "--maxShapes=z:1x80x600,mu:1x80x600,mask:1x1x600"
+      ],
+      "built_at": "2026-10-12T08:24:43.226380+00:00",
+      "status": "built_not_speech_validated"
+    },
+    "matcha_estimator_step2_bf16.engine": {
+      "identity": {
+        "onnx_sha256": "1b9f49b1b2925343de83d2d49e76bedb34c311c6691bf6be83af14928448fc38",
+        "tensorrt": "10.16.2.10",
+        "precision": "bf16",
+        "shapes": {
+          "minShapes": "z:1x80x72,mu:1x80x72,mask:1x1x72",
+          "optShapes": "z:1x80x256,mu:1x80x256,mask:1x1x256",
+          "maxShapes": "z:1x80x600,mu:1x80x600,mask:1x1x600"
+        }
+      },
+      "engine_sha256": "5f7cf0c39c69db38da0ff2e0194e6cd70124eda0c3c9602f6aebf79fe11b6fd1",
+      "bytes": 37718308,
+      "command": [
+        "trtexec",
+        "--onnx=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/onnx/matcha_estimator_step2_trt.onnx",
+        "--saveEngine=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/matcha_estimator_step2_bf16.engine.building",
+        "--bf16",
+        "--memPoolSize=workspace:1024",
+        "--skipInference",
+        "--minShapes=z:1x80x72,mu:1x80x72,mask:1x1x72",
+        "--optShapes=z:1x80x256,mu:1x80x256,mask:1x1x256",
+        "--maxShapes=z:1x80x600,mu:1x80x600,mask:1x1x600"
+      ],
+      "built_at": "2026-10-12T08:27:04.933895+00:00",
+      "status": "built_not_speech_validated"
+    },
+    "vocos_fp16.engine": {
+      "identity": {
+        "onnx_sha256": "b599142a1fb8ff03de3e84ac35ff537c619e56f4267a6fe894851a42844acf9e",
+        "tensorrt": "10.16.2.10",
+        "precision": "fp16",
+        "shapes": {
+          "minShapes": "mels:1x80x72",
+          "optShapes": "mels:1x80x256",
+          "maxShapes": "mels:1x80x600"
+        }
+      },
+      "engine_sha256": "a9818327244cf2c1b03ebcd5b802c1b3b2c274c4a3e8632c7b26bba0098aefa1",
+      "bytes": 29288092,
+      "command": [
+        "trtexec",
+        "--onnx=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/vocos-16khz-univ.onnx",
+        "--saveEngine=/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/vocos_fp16.engine.building",
+        "--fp16",
+        "--memPoolSize=workspace:1024",
+        "--skipInference",
+        "--minShapes=mels:1x80x72",
+        "--optShapes=mels:1x80x256",
+        "--maxShapes=mels:1x80x600"
+      ],
+      "built_at": "2026-10-12T08:28:19.277127+00:00",
+      "status": "built_not_speech_validated"
+    }
+  }
+}

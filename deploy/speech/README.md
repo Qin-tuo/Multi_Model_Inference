@@ -1,6 +1,6 @@
 # 首版语音服务的准备与兼容性核验
 
-固定 **Qwen3-ASR 0.6B + Matcha zh/en TTS + Vocos**，使用 OpenVoiceStream 的独立语音服务。这里的准备脚本没有启动语音推理，J0.5 尚未通过。
+固定 **Qwen3-ASR 0.6B + Matcha zh/en TTS + Vocos**，使用 OpenVoiceStream 的独立语音服务。已增加本机部署路径并通过文件推理与Pipecat语音管线验证。真机录播/AEC和完整质量验收尚未完成，J0.5保持未完成。
 
 ## 已核验的上游
 
@@ -17,7 +17,7 @@
 
 出处：[固定版 compose](https://github.com/Seeed-Solution/openvoicestream/blob/18a459761647a641926f04d7d36c17035c11f8b7/deploy/docker-compose.edgellm-v091-voice.yml)、[固定版 profile](https://github.com/Seeed-Solution/openvoicestream/blob/18a459761647a641926f04d7d36c17035c11f8b7/configs/profiles/jetson-edgellm-v091-matcha.json)。模型仓库 revision、payload SHA256 与尺寸保存在 [source-lock.json](source-lock.json)，这些是上游产物的锁，并不证明产物适用于本机。
 
-ASR 的内部实现使用 Edge-LLM fork；这是 OVS 的语音后端依赖。对话和图文主引擎仍采用 llama.cpp。独立 speech compose 不包含额外对话 LLM 或机器人 agent。
+该上游发布组合的ASR使用Edge-LLM fork。当前本机路径保持Qwen3-ASR模型，改由已验证的llama.cpp CUDA音频后端执行，经OVS后端注册接口接入；对话VLM仍是独立的llama.cpp实例。Matcha采用本机构建的TensorRT引擎。
 
 ## 当前兼容性缺口
 
@@ -57,3 +57,40 @@ python3 deploy/speech/prepare.py --fetch --engine-source \
 启动本机移植版后，先保存 `GET /readyz`、`/v1/models`、`/v1/capabilities` 的原始响应。文件测试使用 `POST /v1/audio/transcriptions` 和 `/v1/audio/speech`；ASR streaming 使用源码存在的 `WS /asr/stream`。如果使用私有 `/tts/stream`，其前 4 字节为 uint32 little-endian 采样率，后续为 PCM16，不能直接作为裸 PCM 播放。
 
 J0.5 通过需要真实文件/录音中文识别、中文音频播放、能力与格式核验、未运行额外 LLM、共存峰值记录。本轮只能证明源码选择与兼容性差异。板载 APE capture 节点存在不能证明外部麦克风或音频连线可用；真实录播另行验证。
+
+## 当前本机路径与复现
+
+旧ASR发布包仅含TRT10.3序列化engine，不能在当前平台证明兼容；Matcha包包含原始ONNX。当前路径复用llama.cpp执行同一Qwen3-ASR-0.6B，使用上游Matcha拆图脚本和本机trtexec构建3个BF16 estimator及FP16 Vocos。ASR权重/revision/SHA256见模型manifest；TTS构建记录见`benchmarks/results/matcha-build.json`。此为平台兼容性适配，不是Edge-LLM性能对比。
+
+```bash
+python3 -m venv --system-site-packages .venv-speech
+.venv-speech/bin/python -m pip install -r deploy/speech/requirements.lock
+python3 deploy/speech/prepare.py --fetch --engine-source
+python3 tools/project.py prepare --component speech
+```
+
+系统需提供与构建一致的TensorRT Python3.12 binding及CUDA13.2；主`.venv`提供ONNX拆图与回归依赖。旧engine留在独立输入缓存，运行目录只接受本机新建并校验SHA256的engine。
+
+分别在三个终端启动本地服务：
+
+```bash
+python3 tools/project.py serve --component asr
+python3 tools/project.py serve --component speech
+python3 tools/project.py serve --component llama
+```
+
+对应端口为8089、8621、8088，均仅监听回环地址。OVS保留其原生路由、模型能力、并发门控和生命周期；本项目只注册ASR适配器、提供部署profile，并桥接CUDA13/Piper的新旧导入接口。GPU watchdog的RK debugfs权限异常通过实际Jetson标记处理；不替换其模型校验。
+
+```bash
+python3 tools/project.py smoke --component speech
+.venv/bin/python -m app.voice_file \
+  --input "$HOME/.local/share/multi-model-assistant/fixtures/roundtrip/request-0.wav" \
+  --output-wav "$HOME/.local/share/multi-model-assistant/fixtures/voice-response.wav" \
+  --report benchmarks/results/voice-file-smoke.json
+```
+
+当前ASR公开能力为整句文件识别，`/v1/capabilities`明确报告partial streaming为false。Pipecat使用真实Silero VAD分句与REST STT；TTS使用16kHz单声道PCM，不能套用OpenAI专用voice名称/24kHz假设。
+
+术语提示配置位于`configs/runtime.yaml`的`asr_context`。保留无提示失败报告`speech-roundtrip-no-context.json`；同一音频加提示后通过，并保留TensorFlow反例。波形哈希记录于报告。三条合成用例与单次语音问答不能代替独立语音质量集、真人/噪声/AEC测试。
+
+实物选型为ReSpeaker Lite双麦；用户暂时无法连接麦克风/扬声器，物理停播、回声与实际听觉体验仍待验证。

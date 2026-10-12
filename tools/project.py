@@ -189,6 +189,14 @@ def manifests():
 
 
 def prepare(args):
+    if args.component == "speech":
+        _, models = manifests()
+        model = models["models"]["asr"]
+        for file in model["files"]:
+            download_file(f"https://huggingface.co/{model['repository']}/resolve/{model['revision']}/{file['name']}",
+                          CACHE / "models" / file["name"], file["sha256"], file["size"])
+        subprocess.run(["python3", str(ROOT / "deploy/speech/build_matcha_host.py")], check=True)
+        return 0
     if args.component == "memory":
         subprocess.run([str(ROOT / ".venv/bin/python"), str(ROOT / "tools/memory_model.py"), "prepare"], check=True)
         return 0
@@ -318,10 +326,26 @@ def smoke_memory(_args):
 def smoke(args):
     if args.component == "llama": return smoke_llama(args)
     if args.component == "memory": return smoke_memory(args)
+    if args.component == "speech":
+        subprocess.run([str(ROOT / ".venv/bin/python"), str(ROOT / "tools/speech_smoke.py")], check=True)
+        return 0
     raise RuntimeError(f"Real smoke for {args.component} is not implemented yet")
 
 
 def serve(args):
+    if args.component == "asr":
+        _, models = manifests()
+        model = models["models"]["asr"]
+        main = next(x for x in model["files"] if not x["name"].startswith("mmproj"))
+        projector = next(x for x in model["files"] if x["name"].startswith("mmproj"))
+        command = [str(CACHE / "build/llama/bin/llama-server"), "-lv", "4", "--alias", "assistant-asr",
+                   "-m", str(CACHE / "models" / main["name"]), "--mmproj", str(CACHE / "models" / projector["name"]),
+                   "-ngl", "99", "-c", str(model["context_tokens"]), "-t", "2", "-np", "1",
+                   "--host", "127.0.0.1", "--port", str(model["port"])]
+        os.execv(command[0], command)
+    if args.component == "speech":
+        python = str(ROOT / ".venv-speech/bin/python")
+        os.execv(python, [python, str(ROOT / "deploy/speech/serve.py")])
     if args.component != "llama":
         raise RuntimeError("Only the llama model service is ready; the complete assistant profile is pending")
     command = server_command()
@@ -353,7 +377,7 @@ def main():
     sm = sub.add_parser("smoke")
     sm.add_argument("--component", required=True, choices=["llama", "vision", "speech", "memory"])
     srv = sub.add_parser("serve", help="Run a model service in the foreground")
-    srv.add_argument("--component", choices=["llama"], required=True)
+    srv.add_argument("--component", choices=["llama", "asr", "speech"], required=True)
     test = sub.add_parser("test")
     test.add_argument("--suite", choices=["core", "framework", "memory", "interaction"], default="core")
     args = parser.parse_args()

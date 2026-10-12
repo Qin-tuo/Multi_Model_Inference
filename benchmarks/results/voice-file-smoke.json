@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "scope": "paced file-audio pipeline with real Silero/STT/LLM/TTS; physical playback/AEC not tested",
+  "framework": "pipecat-ai 1.12.0",
+  "transcripts": [
+    "一加一等于几？"
+  ],
+  "answer": "一加一等于二。",
+  "output_audio_seconds": 1.776,
+  "total_seconds": 3.8673081480010296,
+  "vad_stopped_to_first_pcm_seconds": 1.4209180129982997,
+  "output_wav": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-response.wav",
+  "output_audio_transcript": "一加一等于二。",
+  "output_content_verified": true,
+  "output_wav_sha256": "3ae7e6316bc3f5c2ad6ae74957ab84c6736a1092d19dff3737b555b874c2f077"
+}

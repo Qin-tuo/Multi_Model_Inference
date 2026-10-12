@@ -40,5 +40,15 @@
   "reminders": {
     "provider": "apscheduler",
     "version": "3.11.3"
+  },
+  "speech": {
+    "base_url": "http://127.0.0.1:8621/v1",
+    "asr_model": "qwen3-asr",
+    "tts_model": "matcha-icefall-zh-en",
+    "voice": "0",
+    "sample_rate": 16000,
+    "channels": 1,
+    "asr_mode": "utterance_file",
+    "asr_context": "Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0"
   }
 }

@@ -36,5 +36,14 @@
       "payload_size": 376135680
     }
   },
-  "status": "source_verified_host_port_required"
+  "status": "host_speech_file_pipeline_verified",
+  "host_runtime": {
+    "asr": "llama.cpp CUDA Qwen3-ASR-0.6B Q8_0 + bf16 projector; see models/manifest.json",
+    "tts": "VoxEdge 0.0.15a3 Matcha split BF16 + Vocos FP16 rebuilt using TensorRT10.16.2.10",
+    "python": "3.12",
+    "cuda_python": "13.2.0",
+    "piper_phonemizer": "piper-tts1.8.0 compatibility adapter",
+    "asr_input_mode": "utterance file HTTP; partial streaming not implemented",
+    "host_build_recipe": "deploy/speech/build_matcha_host.py"
+  }
 }
