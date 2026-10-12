@@ -35,6 +35,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SYSTEM_MESSAGE = (
     "你是运行在用户本机的中文个人助手。回答简洁、准确。"
     "只有工具返回成功后才能说操作已完成；没有记忆证据时说明不知道。"
+    "用户要求记住、更正、遗忘、设置或取消提醒时，必须先调用对应工具，不能只口头承诺。"
 )
 
 
@@ -58,6 +59,8 @@ def build_pipeline(
     before_llm: Sequence[FrameProcessor] = (),
     after_llm: Sequence[FrameProcessor] = (),
     tools: Any = None,
+    tool_choice: Any = None,
+    tool_turn: Any = None,
     conversation_id: str | None = None,
 ) -> BotPipeline:
     """Assemble upstream context/service/worker components and plugin hooks.
@@ -66,7 +69,24 @@ def build_pipeline(
     Memory belongs in context processors; tools use Pipecat's ToolsSchema or
     FunctionSchema handlers. The application does not own turn transitions.
     """
+    if tool_turn is not None:
+        from app.tools import ToolResponseGuard
+        if tools is not None or tool_choice is not None:
+            raise ValueError("tool_turn owns the schemas and initial tool choice")
+        messages = [dict(message) for message in messages]
+        guidance = tool_turn.system_guidance()
+        if messages and messages[0].get("role") == "system":
+            messages[0]["content"] += guidance
+        else:
+            messages.insert(0, {"role": "system", "content": SYSTEM_MESSAGE + guidance})
+        tools = tool_turn.schemas()
+        tool_choice = tool_turn.initial_tool_choice()
+        after_llm = (ToolResponseGuard(tool_turn), *after_llm)
     context = LLMContext(messages=messages) if tools is None else LLMContext(messages=messages, tools=tools)
+    if isinstance(tool_choice, dict):
+        raise ValueError("The pinned llama.cpp backend accepts string tool_choice; named objects silently fall back to auto")
+    if tool_choice is not None:
+        context.set_tool_choice(tool_choice)
     aggregators = LLMContextAggregatorPair(context)
     service = llm if llm is not None else create_llama_service(config)
     responses = LLMFullResponseAggregator()
@@ -119,22 +139,36 @@ async def run_smoke(
     timeout_seconds: float = 90,
     llm: FrameProcessor | None = None,
     tools: Any = None,
+    tool_choice: Any = None,
+    tool_turn: Any = None,
 ) -> dict[str, Any]:
     """Run one input through a real Pipecat worker; finish via its EndFrame."""
     if timeout_seconds <= 0:
         raise ValueError("timeout must be positive")
-    bot = build_pipeline(config, messages, llm=llm, tools=tools)
+    bot = build_pipeline(config, messages, llm=llm, tools=tools, tool_choice=tool_choice, tool_turn=tool_turn)
     completions: list[str] = []
     errors: list[str] = []
+    round_has_tools = False
+
+    has_tools = tools is not None or tool_turn is not None
+    if has_tools:
+        @bot.llm.event_handler("on_function_calls_started")
+        async def on_tools_started(_service, _calls):
+            nonlocal round_has_tools
+            round_has_tools = True
 
     @bot.responses.event_handler("on_completion")
     async def on_completion(_aggregator, completion: str, completed: bool) -> None:
+        nonlocal round_has_tools
         if completed:
+            if round_has_tools:
+                round_has_tools = False
+                return
             if completion.strip():
                 completions.append(completion)
             # Empty completions can be a tool round. The maintained LLM service
             # owns tool continuation, so don't terminate that intermediate round.
-            if completion.strip() or tools is None:
+            if completion.strip() or not has_tools:
                 await bot.worker.queue_frame(EndFrame())
 
     @bot.worker.event_handler("on_pipeline_error")

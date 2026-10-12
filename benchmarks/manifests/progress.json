@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T09:30:30.007303+00:00",
+  "updated_at": "2026-10-12T11:02:27.508217+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -28,10 +28,12 @@
       "status": "RUNNING",
       "artifacts": [
         "deploy/vision/prepare.py",
-        "deploy/vision/source-lock.json"
+        "deploy/vision/source-lock.json",
+        "benchmarks/results/yolo-export.json",
+        "benchmarks/results/yolo-engine-smoke.json"
       ],
-      "validation": "ORT1.28 CUDA/TRT source build reached compilation; stopped to release compiler RSS for speech integration",
-      "next_action": "resume same incremental ORT build after closing runtime probes"
+      "validation": "ORT1.28 CUDA/TRT build active; YOLO detection/pose CPU exports pass; actual TensorRT detection executes but bus-box IoU0.973 misses preset0.98 threshold",
+      "next_action": "finish ORT build; investigate FP16 box parity; build yolo_ros and connect actual camera"
     },
     {
       "task_id": "J0.4",
@@ -80,10 +82,12 @@
         "benchmarks/results/pipecat-text-smoke.json",
         "benchmarks/results/assistant-memory-smoke.json",
         "app/adapters/speech.py",
-        "app/voice_file.py"
+        "app/voice_file.py",
+        "app/tools.py",
+        "benchmarks/results/tool-smoke.json"
       ],
-      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending; real file speech pipeline passes with native Silero and turn handling",
-      "next_action": "add audio transport, tool handlers, vision events and bounded concurrency"
+      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending; real file speech pipeline passes with native Silero and turn handling; native Pipecat tool calls get_time/remember/create_reminder pass against real SDK stores, write-confirmation guard added",
+      "next_action": "persistent interactive session; broader model tool quality; voice tool and vision integration"
     },
     {
       "task_id": "J3.reminders",
@@ -91,7 +95,7 @@
       "artifacts": [
         "app/reminders.py"
       ],
-      "validation": "real APScheduler/SQLite plugin tests; audio consumption and acoustic timing pending",
+      "validation": "real APScheduler/SQLite plugin tests; audio consumption and acoustic timing pending; real model-selected create_reminder persisted and confirmed",
       "next_action": "register framework tool handlers and deliver notifications via TTS"
     }
   ],
@@ -173,6 +177,9 @@
   "known_gaps": [
     "ReSpeaker Lite microphone/speaker not connected; physical audio/AEC/interruption acceptance blocked",
     "ASR adapter currently supports utterance file requests, not partial transcription streaming",
-    "Generic live stream queue bounds, real resource release on cancellation, voice tool handlers and full quality/stability/performance acceptance remain pending"
-  ]
+    "Generic live stream queue bounds, real resource release on cancellation, voice tool handlers and full quality/stability/performance acceptance remain pending",
+    "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
+    "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified"
+  ],
+  "dependency_root": "/home/nvidia/AI_Stack"
 }

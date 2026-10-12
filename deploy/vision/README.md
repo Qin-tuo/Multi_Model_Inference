@@ -1,6 +1,6 @@
 # 首版视觉服务的准备与构建
 
-固定 **YOLOv8n 检测 + YOLOv8n-pose 姿态**，接入 yolo_ros 5.0.0 的 C++/ONNX Runtime 管线，使用 TensorRT execution provider。姿态按计划在 J3 接入。当前只完成源码与构建依赖核验，模型推理尚未验收。
+固定 **YOLOv8n 检测 + YOLOv8n-pose 姿态**，接入 yolo_ros 5.0.0 的 C++/ONNX Runtime 管线，使用 TensorRT execution provider。姿态按计划在 J3 接入。当前完成两模型CPU导出回归及检测TensorRT执行；ROS模型整合仍待完成，ORT GPU依赖正在编译。
 
 ## 已核验的版本与限制
 
@@ -10,8 +10,9 @@
 | ONNX Runtime | `v1.28.0`，tag commit `da9b5e364c465de65c49d91e696cd6485270757f` |
 | GPU 目标 | Orin SM87、CUDA13.2、当前 TensorRT10.16 |
 | ORT 构建 | CUDA + TensorRT、shared library、先用 2 个编译任务 |
-| ROS | 本机 `/opt/ros/jazzy/setup.bash` 尚不存在，需安装及构建依赖 |
-| YOLO ONNX 模型 | 尚未下载/导出、尚未锁定哈希；不能作为已部署模型 |
+| ROS | Jazzy与realsense2-camera已安装；双路RGB-D采集实测通过 |
+| YOLO ONNX 模型 | 两模型已固定权重哈希并导出640×640、opset17、无NMS的FP32图；CPU回归通过 |
+| 检测TensorRT引擎 | 本机FP16引擎执行成功；单图框位置对齐未达预设0.98 IoU阈值，需继续验证 |
 
 上游 vendor 的 GPU 预编译 tarball 只支持 x64。aarch64 GPU 构建必须使用源码 ORT，并将 `-DONNXRUNTIME_ROOT` 指向编译输出。CUDA13 对应的上游选择为 ORT1.28.0。[固定版构建说明](https://github.com/mgonzs13/yolo_ros/blob/7924a8be76c81f4051370e254677516ca696a272/docs/build.md)
 
@@ -19,7 +20,7 @@
 
 ## 可执行的准备与构建命令
 
-从项目根目录运行，源码和产物保存在用户缓存。
+从项目根目录运行。源码与产物已统一放在 `~/AI_Stack/`；旧缓存路径通过兼容链接访问，见[依赖总目录说明](../dependencies-layout.md)。
 
 ```bash
 python3 deploy/vision/prepare.py --fetch --stage-sdk \
@@ -46,6 +47,17 @@ python3 deploy/vision/prepare.py --build-ros
 
 ## 模型、相机与调度接入
 
+模型导出使用独立环境：
+
+```bash
+python3 -m venv .venv-vision
+.venv-vision/bin/python -m pip install -r deploy/vision/requirements.lock
+.venv-vision/bin/python deploy/vision/export_models.py
+.venv-vision/bin/python tools/vision_engine_smoke.py
+```
+
+最后一条命令调用本机NVIDIA `trtexec`构建并实际执行TensorRT引擎，再用Ultralytics NMS比较CPU ONNX和GPU输出。已有引擎可加`--reuse-engine`重新执行；每次记录实际模型/引擎/输入哈希。公开`bus.jpg`初测均检出3人和1辆公交车，人物框IoU≥0.998，公交车框IoU为0.973，未达到预先设置的0.98，因此[对齐报告](../../benchmarks/results/yolo-engine-smoke.json)保留FAIL。不能将“引擎执行成功”作为全部数值/质量验收通过；单次耗时也不能当成吞吐或P95验收。
+
 1. 固定 Ultralytics exporter 版本与 YOLOv8n/YOLOv8n-pose 权重 revision/hash；在独立环境导出 static shape、batch=1、明确 raw-output/NMS 规则的 ONNX。
 2. 将权重许可、ONNX SHA256、输入形状、类别/关键点定义和 exporter 参数纳入模型锁。yolo_ros 的 MIT 许可不代替 YOLO 权重许可。
 3. 先使用真实图片/文件输入验证检测、姿态、后处理和执行 provider；保存质量样例与 GPU trace。
@@ -53,4 +65,4 @@ python3 deploy/vision/prepare.py --build-ros
 5. 上游已移除旧 `/yolo/enable` 服务，推理持续运行。图像准入应接入 `camera_streams.cpp` / detection plugin 输入，执行回调应围绕 `engine/model.cpp` 的实际 `Ort::Session::Run` 与同步完成边界补充。
 6. detection plugin 已有 latest-frame-wins 路径。接入 Pipecat 视觉桥接插件后同时记录丢帧原因、帧时间戳、开始/结束、provider 和 worker epoch，避免把“输入已丢弃”当作“GPU 已释放”。
 
-J0.3 通过要求：真实模型执行、实际 TensorRT/GPU 后端证据、真实相机图像、峰值内存与帧时效记录。当前准备脚本没有生成此类推理通过结果。
+J0.3 通过要求：真实模型执行、实际 TensorRT/GPU 后端证据、真实相机图像、峰值内存与帧时效记录。当前只完成上述部分证据，未通过完整J0.3验收。

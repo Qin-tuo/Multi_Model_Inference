@@ -1,0 +1,21 @@
+{
+  "created_at": "2026-10-12T11:02:27.508217+00:00",
+  "status": "PASS",
+  "scope": "dependency relocation, compatibility aliases, three environment imports, live llama health; no full deployment acceptance",
+  "root": "/home/nvidia/AI_Stack",
+  "aliases": {
+    "/home/nvidia/.cache/multi-model-assistant": "/home/nvidia/AI_Stack/cache",
+    "/home/nvidia/.local/share/multi-model-assistant": "/home/nvidia/AI_Stack/runtime-data",
+    "/home/nvidia/Multi_Model_Inference/.venv": "/home/nvidia/AI_Stack/environments/assistant",
+    "/home/nvidia/Multi_Model_Inference/.venv-speech": "/home/nvidia/AI_Stack/environments/speech",
+    "/home/nvidia/Multi_Model_Inference/.venv-vision": "/home/nvidia/AI_Stack/environments/vision"
+  },
+  "aliases_valid": true,
+  "llama_health": {
+    "status": "ok"
+  },
+  "system_installations_moved": false,
+  "references_moved": false,
+  "ongoing_ort_build_resumed": true,
+  "idempotent_organizer_rerun": "PASS"
+}

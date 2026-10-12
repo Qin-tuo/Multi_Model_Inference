@@ -8,7 +8,7 @@
   "yolo_ros": {
     "url": "https://github.com/mgonzs13/yolo_ros.git",
     "commit": "7924a8be76c81f4051370e254677516ca696a272",
-    "status": "not_built"
+    "status": "ort_gpu_dependency_build_running"
   },
   "pipecat": {
     "url": "https://github.com/pipecat-ai/pipecat.git",
@@ -25,7 +25,7 @@
   "apscheduler": {
     "url": "https://github.com/agronholm/apscheduler",
     "version": "3.11.3",
-    "status": "integration_pending"
+    "status": "durable_scheduler_and_model_tool_smoke_pass"
   },
   "ros2": {
     "distribution": "jazzy",

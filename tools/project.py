@@ -244,11 +244,16 @@ def server_command(port=None):
     binary = CACHE / "build/llama/bin/llama-server"
     for path in (binary, CACHE / "models" / main["name"], CACHE / "models" / projector["name"]):
         if not path.exists(): raise RuntimeError(f"Missing prepared artifact: {path}")
-    return [str(binary), "-lv", "4", "--alias", model.get("server_model_id", "assistant-vlm"),
+    command = [str(binary), "-lv", "4", "--jinja", "--alias", model.get("server_model_id", "assistant-vlm"),
             "-m", str(CACHE / "models" / main["name"]), "--mmproj",
             str(CACHE / "models" / projector["name"]), "-ngl", str(config["gpu_layers"]),
             "-c", str(config["context_tokens"]), "-t", str(config["threads"]),
             "-np", str(config["parallel"]), "--host", "127.0.0.1", "--port", str(port or config["port"])]
+    if template := model.get("chat_template"):
+        path = CACHE / "upstreams/llama.cpp" / template["relative_source_path"]
+        if sha256(path) != template["sha256"]: raise RuntimeError("Chat template differs from the model manifest")
+        command += ["--chat-template-file", str(path)]
+    return command
 
 
 def wait_ready(process, url, seconds=240):
