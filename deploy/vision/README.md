@@ -49,7 +49,7 @@ python3 deploy/vision/prepare.py --build-ros
 1. 固定 Ultralytics exporter 版本与 YOLOv8n/YOLOv8n-pose 权重 revision/hash；在独立环境导出 static shape、batch=1、明确 raw-output/NMS 规则的 ONNX。
 2. 将权重许可、ONNX SHA256、输入形状、类别/关键点定义和 exporter 参数纳入模型锁。yolo_ros 的 MIT 许可不代替 YOLO 权重许可。
 3. 先使用真实图片/文件输入验证检测、姿态、后处理和执行 provider；保存质量样例与 GPU trace。
-4. 接入 realsense-ros D435i 的 RGB/depth/CameraInfo。2026-10-12 后续 probe 已发现 D435i `8086:0b3a` 和 `/dev/video0`～`video5`，枚举速度为 **480 Mbit/s（USB2）**；相机实际帧率、同步和 RGB/depth 共存能力仍需测试。建议实物连接至 USB3 数据链路后重新核验。
+4. 接入 realsense-ros D435i 的 RGB/depth/CameraInfo。2026-10-12 后续 probe 已发现 D435i `8086:0b3a` 和 `/dev/video0`～`video5`，枚举速度为 **480 Mbit/s（USB2）**；这是早期枚举记录；后续链路已变为5Gbps。已用ROS实测640×480双路20s，RGB29.48Hz、depth29.78Hz，见[采集报告](../../benchmarks/results/camera-smoke.json)。跨流同步质量、视觉模型及长时稳定性仍需测试。
 5. 上游已移除旧 `/yolo/enable` 服务，推理持续运行。图像准入应接入 `camera_streams.cpp` / detection plugin 输入，执行回调应围绕 `engine/model.cpp` 的实际 `Ort::Session::Run` 与同步完成边界补充。
 6. detection plugin 已有 latest-frame-wins 路径。接入 Pipecat 视觉桥接插件后同时记录丢帧原因、帧时间戳、开始/结束、provider 和 worker epoch，避免把“输入已丢弃”当作“GPU 已释放”。
 

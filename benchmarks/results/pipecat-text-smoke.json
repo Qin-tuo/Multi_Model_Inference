@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "framework": "pipecat-ai",
+  "framework_version": "1.12.0",
+  "backend": "llama.cpp",
+  "model": "assistant-vlm",
+  "base_url": "http://127.0.0.1:8088/v1",
+  "real_model_execution": true,
+  "scope": "text_image_pipeline_smoke",
+  "elapsed_ns": 1542484427,
+  "response": "我是你的中文个人助手，随时准备为你提供帮助。",
+  "context_message_count": 3
+}

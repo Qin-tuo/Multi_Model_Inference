@@ -144,7 +144,15 @@ class Mem0Adapter:
                 from mem0 import Memory
                 config = build_mem0_config(self.data_dir, bge_path, llama_base_url=llama_base_url,
                                            llama_model=llama_model, embedding_backend=embedding_backend)
+                if embedding_backend == "onnx":
+                    import onnxruntime as ort
+                    options = ort.SessionOptions()
+                    options.intra_op_num_threads = 2
+                    options.inter_op_num_threads = 1
+                    config["embedder"]["config"]["model_kwargs"]["model_kwargs"]["session_options"] = options
                 sdk = Memory.from_config(config)
+                from app.adapters.embedding import BGEQueryAdapter
+                sdk.embedding_model = BGEQueryAdapter(sdk.embedding_model)
             self.sdk = sdk
             from mem0.memory.telemetry import MEM0_TELEMETRY
             if MEM0_TELEMETRY:

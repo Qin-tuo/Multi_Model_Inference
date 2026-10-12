@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T07:24:49.390626+00:00",
+  "created_at": "2026-10-12T07:55:13.958412+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
@@ -125,6 +125,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "84babf0d07c3b0070dab3ac953496b37ad1c1578",
+  "source_commit": "b6356e1357ccf3913ecaf1f5896e0c44d8c1c81d",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

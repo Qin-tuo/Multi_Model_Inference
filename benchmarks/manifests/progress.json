@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T07:24:40.481635+00:00",
+  "updated_at": "2026-10-12T07:57:58.896509+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -17,8 +17,11 @@
     {
       "task_id": "J0.2",
       "status": "RUNNING",
-      "validation": "D435i now enumerates video nodes at USB2; ROS and real RGB-D/audio capture not verified",
-      "next_action": "install ROS 2 Jazzy and verify RealSense modes; identify physical audio I/O"
+      "validation": "ROS 2 Jazzy/realsense installed; 20s live RGB-D 640x480: color29.48Hz depth29.78Hz, USB5Gbps; physical audio unavailable",
+      "next_action": "maintain camera bridge and later verify physical ReSpeaker Lite audio",
+      "artifacts": [
+        "benchmarks/results/camera-smoke.json"
+      ]
     },
     {
       "task_id": "J0.3",
@@ -32,13 +35,14 @@
     },
     {
       "task_id": "J0.4",
-      "status": "RUNNING",
+      "status": "DONE",
       "artifacts": [
         "models/manifest.json",
-        "deploy/upstreams.lock.json"
+        "deploy/upstreams.lock.json",
+        "benchmarks/results/llama-smoke.json"
       ],
-      "validation": "GGUF/projector SHA256 verified; CUDA87 build in progress",
-      "next_action": "complete build, then real text/image smoke and Pipecat pipeline"
+      "validation": "real CUDA text/image smoke PASS, 37/37 GPU layers and CUDA projector; baseline quality/performance acceptance pending",
+      "next_action": "integrate vision/speech workloads and evaluate full quality set"
     },
     {
       "task_id": "J0.5",
@@ -52,23 +56,27 @@
     },
     {
       "task_id": "J0.6",
-      "status": "RUNNING",
+      "status": "DONE",
       "artifacts": [
         "app/memory.py",
-        "patches/mem0/purge_history.py"
+        "patches/mem0/purge_history.py",
+        "benchmarks/results/bge-conversion.json",
+        "benchmarks/results/memory-semantic-smoke.json"
       ],
-      "validation": "real SDK lifecycle tests use fixture embeddings; BGE not deployed",
-      "next_action": "prepare BGE CPU model and verify semantic recall"
+      "validation": "CPU ONNX conversion reference regression, 10/10 synthetic semantic recall after reopen, owner isolation PASS; final JT-10/11 corpus pending",
+      "next_action": "expand independent retrieval/quality corpus and integrate bounded runtime calls"
     },
     {
       "task_id": "J1.framework",
       "status": "RUNNING",
       "artifacts": [
         "app/pipecat_bot.py",
-        "app/adapters/llama.py"
+        "app/adapters/llama.py",
+        "benchmarks/results/pipecat-text-smoke.json",
+        "benchmarks/results/assistant-memory-smoke.json"
       ],
-      "validation": "Pipecat native worker/context contract tests; real LLM path pending",
-      "next_action": "connect actual llama-server and then audio services"
+      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending",
+      "next_action": "add audio transport, tool handlers, vision events and bounded concurrency"
     },
     {
       "task_id": "J3.reminders",
@@ -132,6 +140,27 @@
     "JT-13": {
       "status": "NOT_VERIFIED",
       "evidence": []
+    }
+  },
+  "hardware": {
+    "microphone": {
+      "model": "ReSpeaker Lite dual microphone",
+      "source": "user confirmation",
+      "connected": false
+    },
+    "speaker": {
+      "connected": false,
+      "model": "not specified"
+    },
+    "physical_audio_validation": {
+      "status": "BLOCKED",
+      "reason": "User confirmed microphone and speaker cannot be connected yet",
+      "scope": [
+        "capture/playback",
+        "AEC",
+        "acoustic interruption timing"
+      ],
+      "independent_work": "continue file ASR/TTS and framework integration"
     }
   }
 }

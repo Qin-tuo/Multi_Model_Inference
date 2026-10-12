@@ -12,6 +12,7 @@ import asyncio
 import base64
 import json
 import mimetypes
+import os
 import sys
 import time
 from dataclasses import dataclass
@@ -178,6 +179,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--base-url", default="http://127.0.0.1:8088/v1")
     parser.add_argument("--timeout", type=float, default=90)
     parser.add_argument("--output", type=Path, help="Also write the actual result JSON")
+    parser.add_argument("--memory-dir", type=Path, help="Explicit local Mem0 store to retrieve from")
+    parser.add_argument("--user", default="owner", help="Manually selected memory profile")
+    parser.add_argument("--embedding-path", type=Path,
+                        default=Path(os.environ.get("ASSISTANT_CACHE_DIR", Path.home() / ".cache/multi-model-assistant")) / "models/bge-small-zh-v1.5-onnx")
     return parser.parse_args(argv)
 
 
@@ -194,7 +199,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             prompt = args.prompt or "请用一句话介绍你可以帮助我做什么。"
         config = LlamaConfig.from_manifest(args.manifest, base_url=args.base_url)
-        result = asyncio.run(run_smoke(config, input_messages(prompt, args.image), timeout_seconds=args.timeout))
+        messages = input_messages(prompt, args.image)
+        memory_evidence = None
+        if args.memory_dir:
+            from app.memory import Mem0Adapter
+            from app.context_memory import memory_message
+            with Mem0Adapter(args.memory_dir, bge_path=args.embedding_path, embedding_backend="onnx",
+                             llama_base_url=config.base_url, llama_model=config.model) as memory:
+                found = memory.search(args.user, prompt, top_k=5)
+                evidence_message, memory_evidence = memory_message(found["items"], config.base_url)
+                memory_evidence["retrieval_method"] = found["retrieval_method"]
+                memory_evidence["generation"] = found["generation"]
+            messages.insert(-1, evidence_message)
+        result = asyncio.run(run_smoke(config, messages, timeout_seconds=args.timeout))
+        if memory_evidence is not None:
+            result["memory_evidence"] = memory_evidence
         output = json.dumps(result, ensure_ascii=False, indent=2)
         print(output)
         if args.output is not None:

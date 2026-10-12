@@ -1,0 +1,122 @@
+{
+  "created_at": "2026-10-12T07:46:27.718609+00:00",
+  "status": "PASS",
+  "scope": "10 synthetic semantic recall cases after restart; not JT-10/11 acceptance",
+  "backend": "real_mem0_qdrant_bge_onnx_cpu",
+  "cases": [
+    {
+      "key": "style",
+      "query": "我希望你用什么风格回复？",
+      "returned_keys": [
+        "style",
+        "project",
+        "meeting"
+      ],
+      "top1_correct": true,
+      "latency_ms": 43.111700000736164
+    },
+    {
+      "key": "drink",
+      "query": "我最喜欢喝什么饮料？",
+      "returned_keys": [
+        "drink",
+        "style",
+        "sport"
+      ],
+      "top1_correct": true,
+      "latency_ms": 34.80608400059282
+    },
+    {
+      "key": "city",
+      "query": "我住在哪个城市？",
+      "returned_keys": [
+        "city",
+        "style",
+        "book"
+      ],
+      "top1_correct": true,
+      "latency_ms": 33.131840002170065
+    },
+    {
+      "key": "pet",
+      "query": "我家猫咪的名字是什么？",
+      "returned_keys": [
+        "pet",
+        "style",
+        "project"
+      ],
+      "top1_correct": true,
+      "latency_ms": 33.37623400148004
+    },
+    {
+      "key": "sport",
+      "query": "周六我通常做什么运动？",
+      "returned_keys": [
+        "sport",
+        "meeting",
+        "book"
+      ],
+      "top1_correct": true,
+      "latency_ms": 33.691990000079386
+    },
+    {
+      "key": "book",
+      "query": "我最近看的是哪本书？",
+      "returned_keys": [
+        "book",
+        "style",
+        "drink"
+      ],
+      "top1_correct": true,
+      "latency_ms": 32.5224709995382
+    },
+    {
+      "key": "food",
+      "query": "做饭时哪种配菜不要给我放？",
+      "returned_keys": [
+        "food",
+        "drink",
+        "place"
+      ],
+      "top1_correct": true,
+      "latency_ms": 34.743296997476136
+    },
+    {
+      "key": "project",
+      "query": "我现在在开发什么项目？",
+      "returned_keys": [
+        "project",
+        "book",
+        "city"
+      ],
+      "top1_correct": true,
+      "latency_ms": 32.99148099904414
+    },
+    {
+      "key": "meeting",
+      "query": "团队例会是在什么时候？",
+      "returned_keys": [
+        "meeting",
+        "project",
+        "book"
+      ],
+      "top1_correct": true,
+      "latency_ms": 32.89771799973096
+    },
+    {
+      "key": "place",
+      "query": "我的备用钥匙收在哪里？",
+      "returned_keys": [
+        "place",
+        "project",
+        "city"
+      ],
+      "top1_correct": true,
+      "latency_ms": 33.70613500010222
+    }
+  ],
+  "owner_isolation": true,
+  "median_query_ms": 33.534112000779714,
+  "max_query_ms": 43.111700000736164,
+  "record_count": 10
+}

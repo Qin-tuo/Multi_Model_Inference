@@ -1,0 +1,86 @@
+{
+  "run_id": "llama-smoke-20261012T074510Z",
+  "created_at": "2026-10-12T07:45:18.639401+00:00",
+  "backend": "real",
+  "input_mode": "synthetic_fixture",
+  "status": "PASS",
+  "scope": "GPU load and text/image functionality only; not quality or latency acceptance",
+  "load_seconds": 5.074021118001838,
+  "memory": {
+    "VmHWM": "4779936 kB",
+    "VmRSS": "4779936 kB"
+  },
+  "command": [
+    "/home/nvidia/.cache/multi-model-assistant/build/llama/bin/llama-server",
+    "-lv",
+    "4",
+    "--alias",
+    "assistant-vlm",
+    "-m",
+    "/home/nvidia/.cache/multi-model-assistant/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+    "--mmproj",
+    "/home/nvidia/.cache/multi-model-assistant/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
+    "-ngl",
+    "99",
+    "-c",
+    "2048",
+    "-t",
+    "4",
+    "-np",
+    "1",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "54503"
+  ],
+  "cuda_evidence": [
+    "0.00.026.652 I ggml_cuda_init: found 1 CUDA devices (Total VRAM: 15597 MiB):",
+    "0.00.093.529 I cmn  common_param:   - CUDA0   : Orin (15597 MiB, 10125 MiB free)",
+    "0.00.093.955 I cmn  common_param: system_info: n_threads = 4 (n_threads_batch = 4) / 8 | CUDA : ARCHS = 870 | USE_GRAPHS = 1 | FA_QUANTS = q4_0-q4_0,q8_0-q8_0,f16-f16,bf16-bf16 | CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | DOTPROD = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | ",
+    "0.01.192.408 I common_memory_breakdown_print: |   - CUDA0 (Orin)       | 15597 = 9984 + (1989 =  1834 +      72 +      82) +        3623 |",
+    "0.01.452.517 I llama_prepare_model_devices: using device CUDA0 (Orin) (0000:00:00.0) - 9984 MiB free",
+    "0.02.124.796 I load_tensors: offloaded 37/37 layers to GPU",
+    "0.02.124.808 I load_tensors:        CUDA0 model buffer size =  1834.83 MiB",
+    "0.02.124.810 I load_tensors:    CUDA_Host model buffer size =   243.43 MiB",
+    "0.02.883.647 I llama_context:  CUDA_Host  output buffer size =     0.58 MiB",
+    "0.02.897.207 I llama_kv_cache:      CUDA0 KV buffer size =    72.00 MiB",
+    "0.02.931.259 I sched_reserve:      CUDA0 compute buffer size =    82.52 MiB",
+    "0.02.931.272 I sched_reserve:  CUDA_Host compute buffer size =    18.02 MiB",
+    "0.03.124.668 I clip_ctx: CLIP using CUDA0 backend",
+    "0.04.494.010 I reserve_compute_meta:      CUDA0 compute buffer size =   569.70 MiB",
+    "0.06.726.532 I common_memory_breakdown_print: |   - CUDA0 (Orin)       | 15597 = 7631 + (1989 =  1834 +      72 +      82) +        5976 |"
+  ],
+  "results": [
+    {
+      "case": "text",
+      "answer": "一加一等于二。",
+      "seconds": 0.7946467519977887,
+      "usage": {
+        "completion_tokens": 7,
+        "prompt_tokens": 30,
+        "total_tokens": 37,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "nonempty": true,
+      "sanity_answer_correct": true
+    },
+    {
+      "case": "image",
+      "answer": "红色",
+      "seconds": 0.9236548660010158,
+      "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 97,
+        "total_tokens": 99,
+        "prompt_tokens_details": {
+          "cached_tokens": 14
+        }
+      },
+      "nonempty": true,
+      "sanity_answer_correct": true
+    }
+  ],
+  "local_log": "/home/nvidia/.local/share/multi-model-assistant/logs/llama-smoke-20261012T074510Z.log"
+}

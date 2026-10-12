@@ -189,6 +189,9 @@ def manifests():
 
 
 def prepare(args):
+    if args.component == "memory":
+        subprocess.run([str(ROOT / ".venv/bin/python"), str(ROOT / "tools/memory_model.py"), "prepare"], check=True)
+        return 0
     if args.component != "llama":
         raise RuntimeError(f"prepare for {args.component} has not been implemented")
     lock, models = manifests()
@@ -233,7 +236,7 @@ def server_command(port=None):
     binary = CACHE / "build/llama/bin/llama-server"
     for path in (binary, CACHE / "models" / main["name"], CACHE / "models" / projector["name"]):
         if not path.exists(): raise RuntimeError(f"Missing prepared artifact: {path}")
-    return [str(binary), "--alias", model.get("server_model_id", "assistant-vlm"),
+    return [str(binary), "-lv", "4", "--alias", model.get("server_model_id", "assistant-vlm"),
             "-m", str(CACHE / "models" / main["name"]), "--mmproj",
             str(CACHE / "models" / projector["name"]), "-ngl", str(config["gpu_layers"]),
             "-c", str(config["context_tokens"]), "-t", str(config["threads"]),
@@ -283,8 +286,10 @@ def smoke_llama(args):
                     "messages": [{"role": "user", "content": content}], "max_tokens": 64,
                     "temperature": 0, "stream": False})
                 answer = response["choices"][0]["message"].get("content", "")
+                correct = ("二" in answer or "2" in answer) if name == "text" else "红" in answer
                 results.append({"case": name, "answer": answer, "seconds": time.monotonic()-started,
-                                "usage": response.get("usage"), "nonempty": bool(answer.strip())})
+                                "usage": response.get("usage"), "nonempty": bool(answer.strip()),
+                                "sanity_answer_correct": correct})
             status = read(f"/proc/{process.pid}/status") or ""
             memory = {line.split(":")[0]: line.split(":",1)[1].strip() for line in status.splitlines()
                       if line.startswith(("VmRSS:", "VmHWM:"))}
@@ -296,7 +301,7 @@ def smoke_llama(args):
     cuda_evidence = [line for line in backend_log.splitlines() if "CUDA" in line or "offloaded" in line]
     gpu_confirmed = any("offloaded" in line and not "offloaded 0/" in line for line in cuda_evidence)
     report = {"run_id": run_id, "created_at": stamp(), "backend": "real", "input_mode": "synthetic_fixture",
-              "status": "PASS" if gpu_confirmed and all(x["nonempty"] for x in results) else "FAIL",
+              "status": "PASS" if gpu_confirmed and all(x["sanity_answer_correct"] for x in results) else "FAIL",
               "scope": "GPU load and text/image functionality only; not quality or latency acceptance",
               "load_seconds": load_seconds, "memory": memory, "command": command,
               "cuda_evidence": cuda_evidence[-30:], "results": results, "local_log": str(log)}
@@ -306,13 +311,21 @@ def smoke_llama(args):
 
 
 def smoke_memory(_args):
-    raise RuntimeError("Mem0 lifecycle tests are available via test --suite memory; real BGE semantic smoke is pending")
+    subprocess.run([str(ROOT / ".venv/bin/python"), str(ROOT / "tools/memory_model.py"), "smoke"], check=True)
+    return 0
 
 
 def smoke(args):
     if args.component == "llama": return smoke_llama(args)
     if args.component == "memory": return smoke_memory(args)
     raise RuntimeError(f"Real smoke for {args.component} is not implemented yet")
+
+
+def serve(args):
+    if args.component != "llama":
+        raise RuntimeError("Only the llama model service is ready; the complete assistant profile is pending")
+    command = server_command()
+    os.execv(command[0], command)
 
 
 def tests(args):
@@ -339,11 +352,13 @@ def main():
     prep.add_argument("--jobs", type=int, default=2, choices=range(1,5))
     sm = sub.add_parser("smoke")
     sm.add_argument("--component", required=True, choices=["llama", "vision", "speech", "memory"])
+    srv = sub.add_parser("serve", help="Run a model service in the foreground")
+    srv.add_argument("--component", choices=["llama"], required=True)
     test = sub.add_parser("test")
     test.add_argument("--suite", choices=["core", "framework", "memory", "interaction"], default="core")
     args = parser.parse_args()
     try:
-        return {"doctor": doctor, "prepare": prepare, "smoke": smoke, "test": tests}[args.action](args)
+        return {"doctor": doctor, "prepare": prepare, "smoke": smoke, "test": tests, "serve": serve}[args.action](args)
     except (OSError, RuntimeError, TimeoutError, subprocess.CalledProcessError, ValueError) as e:
         print(json.dumps({"status": "FAIL", "error": str(e)}, ensure_ascii=False), file=sys.stderr)
         return 1

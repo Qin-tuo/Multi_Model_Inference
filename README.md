@@ -4,16 +4,16 @@
 
 ## 当前进度
 
-项目处于 J0 依赖核验与框架接入阶段。Pipecat、Mem0 和 APScheduler 的插件测试已经运行；真实模型质量、麦克风/播放、语义记忆和整机验收尚未完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于 J0 依赖核验与框架接入阶段。26项框架/插件测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz。完整模型质量、语音、视觉检测和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
-| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 文本/图文接入代码与框架测试已就绪 |
-| 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 权重与projector已校验；CUDA构建进行中 |
-| 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | SDK持久化、隔离、更正、遗忘测试通过；BGE语义检索待验证 |
+| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 真实llama文本与记忆问答通过；音频链路待接入 |
+| 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
+| 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 持久调度、取消、去重、待播通知测试通过；播报消费待接入 |
 | 语音 | OVS Qwen3-ASR 0.6B + Matcha/Vocos | 上游旧engine与当前系统不匹配，需要移植和重建 |
-| 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | 源码与准备脚本已锁定；真实模型及RGB-D帧率待验证 |
+| 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | ROS/RGB-D采集通过；检测/姿态GPU模型尚未部署 |
 
 Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest](models/manifest.json)，框架适配通过配置读取；更换模型后重新验证质量、上下文预算和共存容量。Edge-LLM留到后续性能对比。
 
@@ -42,10 +42,28 @@ python3 tools/project.py smoke --component llama
 Pipecat真实文本入口需要本地llama-server已监听 `127.0.0.1:8088`、别名`assistant-vlm`：
 
 ```bash
+python3 tools/project.py serve --component llama
+```
+
+在另一终端运行：
+
+```bash
 .venv/bin/python -m app.pipecat_bot --text-smoke \
   --prompt '你好，请用中文回答' \
   --output benchmarks/results/pipecat-text-smoke.json
 ```
+
+准备并验证本地BGE检索：
+
+```bash
+python3 tools/project.py prepare --component memory
+python3 tools/project.py smoke --component memory
+.venv/bin/python tools/assistant_memory_smoke.py
+```
+
+最后一条命令需要llama服务已启动，使用独立临时库及合成偏好，验证保存/更正/遗忘后的真实回答；不读写用户记忆。实际查询指定 `--memory-dir` 与手选 `--user`，记忆证据按本地llama tokenizer限制在512token内。BGE运行使用CPU ONNX，PyTorch CPU仅用于转换和参考回归；锁文件固定官方ARM64 CPU wheel，避免额外安装CUDA运行库。
+
+音频设备确定为ReSpeaker Lite双麦，用户当前无法连接麦克风/扬声器，真机录播/AEC/打断列为待验证。D435i最新链路为5Gbps；早期USB2枚举仅保留为排查记录。
 
 语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。完整 `up/down/interact/bench/acceptance` 命令将在对应里程碑接入，当前不可作为已实现接口使用。
 

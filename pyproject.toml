@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-memory = ["sentence-transformers>=5.2,<6", "onnxruntime>=1.23,<2"]
+memory = ["sentence-transformers[onnx]>=5.2,<6", "onnxruntime>=1.23,<2"]
 
 [tool.ruff]
 target-version = "py312"

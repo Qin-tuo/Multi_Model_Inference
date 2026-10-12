@@ -3,7 +3,7 @@
   "llama": {
     "url": "https://github.com/ggml-org/llama.cpp.git",
     "commit": "08ffba21e5c2f1728b6b405c05ff3913f65706d4",
-    "status": "build_pending"
+    "status": "cuda_text_image_smoke_pass"
   },
   "yolo_ros": {
     "url": "https://github.com/mgonzs13/yolo_ros.git",
@@ -14,17 +14,24 @@
     "url": "https://github.com/pipecat-ai/pipecat.git",
     "version": "1.12.0",
     "commit": "1559a684b1ee9771b36454b72418d7364b518e7f",
-    "status": "integration_pending"
+    "status": "real_text_memory_integration_pass"
   },
   "mem0": {
     "url": "https://github.com/mem0ai/mem0.git",
     "version": "2.2.1",
     "commit": "b7ad69afda6b6ed030347c66d48a13e4de9dec08",
-    "status": "integration_pending"
+    "status": "cpu_onnx_semantic_smoke_pass"
   },
   "apscheduler": {
     "url": "https://github.com/agronholm/apscheduler",
     "version": "3.11.3",
     "status": "integration_pending"
+  },
+  "ros2": {
+    "distribution": "jazzy",
+    "installation": "official_apt",
+    "ros_base": "0.11.0-1noble.20261006.040749",
+    "realsense2_camera": "4.58.4-1noble.20260921.001235",
+    "status": "live_rgbd_capture_smoke_pass"
   }
 }
