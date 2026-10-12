@@ -60,5 +60,12 @@
     "version": "1.1.5",
     "commit": "a894c86dc701b97b6627bc3986e542a72faa0fe3",
     "status": "ros_vendor_compiled"
+  },
+  "local_audio": {
+    "pipecat_extra": "local",
+    "pyaudio": "0.2.14",
+    "portaudio_package": "19.6.0-1.2build3",
+    "status": "native_transport_import_and_read_only_enumeration_pass_physical_audio_pending",
+    "requirements": "deploy/speech/requirements-local-audio.lock"
   }
 }

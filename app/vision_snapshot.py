@@ -12,7 +12,7 @@ from app.vision_frames import VisionUnavailable
 
 def wants_visual_input(text):
     """Local intent hints; /look and the API visual flag provide explicit input."""
-    return bool(re.search(r"摄像头|镜头|画面|图中|图片里|眼前|你(?:现在)?(?:看到|看见)|看(?:看)?(?:这个|这是什么|一下)|这(?:个|是什么).*(?:颜色|东西|物体)|面前有什么", text))
+    return bool(re.search(r"摄像头|镜头|画面|图中|图片里|眼前|你(?:现在)?(?:看到|看见)|看(?:看)?(?:这个|这是什么|一下)|这(?:个|是什么).*(?:颜色|东西|物体)|面前有什么|^(?:请问[，, ]*)?[这那](?:个)?是什么[？?。！!]*$", text.strip()))
 
 
 class VisionReplyReceiver(FrameProcessor):

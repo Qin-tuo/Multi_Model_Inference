@@ -1,0 +1,3 @@
+# Pipecat 1.12.0 local transport extra, in the main application environment.
+# System prerequisite: portaudio19-dev (Ubuntu Noble ARM64).
+PyAudio==0.2.14

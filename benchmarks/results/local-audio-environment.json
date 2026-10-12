@@ -1,0 +1,206 @@
+{
+  "created_at": "2026-10-12T18:26:28.316975+00:00",
+  "status": "PASS",
+  "scope": "PyAudio/native Pipecat local transport imports and read-only PortAudio enumeration; no stream opened or physical recording/playback tested",
+  "pyaudio": "0.2.14",
+  "portaudio": "PortAudio V19.6.0-devel, revision 396fe4b6699ae929d3a685b3ef8a7e97396139a4",
+  "physical_audio_tested": false,
+  "devices": [
+    {
+      "index": 0,
+      "name": "NVIDIA Jetson Orin NX HDA: HDMI 0 (hw:0,3)",
+      "maxInputChannels": 0,
+      "maxOutputChannels": 8,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 1,
+      "name": "NVIDIA Jetson Orin NX HDA: HDMI 1 (hw:0,7)",
+      "maxInputChannels": 0,
+      "maxOutputChannels": 8,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 2,
+      "name": "NVIDIA Jetson Orin NX HDA: HDMI 2 (hw:0,8)",
+      "maxInputChannels": 0,
+      "maxOutputChannels": 8,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 3,
+      "name": "NVIDIA Jetson Orin NX HDA: HDMI 3 (hw:0,9)",
+      "maxInputChannels": 0,
+      "maxOutputChannels": 8,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 4,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,0)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 5,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,1)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 6,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,2)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 7,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,3)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 8,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,4)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 9,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,5)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 10,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,6)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 11,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,7)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 12,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,8)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 13,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,9)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 14,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,10)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 15,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,11)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 16,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,12)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 17,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,13)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 18,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,14)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 19,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,15)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 20,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,16)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 21,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,17)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 22,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,18)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 23,
+      "name": "NVIDIA Jetson Orin NX APE: - (hw:1,19)",
+      "maxInputChannels": 16,
+      "maxOutputChannels": 16,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 24,
+      "name": "hdmi",
+      "maxInputChannels": 0,
+      "maxOutputChannels": 8,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 25,
+      "name": "pipewire",
+      "maxInputChannels": 64,
+      "maxOutputChannels": 64,
+      "defaultSampleRate": 44100.0
+    },
+    {
+      "index": 26,
+      "name": "demixer",
+      "maxInputChannels": 0,
+      "maxOutputChannels": 128,
+      "defaultSampleRate": 48000.0
+    },
+    {
+      "index": 27,
+      "name": "default",
+      "maxInputChannels": 128,
+      "maxOutputChannels": 128,
+      "defaultSampleRate": 48000.0
+    }
+  ]
+}

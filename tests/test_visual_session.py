@@ -14,6 +14,7 @@ from app.records import Records
 from app.reminders import ReminderService
 from app.session import AssistantSession
 from app.vision_frames import VisionFrameStore, VisionUnavailable
+from app.vision_snapshot import wants_visual_input
 from test_mem0_adapter import actual_sdk
 from test_pipecat_pipeline import FrameworkFakeLLM
 
@@ -32,6 +33,11 @@ class ImageInspectLLM(FrameworkFakeLLM):
 
 
 class VisualSessionTests(unittest.IsolatedAsyncioTestCase):
+    def test_spoken_deictic_question_uses_visual_input_without_capturing_model_questions(self):
+        self.assertTrue(wants_visual_input("这是什么？"))
+        self.assertTrue(wants_visual_input("请问那个是什么？"))
+        self.assertFalse(wants_visual_input("这是什么模型？"))
+
     async def asyncSetUp(self):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)

@@ -1,4 +1,5 @@
 """Native long-lived Pipecat wiring; model/tokenizer are labelled fixtures."""
+import asyncio
 from pathlib import Path
 import tempfile
 import unittest
@@ -48,6 +49,32 @@ class PersistentSessionTests(unittest.IsolatedAsyncioTestCase):
     async def test_failed_output_is_not_completed_history(self):
         async def broken_output(_text): raise OSError("fixture output failure")
         with self.assertRaises(OSError): await self.session.ask("你好", emit=broken_output)
+        self.assertEqual(self.records.recent("owner"), [])
+
+    async def test_history_waits_for_emit_receipt_and_keeps_its_output_channel(self):
+        self.session.output_channel = "fixture"
+        entered, drained = asyncio.Event(), asyncio.Event()
+        async def emit(_text):
+            entered.set()
+            await drained.wait()
+        task = asyncio.create_task(self.session.ask("你好", emit=emit))
+        await asyncio.wait_for(entered.wait(), 3)
+        self.assertEqual(self.records.recent("owner"), [])
+        drained.set()
+        await task
+        self.assertEqual(self.records.recent("owner")[0]["output_channel"], "fixture")
+
+    async def test_cancel_after_model_completion_prevents_a_late_output_receipt(self):
+        entered, drained = asyncio.Event(), asyncio.Event()
+        async def emit(_text):
+            entered.set()
+            await drained.wait()
+        task = asyncio.create_task(self.session.ask("你好", emit=emit))
+        await asyncio.wait_for(entered.wait(), 3)
+        self.assertTrue(self.session.pending.done())
+        await self.session.cancel()
+        drained.set()
+        with self.assertRaises(asyncio.CancelledError): await task
         self.assertEqual(self.records.recent("owner"), [])
 
     async def test_oversized_protected_input_never_reaches_model(self):

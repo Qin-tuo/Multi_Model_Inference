@@ -406,6 +406,16 @@ def main():
     interact.add_argument("--session-id")
     interact.add_argument("--input-file", type=Path)
     interact.add_argument("--no-vision", action="store_true")
+    voice = sub.add_parser("voice", help="Persistent Pipecat speech, memory, tools and vision")
+    voice.add_argument("--user", default="owner")
+    voice.add_argument("--data-dir", type=Path, default=DATA)
+    voice.add_argument("--session-id")
+    voice.add_argument("--no-vision", action="store_true")
+    voice.add_argument("--input-wav", type=Path, nargs="+")
+    voice.add_argument("--output-wav", type=Path)
+    voice.add_argument("--report", type=Path)
+    voice.add_argument("--input-device", type=int)
+    voice.add_argument("--output-device", type=int)
     notifications = sub.add_parser("notifications", help="Text reminder delivery; independent of model services")
     notifications.add_argument("--user", default="owner")
     notifications.add_argument("--data-dir", type=Path, default=DATA)
@@ -429,11 +439,18 @@ def main():
         if args.action == "notifications":
             return subprocess.call([str(ROOT / ".venv/bin/python"), "-m", "app.reminder_console", "--user", args.user,
                                     "--data-dir", str(args.data_dir), "--seconds", str(args.seconds)], cwd=ROOT)
-        if args.action == "interact":
-            command = [str(ROOT / ".venv/bin/python"), "-m", "app.interact", "--user", args.user,
+        if args.action in {"interact", "voice"}:
+            module = "app.interact" if args.action == "interact" else "app.voice_cli"
+            command = [str(ROOT / ".venv/bin/python"), "-m", module, "--user", args.user,
                        "--data-dir", str(args.data_dir)]
             if args.session_id: command += ["--session-id", args.session_id]
-            if args.input_file: command += ["--input-file", str(args.input_file)]
+            if args.action == "interact":
+                if args.input_file: command += ["--input-file", str(args.input_file)]
+            else:
+                if args.input_wav: command += ["--input-wav", *map(str, args.input_wav)]
+                for field in ("output_wav", "input_device", "output_device", "report"):
+                    if (value := getattr(args, field)) is not None:
+                        command += ["--" + field.replace("_", "-"), str(value)]
             if args.no_vision:
                 command += ["--no-vision"]
                 return subprocess.call(command, cwd=ROOT)

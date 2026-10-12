@@ -97,9 +97,11 @@ class ToolContinuationBudget(FrameProcessor):
 
 class AssistantSession:
     def __init__(self, config, memory, reminders, records, *, user_id="owner", context_tokens=2048,
-                 session_id=None, llm=None, vision_frames=None):
+                 session_id=None, llm=None, vision_frames=None, output_channel="text"):
         self.config, self.memory, self.reminders, self.records = config, memory, reminders, records
         self.user_id = user_id
+        if output_channel not in {"text", "audio", "fixture"}: raise ValueError("Unknown output channel")
+        self.output_channel = output_channel
         self.session_id = session_id or uuid.uuid4().hex
         self.turn = ToolTurn(user_id, "", memory, reminders, records=records)
         self.guard = ToolResponseGuard(self.turn)
@@ -252,7 +254,7 @@ class AssistantSession:
         if self.cancel_task is not None:
             await asyncio.shield(self.cancel_task)
             return
-        if not self.pending or self.pending.done(): return
+        if not self.pending or not self.busy.locked(): return
         self.cancel_task = asyncio.create_task(self._cancel_backend())
         await asyncio.shield(self.cancel_task)
 
@@ -355,7 +357,7 @@ class AssistantSession:
             question_time_ns = time.monotonic_ns() if question_time_ns is None else question_time_ns
             turn = ToolTurn(self.user_id, text, self.memory, self.reminders, records=self.records)
             self.turn = self.guard.turn = turn
-            self.records.begin(self.user_id, self.session_id, turn.turn_id, text)
+            self.records.begin(self.user_id, self.session_id, turn.turn_id, text, output_channel=self.output_channel)
             started = time.monotonic()
             self.budget.measurements.clear()
             self.budget.actual_usage.clear()
@@ -374,6 +376,7 @@ class AssistantSession:
                 if turn.cancelled: raise asyncio.CancelledError()
                 self._validate_turn()
                 await emit(answer)
+                if turn.cancelled: raise asyncio.CancelledError()
                 persisted = await asyncio.to_thread(self.records.finish, self.user_id, turn.turn_id, answer)
                 return {"turn_id": turn.turn_id, "session_id": self.session_id, "response": answer,
                         "calls": turn.calls, "retrieval": self.retrieval, "prompt_tokens": list(self.budget.measurements),

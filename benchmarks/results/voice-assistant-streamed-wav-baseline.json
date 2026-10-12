@@ -1,0 +1,9 @@
+{
+  "created_at": "2026-10-12T18:11:22.164470+00:00",
+  "status": "FAIL",
+  "scope": "synthetic fixture preparation; no continuous voice pipeline acceptance",
+  "failure": "OVS streaming WAV response has an unfinalized length (2147483647 frames); bounded file input correctly rejected it",
+  "observed_first_file_bytes": 94764,
+  "observed_first_pcm_bytes": 94720,
+  "correction": "Request finite PCM from the same OVS TTS and write a finalized 16kHz PCM16 mono WAV header; retain strict file input bounds"
+}

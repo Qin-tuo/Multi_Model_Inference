@@ -111,6 +111,7 @@ def main():
     for name, target in {"cuda": Path("/usr/local/cuda-13.2"), "ros2-jazzy": Path("/opt/ros/jazzy"),
                          "tensorrt-tools": Path("/usr/src/tensorrt"),
                          "tensorrt-python": Path("/usr/lib/python3.12/dist-packages/tensorrt"),
+                         "portaudio": Path("/usr/lib/aarch64-linux-gnu/libportaudio.so.2"),
                          "cudnn": root / "sdk/cudnn", "tensorrt-sdk": root / "sdk/tensorrt"}.items():
         link(root / "system" / name, target)
     installed_packages = {}
@@ -127,6 +128,7 @@ def main():
         ("pytorch-cpu", "assistant", "torch"), ("onnxruntime-cpu", "assistant", "onnxruntime"),
         ("onnx", "vision", "onnx"), ("sqlalchemy", "assistant", "sqlalchemy")]:
         link(root / "frameworks" / name, sites[environment] / package)
+    link(root / "frameworks/pyaudio", sites["assistant"] / "pyaudio")
     link(root / "frameworks/onnxruntime", root / "builds/onnxruntime-1.28.0/onnxruntime")
     link(root / "frameworks/voice-engine", root / "frameworks/openvoicestream/third_party/jetson-voice-engine")
     link(root / "frameworks/huggingface-hub-cpp", root / "workspaces/vision/build/yolo_hfhub_vendor/_deps/yolo_hfhub-src")

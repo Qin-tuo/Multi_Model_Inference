@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T17:51:27.502453+00:00",
+  "updated_at": "2026-10-12T18:25:42.842500+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -70,9 +70,12 @@
         "benchmarks/results/asr-probe.json",
         "benchmarks/results/tts-smoke.json",
         "benchmarks/results/speech-roundtrip.json",
-        "benchmarks/results/voice-file-smoke.json"
+        "benchmarks/results/voice-file-smoke.json",
+        "benchmarks/results/voice-assistant-smoke.json",
+        "deploy/speech/requirements-local-audio.lock",
+        "benchmarks/results/local-audio-environment.json"
       ],
-      "validation": "Matcha host TRT engines built; real OVS HTTP TTS/ASR and Pipecat Silero→STT→LLM→TTS file pipeline pass; physical ReSpeaker unavailable",
+      "validation": "Matcha host TRT engines built; real OVS HTTP TTS/ASR and Pipecat Silero→STT→LLM→TTS file pipeline pass; physical ReSpeaker unavailable; persistent six-turn voice-file memory/tool/vision/reminder integration PASS; PyAudio0.2.14/PortAudio native transport imports and device enumeration PASS, no audio stream opened",
       "next_action": "live audio transport/AEC after hardware arrives; broader independent audio quality tests"
     },
     {
@@ -103,10 +106,16 @@
         "app/interact.py",
         "benchmarks/results/session-smoke.json",
         "benchmarks/results/application-smoke.json",
-        "benchmarks/results/visual-session-smoke.json"
+        "benchmarks/results/visual-session-smoke.json",
+        "app/voice_assistant.py",
+        "app/voice_cli.py",
+        "app/speech_output.py",
+        "benchmarks/results/voice-assistant-smoke.json",
+        "benchmarks/results/voice-live-camera-smoke.json",
+        "benchmarks/results/voice-console-smoke.json"
       ],
-      "validation": "Persistent native Pipecat worker supports real memory/note tools, text and live camera questions; native multimodal preflight counts match actual usage; cancellation waits for native pipeline interruption acknowledgement and provider slot idle; short file speech pipeline remains separate",
-      "next_action": "unify continuous/file voice with persistent memory/tools/visual conversation and ordered notification output; expand independent quality cases"
+      "validation": "Persistent Pipecat speech I/O now forwards finalized ASR turns into the same memory/tool/vision AssistantSession; six real synthetic-audio turns, real scheduled reminder-to-WAV and a live-D435i voice-file question PASS; native count/usage agree; 90 contract tests PASS",
+      "next_action": "qualify voice interruption/generation boundaries and bounds, improve actual tool quality/latency, connect and test physical transport/AEC"
     },
     {
       "task_id": "J3.reminders",
@@ -116,10 +125,12 @@
         "app/notifications.py",
         "app/reminder_console.py",
         "benchmarks/results/reminder-delivery-smoke.json",
-        "tests/test_notification_pipeline.py"
+        "tests/test_notification_pipeline.py",
+        "benchmarks/results/voice-assistant-smoke.json",
+        "tests/test_speech_output.py"
       ],
-      "validation": "Real APScheduler/SQLite and four independent text-output processes pass mute/expiry/cancel/owner isolation/deduplication checks; native Pipecat output ordering tested with explicit audio fixtures, not hardware",
-      "next_action": "connect the audio notification adapter to the full voice conversation; verify ReSpeaker playback and 20 acoustic timing samples; test wall-clock changes"
+      "validation": "Real APScheduler/SQLite and four independent text-output processes pass mute/expiry/cancel/owner isolation/deduplication checks; native Pipecat output ordering tested with explicit audio fixtures, not hardware; real spoken reminder creation and OVS TTS delivery through the shared speech output queue PASS, explicitly fixture_delivered with no played_utc",
+      "next_action": "verify real speaker drain, full voice barge-in races and timing; test wall-clock changes and exact scheduled content/time quality"
     },
     {
       "task_id": "J2.6",
@@ -130,7 +141,7 @@
         "tests/test_persistent_session.py",
         "benchmarks/results/application-smoke.json"
       ],
-      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending; raw image data URLs are removed from native context at turn end and never persisted in transcript fields; cancellation-during-preparation race covered",
+      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending; raw image data URLs are removed from native context at turn end and never persisted in transcript fields; cancellation-during-preparation race covered; completed transcripts retain text/audio/fixture output channel and wait for the emit receipt; cancellation after model completion rejects late output success",
       "next_action": "voice output evidence, timestamped historical retrieval, recovery fault coverage and larger independent corpus"
     },
     {
@@ -246,13 +257,15 @@
   "known_gaps": [
     "ReSpeaker Lite microphone/speaker not connected; physical audio/AEC/interruption acceptance blocked",
     "ASR adapter currently supports utterance file requests, not partial transcription streaming",
-    "Generic live stream queue bounds, real resource release on cancellation, voice tool handlers and full quality/stability/performance acceptance remain pending",
+    "Generic live stream queue bounds, real resource release on cancellation, continuous voice cancellation races and full quality/stability/performance acceptance remain pending",
     "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
     "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
-    "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending",
+    "Text interact is available; physical notification playback and interruption, complete history/grounding quality and full deployment lifecycle remain pending",
     "Observed build-time OOM with compiler+VLM overlap retained; build now complete and six services restored under build/runtime exclusion leases. Short file-speech coexistence leaves 3.38GiB minimum available memory; full workload capacity and long-duration stability remain unverified.",
-    "Notification audio completion is currently verified with labelled transport fixtures; optional LocalAudio adapter, real speaker drain/AEC and wall-clock jump behavior still require qualification",
-    "Visual dialogue currently uses intent hints plus explicit /look, one 640x480 JPEG per question, and a 2K context; held-out grounding/OCR quality, deictic intent coverage, and voice/visual unification remain pending. One visual cancellation required 2.60s until provider slot idle, not acoustic interruption acceptance."
+    "Notification output ordering is verified with labelled transport fixtures and actual TTS-to-WAV delivery; native LocalAudio imports work, but real speaker drain/AEC and wall-clock jump behavior still require qualification",
+    "Visual dialogue currently uses intent hints plus explicit /look, one 640x480 JPEG per question, and a 2K context; held-out grounding/OCR quality, deictic intent coverage, and full voice/visual quality remain pending. One visual cancellation required 2.60s until provider slot idle, not acoustic interruption acceptance.",
+    "Persistent voice file integration is implemented, but real microphone/speaker, software AEC, late-ASR generation handling under overlapping utterances and full voice interruption/fault/buffer-bound qualification remain unverified.",
+    "Six-turn voice smoke includes a 14.1s reminder response caused by one bounded tool repair after a 128-token unsuccessful first generation; JT-04 latency is not achieved by that functional smoke."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

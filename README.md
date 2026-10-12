@@ -4,15 +4,15 @@
 
 ## 当前进度
 
-项目处于依赖核验与框架接入阶段。框架/插件84项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机问答，并核对实际图文token用量；真实Silero→ASR→LLM→TTS文件问答、时间查询、记忆写入及提醒创建已通过初测。完整模型质量、物理语音和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件90项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
-| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机会话、记忆/笔记工具、进程重启召回与逻辑取消通过初测；完整语音工具整合继续推进 |
+| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机/语音文件会话、记忆与工具通过初测；真实设备、完整打断和质量验证继续推进 |
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
-| 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；Pipecat音频完成协议通过夹具测试，实机播报待验证 |
-| 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 本机引擎与文件语音问答通过；真人/噪声/AEC待验证 |
+| 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；语音创建与真实TTS到期文件输出通过，实机播报待验证 |
+| 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 连续六轮文件语音打通记忆、工具、图像和提醒；设备/AEC及完整质量、时延待验证 |
 | 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | GPU ORT及ROS五个包编译完成；真实相机检测/姿态运行与逐节点TensorRT证据通过，约12.6～12.8Hz；完整场景质量待验证，FP16失败样例保留 |
 
 Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest](models/manifest.json)，框架适配通过配置读取；更换模型后重新验证质量、上下文预算和共存容量。Edge-LLM留到后续性能对比。
@@ -60,6 +60,25 @@ python3 tools/project.py notifications --user owner
 音频通知接入采用 Pipecat 原生 `TTSSpeakFrame` 和有序输出标记，记录实际输出尝试，等待输出设备排空后才确认；合成结束、普通停止讲话事件或部分音频写出都不能作为成功依据。LocalAudio适配提供PortAudio排空接口，但麦克风/扬声器未连接，当前只通过标明为fixture的队列与故障测试，尚未完成完整语音会话接入和声学验收。[PortAudio完成语义](https://portaudio.com/docs/v19-doxydocs/portaudio_8h.html)
 
 实际测试见[持续会话报告](benchmarks/results/session-smoke.json)、[独立进程与取消报告](benchmarks/results/application-smoke.json)。这些是合成开发样例；模型曾漏调用工具或把购物内容误当偏好，失败样例与校验修正已保留，不能以这几条通过替代完整工具质量集。
+
+### 持续语音入口
+
+`voice` 使用Pipecat原生语音worker负责Silero、STT、TTS和输出队列，最终转写交给同一个持续助手会话处理。回答和到期提醒共用输出队列；回答在完整写出并完成排空确认后才进入会话记录。文件输出记录为`fixture`，设备输出记录为`audio`。输入文件每份应只有一句完整发言，PCM16、16kHz、单声道、最长30秒。
+
+本机可执行的文件模式：
+
+```bash
+python3 tools/project.py up --components llama,asr,speech
+python3 tools/project.py voice --no-vision --user owner \
+  --input-wav "$HOME/AI_Stack/runtime-data/fixtures/roundtrip/request-0.wav" \
+  --output-wav "$HOME/AI_Stack/runtime-data/voice-demo.wav"
+```
+
+`--input-wav`接受多份文件，按顺序交给同一会话；处理完后退出。输出文件必须使用新路径。可选`--report PATH`保存包含转写和诊断字段的本地报告。启用视觉时去掉`--no-vision`并先启动`camera`，语音“这是什么？”、“画面主要是什么颜色？”会选取与话音结束时间关联的图像；无法取得有效图像时返回错误。
+
+真实语音模型的[六轮集成报告](benchmarks/results/voice-assistant-smoke.json)覆盖记忆写入/召回、时间工具、已知蓝色图像、提醒创建与到期文件输出；另有[公开命令报告](benchmarks/results/voice-console-smoke.json)和[语音文件→实时D435i→回答音频报告](benchmarks/results/voice-live-camera-smoke.json)。前者视觉输入为合成夹具，后者没有场景地面真值。普通算术和记忆查询初测从推定话音结束到首段PCM约1.8～1.9秒；提醒轮触发一次工具修复、耗时约14.1秒，尚未通过JT-04时延验收。
+
+设备模式使用 `python3 tools/project.py voice --input-device N --output-device M`，需要PyAudio及明确的PortAudio设备索引，详见[语音部署](deploy/speech/README.md)。ReSpeaker Lite和扬声器未连接，设备录播、AEC、真实双讲以及100次打断仍待验证；当前不能宣称完整实时语音助手已经验收。
 
 ### 依赖与单组件检查
 

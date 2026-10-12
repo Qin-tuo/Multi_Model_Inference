@@ -94,3 +94,20 @@ python3 tools/project.py smoke --component speech
 术语提示配置位于`configs/runtime.yaml`的`asr_context`。保留无提示失败报告`speech-roundtrip-no-context.json`；同一音频加提示后通过，并保留TensorFlow反例。波形哈希记录于报告。三条合成用例与单次语音问答不能代替独立语音质量集、真人/噪声/AEC测试。
 
 实物选型为ReSpeaker Lite双麦；用户暂时无法连接麦克风/扬声器，物理停播、回声与实际听觉体验仍待验证。
+
+## 持续会话与本地音频依赖
+
+`python3 tools/project.py voice` 已将原生Pipecat语音输入接到 `AssistantSession`，复用记忆、图像预算和工具。语音回答与APScheduler通知使用同一个原生输出队列和有序完成标记；HTTP合成结束不作为成功播放依据。真实文件模式的六轮验证见[报告](../../benchmarks/results/voice-assistant-smoke.json)。文件输出使用明确的`fixture`通道，通知状态为`fixture_delivered`，不会填写`played_utc`。
+
+麦克风/扬声器入口使用Pipecat的 `LocalAudioInputTransport` / `LocalAudioOutputTransport`。其可选依赖安装在主应用环境：
+
+```bash
+sudo apt-get install --no-install-recommends portaudio19-dev
+.venv/bin/python -m pip install -r deploy/speech/requirements-local-audio.lock
+```
+
+PortAudio排空使用 `stop_stream()` / `start_stream()`，仍需真实设备验证；软件AEC尚未接入。设备模式必须显式提供 `--input-device` 和 `--output-device`，不自动选取板载声卡代替ReSpeaker。
+
+文件模式接受一份或多份有效WAV，处理完后退出；到期提醒需要进程保持运行，或以后由再次启动的消费者处理。OVS的流式WAV响应带未知长度头，不能直接用作有限时长输入文件；测试生成器请求PCM，再写出完整WAV头，原失败记录保留在 `voice-assistant-streamed-wav-baseline.json`。
+
+当前性能限制已记录：3B模型的提醒调用仍可能用掉128token而未调用工具，再触发一次修复。六轮初测中的提醒首段PCM约14.1秒，完整低延迟与工具质量验收仍待完成。原ISO时间戳播报基线也已保留。

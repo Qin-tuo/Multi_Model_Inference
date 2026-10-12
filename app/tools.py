@@ -92,7 +92,7 @@ class ForgetArgs(Args):
 
 
 class CreateReminderArgs(Args):
-    text: str = Field(min_length=1,max_length=500)
+    text: str = Field(min_length=1,max_length=500,description="Only the reminder content, e.g. 喝水; omit the delay/time and 提醒我 command")
     delay_seconds: int | None = Field(default=None,ge=1,le=31536000)
     due_at: str | None = Field(default=None,max_length=64,description="Explicit ISO8601 datetime including timezone")
 
@@ -181,7 +181,7 @@ class ToolTurn:
         if self._write_allowed("remember"):
             return "本轮需要保存用户明确要求记住的事实。直接输出 <tool_call> 开始的 remember 工具调用，arguments 包括 key 和 content；不要先口头确认。例如用户说‘记住我喜欢喝茶’，调用 remember，key 为 drink_preference，content 为 用户喜欢喝茶。只有本轮工具返回成功后才简短确认。"
         if self._write_allowed("create_reminder"):
-            return "本轮是提醒设置任务。先调用 create_reminder 工具；相对时间换算为秒。已有本轮成功的tool结果后，再简短确认。"
+            return "本轮是提醒设置任务。先调用 create_reminder 工具；相对时间换算为秒，text只保留提醒事项。例如‘十秒后提醒我喝水’的参数为text=喝水、delay_seconds=10。成功后简短确认；时间用中文口语，不朗读ISO时间、ID或小数秒。"
         if self._write_allowed("forget"):
             return "本轮必须执行遗忘。使用本轮证据中的记忆ID调用 forget，参数 memory_id；若不知道ID，先调用 list_memories，再调用 forget。输出 <tool_call> 开始的工具调用，只有 forget 成功后才确认。"
         if self._write_allowed("correct"):
@@ -211,8 +211,9 @@ class ToolTurn:
     def _invoke(self, name, args, request_id):
         if name=="get_time":
             now=datetime.now(ZoneInfo(self.timezone_name))
+            date = f"{now.year}年{now.month}月{now.day}日，" if re.search(r"日期|几号|几月|哪天|星期|周几", self.user_text) else ""
             return {"time":now.isoformat(),"timezone":self.timezone_name,
-                    "user_message":"现在是"+now.strftime("%Y年%m月%d日 %H:%M:%S")+"。"}
+                    "user_message":f"现在是{date}{now.hour}点{now.minute}分。"}
         if name=="get_device_status":
             from tools.project import meminfo
             return {"memory_bytes":meminfo(),"scope":"current host memory; model health is separate"}
@@ -221,7 +222,7 @@ class ToolTurn:
                                         source_excerpt=self.user_text,request_id=request_id)
             if self.records:
                 self.records.attach_memories(self.user_id, self.turn_id, [result["memory_id"]])
-            return {**result,"user_message":"已记住："+args["content"]}
+            return {**result,"user_message":"已记住，"+args["content"]}
         if name=="list_memories":
             items=self.memory.list_memories(self.user_id,limit=5)
             if self.records:
@@ -254,7 +255,9 @@ class ToolTurn:
             due=(self.accepted_at+timedelta(seconds=args["delay_seconds"])) if args["delay_seconds"] is not None else datetime.fromisoformat(args["due_at"])
             if due.tzinfo is None or due <= self.accepted_at: raise ValueError("Reminder needs an unambiguous future time with timezone")
             result=self.reminders.create(self.user_id,args["text"],due,request_id=request_id,timezone_name=self.timezone_name)
-            return {**result,"user_message":"已设置提醒："+args["text"]+"，时间为"+due.astimezone(ZoneInfo(self.timezone_name)).isoformat()}
+            local_due = due.astimezone(ZoneInfo(self.timezone_name))
+            day = "今天" if local_due.date() == self.accepted_at.astimezone(ZoneInfo(self.timezone_name)).date() else f"{local_due.month}月{local_due.day}日"
+            return {**result,"user_message":f"提醒已设置，会在{day}{local_due.hour}点{local_due.minute}分{local_due.second}秒提醒你。"}
         if name=="list_reminders": return {"items":self.reminders.list_reminders(self.user_id)}
         if name=="cancel_reminder":
             result=self.reminders.cancel(self.user_id,args["reminder_id"],request_id=request_id)

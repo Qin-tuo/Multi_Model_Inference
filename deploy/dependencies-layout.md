@@ -7,14 +7,14 @@
 | `frameworks/` | llama.cpp、Pipecat、OpenVoiceStream、voice-engine、yolo_ros 的 Git 源码入口；Mem0、APScheduler、Qdrant client、Ultralytics、PyTorch 等已安装包的源码入口；ONNX Runtime 源码及 RealSense ROS 安装包入口 |
 | `builds/` | llama.cpp、ONNX Runtime 等编译目录；`llama/bin/llama-server` 是当前推理服务程序 |
 | `models/` | Qwen 图文/语音模型、BGE、YOLO、Matcha/Vocos 及本机构建的 TensorRT 引擎 |
-| `environments/assistant/` | Pipecat、Mem0、APScheduler、BGE 等主应用 Python 环境 |
+| `environments/assistant/` | Pipecat、Mem0、APScheduler、BGE、PyAudio 等主应用 Python 环境 |
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |
 | `environments/vision/` | Ultralytics、PyTorch CPU、ONNX 等模型导出/验证环境 |
 | `environments/ort-build/` | ORT后续构建和上游lintrunner/clang-format检查的隔离开发环境 |
 | `installed/` | 自行编译的依赖安装前缀；`onnxruntime-1.28.0-cuda13-sm87/` 包含已编译的 CUDA/TensorRT provider 库 |
 | `workspaces/` | ROS视觉工作区及colcon构建/安装目录 |
 | `sdk/` | 本机 CUDA 构建所需的 cuDNN/TensorRT 头文件和库链接布局，以及 CUDA 13.2 CCCL 兼容头文件覆盖层 |
-| `system/` | 系统 CUDA、TensorRT、cuDNN、ROS 2 Jazzy 的访问入口，实际文件由系统包管理器维护 |
+| `system/` | 系统 CUDA、TensorRT、cuDNN、ROS 2 Jazzy、PortAudio 的访问入口，实际文件由系统包管理器维护 |
 | `runtime-data/` | 本项目运行配置、测试输出与运行报告；后续持久记忆等用户状态也放在运行数据根目录下 |
 | `logs/` | 构建、安装、服务与验证日志 |
 | `reports/` | 依赖准备、安装过程报告；`system-packages.tsv`记录整台机器的系统安装包版本，范围包括项目之外的系统组件 |
@@ -39,6 +39,7 @@
 | yolo_ros / ONNX Runtime | `frameworks/yolo_ros/`、`frameworks/onnxruntime/` | Git 源码 |
 | Hugging Face C++ | `frameworks/huggingface-hub-cpp/` | 指向 ROS vendor 下载的 Git 源码 |
 | Ultralytics | `frameworks/ultralytics/` | 指向视觉环境已安装包 |
+| PyAudio / PortAudio | `frameworks/pyaudio/`、`system/portaudio` | Python 本地音频绑定及系统库入口 |
 | CUDA / TensorRT / ROS | `system/cuda/`、`system/tensorrt-sdk/`、`system/ros2-jazzy/` | 系统安装的访问入口 |
 
 原 `references/repo/` 的九个学习参考子模块当前尚未初始化；清单明确标记 `checkout_available=false`。这些参考仓库不参与助手运行，目录入口不代表源码已下载。系统依赖仍由包管理器维护，`system/` 为统一访问入口。

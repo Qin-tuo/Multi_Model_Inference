@@ -76,13 +76,14 @@ class Records:
             db.execute(delete(REFS).where(REFS.c.turn_id.in_(stale)))
             db.execute(delete(TURNS).where(TURNS.c.created_at < cutoff))
 
-    def begin(self, user_id, session_id, turn_id, text):
+    def begin(self, user_id, session_id, turn_id, text, *, output_channel="text"):
         if not user_id or len(user_id) > 128 or not text.strip() or len(text.encode()) > 8192:
             raise ValueError("Invalid owner or input text exceeds 8 KiB")
+        if output_channel not in {"text", "audio", "fixture"}: raise ValueError("Unknown output channel")
         self.expire()
         with self.gate, self.engine.begin() as db:
             db.execute(insert(TURNS).values(id=turn_id, user_id=user_id, session_id=session_id,
-                created_at=now().isoformat(), status="pending", user_text=text, assistant_text="", output_channel="text"))
+                created_at=now().isoformat(), status="pending", user_text=text, assistant_text="", output_channel=output_channel))
 
     def finish(self, user_id, turn_id, text, *, status="completed"):
         if status not in {"completed", "cancelled", "failed"} or len(text.encode()) > 16384:
