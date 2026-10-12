@@ -160,7 +160,7 @@ class Records:
                 note_id = uuid.uuid4().hex
                 db.execute(insert(NOTES).values(id=note_id, user_id=user_id, title=title, body=body,
                     source_id=source_id, created_at=now().isoformat(), request_id=request_id, fingerprint=fingerprint))
-            return {"note_id": note_id, "durable": True, "user_message": "已保存笔记：" + title}
+            return {"note_id": note_id, "durable": True, "user_message": "笔记“" + title + "”已保存。"}
 
     def list_notes(self, user_id, *, limit=5):
         if not 1 <= limit <= 100:

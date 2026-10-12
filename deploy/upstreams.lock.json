@@ -67,5 +67,15 @@
     "portaudio_package": "19.6.0-1.2build3",
     "status": "native_transport_import_and_read_only_enumeration_pass_physical_audio_pending",
     "requirements": "deploy/speech/requirements-local-audio.lock"
+  },
+  "temporal_parser": {
+    "name": "JioNLP",
+    "version": "1.5.29",
+    "url": "https://github.com/dongrixinyu/JioNLP",
+    "dependencies": {
+      "jiojio": "1.2.8",
+      "zipfile36": "0.1.3"
+    },
+    "scope": "offline Chinese time entity/duration parsing, anchored to the accepted request timestamp"
   }
 }

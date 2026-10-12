@@ -7,6 +7,7 @@ dependencies = [
   "pipecat-ai[openai]==1.12.0",
   "mem0ai==2.2.1",
   "APScheduler==3.11.3",
+  "jionlp==1.5.29",
   "SQLAlchemy>=2.0,<3",
 ]
 

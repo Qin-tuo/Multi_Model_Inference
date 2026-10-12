@@ -10,10 +10,12 @@ import json
 import re
 import time
 import uuid
+from datetime import datetime, timezone
 
 import httpx
 from pipecat.adapters.services.open_ai_adapter import OpenAILLMAdapter
 from pipecat.frames.frames import (EndFrame, ErrorFrame, InterruptionFrame, LLMContextFrame,
+    LLMFullResponseStartFrame, LLMFullResponseEndFrame, LLMTextFrame,
     LLMMessagesAppendFrame, LLMMessagesUpdateFrame, LLMSetToolChoiceFrame, LLMSetToolsFrame, MetricsFrame)
 from pipecat.metrics.metrics import LLMUsageMetricsData
 from pipecat.processors.aggregators.llm_context import LLMContext
@@ -24,6 +26,8 @@ from app.context_memory import memory_message
 from app.adapters.llama import apply_required_tool_prefix
 from app.pipecat_bot import SYSTEM_MESSAGE, build_pipeline
 from app.tools import ToolResponseGuard, ToolTurn
+from app.temporal import resolve_reminder_time
+from app.tool_policy import negated, withdrawn
 from app.vision_frames import VisionUnavailable
 from app.vision_snapshot import VisionSnapshotProcessor, VisionReplyReceiver, wants_visual_input
 
@@ -129,6 +133,7 @@ class AssistantSession:
         self.backend_available = True
         self.repair_attempted = False
         self.real_model = llm is None
+        self.pending_clarification = None
         self.interruption_id = None
         self.interruption_received = asyncio.Event()
         self.bot.worker.add_reached_downstream_filter((InterruptionFrame,))
@@ -148,7 +153,7 @@ class AssistantSession:
             if message.interrupted or self.turn.cancelled:
                 self.pending.set_exception(asyncio.CancelledError())
             elif message.content.strip():
-                if self.turn.response_error() and not self.repair_attempted:
+                if self.turn.response_error() and not self.turn.fixed_response and not self.repair_attempted:
                     self.repair_attempted = True
                     required = self.turn.required_operation()
                     self.bot.context.set_tool_choice("required")
@@ -250,11 +255,12 @@ class AssistantSession:
             await asyncio.wait_for(self.run_task, 15)
             self.run_task = None
 
-    async def cancel(self):
+    async def cancel(self, *, clear_clarification=True):
         """Native interruption plus observed provider slot completion.
 
         This is logical text cancellation, not physical playback/AEC validation.
         """
+        if clear_clarification: self.pending_clarification = None
         if self.cancel_task is not None:
             await asyncio.shield(self.cancel_task)
             return
@@ -295,6 +301,44 @@ class AssistantSession:
                 await asyncio.sleep(0.05)
         raise RuntimeError("Backend is still processing the cancelled request")
 
+    def _refine_clarification(self, text, anchor):
+        pending = self.pending_clarification
+        self.pending_clarification = None
+        if not pending or pending["expires"] < time.monotonic() or negated(text) or withdrawn(text):
+            return text, None, {}
+        if pending["operation"] == "create_reminder":
+            parsed = resolve_reminder_time(text, anchor)
+            rest = text.replace(parsed.phrase, "", 1).strip(" ，,。.!！?？") if parsed.phrase else text
+            if parsed.phrase and re.fullmatch(r"(?:(?:就|定在|改为|改到|好|好的|请|在|吧|了|时间是|可以|谢谢|就行|就好|即可|那|嗯))*", rest):
+                old = pending.get("time")
+                has_day = bool(re.search(r"今天|明天|后天|周|星期|年|月|日|\d{4}-", parsed.phrase))
+                if old and old.phrase and old.reason == "missing_clock_time" and not has_day and parsed.delay_seconds is None:
+                    parsed = resolve_reminder_time(old.phrase + parsed.phrase, anchor)
+                return pending["request"] + "，补充时间：" + text, parsed, {}
+            if re.fullmatch(r"(?:稍后|过一会儿|一会儿|待会儿?|等会儿?|晚一点)[吧。！?？\s]*", text):
+                return pending["request"] + "，补充时间：" + text, pending.get("time") or parsed, {}
+        elif pending["operation"] in {"forget", "cancel_reminder"}:
+            label = re.sub(r"(?:那条|那件|这个|那一个|的记忆|的提醒|那条记忆|那条提醒)[。！?？]*$", "", text).strip(" ，,。!！?？")
+            if 2 <= len(label) <= 128:
+                matches = [row for row in pending["candidates"] if label in row["text"]]
+                if len(matches) == 1:
+                    key = "memory_id" if pending["operation"] == "forget" else "reminder_id"
+                    request = ("忘记" + label + "的记忆。") if key == "memory_id" else ("取消" + label + "的提醒。")
+                    return request, None, {key: matches[0]["id"]}
+        return text, None, {}
+
+    def _remember_clarification(self, turn):
+        if not turn.clarification_prompt: return
+        operation = turn.required_operation()
+        if operation not in {"create_reminder", "forget", "cancel_reminder"}: return
+        candidates = []
+        if operation == "forget":
+            candidates = [{"id":row["memory_id"],"text":row["content"]} for row in turn.known_memories()]
+        elif operation == "cancel_reminder":
+            candidates = [{"id":row["id"],"text":row["text"]} for row in turn.reminder_candidates]
+        self.pending_clarification = {"operation":operation,"request":turn.user_text,"candidates":candidates,
+            "time":turn.resolved_time if operation=="create_reminder" else None,"expires":time.monotonic()+300}
+
     async def _messages(self, text, turn, user_message=None):
         task_lookup = turn.requested_lookup() in {"list_notes", "list_reminders", "get_time"} and turn.required_operation() == turn.requested_lookup()
         # Notes/task state have their own authoritative store. Irrelevant
@@ -302,6 +346,7 @@ class AssistantSession:
         found = ({"items": [], "generation": self.memory.generation(self.user_id)} if task_lookup else
                  await asyncio.to_thread(self.memory.search, self.user_id, text, top_k=5))
         found["items"] = self.records.filter_memories(self.user_id, found["items"])
+        turn.memory_candidates = found["items"]
         evidence, metrics = await asyncio.to_thread(memory_message, found["items"], self.config.base_url)
         self.records.attach_memories(self.user_id, turn.turn_id, metrics["injected_memory_ids"])
         history = self.records.recent(self.user_id, session_id=self.session_id, limit=8)
@@ -359,26 +404,35 @@ class AssistantSession:
             self.repair_attempted = False
             self.image_metrics = None
             question_time_ns = time.monotonic_ns() if question_time_ns is None else question_time_ns
-            turn = ToolTurn(self.user_id, text, self.memory, self.reminders, records=self.records)
+            anchor = datetime.now(timezone.utc)
+            effective_text, time_override, targets = self._refine_clarification(text, anchor)
+            turn = ToolTurn(self.user_id, effective_text, self.memory, self.reminders, records=self.records,
+                accepted_at=anchor, time_override=time_override, target_bindings=targets)
             self.turn = self.guard.turn = turn
             self.records.begin(self.user_id, self.session_id, turn.turn_id, text, output_channel=self.output_channel)
             started = time.monotonic()
             self.budget.measurements.clear()
             self.budget.actual_usage.clear()
+            self.retrieval = {}
             self.pending = asyncio.get_running_loop().create_future()
             try:
                 async with asyncio.timeout(timeout):
-                    use_image = wants_visual_input(text) if visual is None else visual
-                    image = await self._image_message(text, turn, question_time_ns) if use_image else None
-                    messages, schemas = await self._messages(text, turn, image)
-                    if turn.cancelled: raise asyncio.CancelledError()
-                    if self.pending.done(): self.pending.result()
-                    await self.bot.worker.queue_frames([
-                        LLMSetToolsFrame(schemas), LLMSetToolChoiceFrame(turn.initial_tool_choice()),
-                        LLMMessagesUpdateFrame(messages=messages, run_llm=True)])
+                    fixed = turn.fixed_response
+                    if fixed:
+                        await self.bot.worker.queue_frames([LLMFullResponseStartFrame(), LLMTextFrame(fixed), LLMFullResponseEndFrame()])
+                    else:
+                        use_image = wants_visual_input(text) if visual is None else visual
+                        image = await self._image_message(text, turn, question_time_ns) if use_image else None
+                        messages, schemas = await self._messages(effective_text, turn, image)
+                        if turn.cancelled: raise asyncio.CancelledError()
+                        if self.pending.done(): self.pending.result()
+                        await self.bot.worker.queue_frames([
+                            LLMSetToolsFrame(schemas), LLMSetToolChoiceFrame(turn.initial_tool_choice()),
+                            LLMMessagesUpdateFrame(messages=messages, run_llm=True)])
                     answer = await asyncio.shield(self.pending)
                 if turn.cancelled: raise asyncio.CancelledError()
                 self._validate_turn()
+                self._remember_clarification(turn)
                 await emit(answer)
                 if turn.cancelled: raise asyncio.CancelledError()
                 persisted = await asyncio.to_thread(self.records.finish, self.user_id, turn.turn_id, answer)
@@ -387,9 +441,14 @@ class AssistantSession:
                         "history_persisted": persisted, "repair_attempted": self.repair_attempted,
                         "image": self.image_metrics,
                         "model_usage": list(self.budget.actual_usage),
+                        "model_request_skipped": bool(fixed),
+                        "effective_user_request": effective_text,
                         "elapsed_seconds": time.monotonic() - started}
             except (TimeoutError, asyncio.CancelledError):
-                await self.cancel()
+                # Barge-in may supply the missing field before the spoken
+                # question finishes. Explicit /stop and input aborts still clear
+                # it through cancel(clear_clarification=True).
+                await self.cancel(clear_clarification=not bool(turn.clarification_prompt))
                 self.records.finish(self.user_id, turn.turn_id, "", status="cancelled")
                 raise
             except Exception:

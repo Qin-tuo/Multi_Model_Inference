@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-12T19:10:05.396188+00:00",
+  "created_at": "2026-10-12T21:38:06.985457+00:00",
   "status": "PASS",
   "checks": {
     "one_persistent_model_worker": true,
@@ -18,30 +18,33 @@
     "all_audio_readbacks_nonempty": true
   },
   "scope": "six synthetic file utterances through real Silero/ASR/BGE/Mem0/llama/TTS and native output queue; synthetic RGB visual input; real APScheduler reminder delivered to WAV, not speaker; no physical AEC or acoustic acceptance",
-  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-assistant-965757743b3648fa93f3d1326d1e3508",
+  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-assistant-ebe8d792ced943eaaa085b4609f648f3",
   "cases": [
     {
-      "turn_id": "ca0dd6bd10e249dcbfa6ad78c40e0eba",
-      "session_id": "a25163475c874422bd165727e5e1465d",
-      "response": "已记住，你喜欢茉莉花茶。",
+      "turn_id": "c6388f6d17d74bc691686c3603aea690",
+      "session_id": "1493531a96114caa834a9f6ab56e655e",
+      "response": "已记住。",
       "calls": [
         {
           "tool": "remember",
           "arguments": {
-            "key": "drink_preference",
-            "content": "我喜欢茉莉花茶"
+            "key": "like_mugwort_tea",
+            "content": "我喜欢茉莉花茶。"
           },
           "outcome": {
             "ok": true,
             "result": {
-              "memory_id": "f2b8b4f9-8251-4acc-99e3-32550a4dbcc4",
+              "memory_id": "3d532a0e-8f93-4542-920c-0071a2e7c9cf",
               "version": 1,
               "generation": 0,
               "durable": true,
               "replayed": false,
               "atomicity": "reconciled_non_atomic",
-              "user_message": "已记住，我喜欢茉莉花茶"
+              "user_message": "已记住。"
             }
+          },
+          "provider_arguments": {
+            "key": "like_mugwort_tea"
           }
         }
       ],
@@ -51,24 +54,24 @@
         "retrieved_count": 0,
         "injected_count": 0,
         "history_turns_dropped": 0,
-        "initial_prompt_tokens": 407,
+        "initial_prompt_tokens": 334,
         "memory_generation": 0,
         "personal_recall": false,
         "task_lookup": false
       },
       "prompt_tokens": [
-        407,
-        547
+        334,
+        300
       ],
       "history_persisted": true,
       "repair_attempted": false,
       "image": null,
       "model_usage": [
         {
-          "prompt_tokens": 407,
-          "completion_tokens": 28,
-          "total_tokens": 435,
-          "cache_read_input_tokens": 393,
+          "prompt_tokens": 334,
+          "completion_tokens": 22,
+          "total_tokens": 356,
+          "cache_read_input_tokens": 318,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -76,10 +79,10 @@
           "cache_read_input_audio_tokens": null
         },
         {
-          "prompt_tokens": 547,
-          "completion_tokens": 10,
-          "total_tokens": 557,
-          "cache_read_input_tokens": 434,
+          "prompt_tokens": 300,
+          "completion_tokens": 9,
+          "total_tokens": 309,
+          "cache_read_input_tokens": 152,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -87,53 +90,55 @@
           "cache_read_input_audio_tokens": null
         }
       ],
-      "elapsed_seconds": 3.0647751910000807,
+      "model_request_skipped": false,
+      "effective_user_request": "请记住，我喜欢茉莉花茶。",
+      "elapsed_seconds": 2.6402521940035513,
       "transcript": "请记住，我喜欢茉莉花茶。",
       "speech_receipt": {
         "channel": "fixture",
-        "bytes_written": 94080,
-        "first_pcm_ns": 57698626497716,
+        "bytes_written": 46080,
+        "first_pcm_ns": 66579775948056,
         "first_sample": 0,
         "completion": "wav_file_flushed"
       },
-      "vad_detected_ns": 57695154794429,
-      "vad_detection_to_first_pcm_seconds": 3.471703287,
-      "inferred_speech_end_to_first_pcm_seconds": 3.871703287,
+      "vad_detected_ns": 66576675856353,
+      "vad_detection_to_first_pcm_seconds": 3.100091703,
+      "inferred_speech_end_to_first_pcm_seconds": 3.500091703,
       "expected_input": "请记住，我喜欢茉莉花茶。",
-      "input_sha256": "412605d557f9289b4b02b311c39ee8286c0c5118ae4ff7353bd6ed57910febf5",
-      "audio_readback": "你记住，你喜欢茉莉花茶。",
-      "output_audio_sha256": "e14b0ee3b49ac4977cc9f9c724739a025a28cd4c81c4990640ceaa4d04da1f98"
+      "input_sha256": "e5135d93b21c951224af02495d24eccfe174b33ce898e24ee4de70df955ce017",
+      "audio_readback": "你记住。",
+      "output_audio_sha256": "ef10af708066ddd0faf2d177d0fc2e2f4fe9f09d59aeca1b9df614fa508f95cb"
     },
     {
-      "turn_id": "ab9b46af83c44cbcb6a2257793ece004",
-      "session_id": "a25163475c874422bd165727e5e1465d",
+      "turn_id": "07cf63c085484aec8134bcfb9515bdac",
+      "session_id": "1493531a96114caa834a9f6ab56e655e",
       "response": "您喜欢喝茉莉花茶。",
       "calls": [],
       "retrieval": {
         "injected_memory_ids": [
-          "f2b8b4f9-8251-4acc-99e3-32550a4dbcc4"
+          "3d532a0e-8f93-4542-920c-0071a2e7c9cf"
         ],
-        "memory_tokens": 164,
+        "memory_tokens": 173,
         "retrieved_count": 1,
         "injected_count": 1,
         "history_turns_dropped": 0,
-        "initial_prompt_tokens": 566,
+        "initial_prompt_tokens": 575,
         "memory_generation": 0,
         "personal_recall": true,
         "task_lookup": false
       },
       "prompt_tokens": [
-        566
+        575
       ],
       "history_persisted": true,
       "repair_attempted": false,
       "image": null,
       "model_usage": [
         {
-          "prompt_tokens": 566,
+          "prompt_tokens": 575,
           "completion_tokens": 9,
-          "total_tokens": 575,
-          "cache_read_input_tokens": 425,
+          "total_tokens": 584,
+          "cache_read_input_tokens": 421,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -141,27 +146,29 @@
           "cache_read_input_audio_tokens": null
         }
       ],
-      "elapsed_seconds": 1.0232402779947734,
+      "model_request_skipped": false,
+      "effective_user_request": "我喜欢喝什么茶？",
+      "elapsed_seconds": 0.9966124369966565,
       "transcript": "我喜欢喝什么茶？",
       "speech_receipt": {
         "channel": "fixture",
         "bytes_written": 74880,
-        "first_pcm_ns": 57702333301470,
-        "first_sample": 47040,
+        "first_pcm_ns": 66583416125488,
+        "first_sample": 23040,
         "completion": "wav_file_flushed"
       },
-      "vad_detected_ns": 57700996199202,
-      "vad_detection_to_first_pcm_seconds": 1.337102268,
-      "inferred_speech_end_to_first_pcm_seconds": 1.737102268,
+      "vad_detected_ns": 66582123345283,
+      "vad_detection_to_first_pcm_seconds": 1.292780205,
+      "inferred_speech_end_to_first_pcm_seconds": 1.692780205,
       "expected_input": "我喜欢喝什么茶？",
-      "input_sha256": "33587b598e4ac245910137d8c18a018fd09e9c901b2a6169c930b65c2e103892",
-      "audio_readback": "您喜欢喝茉莉花茶。",
-      "output_audio_sha256": "59607db5b3de6f7bfbbee966c5fd1f00f1fa1e2eada872b20294aceab7b16d8b"
+      "input_sha256": "c7c0e3e1e7f71c3d191ebdb8ebe436f3c7b524210c028801bf0df0a04386be1d",
+      "audio_readback": "你喜欢喝茉莉花茶。",
+      "output_audio_sha256": "fca29f5999259a88f727464a1800f76432f68ba8dc613c0b39e1c9b5f78a7fee"
     },
     {
-      "turn_id": "c9dc3ddfe9bd4d0a983e6f7aba965dc0",
-      "session_id": "a25163475c874422bd165727e5e1465d",
-      "response": "现在是3点9分。",
+      "turn_id": "45b3627c41264473bec322cd0b94688d",
+      "session_id": "1493531a96114caa834a9f6ab56e655e",
+      "response": "现在是5点37分。",
       "calls": [
         {
           "tool": "get_time",
@@ -169,11 +176,13 @@
           "outcome": {
             "ok": true,
             "result": {
-              "time": "2026-10-13T03:09:41.958186+08:00",
+              "time": "2026-10-13T05:37:43.112808+08:00",
               "timezone": "Asia/Shanghai",
-              "user_message": "现在是3点9分。"
+              "weekday": 1,
+              "user_message": "现在是5点37分。"
             }
-          }
+          },
+          "provider_arguments": {}
         }
       ],
       "retrieval": {
@@ -189,7 +198,7 @@
       },
       "prompt_tokens": [
         286,
-        383
+        390
       ],
       "history_persisted": true,
       "repair_attempted": false,
@@ -199,7 +208,7 @@
           "prompt_tokens": 286,
           "completion_tokens": 14,
           "total_tokens": 300,
-          "cache_read_input_tokens": 285,
+          "cache_read_input_tokens": 276,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -207,9 +216,9 @@
           "cache_read_input_audio_tokens": null
         },
         {
-          "prompt_tokens": 383,
-          "completion_tokens": 8,
-          "total_tokens": 391,
+          "prompt_tokens": 390,
+          "completion_tokens": 9,
+          "total_tokens": 399,
           "cache_read_input_tokens": 299,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
@@ -218,66 +227,68 @@
           "cache_read_input_audio_tokens": null
         }
       ],
-      "elapsed_seconds": 1.704609560998506,
+      "model_request_skipped": false,
+      "effective_user_request": "现在几点？",
+      "elapsed_seconds": 1.797336058007204,
       "transcript": "现在几点？",
       "speech_receipt": {
         "channel": "fixture",
-        "bytes_written": 72320,
-        "first_pcm_ns": 57706369515502,
-        "first_sample": 84480,
+        "bytes_written": 82560,
+        "first_pcm_ns": 66587582369783,
+        "first_sample": 60480,
         "completion": "wav_file_flushed"
       },
-      "vad_detected_ns": 57704417712343,
-      "vad_detection_to_first_pcm_seconds": 1.951803159,
-      "inferred_speech_end_to_first_pcm_seconds": 2.351803159,
+      "vad_detected_ns": 66585502370590,
+      "vad_detection_to_first_pcm_seconds": 2.079999193,
+      "inferred_speech_end_to_first_pcm_seconds": 2.479999193,
       "expected_input": "现在几点？",
-      "input_sha256": "de3cc4179d084de24f1b1c4e2cf04598a0a7dddeb71478d4352e9c50c180b425",
-      "audio_readback": "现在是三点点九分。",
-      "output_audio_sha256": "c7b9ff709299b684e21fd651012822af565b6e0177fc3cb4a8a8bc9944acc230"
+      "input_sha256": "a1b54cd1b17c519e96b9748555176d4d0057f361c9b6a9f5109e0e94d5f2c0be",
+      "audio_readback": "现在是五点三十七分。",
+      "output_audio_sha256": "e6f2e2d8b77343a9cbbf55a1d0cc030c6b57e8a83565f784a5161ace967ed04b"
     },
     {
-      "turn_id": "3cde292c5cc1434784c9e7ac06bb9008",
-      "session_id": "a25163475c874422bd165727e5e1465d",
-      "response": "画面主要为蓝色。",
+      "turn_id": "898209de57074318b4e78ee175180afe",
+      "session_id": "1493531a96114caa834a9f6ab56e655e",
+      "response": "画面主要以蓝色为主。",
       "calls": [],
       "retrieval": {
         "injected_memory_ids": [
-          "f2b8b4f9-8251-4acc-99e3-32550a4dbcc4"
+          "3d532a0e-8f93-4542-920c-0071a2e7c9cf"
         ],
-        "memory_tokens": 164,
+        "memory_tokens": 173,
         "retrieved_count": 1,
         "injected_count": 1,
         "history_turns_dropped": 0,
-        "initial_prompt_tokens": 1079,
+        "initial_prompt_tokens": 1083,
         "memory_generation": 0,
         "personal_recall": false,
         "task_lookup": false
       },
       "prompt_tokens": [
-        1079
+        1083
       ],
       "history_persisted": true,
       "repair_attempted": false,
       "image": {
-        "frame_id": "0e89004e91ab4715a03358cd05e9ef29:57709479359467",
-        "worker_epoch": "0e89004e91ab4715a03358cd05e9ef29",
-        "capture_time_ns": 57709479359467,
-        "question_time_ns": 57709477363561,
-        "source_timestamp_ns": 57709479359467,
+        "frame_id": "0792e92986314089a814fdd1125fdba5:66590719063601",
+        "worker_epoch": "0792e92986314089a814fdd1125fdba5",
+        "capture_time_ns": 66590719063601,
+        "question_time_ns": 66590726544595,
+        "source_timestamp_ns": 66590719063601,
         "size": [
           640,
           480
         ],
         "encoding": "Pipecat JPEG (Pillow default quality 75)",
-        "question_frame_skew_ms": 1.995906,
-        "capture_to_model_admission_ms": 909.036101
+        "question_frame_skew_ms": 7.480994,
+        "capture_to_model_admission_ms": 901.524393
       },
       "model_usage": [
         {
-          "prompt_tokens": 1079,
-          "completion_tokens": 6,
-          "total_tokens": 1085,
-          "cache_read_input_tokens": 494,
+          "prompt_tokens": 1083,
+          "completion_tokens": 7,
+          "total_tokens": 1090,
+          "cache_read_input_tokens": 449,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -285,71 +296,75 @@
           "cache_read_input_audio_tokens": null
         }
       ],
-      "elapsed_seconds": 2.910009095998248,
+      "model_request_skipped": false,
+      "effective_user_request": "请看画面，主要是什么颜色？",
+      "elapsed_seconds": 3.1402195900009247,
       "transcript": "请看画面，主要是什么颜色？",
       "speech_receipt": {
         "channel": "fixture",
-        "bytes_written": 70400,
-        "first_pcm_ns": 57713188848819,
-        "first_sample": 120640,
+        "bytes_written": 80640,
+        "first_pcm_ns": 66594649091139,
+        "first_sample": 101760,
         "completion": "wav_file_flushed"
       },
-      "vad_detected_ns": 57709877363561,
-      "vad_detection_to_first_pcm_seconds": 3.311485258,
-      "inferred_speech_end_to_first_pcm_seconds": 3.711485258,
+      "vad_detected_ns": 66591126544595,
+      "vad_detection_to_first_pcm_seconds": 3.522546544,
+      "inferred_speech_end_to_first_pcm_seconds": 3.922546544,
       "expected_input": "请看画面，主要是什么颜色？",
-      "input_sha256": "334e1aaa49a53ba2a07a253c4d88c7400af69e0aa01d2052dc4a503c3f5675c2",
-      "audio_readback": "画面亮度为蓝色。",
-      "output_audio_sha256": "811f9ebde3dbce9f5bf8cb934f5ad3ed07f786937e51919e8d494b75532fd68a"
+      "input_sha256": "c5a94a0d8f3eb2df6652ba2c844c4badb6a68b94935ce54dac88e76fbee97efd",
+      "audio_readback": "画面纽要以蓝色为主。",
+      "output_audio_sha256": "453b74dee1c10b1527f254e163c9d1a41a993fa204500f5aa664fbcc2939fd87"
     },
     {
-      "turn_id": "6e9e84fc35ff4f20958c1063dcaf086e",
-      "session_id": "a25163475c874422bd165727e5e1465d",
-      "response": "已设置提醒，十秒钟后提醒你喝水。",
+      "turn_id": "fbc6db6c05f941ad9aa4b5496a62156f",
+      "session_id": "1493531a96114caa834a9f6ab56e655e",
+      "response": "提醒已设置，会在今天5点38分4秒提醒你。",
       "calls": [
         {
           "tool": "create_reminder",
           "arguments": {
-            "text": "喝水",
-            "delay_seconds": 10
+            "delay_seconds": 10,
+            "due_at": null,
+            "text": "喝水"
           },
           "outcome": {
             "ok": true,
             "result": {
               "status": "scheduled",
-              "reminder_id": "035acd6e843d47dba09fb703c440cf61",
-              "due_utc": "2026-10-12T19:10:02.766116+00:00",
-              "user_message": "提醒已设置，会在今天3点10分2秒提醒你。"
+              "reminder_id": "a0bf0ed1cba047b28b9b917c4940f064",
+              "due_utc": "2026-10-12T21:38:04.188914+00:00",
+              "user_message": "提醒已设置，会在今天5点38分4秒提醒你。"
             }
-          }
+          },
+          "provider_arguments": {}
         }
       ],
       "retrieval": {
         "injected_memory_ids": [
-          "f2b8b4f9-8251-4acc-99e3-32550a4dbcc4"
+          "3d532a0e-8f93-4542-920c-0071a2e7c9cf"
         ],
-        "memory_tokens": 164,
+        "memory_tokens": 173,
         "retrieved_count": 1,
         "injected_count": 1,
         "history_turns_dropped": 0,
-        "initial_prompt_tokens": 716,
+        "initial_prompt_tokens": 531,
         "memory_generation": 0,
         "personal_recall": false,
         "task_lookup": false
       },
       "prompt_tokens": [
-        716,
-        866
+        531,
+        536
       ],
       "history_persisted": true,
       "repair_attempted": false,
       "image": null,
       "model_usage": [
         {
-          "prompt_tokens": 716,
-          "completion_tokens": 27,
-          "total_tokens": 743,
-          "cache_read_input_tokens": 439,
+          "prompt_tokens": 531,
+          "completion_tokens": 15,
+          "total_tokens": 546,
+          "cache_read_input_tokens": 249,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -357,10 +372,10 @@
           "cache_read_input_audio_tokens": null
         },
         {
-          "prompt_tokens": 866,
-          "completion_tokens": 12,
-          "total_tokens": 878,
-          "cache_read_input_tokens": 742,
+          "prompt_tokens": 536,
+          "completion_tokens": 17,
+          "total_tokens": 553,
+          "cache_read_input_tokens": 114,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
           "input_audio_tokens": null,
@@ -368,52 +383,54 @@
           "cache_read_input_audio_tokens": null
         }
       ],
-      "elapsed_seconds": 3.4772534149960848,
+      "model_request_skipped": false,
+      "effective_user_request": "十秒钟后提醒我喝水。",
+      "elapsed_seconds": 3.8517829749907833,
       "transcript": "十秒钟后提醒我喝水。",
       "speech_receipt": {
         "channel": "fixture",
-        "bytes_written": 124160,
-        "first_pcm_ns": 57719888577141,
-        "first_sample": 155840,
+        "bytes_written": 156800,
+        "first_pcm_ns": 66601679131574,
+        "first_sample": 142080,
         "completion": "wav_file_flushed"
       },
-      "vad_detected_ns": 57716055679132,
-      "vad_detection_to_first_pcm_seconds": 3.832898009,
-      "inferred_speech_end_to_first_pcm_seconds": 4.232898009,
+      "vad_detected_ns": 66597468181794,
+      "vad_detection_to_first_pcm_seconds": 4.21094978,
+      "inferred_speech_end_to_first_pcm_seconds": 4.61094978,
       "expected_input": "十秒钟后提醒我喝水。",
-      "input_sha256": "99beb5c6c409f74ec682e7f94eda8a0fa4fbe6561ced8020d7b810c0650be29e",
-      "audio_readback": "已设置提醒：十秒钟后提醒你喝水。",
-      "output_audio_sha256": "3ee318531103b10de3caae636dce2972e3098113a0be9245902ac11e48d08620"
+      "input_sha256": "35776dd92021a01709206d421a40eff1e1ac6837f8716ae8ab8c486186750368",
+      "audio_readback": "提醒已设置，会在今天五点三十八分四秒提醒你。",
+      "output_audio_sha256": "c69f61d613ed0024d9957a280a23b2d0dc1e3a543a6765922514fcf16f806ce8"
     },
     {
-      "turn_id": "58d4e02299f34847b18a82f7f7a5f16f",
-      "session_id": "a25163475c874422bd165727e5e1465d",
+      "turn_id": "63395a848a7c4fc38469e5b5bae83828",
+      "session_id": "1493531a96114caa834a9f6ab56e655e",
       "response": "一加一等于二。",
       "calls": [],
       "retrieval": {
         "injected_memory_ids": [
-          "f2b8b4f9-8251-4acc-99e3-32550a4dbcc4"
+          "3d532a0e-8f93-4542-920c-0071a2e7c9cf"
         ],
-        "memory_tokens": 164,
+        "memory_tokens": 173,
         "retrieved_count": 1,
         "injected_count": 1,
         "history_turns_dropped": 0,
-        "initial_prompt_tokens": 689,
+        "initial_prompt_tokens": 699,
         "memory_generation": 0,
         "personal_recall": false,
         "task_lookup": false
       },
       "prompt_tokens": [
-        689
+        699
       ],
       "history_persisted": true,
       "repair_attempted": false,
       "image": null,
       "model_usage": [
         {
-          "prompt_tokens": 689,
+          "prompt_tokens": 699,
           "completion_tokens": 7,
-          "total_tokens": 696,
+          "total_tokens": 706,
           "cache_read_input_tokens": 387,
           "cache_creation_input_tokens": null,
           "reasoning_tokens": null,
@@ -422,27 +439,29 @@
           "cache_read_input_audio_tokens": null
         }
       ],
-      "elapsed_seconds": 1.158309136000753,
+      "model_request_skipped": false,
+      "effective_user_request": "一加一等于几？",
+      "elapsed_seconds": 1.149874187001842,
       "transcript": "一加一等于几？",
       "speech_receipt": {
         "channel": "fixture",
         "bytes_written": 56960,
-        "first_pcm_ns": 57723730945827,
-        "first_sample": 217920,
+        "first_pcm_ns": 66605538078163,
+        "first_sample": 220480,
         "completion": "wav_file_flushed"
       },
-      "vad_detected_ns": 57722238999504,
-      "vad_detection_to_first_pcm_seconds": 1.491946323,
-      "inferred_speech_end_to_first_pcm_seconds": 1.891946323,
+      "vad_detected_ns": 66604037985164,
+      "vad_detection_to_first_pcm_seconds": 1.500092999,
+      "inferred_speech_end_to_first_pcm_seconds": 1.900092999,
       "expected_input": "一加一等于几？",
-      "input_sha256": "1e425f13b60a07c3e0b315195d89d691cca8f9f11fc7daa8fb502f8041428cbd",
+      "input_sha256": "1c2f19c981ed44386d51f57b4d51f3e1206ef1a7d3c18a00074bb2642ab35444",
       "audio_readback": "一加一等于二。",
-      "output_audio_sha256": "02832f5c3ea8f59acc6673afa39b3c62bbacc9cdafe347cd72b4b7f8818e8916"
+      "output_audio_sha256": "57dfac92519ebf1c392e3a7459d135d6cfd248aa46ed9ee3b9f06b9930935bdd"
     }
   ],
   "notification_receipts": [
     {
-      "notification_id": "reminder:035acd6e843d47dba09fb703c440cf61:due",
+      "notification_id": "reminder:a0bf0ed1cba047b28b9b917c4940f064:due",
       "confirmed": true,
       "evidence": "fixture_output_drained"
     }
@@ -454,7 +473,7 @@
     "queued_segments": 0,
     "active_and_pending_segments": 0,
     "segment_bytes": 0,
-    "peak_segment_bytes": 122924,
+    "peak_segment_bytes": 123564,
     "pcm_buffer_bytes": 32000,
     "max_pcm_bytes": 992000,
     "max_segment_bytes": 1008044,
@@ -471,8 +490,8 @@
   ],
   "latency_acceptance": "NOT_VERIFIED",
   "known_limitations": [
-    "Synthetic speech files and WAV output; no physical capture/playback/AEC.",
-    "Six heterogeneous development utterances are not the held-out quality corpus or P95 latency population.",
-    "Reminder first PCM remains 4.23s in this run; no full latency acceptance."
+    "Synthetic file input/output; physical voice, AEC and audible latency not tested.",
+    "Development utterances do not establish a population P95 or independent quality score.",
+    "Reminder first PCM in this run is4.61s; final latency acceptance is incomplete."
   ]
 }

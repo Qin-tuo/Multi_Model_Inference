@@ -40,6 +40,7 @@
 | Hugging Face C++ | `frameworks/huggingface-hub-cpp/` | 指向 ROS vendor 下载的 Git 源码 |
 | Ultralytics | `frameworks/ultralytics/` | 指向视觉环境已安装包 |
 | PyAudio / PortAudio | `frameworks/pyaudio/`、`system/portaudio` | Python 本地音频绑定及系统库入口 |
+| JioNLP / jiojio | `frameworks/jionlp/`、`frameworks/jiojio/` | 已安装中文时间语义解析库及其依赖 |
 | CUDA / TensorRT / ROS | `system/cuda/`、`system/tensorrt-sdk/`、`system/ros2-jazzy/` | 系统安装的访问入口 |
 
 原 `references/repo/` 的九个学习参考子模块当前尚未初始化；清单明确标记 `checkout_available=false`。这些参考仓库不参与助手运行，目录入口不代表源码已下载。系统依赖仍由包管理器维护，`system/` 为统一访问入口。

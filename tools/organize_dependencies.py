@@ -129,6 +129,8 @@ def main():
         ("onnx", "vision", "onnx"), ("sqlalchemy", "assistant", "sqlalchemy")]:
         link(root / "frameworks" / name, sites[environment] / package)
     link(root / "frameworks/pyaudio", sites["assistant"] / "pyaudio")
+    link(root / "frameworks/jionlp", sites["assistant"] / "jionlp")
+    link(root / "frameworks/jiojio", sites["assistant"] / "jiojio")
     link(root / "frameworks/onnxruntime", root / "builds/onnxruntime-1.28.0/onnxruntime")
     link(root / "frameworks/voice-engine", root / "frameworks/openvoicestream/third_party/jetson-voice-engine")
     link(root / "frameworks/huggingface-hub-cpp", root / "workspaces/vision/build/yolo_hfhub_vendor/_deps/yolo_hfhub-src")

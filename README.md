@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件101项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件111项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -12,6 +12,7 @@
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；语音创建与真实TTS到期文件输出通过，实机播报待验证 |
+| 时间语义 | JioNLP 1.5.29 + Python datetime | 按用户原文和请求时间解析中文日期/时长；缺少具体时间时先询问 |
 | 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 连续六轮文件语音打通记忆、工具、图像和提醒；设备/AEC及完整质量、时延待验证 |
 | 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | GPU ORT及ROS五个包编译完成；真实相机检测/姿态运行与逐节点TensorRT证据通过，约12.6～12.8Hz；完整场景质量待验证，FP16失败样例保留 |
 
@@ -76,7 +77,7 @@ python3 tools/project.py voice --no-vision --user owner \
 
 `--input-wav`接受多份文件，按顺序交给同一会话；处理完后退出。输出文件必须使用新路径。可选`--report PATH`保存包含转写和诊断字段的本地报告。启用视觉时去掉`--no-vision`并先启动`camera`，语音“这是什么？”、“画面主要是什么颜色？”会选取与话音结束时间关联的图像；无法取得有效图像时返回错误。
 
-真实语音模型的[六轮集成报告](benchmarks/results/voice-assistant-smoke.json)覆盖记忆写入/召回、时间工具、已知蓝色图像、提醒创建与到期文件输出；另有[公开命令报告](benchmarks/results/voice-console-smoke.json)和[语音文件→实时D435i→回答音频报告](benchmarks/results/voice-live-camera-smoke.json)。前者视觉输入为合成夹具，后者没有场景地面真值。最新六轮文件初测中，从推定话音结束到首段PCM：算术/记忆查询约1.7～1.9秒，时间查询2.35秒，图像问答3.71秒，提醒4.23秒，均未触发工具修复。此前提醒轮14.1秒的[基线](benchmarks/results/voice-before-tool-prefill.json)保留；这些个例尚未通过JT-04完整时延验收。
+真实语音模型的[六轮集成报告](benchmarks/results/voice-assistant-smoke.json)覆盖记忆写入/召回、时间工具、已知蓝色图像、提醒创建与到期文件输出；另有[公开命令报告](benchmarks/results/voice-console-smoke.json)和[语音文件→实时D435i→回答音频报告](benchmarks/results/voice-live-camera-smoke.json)。前者视觉输入为合成夹具，后者没有场景地面真值。最新六轮文件初测中，从推定话音结束到首段PCM：算术/记忆查询约1.7～1.9秒，时间查询2.48秒，图像问答3.92秒，提醒4.61秒，均未触发工具修复。此前提醒轮14.1秒的[基线](benchmarks/results/voice-before-tool-prefill.json)保留；这些个例尚未通过JT-04完整时延验收。
 
 ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM缓存上限和12秒请求期限。连续发言中的第一段结果不能在后续分段尚未完成时触发模型；取消会使旧输入、迟到转写和旧错误失效。溢出会使整轮失败，不截断后继续执行。[真实ASR延迟回调验证](benchmarks/results/voice-asr-lifecycle-smoke.json)覆盖分段完整性、取消后无记忆副作用及下一轮恢复；它不代表物理打断或完整故障矩阵验收。
 
@@ -131,6 +132,12 @@ python3 tools/project.py smoke --component memory
 真实模型工具调用测试使用独立临时库：`.venv/bin/python tools/tool_smoke.py`。当前 llama.cpp 使用其上游 Qwen2.5 工具模板，原 Qwen2.5-VL 内嵌模板未提供工具能力。工具按当前明确请求筛选，参数经校验后交给 Mem0/APScheduler；未收到实际写入成功结果时，Pipecat 输出插件会阻止口头成功确认。三条测试不代表完整工具质量或语音打断验收。
 
 当前Qwen模板在 `tool_choice=required` 时通过 llama.cpp 原生assistant prefill从 `<tool_call>` 开始；普通问答和工具回传后的回答不添加此前缀。该值固定在模型manifest，更换模板时一并核验。预算与推理使用相同的请求转换，前缀不写入会话历史。[固定请求五组对照](benchmarks/results/required-tool-prefill.json)中，原格式5次用完128token仍未调用工具；预填格式5次均返回参数正确的调用。对照只生成工具计划，未执行工具，不替代完整工具质量集或B0–B3性能实验。
+
+工具参数中，明确的记忆原文、笔记标题/正文、提醒事项和时间由应用保留或规范化，再交给实际SDK执行；模型只填写尚未明确的字段。时间复用JioNLP实体/时长解析，按请求时间计算，不让模型自行换算“一个半小时”等数值。候选ID来自真实存储，找不到对应项可以返回不匹配；否定、撤回和模糊目标会阻止写入。写入回执和当前时间回答以工具真实结果为准。
+
+“明天提醒我交报告”会先询问具体时间，随后回答“上午八点”即可补齐；原来的“明天”和“交报告”会保留。待补充请求在当前会话内最多保存5分钟，`/stop`、撤回或切换任务会清除授权，重启后不会自动续办。验证见[补充信息对话报告](benchmarks/results/clarification-smoke.json)和[真实语音文件对话报告](benchmarks/results/voice-clarification-smoke.json)。
+
+[100例工具开发语料](benchmarks/corpora/README.md)使用实际模型、BGE和临时SDK数据库，逐例检查意图、参数与状态。[原始基线](benchmarks/results/tool-quality-development-baseline.json)为63/100，[首轮修复](benchmarks/results/tool-quality-development-iteration1.json)为99/100；[最新结果](benchmarks/results/tool-quality-development.json)为100/100，保留全部逐项记录。这是开发集，未替代独立验收和真实提醒播放测量。
 
 音频设备确定为ReSpeaker Lite双麦，用户当前无法连接麦克风/扬声器，真机录播/AEC/打断列为待验证。D435i最新链路为5Gbps；早期USB2枚举仅保留为排查记录。
 

@@ -109,10 +109,18 @@ class ToolHandlerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["code"], "CANCELLED")
         self.assertEqual(self.memory.list_memories("owner"), [])
         turn = self.turn("现在几点？")
-        for _ in range(3):
-            self.assertTrue((await turn.execute("get_time", Args, {}))["ok"])
+        for index in range(3):
+            self.assertEqual((await turn.execute("get_time", Args, {"unknown":index}))["code"], "INVALID_ARGUMENT")
         self.assertEqual((await turn.execute("get_time", Args, {}))["code"], "TOOL_LIMIT")
         self.assertEqual(len(turn.calls), 4)
+
+    async def test_completed_replay_returns_receipt_even_after_attempt_limit(self):
+        turn = self.turn()
+        args = {"key":"drink", "content":"用户喜欢绿茶"}
+        first = await turn.execute("remember", RememberArgs, args)
+        for _ in range(5): self.assertEqual(await turn.execute("remember", RememberArgs, args), first)
+        self.assertEqual(len(self.memory.list_memories("owner")), 1)
+        self.assertEqual((await turn.execute("remember", RememberArgs, {"key":"other","content":"another fact"}))["code"], "TOOL_LIMIT")
 
     async def test_cancel_during_accepted_write_reports_actual_durable_state(self):
         turn = self.turn()

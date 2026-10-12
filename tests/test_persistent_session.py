@@ -77,6 +77,34 @@ class PersistentSessionTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(asyncio.CancelledError): await task
         self.assertEqual(self.records.recent("owner"), [])
 
+    async def test_missing_time_uses_native_response_without_model_and_stop_clears_it(self):
+        async def emit(_text): pass
+        result = await self.session.ask("设置一个喝水提醒。", emit=emit)
+        self.assertTrue(result["model_request_skipped"])
+        self.assertEqual(self.llm.context_frames_seen, 0)
+        self.assertIsNotNone(self.session.pending_clarification)
+        await self.session.cancel()
+        self.assertIsNone(self.session.pending_clarification)
+
+    async def test_barge_in_can_fill_time_before_clarification_audio_finishes(self):
+        entered, release = asyncio.Event(), asyncio.Event()
+        async def emit(_text):
+            entered.set()
+            await release.wait()
+        task = asyncio.create_task(self.session.ask("明天提醒我交报告。", emit=emit))
+        await asyncio.wait_for(entered.wait(), 3)
+        self.assertIsNotNone(self.session.pending_clarification)
+        task.cancel()
+        with self.assertRaises(asyncio.CancelledError): await task
+        self.assertIsNotNone(self.session.pending_clarification)
+        async def output(_text): pass
+        await self.session.ask("上午八点", emit=output)
+        self.assertIn("交报告", self.session.turn.user_text)
+        due = self.session.turn.resolved_time.due
+        self.assertIsNotNone(due)
+        self.assertEqual(due.hour, 8)
+        self.assertEqual((due.date()-self.session.turn.accepted_at.astimezone(due.tzinfo).date()).days, 1)
+
     async def test_oversized_protected_input_never_reaches_model(self):
         self.session.budget.count = AsyncMock(return_value=2000)
         async def emit(_text): self.fail("Oversized request must not produce output")

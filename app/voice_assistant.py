@@ -209,7 +209,7 @@ class VoiceAssistant:
         try:
             await self.worker.queue_frame(frame)
             await asyncio.wait_for(event.wait(), 5)
-            await self.session.cancel()
+            await self.session.cancel(clear_clarification=False)
         finally: self.interruption_events.pop(frame.id, None)
 
     async def _answer(self, text, generation, previous, future, question_time_ns, vad_detected_ns):

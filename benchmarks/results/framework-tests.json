@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T19:43:14.445160+00:00",
+  "created_at": "2026-10-12T21:32:23.830622+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 101,
+  "tests_run": 111,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -137,6 +137,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_persistent_session.PersistentSessionTests.test_barge_in_can_fill_time_before_clarification_audio_finishes",
+      "status": "PASS"
+    },
+    {
       "id": "test_persistent_session.PersistentSessionTests.test_cancel_after_model_completion_prevents_a_late_output_receipt",
       "status": "PASS"
     },
@@ -146,6 +150,10 @@
     },
     {
       "id": "test_persistent_session.PersistentSessionTests.test_history_waits_for_emit_receipt_and_keeps_its_output_channel",
+      "status": "PASS"
+    },
+    {
+      "id": "test_persistent_session.PersistentSessionTests.test_missing_time_uses_native_response_without_model_and_stop_clears_it",
       "status": "PASS"
     },
     {
@@ -301,6 +309,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_tool_handlers.ToolHandlerTests.test_completed_replay_returns_receipt_even_after_attempt_limit",
+      "status": "PASS"
+    },
+    {
       "id": "test_tool_handlers.ToolHandlerTests.test_durable_save_and_replay_have_one_record",
       "status": "PASS"
     },
@@ -322,6 +334,34 @@
     },
     {
       "id": "test_tool_handlers.ToolHandlerTests.test_reminder_words_inside_a_note_do_not_schedule_a_reminder",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_duration_arithmetic_is_anchored_and_does_not_use_model_numbers",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_explicit_note_fields_override_a_confused_model_title",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_literal_fact_preserves_qualifiers_the_model_omits",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_negated_or_withdrawn_requests_never_write",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_no_time_means_no_invented_schedule",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_task_content_can_contain_cancel_without_becoming_a_cancellation",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_vague_destructive_reference_requires_clarification",
       "status": "PASS"
     },
     {
@@ -425,6 +465,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "d1a105b2de1a76102280f59a01303fd303f660eb",
+  "source_commit": "753d7bebea54b50f39ff9a80d3845b9b36237265",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

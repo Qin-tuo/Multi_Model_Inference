@@ -92,3 +92,6 @@ tzlocal==5.4.4
 urllib3==2.8.0
 websockets==17.2
 yarl==1.25.1
+jionlp==1.5.29
+jiojio==1.2.8
+zipfile36==0.1.3
