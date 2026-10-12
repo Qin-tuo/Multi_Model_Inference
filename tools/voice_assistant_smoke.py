@@ -1,5 +1,6 @@
 """Real persistent speech/memory/tool/image/notification integration on synthetic input."""
 import asyncio
+import copy
 from contextlib import ExitStack
 import json
 from pathlib import Path
@@ -72,6 +73,17 @@ async def main():
             records = stack.enter_context(Records(data / "records.sqlite"))
             voice = VoiceAssistant(LlamaConfig.from_manifest(ROOT / "models/manifest.json"), memory, reminders, records,
                 vision_frames=frames, output_path=artifacts / "answers-and-reminders.wav")
+            build_params = voice.session.bot.llm.build_chat_completion_params
+            def capture_required_request(params):
+                tools = params.get("tools", [])
+                names = [row.get("function", {}).get("name") for row in tools] if isinstance(tools, list) else []
+                path = artifacts / "reminder-request-before-provider-prefix.json"
+                if params.get("tool_choice") == "required" and "create_reminder" in names and not path.exists():
+                    request = copy.deepcopy({key: params[key] for key in ("messages", "tools", "tool_choice")})
+                    request.update(model=voice.session.config.model, temperature=0, max_tokens=voice.session.config.max_tokens)
+                    write_json(path, request)
+                return build_params(params)
+            voice.session.bot.llm.build_chat_completion_params = capture_required_request
             try:
                 await voice.start()
                 original_worker = voice.session.bot.worker
@@ -102,6 +114,7 @@ async def main():
                     "no_pipeline_errors": not voice.errors,
                 }
                 notification_receipts = list(voice.notifications.results)
+                asr_state = voice.stt.status()
             finally: await voice.close()
     finally:
         stop.set(); await feeder
@@ -121,6 +134,7 @@ async def main():
     report = {"created_at": stamp(), "status": "PASS" if all(checks.values()) else "FAIL", "checks": checks,
         "scope": "six synthetic file utterances through real Silero/ASR/BGE/Mem0/llama/TTS and native output queue; synthetic RGB visual input; real APScheduler reminder delivered to WAV, not speaker; no physical AEC or acoustic acceptance",
         "artifacts": str(artifacts), "cases": results, "notification_receipts": notification_receipts,
+        "asr_state": asr_state,
         "notification_statuses": [{k: row[k] for k in ("status", "output_channel", "played_utc", "delivery_attempts")} for row in notices]}
     write_json(ROOT / "benchmarks/results/voice-assistant-smoke.json", report)
     print(json.dumps({"status": report["status"], "checks": checks}, ensure_ascii=False), flush=True)

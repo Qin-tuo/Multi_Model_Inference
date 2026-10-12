@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-10-12T18:46:28.055126+00:00",
+  "status": "FAIL",
+  "scope": "native Pipecat with labelled VAD/ASR/model fixtures; no acoustic or ASR-quality claim",
+  "source_commit": "d1a105b2de1a76102280f59a01303fd303f660eb",
+  "checks": {
+    "late_current_result_retained": true,
+    "first_result_waits_for_later_pending_segment": false
+  },
+  "observation": "Model received 第一段发言 while the ASR response for 第二段补充 was still held; the native turn did not stop on silence alone, but did stop prematurely on the first finalized segment."
+}

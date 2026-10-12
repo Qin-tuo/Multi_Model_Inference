@@ -12,18 +12,19 @@ import wave
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.frames.frames import (EndFrame, ErrorFrame, InputAudioRawFrame, InterruptionFrame,
-                                  LLMContextFrame, VADUserStoppedSpeakingFrame)
+                                  LLMContextFrame, UserStoppedSpeakingFrame, VADUserStoppedSpeakingFrame)
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
 from pipecat.processors.aggregators.llm_context import LLMContext
-from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair, LLMUserAggregatorParams
+from pipecat.processors.aggregators.llm_response_universal import LLMAssistantAggregator, LLMUserAggregatorParams
 from pipecat.processors.frame_processor import FrameProcessor
 from pipecat.transports.base_transport import TransportParams
-from pipecat.turns.user_stop import SpeechTimeoutUserTurnStopStrategy
+from pipecat.turns.user_start import TranscriptionUserTurnStartStrategy
 from pipecat.turns.user_turn_strategies import UserTurnStrategies
 from pipecat.workers.runner import WorkerRunner
 
 from app.adapters.speech import OVSTTSService, create_stt_service, validate_speech_capabilities
+from app.adapters.asr import ABORT_GENERATION, ASR_GENERATION, INPUT_EPOCH, CompleteASRTurnStop, ScopedUserAggregator
 from app.notifications import NotificationFrameGate, NotificationPump, PipecatNotificationSink, NOTICE_TOKEN
 from app.session import AssistantSession
 from app.speech_output import (ConversationSpeechGate, ConversationSpeechSink, SPEECH_TOKEN,
@@ -37,7 +38,7 @@ class VoiceContextBridge(FrameProcessor):
 
     async def process_frame(self, frame, direction):
         await super().process_frame(frame, direction)
-        if isinstance(frame, VADUserStoppedSpeakingFrame):
+        if isinstance(frame, VADUserStoppedSpeakingFrame) and ABORT_GENERATION not in frame.metadata:
             # VAD reports after its silence window. Use the inferred end of
             # speech for picture selection and preserve detection time separately.
             self.owner.vad_detected_ns = time.monotonic_ns()
@@ -57,7 +58,9 @@ class VoiceAssistant:
         self.user_id, self.reminders = user_id, reminders
         self.user_speaking = False
         self.answer_task = self.interrupt_task = self.runner_task = self.notification_task = None
+        self.input_cancel_task = None
         self.generation = 0
+        self.input_epoch = 0
         self.question_time_ns = self.vad_detected_ns = None
         self.result_future = None
         self.results, self.errors = [], []
@@ -91,13 +94,19 @@ class VoiceAssistant:
             output = local_assistant_output(self.py_audio, local_params, self.speech, self.notices)
         self.output = output
         context = LLMContext()
-        self.aggregators = LLMContextAggregatorPair(context, user_params=LLMUserAggregatorParams(
+        self.stt = stt or create_stt_service()
+        self.stt.generation = lambda: self.generation
+        self.stt.input_epoch = lambda: self.input_epoch
+        self.stop_strategy = CompleteASRTurnStop(self.stt, user_speech_timeout=.1)
+        self.user_aggregator = ScopedUserAggregator(context, asr=self.stt, stop_strategy=self.stop_strategy, params=LLMUserAggregatorParams(
+            user_turn_stop_timeout=self.stt.request_timeout + 2,
             vad_analyzer=SileroVADAnalyzer(sample_rate=16000, params=VADParams(stop_secs=.4)),
-            user_turn_strategies=UserTurnStrategies(stop=[SpeechTimeoutUserTurnStopStrategy(user_speech_timeout=.1)])))
+            user_turn_strategies=UserTurnStrategies(stop=[self.stop_strategy])))
+        self.assistant_aggregator = LLMAssistantAggregator(context, _paired_user_aggregator=self.user_aggregator)
         self.tts = tts or OVSTTSService(notification_sink=self.notices, speech_sink=self.speech)
-        self.worker = PipelineWorker(Pipeline([*processors, stt or create_stt_service(),
-            self.aggregators.user(), VoiceContextBridge(self), NotificationFrameGate(self.notices),
-            ConversationSpeechGate(self.speech), self.tts, output, self.aggregators.assistant()]),
+        self.worker = PipelineWorker(Pipeline([*processors, self.stt,
+            self.user_aggregator, VoiceContextBridge(self), NotificationFrameGate(self.notices),
+            ConversationSpeechGate(self.speech), self.tts, output, self.assistant_aggregator]),
             params=PipelineParams(audio_in_sample_rate=16000, audio_out_sample_rate=16000,
                                   enable_metrics=True, enable_usage_metrics=True),
             idle_timeout_secs=None, enable_rtvi=False)
@@ -105,7 +114,7 @@ class VoiceAssistant:
         self.notices.worker = self.worker
         self.runner = WorkerRunner(handle_sigint=False, handle_sigterm=False)
         self.notifications = NotificationPump(reminders, user_id, self.notices, occupied=self.occupied)
-        self.worker.add_reached_downstream_filter((InterruptionFrame,))
+        self.worker.add_reached_downstream_filter((InterruptionFrame, UserStoppedSpeakingFrame))
 
         @self.worker.event_handler("on_pipeline_started")
         async def started(_worker, _frame): self.ready.set()
@@ -116,27 +125,39 @@ class VoiceAssistant:
 
         @self.worker.event_handler("on_pipeline_error")
         async def error(_worker, frame):
+            if frame.metadata.get(ASR_GENERATION, self.generation) != self.generation: return
             token = frame.metadata.get(SPEECH_TOKEN)
             if frame.metadata.get(NOTICE_TOKEN) or (token and not self.speech.allowed(token)): return
             self.errors.append(frame.error)
             self.errors = self.errors[-100:]
             if self.result_future and not self.result_future.done():
                 self.result_future.set_exception(RuntimeError(frame.error))
+            if ASR_GENERATION in frame.metadata:
+                self._start_input_cancel(frame.error, expected_generation=frame.metadata[ASR_GENERATION])
 
-        @self.aggregators.user().event_handler("on_user_turn_started")
+        @self.user_aggregator.event_handler("on_user_turn_started")
         async def user_started(_aggregator, _strategy):
             self.user_speaking = True
-            self.generation += 1
-            self.question_time_ns = self.vad_detected_ns = None
+            # A delayed transcript may reopen the SAME spoken input. It must
+            # not manufacture a new source generation and invalidate itself.
+            if not isinstance(_strategy, TranscriptionUserTurnStartStrategy):
+                self.generation += 1
+                self.question_time_ns = self.vad_detected_ns = None
             self.speech.interrupt("new_user_turn")
             if self.answer_task and not self.answer_task.done() and not self.answer_task.cancelling():
                 self.answer_task.cancel()
             self._ensure_interruption()
 
-        @self.aggregators.user().event_handler("on_user_turn_stopped")
+        @self.user_aggregator.event_handler("on_user_turn_stopped")
         async def user_stopped(_aggregator, _strategy, message):
+            if self.closed: return
+            if not message.content:
+                if not self.stt._user_speaking: self.user_speaking = False
+                return
+            if not self.user_aggregator.consume_current_transcript(message.content):
+                self.stt.counts["obsolete_or_duplicate_turn_events"] += 1
+                return
             self.user_speaking = False
-            if not message.content or self.closed: return
             if len(message.content.encode()) > 8192:
                 if self.result_future and not self.result_future.done():
                     self.result_future.set_exception(ValueError("Transcript exceeds 8 KiB"))
@@ -153,6 +174,34 @@ class VoiceAssistant:
         if self.interrupt_task is None or self.interrupt_task.done():
             self.interrupt_task = asyncio.create_task(self._interrupt())
         return self.interrupt_task
+
+    def _start_input_cancel(self, reason, *, expected_generation=None):
+        if self.input_cancel_task is None or self.input_cancel_task.done():
+            self.input_cancel_task = asyncio.create_task(self._cancel_input(reason, expected_generation))
+        return self.input_cancel_task
+
+    async def cancel_input(self, reason="input_cancelled"):
+        await asyncio.shield(self._start_input_cancel(reason))
+
+    async def _cancel_input(self, reason, expected_generation):
+        if expected_generation is not None and expected_generation != self.generation: return
+        self.generation += 1
+        self.input_epoch += 1
+        self.stt.invalidate()
+        self.speech.interrupt(reason)
+        if self.answer_task and not self.answer_task.done() and not self.answer_task.cancelling():
+            self.answer_task.cancel()
+        if self.result_future and not self.result_future.done():
+            self.result_future.set_exception(asyncio.CancelledError())
+        frame = UserStoppedSpeakingFrame()
+        frame.metadata[ABORT_GENERATION] = self.generation
+        event = self.interruption_events[frame.id] = asyncio.Event()
+        try:
+            await self.worker.queue_frames([InterruptionFrame(), frame])
+            await asyncio.wait_for(event.wait(), 5)
+        finally: self.interruption_events.pop(frame.id, None)
+        await self.session.cancel()
+        if self.answer_task: await asyncio.gather(self.answer_task, return_exceptions=True)
 
     async def _interrupt(self):
         frame = InterruptionFrame()
@@ -204,17 +253,19 @@ class VoiceAssistant:
                 if not 0 < wav.getnframes() <= 16000 * 30: raise ValueError("File utterance must be 0..30 seconds")
                 pcm = wav.readframes(wav.getnframes())
             future = self.result_future = asyncio.get_running_loop().create_future()
+            input_epoch = self.input_epoch
             try:
                 async with asyncio.timeout(timeout):
                     audio = bytes(16000) + pcm + bytes(32000)
                     for start in range(0, len(audio), 640):
                         if self.worker.has_finished(): raise RuntimeError("Speech pipeline stopped")
-                        await self.worker.queue_frame(InputAudioRawFrame(audio[start:start+640], 16000, 1))
+                        frame = InputAudioRawFrame(audio[start:start+640], 16000, 1)
+                        frame.metadata[INPUT_EPOCH] = input_epoch
+                        await self.worker.queue_frame(frame)
                         await asyncio.sleep(.02)
                     return await asyncio.shield(future)
             except BaseException:
-                self.speech.interrupt("file_request_aborted")
-                await asyncio.shield(self._ensure_interruption())
+                await self.cancel_input("file_request_aborted")
                 raise
             finally:
                 if future.done() and not future.cancelled(): future.exception()
@@ -223,6 +274,10 @@ class VoiceAssistant:
 
     async def close(self):
         self.closed = True
+        if self.input_cancel_task: await asyncio.gather(self.input_cancel_task, return_exceptions=True)
+        self.generation += 1
+        self.input_epoch += 1
+        self.stt.invalidate()
         await self.notifications.stop()
         if self.notification_task: await self.notification_task
         self.speech.interrupt("voice_assistant_closed")
@@ -230,7 +285,7 @@ class VoiceAssistant:
         if self.answer_task: await asyncio.gather(self.answer_task, return_exceptions=True)
         if self.interrupt_task: await asyncio.gather(self.interrupt_task, return_exceptions=True)
         if self.runner_task:
-            if not self.worker.has_finished(): await self.worker.queue_frame(EndFrame())
+            if not self.worker.has_finished(): await self.worker.cancel()
             await asyncio.wait_for(self.runner_task, 15)
         await self.session.close()
         if self.py_audio: self.py_audio.terminate()

@@ -25,6 +25,7 @@
       "parallel": 1,
       "server_model_id": "assistant-vlm",
       "chat_template": {
+        "required_tool_call_prefix": "<tool_call>\n",
         "relative_source_path": "models/templates/Qwen-Qwen2.5-7B-Instruct.jinja",
         "sha256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
         "status": "text_image_and_scoped_tool_smoke_verified",

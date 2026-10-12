@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T18:16:42.296088+00:00",
+  "created_at": "2026-10-12T19:43:14.445160+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 90,
+  "tests_run": 101,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -182,6 +182,10 @@
     },
     {
       "id": "test_prompt_budget.NativeBudgetTests.test_invalid_provider_count_is_not_a_zero_token_success",
+      "status": "PASS"
+    },
+    {
+      "id": "test_prompt_budget.NativeBudgetTests.test_tool_prefix_budget_matches_provider_body_without_mutating_context",
       "status": "PASS"
     },
     {
@@ -379,8 +383,48 @@
     {
       "id": "test_visual_session.VisualSessionTests.test_spoken_deictic_question_uses_visual_input_without_capturing_model_questions",
       "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_asr_deadline_fails_without_partial_execution_and_recovers",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_cancel_during_capture_ends_occupancy_and_allows_new_input",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_cancelled_asr_result_cannot_start_tools_and_next_input_recovers",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_capture_buffer_limit_is_finite_and_does_not_submit_truncated_audio",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_delayed_current_result_remains_valid_without_new_user_speech",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_delayed_or_repeated_turn_events_do_not_admit_a_second_request",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_final_consumer_refuses_an_already_queued_obsolete_transcript",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_first_segment_cannot_end_turn_while_later_audio_is_pending",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_queue_overflow_refuses_the_whole_utterance_without_partial_execution",
+      "status": "PASS"
+    },
+    {
+      "id": "test_voice_asr_scoping.VoiceASRScopeTests.test_queue_wait_counts_toward_the_segment_deadline",
+      "status": "PASS"
     }
   ],
-  "source_commit": "3c20ac966fc225769e1d7ca3c05360d8ff317a0f",
+  "source_commit": "d1a105b2de1a76102280f59a01303fd303f660eb",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

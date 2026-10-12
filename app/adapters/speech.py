@@ -44,9 +44,11 @@ async def validate_speech_capabilities():
     return caps
 
 
-def create_stt_service():
+def create_stt_service(*, generation=None, input_epoch=None):
+    from app.adapters.asr import ScopedSTTService
     config = speech_settings()
-    return OpenAISTTService(
+    return ScopedSTTService(
+        generation=generation or (lambda: 0), input_epoch=input_epoch,
         api_key="local-no-key", base_url=config["base_url"],
         settings=OpenAISTTService.Settings(model=config["asr_model"], language=Language.ZH),
         sample_rate=16000, include_prob_metrics=False,

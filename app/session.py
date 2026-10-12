@@ -21,6 +21,7 @@ from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.workers.runner import WorkerRunner
 
 from app.context_memory import memory_message
+from app.adapters.llama import apply_required_tool_prefix
 from app.pipecat_bot import SYSTEM_MESSAGE, build_pipeline
 from app.tools import ToolResponseGuard, ToolTurn
 from app.vision_frames import VisionUnavailable
@@ -29,7 +30,7 @@ from app.vision_snapshot import VisionSnapshotProcessor, VisionReplyReceiver, wa
 
 class PromptBudget(FrameProcessor):
     """Measure the provider-rendered prompt before every native LLM request."""
-    def __init__(self, base_url, *, context_tokens, output_tokens, validate=None, turn_id=None):
+    def __init__(self, base_url, *, context_tokens, output_tokens, validate=None, turn_id=None, tool_call_prefix=None):
         super().__init__()
         self.base = base_url.removesuffix("/").removesuffix("/v1")
         self.context_tokens = context_tokens
@@ -40,9 +41,11 @@ class PromptBudget(FrameProcessor):
         self.validate = validate
         self.turn_id = turn_id
         self.actual_usage = []
+        self.tool_call_prefix = tool_call_prefix
 
     async def count(self, context):
         params = self.adapter.get_llm_invocation_params(context, convert_developer_to_user=True)
+        params = apply_required_tool_prefix(params, self.tool_call_prefix)
         body = {key: value for key, value in params.items() if isinstance(value, (dict, list, str))}
         # This pinned llama.cpp endpoint uses the actual chat template AND
         # mtmd processor. Text-only /tokenize misses image embedding tokens.
@@ -110,7 +113,8 @@ class AssistantSession:
         self.image_admitted = False
         self.image_metrics = None
         self.budget = PromptBudget(config.base_url, context_tokens=context_tokens, output_tokens=config.max_tokens,
-                                  validate=self._validate_turn, turn_id=lambda: self.turn.turn_id)
+                                  validate=self._validate_turn, turn_id=lambda: self.turn.turn_id,
+                                  tool_call_prefix=config.tool_call_prefix)
         inputs = [self.vision, VisionReplyReceiver(self._receive_image)] if self.vision else []
         self.bot = build_pipeline(config, [{"role": "system", "content": SYSTEM_MESSAGE}], llm=llm,
                                   before_llm=[*inputs, self.budget], after_llm=[ToolContinuationBudget(self.budget), self.guard], conversation_id=self.session_id)

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T18:25:42.842500+00:00",
+  "updated_at": "2026-10-12T19:29:56.675031+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -75,7 +75,7 @@
         "deploy/speech/requirements-local-audio.lock",
         "benchmarks/results/local-audio-environment.json"
       ],
-      "validation": "Matcha host TRT engines built; real OVS HTTP TTS/ASR and Pipecat Silero→STT→LLM→TTS file pipeline pass; physical ReSpeaker unavailable; persistent six-turn voice-file memory/tool/vision/reminder integration PASS; PyAudio0.2.14/PortAudio native transport imports and device enumeration PASS, no audio stream opened",
+      "validation": "Matcha host TRT engines built; real OVS HTTP TTS/ASR and Pipecat Silero→STT→LLM→TTS file pipeline pass; physical ReSpeaker unavailable; persistent six-turn voice-file memory/tool/vision/reminder integration PASS; PyAudio0.2.14/PortAudio native transport imports and device enumeration PASS, no audio stream opened; real delayed ASR callbacks preserve a paused utterance and reject cancelled input without a new memory write",
       "next_action": "live audio transport/AEC after hardware arrives; broader independent audio quality tests"
     },
     {
@@ -112,10 +112,14 @@
         "app/speech_output.py",
         "benchmarks/results/voice-assistant-smoke.json",
         "benchmarks/results/voice-live-camera-smoke.json",
-        "benchmarks/results/voice-console-smoke.json"
+        "benchmarks/results/voice-console-smoke.json",
+        "app/adapters/asr.py",
+        "benchmarks/results/required-tool-prefill.json",
+        "benchmarks/results/voice-asr-lifecycle-smoke.json",
+        "tests/test_voice_asr_scoping.py"
       ],
-      "validation": "Persistent Pipecat speech I/O now forwards finalized ASR turns into the same memory/tool/vision AssistantSession; six real synthetic-audio turns, real scheduled reminder-to-WAV and a live-D435i voice-file question PASS; native count/usage agree; 90 contract tests PASS",
-      "next_action": "qualify voice interruption/generation boundaries and bounds, improve actual tool quality/latency, connect and test physical transport/AEC"
+      "validation": "Persistent speech/model workers integrate real memory/tool/vision and reminder-to-WAV; six turns PASS without repair after native required-tool prefill; actual model usage matches multimodal preflight; 101 contract tests PASS; source-segment completion and cancellation are guarded",
+      "next_action": "expand independent tool/voice quality and latency datasets; qualify full voice interruption, output bounds and physical transport/AEC"
     },
     {
       "task_id": "J3.reminders",
@@ -141,7 +145,7 @@
         "tests/test_persistent_session.py",
         "benchmarks/results/application-smoke.json"
       ],
-      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending; raw image data URLs are removed from native context at turn end and never persisted in transcript fields; cancellation-during-preparation race covered; completed transcripts retain text/audio/fixture output channel and wait for the emit receipt; cancellation after model completion rejects late output success",
+      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending; raw image data URLs are removed from native context at turn end and never persisted in transcript fields; cancellation-during-preparation race covered; completed transcripts retain text/audio/fixture output channel and wait for the emit receipt; cancellation after model completion rejects late output success; real late-ASR callback cancellation leaves no cancelled text or fact in the stores, and the next input succeeds",
       "next_action": "voice output evidence, timestamped historical retrieval, recovery fault coverage and larger independent corpus"
     },
     {
@@ -177,6 +181,19 @@
       ],
       "validation": "User-systemd camera lifecycle, rollback, cleanup and restart probes PASS; all six managed backends simultaneously READY with zero restart count at observation; five file speech turns coexist with visual services; full application/device acceptance pending",
       "next_action": "integrate final voice application unit and run full redeploy/offline/fault acceptance"
+    },
+    {
+      "task_id": "J3.2",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/adapters/asr.py",
+        "app/voice_assistant.py",
+        "tests/test_voice_asr_scoping.py",
+        "benchmarks/results/asr-segment-ordering-baseline.json",
+        "benchmarks/results/voice-asr-lifecycle-smoke.json"
+      ],
+      "validation": "Native segmented STT premature-prefix failure reproduced with labelled fixtures; scoped consumer, completion watermark, one pending segment, finite PCM/text and 12s queue-inclusive deadline tested. Two real-ASR delayed-callback scenarios pass paused-speech completeness, cancelled fact absence and recovery. No acoustic or GPU cancellation acceptance.; capture-time cancellation releases occupancy, and delayed/repeated native turn events are checked against consumed source text and sequence before model admission",
+      "next_action": "expand to the full ASR/LLM/TTS cancellation/fault matrix, output backpressure and physical echo/barge-in tests"
     }
   ],
   "acceptance": {
@@ -259,13 +276,13 @@
     "ASR adapter currently supports utterance file requests, not partial transcription streaming",
     "Generic live stream queue bounds, real resource release on cancellation, continuous voice cancellation races and full quality/stability/performance acceptance remain pending",
     "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
-    "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
+    "Tool evidence is a small synthetic integration set plus five paired planning trials of one frozen reminder request; the independent 100-case intent/argument/execution corpus remains pending.",
     "Text interact is available; physical notification playback and interruption, complete history/grounding quality and full deployment lifecycle remain pending",
     "Observed build-time OOM with compiler+VLM overlap retained; build now complete and six services restored under build/runtime exclusion leases. Short file-speech coexistence leaves 3.38GiB minimum available memory; full workload capacity and long-duration stability remain unverified.",
     "Notification output ordering is verified with labelled transport fixtures and actual TTS-to-WAV delivery; native LocalAudio imports work, but real speaker drain/AEC and wall-clock jump behavior still require qualification",
     "Visual dialogue currently uses intent hints plus explicit /look, one 640x480 JPEG per question, and a 2K context; held-out grounding/OCR quality, deictic intent coverage, and full voice/visual quality remain pending. One visual cancellation required 2.60s until provider slot idle, not acoustic interruption acceptance.",
-    "Persistent voice file integration is implemented, but real microphone/speaker, software AEC, late-ASR generation handling under overlapping utterances and full voice interruption/fault/buffer-bound qualification remain unverified.",
-    "Six-turn voice smoke includes a 14.1s reminder response caused by one bounded tool repair after a 128-token unsuccessful first generation; JT-04 latency is not achieved by that functional smoke."
+    "Persistent voice file integration and two real delayed-ASR callback scenarios pass; real microphone/speaker, AEC, full voice interruption/fault matrix and end-to-end buffer/backpressure qualification remain unverified.",
+    "The prior 14.1s reminder case is retained. Native assistant prefill removes its 128-token prose loop: five paired frozen-request trials give 0/5 valid baseline calls and 5/5 valid prefills; latest six-turn file run has no repairs and reminder first PCM at 4.23s. Full JT-04 latency and JT-12 quality remain unverified."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }
