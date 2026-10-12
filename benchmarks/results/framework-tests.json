@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T11:01:23.978599+00:00",
+  "created_at": "2026-10-12T11:42:22.507148+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 36,
+  "tests_run": 47,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -93,6 +93,22 @@
       "status": "PASS"
     },
     {
+      "id": "test_persistent_session.PersistentSessionTests.test_failed_output_is_not_completed_history",
+      "status": "PASS"
+    },
+    {
+      "id": "test_persistent_session.PersistentSessionTests.test_missing_tool_execution_repairs_only_once_then_reports_failure",
+      "status": "PASS"
+    },
+    {
+      "id": "test_persistent_session.PersistentSessionTests.test_oversized_protected_input_never_reaches_model",
+      "status": "PASS"
+    },
+    {
+      "id": "test_persistent_session.PersistentSessionTests.test_two_turns_use_one_worker_and_persist_only_after_output",
+      "status": "PASS"
+    },
+    {
       "id": "test_pipecat_pipeline.PipecatConfigurationTest.test_bounded_file_inputs",
       "status": "PASS"
     },
@@ -106,6 +122,26 @@
     },
     {
       "id": "test_pipecat_pipeline.PipecatPipelineTest.test_native_runner_context_and_completion_path",
+      "status": "PASS"
+    },
+    {
+      "id": "test_records.RecordsTests.test_correction_redacts_previous_use_but_allows_new_version",
+      "status": "PASS"
+    },
+    {
+      "id": "test_records.RecordsTests.test_expiry_and_single_writer",
+      "status": "PASS"
+    },
+    {
+      "id": "test_records.RecordsTests.test_forget_redacts_sources_and_recalls_but_preserves_unrelated_turns",
+      "status": "PASS"
+    },
+    {
+      "id": "test_records.RecordsTests.test_note_transaction_replay_and_owner_isolation_survive_reopen",
+      "status": "PASS"
+    },
+    {
+      "id": "test_records.RecordsTests.test_only_delivered_completed_turns_enter_history",
       "status": "PASS"
     },
     {
@@ -161,10 +197,18 @@
       "status": "PASS"
     },
     {
+      "id": "test_tool_handlers.ToolHandlerTests.test_negated_cancel_and_discussion_of_forgetting_have_no_effect",
+      "status": "PASS"
+    },
+    {
       "id": "test_tool_handlers.ToolHandlerTests.test_relative_reminder_is_anchored_and_replay_is_deduplicated",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_handlers.ToolHandlerTests.test_reminder_words_inside_a_note_do_not_schedule_a_reminder",
       "status": "PASS"
     }
   ],
-  "source_commit": "7123e5b3016beecd3f0d45c425504b42f690a0a2",
+  "source_commit": "44a172df041a0c3a2b59f32f6f277a66f3651d67",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T11:02:27.508217+00:00",
+  "updated_at": "2026-10-12T11:38:17.877480+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -84,10 +84,14 @@
         "app/adapters/speech.py",
         "app/voice_file.py",
         "app/tools.py",
-        "benchmarks/results/tool-smoke.json"
+        "benchmarks/results/tool-smoke.json",
+        "app/session.py",
+        "app/interact.py",
+        "benchmarks/results/session-smoke.json",
+        "benchmarks/results/application-smoke.json"
       ],
-      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending; real file speech pipeline passes with native Silero and turn handling; native Pipecat tool calls get_time/remember/create_reminder pass against real SDK stores, write-confirmation guard added",
-      "next_action": "persistent interactive session; broader model tool quality; voice tool and vision integration"
+      "validation": "real Pipecat-to-llama text and 3 separate-process memory/correct/forget answers PASS; audio/vision integration pending; real file speech pipeline passes with native Silero and turn handling; native Pipecat tool calls get_time/remember/create_reminder pass against real SDK stores, write-confirmation guard added; one long-lived native worker supports interactive text, real note/memory tools and token checks on initial and upstream continuation requests",
+      "next_action": "integrate voice transport, notification playback and ROS visual context; expand tool/grounding quality cases"
     },
     {
       "task_id": "J3.reminders",
@@ -97,6 +101,18 @@
       ],
       "validation": "real APScheduler/SQLite plugin tests; audio consumption and acoustic timing pending; real model-selected create_reminder persisted and confirmed",
       "next_action": "register framework tool handlers and deliver notifications via TTS"
+    },
+    {
+      "task_id": "J2.6",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/records.py",
+        "tests/test_records.py",
+        "tests/test_persistent_session.py",
+        "benchmarks/results/application-smoke.json"
+      ],
+      "validation": "7-day delivered-text records, source-dependent purge, separate-process recall, owner/guest isolation and one logical cancellation/recovery probe PASS; physical audio and full historical quality pending",
+      "next_action": "voice output evidence, timestamped historical retrieval, recovery fault coverage and larger independent corpus"
     }
   ],
   "acceptance": {
@@ -179,7 +195,8 @@
     "ASR adapter currently supports utterance file requests, not partial transcription streaming",
     "Generic live stream queue bounds, real resource release on cancellation, voice tool handlers and full quality/stability/performance acceptance remain pending",
     "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
-    "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified"
+    "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
+    "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending"
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

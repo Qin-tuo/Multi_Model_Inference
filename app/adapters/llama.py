@@ -17,7 +17,7 @@ class LlamaConfig:
     model: str
     base_url: str = "http://127.0.0.1:8088/v1"
     max_tokens: int = 128
-    temperature: float = 0.2
+    temperature: float = 0.0
 
     def __post_init__(self) -> None:
         endpoint = urlparse(self.base_url)

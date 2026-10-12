@@ -1,0 +1,313 @@
+{
+  "created_at": "2026-10-12T11:32:22.076537+00:00",
+  "status": "FAIL",
+  "checks": {
+    "remember_executed": true,
+    "same_session_recall": true,
+    "note_saved": true,
+    "reopened_recall": true,
+    "note_tool_queried": true,
+    "forget_executed": true,
+    "forget_persisted": true,
+    "forgotten_fact_absent_from_final_answer": true,
+    "forgotten_fact_absent_from_retained_history": true,
+    "every_request_measured": true,
+    "tool_continuations_measured": true,
+    "does_not_invent_preference_from_shopping_note": false
+  },
+  "scope": "seven synthetic text requests in two native Pipecat workers with real local models; SDK stores closed/reopened between phases; not full quality, process restart or acoustic acceptance",
+  "cases": [
+    {
+      "turn_id": "3be7b4aeefa749028757a764a9dcc642",
+      "session_id": "69f442511883470e8a0781315b218266",
+      "response": "已记住：我喜欢茉莉花茶。",
+      "calls": [
+        {
+          "tool": "remember",
+          "arguments": {
+            "key": "drink_preference",
+            "content": "我喜欢茉莉花茶"
+          },
+          "outcome": {
+            "ok": true,
+            "result": {
+              "memory_id": "32df7b1e-8ec0-4c99-b5db-9eb485f22106",
+              "version": 1,
+              "generation": 0,
+              "durable": true,
+              "replayed": false,
+              "atomicity": "reconciled_non_atomic",
+              "user_message": "已记住：我喜欢茉莉花茶"
+            }
+          }
+        }
+      ],
+      "retrieval": {
+        "injected_memory_ids": [],
+        "memory_tokens": 35,
+        "retrieved_count": 0,
+        "injected_count": 0,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 405,
+        "memory_generation": 0
+      },
+      "prompt_tokens": [
+        405,
+        546
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "elapsed_seconds": 2.317208885000582,
+      "phase": "continuous",
+      "prompt": "请记住，我喜欢茉莉花茶。"
+    },
+    {
+      "turn_id": "0013fb0baa964588931a9a49fcf36530",
+      "session_id": "69f442511883470e8a0781315b218266",
+      "response": "您喜欢喝茉莉花茶。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [
+          "32df7b1e-8ec0-4c99-b5db-9eb485f22106"
+        ],
+        "memory_tokens": 165,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 595,
+        "memory_generation": 0
+      },
+      "prompt_tokens": [
+        595
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "elapsed_seconds": 0.7720437870011665,
+      "phase": "continuous",
+      "prompt": "我喜欢喝什么茶？"
+    },
+    {
+      "turn_id": "0947257f50c24ce4aeeebb8dd9c9bcff",
+      "session_id": "69f442511883470e8a0781315b218266",
+      "response": "已保存笔记：采购。",
+      "calls": [
+        {
+          "tool": "create_note",
+          "arguments": {
+            "title": "采购",
+            "body": "周末买绿茶和杯子。"
+          },
+          "outcome": {
+            "ok": true,
+            "result": {
+              "note_id": "46a8ac0d99b046a2bd189cfe3007d236",
+              "durable": true,
+              "user_message": "已保存笔记：采购"
+            }
+          }
+        }
+      ],
+      "retrieval": {
+        "injected_memory_ids": [
+          "32df7b1e-8ec0-4c99-b5db-9eb485f22106"
+        ],
+        "memory_tokens": 165,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 541,
+        "memory_generation": 0
+      },
+      "prompt_tokens": [
+        541,
+        661,
+        769
+      ],
+      "history_persisted": true,
+      "repair_attempted": true,
+      "elapsed_seconds": 8.8572035770012,
+      "phase": "continuous",
+      "prompt": "创建笔记，标题是采购，内容是周末买绿茶和杯子。"
+    },
+    {
+      "turn_id": "cf74992e94ca4ed2b182ac8f45bb56a8",
+      "session_id": "049cdae0d2744af6b88dcf8054dd58f7",
+      "response": "您喜欢喝茉莉花茶。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [
+          "32df7b1e-8ec0-4c99-b5db-9eb485f22106"
+        ],
+        "memory_tokens": 165,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 567,
+        "memory_generation": 0
+      },
+      "prompt_tokens": [
+        567
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "elapsed_seconds": 0.7474909770025988,
+      "phase": "reopened",
+      "prompt": "我喜欢喝什么茶？"
+    },
+    {
+      "turn_id": "a73dd997ff064b0a9ae7b2081ad7904e",
+      "session_id": "049cdae0d2744af6b88dcf8054dd58f7",
+      "response": "您的笔记如下：\n\n1. 标题：采购\n   内容：周末买绿茶和杯子。\n   创建时间：2026-10-12 11:32:00.667660+00:00\n   未截断内容：false",
+      "calls": [
+        {
+          "tool": "list_notes",
+          "arguments": {},
+          "outcome": {
+            "ok": true,
+            "result": {
+              "items": [
+                {
+                  "id": "46a8ac0d99b046a2bd189cfe3007d236",
+                  "title": "采购",
+                  "body": "周末买绿茶和杯子。",
+                  "created_at": "2026-10-12T11:32:00.667660+00:00",
+                  "body_truncated": false
+                }
+              ],
+              "has_more": false
+            }
+          }
+        }
+      ],
+      "retrieval": {
+        "injected_memory_ids": [],
+        "memory_tokens": 35,
+        "retrieved_count": 0,
+        "injected_count": 0,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 287,
+        "memory_generation": 0
+      },
+      "prompt_tokens": [
+        287,
+        400,
+        546
+      ],
+      "history_persisted": true,
+      "repair_attempted": true,
+      "elapsed_seconds": 11.353543075001653,
+      "phase": "reopened",
+      "prompt": "请查询我的笔记。"
+    },
+    {
+      "turn_id": "b515a184f54a4046bbe65ee000714f58",
+      "session_id": "049cdae0d2744af6b88dcf8054dd58f7",
+      "response": "操作已完成。",
+      "calls": [
+        {
+          "tool": "forget",
+          "arguments": {
+            "memory_id": "3be7b4aeefa749028757a764a9dcc642"
+          },
+          "outcome": {
+            "ok": false,
+            "code": "NOT_FOUND",
+            "message": "memory not found in selected profile"
+          }
+        },
+        {
+          "tool": "list_memories",
+          "arguments": {},
+          "outcome": {
+            "ok": true,
+            "result": {
+              "items": [
+                {
+                  "memory_id": "32df7b1e-8ec0-4c99-b5db-9eb485f22106",
+                  "version": 1,
+                  "content": "我喜欢茉莉花茶"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tool": "forget",
+          "arguments": {
+            "memory_id": "32df7b1e-8ec0-4c99-b5db-9eb485f22106"
+          },
+          "outcome": {
+            "ok": true,
+            "result": {
+              "memory_id": "32df7b1e-8ec0-4c99-b5db-9eb485f22106",
+              "deleted": true,
+              "deleted_ids": [
+                "32df7b1e-8ec0-4c99-b5db-9eb485f22106"
+              ],
+              "generation": 1,
+              "durable": true,
+              "replayed": false,
+              "history_purged": true,
+              "purge_counts": {
+                "history_rows_removed": 2,
+                "owner_message_rows_removed": 0
+              },
+              "atomicity": "reconciled_non_atomic",
+              "user_message": "已删除这条记忆及相关派生内容。"
+            }
+          }
+        }
+      ],
+      "retrieval": {
+        "injected_memory_ids": [
+          "32df7b1e-8ec0-4c99-b5db-9eb485f22106"
+        ],
+        "memory_tokens": 165,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 619,
+        "memory_generation": 0
+      },
+      "prompt_tokens": [
+        619,
+        704,
+        829,
+        929,
+        575
+      ],
+      "history_persisted": false,
+      "repair_attempted": true,
+      "elapsed_seconds": 7.870953652000026,
+      "phase": "reopened",
+      "prompt": "请忘记我喜欢喝什么茶的记忆。"
+    },
+    {
+      "turn_id": "714059c45a5246e39bc5f8570abe6e9c",
+      "session_id": "049cdae0d2744af6b88dcf8054dd58f7",
+      "response": "您喜欢喝绿茶。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [],
+        "memory_tokens": 35,
+        "retrieved_count": 0,
+        "injected_count": 0,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 520,
+        "memory_generation": 1
+      },
+      "prompt_tokens": [
+        520
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "elapsed_seconds": 0.5635320869987481,
+      "phase": "reopened",
+      "prompt": "我喜欢喝什么茶？"
+    }
+  ],
+  "remaining_memory_count": 0,
+  "note_count": 1,
+  "retained_history_count": 2,
+  "review_note": "Manual review found the original unknown-answer check was too weak: the model inferred a green-tea preference from a shopping note. The gate is strengthened in the new probe."
+}

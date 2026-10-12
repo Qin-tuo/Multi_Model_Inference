@@ -8,7 +8,7 @@
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
-| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 真实文本、记忆与文件语音问答通过；实时设备与工具整合继续推进 |
+| 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本会话、记忆/笔记工具、进程重启召回与逻辑取消通过初测；实时设备和语音工具整合继续推进 |
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 持久调度、取消、去重、待播通知测试通过；播报消费待接入 |
@@ -20,6 +20,26 @@ Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest]
 ## 使用现有入口
 
 本机外部框架、模型、构建产物与 Python 环境统一放在 **`/home/nvidia/AI_Stack/`**。其中 `frameworks/llama.cpp/` 是 llama.cpp 源码，`builds/llama/bin/llama-server` 是服务程序。目录与版本入口见 [依赖目录说明](deploy/dependencies-layout.md)；本机总目录内还有 `README.md` 和完整 Python 依赖清单 `dependencies.json`。原缓存路径及项目 `.venv*` 保留为兼容链接。
+
+### 持续文本交互
+
+先运行本地模型服务，再在另一终端开启会话：
+
+```bash
+python3 tools/project.py serve --component llama
+# 另一个终端：
+python3 tools/project.py interact --user owner
+```
+
+可直接输入“请记住，我喜欢茉莉花茶。”“我喜欢喝什么茶？”“创建笔记，标题是采购，内容是周末买绿茶和杯子。”“请查询我的笔记。”或“五分钟后提醒我休息。”。`/new` 开启新会话，`/stop` 停止当前回答，`/memories`、`/notes`、`/reminders`、`/history` 查询实际记录，`/quit` 退出。`--user guest` 使用独立档案；`--session-id ID` 恢复指定档案已输出的会话上下文；`--input-file PATH` 顺序执行最多64KiB的文本脚本。
+
+此入口复用一个持续运行的 Pipecat worker 和原生工具 continuation。模型请求及工具回传请求均经 llama.cpp 实际模板与 tokenizer 检查；优先移除旧轮次，当前问题过长则明确失败。默认会话文本保留7天，仅成功输出的完整文本进入已完成历史；更正/遗忘会清除相关来源和派生会话记录，并失效当前旧上下文。笔记和偏好分别从各自存储读取，购物笔记不作为偏好证据。用户明确操作最多修复重试一次，未实际成功时不会口头确认。
+
+当前取消验证覆盖原生 interruption、HTTP生成请求停止、服务slot空闲及下一轮恢复。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU资源释放。提醒可持久创建和查询，到期语音播报消费尚未接入。完整语音助手验收仍未完成。
+
+实际测试见[持续会话报告](benchmarks/results/session-smoke.json)、[独立进程与取消报告](benchmarks/results/application-smoke.json)。这些是合成开发样例；模型曾漏调用工具或把购物内容误当偏好，失败样例与校验修正已保留，不能以这几条通过替代完整工具质量集。
+
+### 依赖与单组件检查
 
 Python依赖使用独立虚拟环境；锁文件记录当前ARM64/Python3.12验证环境。
 
@@ -69,7 +89,7 @@ python3 tools/project.py smoke --component memory
 
 音频设备确定为ReSpeaker Lite双麦，用户当前无法连接麦克风/扬声器，真机录播/AEC/打断列为待验证。D435i最新链路为5Gbps；早期USB2枚举仅保留为排查记录。
 
-语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。语音服务与文件管线使用部署说明中的独立入口。完整 `up/down/interact/bench/acceptance` 命令将在对应里程碑接入，当前不可作为已实现接口使用。
+语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。语音服务与文件管线使用部署说明中的独立入口。`interact` 已实现文本入口；完整 `up/down/bench/acceptance` 命令仍待对应里程碑接入，当前不可作为已实现接口使用。
 
 ## 数据和上游
 

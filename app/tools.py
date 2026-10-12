@@ -107,12 +107,18 @@ class CancelReminderArgs(Args):
     reminder_id: str = Field(min_length=1,max_length=128)
 
 
+class CreateNoteArgs(Args):
+    title: str = Field(min_length=1, max_length=120)
+    body: str = Field(min_length=1, max_length=2048)
+
+
 @dataclass
 class ToolTurn:
     user_id: str
     user_text: str
     memory: object
     reminders: object
+    records: object = None
     timezone_name: str = "Asia/Shanghai"
     turn_id: str = field(default_factory=lambda: uuid.uuid4().hex)
     accepted_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -123,13 +129,22 @@ class ToolTurn:
     _gate: asyncio.Lock = field(default_factory=asyncio.Lock)
 
     def _write_allowed(self, name):
-        text = self.user_text.strip()
-        if re.match(r"^(不要|别|不用|不必)",text): return name=="cancel_reminder" and "提醒" in text
-        if name=="remember": return bool(re.match(r"^(?:(?:请|麻烦)你?(?:帮我)?|帮我)?(记住|记下|保存)(?!了[吗么]|什么|了吗)",text))
-        if name=="correct": return bool(re.search(r"更正|修改|改为|改成|更新|以后.*(详细|简短)",text))
-        if name=="forget": return bool(re.search(r"忘记|删除|清除",text))
-        if name=="create_reminder": return "提醒" in text and "取消" not in text and bool(re.search(r"秒|分钟|小时|明天|后天|今天|点|设置",text))
-        if name=="cancel_reminder": return "提醒" in text and bool(re.search(r"取消|删除|撤销|别|不要",text))
+        if name not in {"remember", "correct", "forget", "create_note", "create_reminder", "cancel_reminder"}:
+            return True
+        text = re.sub(r"^(?:(?:请|麻烦)你?(?:帮我)?|帮我|我想(?:请你)?|我要)", "", self.user_text.strip())
+        if re.match(r"^(不用|不必|如何|怎么|解释|为什么|假如|如果|假设|你能解释|你知道|有人说|我忘记)", text): return False
+        if re.match(r"^(不要|别)",text): return name=="cancel_reminder" and bool(re.match(r"^(不要|别)(再)?提醒", text))
+        note_request = bool(re.match(r"^(?:(?:新建|创建|保存|记录|添加|写)(?:一[条篇份个])?.{0,6}笔记|记(?:一?[个条篇份])?笔记)", text))
+        if name=="create_note": return note_request
+        if note_request: return False
+        if re.match(r"^(?:修改|更正|更新|删除|清除)(?:这条|那条|我的|该|所有|全部)?笔记", text): return False
+        if name=="remember": return bool(re.match(r"^(记住|记下|保存)(?!了[吗么]|什么|了吗)",text))
+        if name=="correct": return bool(re.match(r"^(?:更正|修改|更新|改为|改成|把.+?(?:更正|修改|更新|改为|改成))",text))
+        if name=="forget": return bool(re.match(r"^(?:忘记|忘掉|删除|清除|把.+?(?:忘掉|删除|清除))",text)) and "提醒" not in text
+        if name=="create_reminder":
+            imperative = re.match(r"^(?:设置|设定|创建|新增|提醒我|今天|明天|后天|大后天|今晚|明早|在|过|等|[0-9零一二两三四五六七八九十百半几])", text)
+            return bool(imperative) and "提醒" in text and "取消" not in text and bool(re.search(r"秒|分钟|小时|明天|后天|今天|点|设置",text))
+        if name=="cancel_reminder": return "提醒" in text and bool(re.match(r"^(?:取消|删除|撤销|把.+?(?:取消|删除|撤销))",text))
         return True
 
     def cancel(self):
@@ -141,25 +156,48 @@ class ToolTurn:
         # Use the framework/provider's structured tool mode for clear write
         # requests. Ordinary conversation remains automatic; lookup-based
         # changes may query IDs before applying the user's operation.
-        for name in ("remember","create_reminder"):
+        for name in ("remember","create_reminder", "create_note"):
             if self._write_allowed(name):
                 return "required"
         if any(self._write_allowed(name) for name in ("correct","forget","cancel_reminder")):
             return "required"
-        return "auto"
+        return "required" if self.requested_lookup() else "auto"
+
+    def requested_lookup(self):
+        text = self.user_text
+        if re.search(r"笔记(?!本)", text) and re.search(r"查询|查看|列出|读|我的笔记|笔记内容", text):
+            return "list_notes"
+        if "提醒" in text and re.search(r"查询|查看|列出|哪些|有什么", text):
+            return "list_reminders"
+        if re.search(r"记忆|记住", text) and re.search(r"查询|查看|列出|哪些|什么", text):
+            return "list_memories"
+        if re.search(r"现在几点|现在的?时间|今天.*日期|今天.*星期", text):
+            return "get_time"
+        return None
 
     def system_guidance(self):
+        if self._write_allowed("create_note"):
+            return "本轮需要保存本地笔记。直接输出 <tool_call> 开始的 create_note 工具调用，参数包括 title 和 body，保留用户明确给出的内容。只有工具成功后才确认。"
         if self._write_allowed("remember"):
             return "本轮需要保存用户明确要求记住的事实。直接输出 <tool_call> 开始的 remember 工具调用，arguments 包括 key 和 content；不要先口头确认。例如用户说‘记住我喜欢喝茶’，调用 remember，key 为 drink_preference，content 为 用户喜欢喝茶。只有本轮工具返回成功后才简短确认。"
         if self._write_allowed("create_reminder"):
             return "本轮是提醒设置任务。先调用 create_reminder 工具；相对时间换算为秒。已有本轮成功的tool结果后，再简短确认。"
+        if self._write_allowed("forget"):
+            return "本轮必须执行遗忘。使用本轮证据中的记忆ID调用 forget，参数 memory_id；若不知道ID，先调用 list_memories，再调用 forget。输出 <tool_call> 开始的工具调用，只有 forget 成功后才确认。"
+        if self._write_allowed("correct"):
+            return "本轮必须更正已有记忆。使用本轮证据中的 memory_id 和 version 调用 correct，参数 memory_id、expected_version、content；若不知道ID和版本先调用 list_memories。只有 correct 成功后才确认。"
+        if self._write_allowed("cancel_reminder"):
+            return "本轮必须取消提醒。先调用 list_reminders 取得ID，再调用 cancel_reminder，参数 reminder_id；只有工具成功后才确认。"
+        if lookup := self.requested_lookup():
+            call = json.dumps({"name": lookup, "arguments": {}}, ensure_ascii=False)
+            return f"本轮需要查询实际数据。先调用工具：<tool_call>\n{call}\n</tool_call>\n只有得到工具结果后才回答，历史偏好不能当成笔记或提醒。"
         return ""
 
     def required_operation(self):
-        for name in ("remember", "correct", "forget", "create_reminder", "cancel_reminder"):
+        for name in ("remember", "correct", "forget", "create_reminder", "cancel_reminder", "create_note"):
             if self._write_allowed(name):
                 return name
-        return None
+        return self.requested_lookup()
 
     def response_error(self):
         """Trusted completion gate: model prose alone cannot confirm a write."""
@@ -181,16 +219,37 @@ class ToolTurn:
         if name=="remember":
             result=self.memory.remember(self.user_id,"fact",args["key"],args["content"],source_id=self.turn_id,
                                         source_excerpt=self.user_text,request_id=request_id)
+            if self.records:
+                self.records.attach_memories(self.user_id, self.turn_id, [result["memory_id"]])
             return {**result,"user_message":"已记住："+args["content"]}
         if name=="list_memories":
-            return {"items":self.memory.list_memories(self.user_id,limit=10)}
+            items=self.memory.list_memories(self.user_id,limit=5)
+            if self.records:
+                items = self.records.filter_memories(self.user_id, items)
+                self.records.attach_memories(self.user_id, self.turn_id, [x["memory_id"] for x in items])
+            return {"items":[{"memory_id": x["memory_id"], "version": x["version"], "content": x["content"][:160]} for x in items]}
         if name=="correct":
             result=self.memory.correct(self.user_id,args["memory_id"],args["content"],expected_version=args["expected_version"],
                                        source_id=self.turn_id,source_excerpt=self.user_text,request_id=request_id)
+            if self.records:
+                self.records.purge_memory(self.user_id, args["memory_id"], deleted=False, exclude_turn=self.turn_id)
+                self.records.attach_memories(self.user_id, self.turn_id, [args["memory_id"]])
             return {**result,"user_message":"已更正为："+args["content"]}
         if name=="forget":
+            if self.records:
+                self.records.attach_memories(self.user_id, self.turn_id, [args["memory_id"]])
+                self.records.purge_memory(self.user_id, args["memory_id"])
             result=self.memory.forget(self.user_id,args["memory_id"],request_id=request_id)
             return {**result,"user_message":"已删除这条记忆及相关派生内容。"}
+        if name=="create_note":
+            if self.records is None: raise RuntimeError("Notes storage is unavailable")
+            return self.records.create_note(self.user_id, **args, source_id=self.turn_id, request_id=request_id)
+        if name=="list_notes":
+            if self.records is None: raise RuntimeError("Notes storage is unavailable")
+            rows = self.records.list_notes(self.user_id, limit=4)
+            return {"items": [{"title": row["title"], "body": row["body"][:160] + ("…（内容节选）" if len(row["body"]) > 160 else ""),
+                               "created_at": datetime.fromisoformat(row["created_at"]).astimezone(ZoneInfo(self.timezone_name)).isoformat()} for row in rows[:3]],
+                    "display_scope": "最近三条笔记" if len(rows) > 3 else "当前笔记"}
         if name=="create_reminder":
             due=(self.accepted_at+timedelta(seconds=args["delay_seconds"])) if args["delay_seconds"] is not None else datetime.fromisoformat(args["due_at"])
             if due.tzinfo is None or due <= self.accepted_at: raise ValueError("Reminder needs an unambiguous future time with timezone")
@@ -238,7 +297,9 @@ class ToolTurn:
         # small baseline model also has less irrelevant schema text to attend to.
         required = self.required_operation()
         related = {"correct": "list_memories", "forget": "list_memories", "cancel_reminder": "list_reminders"}
-        allowed = {required} if required else {"get_time", "get_device_status", "list_memories", "list_reminders"}
+        allowed = {required} if required else {"get_time", "get_device_status", "list_memories", "list_reminders", "list_notes"}
+        if self.records is None:
+            allowed -= {"create_note", "list_notes"}
         if required in related:
             allowed.add(related[required])
         names = allowed if names is None else allowed.intersection(names)
@@ -252,6 +313,8 @@ class ToolTurn:
             ("create_reminder","设置提醒，相对秒数或明确ISO时间二选一。",CreateReminderArgs),
             ("list_reminders","列出未完成提醒及ID。",Args),
             ("cancel_reminder","取消用户指定的提醒。",CancelReminderArgs),
+            ("create_note", "保存用户明确要求创建的本地笔记。", CreateNoteArgs),
+            ("list_notes", "查询当前用户已保存的本地笔记。", Args),
         ]
         schemas=[]
         for name,description,model in definitions:
@@ -260,6 +323,18 @@ class ToolTurn:
                 @tool_options(cancel_on_interruption=True,timeout_secs=10)
                 async def handler(params: FunctionCallParams):
                     result=await self.execute(tool_name,arg_model,params.arguments)
+                    if result.get("ok") and tool_name in {"correct", "forget"}:
+                        # Drop stale recalled text and old tool listings before
+                        # Pipecat resumes generation with the real tool result.
+                        messages = params.context.get_messages()
+                        pending = []
+                        for message in messages:
+                            if message.get("role") == "assistant" and message.get("tool_calls"):
+                                calls = [call for call in message["tool_calls"] if call.get("id") == params.tool_call_id]
+                                if calls: pending.append({"role": "assistant", "tool_calls": calls})
+                            elif message.get("role") == "tool" and message.get("tool_call_id") == params.tool_call_id:
+                                pending.append(message)
+                        params.context.set_messages([messages[0], {"role": "user", "content": "请根据本轮工具真实结果确认刚才的记忆维护操作。"}, *pending])
                     params.context.set_tool_choice("auto")
                     if result.get("code")=="TOOL_LIMIT": params.context.set_tools([])
                     await params.result_callback(result,properties=FunctionCallResultProperties(run_llm=not self.cancelled))

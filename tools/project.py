@@ -385,8 +385,19 @@ def main():
     srv.add_argument("--component", choices=["llama", "asr", "speech"], required=True)
     test = sub.add_parser("test")
     test.add_argument("--suite", choices=["core", "framework", "memory", "interaction"], default="core")
+    interact = sub.add_parser("interact", help="Persistent Pipecat text conversation")
+    interact.add_argument("--user", default="owner")
+    interact.add_argument("--data-dir", type=Path, default=DATA)
+    interact.add_argument("--session-id")
+    interact.add_argument("--input-file", type=Path)
     args = parser.parse_args()
     try:
+        if args.action == "interact":
+            command = [str(ROOT / ".venv/bin/python"), "-m", "app.interact", "--user", args.user,
+                       "--data-dir", str(args.data_dir)]
+            if args.session_id: command += ["--session-id", args.session_id]
+            if args.input_file: command += ["--input-file", str(args.input_file)]
+            return subprocess.call(command, cwd=ROOT)
         return {"doctor": doctor, "prepare": prepare, "smoke": smoke, "test": tests, "serve": serve}[args.action](args)
     except (OSError, RuntimeError, TimeoutError, subprocess.CalledProcessError, ValueError) as e:
         print(json.dumps({"status": "FAIL", "error": str(e)}, ensure_ascii=False), file=sys.stderr)

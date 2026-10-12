@@ -1,0 +1,48 @@
+{
+  "created_at": "2026-10-12T11:39:19.312481+00:00",
+  "status": "PASS",
+  "scope": "three separate console processes, owner/guest profiles, native logical text interruption and observed llama slot idle; not physical playback/AEC or GPU memory-release acceptance",
+  "checks": {
+    "public_commands_succeeded": true,
+    "new_process_recalled": true,
+    "guest_did_not_receive_owner_fact": true,
+    "native_cancellation_observed": true,
+    "cancelled_text_not_delivered_or_recorded": true,
+    "next_turn_works": true
+  },
+  "cases": [
+    {
+      "name": "save_process",
+      "exit_code": 0,
+      "answers": [
+        "我已经记住，你喜欢桂花乌龙茶。"
+      ],
+      "error_tail": ""
+    },
+    {
+      "name": "recall_new_process",
+      "exit_code": 0,
+      "answers": [
+        "您喜欢喝桂花乌龙茶。"
+      ],
+      "error_tail": ""
+    },
+    {
+      "name": "guest_new_process",
+      "exit_code": 0,
+      "answers": [
+        "我目前没有关于您喜欢喝什么茶的可靠记忆。您可以告诉我您最近喜欢喝哪种茶，或者告诉我您最近的饮食习惯，我可以尝试帮助您找到适合您的茶。"
+      ],
+      "error_tail": ""
+    }
+  ],
+  "cancellation": {
+    "observed_backend_running": true,
+    "request_cancelled": true,
+    "provider_slot_idle_confirmed": true,
+    "cancel_to_idle_seconds": 0.16122491699934471,
+    "cancelled_output_count": 0,
+    "cancelled_completed_history_count": 0,
+    "next_response": "2"
+  }
+}

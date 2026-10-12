@@ -11,7 +11,8 @@ from app.adapters.llama import LlamaConfig
 from app.memory import Mem0Adapter
 from app.pipecat_bot import input_messages, run_smoke
 from app.reminders import ReminderService
-from app.tools import Args, CreateReminderArgs, RememberArgs, ToolTurn
+from app.records import Records
+from app.tools import Args, CancelReminderArgs, CreateReminderArgs, ForgetArgs, RememberArgs, ToolTurn
 from test_mem0_adapter import actual_sdk
 from test_pipecat_pipeline import FrameworkFakeLLM
 
@@ -76,6 +77,30 @@ class ToolHandlerTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(result["ok"])
         self.assertIsNotNone(turn.response_error())
         self.assertEqual(self.reminders.list_reminders("owner"), [])
+
+    async def test_negated_cancel_and_discussion_of_forgetting_have_no_effect(self):
+        create = self.turn("五分钟后提醒我喝水。")
+        result = await create.execute("create_reminder", CreateReminderArgs, {"text": "喝水", "delay_seconds": 300})
+        reminder_id = result["result"]["reminder_id"]
+        for text in ("请不要取消我的提醒。", "不用取消提醒。", "请解释五分钟后提醒是什么意思。"):
+            turn = self.turn(text)
+            refused = await turn.execute("cancel_reminder", CancelReminderArgs, {"reminder_id": reminder_id})
+            self.assertEqual(refused["code"], "EXPLICIT_REQUEST_REQUIRED")
+        self.assertEqual(self.reminders.list_reminders("owner")[0]["status"], "active")
+        turn = self.turn("我忘记昨天说过什么了。")
+        refused = await turn.execute("forget", ForgetArgs, {"memory_id": "unknown"})
+        self.assertEqual(refused["code"], "EXPLICIT_REQUEST_REQUIRED")
+
+    async def test_reminder_words_inside_a_note_do_not_schedule_a_reminder(self):
+        from app.tools import CreateNoteArgs
+        with Records(Path(self.temp.name) / "records.sqlite") as records:
+            turn = ToolTurn("owner", "创建笔记，内容是五分钟后提醒我休息。", self.memory, self.reminders, records=records)
+            result = await turn.execute("create_reminder", CreateReminderArgs, {"text": "休息", "delay_seconds": 300})
+            self.assertEqual(result["code"], "EXPLICIT_REQUEST_REQUIRED")
+            result = await turn.execute("create_note", CreateNoteArgs, {"title": "摘录", "body": "五分钟后提醒我休息。"})
+            self.assertTrue(result["ok"])
+            self.assertEqual(self.reminders.list_reminders("owner"), [])
+            self.assertEqual(len(records.list_notes("owner")), 1)
 
     async def test_cancel_before_admission_and_bounded_attempts(self):
         turn = self.turn()
