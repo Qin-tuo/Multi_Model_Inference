@@ -338,6 +338,16 @@ def smoke(args):
 
 
 def serve(args):
+    if args.component in {"camera", "vision", "pose"}:
+        component = "detection" if args.component == "vision" else args.component
+        command = [sys.executable, str(ROOT / "deploy/vision/serve.py"), component]
+        os.execv(command[0], command)
+    if args.component in {"llama", "asr", "speech"}:
+        for proc in Path("/proc").glob("[0-9]*"):
+            try: argv = (proc / "cmdline").read_bytes().split(b"\0")
+            except OSError: continue
+            if b"--build-ort" in argv and any(arg.endswith(b"deploy/vision/prepare.py") for arg in argv):
+                raise RuntimeError("ONNX Runtime GPU build is still active; start model services after this heavy build completes")
     if args.component == "asr":
         _, models = manifests()
         model = models["models"]["asr"]
@@ -382,7 +392,7 @@ def main():
     sm = sub.add_parser("smoke")
     sm.add_argument("--component", required=True, choices=["llama", "vision", "speech", "memory"])
     srv = sub.add_parser("serve", help="Run a model service in the foreground")
-    srv.add_argument("--component", choices=["llama", "asr", "speech"], required=True)
+    srv.add_argument("--component", choices=["llama", "asr", "speech", "camera", "vision", "pose"], required=True)
     test = sub.add_parser("test")
     test.add_argument("--suite", choices=["core", "framework", "memory", "interaction"], default="core")
     interact = sub.add_parser("interact", help="Persistent Pipecat text conversation")

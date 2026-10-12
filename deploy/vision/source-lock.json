@@ -10,7 +10,11 @@
     "version": "1.28.0",
     "tag": "v1.28.0",
     "tag_commit": "da9b5e364c465de65c49d91e696cd6485270757f",
-    "execution_providers": ["TensorRT", "CUDA", "CPU"],
+    "execution_providers": [
+      "TensorRT",
+      "CUDA",
+      "CPU"
+    ],
     "cuda_architecture": "87",
     "parallel_build_jobs": 2,
     "built": false
@@ -18,7 +22,31 @@
   "models": {
     "detection": "YOLOv8n",
     "pose": "YOLOv8n-pose",
-    "artifact_status": "not_yet_exported_or_locked"
+    "artifact_status": "static_onnx_exports_locked_and_cpu_verified"
   },
-  "status": "source_verified_dependencies_pending"
+  "status": "source_verified_dependencies_pending",
+  "patches": [
+    {
+      "path": "patches/vision/ort-profiling.patch",
+      "sha256": "848bd7eb46d647d2d3af71fb3b94db580f9323b8c5d4a3890d3897a007f7002a",
+      "purpose": "Opt-in native ORT per-node execution-provider trace; disabled by default"
+    },
+    {
+      "path": "patches/vision/ort-public-headers.patch",
+      "sha256": "01b62c8e217e290c983251c17ebd5f7624ee75b62d19dc65c9966903645808fd",
+      "purpose": "Package the split ORT1.28 C API public headers"
+    }
+  ],
+  "hfhub_vendor": {
+    "repository": "https://github.com/agonzc34/huggingface-hub-cpp",
+    "version": "1.1.5",
+    "commit": "a894c86dc701b97b6627bc3986e542a72faa0fe3"
+  },
+  "ort_patches": [
+    {
+      "path": "patches/vision/ort-mask-sentinel.patch",
+      "sha256": "8d311882d12e431847d3b5f4a8111f9b5d64152aee748f6901242eeae71a3aad",
+      "purpose": "Keep the existing mask sentinel visible when memory-efficient attention is disabled; value and enabled-kernel behavior unchanged"
+    }
+  ]
 }

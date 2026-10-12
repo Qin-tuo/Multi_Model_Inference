@@ -8,7 +8,7 @@
   "yolo_ros": {
     "url": "https://github.com/mgonzs13/yolo_ros.git",
     "commit": "7924a8be76c81f4051370e254677516ca696a272",
-    "status": "ort_gpu_dependency_build_running"
+    "status": "ros_compiled_with_core_sdk_gpu_ort_build_pending"
   },
   "pipecat": {
     "url": "https://github.com/pipecat-ai/pipecat.git",
@@ -54,5 +54,11 @@
   "piper_phonemizer": {
     "package": "piper-tts",
     "version": "1.8.0"
+  },
+  "huggingface_hub_cpp": {
+    "url": "https://github.com/agonzc34/huggingface-hub-cpp",
+    "version": "1.1.5",
+    "commit": "a894c86dc701b97b6627bc3986e542a72faa0fe3",
+    "status": "ros_vendor_compiled"
   }
 }

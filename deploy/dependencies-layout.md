@@ -10,7 +10,9 @@
 | `environments/assistant/` | Pipecat、Mem0、APScheduler、BGE 等主应用 Python 环境 |
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |
 | `environments/vision/` | Ultralytics、PyTorch CPU、ONNX 等模型导出/验证环境 |
+| `environments/ort-build/` | ORT后续构建和上游lintrunner/clang-format检查的隔离开发环境 |
 | `installed/` | 自行编译的依赖安装前缀；正在构建的 ORT 完成后写入这里 |
+| `workspaces/` | ROS视觉工作区及colcon构建/安装目录 |
 | `sdk/` | 本机 CUDA 构建所需的 cuDNN/TensorRT 头文件和库链接布局 |
 | `system/` | 系统 CUDA、TensorRT、cuDNN、ROS 2 Jazzy 的访问入口，实际文件由系统包管理器维护 |
 | `runtime-data/` | 本项目运行配置、测试输出与运行报告；后续持久记忆等用户状态也放在运行数据根目录下 |
@@ -21,7 +23,7 @@
 | `archives/` | 已退出当前方案的原型归档 |
 | `cache/` | 旧缓存路径的兼容层与零散下载文件；内部目录链接到上述正式分类 |
 | `projects/` | 相关业务项目的目录入口 |
-| `dependencies.json` | 三个 Python 环境内全部已安装发行包的名称、版本与位置，以及系统主要依赖版本 |
+| `dependencies.json` | 各 Python 环境内全部已安装发行包的名称、版本与位置，以及系统主要依赖版本 |
 
 `frameworks/` 中，有些目录是 Git checkout，有些是指向已安装 Python 包的链接。包入口展示当前实际使用的实现代码；Git 源码及模型的锁定版本分别以项目 `deploy/upstreams.lock.json`、`models/manifest.json` 为准。运行入口使用各自环境的 `bin/python`；语音环境使用系统 TensorRT Python 包。
 

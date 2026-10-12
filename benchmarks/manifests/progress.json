@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-12T11:38:17.877480+00:00",
+  "updated_at": "2026-10-12T12:45:19.778639+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -17,10 +17,11 @@
     {
       "task_id": "J0.2",
       "status": "RUNNING",
-      "validation": "ROS 2 Jazzy/realsense installed; 20s live RGB-D 640x480: color29.48Hz depth29.78Hz, USB5Gbps; physical audio unavailable",
+      "validation": "D435i USB5Gbps; aligned RGB-D 640x480 20s: color29.87Hz depth29.98Hz, frame/intrinsics contract PASS, source timestamp nearest-pair P95=0ms; physical audio unavailable",
       "next_action": "maintain camera bridge and later verify physical ReSpeaker Lite audio",
       "artifacts": [
-        "benchmarks/results/camera-smoke.json"
+        "benchmarks/results/camera-smoke.json",
+        "benchmarks/results/camera-aligned-smoke.json"
       ]
     },
     {
@@ -30,10 +31,15 @@
         "deploy/vision/prepare.py",
         "deploy/vision/source-lock.json",
         "benchmarks/results/yolo-export.json",
-        "benchmarks/results/yolo-engine-smoke.json"
+        "benchmarks/results/yolo-engine-smoke.json",
+        "benchmarks/results/yolo-engine-fp32-smoke.json",
+        "benchmarks/results/yolo-engine-fp32_tf32-smoke.json",
+        "benchmarks/results/yolo-pose-engine-fp32_tf32-smoke.json",
+        "benchmarks/results/vision-build-probes.json",
+        "benchmarks/results/build-memory-failure.json"
       ],
-      "validation": "ORT1.28 CUDA/TRT build active; YOLO detection/pose CPU exports pass; actual TensorRT detection executes but bus-box IoU0.973 misses preset0.98 threshold",
-      "next_action": "finish ORT build; investigate FP16 box parity; build yolo_ros and connect actual camera"
+      "validation": "FP16 detection failure retained; TensorRT FP32 detection and pose checks PASS against CPU reference; five ROS packages compile with core SDK; full GPU ORT build resumed after mask-symbol patch, no ROS GPU runtime claim",
+      "next_action": "finish full GPU ORT build; reconfigure ROS against final prefix; profile real detector/pose and capture-to-consumption age"
     },
     {
       "task_id": "J0.4",
@@ -196,7 +202,8 @@
     "Generic live stream queue bounds, real resource release on cancellation, voice tool handlers and full quality/stability/performance acceptance remain pending",
     "YOLO FP16 one-image box comparison has bus IoU0.973 below preset0.98; runtime execution passes but numerical/quality acceptance remains open",
     "Tool smoke covers three requests only; broader intent/argument/correction/forget quality and physical cancellation remain unverified",
-    "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending"
+    "Text interact is available; notification voice delivery, physical interruption, complete history/grounding quality and full deployment lifecycle remain pending",
+    "Observed build-time OOM with compiler+VLM overlap; model services now remain stopped during the heavy ORT build. Full runtime capacity is not yet validated."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

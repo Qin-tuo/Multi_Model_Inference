@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-10-12T12:15:47.466469+00:00",
+  "status": "FAIL",
+  "scope": "build-time capacity failure, not an eight-hour runtime acceptance test",
+  "concurrent_work": [
+    "ORT1.28 CUDA compilation with two jobs",
+    "yolo_ros C++ compilation with two jobs",
+    "Qwen2.5-VL-3B llama-server resident"
+  ],
+  "event": "Linux global OOM killed the owned llama-server",
+  "victim_pid": 107527,
+  "kernel_uptime_seconds": 32533.088363,
+  "victim_anon_rss_kib": 4188568,
+  "victim_file_rss_kib": 259484,
+  "source": "dmesg OOM record and exited process status137",
+  "mitigation": "Disallow starting model services while the heavy ORT build wrapper is live; finish compilation before runtime probes",
+  "data_loss_observed": false,
+  "data_loss_scope": "No console was active; synthetic test stores had already closed. General crash recovery is not asserted."
+}

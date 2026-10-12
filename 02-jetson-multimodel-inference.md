@@ -186,8 +186,8 @@ S0–S6 延续原计划的感知与交互场景，S5 已改为语音反馈。S7�
 
 | 功能 | 选定模型 | 首轮执行路径 | 固定项 |
 |---|---|---|---|
-| 人物/物品检测 | YOLOv8n | ONNX Runtime TensorRT EP，FP16 | 输入、类别、阈值、NMS、后处理 |
-| 人体姿态 | YOLOv8n-pose | ONNX Runtime TensorRT EP，FP16 | 关键点、姿态规则、服务频率 |
+| 人物/物品检测 | YOLOv8n | ONNX Runtime TensorRT EP，当前FP32初始基线，FP16保留比较 | 输入、类别、阈值、NMS、后处理 |
+| 人体姿态 | YOLOv8n-pose | ONNX Runtime TensorRT EP，当前FP32初始基线，FP16保留比较 | 关键点、姿态规则、服务频率 |
 | VAD | Silero VAD ONNX | ONNX Runtime CPU | 采样率、窗口、端点和阈值 |
 | 中文 ASR | Qwen3-ASR 0.6B | OVS Orin 语音子集；实际 engine 由 J0 核验 | checkpoint、流式粒度、CER、端点 |
 | 文本/图文回复 | Qwen2.5-VL-3B-Instruct | llama.cpp CUDA，语言 GGUF Q4_K_M + 匹配 mmproj | processor、上下文、图片和输出上限 |
@@ -199,6 +199,8 @@ llama.cpp 官方多模态说明列出 Qwen2.5-VL-3B GGUF，OVS Orin 指南列出
 BGE small 中文模型为约 24M 参数、512 维，确定为 CPU 检索模型；ONNX 转换后的 pooling、查询指令和归一化需对照原始实现。[模型说明](https://huggingface.co/BAAI/bge-small-zh-v1.5)
 
 功能数量不是完成标准。姿态兼任人物检测时可减少模型；CPU embedding/VAD 不计为 GPU 并发。至少有视觉和 VLM 两个业务必需 GPU 负载存在重叠请求，并通过 trace 说明实际执行或争用。
+
+2026-10-12的J0检查记录了一次精度调整：FP16在公开图像上把两个候选置信度舍入为相等值，导致NMS换框，未通过预设0.98框IoU对齐门槛；FP32在允许或关闭TF32时均通过同一门槛，FP32姿态对齐也通过。因此在J4冻结前先以FP32继续ROS整合，模型、输入与原验收门槛保持一致，FP16留作后续有质量约束的性能候选。此时只有TensorRT SDK单图证据，不能当作ROS整机或冻结质量集验收。
 
 ### 5.2 首轮配置与调整规则
 

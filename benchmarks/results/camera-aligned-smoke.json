@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-12T12:28:52.002795+00:00",
+  "status": "PASS",
+  "input_mode": "live_camera",
+  "seconds": 20,
+  "scope": "RGB-D acquisition only; no detector/pose inference, synchronization quality or JT-03 acceptance",
+  "topics": {
+    "color": "/camera/camera/color/image_raw",
+    "depth": "/camera/camera/aligned_depth_to_color/image_raw"
+  },
+  "streams": {
+    "color": {
+      "count": 554,
+      "arrival_hz": 29.87184529534369,
+      "format": {
+        "width": 640,
+        "height": 480,
+        "step": 1920,
+        "encoding": "rgb8",
+        "frame_id": "camera_color_optical_frame"
+      },
+      "median_gap_ms": 33.349768,
+      "max_gap_ms": 66.948954,
+      "timestamps_nondecreasing": true,
+      "timestamps_nonzero": true,
+      "invalid_payloads": 0
+    },
+    "depth": {
+      "count": 557,
+      "arrival_hz": 29.97876636383555,
+      "format": {
+        "width": 640,
+        "height": 480,
+        "step": 1280,
+        "encoding": "16UC1",
+        "frame_id": "camera_color_optical_frame"
+      },
+      "median_gap_ms": 33.356328000000005,
+      "max_gap_ms": 33.733403,
+      "timestamps_nondecreasing": true,
+      "timestamps_nonzero": true,
+      "invalid_payloads": 0
+    }
+  },
+  "alignment": {
+    "status": "PASS",
+    "nearest_source_timestamp_delta_p95_ms": 0.0,
+    "intrinsics": {
+      "depth": {
+        "width": 640,
+        "height": 480,
+        "frame_id": "camera_color_optical_frame",
+        "positive_focal_lengths": true
+      },
+      "color": {
+        "width": 640,
+        "height": 480,
+        "frame_id": "camera_color_optical_frame",
+        "positive_focal_lengths": true
+      }
+    },
+    "scope": "coordinate-frame/format/intrinsics/timestamp contract; no physical depth accuracy ground truth"
+  }
+}

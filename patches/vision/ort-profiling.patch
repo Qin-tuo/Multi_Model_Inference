@@ -1,0 +1,17 @@
+diff --git a/yolo_ros/src/engine/provider.cpp b/yolo_ros/src/engine/provider.cpp
+index bb61cc0..14a82e5 100644
+--- a/yolo_ros/src/engine/provider.cpp
++++ b/yolo_ros/src/engine/provider.cpp
+@@ -142,6 +142,12 @@ Ort::SessionOptions build_session_options(Provider primary,
+   Ort::SessionOptions options;
+   options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+   options.SetIntraOpNumThreads(primary == Provider::Cpu ? config.n_threads : 1);
++  // Project integration: opt-in native ORT profiling records actual per-node
++  // execution providers instead of inferring placement from the primary EP.
++  if (const char *prefix = std::getenv("ASSISTANT_ORT_PROFILE_PREFIX");
++      prefix != nullptr && *prefix != '\0') {
++    options.EnableProfiling(prefix);
++  }
+ 
+   if (primary == Provider::TensorRt) {
+     OrtTensorRTProviderOptionsV2 *raw_trt_options = nullptr;

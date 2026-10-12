@@ -13,7 +13,7 @@
 | 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 持久调度、取消、去重、待播通知测试通过；播报消费待接入 |
 | 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 本机引擎与文件语音问答通过；真人/噪声/AEC待验证 |
-| 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | ROS/RGB-D采集、检测/姿态CPU导出回归通过；检测TensorRT执行成功，单图FP16框位置对齐未达预设阈值，ROS整合待完成 |
+| 视觉 | yolo_ros/TensorRT + RealSense/ROS 2 | 对齐RGB-D采集、检测/姿态TensorRT FP32单图对齐通过；ROS五个包编译通过，完整GPU ORT与ROS运行验证仍待完成；FP16失败样例保留 |
 
 Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest](models/manifest.json)，框架适配通过配置读取；更换模型后重新验证质量、上下文预算和共存容量。Edge-LLM留到后续性能对比。
 
@@ -24,6 +24,8 @@ Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest]
 ### 持续文本交互
 
 先运行本地模型服务，再在另一终端开启会话：
+
+当前GPU版ORT仍在构建，语言/语音模型服务暂时关闭。发生过编译与驻留模型叠加引起的OOM，启动入口现会在重型ORT构建存活时明确拒绝启动模型；待构建结束后再使用下面的命令。
 
 ```bash
 python3 tools/project.py serve --component llama

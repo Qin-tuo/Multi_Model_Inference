@@ -58,7 +58,7 @@ def main():
     relocate(cache, root / "cache")
     for old, new in {"upstreams": "frameworks", "build": "builds", "models": "models",
                      "sdk": "sdk", "downloads": "downloads", "fixtures": "fixtures",
-                     "evidence": "reports/preparation", "prototypes": "archives/prototypes"}.items():
+                     "evidence": "reports/preparation", "prototypes": "archives/prototypes", "workspaces": "workspaces"}.items():
         relocate(root / "cache" / old, root / new)
     for logfile in (root / "cache").glob("*.log"):
         relocate(logfile, root / "logs" / logfile.name)
@@ -81,8 +81,9 @@ def main():
                          "cudnn": root / "sdk/cudnn", "tensorrt-sdk": root / "sdk/tensorrt"}.items():
         link(root / "system" / name, target)
     installed_packages = {}
-    for name in ("assistant", "speech", "vision"):
+    for name in ("assistant", "speech", "vision", "ort-build"):
         python = root / "environments" / name / "bin/python"
+        if not python.exists(): continue
         command = "import importlib.metadata as m,json; print(json.dumps(sorted([{'name':d.metadata['Name'],'version':d.version,'location':str(d.locate_file(''))} for d in m.distributions()],key=lambda d:d['name'].lower())))"
         installed_packages[name] = json.loads(subprocess.check_output([str(python), "-c", command], text=True))
     sites = {name: root / "environments" / name / "lib/python3.12/site-packages" for name in installed_packages}
