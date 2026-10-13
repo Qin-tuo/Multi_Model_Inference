@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T10:11:02.343281+00:00",
+  "updated_at": "2026-10-13T10:42:44.757900+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -345,10 +345,16 @@
         "tools/memory_sources_console_smoke.py",
         "benchmarks/results/memory-sources-console-smoke.json",
         "benchmarks/results/lcvmem-development-source.json",
-        "benchmarks/results/lcvmem-development-source-final.json"
+        "benchmarks/results/lcvmem-development-source-final.json",
+        "benchmarks/results/lcvmem-development-pre-refs.json",
+        "benchmarks/results/lcvmem-development-refs.json",
+        "benchmarks/results/lcvmem-development-refs-speaker.json",
+        "benchmarks/results/lcvmem-reference-comparison.json",
+        "benchmarks/results/memory-speaker-baseline.json",
+        "benchmarks/results/managed-memory-console-smoke.json"
       ],
-      "validation": "Pinned official CLongEval LCvMem small and upstream metric:358 questions/70 conversations,82 development/200 heldout/76 reserve by conversation.20 development questions use actual BGE/Mem0/authenticated Qdrant/llama/Pipecat. Baseline lexical F1=12.923%, duplicate-evidence removal=16.176%, original source-calendar/speaker metadata plus filtered retrieval and prompt changes=24.726%; normalized exact match0%. Latest reference-text containment in injected evidence10/20; errors, unexpected writes and cross-owner evidence0. New profile changes multiple factors, not a single-factor ablation or official full-context leaderboard reproduction. Public interact synthetic smoke PASS for dated saves, process restart, source roles, missing day and owner isolation.183 framework tests PASS. Scores are lexical diagnostics, not semantic correctness;200 heldout untouched and JT-10 NOT_VERIFIED.",
-      "next_action": "Improve source faithfulness and relevant context selection, qualify relative/range/event-time and historical-version behavior on development cases, then freeze the reader before200 heldout questions and complete lifecycle/source/cancellation acceptance."
+      "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run now preparing fresh data;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance.",
+      "next_action": "Finish the live82-question development evaluation without changing app code, inspect failures and output variability, then qualify temporal/source behavior and freeze for heldout/lifecycle acceptance."
     }
   ],
   "acceptance": {
@@ -441,10 +447,10 @@
     "Gesture greeting integration passes labelled ROS/TTS/file-output tests; real 50-positive/50-negative gesture quality and physical audio remain NOT_VERIFIED. Initial console startup also observed some pose messages beyond200ms; full coexistence timing remains pending.",
     "Public text/voice use managed authenticated native Qdrant with directory/collection/embedding binding.50k isolated capacity and current-control restoration pass their declared checks; independent memory quality, authenticated production-path full-load latency, pending-write/control-loss recovery and backup retention/quotas remain unverified.",
     "Backup and restoration with current SQLite authority, native snapshot/index recovery and exclusive cutover are implemented and tested; pending memory writes must be reconciled first. Loss of current controls, quota/retention policy, power-loss and complete restore fault/quality acceptance remain unverified.",
-    "External Chinese memory development evaluation remains weak:20 LCvMem questions lexical F1=24.726% with explicit source-date/speaker metadata, versus16.176% compact evidence and12.923% baseline. This is not semantic accuracy. Relative/range/event-time/version queries and faithful source/context selection remain incomplete;200 conversation-disjoint heldout questions and complete JT-10 acceptance have not run.",
     "The reproduced STT timer orphan and LLM SDK client cleanup omissions are fixed, with188 framework tests and20 real speech lifecycle cases. This covers delayed callbacks after actual ASR completion and application-owned tasks/connections/files, not backend GPU preemption, physical stop/AEC, complete fault classes or8h stability.",
-    "50 native-stage backend cancellation/deadline/stream interruption cases now pass, with delayed ASR/TTS release explicitly observed. Full voice-application fault paths, TTS timeout, service crash/restart, per-kernel release traces and physical interruption remain unverified; frontend timeout is not backend completion.",
-    "Full voice application cancellation passes40 synthetic-WAV scenarios. A single-number response2 was once read back as 啊; independent ASR/TTS quality remains open. 30 actual worker crash/recovery cases pass (10 per ASR/LLM/TTS), without probe repair. Physical capture/playback,AEC,backpressure,all fault classes and8h remain unverified."
+    "50 native-stage backend cancellation/deadline/stream interruption cases now pass, with delayed ASR/TTS release explicitly observed. Remaining voice-application fault paths, TTS timeout, per-kernel release traces and physical interruption remain unverified; model-worker crash/restart now has30 passing cases; frontend timeout is not backend completion.",
+    "Full voice application cancellation passes40 synthetic-WAV scenarios. A single-number response2 was once read back as 啊; independent ASR/TTS quality remains open. 30 actual worker crash/recovery cases pass (10 per ASR/LLM/TTS), without probe repair. Physical capture/playback,AEC,backpressure,all fault classes and8h remain unverified.",
+    "External Chinese memory remains incomplete:20 development questions lexical F1=27.049% with compact source references and corrected companion pronouns. A same-format rerun changed8/20 answers despite identical retrieval/injection/token counts. Full82 development run is active;200 heldout and complete JT-10 acceptance remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness are still incomplete."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

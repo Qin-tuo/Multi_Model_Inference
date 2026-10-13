@@ -1,0 +1,262 @@
+{
+  "created_at": "2026-10-13T10:33:08.855695+00:00",
+  "status": "PASS",
+  "scope": "20 development cases; representation and speaker-parser diagnostics. Lexical F1 and literal-reference containment are not semantic accuracy or heldout acceptance. No raw questions/reference answers copied into this report.",
+  "profiles": {
+    "pre-refs": {
+      "report": "benchmarks/results/lcvmem-development-pre-refs.json",
+      "reader_fingerprint": "462dd23e7b79b922f9291d31f713b32fbcff88fef70564ef47d5406756340449",
+      "f1_percent": 21.172633267866537,
+      "injected_reference_cases": 10,
+      "mean_injected": 2.65
+    },
+    "refs": {
+      "report": "benchmarks/results/lcvmem-development-refs.json",
+      "reader_fingerprint": "4cbb62df5aa29274b86b980509cc0f381bac4e52b1605d342eda7a76868dee36",
+      "f1_percent": 27.130532720147745,
+      "injected_reference_cases": 14,
+      "mean_injected": 4.7
+    },
+    "refs-speaker": {
+      "report": "benchmarks/results/lcvmem-development-refs-speaker.json",
+      "reader_fingerprint": "748b1fe88f5007dbdc55d95564e1c424db8d01230e87085d5fa22c8f3284ec97",
+      "f1_percent": 27.04884773846276,
+      "injected_reference_cases": 14,
+      "mean_injected": 4.7
+    }
+  },
+  "previous_same_format_repeat": {
+    "prior_report": "benchmarks/results/lcvmem-development-source-final.json",
+    "current_report": "benchmarks/results/lcvmem-development-pre-refs.json",
+    "same_retrieval": 20,
+    "same_injected": 20,
+    "same_prompt_token_counts": 20,
+    "same_response": 12,
+    "cases": 20,
+    "cause_of_output_variation": "not established"
+  },
+  "cases": [
+    {
+      "id": "204ac07b-078b-483a-9592-0d16a9c877be",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 4,
+      "final_injected": 4
+    },
+    {
+      "id": "03677166-53ea-422e-84d0-484778a24511",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "291e2841-310d-4e37-9b0b-c23aaa5244bb",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 4,
+      "final_injected": 4
+    },
+    {
+      "id": "3b3b8816-f8ef-430b-b940-3f3b7b8d8814",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "01751539-bade-419d-8386-3eca6ef74f96",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "2f8a2ee1-2695-4d39-9466-8a0691d094cf",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 4,
+      "final_injected": 4
+    },
+    {
+      "id": "20bb8ca4-1cb0-4198-ab95-715bca9410ac",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "04f61d5a-4380-4a00-82e0-57defa1470e6",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "34c16a25-ddae-4efe-be81-0e0ca38cfafa",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "1224191f-87ad-4bf7-9465-5d778e6314da",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "3485cca6-08d3-47d8-846f-4b37715cd0d0",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "0f6b2ec4-8549-4264-9ae7-940e959dbcad",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "0fe8370f-e024-4eb3-972d-111c2a128c5b",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 4,
+      "final_injected": 4
+    },
+    {
+      "id": "3b3427e9-b57d-4c2a-ab0b-c58e809b6c65",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "1e9a8673-9ac7-4aa2-93cd-7c49b8032910",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 4,
+      "final_injected": 4
+    },
+    {
+      "id": "3b18109b-05b4-404c-a1ec-2c0cdcc0f277",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": false,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 4,
+      "final_injected": 4
+    },
+    {
+      "id": "0939763e-c942-445c-b15f-fbc9c73b520c",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 2,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "07267a79-f874-4423-b071-50d24d8bfe80",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "3f0adb41-f1ce-49df-ba36-d46587bc86cd",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    },
+    {
+      "id": "16d6d4c6-7b6f-4529-8f65-6c5d68850c75",
+      "unchanged_source_state": true,
+      "same_retrieval_before_compaction": true,
+      "same_retrieval_after_speaker_fix": true,
+      "actual_ids_versions_sources_bound": true,
+      "tokens_within512": true,
+      "before_injected": 3,
+      "compact_injected": 5,
+      "final_injected": 5
+    }
+  ],
+  "heldout": "200 cases not run",
+  "jt10": "NOT_VERIFIED"
+}

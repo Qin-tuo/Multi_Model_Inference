@@ -61,7 +61,7 @@ def dialogue_lookup(text):
         return {}
     result={'source_date':day.isoformat()} if year else {'source_month_day':day.strftime('%m-%d')}
     speakers=set()
-    for match in re.finditer(r'(?<![和向给对])([我你])(?:当时|之前|曾经|曾)?(?:和[我你]|向[我你]|给[我你]|对[我你]|为[我你])?(?:推荐过|推荐了|建议过|建议了|分享过|分享了|说过|说了|提到过|提到了|提过|告诉过|告诉了)',text):
+    for match in re.finditer(r'(?<![和向给对为跟与同])([我你])(?:当时|之前|曾经|曾|又|也|还|再次)?(?:[和向给对为跟与同][我你])?(?:推荐过|推荐了|建议过|建议了|分享过|分享了|说过|说了|提到过|提到了|提过|告诉过|告诉了)',text):
         speakers.add('user' if match[1]=='我' else 'assistant')
     if len(speakers)==1:result['source_speaker']=speakers.pop()
     return result

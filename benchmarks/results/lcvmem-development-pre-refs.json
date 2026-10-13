@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "status": "COMPLETE",
+  "split": "development",
+  "source_metadata": "calendar-speaker-v1",
+  "selected": 20,
+  "partition_total": 82,
+  "dataset_sha256": "421fbf602154bcfcd55f943edf636ef8734183ffec68f4580de178b7ec3b5a25",
+  "code_commit": "81ba789bdbf83b88579c0a0ae780fa04090899cd",
+  "metric_files": {
+    "metrics.py": "fd452104c6a70e03e5e03116e4f542976375cad47f6e34269866b4c606f15c05",
+    "post_processing_for_stacked_tasks.py": "8eeed9f5c4cc1410e120d8a0eb6ee8a9d455c5f19240d002549772c7075ef9f7"
+  },
+  "source_commit": "69325c91294e1c1cfe5dc2fe0ca0cd9e1e2ccbca",
+  "reader_fingerprint": "462dd23e7b79b922f9291d31f713b32fbcff88fef70564ef47d5406756340449",
+  "run_id": "0ec97edb418944ff94f808103b9e8f5f",
+  "source_state": "Working tree identified by reader_fingerprint; see checkpoint commit containing the report",
+  "seed_method": "Pinned Mem0 provider batch fixture import; actual BGE, no question/reference-dependent extraction",
+  "scoring_packages": {
+    "jieba": "0.42.1",
+    "rouge": "1.0.1",
+    "six": "1.17.0",
+    "jsonlines": "4.0.0",
+    "attrs": "25.3.0"
+  },
+  "upstream_qa_f1_percent": 21.172633267866537,
+  "normalized_exact_percent": 0.0,
+  "errors": 0,
+  "unexpected_mutations": 0,
+  "cross_owner_evidence": 0,
+  "zero_injected_cases": 0,
+  "verbatim_reference_retrieved_cases": 14,
+  "verbatim_reference_injected_cases": 10,
+  "cases": [
+    {
+      "id": "01751539-bade-419d-8386-3eca6ef74f96",
+      "f1": 0.5833333333333334,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": false,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "c8061f7a407594b84d086031c906714089a85f21555a85eeda6cdc1a0291d4fd",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 3.8954946220001148,
+      "prompt_tokens": [
+        921
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "03677166-53ea-422e-84d0-484778a24511",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": false,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "d38f5223191b4f19597e064944c71ad19c1fd4b931e76327911777e8a7e35ef2",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.433527699999104,
+      "prompt_tokens": [
+        914
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "04f61d5a-4380-4a00-82e0-57defa1470e6",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "9c9a165f8658c4d0adae5d3959228c4de551e970429a92a0b6e299f562c3e5d8",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.9697510820005846,
+      "prompt_tokens": [
+        907
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "07267a79-f874-4423-b071-50d24d8bfe80",
+      "f1": 0.06666666666666667,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "4dd026609f31dbec5a0609518f3c090b834359d2c0817f32dde4ca87f27b0f7c",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 3.4105727640016994,
+      "prompt_tokens": [
+        908
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "0939763e-c942-445c-b15f-fbc9c73b520c",
+      "f1": 0.5,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "1feb624cdb2edadf70189b2972597f74a1f9a0a91142a6772499932066ea37c6",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 1.7553400929973577,
+      "prompt_tokens": [
+        783
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "0f6b2ec4-8549-4264-9ae7-940e959dbcad",
+      "f1": 0.16666666666666669,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "a86cf7f845ceb058c5cea0a6db2ebedf68e49ff073eca69c67a7f939978e6d53",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.155191374000424,
+      "prompt_tokens": [
+        926
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "0fe8370f-e024-4eb3-972d-111c2a128c5b",
+      "f1": 0.6666666666666666,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": false,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "588b00cd0aac09f00a3f51c07087b61e47b25891e9c6e1c29d3d50cf4c333bf2",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.448659075998876,
+      "prompt_tokens": [
+        862
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "1224191f-87ad-4bf7-9465-5d778e6314da",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "362699f090fdfdf8fd997c497b1d21c50879cc8966b03ce75f4c717a2dc9c2d3",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 4.121792212998116,
+      "prompt_tokens": [
+        921
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "16d6d4c6-7b6f-4529-8f65-6c5d68850c75",
+      "f1": 0.19047619047619047,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "dd3e2adcd971e8442acbe9392a9021b99d618295c8b8a6db0cca69ac4bb528db",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.230697594000958,
+      "prompt_tokens": [
+        901
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "1e9a8673-9ac7-4aa2-93cd-7c49b8032910",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "2f59fdf5ff42a4015a071335e7d7e845264b075a47d85085c873608ee22281ba",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 7.808910913001455,
+      "prompt_tokens": [
+        865
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "204ac07b-078b-483a-9592-0d16a9c877be",
+      "f1": 0.12,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "c845270ff4c070fe987324bb82bf5fbe16d5641ff974a23008885b2f262e21bd",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 6.226625680003053,
+      "prompt_tokens": [
+        825
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "20bb8ca4-1cb0-4198-ab95-715bca9410ac",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": false,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "bdb4d04f673bd0d37859933e19b56c4f38cd6dc26d5b090fb8a535256320f867",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 3.409008694001386,
+      "prompt_tokens": [
+        912
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "291e2841-310d-4e37-9b0b-c23aaa5244bb",
+      "f1": 0.37931034482758624,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "84687a722ba43a29b935f0a3341e12c2d8b18fd25e1a60e81325038763cca773",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 4.020573696998326,
+      "prompt_tokens": [
+        800
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "2f8a2ee1-2695-4d39-9466-8a0691d094cf",
+      "f1": 0.35294117647058826,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "7870c7b6cbe2441eda5ac92f2c1eae34033318d2c22ebed417f237284b2ae897",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.4653842199986684,
+      "prompt_tokens": [
+        836
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "3485cca6-08d3-47d8-846f-4b37715cd0d0",
+      "f1": 0.2222222222222222,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "7412e1651eeb05efc7993df5931b4cc9c742378082544f07e169aab10a1e0616",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 4.332382371998392,
+      "prompt_tokens": [
+        930
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "34c16a25-ddae-4efe-be81-0e0ca38cfafa",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "944967404969ad0b671ceb217b601e5618305c5bf8a9b748a71e5e32dff21af7",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 3.420380789000774,
+      "prompt_tokens": [
+        892
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "3b18109b-05b4-404c-a1ec-2c0cdcc0f277",
+      "f1": 0.2666666666666667,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 2,
+      "retrieved_count": 5,
+      "response_sha256": "0edc39e96a7490c0beab9c83555a8f956947b14270e67a1ce5937285a213d83b",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.067900568999903,
+      "prompt_tokens": [
+        784
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "3b3427e9-b57d-4c2a-ab0b-c58e809b6c65",
+      "f1": 0.14814814814814814,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": false,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "1007f3de5d13ba0566861c53bc7cb71070a1a2af5a838a15172975eee50da186",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.425417696002114,
+      "prompt_tokens": [
+        890
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "3b3b8816-f8ef-430b-b940-3f3b7b8d8814",
+      "f1": 0.5714285714285715,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": true,
+      "reference_verbatim_in_injected": true,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "437e74bd1b220437b0e296a7aa5ef2b99c74aff0cc58f2920194f22ad6ed7c35",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.718692108999676,
+      "prompt_tokens": [
+        933
+      ],
+      "model_request_skipped": false
+    },
+    {
+      "id": "3f0adb41-f1ce-49df-ba36-d46587bc86cd",
+      "f1": 0,
+      "normalized_exact": false,
+      "reference_verbatim_in_retrieved": false,
+      "reference_verbatim_in_injected": false,
+      "injected_count": 3,
+      "retrieved_count": 5,
+      "response_sha256": "4c02ee5da8a5a1180fe870f4169422c21da7de63b08555d7e9bdcb9ce8b7b572",
+      "error_type": null,
+      "side_effect": false,
+      "cross_owner_evidence": false,
+      "seconds": 2.586831363998499,
+      "prompt_tokens": [
+        892
+      ],
+      "model_request_skipped": false
+    }
+  ],
+  "scope": "External Chinese LCvMem source questions and reference scoring, adapted to current bounded retrieval plus real AssistantSession. F1/EM and literal-reference containment are not the JT-10 95% correctness/lifecycle gate or official full-context leaderboard reproduction. No scoring failures are dropped from the denominator.",
+  "raw_results_directory": "/home/nvidia/AI_Stack/runtime-data/benchmarks/lcvmem-development-pre-refs-v1/answers",
+  "jt10": "NOT_VERIFIED"
+}

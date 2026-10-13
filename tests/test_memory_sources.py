@@ -14,6 +14,13 @@ from test_mem0_adapter import actual_sdk
 
 
 class SourceQueryTests(unittest.TestCase):
+    def test_companion_pronoun_does_not_replace_the_speaking_subject(self):
+        for link in ('跟','与','同','和','向','对','给'):
+            with self.subTest(link=link):
+                self.assertEqual(dialogue_lookup(f'4月27日，我{link}你分享了什么书？'),{'source_month_day':'04-27','source_speaker':'user'})
+                self.assertEqual(dialogue_lookup(f'4月27日，你{link}我分享了什么书？'),{'source_month_day':'04-27','source_speaker':'assistant'})
+        self.assertEqual(dialogue_lookup('4月27日，我跟你分享了什么，你又向我推荐了什么？'),{'source_month_day':'04-27'})
+
     def test_explicit_calendar_and_speaker_without_invented_year(self):
         self.assertEqual(dialogue_lookup('2023年4月30日，我分享了一句诗，内容是什么？'),{'source_date':'2023-04-30','source_speaker':'user'})
         self.assertEqual(dialogue_lookup('4月30日，我分享了一句诗，内容是什么？'),{'source_month_day':'04-30','source_speaker':'user'})

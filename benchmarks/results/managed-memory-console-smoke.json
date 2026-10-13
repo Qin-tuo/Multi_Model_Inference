@@ -1,10 +1,11 @@
 {
-  "created_at": "2026-10-13T04:06:33.370849+00:00",
+  "created_at": "2026-10-13T10:28:02.917363+00:00",
   "status": "PASS",
   "checks": {
     "public_cli_completed": true,
     "native_bound_store": true,
     "recall_before_and_after_new_session": true,
+    "corrected_recall_after_new_session": true,
     "explicit_forget_confirmed": true,
     "empty_after_forget": true,
     "native_collection_metadata_matches": true,
@@ -14,8 +15,10 @@
     "已记住。",
     "您喜欢喝桂花茶。",
     "您喜欢喝桂花茶。",
+    "已更正为：我现在喜欢喝茉莉花茶。",
+    "您现在喜欢喝茉莉花茶。",
     "已删除这条记忆及相关派生内容。"
   ],
   "returncode": 0,
-  "scope": "Public interact command with actual Pipecat/llama/BGE/Mem0/authenticated native Qdrant; synthetic temporary profile, session reset and explicit forget. Not independent memory quality or physical audio acceptance."
+  "scope": "Public interact command with actual Pipecat/llama/BGE/Mem0/authenticated native Qdrant; synthetic temporary profile, save/recall/session reset/correction/forget. Not independent memory quality or physical audio acceptance."
 }

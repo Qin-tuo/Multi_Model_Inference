@@ -363,7 +363,11 @@ class AssistantSession:
                  await asyncio.to_thread(self.memory.search, self.user_id, text, top_k=5,**source_query))
         found["items"] = self.records.filter_memories(self.user_id, found["items"])
         turn.memory_candidates = found["items"]
-        evidence, metrics = await asyncio.to_thread(memory_message, found["items"], self.config.base_url)
+        # Maintenance needs real IDs/version in model context. Ordinary recall
+        # can use turn-local references while records keep the real IDs below.
+        compact_references=turn.required_operation() not in {'correct','forget'}
+        evidence, metrics = await asyncio.to_thread(memory_message, found["items"], self.config.base_url,
+            compact_references=compact_references)
         self.records.attach_memories(self.user_id, turn.turn_id, metrics["injected_memory_ids"])
         history = self.records.recent(self.user_id, session_id=self.session_id, limit=8)
         # Explicit cross-session history questions use dated, delivered records.
@@ -403,7 +407,8 @@ class AssistantSession:
             elif evidence["content"].endswith("[]"):
                 raise ValueError("问题与工具定义超过当前模型上下文容量，请缩短问题。")
             else:
-                evidence, metrics = await asyncio.to_thread(memory_message, [], self.config.base_url)
+                evidence, metrics = await asyncio.to_thread(memory_message, [], self.config.base_url,
+                    compact_references=compact_references)
         self.retrieval = {**metrics, "history_turns_dropped": dropped, "initial_prompt_tokens": tokens,
                           "source_query":source_query,
                           "memory_generation": found["generation"], "personal_recall": bool(personal_recall),

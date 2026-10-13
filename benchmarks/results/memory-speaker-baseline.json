@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-10-13T10:23:32.483600+00:00",
+  "status": "FAIL",
+  "expected_regression_baseline": true,
+  "tests_run": 11,
+  "failures": 4,
+  "scope": "Calendar source-role parser with controlled Chinese pronoun/companion phrases. The object pronoun in 我跟你分享/你跟我分享 must not become the speaker; mixed subject questions omit a speaker filter.",
+  "log_sha256": "05dd9366dc11392c5d92bca55a6d0afeb129fd59b7d4547026a4a2321026d226",
+  "development_case_id": "3b18109b-05b4-404c-a1ec-2c0cdcc0f277"
+}
