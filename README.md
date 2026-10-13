@@ -238,4 +238,6 @@ source /opt/ros/jazzy/setup.bash
 
 [长条目失败基线](benchmarks/results/long-memory-feasibility-summary.json)中，8份约3.1KiB资料的尾部被嵌入截断，语义top5命中5/8，完整证据均未装入512-token预算。现已将原生多向量和BGE ARM64 int8接入正式适配器，新建档案默认启用，已有档案保留原绑定并用`reindex-memory --data-dir ...`显式升级。规范ID、完整正文、版本和来源保持一致，提示使用可核验的原文片段。
 
-[公开入口集成](benchmarks/results/window-legacy-backup-integration.json)验证了长资料保存、跨会话回忆、迁移、更正和旧格式备份恢复，已遗忘内容未复活；[30次迁移SIGKILL](benchmarks/results/window-reindex-recovery.json)均可续跑，完成后重试不会回放已删除记录。单次约3.1KiB资料的完整适配器写入观测约0.36秒，不代表10k规模或整机时延验收。新格式的完整82题开发评测正在运行，独立质量、容量和JT-10/11仍待验收。准备、升级及撤销方法见[记忆部署说明](deploy/memory/README.md#长条目索引与已有档案升级)。
+[公开入口集成](benchmarks/results/window-legacy-backup-integration.json)验证了长资料保存、跨会话回忆、迁移、更正和旧格式备份恢复，已遗忘内容未复活；[30次迁移SIGKILL](benchmarks/results/window-reindex-recovery.json)均可续跑，完成后重试不会回放已删除记录。单次约3.1KiB资料的完整适配器写入观测约0.36秒，不代表10k规模或整机时延验收。准备、升级及撤销方法见[记忆部署说明](deploy/memory/README.md#长条目索引与已有档案升级)。
+
+新格式的[82题开发评测](benchmarks/results/lcvmem-development-windows.json)已完成：词级F1为26.69，归一化完全匹配1/82，参考原文实际注入56题，执行错误、意外写入及跨主体证据均为0。旧格式F1为26.33，这个小幅差异不足以证明整体质量提升，200题保留集未使用。旧格式备份恢复到当前格式的[40次SIGKILL](benchmarks/results/window-restore-fault-recovery.json)全部续跑成功，保留当前更正和新增事实，未复活已遗忘内容；这轮没有生成模型回答。万条混合长短记忆的正式适配器容量脚本已准备，计时结果、独立质量及JT-10/11仍待验收。

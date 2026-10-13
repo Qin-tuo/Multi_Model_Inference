@@ -98,6 +98,30 @@ FP32多段SDK写入约0.75秒，超出目标500毫秒，因此用[Sentence Trans
 
 随后已接入正式适配器、双collection绑定、原文片段、重建迁移和备份恢复，新档案默认采用锁定的int8窗口配置，旧绑定按原profile读取直到显式升级。动态int8跨记录batch曾造成恢复重算不一致，现固定为单条记忆独立编码，原严格向量校验保持不变。[真实公开入口验证](../../benchmarks/results/window-legacy-backup-integration.json)通过长原文保存/跨会话回忆、更正、原ID与主体保持、旧单向量备份恢复及遗忘不复活；[迁移故障验证](../../benchmarks/results/window-reindex-recovery.json)覆盖三个阶段各10次SIGKILL。
 
-新格式在检索结果中保留全文，仅将有原文位置与哈希的窗口送入提示。评分现检查实际可见的正文窗口；参考答案只出现在未展示部分时，不再计为已注入。新profile的82题开发评测使用独立目录`lcvmem-development-windows-v1`，结果另存`lcvmem-development-windows.json`，不混用旧索引数据，也不使用200题保留集。更广质量、真实10k完整路径时延和全部JT仍未完成。
+新格式在检索结果中保留全文，仅将有原文位置与哈希的窗口送入提示。评分现检查实际可见的正文窗口；参考答案只出现在未展示部分时，不再计为已注入。新profile的[82题开发评测](../../benchmarks/results/lcvmem-development-windows.json)已完成，使用独立目录`lcvmem-development-windows-v1`，没有混用旧索引数据或使用200题保留集。
+
+| 开发集配置 | 词级F1 | 归一化完全匹配 | 检索包含参考原文 | 实际提示包含参考原文 | 执行错误/意外写入/跨主体证据 |
+|---|---:|---:|---:|---:|---|
+| 原FP32单向量，82题 | 26.33 | 1/82 | 58 | 57 | 0/0/0 |
+| int8原文窗口，82题 | 26.69 | 1/82 | 58 | 56 | 0/0/0 |
+
+本轮没有证明整体回答质量明显提升。新配置解决了已复现的长条目截断与装配问题，但当前词级F1与实际可见参考原文数量表明，广泛检索和回答质量仍有缺口。归一化完全匹配也不是人工语义判定；这些开发指标均不能替代JT-10。
+
+## 当前格式的正式适配器容量测量
+
+`tools/managed_memory_capacity.py`使用真实Mem0Adapter、受认证Qdrant及当前多向量绑定。准备阶段复用冻结的合成编号资料，10%的主人条目加入长前缀，核心要求位于末尾；正式计时调用完整查询/写入适配器，包含绑定检查、BGE、原文窗口及写入journal/history。
+
+```bash
+.venv/bin/python tools/managed_memory_capacity.py --phase prepare --tier 10000 \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/managed-window-capacity-10k-v1" \
+  --output benchmarks/results/managed-window-capacity-10k.json
+
+# 准备完成后，停止其他评测/导入，再单独计时：
+.venv/bin/python tools/managed_memory_capacity.py --phase measure --tier 10000 \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/managed-window-capacity-10k-v1" \
+  --output benchmarks/results/managed-window-capacity-10k.json
+```
+
+100次查询按长短目标各50次分层，50次完整写入按长短各25次分层；写入持久性在计时后另行核对。首次准备可续跑，已有测量结果不可覆盖。脚本已准备，尚无本配置10k计时结果；该脚本记录后端驻留状态，没有前台语音负载或逐帧视觉测量，不能独自完成JT-11共存验收。
 
 后续先在开发集完善时间范围、对话来源与相关上下文检索，再冻结版本运行200题保留集。完整JT-10还须覆盖保存/更正/遗忘、无事实、取消、来源、重启和索引恢复；公开语言基准、词级F1以及框架回归均不能替代该验收。

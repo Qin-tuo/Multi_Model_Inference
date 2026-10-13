@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T14:20:38.384292+00:00",
+  "updated_at": "2026-10-13T14:55:49.206917+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -296,9 +296,10 @@
         "tools/memory_migration_smoke.py",
         "tools/memory_migration_recovery_smoke.py",
         "benchmarks/results/memory-migration-smoke.json",
-        "benchmarks/results/memory-migration-recovery-smoke.json"
+        "benchmarks/results/memory-migration-recovery-smoke.json",
+        "tools/managed_memory_capacity.py"
       ],
-      "validation": "Embedded local baseline:1k query79.2ms/write146.1ms P95;10k350.4/906.3ms FAIL200/500ms gates. Native Qdrant1.19.2 exact-search comparison:10k47.5/56.6ms,50k61.6/59.2ms; no errors/owner leaks/unconfirmed writes.10k hit mask unchanged;50k numbered recall94/100 is not independent quality.40 native-server SIGKILLs pass4 phases10each. Authenticated directory/collection/embedding binding is used by public text/voice; real-model smokes pass. Strict owner-scoped entity erasure covers lazy restart and failure recovery. Explicit in-place legacy migration preserves IDs/payloads/versions/sources, checks embeddings and merges deletion intents including descendants/entities; real BGE public-CLI recall/forget and4 migration-process SIGKILL phases1each PASS.147 framework tests PASS, including partial-target abort/resume. Full backup restore, independent memory quality and authenticated full-workload latency remain pending; capacity runs did not sample per-frame vision rates.",
+      "validation": "Embedded local baseline:1k query79.2ms/write146.1ms P95;10k350.4/906.3ms FAIL200/500ms gates. Native Qdrant1.19.2 exact-search comparison:10k47.5/56.6ms,50k61.6/59.2ms; no errors/owner leaks/unconfirmed writes.10k hit mask unchanged;50k numbered recall94/100 is not independent quality.40 native-server SIGKILLs pass4 phases10each. Authenticated directory/collection/embedding binding is used by public text/voice; real-model smokes pass. Strict owner-scoped entity erasure covers lazy restart and failure recovery. Explicit in-place legacy migration preserves IDs/payloads/versions/sources, checks embeddings and merges deletion intents including descendants/entities; real BGE public-CLI recall/forget and4 migration-process SIGKILL phases1each PASS.147 framework tests PASS, including partial-target abort/resume. Full backup restore, independent memory quality and authenticated full-workload latency remain pending; capacity runs did not sample per-frame vision rates. Current int8-window managed-adapter mixed short/long capacity harness is prepared;no timing result yet. Import and measurement are separate;baseline records residency without foreground voice or per-frame visual timing.",
       "next_action": "Measure authenticated/bound production path at10k with complete workload, complete independent200-case memory quality, and qualify pending-write restore/control recovery and quotas."
     },
     {
@@ -318,9 +319,11 @@
         "tools/restore_data.py",
         "tools/data_restore_smoke.py",
         "tests/test_data_restore.py",
-        "benchmarks/results/data-restore-smoke.json"
+        "benchmarks/results/data-restore-smoke.json",
+        "benchmarks/results/window-restore-fault-first.json",
+        "benchmarks/results/window-restore-fault-recovery.json"
       ],
-      "validation": "Public backup/verify use native Qdrant snapshots and SQLite backup including committed WAL;30 copy-process SIGKILLs,3 phases10each PASS. Public restore-data now uses current control databases, confirmed versions and entity/transcript/history erasure, restores current reminders without replaying delivered/cancelled/uncertain output, and fences both directories before exclusive cutover. Real BGE/Mem0/Qdrant/APScheduler and public interact recall corrected preference; actual collection loss rebuilds from a verified snapshot.30 restore-process SIGKILLs,3 phases10each PASS;165 framework tests PASS, including abort/resume, lineage continuity, late source changes, notification regression and corrupt/missing vector fallback. Raw old-backup FAIL baseline retained as comparison. Test profiles synthetic; playback receipts are fixture only. Pending writes, current-control loss, quotas, retention and full JT fault acceptance remain incomplete.",
+      "validation": "Public backup/verify use native Qdrant snapshots and SQLite backup including committed WAL;30 copy-process SIGKILLs,3 phases10each PASS. Public restore-data now uses current control databases, confirmed versions and entity/transcript/history erasure, restores current reminders without replaying delivered/cancelled/uncertain output, and fences both directories before exclusive cutover. Real BGE/Mem0/Qdrant/APScheduler and public interact recall corrected preference; actual collection loss rebuilds from a verified snapshot.30 restore-process SIGKILLs,3 phases10each PASS;165 framework tests PASS, including abort/resume, lineage continuity, late source changes, notification regression and corrupt/missing vector fallback. Raw old-backup FAIL baseline retained as comparison. Test profiles synthetic; playback receipts are fixture only. Pending writes, current-control loss, quotas, retention and full JT fault acceptance remain incomplete. First4 actual legacy-backup/current-window restore SIGKILLs PASS at snapshot_staged,snapshot,merged,source_retired. Each resumed run verifies current version/new fact/forgotten family/history/guest and reminder state;conversation_tested=false. Extended cross-profile restore fault run COMPLETE:40 actual SIGKILLs,4 stages10each,all PASS;conversation_tested=false.",
       "next_action": "Qualify pending-write and control-database recovery, implement retention/quotas, and continue independent memory quality plus complete-load latency and full J6 fault/stability acceptance."
     },
     {
@@ -352,10 +355,11 @@
         "benchmarks/results/lcvmem-reference-comparison.json",
         "benchmarks/results/memory-speaker-baseline.json",
         "benchmarks/results/managed-memory-console-smoke.json",
-        "benchmarks/results/lcvmem-development-all-refs.json"
+        "benchmarks/results/lcvmem-development-all-refs.json",
+        "benchmarks/results/lcvmem-development-windows.json"
       ],
-      "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run COMPLETE:lexical F1=26.329%,normalized exact1/82,reference-text retrieved58/injected57,errors/unexpected writes/cross-owner evidence0;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance.",
-      "next_action": "Inspect the live82-question window-profile result with visible-window-aware grounding metrics; compare quality before any heldout run and continue source/time behavior qualification."
+      "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run COMPLETE:lexical F1=26.329%,normalized exact1/82,reference-text retrieved58/injected57,errors/unexpected writes/cross-owner evidence0;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance. Current int8-window82 development COMPLETE:lexical F1=26.685%,normalized exact1/82,reference-text retrieved58/visible injected56,errors/unexpected writes/cross-owner evidence0. Small change versus old26.329% does not establish broad quality improvement.",
+      "next_action": "Improve source/time/context retrieval and answer faithfulness on development evidence before freezing any heldout run;200 heldout and76 reserve remain untouched."
     },
     {
       "task_id": "J4.memory.long_records",
@@ -382,10 +386,14 @@
         "benchmarks/results/window-memory-integration.json",
         "benchmarks/results/window-legacy-backup-integration.json",
         "benchmarks/results/window-reindex-recovery.json",
-        "benchmarks/results/window-restore-batch-baseline.json"
+        "benchmarks/results/window-restore-batch-baseline.json",
+        "benchmarks/results/lcvmem-development-windows.json",
+        "benchmarks/results/window-restore-fault-first.json",
+        "tools/managed_memory_capacity.py",
+        "benchmarks/results/window-restore-fault-recovery.json"
       ],
-      "validation": "Native MaxSim/BGE int8 now integrated into production MemoryAdapter,versioned primary/entity binding,exact original-source windows,and current/legacy snapshot restoration. Single canonical ID/full body/version/journal remains authoritative. Reindex retains lineage,filters existing erasures,verifies all points,blocks partial access and deletes retired indexes;30 real SIGKILLs across3 stages PASS,including no replay after later forget. Public interact saves a3104-byte literal fact and recalls its tail in a new session;public migration/correction/restore retains IDs/versions/owners and does not revive forgotten facts/entities. Dynamic-int8 cross-record batching mismatch was reproduced;record-wise encoding restores strict verification without relaxing tolerance.211 framework tests PASS. New stores default to locked windows profile;old bindings retain legacy until explicit reindex. One full-adapter long write0.356s,not10k/JT-11 qualification. New-profile82 development quality run is active.",
-      "next_action": "Finish the live82-question window-profile evaluation; qualify10k full adapter/coexistence latency and remaining restore/fault classes,then complete independent memory and system acceptance."
+      "validation": "Native MaxSim/BGE int8 now integrated into production MemoryAdapter,versioned primary/entity binding,exact original-source windows,and current/legacy snapshot restoration. Single canonical ID/full body/version/journal remains authoritative. Reindex retains lineage,filters existing erasures,verifies all points,blocks partial access and deletes retired indexes;30 real SIGKILLs across3 stages PASS,including no replay after later forget. Public interact saves a3104-byte literal fact and recalls its tail in a new session;public migration/correction/restore retains IDs/versions/owners and does not revive forgotten facts/entities. Dynamic-int8 cross-record batching mismatch was reproduced;record-wise encoding restores strict verification without relaxing tolerance.211 framework tests PASS. New stores default to locked windows profile;old bindings retain legacy until explicit reindex. One full-adapter long write0.356s,not10k/JT-11 qualification. New-profile82 development COMPLETE:F1=26.685%,exact1/82,no errors/unexpected writes/cross-owner evidence;not semantic acceptance. First4 cross-profile restore SIGKILLs PASS,with current versions/new facts/erasure barriers/guest isolation/history and reminder receipts retained;conversation skipped explicitly. Extended cross-profile restore fault run COMPLETE:40 actual SIGKILLs,4 stages10each,all PASS;conversation_tested=false.",
+      "next_action": "Prepare then measure10k mixed short/long records through the complete bound adapter,then foreground voice/vision coexistence,remaining recovery fault classes and independent memory acceptance."
     }
   ],
   "acceptance": {
@@ -481,8 +489,8 @@
     "The reproduced STT timer orphan and LLM SDK client cleanup omissions are fixed, with188 framework tests and20 real speech lifecycle cases. This covers delayed callbacks after actual ASR completion and application-owned tasks/connections/files, not backend GPU preemption, physical stop/AEC, complete fault classes or8h stability.",
     "50 native-stage backend cancellation/deadline/stream interruption cases now pass, with delayed ASR/TTS release explicitly observed. Remaining voice-application fault paths, TTS timeout, per-kernel release traces and physical interruption remain unverified; model-worker crash/restart now has30 passing cases; frontend timeout is not backend completion.",
     "Full voice application cancellation passes40 synthetic-WAV scenarios. A single-number response2 was once read back as 啊; independent ASR/TTS quality remains open. 30 actual worker crash/recovery cases pass (10 per ASR/LLM/TTS), without probe repair. Physical capture/playback,AEC,backpressure,all fault classes and8h remain unverified.",
-    "External Chinese memory remains incomplete:20 development questions lexical F1=27.049% with compact source references and corrected companion pronouns. A same-format rerun changed8/20 answers despite identical retrieval/injection/token counts. Full82 development completed with lexical F1=26.329%;200 heldout and complete JT-10 acceptance remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness are still incomplete.",
-    "Long-record indexing/packing is integrated and new stores default to native multivectors with locked BGE int8.8 synthetic long records,public save/recall/correction/old-backup restore,and30 reindex SIGKILLs pass. Dynamic quantization must stay record-wise. New-profile82 development quality,10k full-load timing,all cross-profile restore fault stages and independent JT gates remain incomplete."
+    "External Chinese memory remains incomplete:full82 development lexical F1=26.329% with scalar FP32 and26.685% with int8 windows;no execution errors,unexpected writes or cross-owner evidence. Small changes do not prove broad quality improvement;200 heldout and76 reserve remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness remain incomplete.",
+    "Long-record indexing/packing is integrated with locked BGE int8. Public save/recall/correction/old-backup restore,30 reindex SIGKILLs and40 cross-profile restore SIGKILLs pass. Dynamic quantization must remain record-wise.10k complete-adapter/foreground coexistence timing,other fault classes including control-loss/pending writes and independent JT gates remain incomplete."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

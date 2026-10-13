@@ -16,6 +16,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app.data_lifecycle import check_available
 from app.memory_runtime import open_memory
+from app.memory_profiles import LEGACY,profile_of,model_path
 from app.records import Records
 from app.reminders import ReminderService,_deliver_due
 from deploy.data.restore import restore
@@ -32,21 +33,26 @@ def public(command):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--child-phase',choices=['source_fenced','merged','source_retired'])
+    parser.add_argument('--child-phase',choices=['source_fenced','snapshot_staged','snapshot','merged','source_retired'])
     parser.add_argument('--backup',type=Path);parser.add_argument('--source',type=Path);parser.add_argument('--target',type=Path)
     parser.add_argument('--repeats',type=int,default=10)
+    parser.add_argument('--legacy-backup',action='store_true',help='Reindex after backup, then repeatedly recover the older scalar snapshot')
+    parser.add_argument('--skip-conversation',action='store_true',help='Data fault checks only; do not generate a model answer')
+    parser.add_argument('--output',type=Path,default=ROOT/'benchmarks/results/data-restore-smoke.json')
     args=parser.parse_args();service=load(DATA/'qdrant')
     if args.child_phase:
         def kill(phase):
             if phase==args.child_phase:os.kill(os.getpid(),signal.SIGKILL)
-        restore(args.backup,args.source,args.target,service,production_profile(CACHE/'models/bge-small-zh-v1.5-onnx'),checkpoint=kill)
+        profile=profile_of(json.loads((args.source/'memory/store.json').read_text()))
+        restore(args.backup,args.source,args.target,service,production_profile(model_path(profile),profile),checkpoint=kill)
         raise RuntimeError('SIGKILL checkpoint was not reached')
     if not 1<=args.repeats<=10:raise ValueError('Repeats must be1..10')
     checks={};faults=[];error=None;answers=[]
     with tempfile.TemporaryDirectory(prefix='real-data-restore-') as tmp:
         root=Path(tmp);source=root/'source';backup=root/'backup';target=root/'restored'
         try:
-            with open_memory(source/'memory') as memory:
+            settings={'memory':{'vector_store':'qdrant_server','embedding_profile':LEGACY}} if args.legacy_backup else None
+            with open_memory(source/'memory',settings=settings) as memory:
                 kept=memory.remember('synthetic-owner','preference','drink','我喜欢喝绿茶。',source_id='seed',request_id='save')['memory_id']
                 forgotten=memory.remember('synthetic-owner','preference','old','我收藏旧式水杯。',source_id='old',request_id='old')['memory_id']
                 child=memory.remember('synthetic-owner','summary','summary','旧式水杯是我的收藏。',source_id='child',derived_from=(forgotten,),request_id='child')['memory_id']
@@ -62,6 +68,7 @@ def main():
                 due=datetime.now(timezone.utc)+timedelta(hours=1)
                 scheduled={name:reminders.create('synthetic-owner','合成'+name,due,request_id=name)['reminder_id'] for name in ('future','cancel','delivered','uncertain')}
             public(['backup-data','--data-dir',source,'--output',backup])
+            if args.legacy_backup:public(['reindex-memory','--data-dir',source])
             with Records(source/'records.sqlite') as records:
                 records.purge_memory('synthetic-owner',forgotten)
                 records.create_note('synthetic-owner','备份后新增','保留这条新笔记',source_id='new',request_id='new-note')
@@ -101,10 +108,11 @@ def main():
                 try:handle=callback()
                 except RuntimeError as failure:checks['old_'+name+'_fenced']='retired' in str(failure)
                 else:handle.close();checks['old_'+name+'_fenced']=False
-            script=root/'questions.txt';script.write_text('我喜欢喝什么茶？\n/quit\n')
-            conversation=public(['interact','--no-vision','--user','synthetic-owner','--data-dir',target,'--input-file',script])
-            answers=[line.removeprefix('助手：') for line in conversation.stdout.splitlines() if line.startswith('助手：')]
-            checks['public_conversation_uses_corrected_fact']=bool(answers) and '桂花' in answers[0]
+            if not args.skip_conversation:
+                script=root/'questions.txt';script.write_text('我喜欢喝什么茶？\n/quit\n')
+                conversation=public(['interact','--no-vision','--user','synthetic-owner','--data-dir',target,'--input-file',script])
+                answers=[line.removeprefix('助手：') for line in conversation.stdout.splitlines() if line.startswith('助手：')]
+                checks['public_conversation_uses_corrected_fact']=bool(answers) and '桂花' in answers[0]
             # A fresh verified backup can rebuild an actually missing vector index.
             newer=root/'newer-backup';public(['backup-data','--data-dir',target,'--output',newer])
             binding=json.loads((target/'memory/store.json').read_text())
@@ -113,10 +121,12 @@ def main():
             result=json.loads(public(['restore-data','--backup',newer,'--current-data-dir',target,'--data-dir',indexed]).stdout)
             checks['missing_index_rebuilt']=result['status']=='PASS' and result['memories']==3
             current=indexed
-            for phase in ('source_fenced','merged','source_retired'):
+            phases=('snapshot_staged','snapshot','merged','source_retired') if args.legacy_backup else ('source_fenced','merged','source_retired')
+            fault_backup=backup if args.legacy_backup else newer
+            for phase in phases:
                 for iteration in range(args.repeats):
                     destination=root/f'fault-{phase}-{iteration}'
-                    killed=subprocess.run([sys.executable,__file__,'--child-phase',phase,'--backup',str(newer),
+                    killed=subprocess.run([sys.executable,__file__,'--child-phase',phase,'--backup',str(fault_backup),
                         '--source',str(current),'--target',str(destination)],cwd=ROOT,capture_output=True,text=True,timeout=180)
                     case={'phase':phase,'iteration':iteration+1,'actual_sigkill':killed.returncode==-signal.SIGKILL}
                     if not case['actual_sigkill']:raise RuntimeError(killed.stderr[-1800:])
@@ -124,13 +134,20 @@ def main():
                         try:check_available(path)
                         except RuntimeError:case[label]=True
                         else:case[label]=False
-                    resumed=json.loads(public(['restore-data','--backup',newer,'--current-data-dir',current,'--data-dir',destination]).stdout)
+                    resumed=json.loads(public(['restore-data','--backup',fault_backup,'--current-data-dir',current,'--data-dir',destination]).stdout)
                     case['resume_complete']=resumed['status']=='PASS' and resumed['memories']==3
                     check_available(destination)
                     with ReminderService(destination/'reminders.sqlite') as reminders:case['no_duplicate_reminder']=reminders.claim_next('synthetic-owner') is None
-                    case['status']='PASS' if all(case[key] for key in ('actual_sigkill','source_fenced','target_fenced','resume_complete','no_duplicate_reminder')) else 'FAIL'
+                    with open_memory(destination/'memory') as memory:
+                        drink=memory.search('synthetic-owner',key='drink')['items'][0]
+                        case['current_version_preserved']=drink['memory_id']==kept and drink['version']==2 and drink['content']=='我喜欢喝桂花茶。'
+                        case['new_fact_preserved']=memory.search('synthetic-owner',key='language')['items'][0]['memory_id']==new
+                        case['forgotten_family_absent']=not any(item['memory_id'] in {forgotten,child} for item in memory.list_memories('synthetic-owner'))
+                        case['guest_preserved']=memory.search('synthetic-guest',key='drink')['items'][0]['memory_id']==guest
+                        case['erased_history_absent']=memory.sdk.history(forgotten)==[] and memory.sdk.history(child)==[]
+                    case['status']='PASS' if all(case[key] for key in ('actual_sigkill','source_fenced','target_fenced','resume_complete','no_duplicate_reminder','current_version_preserved','new_fact_preserved','forgotten_family_absent','guest_preserved','erased_history_absent')) else 'FAIL'
                     faults.append(case);print(json.dumps(case),flush=True);current=destination
-            checks['all_recovery_cases_pass']=len(faults)==3*args.repeats and all(case['status']=='PASS' for case in faults)
+            checks['all_recovery_cases_pass']=len(faults)==len(phases)*args.repeats and all(case['status']=='PASS' for case in faults)
         except Exception as failure:error=str(failure);checks['exception']=False
         finally:
             with closing(service.client(timeout=60)) as client:
@@ -140,6 +157,13 @@ def main():
                 for path in root.rglob('data-transition.json'):
                     state=json.loads(path.read_text())
                     if 'binding' in state:collections[state['binding']['collection']]=state['binding']['store_id']
+                    for role,name in state.get('staged_snapshots',{}).items():
+                        expected=state['binding']['collection']+('_entities' if role=='entities' else '')+'_source'
+                        if name!=expected:raise RuntimeError('Unexpected staging collection name')
+                        if client.collection_exists(name):
+                            metadata=client.get_collection(name).config.metadata or {}
+                            if metadata.get('assistant_store_id')!=state['binding']['store_id']:raise RuntimeError('Unrelated staging collection cannot be cleaned')
+                            client.delete_collection(name)
                 for base,store_id in collections.items():
                     for name in (base+'_entities',base):
                         if not client.collection_exists(name):continue
@@ -148,9 +172,10 @@ def main():
                         client.delete_collection(name)
     report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'answers':answers,'faults':faults,
         'actual_sigkills':sum(case['actual_sigkill'] for case in faults),'repeats_per_phase':args.repeats,
+        'legacy_backup':args.legacy_backup,'conversation_tested':not args.skip_conversation,
         'scope':'Actual BGE/Mem0/native Qdrant/SQLite/APScheduler and public backup/restore/interact commands. Synthetic profiles; reminder receipts are explicitly fixture/uncertain, not physical playback. Current SQLite authority preserved, actual vector index loss and restore-process SIGKILL; no entire-disk loss, power loss or complete JT acceptance.'}
     if error:report['error']=error
-    write_json(ROOT/'benchmarks/results/data-restore-smoke.json',report)
+    write_json(args.output,report)
     print(json.dumps({'status':report['status'],'checks':checks,'actual_sigkills':report['actual_sigkills'],'error':error},ensure_ascii=False),flush=True)
     return 0 if report['status']=='PASS' else 1
 

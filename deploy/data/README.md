@@ -55,6 +55,13 @@ python3 tools/project.py restore-data --abort \
 
 多向量档案的主索引和实体索引均校验MaxSim结构及profile，备份必须包含其实体快照。旧单向量备份跨配置恢复时，已遗忘的记录和无效实体关联在重新嵌入前排除，当前较新版本从当前有效库补入。临时快照集合记录归属并在完成或撤销时清理，未核验的上传结果须先续跑核验。真实旧备份→当前多向量、更正版本保留及遗忘不复活见[集成报告](../../benchmarks/results/window-legacy-backup-integration.json)；临时快照阶段续跑和撤销另有框架回归，完整跨配置故障矩阵仍待扩展。
 
+跨配置恢复的[首轮故障测试](../../benchmarks/results/window-restore-fault-first.json)在旧快照暂存、快照核验完成、合并完成和旧源退休四个阶段各实际SIGKILL一次，全部续跑成功。每次均核对当前版本、新事实、主人/访客隔离、遗忘及派生内容/历史清除、提醒不重复；另验证实际索引丢失后的恢复。本轮使用`--skip-conversation`，没有生成恢复后的模型回答，也没有物理播报。 随后的[40次扩展验证](../../benchmarks/results/window-restore-fault-recovery.json)已完成，四个阶段各10次全部通过，保持相同数据校验与明确的测试范围。
+
+```bash
+.venv/bin/python tools/data_restore_smoke.py --legacy-backup --skip-conversation \
+  --repeats 10 --output benchmarks/results/window-restore-fault-recovery.json
+```
+
 删除屏障和会话删除记录共同排除旧事实及派生摘要，并清除history/messages、实体关联及相关会话正文。实体索引缺少事实版本来源，因此恢复会失效更正过的事实关联；事实ID、正文和向量保留，其他有效实体关联继续使用。SDK正常更正路径也补充了严格实体清理，失败保留待重试状态。
 
 提醒采用当前的取消、已输出和结果不确定状态。复制的APScheduler jobs先清空，应用启动时由现有ReminderService根据有效提醒重建任务，避免反序列化旧任务或写回旧路径。先前处于playing且没有完成回执的通知按既有规则变为uncertain，不自动重复播报。复制过程不会启动scheduler。
