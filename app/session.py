@@ -127,6 +127,7 @@ class AssistantSession:
         self.pending = None
         self.output = None
         self.run_task = None
+        self._closed = False
         self.busy = asyncio.Lock()
         self.retrieval = {}
         self.cancel_task = None
@@ -236,17 +237,23 @@ class AssistantSession:
                 message["content"] = [part for part in message["content"] if part.get("type") != "image_url"]
 
     async def start(self):
-        if self.real_model:
-            health = await self.budget.client.get(self.budget.base + "/health")
-            health.raise_for_status()
-            if health.json().get("status") != "ok":
-                raise RuntimeError("Local llama.cpp model is not ready")
-        await self.runner.add_workers(self.bot.worker)
-        self.run_task = asyncio.create_task(self.runner.run())
-        await asyncio.wait_for(self.ready.wait(), 10)
-        return self
+        if self._closed:raise RuntimeError('Assistant session is closed')
+        try:
+            if self.real_model:
+                health = await self.budget.client.get(self.budget.base + "/health")
+                health.raise_for_status()
+                if health.json().get("status") != "ok":
+                    raise RuntimeError("Local llama.cpp model is not ready")
+            await self.runner.add_workers(self.bot.worker)
+            self.run_task = asyncio.create_task(self.runner.run())
+            await asyncio.wait_for(self.ready.wait(), 10)
+            return self
+        except BaseException:
+            await self.close()
+            raise
 
     async def close(self):
+        if self._closed:return
         if self.run_task:
             if self.pending and not self.pending.done():
                 await self.cancel()
@@ -254,6 +261,11 @@ class AssistantSession:
                 await self.bot.worker.queue_frame(EndFrame())
             await asyncio.wait_for(self.run_task, 15)
             self.run_task = None
+        else:
+            # Constructors already own SDK/HTTP clients before worker setup.
+            # Native pipeline cleanup also handles never-started processors.
+            await self.bot.worker.pipeline.cleanup()
+        self._closed = True
 
     async def cancel(self, *, clear_clarification=True):
         """Native interruption plus observed provider slot completion.

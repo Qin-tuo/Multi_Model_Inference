@@ -1,0 +1,137 @@
+{
+  "created_at": "2026-10-13T09:23:15.841799+00:00",
+  "status": "FAIL",
+  "cycles": 1,
+  "stages": [
+    "asr",
+    "llm",
+    "tts"
+  ],
+  "cases": [
+    {
+      "cycle": 1,
+      "stage": "asr",
+      "checks": {
+        "native_active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_cancelled": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "",
+      "application_cancel_seconds": 0.009419486999831861,
+      "samples_after_cancel": 0,
+      "recovery_seconds": 3.68300722999993,
+      "response": "2",
+      "recovery_transcript": "一加一等于几？",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 3,
+        "obsolete_input_frames_discarded": 54,
+        "obsolete_results_discarded": 1
+      },
+      "seconds": 8.686498593000579,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-aacdcfef1ed04d7db1b8d2e3af8cac50/1-asr-observations.json",
+        "sha256": "8a5806628ee9df7faa222210207035c1754eab6d589b87e15748527b2b5daae5",
+        "samples": 102
+      },
+      "status": "PASS"
+    },
+    {
+      "cycle": 1,
+      "stage": "llm",
+      "checks": {
+        "native_active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_cancelled": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": false,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "请详细介绍太阳系各颗行星的特点。",
+      "application_cancel_seconds": 0.13032223700065515,
+      "samples_after_cancel": 0,
+      "recovery_seconds": 3.61733933999858,
+      "response": "2",
+      "recovery_transcript": "一加一等于几？",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "啊！",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 3,
+        "obsolete_input_frames_discarded": 27
+      },
+      "seconds": 9.782350634999602,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-aacdcfef1ed04d7db1b8d2e3af8cac50/1-llm-observations.json",
+        "sha256": "fa9309e601ee5bac76c03d717388bcf6a40344864ba22e2e12a2410975fbc9b2",
+        "samples": 196
+      },
+      "status": "FAIL"
+    },
+    {
+      "cycle": 1,
+      "stage": "tts",
+      "checks": {
+        "case_completed": false,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "early_error": null,
+      "error": {
+        "type": "RuntimeError",
+        "message": "Original turn ended before the required active stage"
+      },
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 1,
+        "input_invalidated": 1
+      },
+      "seconds": 13.41811299800247,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-aacdcfef1ed04d7db1b8d2e3af8cac50/1-tts-observations.json",
+        "sha256": "e42d5cfffb9135c98df26eba7d3092f93db892775b0101713e562b19b18e7ab6",
+        "samples": 461
+      },
+      "status": "FAIL"
+    }
+  ],
+  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-aacdcfef1ed04d7db1b8d2e3af8cac50",
+  "source_commit": "1cbd0bb86bbb4401968dd8d35fce907754305ff3",
+  "scope": "Full VoiceAssistant with synthetic WAV capture/file output and actual Silero/ASR/LLM/TTS/BGE/Mem0/authenticated Qdrant. Cancel during observed native work, immediately submit next voice file, inspect late PCM and recognize recovery output. No held provider replies, physical transport/AEC or per-kernel timing."
+}

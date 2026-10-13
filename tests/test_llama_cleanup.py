@@ -2,6 +2,8 @@
 import asyncio
 import unittest
 from unittest.mock import AsyncMock,patch
+import httpx
+from openai import APIStatusError
 
 from pipecat.frames.frames import EndFrame
 from pipecat.pipeline.pipeline import Pipeline
@@ -12,6 +14,17 @@ from app.adapters.llama import LlamaConfig,create_llama_service,provider_slots_i
 
 
 class LlamaClientCleanupTests(unittest.IsolatedAsyncioTestCase):
+    async def test_transient_provider_failure_is_not_silently_replayed(self):
+        service=create_llama_service(LlamaConfig('FIXTURE'));requests=[]
+        await service._client._client.aclose()
+        service._client._client=httpx.AsyncClient(transport=httpx.MockTransport(
+            lambda request:(requests.append(request) or httpx.Response(503,json={'error':{'message':'injected backend failure','type':'server_error'}}))))
+        try:
+            with self.assertRaises(APIStatusError):
+                await service._client.chat.completions.create(model='FIXTURE',messages=[{'role':'user','content':'test'}])
+            self.assertEqual(len(requests),1,'Failed model work must be surfaced, not automatically replayed')
+        finally:await service._client.close()
+
     def test_provider_observation_requires_real_boolean_slot_states(self):
         for value in ([],{},None,[{}],[False],[{'is_processing':None}],[{'is_processing':0}],[{'is_processing':'false'}]):
             with self.subTest(value=value),self.assertRaises(RuntimeError):provider_slots_idle(value)

@@ -1,0 +1,392 @@
+{
+  "created_at": "2026-10-13T09:52:01.903495+00:00",
+  "status": "PASS",
+  "cycles": 1,
+  "stages": [
+    "asr",
+    "llm",
+    "tts"
+  ],
+  "fault": "crash",
+  "cases": [
+    {
+      "cycle": 1,
+      "stage": "asr",
+      "fault": "crash",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_failed": true,
+        "backend_restarted_automatically": true,
+        "old_backend_processes_exited": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_recovery_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "",
+      "backend_fault": {
+        "component": "asr",
+        "old_processes": [
+          {
+            "pid": 91535,
+            "start_ticks": "2806425"
+          },
+          {
+            "pid": 91536,
+            "start_ticks": "2806441"
+          }
+        ],
+        "before": {
+          "MainPID": "91535",
+          "Result": "success",
+          "NRestarts": "1",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+          "main_pid": 91535,
+          "cgroup_pids": [
+            91535,
+            91536
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "scope": "local backend readiness",
+            "owned_listening_socket": true
+          }
+        },
+        "signal": "SIGKILL",
+        "signal_command_returncode": 1,
+        "signal_command_stderr": "Failed to kill unit mmassistant-asr.service: Failed to send signal SIGKILL to auxiliary processes: Invalid argument",
+        "after": {
+          "MainPID": "92852",
+          "Result": "success",
+          "NRestarts": "2",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+          "main_pid": 92852,
+          "cgroup_pids": [
+            92852,
+            92854
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "scope": "local backend readiness",
+            "owned_listening_socket": true
+          }
+        },
+        "ready_wait_seconds": 7.308687695000117,
+        "old_processes_exited": true
+      },
+      "request_failure": {
+        "type": "RuntimeError",
+        "message": "Unknown error occurred: Error code: 503 - {'error': {'message': 'service unavailable', 'type': 'server_error', 'code': 'backend_error'}}"
+      },
+      "samples_after_cancel": 0,
+      "recovery_seconds": 5.735938351001096,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [
+        "Unknown error occurred: Error code: 503 - {'error': {'message': 'service unavailable', 'type': 'server_error', 'code': 'backend_error'}}"
+      ],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 3,
+        "obsolete_input_frames_discarded": 47
+      },
+      "seconds": 18.04655929599903,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1128c914769345d1b36dadb096d726fc/1-asr-observations.json",
+        "sha256": "bb90aba64047c1e1c50c393f849cd6c7443bc163b9f6307cb301f3c33e7e9687",
+        "samples": 104
+      },
+      "status": "PASS"
+    },
+    {
+      "cycle": 1,
+      "stage": "llm",
+      "fault": "crash",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_failed": true,
+        "backend_restarted_automatically": true,
+        "old_backend_processes_exited": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_recovery_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "请详细介绍太阳系各颗行星的特点。",
+      "backend_fault": {
+        "component": "llama",
+        "old_processes": [
+          {
+            "pid": 8062,
+            "start_ticks": "47863"
+          },
+          {
+            "pid": 8065,
+            "start_ticks": "47879"
+          }
+        ],
+        "before": {
+          "MainPID": "8062",
+          "Result": "success",
+          "NRestarts": "0",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+          "main_pid": 8062,
+          "cgroup_pids": [
+            8062,
+            8065
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "scope": "local backend readiness",
+            "owned_listening_socket": true
+          }
+        },
+        "signal": "SIGKILL",
+        "signal_command_returncode": 1,
+        "signal_command_stderr": "Failed to kill unit mmassistant-llama.service: Failed to send signal SIGKILL to auxiliary processes: Invalid argument",
+        "after": {
+          "MainPID": "93128",
+          "Result": "success",
+          "NRestarts": "1",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+          "main_pid": 93128,
+          "cgroup_pids": [
+            93128,
+            93129
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "scope": "local backend readiness",
+            "owned_listening_socket": true
+          }
+        },
+        "ready_wait_seconds": 13.382658115002414,
+        "old_processes_exited": true
+      },
+      "request_failure": {
+        "type": "RuntimeError",
+        "message": "Error during completion: Connection error."
+      },
+      "samples_after_cancel": 0,
+      "recovery_seconds": 6.1478060059998825,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [
+        "Error during completion: Connection error."
+      ],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 2
+      },
+      "seconds": 25.625687116000336,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1128c914769345d1b36dadb096d726fc/1-llm-observations.json",
+        "sha256": "08aca723055babef14640429089c167de3d2839c85fbc6868efa4873226d86ac",
+        "samples": 197
+      },
+      "status": "PASS"
+    },
+    {
+      "cycle": 1,
+      "stage": "tts",
+      "fault": "crash",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_failed": true,
+        "backend_restarted_automatically": true,
+        "old_backend_processes_exited": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_recovery_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "请详细介绍太阳系各颗行星的特点。",
+      "backend_fault": {
+        "component": "speech",
+        "old_processes": [
+          {
+            "pid": 8154,
+            "start_ticks": "48910"
+          },
+          {
+            "pid": 8157,
+            "start_ticks": "48924"
+          }
+        ],
+        "before": {
+          "MainPID": "8154",
+          "Result": "success",
+          "NRestarts": "0",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+          "main_pid": 8154,
+          "cgroup_pids": [
+            8154,
+            8157
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "scope": "local backend readiness",
+            "owned_listening_socket": true
+          }
+        },
+        "signal": "SIGKILL",
+        "signal_command_returncode": 1,
+        "signal_command_stderr": "Failed to kill unit mmassistant-speech.service: Failed to send signal SIGKILL to auxiliary processes: Invalid argument",
+        "after": {
+          "MainPID": "93877",
+          "Result": "success",
+          "NRestarts": "1",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+          "main_pid": 93877,
+          "cgroup_pids": [
+            93877,
+            93881
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "scope": "local backend readiness",
+            "owned_listening_socket": true
+          }
+        },
+        "ready_wait_seconds": 11.88480981000248,
+        "old_processes_exited": true
+      },
+      "request_failure": {
+        "type": "RuntimeError",
+        "message": "Local OVS TTS failed: Server disconnected without sending a response."
+      },
+      "samples_after_cancel": 0,
+      "recovery_seconds": 5.4452418360015145,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [
+        "Local OVS TTS failed: Server disconnected without sending a response."
+      ],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 2
+      },
+      "seconds": 30.844834961000743,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1128c914769345d1b36dadb096d726fc/1-tts-observations.json",
+        "sha256": "11356f67a5a1b4587cb60fcf0a95b77a83dd162266b363e410b5345395a11eec",
+        "samples": 467
+      },
+      "status": "PASS"
+    }
+  ],
+  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1128c914769345d1b36dadb096d726fc",
+  "application_files": {
+    "app/__init__.py": "fd4fdfb14b30e561f5fba76cb6c552511f866ada29bd87be61203204a6fb5b92",
+    "app/adapters/__init__.py": "51a4139ece1c63135b981f7ca1bb7cf88d061e8b4d4e79ccced8915b87d66f75",
+    "app/adapters/asr.py": "e592b5639d36b25ba41a357a8051315c11c470d74817ce103a39228d06f927db",
+    "app/adapters/embedding.py": "0c1f78efbb48c15e2074ac52b619cdb128a91baf5630c0a2bdcf0d1321a732fb",
+    "app/adapters/llama.py": "fb3e05b248298610fa38e43e43dd29fcb9a3a0e187e2f61f665bb092e3c82c6f",
+    "app/adapters/speech.py": "06989bcef6c9b96afc7b794f049ee9a1a69f52ed6eb2dde36f9e7594e5a3f475",
+    "app/adapters/vision.py": "0dcc889b3a144aa7744d18e123a09181b2d64b707a52a2bf96f0721bf6645513",
+    "app/context_memory.py": "190f8e844e1ad0c0e6baca010f7d7303e22e3253c69accc7a6336041b547913b",
+    "app/data_lifecycle.py": "2be427005b22a7df11b440d4d85b6508611123359b840c99f4814539b8e46559",
+    "app/interact.py": "14ec33813b2a3b4209e06138422522ecb222effed2ec60fbfbd7c9394949583a",
+    "app/memory.py": "aa7d4b37504d6c2967e77ab3a10683c23934ca8577cb3a06b5b89e6ad06814d9",
+    "app/memory_runtime.py": "44348fd4fe3f54bcedc4ca4e716f5573fe3a0a965b673022d8c5d2430d86f4d4",
+    "app/memory_sources.py": "112bbe8d7dd77b1aa700340ae40bf52840be05eda33d943af41791a2689f11ed",
+    "app/memory_store.py": "2bc2a1c91c141fed5f05d0a41e79bf41c9c27dc29473ade2b6b0aba2b5a9b450",
+    "app/notifications.py": "28dfe3eb3dcd0284c6e6e774208d6f4753d334ce245fe24f585ef296c0fd462a",
+    "app/perception.py": "8d193c3801c72af5f4459eef977db055d7179f16d06705fddb48d4817042735b",
+    "app/pipecat_bot.py": "49de381660a156a3f7801dcdf0de2a4cb7fb5856ee0b2a671b6a05bd2e049853",
+    "app/proactive.py": "4bad0800ad89c67eef4f80ed722e2a843dd52922d05d2ca9055a746e588b3e20",
+    "app/records.py": "1b7f8f35b965cbbe7a0e9739a022c4f1b10909293f776a9ccd8a78d6c2c53a96",
+    "app/reminder_console.py": "b1b2adba9f18dea4e02d6ae0d78491faaa35a70fa970983d38481898a2950fda",
+    "app/reminders.py": "af49c22645921d90e47366f3c7e86992639596aacfff16cb4f81b40a01e64cd7",
+    "app/session.py": "bab84e2d9e7ab9e414376536405a47df56ac295837cf2bfeb22b9d67bdba93f8",
+    "app/speech_output.py": "6ec7fdcfe9afe364b8f3eaa2a455b1e004e65ab4e3cdc758c5b87f7ab623b4fd",
+    "app/temporal.py": "fdcfe04f2fe437824818ebaa4890656324f8f9ae0cd3b43e31c34ced74debc3e",
+    "app/tool_policy.py": "8ce822084c85d16f0dca8c83d6bb2772f813e2264c0ed6735489b17e3971c4f7",
+    "app/tools.py": "1658654aa0ba73983c2fb3bae7c1436167d95d57cc3db9d3069d3a6f02a7ed41",
+    "app/vision_frames.py": "ae49f83eda5d11f92362b9bb4a16b83bf5a2849a5456e0d051901138eb63952c",
+    "app/vision_snapshot.py": "d560b35e14abaa79952707e13089f3ba911b94188b17e13eea19072d6fd1cee4",
+    "app/voice_assistant.py": "ecdb36ac6419fed741086c0922601981cffc348d08cdc8d626fcef04a1ac280a",
+    "app/voice_cli.py": "551ec68f4ba736c3a70fac06c7cb334a6cf3166d20424ae22cf49284a7429051",
+    "app/voice_file.py": "74576832fd340ffa156da3c6f63719be5c63acd534322be3b9e57c4527c567bf",
+    "configs/runtime.yaml": "346da8a0536a803d52626b6c5cf9ebf19220ebf7727e917244e91b7158de55b7",
+    "models/manifest.json": "3df8d2e429d77a7cf341c68160e62510891fc0586b0e2e107ddd77a8700a5098"
+  },
+  "source_commit": "1cbd0bb86bbb4401968dd8d35fce907754305ff3",
+  "source_state": "Working tree identified by application_files; see checkpoint commit containing this report.",
+  "scope": "Full VoiceAssistant with synthetic WAV capture/file output and actual Silero/ASR/LLM/TTS/BGE/Mem0/authenticated Qdrant. Cancel or terminate the project-owned backend during observed active stage; same application accepts recovery voice, after automatic backend readiness for crashes. Inspect late PCM and recognize recovery output. No held provider replies, physical transport/AEC or per-kernel timing."
+}

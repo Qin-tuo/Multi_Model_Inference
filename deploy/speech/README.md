@@ -155,3 +155,23 @@ Pipecat1.12.0的结束策略在重复VAD停止事件上重建STT定时器，却�
 实测ASR与TTS在客户端取消后仍会继续当前计算或清理阶段；只有确认服务释放后才执行探针的恢复请求。LLM的应用入口原本就等待原生中断确认和非忙执行槽，现在还拒绝空列表、缺失字段和非布尔状态，保留准入关闭；[异常状态失败基线](../../benchmarks/results/provider-observation-baseline.json)记录了修复前的误判。
 
 首次扩大测试采用0.2秒ASR读取期限，10次均在观察到原生忙槽之前超时，未计为推理中超时通过；[完整原始结果](../../benchmarks/results/backend-cancellation-short-deadline.json)保留40项通过及这10项未满足测试前提的失败。后续将注入期限改为0.8秒，不改变产品的12秒ASR期限。服务崩溃/重启、TTS超时、完整应用在各阶段的连续打断及GPU执行trace仍需单独验收。
+
+## 完整语音应用的分阶段验证
+
+`tools/voice_inflight_probe.py`从合成WAV经过真实Silero、ASR、LLM、TTS及WAV输出，使用同一个`VoiceAssistant`取消原问题并处理新语音。ASR/LLM阶段必须观察到原生槽忙；TTS合成阶段要求语音交付已开始且OVS占用仍存在；播报阶段要求已有实际PCM写出。合成与播报分别测试，因为当前链路可能在合成完成后才开始输出，不能把两个阶段混为一个条件。
+
+取消返回后立即提交恢复语音，不由探针额外等待后端空闲。检查取消内容没有成为完成历史或记忆、新播报开始前没有迟到PCM写入、仅新轮获得输出回执，再从回执指示的样本区间截取新音频并通过真实ASR回读。原始采样和WAV存入AI_Stack，Git报告记录路径及采样文件哈希。
+
+```bash
+.venv/bin/python tools/voice_inflight_probe.py --cycles 10
+```
+
+[首次基线](../../benchmarks/results/voice-inflight-baseline.json)保留两个问题：要求“合成占用与PCM已写出同时存在”未能触发TTS用例；单字回答“2”的一次回读为“啊”。后续分别检查合成和播报，恢复问题要求完整句子，期望回答与回读仍须包含正确结果。单字数字语音回读质量没有因此被证明合格，仍应纳入独立ASR/TTS质量集。
+
+工具还支持显式`--fault crash --stages asr,llm,tts`：验证服务归本项目systemd单元管理且拥有目标端口后，对该单元cgroup发送SIGKILL。记录旧进程PID/启动标识和新实例，等待systemd自动恢复健康，再向同一个语音应用提交恢复问题。该模式会暂时中断对应推理服务；未自动恢复时记录失败并尝试恢复服务，不把人工修复计为自动恢复通过。系统的重启限流保持不变。
+
+完整语音取消[40次测试](../../benchmarks/results/voice-inflight-cancellation.json)覆盖ASR、LLM、TTS合成及WAV播报各10次，全部通过；新轮开始播报前没有迟到PCM写入，取消内容没有进入完成历史或记忆，恢复音频均回读为正确的完整句子。这组取消测试运行于`1cbd0bb`的应用代码，之后另行关闭了LLM SDK隐式重试。
+
+故障准备发现`retry_on_timeout=False`仅关闭Pipecat层重试，SDK遇到503仍请求3次，见[失败基线](../../benchmarks/results/llama-implicit-retry-baseline.json)。现在同时设置SDK的`max_retries=0`，失败交给会话处理；实际SDK与HTTP故障夹具核验只发出1次请求。191项框架回归通过。该策略不自动重放旧模型请求，后续新问题仍由现有应用入口接收。
+
+首次崩溃探针遇到systemd信号命令部分成功：命令返回辅助进程错误，但ASR主服务已经重启。探针现保留命令结果和旧进程身份，继续核对实际退出与新实例就绪，避免错误后直接进入下一个场景。该次[失败记录](../../benchmarks/results/voice-worker-crash-baseline.json)也暴露了应用启动前健康检查失败时的客户端泄漏：`VoiceAssistant`和`AssistantSession`现在自动清理失败或取消的启动，并通过原生pipeline清理尚未启动的处理器。关闭可重复调用，调用方拥有的记忆、会话及提醒数据库不会被一并关闭。[启动失败回归基线](../../benchmarks/results/voice-startup-cleanup-baseline.json)保留原来3项失败。

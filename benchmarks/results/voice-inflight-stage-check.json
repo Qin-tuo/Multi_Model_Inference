@@ -1,0 +1,199 @@
+{
+  "created_at": "2026-10-13T09:27:19.544546+00:00",
+  "status": "PASS",
+  "cycles": 1,
+  "stages": [
+    "asr",
+    "llm",
+    "tts",
+    "playback"
+  ],
+  "cases": [
+    {
+      "cycle": 1,
+      "stage": "asr",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_cancelled": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "",
+      "application_cancel_seconds": 0.010249693998048315,
+      "samples_after_cancel": 0,
+      "recovery_seconds": 5.635502424000151,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 3,
+        "obsolete_input_frames_discarded": 53,
+        "obsolete_results_discarded": 1
+      },
+      "seconds": 10.64401823099979,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1d6f1f3acf9c4306b991e94da3e43146/1-asr-observations.json",
+        "sha256": "0db2e484b29281220013efbb8d555a754c05abf4f8e54f05b9732f6e679a3c22",
+        "samples": 103
+      },
+      "status": "PASS"
+    },
+    {
+      "cycle": 1,
+      "stage": "llm",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_cancelled": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "请详细介绍太阳系各颗行星的特点。",
+      "application_cancel_seconds": 0.18591237500004354,
+      "samples_after_cancel": 0,
+      "recovery_seconds": 5.503642050000053,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 3,
+        "obsolete_input_frames_discarded": 11
+      },
+      "seconds": 11.655222925000999,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1d6f1f3acf9c4306b991e94da3e43146/1-llm-observations.json",
+        "sha256": "2edf13c15ec7ec6f8483302b338f69614686c48390a48f09446487ac9286ce61",
+        "samples": 211
+      },
+      "status": "PASS"
+    },
+    {
+      "cycle": 1,
+      "stage": "tts",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_cancelled": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "请详细介绍太阳系各颗行星的特点。",
+      "application_cancel_seconds": 0.06357597099849954,
+      "samples_after_cancel": 0,
+      "recovery_seconds": 5.427346308999404,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 2
+      },
+      "seconds": 18.93221185499715,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1d6f1f3acf9c4306b991e94da3e43146/1-tts-observations.json",
+        "sha256": "5b18b0019e126efa542e4b926ba85586aa7eb1fca5e6cc72b6cbc51fc611afa9",
+        "samples": 454
+      },
+      "status": "PASS"
+    },
+    {
+      "cycle": 1,
+      "stage": "playback",
+      "checks": {
+        "active_stage_observed": true,
+        "original_voice_request_pending": true,
+        "original_caller_cancelled": true,
+        "cancelled_turn_not_completed": true,
+        "no_cancelled_memory_write": true,
+        "no_late_pcm_before_new_speech": true,
+        "recovered_question": true,
+        "recovered_answer": true,
+        "recovered_audio": true,
+        "only_recovery_completed": true,
+        "still_no_memory_side_effect": true,
+        "no_pipeline_errors": true,
+        "recovery_wav_recognizes_answer": true,
+        "provider_idle_at_case_end": true,
+        "no_tasks_after_close": true,
+        "clients_closed": true,
+        "output_closed": true
+      },
+      "original_transcript": "请详细介绍太阳系各颗行星的特点。",
+      "application_cancel_seconds": 0.09137240000200109,
+      "samples_after_cancel": 17280,
+      "recovery_seconds": 5.451570956000069,
+      "response": "一加一等于二。",
+      "recovery_transcript": "一加一等于几？请用完整句子回答。",
+      "unexpected_pcm_before_new_speech": 0,
+      "recovery_audio_readback": "一加一等于二。",
+      "remaining_voice_tasks": [],
+      "remaining_model_tasks": [],
+      "pipeline_errors": [],
+      "asr_counts": {
+        "segments_submitted": 2,
+        "input_invalidated": 2
+      },
+      "seconds": 19.147309607000352,
+      "trace": {
+        "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1d6f1f3acf9c4306b991e94da3e43146/1-playback-observations.json",
+        "sha256": "21716a11f76d71ab37ac30c5a8d337767139c7af191fc56c2fc105a93a7bcff2",
+        "samples": 458
+      },
+      "status": "PASS"
+    }
+  ],
+  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-inflight-1d6f1f3acf9c4306b991e94da3e43146",
+  "source_commit": "1cbd0bb86bbb4401968dd8d35fce907754305ff3",
+  "scope": "Full VoiceAssistant with synthetic WAV capture/file output and actual Silero/ASR/LLM/TTS/BGE/Mem0/authenticated Qdrant. Cancel during observed native work, immediately submit next voice file, inspect late PCM and recognize recovery output. No held provider replies, physical transport/AEC or per-kernel timing."
+}

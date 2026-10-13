@@ -68,6 +68,7 @@ class VoiceAssistant:
         self.interruption_events = {}
         self.file_lock = asyncio.Lock()
         self.closed = False
+        self._resources_closed = False
         self.file_mode = output_path is not None
         self.py_audio = None
         self.output_path = output_path
@@ -235,13 +236,18 @@ class VoiceAssistant:
             if future and not future.done(): future.set_exception(error)
 
     async def start(self, *, check_services=True):
-        if check_services: await validate_speech_capabilities()
-        await self.session.start()
-        await self.runner.add_workers(self.worker)
-        self.runner_task = asyncio.create_task(self.runner.run())
-        await asyncio.wait_for(self.ready.wait(), 15)
-        self.notification_task = asyncio.create_task(self.notifications.run())
-        return self
+        if self.closed:raise RuntimeError('Voice assistant is closed')
+        try:
+            if check_services: await validate_speech_capabilities()
+            await self.session.start()
+            await self.runner.add_workers(self.worker)
+            self.runner_task = asyncio.create_task(self.runner.run())
+            await asyncio.wait_for(self.ready.wait(), 15)
+            self.notification_task = asyncio.create_task(self.notifications.run())
+            return self
+        except BaseException:
+            await self.close()
+            raise
 
     async def run_file(self, path, *, timeout=90):
         if not self.file_mode: raise ValueError("run_file requires the file output transport")
@@ -273,6 +279,7 @@ class VoiceAssistant:
                 self.result_future = None
 
     async def close(self):
+        if self._resources_closed:return
         self.closed = True
         if self.input_cancel_task: await asyncio.gather(self.input_cancel_task, return_exceptions=True)
         self.generation += 1
@@ -287,5 +294,8 @@ class VoiceAssistant:
         if self.runner_task:
             if not self.worker.has_finished(): await self.worker.cancel()
             await asyncio.wait_for(self.runner_task, 15)
+        else:
+            await self.worker.pipeline.cleanup()
         await self.session.close()
         if self.py_audio: self.py_audio.terminate()
+        self._resources_closed = True

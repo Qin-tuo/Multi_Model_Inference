@@ -181,8 +181,10 @@ class ScopedSTTService(OpenAISTTService):
             "max_pending_segments": 1, "request_timeout_seconds": self.request_timeout}
 
     async def cleanup(self):
-        await super().cleanup()
-        await self._client.close()
+        try:
+            await super().cleanup()
+        finally:
+            await self._client.close()
 
 
 class ScopedUserAggregator(LLMUserAggregator):

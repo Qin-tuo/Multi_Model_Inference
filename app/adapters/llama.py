@@ -71,6 +71,9 @@ class LocalLlamaService(OpenAILLMService):
     def __init__(self, *, tool_call_prefix=None, **kwargs):
         self.tool_call_prefix = tool_call_prefix
         super().__init__(**kwargs)
+        # Pipecat's timeout retry setting does not control SDK retries. Surface
+        # failed local work to the turn instead of replaying it during recovery.
+        self._client.max_retries = 0
 
     def build_chat_completion_params(self, params_from_context):
         return apply_required_tool_prefix(super().build_chat_completion_params(params_from_context), self.tool_call_prefix)
