@@ -9,6 +9,24 @@ import re
 SPEAKERS={'user','assistant','tool','observation'}
 DATE_KEYS=('source_date','source_month_day','source_speaker')
 
+_NUMBER=r'(?:[-负]?(?:[0-9]+(?:\.[0-9]+)?|[零〇一二两三四五六七八九十百千万亿]+(?:点[零〇一二三四五六七八九]+)?))'
+_OPERATOR=r'(?:加上?|减去?|乘以?|除以|[+＋\-−×*÷/])'
+_LITERAL_ARITHMETIC=re.compile(r'(?:(?:请问|请计算|请算一下|算一下|计算|帮我算一下|帮我计算)[，,]?)?'
+    +_NUMBER+r'(?:'+_OPERATOR+_NUMBER+r')+'
+    +r'(?:等于(?:几|多少)|(?:结果)?是多少|得(?:几|多少)|=)?[？?。.!！]?')
+
+
+def literal_arithmetic(text):
+    """Recognize a complete numeric expression,not a calculator or intent LLM.
+
+    Units,variables,personal facts,anaphora,quoted text and extra instructions
+    deliberately fall back to ordinary retrieval. Active dialogue stays intact.
+    """
+    if not isinstance(text,str) or len(text)>256:return False
+    compact=re.sub(r'\s+','',text)
+    if re.search(r'\d{4}[-/]\d{1,2}[-/]\d{1,2}|1\d{2}-\d{4}-\d{4}|0\d{2,3}-\d{7,8}',compact):return False
+    return _LITERAL_ARITHMETIC.fullmatch(compact) is not None
+
 
 def provenance(source_date=None,source_speaker=None):
     result={}

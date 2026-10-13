@@ -41,7 +41,8 @@ async def console(args):
         session = AssistantSession(config, memory, reminders, records, user_id=args.user,
             session_id=args.session_id, context_tokens=runtime["llama"]["context_tokens"],
             vision_frames=vision.frames if vision else None,memory_top_k=runtime['memory']['top_k'],
-            memory_context_tokens=runtime['memory']['context_token_limit'])
+            memory_context_tokens=runtime['memory']['context_token_limit'],
+            memory_skip_literal_arithmetic=runtime['memory'].get('skip_literal_arithmetic',False))
         await session.start()
         pending = None
         errors = []
@@ -99,7 +100,8 @@ async def console(args):
                 await session.close()
                 session = await AssistantSession(config, memory, reminders, records, user_id=args.user,
                     context_tokens=runtime["llama"]["context_tokens"], vision_frames=vision.frames if vision else None,
-                    memory_top_k=runtime['memory']['top_k'],memory_context_tokens=runtime['memory']['context_token_limit']).start()
+                    memory_top_k=runtime['memory']['top_k'],memory_context_tokens=runtime['memory']['context_token_limit'],
+                    memory_skip_literal_arithmetic=runtime['memory'].get('skip_literal_arithmetic',False)).start()
                 print("已开启新会话。", flush=True)
             elif line in {"/memories", "/notes", "/reminders", "/history"}:
                 if line == "/memories": rows = memory.list_memories(args.user, limit=20)

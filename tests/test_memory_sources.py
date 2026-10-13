@@ -9,11 +9,21 @@ import threading
 from types import SimpleNamespace
 
 from app.memory import Mem0Adapter,MemoryAdapterError
-from app.memory_sources import constraints,dialogue_lookup,provenance
+from app.memory_sources import constraints,dialogue_lookup,provenance,literal_arithmetic
 from test_mem0_adapter import actual_sdk
 
 
 class SourceQueryTests(unittest.TestCase):
+    def test_literal_arithmetic_requires_complete_numbers_without_personal_context(self):
+        for text in ('一加一等于几？','请计算12乘以3减去2等于多少。','2 + 3','负三加五得多少？','1.5×2是多少','10/2='):
+            with self.subTest(text=text):self.assertTrue(literal_arithmetic(text))
+        for text in ('我上次说一加一等于几？','请记住，一加一等于二。','按我的约定一加一等于几？','再加一呢？',
+                     '加上上次的数量是多少？','我的预算100加200够不够？','2杯加3杯是多少','x+1=','昨天1+1是多少',
+                     '你说过一加一等于几？','1+1等于几，再回忆我的偏好','"1+1"','1+','一加一等于几？'*100):
+            with self.subTest(text=text):self.assertFalse(literal_arithmetic(text))
+        for text in ('2023-04-28','2023/04/28?','139-1234-5678','010-12345678'):
+            with self.subTest(text=text):self.assertFalse(literal_arithmetic(text))
+
     def test_companion_pronoun_does_not_replace_the_speaking_subject(self):
         for link in ('跟','与','同','和','向','对','给'):
             with self.subTest(link=link):
@@ -111,6 +121,24 @@ class SourceTranscriptTests(unittest.TestCase):
 
 
 class SourceParserAsyncTests(unittest.IsolatedAsyncioTestCase):
+    async def test_authoritative_lookup_generation_read_does_not_block_event_loop(self):
+        from app.session import AssistantSession
+        started=threading.Event();release=threading.Event()
+        class ReachedGeneration(RuntimeError):pass
+        def generation(_user):
+            started.set()
+            if not release.wait(2):raise AssertionError('Generation read blocked the event loop')
+            raise ReachedGeneration()
+        session=SimpleNamespace(memory=SimpleNamespace(generation=generation),user_id='owner',memory_skip_literal_arithmetic=False)
+        turn=SimpleNamespace(requested_lookup=lambda:'get_time',required_operation=lambda:'get_time',cancelled=False)
+        task=asyncio.create_task(AssistantSession._messages(session,'现在几点？',turn))
+        try:
+            self.assertTrue(await asyncio.to_thread(started.wait,1));release.set()
+            with self.assertRaises(ReachedGeneration):await task
+        finally:
+            release.set()
+            if not task.done():task.cancel()
+
     async def test_parser_does_not_block_the_pipeline_event_loop(self):
         from app.session import AssistantSession
         started=threading.Event();release=threading.Event()
@@ -120,7 +148,7 @@ class SourceParserAsyncTests(unittest.IsolatedAsyncioTestCase):
             return {}
         class ReachedSearch(RuntimeError):pass
         def search(*args,**kwargs):raise ReachedSearch()
-        session=SimpleNamespace(memory=SimpleNamespace(search=search),user_id='owner',memory_top_k=5,memory_context_tokens=512)
+        session=SimpleNamespace(memory=SimpleNamespace(search=search),user_id='owner',memory_top_k=5,memory_context_tokens=512,memory_skip_literal_arithmetic=False)
         turn=SimpleNamespace(requested_lookup=lambda:None,required_operation=lambda:None,cancelled=False)
         with patch('app.memory_sources.dialogue_lookup',parser):
             task=asyncio.create_task(AssistantSession._messages(session,'4月27日我分享了什么？',turn))

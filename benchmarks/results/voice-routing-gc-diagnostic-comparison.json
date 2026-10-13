@@ -1,0 +1,199 @@
+{
+  "created_at": "2026-10-13T19:55:08.591600+00:00",
+  "status": "INCOMPLETE",
+  "checks": {
+    "same_reader_code": true,
+    "same_memory_recipe": true,
+    "same_retrieval_limits": true,
+    "same_observation_mode": false,
+    "same_fixed_interval": true,
+    "exactly20_attempts": true,
+    "same_voice_inputs": true,
+    "only_candidate_routes_arithmetic": true,
+    "same_pristine_snapshot": true
+  },
+  "variants": [
+    {
+      "variant": "baseline",
+      "status": "FAIL",
+      "voice_latency": {
+        "recall": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 1874.545171,
+          "p95_ms": 4262.458209,
+          "max_ms": 4262.458209
+        },
+        "time": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2892.076741,
+          "p95_ms": 3209.0755780000004,
+          "max_ms": 3209.0755780000004
+        },
+        "image": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 4170.044755,
+          "p95_ms": 4923.014332,
+          "max_ms": 4923.014332
+        },
+        "arithmetic": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 3100.801347,
+          "p95_ms": 3165.170853,
+          "max_ms": 3165.170853
+        }
+      },
+      "all_short_p95_ms": 4262.458209,
+      "query_p95_ms": 162.305949,
+      "write_p95_ms": 467.46248,
+      "background_counts": {
+        "queries": 196,
+        "writes": 98
+      },
+      "maximum_release_lateness_ms": 8.824561,
+      "arithmetic_prompt_tokens": [
+        [
+          1226
+        ],
+        [
+          1317
+        ],
+        [
+          1339
+        ],
+        [
+          1339
+        ],
+        [
+          1339
+        ]
+      ],
+      "arithmetic_evidence_tokens": [
+        707,
+        707,
+        707,
+        707,
+        707
+      ],
+      "arithmetic_skipped_reasons": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "arithmetic_text_sanity": true,
+      "arithmetic_audio_readback_sanity": true,
+      "personal_recall_still_retrieves": true,
+      "application_checks": {
+        "workload_completed": true,
+        "all_voice_outputs": true,
+        "no_voice_errors": true,
+        "no_query_errors": true,
+        "no_write_errors": true,
+        "no_owner_leaks": true,
+        "durable_writes": true,
+        "visual_rates": true,
+        "visual_age": true,
+        "recall_text_and_audio": true
+      }
+    },
+    {
+      "variant": "selective",
+      "status": "FAIL",
+      "voice_latency": {
+        "recall": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2927.174173,
+          "p95_ms": 4347.985089,
+          "max_ms": 4347.985089
+        },
+        "time": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2876.045646,
+          "p95_ms": 3130.0909199999996,
+          "max_ms": 3130.0909199999996
+        },
+        "image": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 4178.262198,
+          "p95_ms": 4826.481001,
+          "max_ms": 4826.481001
+        },
+        "arithmetic": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 1920.462512,
+          "p95_ms": 1940.82045,
+          "max_ms": 1940.82045
+        }
+      },
+      "all_short_p95_ms": 4347.985089,
+      "query_p95_ms": 158.662598,
+      "write_p95_ms": 488.903186,
+      "background_counts": {
+        "queries": 194,
+        "writes": 97
+      },
+      "maximum_release_lateness_ms": 5.789528,
+      "arithmetic_prompt_tokens": [
+        [
+          573
+        ],
+        [
+          664
+        ],
+        [
+          686
+        ],
+        [
+          686
+        ],
+        [
+          686
+        ]
+      ],
+      "arithmetic_evidence_tokens": [
+        54,
+        54,
+        54,
+        54,
+        54
+      ],
+      "arithmetic_skipped_reasons": [
+        "literal_arithmetic",
+        "literal_arithmetic",
+        "literal_arithmetic",
+        "literal_arithmetic",
+        "literal_arithmetic"
+      ],
+      "arithmetic_text_sanity": true,
+      "arithmetic_audio_readback_sanity": true,
+      "personal_recall_still_retrieves": true,
+      "application_checks": {
+        "workload_completed": true,
+        "all_voice_outputs": true,
+        "no_voice_errors": true,
+        "no_query_errors": true,
+        "no_write_errors": true,
+        "no_owner_leaks": true,
+        "durable_writes": true,
+        "visual_rates": true,
+        "visual_age": true,
+        "recall_text_and_audio": true
+      }
+    }
+  ],
+  "arithmetic_p95_reduction_percent": null,
+  "sources": [
+    "benchmarks/results/voice-fixed-arrival-baseline.json",
+    "benchmarks/results/voice-fixed-arrival-selective-v2.json"
+  ],
+  "scope": "One development pair,20 fixed releases at10s intervals,five repetitions pertype. Same snapshot andcode;onlyrouting flag differs. Background tail counts,livecamera,time responses,warmth andload may differ. Allslow/cold attempts retained;not5-run/100independent events,B0-B3,acoustic orfinalJT qualification. Arithmetic-subset reduction isnot the overallS2 metric."
+}

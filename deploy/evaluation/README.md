@@ -254,3 +254,17 @@ python3 tools/project.py bench --suite memory-quality --split development \
 两轮的记忆操作、文件输出、主人/访客隔离与视觉频率/年龄检查通过；每类只有5轮，现场画面、时间回答和缓存热度有所不同，因此没有把差值当作插桩开销或单因素收益。当前仍只验证文件PCM，没有物理可听起点或画面内容地面真值。
 
 [阶段分析](../../benchmarks/results/voice-stage-diagnostic.json)得到1150个结构化事件、0超限丢弃。慢算术请求输入1339tokens，记忆证据707tokens，原生LLM首token等待约1.67秒，说明完整字面算式的长期记忆检索值得单独做选择性实验。图像轮还多次重算提示以移除历史，最终清空证据来满足2K预算；真实图像计数保护继续保留。主线程记忆generation读取约10–17ms，与最大136ms事件循环延误不重叠，最大延误原因仍未确定。墙钟区间包含等待、可能彼此嵌套，不作CUDA kernel或独占CPU时间解读。
+
+## 完整算式的选择性记忆实验
+
+新增的`memory.skip_literal_arithmetic`默认关闭。开启时，只对完整的数字/中文数字算式省略长期向量检索；模型仍实际回答，不计算或写死结果。当前会话历史及其记忆引用继续传递，个人问题、单位、变量、指代、日期、电话号码和额外指令走原路径；维护操作、图像请求也不启用此规则。跳过原因记录为`literal_arithmetic`。版本读取仍检查真实绑定与owner，只移到线程中执行，未降低存储检查。225项框架测试通过，原82题中文记忆开发问题均未命中该规则。
+
+为避免优化后输入节奏随回复速度改变，开发对照采用[固定协议](../../benchmarks/manifests/literal-arithmetic-routing-v1.json)：同一封存种子快照分别恢复新档案，20个相同语音输入每10秒释放；两轮都先重启模型服务、保持8条/768tokens及256/64MiB缓存。记录释放延迟，并把它加入文件首PCM时延；实际文件帧仍按既有方式播放，不能视为物理声学端点。背景记忆按2秒周期持续至前台结束，因此末尾操作数量可以不同。
+
+[基线](../../benchmarks/results/voice-fixed-arrival-baseline.json)20轮完成：算术P95为3.165秒，回忆4.262秒、时间3.209秒，图像4.923秒，整体FAIL。首次[开启规则的运行](../../benchmarks/results/voice-fixed-arrival-selective.json)在第15轮图像请求发生`CAMERA_EPOCH_CHANGED`，前三个算术回合虽较快，但不能形成完整20轮结论；[不完整比较](../../benchmarks/results/voice-routing-incomplete-comparison.json)不发布收益百分比。相机保护没有放宽，旧帧回答被拒绝，原失败保留。
+
+随后使用另一份全新档案[被动观察GC复跑](../../benchmarks/results/voice-fixed-arrival-selective-v2.json)，20轮均完成，算术P95约1.941秒，但回忆4.348秒、时间3.130秒，整体仍FAIL；图像4.826秒。由于新增GC观测，与无观测基线不作严格单因素收益结论，比较工具检查观测模式并保留[诊断比较](../../benchmarks/results/voice-routing-gc-diagnostic-comparison.json)。
+
+[GC诊断](../../benchmarks/results/voice-gc-pause-diagnostic.json)记录328次回收、0丢弃；一次generation2回收耗时580.1ms，与最大573.5ms事件循环延误重叠，所在时段为第15轮图像请求。相机输入再次重置epoch，但该轮没有形成问答失败。这是明确的时间相关证据，尚未完整隔离因果；回收策略保持原样，没有禁用GC或改阈值。启动期静态对象管理、关闭后的释放和长时内存曲线需要进一步验证。
+
+`clone_capacity_fixture.py --from-snapshot`只重用此前完整回执绑定的不可变`seed-backup`，核对其manifest哈希并再次验证点/SQL/合成内容；不会复制已测工作目录新增的事实。`memory_voice_load.py --skip-literal-arithmetic/--no-skip-literal-arithmetic --turn-interval 10`选择开发条件；`--observe-gc`只记录回收时间。已测目录和失败结果不可覆盖。

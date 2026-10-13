@@ -50,6 +50,27 @@ class PersistentSessionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(emitted), 2)
         self.assertEqual(len(self.records.recent("owner")), 2)
 
+    async def test_literal_arithmetic_skips_long_term_search_but_keeps_active_history(self):
+        fact=self.memory.remember('owner','preference','style','我喜欢完整句回答。',source_id='context',request_id='context')['memory_id']
+        self.records.begin('owner',self.session.session_id,'earlier','接下来回答算式时先说答案。')
+        self.records.attach_memories('owner','earlier',[fact]);self.records.finish('owner','earlier','好的。')
+        self.assertFalse(self.session.memory_skip_literal_arithmetic)
+        self.session.memory_skip_literal_arithmetic=True
+        async def emit(_text):pass
+        with patch.object(self.memory,'search',wraps=self.memory.search) as search:
+            result=await self.session.ask('一加一等于几？',emit=emit)
+            self.assertEqual(search.call_count,0)
+            self.assertFalse(result['model_request_skipped'])
+            self.assertEqual(result['retrieval']['retrieval_skipped_reason'],'literal_arithmetic')
+            self.assertIn('接下来回答算式时先说答案',json.dumps(self.session.bot.context.get_messages(),ensure_ascii=False))
+            self.assertIn(fact,self.records.memory_refs('owner',[result['turn_id']]))
+            result=await self.session.ask('我之前说喜欢什么？',emit=emit)
+            self.assertEqual(search.call_count,1);self.assertIsNone(result['retrieval']['retrieval_skipped_reason'])
+            self.session.memory_skip_literal_arithmetic=False
+            await self.session.ask('一加一等于几？',emit=emit)
+            self.assertEqual(search.call_count,2)
+        self.assertEqual(self.llm.context_frames_seen,3)
+
     async def test_configured_retrieval_count_reaches_store_and_evidence_budget(self):
         await self.session.close();self.evidence.stop()
         # Equal fixture vectors isolate count/filter/budget wiring from model

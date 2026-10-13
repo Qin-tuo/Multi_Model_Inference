@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T19:12:34.485527+00:00",
+  "updated_at": "2026-10-13T19:57:08.955208+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -443,7 +443,7 @@
         "tools/clone_capacity_fixture.py"
       ],
       "validation": "Native local BM25+DBSF integrated per Mem0 provider instance with owner/namespace/source filters; no global SDK factory replacement or external inference. Schema3 binds retrieval configuration,existing schema1/2 stores remain unchanged until explicit reindex. Canonical writes/corrections/reindex/restore regenerate sparse data;strict dense verification retained.6 native lifecycle/provider tests and217 complete framework tests PASS. Real BGE/llama/publicCLI integration PASS:8long records,canonical ID/body/source windows,save/new-session recall,correction,legacy-backup restoration,forget/entity purge andowner isolation. Successive upgrades support abort/resume and refuse downgrade. Candidate not default.30 actual reindexSIGKILLs(3phases10each) PASS. Managed native-DBSF10k:100query numbered recall100/100(long50/50,short50/50),query P95=62.290ms;50complete writes P95=355.660ms,long-write P95=359.303ms;zero errors/leaks,all durable. Frozen recipe/query indices/write sizes/embedding artifact and observed six model/vision backend identities match earlier dense9/100 run. No competing heavy evaluations during timing,no foreground voice;not independent quality or single-factor optimization.82development COMPLETE:F1=25.966%,visible reference57/82,no errors/writes/leaks. Direct-answer prompt=26.958%,same82/82 evidence. Config wiring andhidden five-item packing cap fixed;220core tests PASS. Top8/512 retrieves reference65but injects57,F1=26.951%;top8/768 same82/82 retrieval injects65,F1=29.585%,no errors/writes/leaks. Not95% semantic correctness. Untraced hybrid5/512+direct-prompt20-turn voice load:106queries161.22ms P95,53writes462.00ms;visual11.49/11.42Hz age175/182ms. Short-file-first-PCMmax-typeP95=2.902s passes3s,butimage5.202s fails5s;overallFAIL. Only5/type,no acoustic/scene-truth qualification. Optional native stage tracer passed frame-clock/privacy/wrapper checks but real voice tracing/observer-overhead qualification not yet run. Hybrid legacy-backup restoration40 actualSIGKILLs PASS;idle model services were restarted withbounded caches during this skip-conversation test after observed memorypressure,so not fullcoexistence. Hybrid8/768 withcache256/64 untraced20turns:110queries153.421ms P95,55writes468.514ms,shortmax-typeP95=3.271s FAIL3s,image4.895s PASS5s;visual gates anddurability/isolation pass. Actual native-stage trace1150events0dropped shows slowmath1339prompt/707evidence tokens,LLM TTFB~1.67s. Main-thread memorygeneration10-17ms doesnot overlapmax136msloopdelay. Diagnostic trace notobserver-overheadorGPUtrace acceptance.",
-      "next_action": "Investigate selective long-term recall for complete literal arithmetic while preserving active context/personal queries;use current phase evidence and frozen inputs for comparison. Qualify remaining natural-memory gaps and all formal gates;defaults remainWINDOWS5/512."
+      "next_action": "Selective literal arithmetic implemented as opt-in;qualify GC/startup pauses and broad memory/source quality while preserving exact ownership/history. Current natural-language default andformalJT remainunverified."
     },
     {
       "task_id": "J6.runtime.prompt_cache",
@@ -459,6 +459,27 @@
       ],
       "validation": "ObservedMemAvailable145MiB with original per-server8192MiB host prompt-cache default;native logsVLM3324.574MiB88prompts,ASR431.170MiB49prompts. Both slots confirmedidle then VLM/ASR/dependent speech stopped andrestored with explicit256/64MiB bounds;context stays2048. Native20text+20synthetic-audio requests PASS,realcacheevictions4/13,maxlogged246.232/62.580MiB,outputs correctandno worker restart. Publicvoice memorysave/recall and222core checks PASS. Not all pressure attributedtocache;not wholeprocessmemory boundor8h acceptance.",
       "next_action": "Keep cache bounds in workload/runtime snapshots,qualify repeated/full-load memory curves and latency with current settings;retain unbounded baseline andscope ofserviceintervention."
+    },
+    {
+      "task_id": "J5.memory.selective_retrieval",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/memory_sources.py",
+        "app/session.py",
+        "tests/test_memory_sources.py",
+        "tests/test_persistent_session.py",
+        "benchmarks/manifests/literal-arithmetic-routing-v1.json",
+        "tools/compare_voice_routing.py",
+        "tools/gc_observation.py",
+        "benchmarks/results/voice-fixed-arrival-baseline.json",
+        "benchmarks/results/voice-fixed-arrival-selective.json",
+        "benchmarks/results/voice-fixed-arrival-selective-v2.json",
+        "benchmarks/results/voice-routing-incomplete-comparison.json",
+        "benchmarks/results/voice-routing-gc-diagnostic-comparison.json",
+        "benchmarks/results/voice-gc-pause-diagnostic.json"
+      ],
+      "validation": "Opt-in complete literal arithmetic skips onlylong-termsearch;modelstillruns,activehistory/refsretained. Personal/unit/variable/date/phone/extra-instruction inputsfallthrough;82existingmemorydevquestions notrouted. Versionread remainsreal/off-eventloop.225corePASS. Samepristinesealedseed,fixed20releases10s,coldmodels:baseline mathP95=3.165s,recall4.262s;candidatev1fails15thimageCAMERA_EPOCH_CHANGED,staleanswerrefused,retained. PassiveGCv2completes20:math1.941s,recall4.348s,time3.130s,image4.826s;overallFAILshort3s. GCgen2=580.123ms overlapsmaxloop573.457ms;cameraepochreset1. Observationmodes differ,no strictsinglefactor gain claim;noGCpolicychange.",
+      "next_action": "Isolate and test startup/static-heap collection policy with explicit cleanup and memory-growth checks;repeat complete workloads without relaxing camera/audio guards. Keep routingopt-in until widerqualification;formalB0-B3/5runs100events/8h notmet."
     }
   ],
   "acceptance": {
@@ -558,7 +579,8 @@
     "Long-record indexing/packing is integrated with locked BGE int8. Public save/recall/correction/old-backup restore,30 reindex SIGKILLs and40 cross-profile restore SIGKILLs pass. Dynamic quantization must remain record-wise.10k complete-adapter/foreground coexistence timing,other fault classes including control-loss/pending writes and independent JT gates remain incomplete.",
     "Managed current-profile10k timing passes47ms query/343ms write P95,but numbered top5 recall9/100(long0/50). Native local BM25/RRF/DBSF isolated candidates each recover100/100,not production-integrated/lifecycle-qualified. Actual20-turn shared10k voice/live-camera load passes memory127/459ms and visual11.64Hz/174-178ms but FAILS file first-PCM3/5s targets(3.098/5.545s);loop max154.90ms needs diagnosis. Physical audio,independent quality,full scenes and JT gates remain unverified.",
     "Hybrid dev82 remains below semantic acceptance:direct5/512 lexicalF1=26.958%;fixed8/768=29.585%,visible reference65/82. Configuration nowreaches store andpacker;defaultstillWINDOWS5/512. Hybrid5/512 voice image5.202s fails5s;8/768 voice andreal-stage tracing untested.40cross-profile restoreSIGKILLs passed with declared idlemodelservice intervention. AllJT remainNOT_VERIFIED.",
-    "Current8/768 + bounded256/64MiB prompt-cache20turn baseline stillFAILshort3s(firstPCMmax-typeP95=3.271s),image4.895s;no acousticgroundtruth. Nativephase trace shows irrelevant memorycostfor arithmetic butrouting change notyetimplemented. GlobalRSS/memory and8h remainunqualified;prompt-cache cap isnot a totalprocesscap."
+    "Current8/768 + bounded256/64MiB prompt-cache20turn baseline stillFAILshort3s(firstPCMmax-typeP95=3.271s),image4.895s;no acousticgroundtruth. Nativephase trace shows irrelevant memorycostfor arithmetic butrouting change notyetimplemented. GlobalRSS/memory and8h remainunqualified;prompt-cache cap isnot a totalprocesscap.",
+    "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

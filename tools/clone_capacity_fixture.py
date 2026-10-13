@@ -8,6 +8,7 @@ from contextlib import closing
 import json
 from pathlib import Path
 import sqlite3
+import shutil
 import sys
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -27,13 +28,29 @@ def main(args):
     corpus,expected,_,fact=workload(config['tier'],personal=config.get('namespace')=='personal',profile=config['profile'])
     if config!=expected or json.loads((source/'population.json').read_text())!={'owner':config['tier'],'guest':100}:
         raise RuntimeError('Source is not a completed frozen capacity seed')
-    if any((source/name).exists() for name in ('coexistence-started.json','records.sqlite','reminders.sqlite')):
+    archived=None
+    if args.from_snapshot:
+        previous=json.loads((source/'clone-receipt.json').read_text())
+        if (previous.get('kind')!='synthetic-capacity-clone-v1' or previous.get('status')!='COMPLETE'
+                or previous.get('config')!=config or previous.get('target')!=str(source)
+                or sha256(source/'seed-backup/manifest.json')!=previous.get('backup_manifest_sha256')):
+            raise RuntimeError('Source lacks the sealed synthetic seed snapshot')
+        archived=validate(source/'seed-backup')
+    elif any((source/name).exists() for name in ('coexistence-started.json','records.sqlite','reminders.sqlite')):
         raise RuntimeError('Only unused seed fixtures may be cloned')
     if target.exists():raise RuntimeError('Target must be new; preserve any incomplete clone for inspection')
     target.mkdir(parents=True,mode=0o700);receipt=target/'clone-receipt.json'
     state={'kind':'synthetic-capacity-clone-v1','status':'PREPARING','created_at':stamp(),'source':str(source),'target':str(target),'config':config}
     atomic_json(receipt,state)
-    backup=target/'seed-backup';create(source,backup);manifest=validate(backup)
+    backup=target/'seed-backup'
+    if archived:
+        backup.mkdir()
+        for name in [*archived['files'],'manifest.json']:
+            destination=backup/name;destination.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copyfile(source/'seed-backup'/name,destination);destination.chmod(0o600)
+        state['sealed_snapshot_source']=str(source/'seed-backup')
+    else:create(source,backup)
+    manifest=validate(backup)
     if any(name in manifest['files'] for name in ('records.sqlite','reminders.sqlite')):raise RuntimeError('Source contains application state beyond the seed')
     original=manifest['source_binding'];service=load(original['service_directory'])
     if profile_of(original)!=config['profile'] or original['embedding_sha256']!=config['embedding_sha256']:
@@ -94,4 +111,5 @@ def main(args):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--source',type=Path,required=True);parser.add_argument('--target',type=Path,required=True)
+    parser.add_argument('--from-snapshot',action='store_true',help='Use only a previously verified immutable seed archive,even if its working clone has been measured')
     main(parser.parse_args())

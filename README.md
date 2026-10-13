@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件222项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件225项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -249,3 +249,5 @@ source /opt/ros/jazzy/setup.bash
 目前完整开发对照已进一步定位到检索配置和提示装配的固定上限。配置现在贯通文字、`/new`和语音入口，候选数有20条硬上限，实际注入继续受token预算约束；默认仍为原窗口配置、5条/512tokens。DBSF的[8条/768tokens开发结果](benchmarks/results/lcvmem-development-hybrid-top8-768.json)F1为29.58，参考原文实际注入65/82题，没有执行错误、意外写入或跨主体证据；不等于语义正确率达标。此前[5条/512tokens候选语音共存](benchmarks/results/memory-voice-hybrid-10k.json)短问答首段文件音频P95最高2.902秒，但图像为5.202秒，整轮仍FAIL。完整对照、无效实验与范围见[评测说明](deploy/evaluation/README.md#候选开发质量与证据预算)。
 
 后续资源检查发现llama.cpp默认主机提示缓存上限每服务8GiB，日志中VLM已积累约3.25GiB，ASR约431MiB。现显式限制为256/64MiB，保持2K上下文；真实请求已验证缓存淘汰及语音保存/回忆，222项回归通过。[8条/768tokens并发结果](benchmarks/results/memory-voice-hybrid-8x768.json)图像首段文件音频P95为4.895秒，但短问答最高3.271秒，整体仍FAIL。[阶段追踪](benchmarks/results/voice-stage-diagnostic.json)显示慢算术请求携带707tokens记忆证据、模型首token等待约1.67秒；后续须验证选择性检索，当前没有宣称已解决短问答时延或最大事件循环延误。候选[40次跨格式恢复故障](benchmarks/results/hybrid-restore-fault-recovery.json)全部通过，报告保留了测试中模型服务的内存干预记录。
+
+完整字面算式可通过默认关闭的实验开关省略长期检索，保留当前会话、来源依赖并继续调用模型；个人/指代/单位等问题不走捷径，225项回归通过。固定到达对照中，一轮在图像输入epoch变化时正确拒绝旧帧并失败；全新档案的GC诊断复跑完成20轮，算术P95约1.94秒，但回忆约4.35秒，整体仍未达标。[诊断](benchmarks/results/voice-gc-pause-diagnostic.json)发现一次约580ms的第二代GC与573ms事件循环延误重叠。GC策略未改，选择性检索也未设为默认；后续验证静态对象管理及长时稳定性。

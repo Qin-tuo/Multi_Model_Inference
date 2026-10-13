@@ -46,6 +46,7 @@ async def main(args):
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
     top_k=args.memory_top_k if args.memory_top_k is not None else runtime['memory']['top_k']
     memory_tokens=args.memory_token_limit if args.memory_token_limit is not None else runtime['memory']['context_token_limit']
+    skip_arithmetic=args.skip_literal_arithmetic if args.skip_literal_arithmetic is not None else runtime['memory'].get('skip_literal_arithmetic',False)
     model=LlamaConfig.from_manifest(ROOT/'models/manifest.json')
     validate_retrieval_limits(top_k,memory_tokens,runtime['llama']['context_tokens'],model.max_tokens)
     folder=args.run_dir.resolve();corpus,config,prefix,_=workload(10000,personal=True,profile=args.profile)
@@ -66,11 +67,16 @@ async def main(args):
     reader=fingerprint();before=backend_state();artifacts=folder/'coexistence';artifacts.mkdir()
     write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'trace_stages':args.trace_stages,'debug_loop':args.debug_loop,
         'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
+        'skip_literal_arithmetic':skip_arithmetic,'turn_interval_seconds':args.turn_interval,
         'inputs':[{'label':a,'sha256':c} for a,_,c in inputs]})
     queries=[];writes=[];turns=[];lag=[];errors=[];checks={};voice=None;probe=None;bridge=None;thread=None
     observe_stop=threading.Event();voice_done=asyncio.Event();memory_minimum=asyncio.Event();sampling_done=asyncio.Event()
     memory_task=lag_task=None;begin=end=None;vision={};bridge_state={};asr_state={}
     stage_trace=None
+    gc_observer=None
+    if args.observe_gc:
+        from tools.gc_observation import GCObservation
+        gc_observer=GCObservation()
     if args.trace_stages:
         from tools.voice_stage_trace import StageTrace
         stage_trace=StageTrace()
@@ -135,25 +141,33 @@ async def main(args):
                     await asyncio.sleep(.1)
             voice=VoiceAssistant(model,memory,reminders,records,
                 user_id=corpus['owner'],vision_frames=bridge.frames,output_path=artifacts/'answers.wav',
-                context_tokens=runtime['llama']['context_tokens'],memory_top_k=top_k,memory_context_tokens=memory_tokens)
+                context_tokens=runtime['llama']['context_tokens'],memory_top_k=top_k,memory_context_tokens=memory_tokens,
+                memory_skip_literal_arithmetic=skip_arithmetic)
             if stage_trace:stage_trace.attach(voice,memory)
+            if gc_observer:gc_observer.start()
             await voice.start();begin=time.monotonic_ns();probe.started_ns=begin;probe.measuring=True
             lag_task=asyncio.create_task(sample_loop());memory_task=asyncio.create_task(memory_load(memory))
             # Keep real foreground turns active until at least100 searches and
             #50 durable writes have been attempted during the same interval.
             async with asyncio.timeout(900):
-                while len(turns)<args.turns or not memory_minimum.is_set():
+                while len(turns)<args.turns or (not args.turn_interval and not memory_minimum.is_set()):
                     if memory_task.done():await memory_task;raise RuntimeError('Memory workload ended before foreground input')
                     label,path,digest=inputs[len(turns)%len(inputs)]
+                    due=begin+int(len(turns)*args.turn_interval*1e9) if args.turn_interval else None
+                    if due is not None:await asyncio.sleep(max(0,(due-time.monotonic_ns())/1e9))
                     started=time.monotonic_ns()
                     try:
                         row=await voice.run_file(path,timeout=60)
                         row.update(label=label,input_sha256=digest,started_ns=started,finished_ns=time.monotonic_ns())
+                        if due is not None:
+                            row['scheduled_release_ns']=due;row['release_lateness_ms']=max(0,(started-due)/1e6)
+                            row['scheduled_end_to_first_pcm_seconds']=row['inferred_speech_end_to_first_pcm_seconds']+row['release_lateness_ms']/1000
                         turns.append(row)
                         print(json.dumps({'turn':len(turns),'label':label,'first_pcm_s':row.get('inferred_speech_end_to_first_pcm_seconds'),
                             'response':row['response']},ensure_ascii=False),flush=True)
                     except Exception as error:
-                        turns.append({'label':label,'started_ns':started,'finished_ns':time.monotonic_ns(),'error':str(error)})
+                        turns.append({'label':label,'input_sha256':digest,'started_ns':started,'finished_ns':time.monotonic_ns(),
+                            'scheduled_release_ns':due,'release_lateness_ms':max(0,(started-due)/1e6) if due is not None else None,'error':str(error)})
                         raise
         except Exception as error:errors.append({'stage':'workload','type':type(error).__name__,'error':str(error)})
         finally:
@@ -178,6 +192,7 @@ async def main(args):
                 try:await voice.close()
                 except Exception as error:errors.append({'stage':'close','error':str(error)})
             if stage_trace:stage_trace.detach()
+            if gc_observer:gc_observer.stop()
         # Readbacks are deliberately outside all timed workload intervals.
         if (artifacts/'answers.wav').exists():
             with wave.open(str(artifacts/'answers.wav')) as wav:
@@ -197,7 +212,7 @@ async def main(args):
             row['foreground_overlap']=bool(turns) and row['queued_ns']<foreground_end and row['returned_ns']>foreground_begin
         overlap_queries=[row for row in queries if row['foreground_overlap']]
         overlap_writes=[row for row in writes if row['foreground_overlap']]
-        latencies={label:statistics([{'elapsed_ms':row['inferred_speech_end_to_first_pcm_seconds']*1000} for row in turns
+        latencies={label:statistics([{'elapsed_ms':row.get('scheduled_end_to_first_pcm_seconds',row['inferred_speech_end_to_first_pcm_seconds'])*1000} for row in turns
             if row['label']==label and 'inferred_speech_end_to_first_pcm_seconds' in row]) for label,_,_ in inputs}
         checks={'workload_completed':not errors,'minimum_memory_samples':len(queries)>=100 and len(writes)>=50,
             'minimum_overlapping_samples':len(overlap_queries)>=100 and len(overlap_writes)>=50,
@@ -218,6 +233,8 @@ async def main(args):
             'reader_fingerprint':reader,'config':config,'initial_population':counts,'run_directory':str(folder),
             'preparation_method':prepared.get('method','sdk-batch-real-bge'),'preparation_sha256':sha256(folder/'prepared.json'),
             'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
+            'skip_literal_arithmetic':skip_arithmetic,'turn_interval_seconds':args.turn_interval,
+            'latency_origin':'inferred actual speech end plus file-release lateness' if args.turn_interval else 'inferred end from actual paced input',
             'workload_begin_ns':begin,'workload_end_ns':end,'query_summary':qstat,'write_summary':wstat,
             'foreground_begin_ns':foreground_begin,'foreground_end_ns':foreground_end,
             'queries_overlapping_foreground':statistics(overlap_queries),'writes_overlapping_foreground':statistics(overlap_writes),
@@ -227,6 +244,7 @@ async def main(args):
             'event_loop_lag':{**statistics(lag),'missed20ms_periods':sum(row['missed_periods'] for row in lag)},
             'event_loop_samples':lag,'asr_state':asr_state,'backends_before':before,'backends_after':backend_state(),'resources':monitor.report(),
             'stage_trace':stage_trace.report() if stage_trace else None,'debug_loop':args.debug_loop,
+            'gc_observation':gc_observer.report() if gc_observer else None,
             'scope':'Same real VoiceAssistant and bound int8-window MemoryAdapter;10k personal owner records plus100 guest distractors,10% long owner records. Paced real memory searches/writes overlap repeated frozen synthetic speech inputs,real ASR/LLM/TTS and live RGB-D/detection/pose. File PCM is not physical playback. Periodic visual result age is measured,visual content has no scene ground truth. No reminder/gesture workload,no formal JT,independent quality,B0-B3 or8h acceptance.'}
         write_json(args.output,report)
         print(json.dumps({key:report[key] for key in ('status','checks','query_summary','write_summary','voice_latency','event_loop_lag')},ensure_ascii=False),flush=True)
@@ -239,8 +257,12 @@ if __name__=='__main__':
     parser.add_argument('--profile',choices=[WINDOWS,HYBRID],default=WINDOWS)
     parser.add_argument('--memory-top-k',type=int,choices=range(1,21))
     parser.add_argument('--memory-token-limit',type=int)
+    parser.add_argument('--skip-literal-arithmetic',action=argparse.BooleanOptionalAction,default=None)
+    parser.add_argument('--turn-interval',type=float,default=0,help='Fixed file-release interval in seconds;0 preserves prior closed-loop protocol')
     parser.add_argument('--trace-stages',action='store_true',help='Diagnostic native frames and wall spans; qualify observer overhead before comparisons')
     parser.add_argument('--debug-loop',action='store_true',help='Diagnostic asyncio callbacks slower than20ms; affects measured execution')
+    parser.add_argument('--observe-gc',action='store_true',help='Passive diagnostic GC timing;does not disable or tune collection')
     args=parser.parse_args()
     if not 4<=args.turns<=100:parser.error('turns must be4..100')
+    if args.turn_interval and not 8<=args.turn_interval<=20:parser.error('fixed turn interval must be8..20s')
     raise SystemExit(asyncio.run(main(args)))

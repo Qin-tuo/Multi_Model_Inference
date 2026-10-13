@@ -38,7 +38,8 @@ async def run(args):
             user_id=args.user, session_id=args.session_id, vision_frames=bridge.frames if bridge else None,
             output_path=args.output_wav, input_device=args.input_device, output_device=args.output_device,
             context_tokens=settings["llama"]["context_tokens"],memory_top_k=settings['memory']['top_k'],
-            memory_context_tokens=settings['memory']['context_token_limit'])
+            memory_context_tokens=settings['memory']['context_token_limit'],
+            memory_skip_literal_arithmetic=settings['memory'].get('skip_literal_arithmetic',False))
         if feedback: voice.notifications.before_claim = feedback.tick
         try:
             await voice.start()

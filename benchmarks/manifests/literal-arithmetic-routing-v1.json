@@ -1,0 +1,74 @@
+{
+  "created_at": "2026-10-13T19:31:41.859979+00:00",
+  "protocol_id": "literal-arithmetic-memory-routing-development-v1",
+  "status": "FROZEN_BEFORE_COMPLETION",
+  "reader_fingerprint": "ca31aa06f54f91736c42f0fbaa237db4ae8be41f576d38e7aab87030b00ef7d4",
+  "model_context_tokens": 2048,
+  "memory_profile": "bge-int8-windows-bm25-v1",
+  "memory_top_k": 8,
+  "memory_evidence_tokens": 768,
+  "prompt_cache_mib": {
+    "llama": 256,
+    "asr": 64
+  },
+  "seed_snapshot_manifest_sha256": "9e7e2511c662a2e9628082551bd94e20f4ba587cf84d3491d8162456fd361c69",
+  "turn_count": 20,
+  "release_offsets_seconds": [
+    0,
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100,
+    110,
+    120,
+    130,
+    140,
+    150,
+    160,
+    170,
+    180,
+    190
+  ],
+  "input_cycle": [
+    {
+      "label": "recall",
+      "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-assistant-ebe8d792ced943eaaa085b4609f648f3/input-1.wav",
+      "sha256": "c7c0e3e1e7f71c3d191ebdb8ebe436f3c7b524210c028801bf0df0a04386be1d"
+    },
+    {
+      "label": "time",
+      "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-assistant-ebe8d792ced943eaaa085b4609f648f3/input-2.wav",
+      "sha256": "a1b54cd1b17c519e96b9748555176d4d0057f361c9b6a9f5109e0e94d5f2c0be"
+    },
+    {
+      "label": "image",
+      "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-assistant-ebe8d792ced943eaaa085b4609f648f3/input-3.wav",
+      "sha256": "c5a94a0d8f3eb2df6652ba2c844c4badb6a68b94935ce54dac88e76fbee97efd"
+    },
+    {
+      "label": "arithmetic",
+      "path": "/home/nvidia/.local/share/multi-model-assistant/fixtures/voice-assistant-ebe8d792ced943eaaa085b4609f648f3/input-5.wav",
+      "sha256": "1c2f19c981ed44386d51f57b4d51f3e1206ef1a7d3c18a00074bb2642ab35444"
+    }
+  ],
+  "background_memory": "Two queries and one alternating short/long write every2s until foreground voice completes;actual counts/overlap preserved. Fixed foreground arrivals,background tail counts may differ when replies finish earlier.",
+  "variants": [
+    {
+      "name": "baseline",
+      "skip_literal_arithmetic": false
+    },
+    {
+      "name": "selective",
+      "skip_literal_arithmetic": true
+    }
+  ],
+  "startup": "Owned llama/asr/dependent speech restarted before each variant;health ready required;initial prompts not warmed artificially;camera/detection/pose remain live.",
+  "measurement": "No stage trace/debug. All20 attempts retained;recordactual release lateness,actual inferred-end latency andlatency includingrelease lateness. Fileinput timing isnot physicalspeech groundtruth.",
+  "scope": "One development pair,five repetitions ofeach of four synthetic questions,not independent question-quality,B0-B3five-run/100event qualification oracoustic acceptance. Same initial seed snapshot;livecamera,time-tool responses andsystem load can differ."
+}

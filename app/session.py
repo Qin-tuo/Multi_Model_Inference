@@ -105,9 +105,11 @@ class ToolContinuationBudget(FrameProcessor):
 class AssistantSession:
     def __init__(self, config, memory, reminders, records, *, user_id="owner", context_tokens=2048,
                  session_id=None, llm=None, vision_frames=None, output_channel="text",
-                 memory_top_k=5, memory_context_tokens=512):
+                 memory_top_k=5, memory_context_tokens=512,memory_skip_literal_arithmetic=False):
         from app.memory import validate_retrieval_limits
         validate_retrieval_limits(memory_top_k,memory_context_tokens,context_tokens,config.max_tokens)
+        if type(memory_skip_literal_arithmetic) is not bool:raise ValueError('Arithmetic retrieval routing must be a boolean')
+        self.memory_skip_literal_arithmetic=memory_skip_literal_arithmetic
         self.memory_top_k=memory_top_k;self.memory_context_tokens=memory_context_tokens
         self.config, self.memory, self.reminders, self.records = config, memory, reminders, records
         self.user_id = user_id
@@ -357,13 +359,16 @@ class AssistantSession:
             "time":turn.resolved_time if operation=="create_reminder" else None,"expires":time.monotonic()+300}
 
     async def _messages(self, text, turn, user_message=None):
-        from app.memory_sources import dialogue_lookup
+        from app.memory_sources import dialogue_lookup,literal_arithmetic
         task_lookup = turn.requested_lookup() in {"list_notes", "list_reminders", "get_time"} and turn.required_operation() == turn.requested_lookup()
-        source_query={} if task_lookup else await asyncio.to_thread(dialogue_lookup,text)
+        arithmetic_lookup=(self.memory_skip_literal_arithmetic and user_message is None
+            and turn.required_operation() is None and literal_arithmetic(text))
+        skip_retrieval=task_lookup or arithmetic_lookup
+        source_query={} if skip_retrieval else await asyncio.to_thread(dialogue_lookup,text)
         if turn.cancelled:raise asyncio.CancelledError()
         # Notes/task state have their own authoritative store. Irrelevant
         # semantic matches must not be presented as evidence for those queries.
-        found = ({"items": [], "generation": self.memory.generation(self.user_id)} if task_lookup else
+        found = ({"items": [], "generation": await asyncio.to_thread(self.memory.generation,self.user_id)} if skip_retrieval else
                  await asyncio.to_thread(self.memory.search, self.user_id, text, top_k=self.memory_top_k,**source_query))
         found["items"] = self.records.filter_memories(self.user_id, found["items"])
         turn.memory_candidates = found["items"]
@@ -415,6 +420,7 @@ class AssistantSession:
                     compact_references=compact_references)
         self.retrieval = {**metrics, "history_turns_dropped": dropped, "initial_prompt_tokens": tokens,
                           "requested_top_k":self.memory_top_k,"evidence_token_limit":self.memory_context_tokens,
+                          "retrieval_skipped_reason":'literal_arithmetic' if arithmetic_lookup else ('authoritative_tool_store' if task_lookup else None),
                           "source_query":source_query,
                           "memory_generation": found["generation"], "personal_recall": bool(personal_recall),
                           "task_lookup": task_lookup}
