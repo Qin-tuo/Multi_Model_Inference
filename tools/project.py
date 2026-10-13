@@ -406,6 +406,11 @@ def main():
     migration=sub.add_parser('migrate-memory',help='Resume legacy local memory migration to the managed Qdrant service')
     migration.add_argument('--data-dir',type=Path,required=True)
     migration.add_argument('--abort',action='store_true')
+    backup=sub.add_parser('backup-data',help='Quiescent native Qdrant and SQLite application backup')
+    backup.add_argument('--data-dir',type=Path,required=True)
+    backup.add_argument('--output',type=Path,required=True)
+    verify=sub.add_parser('verify-backup',help='Verify backup completeness, checksums and SQLite contents')
+    verify.add_argument('--backup',type=Path,required=True)
     bench = sub.add_parser('bench', help='Measured workloads; full B0-B3 scenarios remain separate work')
     bench.add_argument('--suite', choices=['memory-capacity'], required=True)
     bench.add_argument('--tier', type=int, choices=[1000,10000,50000], required=True)
@@ -443,6 +448,11 @@ def main():
     logs.add_argument("--lines", type=int, default=50)
     args = parser.parse_args()
     try:
+        if args.action in {'backup-data','verify-backup'}:
+            command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/backup_data.py')]
+            if args.action=='backup-data':command+=['create','--data-dir',str(args.data_dir),'--output',str(args.output)]
+            else:command+=['verify','--backup',str(args.backup)]
+            return subprocess.call(command,cwd=ROOT)
         if args.action=='migrate-memory':
             env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
             return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/migrate_memory.py'),

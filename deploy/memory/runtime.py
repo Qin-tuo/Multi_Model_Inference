@@ -50,11 +50,11 @@ class MemoryService:
     def url(self):return f'http://127.0.0.1:{self.port}'
     @property
     def key_path(self):return self.directory/'api-key'
-    def client(self):
+    def client(self,*,timeout=5):
         from qdrant_client import QdrantClient
         # Check synchronously through the same proxy-free authenticated client;
         # the SDK's optional background compatibility helper has its own HTTP path.
-        client=QdrantClient(url=self.url,api_key=private_key(self.key_path),timeout=5,trust_env=False,check_compatibility=False)
+        client=QdrantClient(url=self.url,api_key=private_key(self.key_path),timeout=timeout,trust_env=False,check_compatibility=False)
         try:
             if client.info().version!=VERSION:raise RuntimeError('Memory server version differs from the qualified release')
             return client

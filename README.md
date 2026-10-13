@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件147项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件153项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -48,7 +48,7 @@ python3 tools/project.py interact --user owner
 
 当前取消验证覆盖原生 interruption 到达管线末端的确认、HTTP生成请求停止、服务slot空闲及下一轮恢复。取消期间阻止新请求准入；视觉初测从取消到确认模型空闲约2.60秒，不代表声学停播时延。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU内存释放。到期提醒已在控制台按“通知：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
 
-提醒数据库迁到新目录后，启动恢复会重建指向当前数据库的任务参数，避免到期任务写回旧目录；原始失败见[迁移基线](benchmarks/results/reminder-relocation-baseline.json)。完整备份恢复与删除日志合并仍待实现。
+提醒数据库迁到新目录后，启动恢复会重建指向当前数据库的任务参数，避免到期任务写回旧目录；原始失败见[迁移基线](benchmarks/results/reminder-relocation-baseline.json)。一致备份已实现；旧备份恢复时的当前删除记录、提醒回执合并及应用切换仍待完成。
 
 提醒静音使用 `/mute-reminders on`、`/mute-reminders off`，设置按档案持久保存。未开始输出的失败最多重试3次，默认间隔5秒；提醒到期后默认有效1小时，可在`configs/runtime.yaml`配置。已开始输出但未确认的提醒保留为`uncertain`，重启后不自动重播，可查询后取消或重新设置。文字显示与音频播放分开记录。
 
@@ -94,6 +94,12 @@ ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM�
 每个数据目录拥有独立collection，绑定服务实例、目录和embedding文件指纹。绑定同时记录在本地`store.json`和Qdrant原生collection元数据中；复制目录、连接错误实例、替换embedding或丢失collection会明确失败，避免悄悄打开空库。已有绑定的数据目录沿用自身绑定。旧嵌入式数据通过`python3 tools/project.py migrate-memory --data-dir /实际应用数据目录`显式迁移；先退出使用该目录的应用，Qdrant服务保持运行。工具保留ID/版本/来源，合并删除记录，核对当前BGE向量后分批导入；中断后重复原命令续跑。未完成的迁移可加`--abort`撤销，已完成迁移禁止回退到旧库。详见[迁移说明](deploy/memory/README.md)。
 
 验证包括[绑定后的实际Mem0读写](benchmarks/results/managed-memory-smoke.json)、[公开文字入口](benchmarks/results/managed-memory-console-smoke.json)、[语音文件入口](benchmarks/results/managed-memory-voice-smoke.json)及[真实BGE迁移](benchmarks/results/memory-migration-smoke.json)。文件语音验证了真实ASR/LLM/TTS及记忆写读；没有声学播放回执。配置及复现说明见[记忆部署](deploy/memory/README.md)。
+
+### 应用数据备份
+
+退出使用目标数据目录的应用后，可执行`python3 tools/project.py backup-data --data-dir /应用数据目录 --output /独立备份目录`，再用`python3 tools/project.py verify-backup --backup /独立备份目录`校验。备份包含Qdrant原生快照及记忆、会话/笔记、提醒的SQLite数据，保留WAL中已提交内容，完成后不可覆盖，中断后可重复原命令续跑。模型、原始音视频和认证文件不进入备份。
+
+[真实备份与故障测试](benchmarks/results/data-backup-smoke.json)验证公开CLI、原生快照和SQLite还原，并完成三个阶段各10次真实SIGKILL续跑。[旧备份基线](benchmarks/results/old-backup-controls-baseline.json)保留了备份后遗忘/取消不能由旧快照体现的失败证据；完整应用恢复需要先合并当前状态，尚未交付。详见[数据维护说明](deploy/data/README.md)。
 
 ### 人物状态与手势主动回应
 
