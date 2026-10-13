@@ -241,15 +241,24 @@ class ReminderService:
 
     def _ensure_job(self, reminder: Any) -> None:
         job_id = "reminder:" + reminder["id"]
-        if self.scheduler.get_job(job_id) is not None:
+        existing = self.scheduler.get_job(job_id)
+        due_at = datetime.fromisoformat(reminder['due_utc'])
+        # Persisted APScheduler args include the database's absolute path.
+        # Rebind while recovery is paused if a backup was restored elsewhere;
+        # otherwise its callback would mutate the old database (if it exists).
+        valid = (existing is not None and existing.func_ref == 'app.reminders:_deliver_due'
+                 and tuple(existing.args) == (self.database_path, reminder['id']) and not existing.kwargs
+                 and isinstance(existing.trigger, DateTrigger) and existing.trigger.run_date == due_at)
+        if valid:
             return
         try:
             self.scheduler.add_job(
                 _deliver_due,
-                trigger=DateTrigger(run_date=datetime.fromisoformat(reminder["due_utc"])),
+                trigger=DateTrigger(run_date=due_at),
                 args=(self.database_path, reminder["id"]),
                 id=job_id,
                 name="local-reminder",
+                replace_existing=existing is not None,
             )
         except ConflictingIdError:
             pass

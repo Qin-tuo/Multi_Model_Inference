@@ -5,6 +5,8 @@ from __future__ import annotations
 import tempfile
 import time
 import unittest
+import shutil
+import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -91,6 +93,21 @@ class ReminderIntegrationTest(unittest.TestCase):
             self.assertTrue(after_claim_restart.acknowledge_delivery(notice_id, attempt_id=notice["attempt_id"], evidence="fixture-drained"))
             self.assertTrue(after_claim_restart.acknowledge_delivery(notice_id, attempt_id=notice["attempt_id"], evidence="fixture-drained"))
             self.assertIsNone(after_claim_restart.claim_next("owner"))
+
+    def test_relocated_database_rebinds_job_without_mutating_source(self):
+        with ReminderService(self.database) as original:
+            reminder=original.create('owner','restore to a new directory',self.due_after(.3),request_id='restore')
+        restored=self.database.with_name('restored.sqlite')
+        shutil.copy2(self.database,restored)
+        with ReminderService(restored) as service:
+            job=service.scheduler.get_job('reminder:'+reminder['reminder_id'])
+            self.assertEqual(job.args,(str(restored.resolve()),reminder['reminder_id']))
+            self.wait_fired(service,reminder['reminder_id'])
+            self.assertIsNotNone(service.claim_next('owner'))
+            with sqlite3.connect(self.database) as source:
+                status=source.execute('SELECT status FROM assistant_reminders WHERE id=?',
+                    (reminder['reminder_id'],)).fetchone()[0]
+            self.assertEqual(status,'active')
 
     def test_mute_and_occupied_keep_notice_unplayed(self):
         with ReminderService(self.database) as service:

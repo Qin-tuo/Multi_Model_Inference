@@ -48,6 +48,8 @@ python3 tools/project.py interact --user owner
 
 当前取消验证覆盖原生 interruption 到达管线末端的确认、HTTP生成请求停止、服务slot空闲及下一轮恢复。取消期间阻止新请求准入；视觉初测从取消到确认模型空闲约2.60秒，不代表声学停播时延。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU内存释放。到期提醒已在控制台按“通知：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
 
+提醒数据库迁到新目录后，启动恢复会重建指向当前数据库的任务参数，避免到期任务写回旧目录；原始失败见[迁移基线](benchmarks/results/reminder-relocation-baseline.json)。完整备份恢复与删除日志合并仍待实现。
+
 提醒静音使用 `/mute-reminders on`、`/mute-reminders off`，设置按档案持久保存。未开始输出的失败最多重试3次，默认间隔5秒；提醒到期后默认有效1小时，可在`configs/runtime.yaml`配置。已开始输出但未确认的提醒保留为`uncertain`，重启后不自动重播，可查询后取消或重新设置。文字显示与音频播放分开记录。
 
 模型服务不可用时，可独立运行文字提醒消费者：
@@ -102,6 +104,28 @@ source /opt/ros/jazzy/setup.bash
 source "$HOME/AI_Stack/workspaces/vision/install/setup.bash"
 .venv/bin/python tools/gesture_feedback_smoke.py
 ```
+
+### 记忆容量测量
+
+入口 `bench --suite memory-capacity` 已实现，其余B0–B3整机负载和完整 `acceptance` 入口仍待完成。使用[冻结合成语料定义](benchmarks/corpora/memory-capacity-v1.json)，在六个后端驻留、真实检测/姿态持续运行、无并发对话时，对每档100次查询和50次明确事实写入计时。BGE为真实CPU ONNX，查询包括embedding、主体过滤、检索及适配器返回；写入包括SDK、history和operation journal确认。默认基准线程配置为OpenBLAS1、OMP2、ORT intra2/inter1，报告记录实际值。
+
+| 当前Qdrant local基线 | 查询P95 | 完整写入P95 | 容量时延目标 |
+| --- | --- | --- | --- |
+| [1k档](benchmarks/results/memory-capacity-1k-baseline.json) | 79.2ms | 146.1ms | 该档低于200/500ms参考值 |
+| [10k档](benchmarks/results/memory-capacity-10k-baseline.json) | 350.4ms | 906.3ms | **未达到JT-11的200/500ms目标** |
+
+各档另加100条访客硬负例，未观察到主体泄漏，全部50次写入均在计时后检查了正文、历史及journal完成状态。编号近似记录的Top-5命中分别为0/100、86/100；各档查询编号集合不同，召回率仅作各自压力观察。这不是独立200例记忆质量集，1k档低时延也不代表记忆质量或JT验收通过。50k压力档仍待测量；当前先处理10k档已暴露的瓶颈。
+
+[分段诊断](benchmarks/results/memory-capacity-10k-profile.json)在已完成数据的隔离副本上进行：10次查询平均总耗时333ms，其中Qdrant查询296ms；10次写入平均846ms，两次Qdrant过滤列表合计约773ms。主耗时在嵌入式存储的过滤/查询路径。上游说明[local模式面向小规模使用，payload索引不生效](https://github.com/qdrant/qdrant-client/blob/v1.19.1/qdrant_client/local/qdrant_local.py)。后续评估同一Mem0/Qdrant技术栈的本机服务模式和原生索引，保留此失败基线；当前应用尚未切换。
+
+```bash
+python3 tools/project.py bench --suite memory-capacity --tier 10000 \
+  --seed-method sdk-batch \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/memory-capacity-new-run" \
+  --output benchmarks/results/memory-capacity-new-run.json
+```
+
+`--run-dir`必须是新目录，或带有完全匹配标记的本工具数据目录；准备阶段中断可在相同目录继续。完成测量会额外写入50条事实，再次完整测量应使用新目录。`adapter`准备模式逐条走完整应用写入；`sdk-batch`仅在隔离测试数据准备阶段复用BGE批量embedding和Mem0的Qdrant/history provider，并写入对应操作日志，减少反复全库冲突扫描。两种准备结果的向量、payload、history、journal指纹已[抽样核对](benchmarks/results/memory-capacity-import-equivalence.json)；计时写入始终使用完整应用适配器。模型、原始数据库和批量测试数据保留在AI_Stack运行目录，不提交Git。
 
 ### 依赖与单组件检查
 
@@ -170,7 +194,7 @@ source /opt/ros/jazzy/setup.bash
 .venv/bin/python tools/vision_bridge_probe.py --launch-camera
 ```
 
-语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。`interact` 已实现文本入口；`up/down/status/logs`通过systemd管理所选后端，使用方法见[后端生命周期说明](deploy/systemd/README.md)。`backend_status=READY`只表示后端接口就绪，完整助手与物理设备仍待验收。`bench/acceptance`完整入口尚未实现。
+语音与视觉准备细节分别见 [语音部署说明](deploy/speech/README.md)、[视觉部署说明](deploy/vision/README.md)。`interact` 已实现文本入口；`up/down/status/logs`通过systemd管理所选后端，使用方法见[后端生命周期说明](deploy/systemd/README.md)。`backend_status=READY`只表示后端接口就绪，完整助手与物理设备仍待验收。`bench`目前提供记忆容量工作负载，完整B0–B3与`acceptance`入口仍待实现。
 
 ## 数据和上游
 

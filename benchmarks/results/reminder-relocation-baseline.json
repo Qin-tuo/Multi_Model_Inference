@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-10-13T02:35:52.446397+00:00",
+  "status": "FAIL",
+  "scope": "Real APScheduler/SQLite in isolated directories; relocation of a closed reminder database before due time",
+  "job_points_to_original_database": true,
+  "observed_states": {
+    "original": "fired",
+    "restored": "active"
+  },
+  "required_states": {
+    "original": "active",
+    "restored": "fired"
+  }
+}

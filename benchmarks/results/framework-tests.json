@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T02:16:44.751513+00:00",
+  "created_at": "2026-10-13T02:48:27.401541+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 125,
+  "tests_run": 126,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -297,6 +297,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_reminders.ReminderIntegrationTest.test_relocated_database_rebinds_job_without_mutating_source",
+      "status": "PASS"
+    },
+    {
       "id": "test_reminders.ReminderIntegrationTest.test_restart_recovers_missing_job_and_deduplicates_due_callback",
       "status": "PASS"
     },
@@ -521,6 +525,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "fd7ab34a7441bc15d96b9b6fcc621158b49a20d1",
+  "source_commit": "131b24b1b4031b4e28673fa023114bcea23afad3",
   "source_state": "working tree; see checkpoint commit containing this report"
 }
