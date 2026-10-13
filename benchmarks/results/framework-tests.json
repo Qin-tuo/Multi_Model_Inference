@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T04:34:35.809152+00:00",
+  "created_at": "2026-10-13T04:58:40.664704+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 135,
+  "tests_run": 137,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -50,6 +50,14 @@
     },
     {
       "id": "test_mem0_adapter.Mem0LifecycleTests.test_delete_failure_preserves_barrier_and_restarts_to_finish",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_entity_cleanup_after_restart_preserves_other_owners_and_live_links",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_entity_cleanup_failure_stays_pending_and_recovers_on_reopen",
       "status": "PASS"
     },
     {
@@ -561,6 +569,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "11872a8e0c1f5c66bce6808adc8d654e6dd073d8",
+  "source_commit": "1f8c6787285f1ae611760d75eb9cf1273776a10c",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

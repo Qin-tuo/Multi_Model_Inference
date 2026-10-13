@@ -534,6 +534,7 @@ class Mem0Adapter:
 
     def _erase(self, user_id, ids):
         from patches.mem0.purge_history import purge_history
+        from patches.mem0.purge_entities import purge_entities
         for memory_id in ids:
             record = self.sdk.get(memory_id)
             if record is not None:
@@ -541,6 +542,7 @@ class Mem0Adapter:
                     raise MemoryAdapterError("CONFLICT", "deletion barrier does not match SDK owner")
                 self.sdk.delete(memory_id)
         result = purge_history(self.sdk, ids, user_id)
+        result.update(purge_entities(self.sdk,ids,user_id))
         with self.engine.begin() as connection:
             connection.execute(self.barriers.update().where(self.barriers.c.user_id == user_id,
                                                             self.barriers.c.memory_id.in_(ids)).values(status="COMPLETED"))

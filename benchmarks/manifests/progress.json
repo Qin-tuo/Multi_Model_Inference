@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T04:39:58.310555+00:00",
+  "updated_at": "2026-10-13T04:58:52.619169+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -259,9 +259,12 @@
         "app/memory_store.py",
         "app/memory_runtime.py",
         "deploy/memory/runtime.py",
-        "tests/test_memory_service.py"
+        "tests/test_memory_service.py",
+        "patches/mem0/purge_entities.py",
+        "tests/test_mem0_adapter.py",
+        "benchmarks/results/framework-tests.json"
       ],
-      "validation": "Embedded Qdrant local baseline:1k query79.2ms/write146.1ms P95;10k query350.4ms/write906.3ms FAIL200/500ms gates. Native Qdrant1.19.2 exact-search/keyword-index comparison:10k47.5/56.6ms and50k61.6/59.2ms, no errors/owner leaks/unconfirmed writes.10k100-query hit mask unchanged;50k numbered recall94/100, not independent memory quality.40 native SIGKILLs pass4 phases10each. Authenticated managed store with directory/collection/embedding binding is now used by public text/voice; real-model text and file-voice smokes pass. Per-frame vision rates were not recorded throughout capacity runs; full coexistence/production-path latency remain pending.",
+      "validation": "Embedded Qdrant local baseline:1k query79.2ms/write146.1ms P95;10k query350.4ms/write906.3ms FAIL200/500ms gates. Native Qdrant1.19.2 exact-search/keyword-index comparison:10k47.5/56.6ms and50k61.6/59.2ms, no errors/owner leaks/unconfirmed writes.10k100-query hit mask unchanged;50k numbered recall94/100, not independent memory quality.40 native SIGKILLs pass4 phases10each. Authenticated managed store with directory/collection/embedding binding is now used by public text/voice; real-model text and file-voice smokes pass. Per-frame vision rates were not recorded throughout capacity runs; full coexistence/production-path latency remain pending. Strict owner-scoped entity erasure now covers lazy SDK restart, shared live links and failure/reopen recovery using real SDK/Qdrant/SQLite with fixture embeddings; full framework regression137/137 PASS. Migration and complete backup/restore remain pending.",
       "next_action": "Implement explicit existing-store migration and full backup/deletion-journal restore; measure authenticated/bound production path at10k with complete workload, and complete independent200-case memory quality."
     }
   ],

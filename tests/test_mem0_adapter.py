@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 import tempfile
 import unittest
+import uuid
 
 from app.memory import Mem0Adapter, MemoryAdapterError, build_mem0_config
 
@@ -174,6 +175,43 @@ class Mem0LifecycleTests(unittest.TestCase):
         self.assertEqual({parent, summary["memory_id"]}, set(result["deleted_ids"]))
         self.assertEqual([], self.adapter.sdk.history(summary["memory_id"]))
         self.assertEqual([], self.adapter.list_memories("owner"))
+
+    def test_entity_cleanup_after_restart_preserves_other_owners_and_live_links(self):
+        forgotten=self.remember()["memory_id"]
+        kept=self.remember(key='other',content='保留内容',request_id='keep')['memory_id']
+        entity=self.adapter.sdk.entity_store
+        ids=[str(uuid.uuid4()) for _ in range(3)]
+        entity.insert(vectors=[FixtureEmbedding().embed('entity')]*3,ids=ids,payloads=[
+            {'data':'删除的实体','user_id':'owner','linked_memory_ids':[forgotten]},
+            {'data':'共享实体','user_id':'owner','linked_memory_ids':[forgotten,kept]},
+            {'data':'其他档案实体','user_id':'guest','linked_memory_ids':[forgotten]}])
+        self.restart()
+        self.assertIsNone(self.adapter.sdk._entity_store)
+        self.adapter.forget('owner',forgotten,request_id='forget-entity')
+        rows=self.adapter.sdk.vector_store.client.retrieve('assistant_memories_entities',ids)
+        by_id={str(row.id):row.payload for row in rows}
+        self.assertNotIn(ids[0],by_id)
+        self.assertEqual(by_id[ids[1]]['linked_memory_ids'],[kept])
+        self.assertEqual(by_id[ids[2]]['linked_memory_ids'],[forgotten])
+
+    def test_entity_cleanup_failure_stays_pending_and_recovers_on_reopen(self):
+        memory_id=self.remember()['memory_id']
+        entity=self.adapter.sdk.entity_store
+        entity_id=str(uuid.uuid4())
+        entity.insert(vectors=[FixtureEmbedding().embed('entity')],ids=[entity_id],payloads=[
+            {'data':'合成遗忘实体','user_id':'owner','linked_memory_ids':[memory_id]}])
+        self.restart()
+        client=self.adapter.sdk.vector_store.client;original=client.delete
+        def fail_entity(collection_name,*args,**kwargs):
+            if collection_name.endswith('_entities'):raise OSError('LABELLED entity erasure failure')
+            return original(collection_name,*args,**kwargs)
+        client.delete=fail_entity
+        self.assertCode('STORAGE_ERROR',lambda:self.adapter.forget('owner',memory_id,request_id='forget-entity'))
+        self.assertEqual(self.adapter.operation_status('owner','forget-entity')['status'],'PENDING')
+        client.delete=original
+        self.restart()
+        self.assertEqual(self.adapter.sdk.vector_store.client.retrieve('assistant_memories_entities',[entity_id]),[])
+        self.assertTrue(self.adapter.forget('owner',memory_id,request_id='forget-entity')['durable'])
 
     def test_correction_invalidates_old_derived_summary(self):
         parent = self.remember()["memory_id"]
