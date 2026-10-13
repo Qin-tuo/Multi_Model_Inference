@@ -9,7 +9,7 @@ import sys
 from loguru import logger
 from app.adapters.llama import LlamaConfig
 from app.adapters.vision import RosVisionBridge
-from app.memory import Mem0Adapter
+from app.memory_runtime import open_memory
 from app.records import Records
 from app.reminders import ReminderService
 from app.voice_assistant import VoiceAssistant
@@ -24,8 +24,7 @@ async def run(args):
         if not args.no_vision:
             bridge = RosVisionBridge.configured().start()
             stack.callback(bridge.close)
-        memory = stack.enter_context(Mem0Adapter(args.data_dir / "memory",
-            bge_path=CACHE / "models/bge-small-zh-v1.5-onnx", embedding_backend="onnx"))
+        memory = stack.enter_context(open_memory(args.data_dir/'memory',settings=settings))
         options = {key: settings["reminders"][key] for key in
                    ("notification_ttl_seconds", "max_delivery_attempts", "retry_delay_seconds")}
         reminders = stack.enter_context(ReminderService(args.data_dir / "reminders.sqlite", **options))

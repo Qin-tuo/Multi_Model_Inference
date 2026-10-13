@@ -1,0 +1,164 @@
+{
+  "created_at": "2026-10-13T04:12:18.594894+00:00",
+  "status": "PASS",
+  "checks": {
+    "public_voice_completed": true,
+    "native_bound": true,
+    "two_complete_turns": true,
+    "recalled_fact_in_reply": true,
+    "no_pipeline_errors": true,
+    "fact_actually_persisted": true,
+    "audio_file_nonempty": true
+  },
+  "scope": "Two existing synthetic WAV utterances through public voice command with real ASR/BGE/llama/TTS, authenticated bound Mem0/Qdrant store and WAV output. No physical audio or full quality/latency acceptance.",
+  "input_sha256": [
+    "e5135d93b21c951224af02495d24eccfe174b33ce898e24ee4de70df955ce017",
+    "c7c0e3e1e7f71c3d191ebdb8ebe436f3c7b524210c028801bf0df0a04386be1d"
+  ],
+  "turns": [
+    {
+      "turn_id": "0dd1a7a889d24a7eb2a8641b12b357fb",
+      "session_id": "23318bdc32104da2acf97df4b3a28079",
+      "response": "已记住。",
+      "calls": [
+        {
+          "tool": "remember",
+          "arguments": {
+            "key": "like_mugwort_tea",
+            "content": "我喜欢茉莉花茶。"
+          },
+          "outcome": {
+            "ok": true,
+            "result": {
+              "memory_id": "981c1cc5-92eb-4db2-ac4a-e3162f0f346e",
+              "version": 1,
+              "generation": 0,
+              "durable": true,
+              "replayed": false,
+              "atomicity": "reconciled_non_atomic",
+              "user_message": "已记住。"
+            }
+          },
+          "provider_arguments": {
+            "key": "like_mugwort_tea"
+          }
+        }
+      ],
+      "retrieval": {
+        "injected_memory_ids": [],
+        "memory_tokens": 35,
+        "retrieved_count": 0,
+        "injected_count": 0,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 334,
+        "memory_generation": 0,
+        "personal_recall": false,
+        "task_lookup": false
+      },
+      "prompt_tokens": [
+        334,
+        295
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "image": null,
+      "model_usage": [
+        {
+          "prompt_tokens": 334,
+          "completion_tokens": 22,
+          "total_tokens": 356,
+          "cache_read_input_tokens": 322,
+          "cache_creation_input_tokens": null,
+          "reasoning_tokens": null,
+          "input_audio_tokens": null,
+          "output_audio_tokens": null,
+          "cache_read_input_audio_tokens": null
+        },
+        {
+          "prompt_tokens": 295,
+          "completion_tokens": 9,
+          "total_tokens": 304,
+          "cache_read_input_tokens": 156,
+          "cache_creation_input_tokens": null,
+          "reasoning_tokens": null,
+          "input_audio_tokens": null,
+          "output_audio_tokens": null,
+          "cache_read_input_audio_tokens": null
+        }
+      ],
+      "model_request_skipped": false,
+      "effective_user_request": "请记住，我喜欢茉莉花茶。",
+      "elapsed_seconds": 2.7505707100008294,
+      "transcript": "请记住，我喜欢茉莉花茶。",
+      "speech_receipt": {
+        "channel": "fixture",
+        "bytes_written": 46080,
+        "first_pcm_ns": 8269353095127,
+        "first_sample": 0,
+        "completion": "wav_file_flushed"
+      },
+      "vad_detected_ns": 8266077009599,
+      "vad_detection_to_first_pcm_seconds": 3.276085528,
+      "inferred_speech_end_to_first_pcm_seconds": 3.676085528
+    },
+    {
+      "turn_id": "b49366c728a1462987c7fc6ab544ffbc",
+      "session_id": "23318bdc32104da2acf97df4b3a28079",
+      "response": "您喜欢喝茉莉花茶。",
+      "calls": [],
+      "retrieval": {
+        "injected_memory_ids": [
+          "981c1cc5-92eb-4db2-ac4a-e3162f0f346e"
+        ],
+        "memory_tokens": 168,
+        "retrieved_count": 1,
+        "injected_count": 1,
+        "history_turns_dropped": 0,
+        "initial_prompt_tokens": 570,
+        "memory_generation": 0,
+        "personal_recall": true,
+        "task_lookup": false
+      },
+      "prompt_tokens": [
+        570
+      ],
+      "history_persisted": true,
+      "repair_attempted": false,
+      "image": null,
+      "model_usage": [
+        {
+          "prompt_tokens": 570,
+          "completion_tokens": 9,
+          "total_tokens": 579,
+          "cache_read_input_tokens": 425,
+          "cache_creation_input_tokens": null,
+          "reasoning_tokens": null,
+          "input_audio_tokens": null,
+          "output_audio_tokens": null,
+          "cache_read_input_audio_tokens": null
+        }
+      ],
+      "model_request_skipped": false,
+      "effective_user_request": "我喜欢喝什么茶？",
+      "elapsed_seconds": 1.0894934549996833,
+      "transcript": "我喜欢喝什么茶？",
+      "speech_receipt": {
+        "channel": "fixture",
+        "bytes_written": 74880,
+        "first_pcm_ns": 8273198316777,
+        "first_sample": 23040,
+        "completion": "wav_file_flushed"
+      },
+      "vad_detected_ns": 8271746465747,
+      "vad_detection_to_first_pcm_seconds": 1.45185103,
+      "inferred_speech_end_to_first_pcm_seconds": 1.85185103
+    }
+  ],
+  "audio": {
+    "frames": 60480,
+    "rate": 16000,
+    "channels": 1
+  },
+  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/managed-memory-voice-72f4f01a70dd4a1db6ccae92f1f3d8ed",
+  "returncode": 0
+}

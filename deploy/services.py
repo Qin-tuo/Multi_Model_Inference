@@ -20,9 +20,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.project import CACHE, DATA, meminfo, server_command, stamp, write_json
 
-ORDER = ("llama", "asr", "speech", "camera", "vision", "pose")
+ORDER = ("qdrant", "llama", "asr", "speech", "camera", "vision", "pose")
 DEPENDENCIES = {"speech": ("asr",), "vision": ("camera",), "pose": ("camera",)}
-PORTS = {"llama": 8088, "asr": 8089, "speech": 8621}
+PORTS = {"qdrant":6333, "llama": 8088, "asr": 8089, "speech": 8621}
 UNIT_DIR = DATA / "systemd"
 LINK_DIR = Path.home() / ".config/systemd/user"
 
@@ -123,6 +123,11 @@ def preflight(names):
     if building and any(name != "camera" for name in names):
         raise RuntimeError(f"GPU ORT build PID {building} is active; keep model services stopped until it completes")
     if "llama" in names: server_command()
+    if 'qdrant' in names:
+        from deploy.memory.prepare import BINARY
+        from deploy.memory.runtime import prepare
+        if not BINARY.is_file():raise RuntimeError('Pinned Qdrant binary is missing; run deploy/memory/prepare.py')
+        prepare(DATA/'qdrant')
     if "asr" in names:
         item = json.loads((ROOT / "models/manifest.json").read_text())["models"]["asr"]
         if not all((CACHE / "models" / entry["name"]).is_file() for entry in item["files"]):
@@ -163,7 +168,7 @@ def owns_port(component, pids):
     for line in Path("/proc/net/tcp").read_text().splitlines()[1:]:
         fields = line.split()
         address, number = fields[1].split(":")
-        if int(number, 16) == port and fields[3] == "0A" and address in {"0100007F", "00000000"}:
+        if int(number, 16) == port and fields[3] == "0A" and address == "0100007F":
             inodes.add(fields[9])
     for pid in pids:
         try:
@@ -176,6 +181,9 @@ def owns_port(component, pids):
 
 
 def probe(component):
+    if component=='qdrant':
+        from deploy.memory.runtime import health
+        return health(DATA/'qdrant')
     if component in PORTS:
         suffix = "/v1/capabilities" if component == "speech" else "/health"
         try:
@@ -187,10 +195,13 @@ def probe(component):
     setups = ["/opt/ros/jazzy/setup.bash"]
     if component != "camera": setups.append(str(CACHE / "workspaces/vision/install/setup.bash"))
     script = " && ".join("source " + shlex.quote(path) for path in setups)
-    script += " && " + shlex.join(["/usr/bin/python3", str(ROOT / "tools/ros_health.py"), component])
+    script += " && exec " + shlex.join(["/usr/bin/python3", str(ROOT / "tools/ros_health.py"), component])
     env = os.environ.copy()
     env.update(ROS_DOMAIN_ID=env.get("ASSISTANT_ROS_DOMAIN_ID", "42"), ROS_AUTOMATIC_DISCOVERY_RANGE="LOCALHOST")
-    result = command(["bash", "-c", script], timeout=8, check=False, env=env)
+    try:
+        result = command(["bash", "-c", script], timeout=8, check=False, env=env)
+    except subprocess.TimeoutExpired:
+        return {'ready':False,'reason':'ROS_probe_timeout','scope':'Observation timed out; backend termination is not implied'}
     try: return json.loads(result.stdout)
     except ValueError: return {"ready": False, "reason": "ROS_probe_failed"}
 

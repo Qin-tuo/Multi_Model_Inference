@@ -980,3 +980,9 @@ J2先以“整段识别→整段生成→分段播报”建立正确闭环，再
 > 按《项目二 本地多模态个人助手实施计划 v1.1》在当前 Jetson Orin NX 16GB 上完成具有中文语音、持续视觉、图文理解、长期记忆、打断、工具和提醒能力的本地助手。整体复用 Pipecat1.12.0 原生 PipelineWorker/WorkerRunner/context/frame/function handlers，Mem02.2.1 + Qdrant local/SQLite history + CPU BGE，以及APScheduler3.11.3/SQLAlchemy持久提醒；必要适配和局部补丁覆盖主体、版本、遗忘、非原子跨存储恢复、有界资源和真实释放，不另造主控或记忆框架。首版对话/VLM使用llama.cpp CUDA，Qwen2.5-VL-3B为首轮基线；OVS Qwen3-ASR0.6B/Matcha、yolo_ros/TensorRT、ROS2 Jazzy保留。依次完成J0–J7和B0–B3、8h/故障/离线/重部署及全部JT-01–JT-13真实验收，不因SDK限制下调门槛。保留references，不使用SO-101或实体执行器；Letta/Triton只作参考；Edge-LLM对话后端留到J5.7性能对比。缺失硬件或未达标项明确记录并继续独立推进，不以fixture、模拟输出或文档代替完成。
 
 实施的第一个可检查交付为 J0.1 工程基础与只读doctor，以及环境/依赖/外设差距清单；随后建立真实 llama.cpp 文本/图文最小闭环。完成 J0/J1 后用实测构建成本与资源情况更新排期。
+
+### 2026-10-13 容量验证后的存储部署调整
+
+原v1.1的Mem0/Qdrant技术栈和全部功能、J0–J7、JT门槛保持不变；Qdrant从Python嵌入式local模式调整为本机受管理的原生服务。真实10k基线查询/完整写入P95为350/906ms，诊断表明主要耗时在过滤/查询；相同数据和BGE的原生服务对照为47.5/56.6ms，50k压力档为61.6/59.2ms。使用精确扫描与原生字段索引，没有降低查询或事务确认范围。
+
+公开文字/语音入口已接入认证和collection元数据绑定，服务由已有systemd框架管理。当前日常运行目录没有旧用户数据库，未覆盖或自动迁移用户内容；旧目录迁移、完整备份/删除日志恢复及独立记忆质量仍为未完成项。编号压力样例并非独立200例语言质量验收，正式JT状态不因此改为通过。证据入口见README及deploy/memory/README.md。

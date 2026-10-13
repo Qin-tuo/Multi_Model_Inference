@@ -1,0 +1,12 @@
+{
+  "created_at": "2026-10-13T04:01:12.700621+00:00",
+  "status": "PASS",
+  "checks": {
+    "real_server": true,
+    "saved_and_retrieved": true,
+    "reopen_same_collection": true,
+    "fact_survives_reopen": true,
+    "forgotten": true
+  },
+  "scope": "Real managed authenticated Qdrant, BGE, Mem0, SQLite and collection metadata binding, isolated synthetic profile; no independent language quality or full migration/restore acceptance"
+}

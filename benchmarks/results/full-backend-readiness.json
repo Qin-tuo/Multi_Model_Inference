@@ -1,8 +1,31 @@
 {
-  "created_at": "2026-10-12T17:34:30.097612+00:00",
+  "created_at": "2026-10-13T04:33:36.890004+00:00",
   "components": {
+    "qdrant": {
+      "MainPID": "19043",
+      "Result": "success",
+      "NRestarts": "0",
+      "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+      "LoadState": "loaded",
+      "ActiveState": "active",
+      "SubState": "running",
+      "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+      "main_pid": 19043,
+      "cgroup_pids": [
+        19043,
+        19046
+      ],
+      "managed_by_project": true,
+      "health": {
+        "ready": true,
+        "authentication_required": true,
+        "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+        "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+        "owned_listening_socket": true
+      }
+    },
     "llama": {
-      "MainPID": "156037",
+      "MainPID": "8062",
       "Result": "success",
       "NRestarts": "0",
       "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
@@ -10,10 +33,10 @@
       "ActiveState": "active",
       "SubState": "running",
       "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
-      "main_pid": 156037,
+      "main_pid": 8062,
       "cgroup_pids": [
-        156037,
-        156039
+        8062,
+        8065
       ],
       "managed_by_project": true,
       "health": {
@@ -23,7 +46,7 @@
       }
     },
     "asr": {
-      "MainPID": "156098",
+      "MainPID": "8119",
       "Result": "success",
       "NRestarts": "0",
       "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
@@ -31,10 +54,10 @@
       "ActiveState": "active",
       "SubState": "running",
       "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
-      "main_pid": 156098,
+      "main_pid": 8119,
       "cgroup_pids": [
-        156098,
-        156100
+        8119,
+        8121
       ],
       "managed_by_project": true,
       "health": {
@@ -44,7 +67,7 @@
       }
     },
     "speech": {
-      "MainPID": "156137",
+      "MainPID": "8154",
       "Result": "success",
       "NRestarts": "0",
       "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
@@ -52,11 +75,10 @@
       "ActiveState": "active",
       "SubState": "running",
       "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
-      "main_pid": 156137,
+      "main_pid": 8154,
       "cgroup_pids": [
-        156137,
-        156139,
-        157633
+        8154,
+        8157
       ],
       "managed_by_project": true,
       "health": {
@@ -66,7 +88,7 @@
       }
     },
     "camera": {
-      "MainPID": "152676",
+      "MainPID": "8205",
       "Result": "success",
       "NRestarts": "0",
       "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
@@ -74,22 +96,22 @@
       "ActiveState": "active",
       "SubState": "running",
       "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
-      "main_pid": 152676,
+      "main_pid": 8205,
       "cgroup_pids": [
-        152676,
-        152684,
-        152738
+        8205,
+        8213,
+        8240
       ],
       "managed_by_project": true,
       "health": {
         "ready": true,
         "topic": "/camera/camera/color/image_raw",
-        "capture_age_ms": 43.276271,
+        "capture_age_ms": 44.60336,
         "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
       }
     },
     "vision": {
-      "MainPID": "155495",
+      "MainPID": "8274",
       "Result": "success",
       "NRestarts": "0",
       "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
@@ -97,22 +119,22 @@
       "ActiveState": "active",
       "SubState": "running",
       "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
-      "main_pid": 155495,
+      "main_pid": 8274,
       "cgroup_pids": [
-        155495,
-        155503,
-        155544
+        8274,
+        8282,
+        8324
       ],
       "managed_by_project": true,
       "health": {
         "ready": true,
         "topic": "/vision/d435/detections_3d",
-        "capture_age_ms": 76.77062,
+        "capture_age_ms": 69.493353,
         "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
       }
     },
     "pose": {
-      "MainPID": "155576",
+      "MainPID": "8356",
       "Result": "success",
       "NRestarts": "0",
       "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
@@ -120,17 +142,17 @@
       "ActiveState": "active",
       "SubState": "running",
       "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
-      "main_pid": 155576,
+      "main_pid": 8356,
       "cgroup_pids": [
-        155576,
-        155584,
-        155625
+        8356,
+        8364,
+        8406
       ],
       "managed_by_project": true,
       "health": {
         "ready": true,
         "topic": "/pose/d435/detections_3d",
-        "capture_age_ms": 62.208539,
+        "capture_age_ms": 87.075486,
         "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
       }
     }

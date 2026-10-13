@@ -9,8 +9,16 @@ VERSION='1.19.2'
 COMMIT='016542aa5deb6c66380bb137badf73d54f742bde'
 ARCHIVE='qdrant-aarch64-unknown-linux-musl.tar.gz'
 SHA256='6970b93b56fa1203f0cea47d2f330fdb654988fd56617aa77e8478cffd3c0ccb'
+EXECUTABLE_SHA256='5e62d077fb960e98f1c84f6e0c2aa8caa57f91e3b06d8f90e8e1f9377a195406'
 STACK=Path.home()/'AI_Stack'
 BINARY=STACK/'installed'/('qdrant-'+VERSION)/'qdrant'
+
+
+def validate_binary():
+    digest=hashlib.sha256()
+    with BINARY.open('rb') as stream:
+        while chunk:=stream.read(1024*1024):digest.update(chunk)
+    if digest.hexdigest()!=EXECUTABLE_SHA256:raise RuntimeError('Qdrant executable differs from the pinned release')
 
 
 def main():
@@ -32,6 +40,7 @@ def main():
     if not source.exists():subprocess.run(['git','clone','--depth','1','--branch','v'+VERSION,'https://github.com/qdrant/qdrant.git',str(source)],check=True)
     if subprocess.check_output(['git','rev-parse','HEAD'],cwd=source,text=True).strip()!=COMMIT:raise RuntimeError('Qdrant source checkout differs from the lock')
     subprocess.run([str(BINARY),'--version'],check=True)
+    validate_binary()
 
 
 if __name__=='__main__':main()

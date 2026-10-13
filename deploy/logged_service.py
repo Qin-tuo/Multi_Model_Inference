@@ -14,7 +14,7 @@ from tools.project import DATA
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("component", choices=["llama", "asr", "speech", "camera", "vision", "pose"])
+    parser.add_argument("component", choices=["qdrant", "llama", "asr", "speech", "camera", "vision", "pose"])
     args = parser.parse_args()
     directory = DATA / "logs/backends"
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)

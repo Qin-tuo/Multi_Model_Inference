@@ -39,7 +39,7 @@ class QdrantProcess:
             # Qdrant's config crate in this release enables YAML, not JSON.
             # JSON syntax is valid YAML; use its supported file extension.
             config_path=self.folder/'config.yaml';config_path.write_text(json.dumps(config,indent=2)+'\n')
-            env={k:v for k,v in os.environ.items() if not k.startswith('QDRANT__')}
+            env={k:v for k,v in os.environ.items() if not k.startswith('QDRANT_')}
             env.update(QDRANT__SERVICE__HOST='127.0.0.1',QDRANT__SERVICE__HTTP_PORT=str(self.port))
             self.log=(self.folder/'server.log').open('ab')
             self.process=subprocess.Popen([str(BINARY),'--config-path',str(config_path),'--disable-telemetry'],

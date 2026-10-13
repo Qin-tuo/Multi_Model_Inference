@@ -339,6 +339,9 @@ def smoke(args):
 
 
 def serve(args):
+    if args.component=='qdrant':
+        from deploy.memory.runtime import serve as serve_memory
+        return serve_memory(DATA/'qdrant')
     model_lease = None
     if args.component in {"llama", "asr", "speech", "vision", "pose"}:
         from deploy.resource_guard import hold_model_lease
@@ -397,7 +400,7 @@ def main():
     sm = sub.add_parser("smoke")
     sm.add_argument("--component", required=True, choices=["llama", "vision", "speech", "memory"])
     srv = sub.add_parser("serve", help="Run a model service in the foreground")
-    srv.add_argument("--component", choices=["llama", "asr", "speech", "camera", "vision", "pose"], required=True)
+    srv.add_argument("--component", choices=["qdrant", "llama", "asr", "speech", "camera", "vision", "pose"], required=True)
     test = sub.add_parser("test")
     test.add_argument("--suite", choices=["core", "framework", "memory", "interaction"], default="core")
     bench = sub.add_parser('bench', help='Measured workloads; full B0-B3 scenarios remain separate work')
@@ -433,7 +436,7 @@ def main():
         lifecycle.add_argument("--components", default="all")
         lifecycle.add_argument("--timeout", type=float, default=300)
     logs = sub.add_parser("logs", help="Read one managed backend's rotated log")
-    logs.add_argument("--component", choices=["llama", "asr", "speech", "camera", "vision", "pose"], required=True)
+    logs.add_argument("--component", choices=["qdrant", "llama", "asr", "speech", "camera", "vision", "pose"], required=True)
     logs.add_argument("--lines", type=int, default=50)
     args = parser.parse_args()
     try:
@@ -455,6 +458,9 @@ def main():
             return subprocess.call([str(ROOT / ".venv/bin/python"), "-m", "app.reminder_console", "--user", args.user,
                                     "--data-dir", str(args.data_dir), "--seconds", str(args.seconds)], cwd=ROOT)
         if args.action in {"interact", "voice"}:
+            application_env=os.environ.copy()
+            application_env.setdefault('OPENBLAS_NUM_THREADS','1')
+            application_env.setdefault('OMP_NUM_THREADS','2')
             module = "app.interact" if args.action == "interact" else "app.voice_cli"
             command = [str(ROOT / ".venv/bin/python"), "-m", module, "--user", args.user,
                        "--data-dir", str(args.data_dir)]
@@ -469,14 +475,16 @@ def main():
                         command += ["--" + field.replace("_", "-"), str(value)]
             if args.no_vision:
                 command += ["--no-vision"]
-                return subprocess.call(command, cwd=ROOT)
+                return subprocess.call(command, cwd=ROOT,env=application_env)
             from deploy.vision.serve import ros_environment
             setup = Path("/opt/ros/jazzy/setup.bash")
             if not setup.is_file(): raise RuntimeError("ROS is unavailable; use --no-vision for text-only operation")
             overlay = CACHE / 'workspaces/vision/install/setup.bash'
             if not overlay.is_file(): raise RuntimeError('Vision workspace is unavailable; prepare vision or use --no-vision')
             script = "source " + shlex.quote(str(setup)) + ' && source ' + shlex.quote(str(overlay)) + " && exec " + shlex.join(command)
-            return subprocess.call(["bash", "-c", script], cwd=ROOT, env=ros_environment())
+            ros_env=ros_environment()
+            ros_env.update({key:application_env[key] for key in ('OPENBLAS_NUM_THREADS','OMP_NUM_THREADS')})
+            return subprocess.call(["bash", "-c", script], cwd=ROOT, env=ros_env)
         return {"doctor": doctor, "prepare": prepare, "smoke": smoke, "test": tests, "serve": serve}[args.action](args)
     except (OSError, RuntimeError, TimeoutError, subprocess.CalledProcessError, ValueError) as e:
         print(json.dumps({"status": "FAIL", "error": str(e)}, ensure_ascii=False), file=sys.stderr)

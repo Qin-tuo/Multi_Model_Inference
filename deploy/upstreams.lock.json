@@ -85,8 +85,9 @@
     "binary": {
       "name": "qdrant-aarch64-unknown-linux-musl.tar.gz",
       "sha256": "6970b93b56fa1203f0cea47d2f330fdb654988fd56617aa77e8478cffd3c0ccb",
-      "url": "https://github.com/qdrant/qdrant/releases/download/v1.19.2/qdrant-aarch64-unknown-linux-musl.tar.gz"
+      "url": "https://github.com/qdrant/qdrant/releases/download/v1.19.2/qdrant-aarch64-unknown-linux-musl.tar.gz",
+      "executable_sha256": "5e62d077fb960e98f1c84f6e0c2aa8caa57f91e3b06d8f90e8e1f9377a195406"
     },
-    "status": "isolated_10k_capacity_and_40_process_kill_recovery_probes_pass_application_default_unchanged"
+    "status": "managed_authenticated_bound_store_text_and_file_voice_smoke_pass"
   }
 }

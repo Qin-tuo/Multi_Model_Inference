@@ -4,13 +4,13 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件111项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件135项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
 | 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机/语音文件会话、记忆与工具通过初测；真实设备、完整打断和质量验证继续推进 |
 | 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
-| 长期记忆 | Mem0 2.2.1 + 本地Qdrant + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
+| 长期记忆 | Mem0 2.2.1 + 本机Qdrant 1.19.2服务 + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；语音创建与真实TTS到期文件输出通过，实机播报待验证 |
 | 时间语义 | JioNLP 1.5.29 + Python datetime | 按用户原文和请求时间解析中文日期/时长；缺少具体时间时先询问 |
 | 语音 | OVS + llama.cpp Qwen3-ASR 0.6B + TensorRT Matcha/Vocos | 连续六轮文件语音打通记忆、工具、图像和提醒；设备/AEC及完整质量、时延待验证 |
@@ -18,7 +18,7 @@
 
 Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest](models/manifest.json)，框架适配通过配置读取；更换模型后重新验证质量、上下文预算和共存容量。Edge-LLM留到后续性能对比。
 
-六个后端已同时[就绪](benchmarks/results/full-backend-readiness.json)。持续视觉运行期间，5次[文件语音问答](benchmarks/results/concurrent-file-speech.json)全部识别、回答并回读正确，采样最低可用内存约3.38GiB；同期[40秒视觉测量](benchmarks/results/vision-with-file-speech.json)中，检测/姿态最新结果年龄P95约157/163ms。测量包含后续ASR回读请求；当前镜头没有检出目标，不能据此判断目标/关键点准确率。这是短时共存初测，物理播放、完整负载容量和GPU任务重叠trace仍待验证。
+当前包括Qdrant在内的七个后端已同时[就绪](benchmarks/results/full-backend-readiness.json)。以下是此前六个模型/视觉后端的共存记录。持续视觉运行期间，5次[文件语音问答](benchmarks/results/concurrent-file-speech.json)全部识别、回答并回读正确，采样最低可用内存约3.38GiB；同期[40秒视觉测量](benchmarks/results/vision-with-file-speech.json)中，检测/姿态最新结果年龄P95约157/163ms。测量包含后续ASR回读请求；当前镜头没有检出目标，不能据此判断目标/关键点准确率。这是短时共存初测，物理播放、完整负载容量和GPU任务重叠trace仍待验证。
 
 ## 使用现有入口
 
@@ -31,7 +31,7 @@ Qwen3B作为首轮功能与容量基线。模型身份和产物放在 [manifest]
 GPU版ORT已完成构建，模型服务已恢复。启动命令会复用已就绪的受管理服务。构建与驻留模型曾叠加触发OOM，现通过互斥租约阻止重型ORT编译和模型服务同时运行。
 
 ```bash
-python3 tools/project.py up --components llama
+python3 tools/project.py up --components qdrant,llama
 # 另一个终端：
 python3 tools/project.py interact --user owner
 ```
@@ -71,7 +71,7 @@ python3 tools/project.py notifications --user owner
 本机可执行的文件模式：
 
 ```bash
-python3 tools/project.py up --components llama,asr,speech
+python3 tools/project.py up --components qdrant,llama,asr,speech
 python3 tools/project.py voice --no-vision --user owner \
   --input-wav "$HOME/AI_Stack/runtime-data/fixtures/roundtrip/request-0.wav" \
   --output-wav "$HOME/AI_Stack/runtime-data/voice-demo.wav"
@@ -84,6 +84,16 @@ python3 tools/project.py voice --no-vision --user owner \
 ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM缓存上限和12秒请求期限。连续发言中的第一段结果不能在后续分段尚未完成时触发模型；取消会使旧输入、迟到转写和旧错误失效。溢出会使整轮失败，不截断后继续执行。[真实ASR延迟回调验证](benchmarks/results/voice-asr-lifecycle-smoke.json)覆盖分段完整性、取消后无记忆副作用及下一轮恢复；它不代表物理打断或完整故障矩阵验收。
 
 设备模式使用 `python3 tools/project.py voice --input-device N --output-device M`，需要PyAudio及明确的PortAudio设备索引，详见[语音部署](deploy/speech/README.md)。ReSpeaker Lite和扬声器未连接，设备录播、AEC、真实双讲以及100次打断仍待验证；当前不能宣称完整实时语音助手已经验收。
+
+### 长期记忆服务
+
+公开`interact`、`voice`入口使用Mem0和本机Qdrant 1.19.2服务，BGE及SQLite history/journal保持原有职责。先运行`python3 tools/project.py up --components qdrant,llama`；语音还需`asr,speech`，视觉还需`camera,vision,pose`，也可直接`up --components all`。
+
+服务只监听127.0.0.1:6333，认证凭据由启动工具自动生成并保存在运行目录的私有文件中，无需手工配置。`status --components qdrant`核对实际进程、监听socket、认证访问成功及无凭据访问被拒绝。systemd负责重启和进程组清理，日志按既有限额轮转。当前仍需手动`up`，没有启用开机自启动。
+
+每个数据目录拥有独立collection，绑定服务实例、目录和embedding文件指纹。绑定同时记录在本地`store.json`和Qdrant原生collection元数据中；复制目录、连接错误实例、替换embedding或丢失collection会明确失败，避免悄悄打开空库。已有绑定的数据目录沿用自身绑定。旧嵌入式数据需要显式迁移，当前没有自动迁移工具；切换时本机日常数据目录为空，未覆盖用户记忆。
+
+验证包括[绑定后的实际Mem0读写](benchmarks/results/managed-memory-smoke.json)、[公开文字入口](benchmarks/results/managed-memory-console-smoke.json)及[语音文件入口](benchmarks/results/managed-memory-voice-smoke.json)。文件语音验证了真实ASR/LLM/TTS及记忆写读；没有声学播放回执。配置及复现说明见[记忆部署](deploy/memory/README.md)。
 
 ### 人物状态与手势主动回应
 
@@ -114,11 +124,11 @@ source "$HOME/AI_Stack/workspaces/vision/install/setup.bash"
 | [1k档](benchmarks/results/memory-capacity-1k-baseline.json) | 79.2ms | 146.1ms | 该档低于200/500ms参考值 |
 | [10k档](benchmarks/results/memory-capacity-10k-baseline.json) | 350.4ms | 906.3ms | **未达到JT-11的200/500ms目标** |
 
-各档另加100条访客硬负例，未观察到主体泄漏，全部50次写入均在计时后检查了正文、历史及journal完成状态。编号近似记录的Top-5命中分别为0/100、86/100；各档查询编号集合不同，召回率仅作各自压力观察。这不是独立200例记忆质量集，1k档低时延也不代表记忆质量或JT验收通过。50k压力档仍待测量；当前先处理10k档已暴露的瓶颈。
+各档另加100条访客硬负例，未观察到主体泄漏，全部50次写入均在计时后检查了正文、历史及journal完成状态。编号近似记录的Top-5命中分别为0/100、86/100；各档查询编号集合不同，召回率仅作各自压力观察。这不是独立200例记忆质量集，1k档低时延也不代表记忆质量或JT验收通过。[本机服务的50k压力档](benchmarks/results/qdrant-native-50k-comparison.json)已完成：查询/完整写入P95为61.6/59.2ms，编号命中94/100，未观察到主体泄漏或未确认写入。该档同样是合成容量观察，正式独立质量和整机验收仍待完成。
 
-隔离的[Qdrant本机服务对照](benchmarks/results/qdrant-native-10k-comparison.json)已完成：相同10k种子记录、ID、向量、BGE与完整写入路径下，查询/写入P95降至47.5/56.6ms，100个查询的目标命中结果逐项一致。使用精确向量扫描及原生字段索引；[40次进程强杀恢复检查](benchmarks/results/qdrant-recovery-smoke.json)通过。应用默认仍为Qdrant local，50k压力档正在独立准备，部署与迁移尚未完成。复现方式见[本机服务评估说明](deploy/memory/README.md)。
+隔离的[Qdrant本机服务对照](benchmarks/results/qdrant-native-10k-comparison.json)已完成：相同10k种子记录、ID、向量、BGE与完整写入路径下，查询/写入P95降至47.5/56.6ms，100个查询的目标命中结果逐项一致。使用精确向量扫描及原生字段索引；[40次进程强杀恢复检查](benchmarks/results/qdrant-recovery-smoke.json)通过。文字和语音入口现默认连接受管理的本机Qdrant服务；认证、目录/collection绑定以及实际文字和文件语音已验证，既有嵌入式数据的迁移和完整备份恢复仍待完成。复现方式见[本机服务评估说明](deploy/memory/README.md)。
 
-[分段诊断](benchmarks/results/memory-capacity-10k-profile.json)在已完成数据的隔离副本上进行：10次查询平均总耗时333ms，其中Qdrant查询296ms；10次写入平均846ms，两次Qdrant过滤列表合计约773ms。主耗时在嵌入式存储的过滤/查询路径。上游说明[local模式面向小规模使用，payload索引不生效](https://github.com/qdrant/qdrant-client/blob/v1.19.1/qdrant_client/local/qdrant_local.py)。已评估同一Mem0/Qdrant技术栈的本机服务模式和原生索引，保留此失败基线；当前应用尚未切换。
+[分段诊断](benchmarks/results/memory-capacity-10k-profile.json)在已完成数据的隔离副本上进行：10次查询平均总耗时333ms，其中Qdrant查询296ms；10次写入平均846ms，两次Qdrant过滤列表合计约773ms。主耗时在嵌入式存储的过滤/查询路径。上游说明[local模式面向小规模使用，payload索引不生效](https://github.com/qdrant/qdrant-client/blob/v1.19.1/qdrant_client/local/qdrant_local.py)。已评估同一Mem0/Qdrant技术栈的本机服务模式和原生索引，保留此失败基线；公开应用入口已采用本机服务，基准工具仍可显式测量原来的嵌入式路径。
 
 ```bash
 python3 tools/project.py bench --suite memory-capacity --tier 10000 \

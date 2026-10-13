@@ -1,8 +1,8 @@
-# 本机 Qdrant 服务评估
+# 本机 Qdrant 服务
 
-应用默认仍是 Mem0 2.2.1 + Qdrant local。10k嵌入式基线的查询/写入P95为350/906ms，主要耗时在过滤和查询。这里评估同一SDK连接本机原生Qdrant服务，不更换BGE或事实事务边界。
+公开文字和语音入口默认使用 Mem0 2.2.1 + 本机Qdrant服务。原Qdrant local仍用于兼容SDK测试和历史基准。10k嵌入式基线的查询/写入P95为350/906ms，主要耗时在过滤和查询。这里评估同一SDK连接本机原生Qdrant服务，不更换BGE或事实事务边界。
 
-`prepare.py`校验官方ARM64 musl归档SHA256、固定Qdrant 1.19.2及源码commit。程序和源码分别位于`~/AI_Stack/installed/qdrant-1.19.2/`、`~/AI_Stack/frameworks/qdrant/`，没有安装系统服务或修改系统包。
+`prepare.py`校验官方ARM64 musl归档SHA256、固定Qdrant 1.19.2及源码commit。程序和源码分别位于`~/AI_Stack/installed/qdrant-1.19.2/`、`~/AI_Stack/frameworks/qdrant/`，生产入口使用项目的systemd用户单元`mmassistant-qdrant.service`，未修改系统包。
 
 ```bash
 python3 deploy/memory/prepare.py
@@ -26,4 +26,18 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 \
   .venv/bin/python tools/qdrant_recovery_smoke.py
 ```
 
-50k压力档使用新数据目录，不提供`--baseline-run/--baseline-report`，由真实BGE和SDK批量准备，之后仍走完整应用API计时。主程序接入前还需解决：持久服务监督、本地访问控制、SDK数据库与服务collection的绑定、已有数据迁移、完整备份/删除日志恢复，以及独立200例记忆质量。当前评估没有迁移日常用户数据。
+[50k档](../../benchmarks/results/qdrant-native-50k-comparison.json)已完成：查询/写入P95=61.6/59.2ms，编号记录命中94/100，无查询错误、主体泄漏或未确认写入。它使用真实BGE及SDK批量准备，精确扫描，全部计时操作经过完整Mem0适配器。它仍是隔离容量基准；认证/绑定后的公开入口另做功能验证，不把这些组合为完整JT验收。
+
+## 受管理的应用入口
+
+```bash
+python3 tools/project.py up --components qdrant,llama
+python3 tools/project.py status --components qdrant
+python3 tools/project.py interact --no-vision
+```
+
+`runtime.py`生成运行目录`qdrant/`内的deployment、私有认证文件及YAML配置；凭据不进入仓库、命令行或服务环境。SDK使用显式`trust_env=False`客户端，并同步检查锁定的服务器版本。服务启动前校验官方程序SHA256，只监听回环地址，关闭gRPC、集群与telemetry；配置有本地修改时不会覆盖。
+
+`app/memory_store.py`通过Qdrant原生collection metadata核对服务实例、数据目录、embedding指纹及向量维度，使用数据目录及collection两个写入锁。首次配置可从`PREPARING`恢复，确认SDK初始化与删除屏障恢复后标记`READY`；已READY但collection丢失时拒绝创建空替代库。每次应用存储操作核对绑定。Mem0继续拥有事实、向量、history，应用journal继续承接幂等与删除屏障。
+
+旧的嵌入式目录被明确拒绝自动切换；当前主运行目录此前没有用户数据库，因此本次只建立服务及新库入口。既有数据迁移、完整备份/删除日志合并、权限和故障的完整矩阵仍待实现。`StoreBinding`拒绝目录复制或模型指纹变化不等于已经具备恢复工具。

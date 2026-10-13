@@ -114,7 +114,7 @@ class Mem0Adapter:
     def __init__(self, data_dir: str | Path, *, bge_path: str | Path | None = None,
                  llama_base_url: str = "http://127.0.0.1:8088/v1",
                  llama_model: str = "assistant-vlm", embedding_backend: str = "torch",
-                 sdk=None, embedding_scope: str = "PRODUCTION"):
+                 sdk=None, embedding_scope: str = "PRODUCTION", server_config=None):
         from sqlalchemy import Column, Integer, MetaData, String, Table, Text, create_engine, event
 
         if importlib.metadata.version("mem0ai") != "2.2.1":
@@ -128,6 +128,7 @@ class Mem0Adapter:
         self._gate = threading.RLock()
         self._closed = False
         self.embedding_scope = embedding_scope
+        self._binding = None
         self._lock_file = open(self.data_dir / "adapter.writer.lock", "a+")
         try:
             fcntl.flock(self._lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -156,12 +157,26 @@ class Mem0Adapter:
                                        Column("user_id", String, primary_key=True), Column("source_id", String, primary_key=True))
         try:
             metadata.create_all(self.engine)
+            if (self.data_dir/'store.json').exists() and (server_config is None or sdk is not None):
+                raise MemoryAdapterError('UNAVAILABLE','This memory directory is bound to a native service; use its configured entry point')
+            if server_config is not None and sdk is not None:
+                raise MemoryAdapterError('INVALID_ARGUMENT','Native service binding cannot be bypassed by an injected SDK')
             if sdk is None:
                 if bge_path is None or not Path(bge_path).expanduser().is_dir():
                     raise MemoryAdapterError("UNAVAILABLE", "cached local BGE directory is required")
                 from mem0 import Memory
                 config = build_mem0_config(self.data_dir, bge_path, llama_base_url=llama_base_url,
                                            llama_model=llama_model, embedding_backend=embedding_backend)
+                if server_config is not None:
+                    if embedding_backend!='onnx':
+                        raise MemoryAdapterError('INVALID_ARGUMENT','Native store profile requires the qualified ONNX embedding')
+                    from app.memory_store import StoreBinding,embedding_fingerprint
+                    self._binding=StoreBinding(self.data_dir,server_config,embedding_sha256=embedding_fingerprint(bge_path))
+                    config=build_mem0_config(self.data_dir,bge_path,llama_base_url=llama_base_url,llama_model=llama_model,
+                        embedding_backend=embedding_backend,qdrant_url=server_config.url,qdrant_collection=self._binding.collection)
+                    # Mem0's maintained provider accepts a public Qdrant client;
+                    # this preserves its API-key auth and trust_env=False.
+                    config['vector_store']['config']['client']=self._binding.client
                 if embedding_backend == "onnx":
                     import onnxruntime as ort
                     options = ort.SessionOptions()
@@ -176,10 +191,12 @@ class Mem0Adapter:
             if MEM0_TELEMETRY:
                 raise MemoryAdapterError("UNAVAILABLE", "Mem0 was imported before telemetry was disabled; restart service")
             self._recover_deletes()
+            if self._binding:self._binding.ready()
         except BaseException:
             try:
                 self._close_sdk()
             finally:
+                if self._binding:self._binding.close()
                 self.engine.dispose()
                 fcntl.flock(self._lock_file, fcntl.LOCK_UN)
                 self._lock_file.close()
@@ -201,6 +218,7 @@ class Mem0Adapter:
             try:
                 self._close_sdk()
             finally:
+                if self._binding:self._binding.close()
                 self.engine.dispose()
                 fcntl.flock(self._lock_file, fcntl.LOCK_UN)
                 self._lock_file.close()
@@ -232,6 +250,10 @@ class Mem0Adapter:
     def _check_open(self):
         if self._closed:
             raise MemoryAdapterError("UNAVAILABLE", "memory adapter is closed")
+        if self._binding:
+            try:self._binding.validate()
+            except Exception as error:
+                raise MemoryAdapterError('UNAVAILABLE','Native memory binding or collection is unavailable',retryable=True) from error
 
     def generation(self, user_id: str) -> int:
         from sqlalchemy import select

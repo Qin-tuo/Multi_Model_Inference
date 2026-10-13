@@ -34,7 +34,7 @@
 |---|---|---|
 | llama.cpp | `frameworks/llama.cpp/` | Git 源码 |
 | Pipecat | `frameworks/pipecat/` | Git 源码；实际运行包在 `environments/assistant/` |
-| Qdrant server（隔离评估） | `frameworks/qdrant/`、`installed/qdrant-1.19.2/` | 固定源码及校验过的官方ARM64程序；应用尚未切换 |
+| Qdrant server | `frameworks/qdrant/`、`installed/qdrant-1.19.2/` | 固定源码及校验过的官方ARM64程序；本机长期记忆服务 |
 | Mem0 / APScheduler / Qdrant client | `frameworks/mem0/`、`frameworks/apscheduler/`、`frameworks/qdrant-client/` | 指向实际使用的已安装包 |
 | OpenVoiceStream / voice-engine | `frameworks/openvoicestream/`、`frameworks/voice-engine/` | Git 源码及其子模块 |
 | yolo_ros / ONNX Runtime | `frameworks/yolo_ros/`、`frameworks/onnxruntime/` | Git 源码 |

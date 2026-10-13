@@ -17,7 +17,7 @@
     "embedding_threads": 2,
     "transcript_retention_days": 7,
     "provider": "mem0",
-    "vector_store": "qdrant_local"
+    "vector_store": "qdrant_server"
   },
   "vision": {
     "capture_hz": 30,

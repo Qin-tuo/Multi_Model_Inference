@@ -14,6 +14,12 @@ from deploy import services
 
 
 class ServiceConfigTests(unittest.TestCase):
+    def test_probe_timeout_is_reported_without_claiming_backend_exit(self):
+        with patch.object(services,'command',side_effect=subprocess.TimeoutExpired(['labelled_probe'],8)):
+            result=services.probe('camera')
+        self.assertFalse(result['ready'])
+        self.assertEqual(result['reason'],'ROS_probe_timeout')
+
     def test_dependencies_and_rejected_component_names(self):
         self.assertEqual(services.selected("speech,pose"), ["asr", "speech", "camera", "pose"])
         with self.assertRaises(ValueError): services.selected("camera;arbitrary-command")
