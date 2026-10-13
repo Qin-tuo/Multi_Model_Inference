@@ -55,6 +55,8 @@ python3 tools/project.py restore-data --abort \
 
 多向量档案的主索引和实体索引均校验MaxSim结构及profile，备份必须包含其实体快照。旧单向量备份跨配置恢复时，已遗忘的记录和无效实体关联在重新嵌入前排除，当前较新版本从当前有效库补入。临时快照集合记录归属并在完成或撤销时清理，未核验的上传结果须先续跑核验。真实旧备份→当前多向量、更正版本保留及遗忘不复活见[集成报告](../../benchmarks/results/window-legacy-backup-integration.json)；临时快照阶段续跑和撤销另有框架回归，完整跨配置故障矩阵仍待扩展。
 
+显式启用的`bge-int8-windows-bm25-v1`候选使用schema3检索绑定。恢复到该配置时，不论备份是旧格式还是同格式，均从通过当前版本/删除校验的规范正文重新生成BM25；不会恢复已损坏或过时的词项向量。BGE稠密向量仍须通过原有严格重算核验。[候选实际集成](../../benchmarks/results/hybrid-memory-integration.json)已验证旧备份、更正与遗忘；损坏BM25的同格式恢复另有实际Qdrant回归。完整候选故障重复和整机验收尚未完成。
+
 跨配置恢复的[首轮故障测试](../../benchmarks/results/window-restore-fault-first.json)在旧快照暂存、快照核验完成、合并完成和旧源退休四个阶段各实际SIGKILL一次，全部续跑成功。每次均核对当前版本、新事实、主人/访客隔离、遗忘及派生内容/历史清除、提醒不重复；另验证实际索引丢失后的恢复。本轮使用`--skip-conversation`，没有生成恢复后的模型回答，也没有物理播报。 随后的[40次扩展验证](../../benchmarks/results/window-restore-fault-recovery.json)已完成，四个阶段各10次全部通过，保持相同数据校验与明确的测试范围。
 
 ```bash

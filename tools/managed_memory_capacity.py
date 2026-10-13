@@ -12,7 +12,7 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app.memory_runtime import open_memory
-from app.memory_profiles import WINDOWS,model_path
+from app.memory_profiles import WINDOWS,HYBRID,model_path
 from app.memory_store import embedding_fingerprint
 from tools.long_memory_probe import documents
 from tools.memory_capacity import MemoryMonitor,backend_state,statistics,timed
@@ -20,17 +20,17 @@ from tools.memory_capacity_seed import populate
 from tools.project import stamp,write_json,sha256
 
 
-def workload(tier, *, personal=False):
+def workload(tier, *, personal=False,profile=WINDOWS):
     corpus_path=ROOT/'benchmarks/corpora/memory-capacity-v1.json'
     corpus=json.loads(corpus_path.read_text())
     # Prefix deliberately excludes the project identity: long-record queries
     # need the tail, beyond the original encoder's single-window limit.
     prefix=documents()[0]['content'].split('本档案归属',1)[0]
     config={'kind':'managed-window-capacity-v1','schema_version':1,'dataset_sha256':sha256(corpus_path),
-        'tier':tier,'seed_method':'sdk-batch','profile':WINDOWS,'long_every':10,
+        'tier':tier,'seed_method':'sdk-batch','profile':profile,'long_every':10,
         'long_prefix_sha256':hashlib.sha256(prefix.encode()).hexdigest(),
         'query_indices':'floor(floor((j+0.5)*tier/100)/10)*10+j%2, j=0..99',
-        'embedding_sha256':embedding_fingerprint(model_path(WINDOWS))}
+        'embedding_sha256':embedding_fingerprint(model_path(profile))}
     if personal:
         corpus['namespace']='personal'
         config.update(namespace='personal',preference_record=1,preference_content='我的饮品偏好是茉莉花茶。')
@@ -42,16 +42,17 @@ def workload(tier, *, personal=False):
 
 
 def main(args):
-    corpus,config,prefix,fact=workload(args.tier,personal=args.personal)
+    corpus,config,prefix,fact=workload(args.tier,personal=args.personal,profile=args.profile)
     folder=args.run_dir.resolve();marker=folder/'capacity-run.json'
     if folder.exists():
         if not marker.exists() or json.loads(marker.read_text())!=config:raise RuntimeError('Capacity directory ownership/configuration differs')
     else:folder.mkdir(parents=True,mode=0o700);write_json(marker,config)
     progress_path=folder/'population.json';progress=json.loads(progress_path.read_text()) if progress_path.exists() else {'owner':0,'guest':0}
-    settings={'memory':{'vector_store':'qdrant_server','embedding_profile':WINDOWS}}
+    settings={'memory':{'vector_store':'qdrant_server','embedding_profile':args.profile}}
     with MemoryMonitor() as monitor:
         if args.phase=='prepare':
             with open_memory(folder/'memory',settings=settings) as memory:
+                if memory.capabilities()['embedding_profile']!=args.profile:raise RuntimeError('Bound index differs from the prepared profile')
                 for owner,total in [('owner',args.tier),('guest',corpus['guest_records'])]:
                     def checkpoint(count):
                         progress[owner]=count;write_json(progress_path,progress)
@@ -65,6 +66,7 @@ def main(args):
         from tools.lcvmem_eval import fingerprint
         reader=fingerprint();state=backend_state();queries=[];writes=[]
         with open_memory(folder/'memory',settings=settings) as memory:
+            if memory.capabilities()['embedding_profile']!=args.profile:raise RuntimeError('Bound index differs from the measured profile')
             def count(user):return memory.sdk.vector_store.client.count(memory.sdk.collection_name,count_filter=models.Filter(must=[
                 models.FieldCondition(key='user_id',match=models.MatchValue(value=user)),
                 models.FieldCondition(key='namespace',match=models.MatchValue(value=corpus['namespace']))]),exact=True).count
@@ -94,7 +96,7 @@ def main(args):
         checks={'correct_population':before==progress,'no_query_errors':qstat['errors']==0,'no_write_errors':wstat['errors']==0,
             'no_owner_leaks':all(r.get('owner_leaks')==0 for r in queries),'all_writes_durable':all(r.get('verified_after_timer') for r in writes),
             'query_p95_under200ms':qstat['p95_ms']<=200,'write_p95_under500ms':wstat['p95_ms']<=500,'app_unchanged':reader==fingerprint()}
-        report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'tier':args.tier,'profile':WINDOWS,
+        report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'tier':args.tier,'profile':args.profile,
             'config':config,'binding':{k:binding[k] for k in ('schema_version','embedding_profile','dimensions','embedding_sha256')},
             'query_summary':qstat,'write_summary':wstat,'queries':queries,'writes':writes,
             'query_long':statistics([r for r in queries if r['long_record']]),'query_short':statistics([r for r in queries if not r['long_record']]),
@@ -111,6 +113,7 @@ def main(args):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--phase',choices=['prepare','measure'],required=True)
     parser.add_argument('--personal',action='store_true',help='Dedicated synthetic personal namespace for subsequent real voice co-load; one frozen preference replaces record1')
+    parser.add_argument('--profile',choices=[WINDOWS,HYBRID],default=WINDOWS)
     parser.add_argument('--tier',type=int,choices=[1000,10000],default=10000);parser.add_argument('--run-dir',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     raise SystemExit(main(parser.parse_args()))

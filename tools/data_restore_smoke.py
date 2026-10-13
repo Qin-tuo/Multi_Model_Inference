@@ -16,7 +16,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app.data_lifecycle import check_available
 from app.memory_runtime import open_memory
-from app.memory_profiles import LEGACY,profile_of,model_path
+from app.memory_profiles import LEGACY,WINDOWS,HYBRID,profile_of,model_path
 from app.records import Records
 from app.reminders import ReminderService,_deliver_due
 from deploy.data.restore import restore
@@ -39,6 +39,7 @@ def main():
     parser.add_argument('--legacy-backup',action='store_true',help='Reindex after backup, then repeatedly recover the older scalar snapshot')
     parser.add_argument('--skip-conversation',action='store_true',help='Data fault checks only; do not generate a model answer')
     parser.add_argument('--output',type=Path,default=ROOT/'benchmarks/results/data-restore-smoke.json')
+    parser.add_argument('--profile',choices=[WINDOWS,HYBRID],default=WINDOWS)
     args=parser.parse_args();service=load(DATA/'qdrant')
     if args.child_phase:
         def kill(phase):
@@ -51,7 +52,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='real-data-restore-') as tmp:
         root=Path(tmp);source=root/'source';backup=root/'backup';target=root/'restored'
         try:
-            settings={'memory':{'vector_store':'qdrant_server','embedding_profile':LEGACY}} if args.legacy_backup else None
+            settings={'memory':{'vector_store':'qdrant_server','embedding_profile':LEGACY if args.legacy_backup else args.profile}}
             with open_memory(source/'memory',settings=settings) as memory:
                 kept=memory.remember('synthetic-owner','preference','drink','我喜欢喝绿茶。',source_id='seed',request_id='save')['memory_id']
                 forgotten=memory.remember('synthetic-owner','preference','old','我收藏旧式水杯。',source_id='old',request_id='old')['memory_id']
@@ -68,7 +69,7 @@ def main():
                 due=datetime.now(timezone.utc)+timedelta(hours=1)
                 scheduled={name:reminders.create('synthetic-owner','合成'+name,due,request_id=name)['reminder_id'] for name in ('future','cancel','delivered','uncertain')}
             public(['backup-data','--data-dir',source,'--output',backup])
-            if args.legacy_backup:public(['reindex-memory','--data-dir',source])
+            if args.legacy_backup:public(['reindex-memory','--data-dir',source,'--profile',args.profile])
             with Records(source/'records.sqlite') as records:
                 records.purge_memory('synthetic-owner',forgotten)
                 records.create_note('synthetic-owner','备份后新增','保留这条新笔记',source_id='new',request_id='new-note')
@@ -172,7 +173,7 @@ def main():
                         client.delete_collection(name)
     report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'answers':answers,'faults':faults,
         'actual_sigkills':sum(case['actual_sigkill'] for case in faults),'repeats_per_phase':args.repeats,
-        'legacy_backup':args.legacy_backup,'conversation_tested':not args.skip_conversation,
+        'profile':args.profile,'legacy_backup':args.legacy_backup,'conversation_tested':not args.skip_conversation,
         'scope':'Actual BGE/Mem0/native Qdrant/SQLite/APScheduler and public backup/restore/interact commands. Synthetic profiles; reminder receipts are explicitly fixture/uncertain, not physical playback. Current SQLite authority preserved, actual vector index loss and restore-process SIGKILL; no entire-disk loss, power loss or complete JT acceptance.'}
     if error:report['error']=error
     write_json(args.output,report)

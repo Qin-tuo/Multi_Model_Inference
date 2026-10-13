@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app.context_memory import memory_message
 from app.memory_runtime import open_memory
-from app.memory_profiles import LEGACY,WINDOWS,profile_of,entity_name
+from app.memory_profiles import LEGACY,WINDOWS,HYBRID,profile_of,entity_name
 from app.records import Records
 from deploy.memory.runtime import load
 from tools.long_memory_probe import documents
@@ -39,15 +39,16 @@ def main(args):
             original=json.loads((source/'memory/store.json').read_text());bindings.append(original)
             legacy_backup=directory/'legacy-backup'
             if args.legacy_backup:command(['backup-data','--data-dir',str(source),'--output',str(legacy_backup)])
-            migrated=json.loads(command(['reindex-memory','--data-dir',str(source)]))
+            migrated=json.loads(command(['reindex-memory','--data-dir',str(source),'--profile',args.profile]))
             checks['public_reindex_completed']=migrated['status']=='PASS'
             current=json.loads((source/'memory/store.json').read_text());bindings.append(current)
-            checks['profile_bound']=profile_of(current)==WINDOWS
+            checks['profile_bound']=profile_of(current)==args.profile
             with open_memory(source/'memory') as memory:
                 for doc in inputs:
                     result=memory.search('owner',f'{doc["project"]}项目的最终交付箱编号是什么？')
                     item=result['items'][0];message,metrics=memory_message([item],'http://127.0.0.1:8088/v1',compact_references=True)
                     queries.append({'project':doc['project'],'correct_id':item['memory_id']==doc['id'],
+                        'retrieval_method':result['retrieval_method'],
                         'original_content_intact':item['content']==doc['content'],'window_answer_present':doc['project']+'七号' in item.get('evidence_window',{}).get('text',''),
                         'packed_count':metrics['injected_count'],'tokens':metrics['memory_tokens']})
                 checks['all_eight_long_records_recalled']=all(r['correct_id'] and r['original_content_intact'] and r['window_answer_present'] and r['packed_count']==1 for r in queries)
@@ -82,6 +83,9 @@ def main(args):
             final_answers=[line.removeprefix('助手：') for line in output.splitlines() if line.startswith('助手：')]
             checks['public_corrected_recall_after_restore']=bool(final_answers) and '海岚九号' in final_answers[0] and '海岚七号' not in final_answers[0]
             fresh=directory/'fresh';save_script=directory/'save.txt'
+            # Bind the requested candidate explicitly without changing the
+            # application's global default during qualification.
+            with open_memory(fresh/'memory',settings={'memory':{'vector_store':'qdrant_server','embedding_profile':args.profile}}):pass
             save_script.write_text('请记住，'+inputs[0]['content']+'\n/new\n海岚项目的最终交付箱编号是什么？\n/quit\n')
             output=command(['interact','--no-vision','--data-dir',str(fresh),'--input-file',str(save_script)])
             fresh_answers=[line.removeprefix('助手：') for line in output.splitlines() if line.startswith('助手：')]
@@ -89,9 +93,9 @@ def main(args):
                 from app.tool_policy import literal_fact
                 saved=memory.list_memories('owner')
                 checks['public_long_save_preserves_literal_fact']=len(saved)==1 and saved[0]['content']==literal_fact('请记住，'+inputs[0]['content'])
-                checks['new_profile_default']=memory.capabilities()['embedding_profile']==WINDOWS
+                checks['fresh_profile_bound']=memory.capabilities()['embedding_profile']==args.profile
             checks['public_long_save_then_new_session_recall']=len(fresh_answers)==2 and '海岚七号' in fresh_answers[1]
-            report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'queries':queries,
+            report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','profile':args.profile,'checks':checks,'queries':queries,
                 'public_answers_before_and_after':[answers,final_answers],'observed_adapter_long_write_seconds':write_seconds,
                 'fresh_public_save_answers':fresh_answers,
                 'restored_backup_profile':'legacy_before_reindex' if args.legacy_backup else 'current_windows',
@@ -122,4 +126,5 @@ def main(args):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--legacy-backup',action='store_true')
     parser.add_argument('--output',type=Path,default=ROOT/'benchmarks/results/window-memory-integration.json')
+    parser.add_argument('--profile',choices=[WINDOWS,HYBRID],default=WINDOWS)
     raise SystemExit(main(parser.parse_args()))

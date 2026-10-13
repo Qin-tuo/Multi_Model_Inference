@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T15:26:39.859536+00:00",
+  "updated_at": "2026-10-13T15:58:59.711684+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -401,6 +401,23 @@
       ],
       "validation": "Native MaxSim/BGE int8 now integrated into production MemoryAdapter,versioned primary/entity binding,exact original-source windows,and current/legacy snapshot restoration. Single canonical ID/full body/version/journal remains authoritative. Reindex retains lineage,filters existing erasures,verifies all points,blocks partial access and deletes retired indexes;30 real SIGKILLs across3 stages PASS,including no replay after later forget. Public interact saves a3104-byte literal fact and recalls its tail in a new session;public migration/correction/restore retains IDs/versions/owners and does not revive forgotten facts/entities. Dynamic-int8 cross-record batching mismatch was reproduced;record-wise encoding restores strict verification without relaxing tolerance.211 framework tests PASS. New stores default to locked windows profile;old bindings retain legacy until explicit reindex. One full-adapter long write0.356s,not10k/JT-11 qualification. New-profile82 development COMPLETE:F1=26.685%,exact1/82,no errors/unexpected writes/cross-owner evidence;not semantic acceptance. First4 cross-profile restore SIGKILLs PASS,with current versions/new facts/erasure barriers/guest isolation/history and reminder receipts retained;conversation skipped explicitly. Extended cross-profile restore fault run COMPLETE:40 actual SIGKILLs,4 stages10each,all PASS;conversation_tested=false.",
       "next_action": "Qualify native BM25/fusion integration beyond feasibility,including versioned indexing,exact source windows,forget/correct/backup/restore;retain failed coexistence latency baseline and finish independent quality."
+    },
+    {
+      "task_id": "J4.memory.hybrid",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/adapters/qdrant_hybrid.py",
+        "app/memory_lexical.py",
+        "app/memory_profiles.py",
+        "app/memory_store.py",
+        "deploy/memory/reindex.py",
+        "deploy/data/restore.py",
+        "tests/test_memory_hybrid.py",
+        "benchmarks/results/hybrid-memory-integration.json",
+        "benchmarks/results/framework-tests.json"
+      ],
+      "validation": "Native local BM25+DBSF integrated per Mem0 provider instance with owner/namespace/source filters; no global SDK factory replacement or external inference. Schema3 binds retrieval configuration,existing schema1/2 stores remain unchanged until explicit reindex. Canonical writes/corrections/reindex/restore regenerate sparse data;strict dense verification retained.6 native lifecycle/provider tests and217 complete framework tests PASS. Real BGE/llama/publicCLI integration PASS:8long records,canonical ID/body/source windows,save/new-session recall,correction,legacy-backup restoration,forget/entity purge andowner isolation. Successive upgrades support abort/resume and refuse downgrade. Candidate not default;10k preparation and30 actual reindexSIGKILLs active.",
+      "next_action": "Inspect live capacity preparation and30-case reindex recovery;measure true10k retrieval/writes only when other heavy jobs stop. Complete current/old-backup fault repetitions and82development quality before promotion;preserve200heldout and76reserve."
     }
   ],
   "acceptance": {
@@ -498,7 +515,8 @@
     "Full voice application cancellation passes40 synthetic-WAV scenarios. A single-number response2 was once read back as 啊; independent ASR/TTS quality remains open. 30 actual worker crash/recovery cases pass (10 per ASR/LLM/TTS), without probe repair. Physical capture/playback,AEC,backpressure,all fault classes and8h remain unverified.",
     "External Chinese memory remains incomplete:full82 development lexical F1=26.329% with scalar FP32 and26.685% with int8 windows;no execution errors,unexpected writes or cross-owner evidence. Small changes do not prove broad quality improvement;200 heldout and76 reserve remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness remain incomplete.",
     "Long-record indexing/packing is integrated with locked BGE int8. Public save/recall/correction/old-backup restore,30 reindex SIGKILLs and40 cross-profile restore SIGKILLs pass. Dynamic quantization must remain record-wise.10k complete-adapter/foreground coexistence timing,other fault classes including control-loss/pending writes and independent JT gates remain incomplete.",
-    "Managed current-profile10k timing passes47ms query/343ms write P95,but numbered top5 recall9/100(long0/50). Native local BM25/RRF/DBSF isolated candidates each recover100/100,not production-integrated/lifecycle-qualified. Actual20-turn shared10k voice/live-camera load passes memory127/459ms and visual11.64Hz/174-178ms but FAILS file first-PCM3/5s targets(3.098/5.545s);loop max154.90ms needs diagnosis. Physical audio,independent quality,full scenes and JT gates remain unverified."
+    "Managed current-profile10k timing passes47ms query/343ms write P95,but numbered top5 recall9/100(long0/50). Native local BM25/RRF/DBSF isolated candidates each recover100/100,not production-integrated/lifecycle-qualified. Actual20-turn shared10k voice/live-camera load passes memory127/459ms and visual11.64Hz/174-178ms but FAILS file first-PCM3/5s targets(3.098/5.545s);loop max154.90ms needs diagnosis. Physical audio,independent quality,full scenes and JT gates remain unverified.",
+    "Native BM25/DBSF candidate is integrated and passes public functional/native lifecycle/217 core checks,but default remains window dense. Candidate10k timing/actual SDK numbered recall,expanded native SIGKILLs,and82development quality are pending. Prior20-turn coexistence latency FAIL remains unresolved;all formal JT gates remain NOT_VERIFIED."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

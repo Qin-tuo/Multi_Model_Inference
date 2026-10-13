@@ -410,6 +410,7 @@ def main():
     reindex=sub.add_parser('reindex-memory',help='Re-embed a native store into the bound long-document profile')
     reindex.add_argument('--data-dir',type=Path,required=True)
     reindex.add_argument('--abort',action='store_true')
+    reindex.add_argument('--profile',choices=['bge-int8-windows-v1','bge-int8-windows-bm25-v1'],default='bge-int8-windows-v1')
     backup=sub.add_parser('backup-data',help='Quiescent native Qdrant and SQLite application backup')
     backup.add_argument('--data-dir',type=Path,required=True)
     backup.add_argument('--output',type=Path,required=True)
@@ -430,6 +431,7 @@ def main():
     bench.add_argument('--limit',type=int)
     bench.add_argument('--seed-from',type=Path)
     bench.add_argument('--source-metadata',choices=['body-only-v1','calendar-speaker-v1'],default='body-only-v1')
+    bench.add_argument('--memory-profile',choices=['bge-fp32-single-v1','bge-int8-windows-v1','bge-int8-windows-bm25-v1'],help='Explicit memory-quality candidate; existing bindings must match')
     interact = sub.add_parser("interact", help="Persistent Pipecat text conversation")
     interact.add_argument("--user", default="owner")
     interact.add_argument("--data-dir", type=Path, default=DATA)
@@ -463,7 +465,7 @@ def main():
     try:
         if args.action=='reindex-memory':
             env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
-            return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/reindex_memory.py'),'--data-dir',str(args.data_dir)]+(['--abort'] if args.abort else []),cwd=ROOT,env=env)
+            return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/reindex_memory.py'),'--data-dir',str(args.data_dir),'--profile',args.profile]+(['--abort'] if args.abort else []),cwd=ROOT,env=env)
         if args.action=='restore-data':
             env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
             command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/restore_data.py'),'--data-dir',str(args.data_dir)]
@@ -490,7 +492,9 @@ def main():
                     '--output',str(args.output),'--split',args.split,'--source-metadata',args.source_metadata]
                 if args.limit is not None:command+=['--limit',str(args.limit)]
                 if args.seed_from is not None:command+=['--seed-from',str(args.seed_from)]
+                if args.memory_profile:command+=['--memory-profile',args.memory_profile]
                 return subprocess.call(command,cwd=ROOT,env=env)
+            if args.memory_profile:raise ValueError('memory-profile applies to memory-quality; use managed_memory_capacity.py for bound capacity profiles')
             if args.tier is None:raise ValueError('memory-capacity requires --tier')
             return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/memory_capacity.py'),
                 '--tier',str(args.tier),'--run-dir',str(args.run_dir),'--output',str(args.output),

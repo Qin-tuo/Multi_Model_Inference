@@ -129,7 +129,8 @@ def erase_restored(client,collection,directory,records,changed):
 def reembed_snapshots(client,backup,manifest,state,directory,records,operations,profile,publish,checkpoint):
     """Import an older layout privately, then rebuild only currently live facts."""
     from qdrant_client import models
-    from app.memory_profiles import profile_of,layout_matches,vector_params
+    from app.memory_profiles import profile_of,layout_matches,lexical_layout_matches,vector_params
+    from app.memory_lexical import upsert_canonical
     base=state['binding']['collection'];staged={}
     for role,evidence in manifest['collections'].items():
         name=base+('_entities' if role=='entities' else '')+'_source'
@@ -141,7 +142,8 @@ def reembed_snapshots(client,backup,manifest,state,directory,records,operations,
             upload_snapshot_to_new_collection(client,name,backup/evidence['file'],manifest['files'][evidence['file']]['sha256'])
         info=client.get_collection(name)
         allowed=(source_meta,owned) if role=='memory' else (source_meta,owned,None,{})
-        if info.config.metadata not in allowed or not layout_matches(info.config.params.vectors,manifest['source_binding']['dimensions'],profile_of(manifest['source_binding'])):
+        if (info.config.metadata not in allowed or not layout_matches(info.config.params.vectors,manifest['source_binding']['dimensions'],profile_of(manifest['source_binding']))
+                or (role=='memory' and not lexical_layout_matches(info,profile_of(manifest['source_binding'])))):
             raise RuntimeError('Cross-profile snapshot staging differs from its recorded source')
         if collection_state(client,name)!={key:evidence[key] for key in ('sha256','points')}:
             raise RuntimeError('Cross-profile snapshot upload is unverified')
@@ -156,7 +158,8 @@ def reembed_snapshots(client,backup,manifest,state,directory,records,operations,
             client.create_collection(target,vectors_config=vector_params(profile.dimensions,profile.profile_id),
                 sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},hnsw_config=models.HnswConfigDiff(m=0),metadata=metadata)
         info=client.get_collection(target)
-        if info.config.metadata!=metadata or not layout_matches(info.config.params.vectors,profile.dimensions,profile.profile_id):
+        if (info.config.metadata!=metadata or not layout_matches(info.config.params.vectors,profile.dimensions,profile.profile_id)
+                or (role=='memory' and not lexical_layout_matches(info,profile.profile_id))):
             raise RuntimeError('Cross-profile restore target is unrelated')
         if role not in staged:continue
         for batch in pages(client,staged[role]):
@@ -180,7 +183,7 @@ def reembed_snapshots(client,backup,manifest,state,directory,records,operations,
                 chosen.append((point.id,p))
             vectors=profile.embedder.embed_batch([p['data'] for _,p in chosen],'add')
             if len(vectors)!=len(chosen):raise RuntimeError('Snapshot re-embedding length differs')
-            if chosen:client.upsert(target,[models.PointStruct(id=mid,vector={'':vector},payload=p) for (mid,p),vector in zip(chosen,vectors)],wait=True)
+            if chosen:upsert_canonical(client,target,[models.PointStruct(id=mid,vector={'':vector},payload=p) for (mid,p),vector in zip(chosen,vectors)],profile.profile_id,entities=role=='entities')
         state['snapshots'][role]='REEMBEDDED';publish();checkpoint('snapshot')
 
 
@@ -197,6 +200,7 @@ def cleanup_staged(client,state):
 def merge_vectors(client,collection,current_client,current_collection,directory,records,operations,profile):
     from qdrant_client import models
     from app.memory_profiles import vector_params
+    from app.memory_lexical import upsert_canonical
     expected=expected_memories(operations)
     deleted={x['memory_id']:x['user_id'] for x in rows(directory/'operations.sqlite','deletion_barriers')}
     if records:
@@ -242,7 +246,7 @@ def merge_vectors(client,collection,current_client,current_collection,directory,
                     or not matching(saved.vector,profile.embedder.embed_batch([saved.payload['data']],'add')[0],profile.dimensions)):
                 raise RuntimeError('Restored embeddings differ from the qualified model')
             points[index]=models.PointStruct(id=saved.id,vector=saved.vector,payload=saved.payload)
-        client.upsert(collection,points,wait=True)
+        upsert_canonical(client,collection,points,profile.profile_id)
     # Entity payloads have no fact-version provenance. Invalidate associations
     # to corrected facts consistently on retries, rather than trusting old tags.
     invalidated={mid:value['owner'] for mid,value in expected.items() if value['version']>1}
@@ -368,7 +372,9 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
             allowed=(source_metadata,expected) if role=='memory' else (source_metadata,expected,None,{})
             if info.config.metadata not in allowed:raise RuntimeError('Restore target collection metadata is unrelated')
             from qdrant_client import models
-            if (not layout_matches(info.config.params.vectors,profile.dimensions,profile.profile_id) or info.config.hnsw_config.m!=0):
+            from app.memory_profiles import lexical_layout_matches
+            if (not layout_matches(info.config.params.vectors,profile.dimensions,profile.profile_id) or info.config.hnsw_config.m!=0
+                    or (role=='memory' and not lexical_layout_matches(info,profile.profile_id))):
                 raise RuntimeError('Restored vector configuration differs from the qualified profile')
             if role not in state['snapshots']:
                 if collection_state(client,name)!={key:evidence[key] for key in ('sha256','points')}:

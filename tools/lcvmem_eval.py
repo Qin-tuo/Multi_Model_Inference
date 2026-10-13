@@ -47,7 +47,12 @@ def owner_state(memory,user):
 def seed(args,run):
     from app.memory_runtime import open_memory
     from tools.lcvmem_seed import populate
-    with open_memory(Path(run.get('memory_directory',args.run_dir/'data/memory'))) as memory:
+    settings={'memory':{'vector_store':'qdrant_server','embedding_profile':run['requested_profile']}} if run.get('requested_profile') else None
+    with open_memory(Path(run.get('memory_directory',args.run_dir/'data/memory')),settings=settings) as memory:
+        actual=memory.capabilities()['embedding_profile']
+        if run.get('requested_profile') not in (None,actual) or run.get('actual_embedding_profile') not in (None,actual):
+            raise RuntimeError('Benchmark bound index differs from its declared profile')
+        run['actual_embedding_profile']=actual
         for row in selected(run):
             count=populate(memory,run['run_id'],row,source_metadata=run.get('source_metadata','body-only-v1'))
             if owner_state(memory,'lcvmem-'+row['id'])['facts']!=count:raise RuntimeError('Benchmark source import count differs')
@@ -70,6 +75,9 @@ async def answer(args,run):
     (args.run_dir/'answers').mkdir(exist_ok=True)
     config=LlamaConfig.from_manifest(ROOT/'models/manifest.json')
     with open_memory(Path(run.get('memory_directory',args.run_dir/'data/memory'))) as memory:
+        actual=memory.capabilities()['embedding_profile']
+        if run.get('requested_profile') not in (None,actual) or run.get('actual_embedding_profile') not in (None,actual):
+            raise RuntimeError('Benchmark index changed between preparation and answering')
         for index,row in enumerate(selected(run),1):
             output=args.run_dir/'answers'/(row['id']+'.json')
             if output.exists():continue
@@ -122,6 +130,7 @@ def main():
     parser.add_argument('--limit',type=int);parser.add_argument('--phase',choices=['run','seed','answer'],default='run')
     parser.add_argument('--seed-from',type=Path,help='Development-only comparison using verified unchanged source data and fresh sessions')
     parser.add_argument('--source-metadata',choices=['body-only-v1','calendar-speaker-v1'],default='body-only-v1')
+    parser.add_argument('--memory-profile',choices=['bge-fp32-single-v1','bge-int8-windows-v1','bge-int8-windows-bm25-v1'])
     args=parser.parse_args();args.run_dir=args.run_dir.resolve()
     manifest_path=ROOT/'benchmarks/corpora/lcvmem-v1.json';manifest=json.loads(manifest_path.read_text())
     ids=manifest['partitions'][args.split]['ids']
@@ -132,12 +141,13 @@ def main():
     if marker.exists():
         run=json.loads(marker.read_text())
         if (run.get('corpus_sha256')!=sha(manifest_path) or run.get('ids')!=ids or run.get('split')!=args.split
-                or run.get('source_metadata','body-only-v1')!=args.source_metadata):
+                or run.get('source_metadata','body-only-v1')!=args.source_metadata
+                or run.get('requested_profile')!=args.memory_profile):
             raise RuntimeError('Existing benchmark ownership/configuration differs')
     else:
         if any(args.run_dir.iterdir()):raise RuntimeError('Benchmark directory is not empty')
         run={'schema_version':1,'run_id':uuid.uuid4().hex,'status':'PREPARING','created_at':stamp(),'split':args.split,'ids':ids,
-            'corpus_sha256':sha(manifest_path),'source_metadata':args.source_metadata,
+            'corpus_sha256':sha(manifest_path),'source_metadata':args.source_metadata,'requested_profile':args.memory_profile,
             'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}
         if args.seed_from:
             if args.split!='development':raise ValueError('Seed reuse is restricted to development comparisons')
@@ -152,6 +162,11 @@ def main():
                 expected[qid]=result['before']
             run.update(seed_complete=True,seed_origin=str(origin),expected_seed_states=expected,
                 memory_directory=prior.get('memory_directory',str(origin/'data/memory')))
+            from app.memory_profiles import profile_of
+            actual=profile_of(json.loads((Path(run['memory_directory'])/'store.json').read_text()))
+            if args.memory_profile not in (None,actual) or prior.get('actual_embedding_profile') not in (None,actual):
+                raise RuntimeError('Reused seed index does not match the requested profile')
+            run['actual_embedding_profile']=actual
         write_json(marker,run)
     if args.phase in {'seed','answer'}:
         with (args.run_dir/'worker.lock').open('a+b') as lock:
@@ -161,6 +176,7 @@ def main():
         return 0
     common=['--run-dir',str(args.run_dir),'--output',str(args.output),'--split',args.split,
             '--source-metadata',args.source_metadata]+(['--limit',str(args.limit)] if args.limit else [])
+    if args.memory_profile:common+=['--memory-profile',args.memory_profile]
     with (args.run_dir/'orchestrator.lock').open('a+b') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         phases=('answer',) if run.get('seed_complete') else ('seed','answer')

@@ -226,6 +226,31 @@
       "backend": "sentence-transformers-onnx-cpu",
       "vector_layout": "qdrant-max-sim",
       "source_export": "benchmarks/results/bge-int8-export.json"
+    },
+    "bge-int8-windows-bm25-v1": {
+      "model_directory": "bge-small-zh-v1.5-onnx-arm64-int8",
+      "embedding_sha256": "2e273ef07b8e6a6c7b029bf0651ae058b4dc6d9adf6e1a3d2399b1944e7f1136",
+      "window_tokens": 256,
+      "window_overlap": 32,
+      "backend": "sentence-transformers-onnx-cpu",
+      "vector_layout": "qdrant-max-sim",
+      "source_export": "benchmarks/results/bge-int8-export.json",
+      "retrieval": {
+        "server_version": "1.19.2",
+        "model": "qdrant/bm25",
+        "slot": "bm25",
+        "fusion": "dbsf",
+        "prefetch": 60,
+        "options": {
+          "tokenizer": "multilingual",
+          "stemmer": {
+            "type": "none"
+          },
+          "stopwords": {},
+          "lowercase": true
+        }
+      },
+      "status": "candidate_integration"
     }
   }
 }

@@ -11,13 +11,15 @@ import sqlite3
 import uuid
 
 from deploy.memory.runtime import atomic_json
-from app.memory_profiles import LEGACY,WINDOWS,profile_of,vector_params,layout_matches,entity_name,entity_metadata
+from app.memory_profiles import LEGACY,WINDOWS,HYBRID,is_window_profile,retrieval_fingerprint,lexical_layout_matches,profile_of,vector_params,layout_matches,entity_name,entity_metadata
 
 
 def new_binding(directory, service, embedding_sha256, dimensions=512,profile=LEGACY):
-    if profile not in {LEGACY,WINDOWS}:raise ValueError('Unsupported memory embedding profile')
+    if profile not in {LEGACY,WINDOWS,HYBRID}:raise ValueError('Unsupported memory embedding profile')
     store_id=uuid.uuid4().hex
-    return {'schema_version':1 if profile==LEGACY else 2,**({'embedding_profile':profile} if profile!=LEGACY else {}),'backend':'qdrant_server','store_id':store_id,
+    return {'schema_version':1 if profile==LEGACY else (3 if profile==HYBRID else 2),
+        **({'embedding_profile':profile} if profile!=LEGACY else {}),
+        **({'retrieval_sha256':retrieval_fingerprint()} if profile==HYBRID else {}),'backend':'qdrant_server','store_id':store_id,
         'collection':'assistant_'+store_id,'directory':str(Path(directory).resolve()),'instance_id':service.instance_id,
         'service_directory':str(service.directory),'embedding_sha256':embedding_sha256,'dimensions':dimensions,'status':'PREPARING'}
 
@@ -49,7 +51,8 @@ def collection_metadata(binding):
     return {'assistant_store_id':binding['store_id'],'instance_id':binding['instance_id'],
         'directory_sha256':hashlib.sha256(binding['directory'].encode()).hexdigest(),
         'embedding_sha256':binding['embedding_sha256'],'dimensions':binding['dimensions'],
-        **({'embedding_profile':profile} if profile!=LEGACY else {})}
+        **({'embedding_profile':profile} if profile!=LEGACY else {}),
+        **({'retrieval_sha256':binding['retrieval_sha256']} if profile==HYBRID else {})}
 
 
 class StoreBinding:
@@ -94,7 +97,7 @@ class StoreBinding:
                     vectors_config=vector_params(dimensions,self.profile),
                     sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},
                     hnsw_config=models.HnswConfigDiff(m=0),metadata=self.expected)
-            if self.profile==WINDOWS:
+            if is_window_profile(self.profile):
                 entity=entity_name(self.collection)
                 if not self.client.collection_exists(entity):
                     if self.binding['status']=='READY':raise RuntimeError('Bound entity collection is missing; explicit recovery is required')
@@ -114,9 +117,10 @@ class StoreBinding:
     def validate(self):
         info=self.client.get_collection(self.collection)
         if (info.config.metadata!=self.expected or info.config.hnsw_config.m!=0
-                or not layout_matches(info.config.params.vectors,self.binding['dimensions'],self.profile)):
+                or not layout_matches(info.config.params.vectors,self.binding['dimensions'],self.profile)
+                or not lexical_layout_matches(info,self.profile)):
             raise RuntimeError('Native collection metadata/configuration does not match this journal')
-        if self.profile==WINDOWS:
+        if is_window_profile(self.profile):
             entity=self.client.get_collection(entity_name(self.collection))
             if (entity.config.metadata!=entity_metadata(self.binding) or entity.config.hnsw_config.m!=0
                     or not layout_matches(entity.config.params.vectors,self.binding['dimensions'],self.profile)):

@@ -47,6 +47,7 @@ def main():
     total=len(cases)
     report={'schema_version':1,'status':'COMPLETE' if all((args.run_dir/'answers'/(qid+'.json')).is_file() for qid in run['ids']) else 'INCOMPLETE',
         'split':run['split'],'source_metadata':run.get('source_metadata','body-only-v1'),
+        'embedding_profile':run.get('actual_embedding_profile'),
         'selected':total,'partition_total':len(manifest['partitions'][run['split']]['ids']),
         'dataset_sha256':manifest['data_sha256'],'code_commit':manifest['code_commit'],'metric_files':manifest['metric_files'],
         'source_commit':run.get('source_commit'),'reader_fingerprint':run.get('reader_fingerprint'),'run_id':run['run_id'],

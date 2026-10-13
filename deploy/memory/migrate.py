@@ -42,8 +42,8 @@ def production_profile(model,profile_id='bge-fp32-single-v1'):
     options=ort.SessionOptions();options.intra_op_num_threads=2;options.inter_op_num_threads=1
     config['embedder']['config']['model_kwargs']['model_kwargs']['session_options']=options
     embedder=EmbedderFactory.create('huggingface',config['embedder']['config'],config['vector_store']['config'])
-    from app.memory_profiles import LEGACY,WINDOWS
-    if profile_id==WINDOWS:
+    from app.memory_profiles import LEGACY,is_window_profile
+    if is_window_profile(profile_id):
         from app.adapters.embedding_windows import BGEWindowAdapter
         encoder=BGEWindowAdapter(embedder)
     elif profile_id==LEGACY:encoder=BGEQueryAdapter(embedder)

@@ -132,9 +132,9 @@ FP32多段SDK写入约0.75秒，超出目标500毫秒，因此用[Sentence Trans
 
 `tools/qdrant_lexical_probe.py`把冻结的10000条主人和100条访客种子资料复制到有归属标记的临时原生collection，保留现有int8多向量不重新编码，再由服务器生成BM25稀疏向量。两个候选分支及融合结果均施加主人/命名空间条件。完整原文和编号问题不改变；分别运行BM25、原生RRF、原生DBSF。
 
-[可行性结果](../../benchmarks/results/qdrant-lexical-numbered-feasibility.json)三种方式的编号top5均为100/100，长/短各50/50，无主体泄漏，临时collection已清理。这证明该合成缺口可由现有开源组件的词项候选补足，**尚未接入正式Mem0检索或验证其更正/遗忘/恢复生命周期**；数据准备曾与该探针重叠，没有时延结论，也不是独立语义质量或JT通过。
+[可行性结果](../../benchmarks/results/qdrant-lexical-numbered-feasibility.json)三种方式的编号top5均为100/100，长/短各50/50，无主体泄漏，临时collection已清理。这证明该合成缺口可由现有开源组件的词项候选补足，该隔离结果本身不验证正式Mem0检索或更正/遗忘/恢复生命周期；数据准备曾与该探针重叠，没有时延结论，也不是独立语义质量或JT通过。
 
-集成前还须处理上游边界：当前固定Mem0的`_search_vector_store`只把语义前60结果送入最终评分，关键词结果只贡献分数；仅启用可选BM25不能保证补回语义候选之外的长条目。正式方案需要保留原生融合得到的候选并复用Mem0的存储/生命周期，冻结分词与索引绑定，重新验证更正、遗忘、迁移、恢复和完整时延。
+集成前还须处理上游边界：当前固定Mem0的`_search_vector_store`只把语义前60结果送入最终评分，关键词结果只贡献分数；仅启用可选BM25不能保证补回语义候选之外的长条目。现已在单个Mem0 provider实例接入原生DBSF候选集合，稠密与BM25写入复用同一本机认证客户端，schema3绑定冻结词项配置；新增、更正、迁移和恢复均按规范正文生成BM25。实际保存/召回/旧备份恢复已通过[集成验证](../../benchmarks/results/hybrid-memory-integration.json)，217项框架测试通过；默认配置暂未切换，完整时延、重复故障与开发质量仍在验证。显式升级见[部署说明](../memory/README.md#本地关键词与语义融合候选)。
 
 ### 语音、视觉与记忆同时工作
 
@@ -173,3 +173,14 @@ ROS_DOMAIN_ID=42 ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST OPENBLAS_NUM_THREADS=1 
 它使用真实模型和相机、合成输入音频及WAV输出，不测声学停播，也没有画面内容的地面真值。提醒/手势负载、独立质量、B0–B3、正式JT及8小时验收仍须单独完成；两份容量准备配置也不是同数据单因素对照。正式应用仍使用原来的dense检索，本轮没有启用上述BM25候选。
 
 后续先在开发集完善时间范围、对话来源与相关上下文检索，再冻结版本运行200题保留集。完整JT-10还须覆盖保存/更正/遗忘、无事实、取消、来源、重启和索引恢复；公开语言基准、词级F1以及框架回归均不能替代该验收。
+
+候选开发质量对照使用新索引目录及明确的配置，不复用旧向量，也不接触保留集：
+
+```bash
+python3 tools/project.py bench --suite memory-quality --split development \
+  --source-metadata calendar-speaker-v1 --memory-profile bge-int8-windows-bm25-v1 \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/lcvmem-development-hybrid-v1" \
+  --output benchmarks/results/lcvmem-development-hybrid.json
+```
+
+此命令的准备配置、实际绑定及报告均记录profile；复用或续跑的索引不匹配时拒绝继续。候选容量使用`managed_memory_capacity.py --profile bge-int8-windows-bm25-v1`在新的专用目录准备和计时；计时必须等待其他重负载评测结束。

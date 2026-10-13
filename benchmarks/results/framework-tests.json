@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T14:16:08.547576+00:00",
+  "created_at": "2026-10-13T15:56:00.034507+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 211,
+  "tests_run": 217,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -278,6 +278,30 @@
     },
     {
       "id": "test_memory_context.MemoryContextTests.test_skipped_fact_has_no_injected_reference",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_hybrid.HybridProviderTests.test_candidate_union_keeps_lexical_match_outside_dense_sixty",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_hybrid.HybridProviderTests.test_canonical_update_owner_namespace_source_and_forget",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_hybrid.HybridProviderTests.test_profile_lock_and_incomplete_updates_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_hybrid.HybridReindexTests.test_old_backup_and_deleted_sparse_content_cannot_revive",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_hybrid.HybridReindexTests.test_same_profile_restore_rebuilds_corrupt_lexical_vectors",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_hybrid.HybridReindexTests.test_successive_upgrade_abort_resume_and_no_downgrade",
       "status": "PASS"
     },
     {
@@ -865,6 +889,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "476bc3d15fccb210ae8af951bea3ef56f6d2be0e",
+  "source_commit": "88cfc141fdcf6f90c3b91c5340283562bc6ba085",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

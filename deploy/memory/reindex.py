@@ -6,7 +6,8 @@ import re
 from types import SimpleNamespace
 
 from app.data_lifecycle import MARKER,check_available,read_state
-from app.memory_profiles import WINDOWS,profile_of,layout_matches,entity_name,entity_metadata
+from app.memory_profiles import LEGACY,WINDOWS,HYBRID,is_window_profile,lexical_layout_matches,profile_of,layout_matches,entity_name,entity_metadata
+from app.memory_lexical import upsert_canonical
 from app.memory_store import StoreBinding,check_transition,collection_metadata,new_binding
 from deploy.data.backup import sync_directory
 from deploy.data.restore import data_locks,expected_memories,rows
@@ -36,7 +37,8 @@ def validate_source(client,binding):
     if binding.get('status')!='READY':raise RuntimeError('Reindex source is not ready')
     info=client.get_collection(binding['collection'])
     if (info.config.metadata!=collection_metadata(binding)
-            or info.config.hnsw_config.m!=0 or not layout_matches(info.config.params.vectors,binding['dimensions'],profile_of(binding))):
+            or info.config.hnsw_config.m!=0 or not layout_matches(info.config.params.vectors,binding['dimensions'],profile_of(binding))
+            or not lexical_layout_matches(info,profile_of(binding))):
         raise RuntimeError('Reindex source collection does not match its binding')
 
 
@@ -45,7 +47,7 @@ def cleanup_collections(client,binding):
     for name,expected in names:
         if client.collection_exists(name):
             actual=client.get_collection(name).config.metadata
-            allowed=(expected,None,{}) if name.endswith('_entities') and profile_of(binding)!='bge-int8-windows-v1' else (expected,)
+            allowed=(expected,None,{}) if name.endswith('_entities') and not is_window_profile(profile_of(binding)) else (expected,)
             if actual not in allowed:raise RuntimeError('Refusing to remove an unrelated reindex collection')
     for name,_ in names:
         if client.collection_exists(name):client.delete_collection(name)
@@ -56,10 +58,14 @@ def reindex(directory,profile,*,checkpoint=lambda phase:None):
     from mem0.memory.storage import SQLiteManager
     from patches.mem0.purge_history import purge_history
     directory=Path(directory).resolve();memory=directory/'memory';marker=memory/MARK;binding_path=memory/'store.json'
-    if profile.profile_id!=WINDOWS:raise RuntimeError('Reindex target must be the qualified token-window profile')
+    if not is_window_profile(profile.profile_id):raise RuntimeError('Reindex target must be a supported token-window profile')
     with ExitStack() as stack:
         data_locks(stack,directory)
         state=json.loads(marker.read_text()) if marker.exists() else None
+        previous_reindex=None
+        if state and state.get('status')=='COMPLETED' and profile_of(state['binding'])!=profile.profile_id:
+            check_available(directory);check_transition(memory)
+            previous_reindex=state;state=None
         if state:
             target=state['binding'];original=state['original_binding'];service=load(original['service_directory'])
             validate_binding(original,memory,service);validate_binding(target,memory,service)
@@ -76,6 +82,8 @@ def reindex(directory,profile,*,checkpoint=lambda phase:None):
             check_available(directory);check_transition(memory)
             original=json.loads(binding_path.read_text());service=load(original['service_directory'])
             validate_binding(original,memory,service)
+            if {LEGACY:0,WINDOWS:1,HYBRID:2}[profile_of(original)]>{LEGACY:0,WINDOWS:1,HYBRID:2}[profile.profile_id]:
+                raise RuntimeError('Reindex cannot downgrade the bound memory profile')
             if original.get('status')!='READY' or original.get('directory')!=str(memory):raise RuntimeError('Reindex requires an existing ready native store')
             if profile_of(original)==profile.profile_id and original['embedding_sha256']==profile.fingerprint:
                 owned=StoreBinding(memory,service,embedding_sha256=profile.fingerprint,dimensions=profile.dimensions,profile=profile.profile_id)
@@ -84,7 +92,7 @@ def reindex(directory,profile,*,checkpoint=lambda phase:None):
             if any(r['status']!='COMPLETED' and r['operation'] in {'remember','correct'} for r in ops):raise RuntimeError('Reconcile pending writes before reindexing')
             state={'schema_version':1,'directory':str(directory),'status':'WRITING','original_binding':original,
                 'binding':new_binding(memory,service,profile.fingerprint,profile.dimensions,profile.profile_id),
-                'previous_data_state':read_state(directory),'source_sha256':None,'scope':profile.scope}
+                'previous_data_state':read_state(directory),'previous_reindex_state':previous_reindex,'source_sha256':None,'scope':profile.scope}
         lock(stack,service.directory/'leases'/(original['collection']+'.lock'))
         client=stack.enter_context(closing(service.client(timeout=60)))
         def publish():atomic_json(marker,state)
@@ -135,7 +143,7 @@ def reindex(directory,profile,*,checkpoint=lambda phase:None):
                 if not ids:continue
                 vectors=profile.embedder.embed_batch([p['data'] for p in payloads],'add')
                 if len(vectors)!=len(ids):raise RuntimeError('Reindex embedding batch differs')
-                client.upsert(dst,[models.PointStruct(id=mid,vector={'':vector},payload=payload) for mid,vector,payload in zip(ids,vectors,payloads)],wait=True)
+                upsert_canonical(client,dst,[models.PointStruct(id=mid,vector={'':vector},payload=payload) for mid,vector,payload in zip(ids,vectors,payloads)],profile.profile_id,entities=is_entity)
                 actual={str(p.id):p for p in client.retrieve(dst,ids,with_payload=True,with_vectors=True)}
                 for mid,vector,payload in zip(ids,vectors,payloads):
                     returned=actual.get(str(mid))
@@ -177,5 +185,6 @@ def abort(directory):
         atomic_json(memory/'store.json',original)
         if previous:atomic_json(directory/MARKER,previous)
         elif (directory/MARKER).exists():(directory/MARKER).unlink();sync_directory(directory)
-        marker.unlink();sync_directory(memory)
+        if state.get('previous_reindex_state'):atomic_json(marker,state['previous_reindex_state'])
+        else:marker.unlink();sync_directory(memory)
         return {'status':'ABORTED','source_preserved':True}

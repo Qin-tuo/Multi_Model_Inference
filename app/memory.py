@@ -189,11 +189,14 @@ class Mem0Adapter:
                     config["embedder"]["config"]["model_kwargs"]["model_kwargs"]["session_options"] = options
                 sdk = Memory.from_config(config)
                 from app.adapters.embedding import BGEQueryAdapter
-                from app.memory_profiles import WINDOWS
-                if self._binding and self._binding.profile==WINDOWS:
+                from app.memory_profiles import HYBRID,is_window_profile
+                if self._binding and is_window_profile(self._binding.profile):
                     from app.adapters.embedding_windows import BGEWindowAdapter
                     sdk.embedding_model=BGEWindowAdapter(sdk.embedding_model)
                 else:sdk.embedding_model = BGEQueryAdapter(sdk.embedding_model)
+                if self._binding and self._binding.profile==HYBRID:
+                    from app.adapters.qdrant_hybrid import NativeHybridQdrant
+                    sdk.vector_store=NativeHybridQdrant(sdk.vector_store)
             self.sdk = sdk
             from mem0.memory.telemetry import MEM0_TELEMETRY
             if MEM0_TELEMETRY:
@@ -474,10 +477,11 @@ class Mem0Adapter:
                 # absent. Report the actual configured backend after this call.
                 bm25_ready = bool(getattr(self.sdk.vector_store, "_bm25_encoder", None)
                                   and getattr(self.sdk.vector_store, "_has_bm25_slot", False))
-                method = "mem0_hybrid" if bm25_ready else "mem0_dense"
+                method = ('qdrant_native_dbsf' if getattr(self.sdk.vector_store,'native_hybrid',False)
+                    else ("mem0_hybrid" if bm25_ready else "mem0_dense"))
             items=[self._record(record) for record in records]
-            from app.memory_profiles import WINDOWS
-            if key is None and self._binding and self._binding.profile==WINDOWS:
+            from app.memory_profiles import is_window_profile
+            if key is None and self._binding and is_window_profile(self._binding.profile):
                 encoder=self.sdk.embedding_model
                 long_items=[item for item in items if len(encoder.spans(item['content']))>1]
                 if long_items:
