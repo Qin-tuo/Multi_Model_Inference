@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T04:58:40.664704+00:00",
+  "created_at": "2026-10-13T05:08:58.473894+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 137,
+  "tests_run": 147,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -114,6 +114,46 @@
     },
     {
       "id": "test_mem0_adapter.Mem0LifecycleTests.test_serialized_adapter_cas_has_one_winner",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_abort_refuses_unrelated_target",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_completed_retry_never_replays_retired_source_and_missing_binding_fails",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_cross_owner_entities_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_deletion_intents_and_descendants_do_not_resurrect",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_faults_block_open_and_resume_without_duplicates",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_ids_payloads_vectors_versions_history_and_owner_are_preserved",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_incomplete_abort_is_resumable_and_preserves_source",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_model_mismatch_and_changed_source_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_unrelated_target_metadata_is_never_overwritten",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_migration.MemoryMigrationTests.test_writer_or_records_busy_is_rejected_before_transition",
       "status": "PASS"
     },
     {
@@ -569,6 +609,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "1f8c6787285f1ae611760d75eb9cf1273776a10c",
+  "source_commit": "0ecd1d52a31745eac6b8ccb370951d673c7cb481",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

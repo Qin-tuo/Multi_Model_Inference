@@ -403,6 +403,9 @@ def main():
     srv.add_argument("--component", choices=["qdrant", "llama", "asr", "speech", "camera", "vision", "pose"], required=True)
     test = sub.add_parser("test")
     test.add_argument("--suite", choices=["core", "framework", "memory", "interaction"], default="core")
+    migration=sub.add_parser('migrate-memory',help='Resume legacy local memory migration to the managed Qdrant service')
+    migration.add_argument('--data-dir',type=Path,required=True)
+    migration.add_argument('--abort',action='store_true')
     bench = sub.add_parser('bench', help='Measured workloads; full B0-B3 scenarios remain separate work')
     bench.add_argument('--suite', choices=['memory-capacity'], required=True)
     bench.add_argument('--tier', type=int, choices=[1000,10000,50000], required=True)
@@ -440,6 +443,10 @@ def main():
     logs.add_argument("--lines", type=int, default=50)
     args = parser.parse_args()
     try:
+        if args.action=='migrate-memory':
+            env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
+            return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/migrate_memory.py'),
+                '--data-dir',str(args.data_dir)]+(['--abort'] if args.abort else []),cwd=ROOT,env=env)
         if args.action == 'bench':
             env = os.environ.copy()
             env.setdefault('OPENBLAS_NUM_THREADS','1')

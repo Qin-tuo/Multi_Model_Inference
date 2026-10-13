@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件137项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件147项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -91,9 +91,9 @@ ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM�
 
 服务只监听127.0.0.1:6333，认证凭据由启动工具自动生成并保存在运行目录的私有文件中，无需手工配置。`status --components qdrant`核对实际进程、监听socket、认证访问成功及无凭据访问被拒绝。systemd负责重启和进程组清理，日志按既有限额轮转。当前仍需手动`up`，没有启用开机自启动。
 
-每个数据目录拥有独立collection，绑定服务实例、目录和embedding文件指纹。绑定同时记录在本地`store.json`和Qdrant原生collection元数据中；复制目录、连接错误实例、替换embedding或丢失collection会明确失败，避免悄悄打开空库。已有绑定的数据目录沿用自身绑定。旧嵌入式数据需要显式迁移，当前没有自动迁移工具；切换时本机日常数据目录为空，未覆盖用户记忆。
+每个数据目录拥有独立collection，绑定服务实例、目录和embedding文件指纹。绑定同时记录在本地`store.json`和Qdrant原生collection元数据中；复制目录、连接错误实例、替换embedding或丢失collection会明确失败，避免悄悄打开空库。已有绑定的数据目录沿用自身绑定。旧嵌入式数据通过`python3 tools/project.py migrate-memory --data-dir /实际应用数据目录`显式迁移；先退出使用该目录的应用，Qdrant服务保持运行。工具保留ID/版本/来源，合并删除记录，核对当前BGE向量后分批导入；中断后重复原命令续跑。未完成的迁移可加`--abort`撤销，已完成迁移禁止回退到旧库。详见[迁移说明](deploy/memory/README.md)。
 
-验证包括[绑定后的实际Mem0读写](benchmarks/results/managed-memory-smoke.json)、[公开文字入口](benchmarks/results/managed-memory-console-smoke.json)及[语音文件入口](benchmarks/results/managed-memory-voice-smoke.json)。文件语音验证了真实ASR/LLM/TTS及记忆写读；没有声学播放回执。配置及复现说明见[记忆部署](deploy/memory/README.md)。
+验证包括[绑定后的实际Mem0读写](benchmarks/results/managed-memory-smoke.json)、[公开文字入口](benchmarks/results/managed-memory-console-smoke.json)、[语音文件入口](benchmarks/results/managed-memory-voice-smoke.json)及[真实BGE迁移](benchmarks/results/memory-migration-smoke.json)。文件语音验证了真实ASR/LLM/TTS及记忆写读；没有声学播放回执。配置及复现说明见[记忆部署](deploy/memory/README.md)。
 
 ### 人物状态与手势主动回应
 

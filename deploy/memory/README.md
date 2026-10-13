@@ -40,6 +40,34 @@ python3 tools/project.py interact --no-vision
 
 `app/memory_store.py`通过Qdrant原生collection metadata核对服务实例、数据目录、embedding指纹及向量维度，使用数据目录及collection两个写入锁。首次配置可从`PREPARING`恢复，确认SDK初始化与删除屏障恢复后标记`READY`；已READY但collection丢失时拒绝创建空替代库。每次应用存储操作核对绑定。Mem0继续拥有事实、向量、history，应用journal继续承接幂等与删除屏障。
 
-旧的嵌入式目录被明确拒绝自动切换；当前主运行目录此前没有用户数据库，因此本次只建立服务及新库入口。既有数据迁移、完整备份/删除日志合并、权限和故障的完整矩阵仍待实现。`StoreBinding`拒绝目录复制或模型指纹变化不等于已经具备恢复工具。
+旧的嵌入式目录被明确拒绝自动切换；当前主运行目录此前没有用户数据库，部署时未迁移或覆盖用户内容。显式迁移入口见下文。完整备份/删除日志合并、权限和故障的完整矩阵仍待实现。`StoreBinding`拒绝目录复制或模型指纹变化不等于已经具备完整恢复工具。
 
 显式遗忘还通过`patches/mem0/purge_entities.py`清理Mem0实体索引：按主体及记忆ID分页查询，移除已删除事实的关联；没有剩余关联的实体一并删除，其他主体及仍有效的关联保留。上游在实体索引尚未加载时跳过清理，并抑制清理异常，因此适配器在重启后也直接使用Qdrant公开API检查实体集合。清理失败时删除屏障保持待处理，重启后重试成功才确认完成。真实SDK、Qdrant及SQLite回归覆盖重启清理、共享关联保留、主体隔离和故障恢复；测试embedding为明确标记的fixture，不证明完整备份恢复或磁盘级数据擦除。
+
+## 旧库原地迁移
+
+```bash
+# 退出使用该数据目录的 interact/voice；Qdrant后台服务保持运行。
+python3 tools/project.py migrate-memory --data-dir /实际应用数据目录
+# 仅撤销尚未完成的迁移：
+python3 tools/project.py migrate-memory --data-dir /实际应用数据目录 --abort
+```
+
+参数是包含`memory/`和可选`records.sqlite`的应用数据目录，与`interact --data-dir`一致。源必须是本项目Mem0 2.2.1的`memory/qdrant`、`history.sqlite`和`operations.sqlite`，使用当前已验证的512维BGE ONNX模型；目标是配置中的受管理本机服务。更换embedding、搬到另一台机器或恢复任意备份不属于此命令的范围。
+
+工具取得adapter、records及目标collection写入锁，通过Qdrant公开scroll/upsert/retrieve接口迁移事实及实体；SQLite history/journal留在原位置。保留事实ID、payload、版本和来源，逐批用真实BGE复算并检查保留向量的余弦一致性（≥0.99999），写入后读取核对payload、向量及总条数。未知collection、数据归属冲突、源内容改变或目标metadata不符会拒绝发布。
+
+已有删除屏障和records中先于Mem0遗忘提交的删除意图会合并；派生事实一并排除，相关history/messages清除，实体关联裁剪，操作回执继续保留。源指纹覆盖事实ID/payload、SQLite逻辑内容和records删除记录，避免续跑时混入变更。此过程保留已有授权的删除意图，即使撤销迁移也不会撤销遗忘。
+
+`store-transition.json`先记录迁移状态，检查完成后依次发布`store.json=READY`及`COMPLETED`。任一中间状态都阻止应用打开目录，包括绑定文件缺失的情况；重复原命令续跑同一collection。完成后重复命令只检查绑定，不再导入旧数据，因此不会覆盖新更正或复活迁移后已遗忘的事实。
+
+`--abort`仅清除metadata完全匹配的未发布目标，保留原库及删除屏障；撤销自身也可中断续跑。完成后的迁移拒绝撤销。旧`memory/qdrant`目录会保留为停用副本；后续遗忘不会物理擦除该副本，也不得用它绕过当前删除日志恢复。完整备份/恢复和旧副本保留策略仍待交付。
+
+[真实模型迁移报告](../../benchmarks/results/memory-migration-smoke.json)覆盖公开CLI、ID/版本/来源保持、语义召回、主体隔离、回执重放和迁移后遗忘/重启；输入是隔离的合成资料。[迁移专项测试](../../tests/test_memory_migration.py)另外覆盖分页、四个提交阶段中断、续跑、源变更、模型不匹配和撤销。它们不能替代独立记忆质量、整机断电或完整备份恢复验收。
+
+[真实进程恢复报告](../../benchmarks/results/memory-migration-recovery-smoke.json)在标记写入、批次提交、核对完成、READY发布后分别执行一次真实SIGKILL，共4次；全部通过公开CLI续跑，确认事实只保留一份，旧源中的已遗忘事实被删除屏障排除。该检查使用真实BGE/Mem0/SQLite及认证Qdrant，但每阶段仅一次，尚不满足完整故障矩阵的每类10次要求。
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 .venv/bin/python tools/memory_migration_smoke.py
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 .venv/bin/python tools/memory_migration_recovery_smoke.py
+```

@@ -156,6 +156,8 @@ class Mem0Adapter:
         self.cancelled_sources = Table("cancelled_sources", metadata,
                                        Column("user_id", String, primary_key=True), Column("source_id", String, primary_key=True))
         try:
+            from app.memory_store import check_transition
+            check_transition(self.data_dir)
             metadata.create_all(self.engine)
             if (self.data_dir/'store.json').exists() and (server_config is None or sdk is not None):
                 raise MemoryAdapterError('UNAVAILABLE','This memory directory is bound to a native service; use its configured entry point')

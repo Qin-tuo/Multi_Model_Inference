@@ -13,6 +13,34 @@ import uuid
 from deploy.memory.runtime import atomic_json
 
 
+def new_binding(directory, service, embedding_sha256, dimensions=512):
+    store_id=uuid.uuid4().hex
+    return {'schema_version':1,'backend':'qdrant_server','store_id':store_id,
+        'collection':'assistant_'+store_id,'directory':str(Path(directory).resolve()),'instance_id':service.instance_id,
+        'service_directory':str(service.directory),'embedding_sha256':embedding_sha256,'dimensions':dimensions,'status':'PREPARING'}
+
+
+def check_transition(directory):
+    """A crashed migration must never reopen the retired local store."""
+    directory=Path(directory)
+    marker=directory/'store-transition.json'
+    if not marker.exists():return
+    transition=json.loads(marker.read_text())
+    path=directory/'store.json'
+    if transition.get('status')!='COMPLETED' or not path.is_file():
+        raise RuntimeError('Memory migration is incomplete; resume migrate-memory before opening this store')
+    binding=json.loads(path.read_text())
+    expected=dict(transition['binding'],status='READY')
+    if binding!=expected:
+        raise RuntimeError('Memory migration binding differs; explicit recovery is required')
+
+
+def collection_metadata(binding):
+    return {'assistant_store_id':binding['store_id'],'instance_id':binding['instance_id'],
+        'directory_sha256':hashlib.sha256(binding['directory'].encode()).hexdigest(),
+        'embedding_sha256':binding['embedding_sha256'],'dimensions':binding['dimensions']}
+
+
 class StoreBinding:
     def __init__(self,directory,service,*,embedding_sha256,dimensions=512):
         from qdrant_client import models
@@ -36,18 +64,13 @@ class StoreBinding:
                 if journal.exists():
                     with sqlite3.connect(journal) as db:
                         if db.execute('SELECT count(*) FROM operations').fetchone()[0]:raise RuntimeError('Existing memory journal requires explicit migration')
-                store_id=uuid.uuid4().hex
-                self.binding={'schema_version':1,'backend':'qdrant_server','store_id':store_id,
-                    'collection':'assistant_'+store_id,'directory':str(self.directory),'instance_id':service.instance_id,
-                    'service_directory':str(service.directory),'embedding_sha256':embedding_sha256,'dimensions':dimensions,'status':'PREPARING'}
+                self.binding=new_binding(self.directory,service,embedding_sha256,dimensions)
                 atomic_json(self.path,self.binding)
             store_id=self.binding['store_id']
             if len(store_id)!=32 or any(x not in '0123456789abcdef' for x in store_id) or self.binding['collection']!='assistant_'+store_id:
                 raise RuntimeError('Invalid collection binding')
             self.collection=self.binding['collection']
-            self.expected={'assistant_store_id':store_id,'instance_id':service.instance_id,
-                'directory_sha256':hashlib.sha256(str(self.directory).encode()).hexdigest(),
-                'embedding_sha256':embedding_sha256,'dimensions':dimensions}
+            self.expected=collection_metadata(self.binding)
             self.lease=(service.directory/'leases'/(self.collection+'.lock')).open('a+b')
             fcntl.flock(self.lease,fcntl.LOCK_EX|fcntl.LOCK_NB)
             self.client=service.client()

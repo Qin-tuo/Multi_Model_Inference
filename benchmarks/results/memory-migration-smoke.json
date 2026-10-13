@@ -1,0 +1,35 @@
+{
+  "created_at": "2026-10-13T05:06:50.809399+00:00",
+  "status": "PASS",
+  "checks": {
+    "public_cli_completed": true,
+    "real_model_validated": true,
+    "only_live_facts_copied": true,
+    "same_id_version_content_sources": true,
+    "semantic_recall_after_process_switch": true,
+    "guest_isolated": true,
+    "deleted_absent": true,
+    "old_receipt_replays": true,
+    "native_entity_links_erased": true,
+    "repeat_does_not_reimport": true,
+    "post_migration_forget_survives_reopen": true,
+    "guest_survives": true,
+    "forgotten_history_empty": true
+  },
+  "migration": {
+    "status": "PASS",
+    "counts": {
+      "memories": 2,
+      "entities": 1
+    },
+    "excluded_rows": 1,
+    "entity_links_pruned": 1,
+    "deletion_barriers": 1,
+    "embedding_scope": "PRODUCTION",
+    "source_sha256": "8334762cf3e2ad547c50736cb5f6d3491a531fcb665556c665399014065c39a4",
+    "collection": "assistant_196c556351504442b48b6966442eec59",
+    "already_completed": false,
+    "scope": "Legacy Mem0 local to authenticated native Qdrant, original SQLite journal/history retained; not full backup/restore or physical erasure"
+  },
+  "scope": "Public migration command with actual BGE ONNX, Mem0 and authenticated managed Qdrant; synthetic temporary profiles, real reopen/correct/forget. Not independent recall quality, full backup/restore, or physical storage erasure."
+}
