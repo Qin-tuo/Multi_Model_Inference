@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T17:38:46.418462+00:00",
+  "created_at": "2026-10-13T18:43:01.239439+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 220,
+  "tests_run": 222,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -605,6 +605,14 @@
       "status": "PASS"
     },
     {
+      "id": "test_prompt_cache_limits.PromptCacheLimitTests.test_both_commands_keep_context_and_forward_distinct_cache_limits",
+      "status": "PASS"
+    },
+    {
+      "id": "test_prompt_cache_limits.PromptCacheLimitTests.test_unlimited_or_untyped_budget_rejected_and_zero_disables_cache",
+      "status": "PASS"
+    },
+    {
       "id": "test_qdrant_process.NativeQdrantProcessTests.test_loopback_readiness_exclusive_ownership_and_cleanup",
       "status": "PASS"
     },
@@ -901,6 +909,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "0c11fd038094fcf4c910607db1034d2a7615f559",
+  "source_commit": "35b0bee4a4a19b594e7a0527c3b1d5d5dd3d1deb",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

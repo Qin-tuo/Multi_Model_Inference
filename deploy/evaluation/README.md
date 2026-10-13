@@ -228,10 +228,29 @@ python3 tools/project.py bench --suite memory-quality --split development \
   --output benchmarks/results/lcvmem-hybrid-8x768-new-run.json
 ```
 
-每次续跑核对检索参数；非法预算在创建评测目录前拒绝。`tools/lcvmem_compare.py`只用于完成后的开发集分析，参考答案不进入运行期。默认存储配置和5条/512tokens暂未切换；8条/768tokens的语音共存仍待测。
+每次续跑核对检索参数；非法预算在创建评测目录前拒绝。`tools/lcvmem_compare.py`只用于完成后的开发集分析，参考答案不进入运行期。默认存储配置和5条/512tokens暂未切换；8条/768tokens的后续语音共存及缓存边界见下。
 
 ## 当前候选的语音共存基线
 
 [20轮未插桩结果](../../benchmarks/results/memory-voice-hybrid-10k.json)使用DBSF、直接回答提示、5条/512tokens和独立万条个人档案，完成106次查询与53次写入。查询/写入P95为161.22/462.00ms，全部写入持久确认，0执行错误或主体泄漏。检测/姿态约11.49/11.42Hz，最新结果年龄P95约175/182ms。
 
 偏好/时间/算术的首段文件PCM P95分别为2.902/2.859/2.701秒，图像为5.202秒，因此整体仍为`FAIL`。每类只有5轮，图像内容没有地面真值，也没有物理可听回执。该配置同时改变检索与答复提示，不能把与旧窗口方案的差异当成单因素收益。事件循环最大延误约145ms，原因仍待实际阶段追踪确认。
+
+## 提示缓存与后续阶段追踪
+
+恢复故障测试期间，实际可用内存曾降到约145MiB。固定llama.cpp版本默认每个服务允许8192MiB主机提示缓存，而启动入口未显式覆盖。原生日志记录VLM缓存88份提示、3324.574MiB，ASR缓存49份、431.170MiB。[原始观察](../../benchmarks/results/llama-prompt-cache-baseline.json)保留进程、日志、空闲槽核验和服务干预信息；Jetson的进程RSS与smaps口径不同，没有将它们当成独占物理内存相加，也不把全部压力归因于缓存。
+
+当前启动器显式传入`--cache-ram`：VLM256MiB、ASR64MiB，配置位于`runtime.yaml`的`llama.prompt_cache_ram_mib`与`speech.asr_prompt_cache_ram_mib`。这个16GB部署档案拒绝负数/无限缓存及超过1024MiB的单服务设置，0表示关闭该缓存。模型、量化、2K上下文不变；整体进程/设备内存仍需单独测量。
+
+停止空闲模型服务后，可用内存恢复到约9.2GiB，其中也包含模型本身释放的内存；ASR依赖关系同时停止了speech，随后三者已按新参数恢复。[20次文本＋20次语音缓存检查](../../benchmarks/results/llama-prompt-cache-bounded.json)观察到实际淘汰，缓存最高246.232/62.580MiB，校验标签及原语音问题均正确返回，没有工作进程重启；不是8h或独立质量验收。[公开语音保存/回忆](../../benchmarks/results/cache-bounded-voice-smoke.json)通过，222项框架回归通过。恢复故障测试跳过对话生成，40次最终均通过，但报告明确记录了服务干预，不据此声称全模型共存通过。
+
+8条/768tokens的新测试先准备未测量的10000条主人＋100条访客档案，再用原生Qdrant快照和SQLite备份复制一份。[复制验证](../../benchmarks/results/voice-capacity-seed-clone.json)核对完整点校验和、规范合成正文/来源、纯种子操作及SQLite逻辑状态，为副本建立新的绑定。`tools/clone_capacity_fixture.py`仅接受未使用的合成容量档案，已测量档案会在创建目标前拒绝；它不是日常数据复制入口。备份和原始波形留在AI_Stack，测量中仍执行真实BGE/适配器。
+
+| 8条/768tokens、缓存256/64MiB | 查询/写入P95 | 短问答各类最高P95 | 图像P95 | 结论 |
+|---|---|---|---|---|
+| [无插桩，20轮](../../benchmarks/results/memory-voice-hybrid-8x768.json) | 153.42/468.51ms | 3.271秒 | 4.895秒 | 短问答超3秒，FAIL |
+| [阶段追踪，20轮](../../benchmarks/results/memory-voice-hybrid-8x768-trace.json) | 184.08/481.47ms | 3.304秒 | 4.273秒 | 诊断运行，短问答仍超标 |
+
+两轮的记忆操作、文件输出、主人/访客隔离与视觉频率/年龄检查通过；每类只有5轮，现场画面、时间回答和缓存热度有所不同，因此没有把差值当作插桩开销或单因素收益。当前仍只验证文件PCM，没有物理可听起点或画面内容地面真值。
+
+[阶段分析](../../benchmarks/results/voice-stage-diagnostic.json)得到1150个结构化事件、0超限丢弃。慢算术请求输入1339tokens，记忆证据707tokens，原生LLM首token等待约1.67秒，说明完整字面算式的长期记忆检索值得单独做选择性实验。图像轮还多次重算提示以移除历史，最终清空证据来满足2K预算；真实图像计数保护继续保留。主线程记忆generation读取约10–17ms，与最大136ms事件循环延误不重叠，最大延误原因仍未确定。墙钟区间包含等待、可能彼此嵌套，不作CUDA kernel或独占CPU时间解读。

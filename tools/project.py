@@ -237,10 +237,19 @@ def request_json(url, data=None, timeout=120):
         return json.load(r)
 
 
+def prompt_cache_args(settings,component):
+    if component=='llama':value=settings['llama'].get('prompt_cache_ram_mib',256)
+    elif component=='asr':value=settings['speech'].get('asr_prompt_cache_ram_mib',64)
+    else:raise ValueError('Prompt cache policy applies only to llama.cpp backends')
+    if type(value) is not int or not 0<=value<=1024:
+        raise ValueError('This16GB profile requires a prompt cache limit of0..1024MiB;negative/unlimited caches are not allowed')
+    return ['--cache-ram',str(value)]
+
+
 def server_command(port=None):
     _, models = manifests()
     model = models["models"]["vlm"]
-    config = json.loads((ROOT / "configs/runtime.yaml").read_text())["llama"]
+    settings=json.loads((ROOT / "configs/runtime.yaml").read_text());config=settings['llama']
     main = next(x for x in model["files"] if not x["name"].startswith("mmproj"))
     projector = next(x for x in model["files"] if x["name"].startswith("mmproj"))
     binary = CACHE / "build/llama/bin/llama-server"
@@ -251,11 +260,25 @@ def server_command(port=None):
             str(CACHE / "models" / projector["name"]), "-ngl", str(config["gpu_layers"]),
             "-c", str(config["context_tokens"]), "-t", str(config["threads"]),
             "-np", str(config["parallel"]), "--host", "127.0.0.1", "--port", str(port or config["port"])]
+    command+=prompt_cache_args(settings,'llama')
     if template := model.get("chat_template"):
         path = CACHE / "upstreams/llama.cpp" / template["relative_source_path"]
         if sha256(path) != template["sha256"]: raise RuntimeError("Chat template differs from the model manifest")
         command += ["--chat-template-file", str(path)]
     return command
+
+
+def asr_server_command():
+    _,models=manifests();model=models['models']['asr']
+    settings=json.loads((ROOT/'configs/runtime.yaml').read_text())
+    main=next(x for x in model['files'] if not x['name'].startswith('mmproj'))
+    projector=next(x for x in model['files'] if x['name'].startswith('mmproj'))
+    binary=CACHE/'build/llama/bin/llama-server'
+    for path in (binary,CACHE/'models'/main['name'],CACHE/'models'/projector['name']):
+        if not path.exists():raise RuntimeError(f'Missing prepared artifact: {path}')
+    return [str(binary),'-lv','4','--alias','assistant-asr','-m',str(CACHE/'models'/main['name']),
+        '--mmproj',str(CACHE/'models'/projector['name']),'-ngl','99','-c',str(model['context_tokens']),
+        '-t','2','-np','1','--host','127.0.0.1','--port',str(model['port']),*prompt_cache_args(settings,'asr')]
 
 
 def wait_ready(process, url, seconds=240):
@@ -358,14 +381,7 @@ def serve(args):
             if b"--build-ort" in argv and any(arg.endswith(b"deploy/vision/prepare.py") for arg in argv):
                 raise RuntimeError("ONNX Runtime GPU build is still active; start model services after this heavy build completes")
     if args.component == "asr":
-        _, models = manifests()
-        model = models["models"]["asr"]
-        main = next(x for x in model["files"] if not x["name"].startswith("mmproj"))
-        projector = next(x for x in model["files"] if x["name"].startswith("mmproj"))
-        command = [str(CACHE / "build/llama/bin/llama-server"), "-lv", "4", "--alias", "assistant-asr",
-                   "-m", str(CACHE / "models" / main["name"]), "--mmproj", str(CACHE / "models" / projector["name"]),
-                   "-ngl", "99", "-c", str(model["context_tokens"]), "-t", "2", "-np", "1",
-                   "--host", "127.0.0.1", "--port", str(model["port"])]
+        command=asr_server_command()
         os.execv(command[0], command)
     if args.component == "speech":
         python = str(ROOT / ".venv-speech/bin/python")

@@ -21,6 +21,7 @@ sys.path.insert(0,str(ROOT))
 from app.adapters.llama import LlamaConfig
 from app.adapters.vision import RosVisionBridge
 from app.memory_runtime import open_memory
+from app.memory import validate_retrieval_limits
 from app.memory_profiles import WINDOWS,HYBRID
 from app.records import Records
 from app.reminders import ReminderService
@@ -42,9 +43,17 @@ def vision_summary(node,elapsed):
 
 async def main(args):
     logger.remove();logger.add(sys.stderr,level='WARNING')
+    runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
+    top_k=args.memory_top_k if args.memory_top_k is not None else runtime['memory']['top_k']
+    memory_tokens=args.memory_token_limit if args.memory_token_limit is not None else runtime['memory']['context_token_limit']
+    model=LlamaConfig.from_manifest(ROOT/'models/manifest.json')
+    validate_retrieval_limits(top_k,memory_tokens,runtime['llama']['context_tokens'],model.max_tokens)
     folder=args.run_dir.resolve();corpus,config,prefix,_=workload(10000,personal=True,profile=args.profile)
     if json.loads((folder/'capacity-run.json').read_text())!=config:raise RuntimeError('Expected the exact personal10k synthetic workload')
     if json.loads((folder/'population.json').read_text())!={'owner':10000,'guest':100}:raise RuntimeError('Finish preparation first')
+    if (folder/'clone-receipt.json').exists() and json.loads((folder/'clone-receipt.json').read_text()).get('status')!='COMPLETE':
+        raise RuntimeError('Cloned seed is incomplete')
+    prepared=json.loads((folder/'prepared.json').read_text())
     started_marker=folder/'coexistence-started.json'
     if args.output.exists() or started_marker.exists():raise RuntimeError('Measurement already attempted; retain its evidence and use a fresh prepared directory')
     prior=json.loads((ROOT/'benchmarks/results/voice-assistant-smoke.json').read_text())
@@ -55,8 +64,8 @@ async def main(args):
         if digest!=prior['cases'][index]['input_sha256']:raise RuntimeError('Frozen synthetic voice input changed')
         inputs.append((label,path,digest))
     reader=fingerprint();before=backend_state();artifacts=folder/'coexistence';artifacts.mkdir()
-    runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
     write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'trace_stages':args.trace_stages,'debug_loop':args.debug_loop,
+        'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
         'inputs':[{'label':a,'sha256':c} for a,_,c in inputs]})
     queries=[];writes=[];turns=[];lag=[];errors=[];checks={};voice=None;probe=None;bridge=None;thread=None
     observe_stop=threading.Event();voice_done=asyncio.Event();memory_minimum=asyncio.Event();sampling_done=asyncio.Event()
@@ -124,10 +133,9 @@ async def main(args):
             async with asyncio.timeout(25):
                 while bridge.status()['state']!='READY' or not all(row['latest'] and time.monotonic_ns()-row['latest']<500_000_000 for row in probe.rows.values()):
                     await asyncio.sleep(.1)
-            voice=VoiceAssistant(LlamaConfig.from_manifest(ROOT/'models/manifest.json'),memory,reminders,records,
+            voice=VoiceAssistant(model,memory,reminders,records,
                 user_id=corpus['owner'],vision_frames=bridge.frames,output_path=artifacts/'answers.wav',
-                context_tokens=runtime['llama']['context_tokens'],memory_top_k=runtime['memory']['top_k'],
-                memory_context_tokens=runtime['memory']['context_token_limit'])
+                context_tokens=runtime['llama']['context_tokens'],memory_top_k=top_k,memory_context_tokens=memory_tokens)
             if stage_trace:stage_trace.attach(voice,memory)
             await voice.start();begin=time.monotonic_ns();probe.started_ns=begin;probe.measuring=True
             lag_task=asyncio.create_task(sample_loop());memory_task=asyncio.create_task(memory_load(memory))
@@ -208,7 +216,8 @@ async def main(args):
             'app_unchanged':reader==fingerprint()}
         report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'errors':errors,
             'reader_fingerprint':reader,'config':config,'initial_population':counts,'run_directory':str(folder),
-            'retrieval_config':{key:runtime['memory'][key] for key in ('top_k','context_token_limit')},
+            'preparation_method':prepared.get('method','sdk-batch-real-bge'),'preparation_sha256':sha256(folder/'prepared.json'),
+            'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
             'workload_begin_ns':begin,'workload_end_ns':end,'query_summary':qstat,'write_summary':wstat,
             'foreground_begin_ns':foreground_begin,'foreground_end_ns':foreground_end,
             'queries_overlapping_foreground':statistics(overlap_queries),'writes_overlapping_foreground':statistics(overlap_writes),
@@ -228,6 +237,8 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--run-dir',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True);parser.add_argument('--turns',type=int,default=20)
     parser.add_argument('--profile',choices=[WINDOWS,HYBRID],default=WINDOWS)
+    parser.add_argument('--memory-top-k',type=int,choices=range(1,21))
+    parser.add_argument('--memory-token-limit',type=int)
     parser.add_argument('--trace-stages',action='store_true',help='Diagnostic native frames and wall spans; qualify observer overhead before comparisons')
     parser.add_argument('--debug-loop',action='store_true',help='Diagnostic asyncio callbacks slower than20ms; affects measured execution')
     args=parser.parse_args()

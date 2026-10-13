@@ -61,6 +61,8 @@ def main(args):
             write_json(folder/'prepared.json',{'created_at':stamp(),'status':'PREPARED','population':progress,'config':config,'resources':monitor.report()})
             return 0
         if args.output.exists():raise RuntimeError('Measurement report already exists; use a fresh prepared directory')
+        if (folder/'clone-receipt.json').exists() and json.loads((folder/'clone-receipt.json').read_text()).get('status')!='COMPLETE':
+            raise RuntimeError('Cloned seed is incomplete')
         if progress!={'owner':args.tier,'guest':corpus['guest_records']}:raise RuntimeError('Complete preparation before measurement')
         from qdrant_client import models
         from tools.lcvmem_eval import fingerprint
@@ -97,6 +99,8 @@ def main(args):
             'no_owner_leaks':all(r.get('owner_leaks')==0 for r in queries),'all_writes_durable':all(r.get('verified_after_timer') for r in writes),
             'query_p95_under200ms':qstat['p95_ms']<=200,'write_p95_under500ms':wstat['p95_ms']<=500,'app_unchanged':reader==fingerprint()}
         report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'tier':args.tier,'profile':args.profile,
+            'preparation_method':json.loads((folder/'prepared.json').read_text()).get('method','sdk-batch-real-bge'),
+            'preparation_sha256':sha256(folder/'prepared.json'),
             'config':config,'binding':{k:binding[k] for k in ('schema_version','embedding_profile','dimensions','embedding_sha256')},
             'query_summary':qstat,'write_summary':wstat,'queries':queries,'writes':writes,
             'query_long':statistics([r for r in queries if r['long_record']]),'query_short':statistics([r for r in queries if not r['long_record']]),

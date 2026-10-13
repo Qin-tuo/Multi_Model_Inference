@@ -9,7 +9,8 @@
     "max_output_tokens": 128,
     "threads": 4,
     "parallel": 1,
-    "gpu_layers": 99
+    "gpu_layers": 99,
+    "prompt_cache_ram_mib": 256
   },
   "memory": {
     "top_k": 5,
@@ -53,6 +54,7 @@
     "sample_rate": 16000,
     "channels": 1,
     "asr_mode": "utterance_file",
-    "asr_context": "Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0"
+    "asr_context": "Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0",
+    "asr_prompt_cache_ram_mib": 64
   }
 }

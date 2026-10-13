@@ -57,6 +57,8 @@ python3 tools/project.py restore-data --abort \
 
 显式启用的`bge-int8-windows-bm25-v1`候选使用schema3检索绑定。恢复到该配置时，不论备份是旧格式还是同格式，均从通过当前版本/删除校验的规范正文重新生成BM25；不会恢复已损坏或过时的词项向量。BGE稠密向量仍须通过原有严格重算核验。[候选实际集成](../../benchmarks/results/hybrid-memory-integration.json)已验证旧备份、更正与遗忘；损坏BM25的同格式恢复另有实际Qdrant回归。完整候选故障重复和整机验收尚未完成。
 
+[候选跨格式40次SIGKILL](../../benchmarks/results/hybrid-restore-fault-recovery.json)现已完成，旧快照暂存、快照核验完成、合并完成、旧源退休四个阶段各10次通过，验证当前版本/新增事实、遗忘及历史清除、访客隔离和提醒不重复。测试使用`--skip-conversation`；途中因实际内存压力停止并按明确缓存上限重启了空闲VLM/ASR及依赖的speech，Qdrant/BGE恢复链保持运行。该干预已写入报告；这不是全模型并发稳定性或整盘/断电验收。
+
 跨配置恢复的[首轮故障测试](../../benchmarks/results/window-restore-fault-first.json)在旧快照暂存、快照核验完成、合并完成和旧源退休四个阶段各实际SIGKILL一次，全部续跑成功。每次均核对当前版本、新事实、主人/访客隔离、遗忘及派生内容/历史清除、提醒不重复；另验证实际索引丢失后的恢复。本轮使用`--skip-conversation`，没有生成恢复后的模型回答，也没有物理播报。 随后的[40次扩展验证](../../benchmarks/results/window-restore-fault-recovery.json)已完成，四个阶段各10次全部通过，保持相同数据校验与明确的测试范围。
 
 ```bash
