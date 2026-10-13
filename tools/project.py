@@ -425,6 +425,7 @@ def main():
     bench.add_argument('--split',choices=['development','heldout','reserve'],default='development')
     bench.add_argument('--limit',type=int)
     bench.add_argument('--seed-from',type=Path)
+    bench.add_argument('--source-metadata',choices=['body-only-v1','calendar-speaker-v1'],default='body-only-v1')
     interact = sub.add_parser("interact", help="Persistent Pipecat text conversation")
     interact.add_argument("--user", default="owner")
     interact.add_argument("--data-dir", type=Path, default=DATA)
@@ -479,7 +480,7 @@ def main():
             env.setdefault('OMP_NUM_THREADS','2')
             if args.suite=='memory-quality':
                 command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/lcvmem_eval.py'),'--run-dir',str(args.run_dir),
-                    '--output',str(args.output),'--split',args.split]
+                    '--output',str(args.output),'--split',args.split,'--source-metadata',args.source_metadata]
                 if args.limit is not None:command+=['--limit',str(args.limit)]
                 if args.seed_from is not None:command+=['--seed-from',str(args.seed_from)]
                 return subprocess.call(command,cwd=ROOT,env=env)

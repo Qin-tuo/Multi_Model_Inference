@@ -82,7 +82,7 @@ class StoreBinding:
                     sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},
                     hnsw_config=models.HnswConfigDiff(m=0),metadata=self.expected)
             self.validate()
-            for field in ('user_id','namespace','key','memory_type','operation_key','derived_from'):
+            for field in ('user_id','namespace','key','memory_type','operation_key','derived_from','source_date','source_month_day','source_speaker'):
                 self.client.create_payload_index(self.collection,field,models.PayloadSchemaType.KEYWORD,wait=True)
         except Exception as error:
             self.close()

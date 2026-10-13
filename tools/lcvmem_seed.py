@@ -7,11 +7,13 @@ import uuid
 from tools.lcvmem_data import messages
 
 
-def populate(memory,run_id,row):
+def populate(memory,run_id,row,*,source_metadata='body-only-v1'):
     marker=memory.data_dir.parent.parent/'lcvmem-run.json'
     if not marker.is_file() or json.loads(marker.read_text()).get('run_id')!=run_id:
         raise RuntimeError('Dialogue import is restricted to a marked benchmark directory')
     from mem0.utils.lemmatization import lemmatize_for_bm25
+    from app.memory_sources import provenance
+    if source_metadata not in {'body-only-v1','calendar-speaker-v1'}:raise ValueError('Unknown source metadata profile')
     user='lcvmem-'+row['id'];events=messages(row['context'])
     if memory.generation(user)!=0:raise RuntimeError('Benchmark owner already has maintenance history')
     with memory._gate:
@@ -21,6 +23,9 @@ def populate(memory,run_id,row):
                 content=item['content'];source=f'lcv:{row["id"]}:{index}';request=f'seed-{index}';key=f'history-{index}'
                 args={'type':'event','key':key,'content':content,'source_id':source,'source_excerpt':content,
                     'namespace':'personal','expected_generation':None,'derived_from':[]}
+                source_fields=(provenance(datetime.strptime(item['date'],'%Y年%m月%d日').date().isoformat(),
+                    'user' if item['role']=='用户' else 'assistant') if source_metadata=='calendar-speaker-v1' else {})
+                args.update(source_fields)
                 _,prior=memory._start(user,request,'remember',args)
                 if prior:continue
                 mid=str(uuid.uuid5(uuid.NAMESPACE_URL,f'lcvmem-v1/{run_id}/{row["id"]}/{index}'))
@@ -29,6 +34,7 @@ def populate(memory,run_id,row):
                     'source_id':source,'source_excerpt':content,'operation_key':request,'derived_from':[],'user_id':user,
                     'role':'user','data':content,'hash':hashlib.md5(content.encode()).hexdigest(),'created_at':created,'updated_at':created,
                     'text_lemmatized':lemmatize_for_bm25(content)}
+                payload.update(source_fields)
                 batch.append((mid,payload,request))
             if not batch:continue
             vectors=memory.sdk.embedding_model.embed_batch([payload['data'] for _,payload,_ in batch],'add')

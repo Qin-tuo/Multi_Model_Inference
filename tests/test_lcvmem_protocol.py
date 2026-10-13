@@ -57,3 +57,20 @@ class SourceProtocolTests(unittest.TestCase):
                     self.assertEqual(copied[key],sdk[key])
                 self.assertEqual(populate(memory,'fixture',SourceOnly(id='fixture-case',context=context)),2)
                 self.assertEqual(len(memory.list_memories('lcvmem-fixture-case')),2)
+
+    def test_annotated_fixture_matches_public_source_metadata_arguments(self):
+        from app.memory import Mem0Adapter
+        from test_mem0_adapter import actual_sdk
+        from tools.lcvmem_seed import populate
+        context='以下是2023年04月27日的对话记录：\n“用户: 我喜欢绿茶。\nAI: 我推荐你尝尝龙井。\n”\n\n'+SUFFIX
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);directory=root/'data/memory';(root/'lcvmem-run.json').write_text(json.dumps({'run_id':'fixture'}))
+            with Mem0Adapter(directory,sdk=actual_sdk(directory),embedding_scope='FIXTURE') as memory:
+                populate(memory,'fixture',{'id':'annotated','context':context},source_metadata='calendar-speaker-v1')
+                copied=memory.search('lcvmem-annotated',key='history-1')['items'][0]
+                content=messages(context)[1]['content']
+                memory.remember('normal-owner','event','history-1',content,source_id='lcv:annotated:1',request_id='seed-1',
+                    source_date='2023-04-27',source_speaker='assistant')
+                normal=memory.search('normal-owner',key='history-1')['items'][0]
+                self.assertEqual(copied['sources'],normal['sources'])
+                self.assertEqual(copied['content'],normal['content'])

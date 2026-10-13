@@ -289,12 +289,15 @@ class Mem0Adapter:
     @staticmethod
     def _record(record):
         meta = record.get("metadata", {})
+        source={"source_id":meta.get("source_id"),"evidence":meta.get("source_excerpt")}
+        if meta.get('source_date'):source['date']=meta['source_date']
+        if meta.get('source_speaker'):source['speaker']=meta['source_speaker']
         return {"memory_id": record["id"], "user_id": record.get("user_id"),
                 "content": record.get("memory", ""), "type": meta.get("memory_type", "fact"),
                 "key": meta.get("key"), "namespace": meta.get("namespace", "personal"),
                 "version": meta.get("version", 1), "generation": meta.get("generation", 0),
                 "created_at": record.get("created_at"), "updated_at": record.get("updated_at"),
-                "sources": [{"source_id": meta.get("source_id"), "evidence": meta.get("source_excerpt")}],
+                "sources": [source],
                 "derived_from": meta.get("derived_from", []), "score": record.get("score")}
 
     def _find(self, user_id, namespace, extra=None, *, top_k=5):
@@ -384,7 +387,11 @@ class Mem0Adapter:
     def remember(self, user_id: str, memory_type: str, key: str, content: str, *, source_id: str,
                  source_excerpt: str | None = None, namespace: str = "personal", confirmed: bool = True,
                  request_id: str | None = None, expected_generation: int | None = None,
-                 derived_from: tuple[str, ...] = ()) -> dict:
+                 derived_from: tuple[str, ...] = (),source_date: str | None = None,
+                 source_speaker: str | None = None) -> dict:
+        from app.memory_sources import provenance
+        try:source_fields=provenance(source_date,source_speaker)
+        except (ValueError,TypeError) as error:raise MemoryAdapterError('INVALID_ARGUMENT',str(error)) from error
         user_id, key, content = _text(user_id, "user_id", 128), _text(key, "key", 512), _text(content, "content")
         source_id, namespace = _text(source_id, "source_id", 256), _text(namespace, "namespace", 128)
         excerpt = _text(source_excerpt if source_excerpt is not None else content, "source_excerpt")
@@ -395,6 +402,7 @@ class Mem0Adapter:
         arguments = {"type": memory_type, "key": key, "content": content, "source_id": source_id,
                      "source_excerpt": excerpt, "namespace": namespace, "expected_generation": expected_generation,
                      "derived_from": list(derived_from)}
+        arguments.update(source_fields)
         with self._gate:
             self._check_open()
             request_id, prior = self._start(user_id, request_id, "remember", arguments)
@@ -406,7 +414,8 @@ class Mem0Adapter:
             recovered = self._find(user_id, namespace, {"operation_key": request_id}, top_k=2)
             if recovered:
                 record = recovered[0]
-                if record.get("memory") != content or record.get("metadata", {}).get("key") != key:
+                if (record.get("memory") != content or record.get("metadata", {}).get("key") != key
+                        or any(record.get('metadata',{}).get(name)!=value for name,value in source_fields.items())):
                     raise MemoryAdapterError("CONFLICT", "pending operation has conflicting persisted memory")
                 try:
                     if not self.sdk.history(record["id"]):
@@ -421,6 +430,7 @@ class Mem0Adapter:
             metadata = {"namespace": namespace, "memory_type": memory_type, "key": key, "version": 1,
                         "generation": generation, "source_id": source_id, "source_excerpt": excerpt,
                         "operation_key": request_id, "derived_from": list(derived_from)}
+            metadata.update(source_fields)
             try:
                 result = self.sdk.add([{"role": "user", "content": content}], user_id=user_id, metadata=metadata, infer=False)
                 memories = result.get("results", [])
@@ -434,17 +444,21 @@ class Mem0Adapter:
                 self._pending_error(user_id, request_id, exc)
 
     def search(self, user_id: str, query: str = "", *, key: str | None = None, namespace: str = "personal",
-               memory_type: str | None = None, top_k: int = 5) -> dict:
+               memory_type: str | None = None, top_k: int = 5, source_date: str | None = None,
+               source_month_day: str | None = None, source_speaker: str | None = None) -> dict:
+        from app.memory_sources import constraints
+        try:source_filters=constraints(source_date,source_month_day,source_speaker)
+        except (ValueError,TypeError) as error:raise MemoryAdapterError('INVALID_ARGUMENT',str(error)) from error
         user_id, namespace = _text(user_id, "user_id", 128), _text(namespace, "namespace", 128)
         if isinstance(top_k, bool) or not isinstance(top_k, int) or not 1 <= top_k <= 5:
             raise MemoryAdapterError("INVALID_ARGUMENT", "top_k must be 1..5")
         with self._gate:
             self._check_open()
-            filters = {"user_id": user_id, "namespace": namespace}
+            filters = {"user_id": user_id, "namespace": namespace,**source_filters}
             if memory_type:
                 filters["memory_type"] = memory_type
             if key is not None:
-                records = self._find(user_id, namespace, {"key": _text(key, "key", 512), **({"memory_type": memory_type} if memory_type else {})}, top_k=top_k)
+                records = self._find(user_id, namespace, {"key": _text(key, "key", 512), **source_filters,**({"memory_type": memory_type} if memory_type else {})}, top_k=top_k)
                 method = "exact_metadata"
             else:
                 query = _text(query, "query", 4096)
@@ -457,6 +471,7 @@ class Mem0Adapter:
                                   and getattr(self.sdk.vector_store, "_has_bm25_slot", False))
                 method = "mem0_hybrid" if bm25_ready else "mem0_dense"
             return {"items": [self._record(record) for record in records], "retrieval_method": method,
+                    "source_filters":source_filters,
                     "embedding_scope": self.embedding_scope, "generation": self.generation(user_id),
                     "degraded": method == "mem0_dense", "semantic_quality_verified": False}
 
@@ -470,8 +485,12 @@ class Mem0Adapter:
 
     def correct(self, user_id: str, memory_id: str, content: str, *, expected_version: int,
                 source_id: str, source_excerpt: str | None = None, request_id: str | None = None,
-                expected_generation: int | None = None) -> dict:
+                expected_generation: int | None = None,source_date: str | None = None,
+                source_speaker: str | None = None) -> dict:
         from patches.mem0.purge_entities import purge_entities
+        from app.memory_sources import provenance,DATE_KEYS
+        try:source_fields=provenance(source_date,source_speaker)
+        except (ValueError,TypeError) as error:raise MemoryAdapterError('INVALID_ARGUMENT',str(error)) from error
         user_id, content = _text(user_id, "user_id", 128), _text(content, "content")
         source_id = _text(source_id, "source_id", 256)
         excerpt = _text(source_excerpt if source_excerpt is not None else content, "source_excerpt")
@@ -479,6 +498,7 @@ class Mem0Adapter:
             raise MemoryAdapterError("INVALID_ARGUMENT", "expected_version must be positive integer")
         arguments = {"memory_id": memory_id, "content": content, "expected_version": expected_version,
                      "source_id": source_id, "source_excerpt": excerpt, "expected_generation": expected_generation}
+        arguments.update(source_fields)
         with self._gate:
             self._check_open()
             request_id, prior = self._start(user_id, request_id, "correct", arguments)
@@ -489,6 +509,8 @@ class Mem0Adapter:
             meta = record.get("metadata", {})
             current_version = meta.get("version", 1)
             if current_version == expected_version + 1 and meta.get("operation_key") == request_id and record.get("memory") == content:
+                if any(meta.get(name)!=value for name,value in source_fields.items()):
+                    raise MemoryAdapterError('CONFLICT','pending correction source differs')
                 # A prior update committed its vector payload but journal commit
                 # or SDK history failed. Repair the history then acknowledge.
                 try:
@@ -507,7 +529,8 @@ class Mem0Adapter:
             try:
                 self.sdk.update(memory_id, text=content, metadata={"version": expected_version + 1,
                                                                   "generation": generation, "source_id": source_id,
-                                                                  "source_excerpt": excerpt, "operation_key": request_id})
+                                                                  "source_excerpt": excerpt, "operation_key": request_id,
+                                                                  **{name:source_fields.get(name) for name in DATE_KEYS}})
                 self._purge_descendants(user_id, memory_id, meta.get("namespace", "personal"))
                 purge_entities(self.sdk,[memory_id],user_id)
                 return self._finish(user_id, request_id, {"memory_id": memory_id, "version": expected_version + 1,

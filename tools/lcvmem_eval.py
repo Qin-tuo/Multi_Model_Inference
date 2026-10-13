@@ -49,7 +49,7 @@ def seed(args,run):
     from tools.lcvmem_seed import populate
     with open_memory(Path(run.get('memory_directory',args.run_dir/'data/memory'))) as memory:
         for row in selected(run):
-            count=populate(memory,run['run_id'],row)
+            count=populate(memory,run['run_id'],row,source_metadata=run.get('source_metadata','body-only-v1'))
             if owner_state(memory,'lcvmem-'+row['id'])['facts']!=count:raise RuntimeError('Benchmark source import count differs')
             print(json.dumps({'phase':'seed','id':row['id'],'events':count}),flush=True)
     run['seed_complete']=True;run['seed_finished_at']=stamp();write_json(args.run_dir/'lcvmem-run.json',run)
@@ -121,6 +121,7 @@ def main():
     parser.add_argument('--split',choices=['development','heldout','reserve'],default='development')
     parser.add_argument('--limit',type=int);parser.add_argument('--phase',choices=['run','seed','answer'],default='run')
     parser.add_argument('--seed-from',type=Path,help='Development-only comparison using verified unchanged source data and fresh sessions')
+    parser.add_argument('--source-metadata',choices=['body-only-v1','calendar-speaker-v1'],default='body-only-v1')
     args=parser.parse_args();args.run_dir=args.run_dir.resolve()
     manifest_path=ROOT/'benchmarks/corpora/lcvmem-v1.json';manifest=json.loads(manifest_path.read_text())
     ids=manifest['partitions'][args.split]['ids']
@@ -130,16 +131,19 @@ def main():
     args.run_dir.mkdir(parents=True,exist_ok=True,mode=0o700);marker=args.run_dir/'lcvmem-run.json'
     if marker.exists():
         run=json.loads(marker.read_text())
-        if run.get('corpus_sha256')!=sha(manifest_path) or run.get('ids')!=ids or run.get('split')!=args.split:
+        if (run.get('corpus_sha256')!=sha(manifest_path) or run.get('ids')!=ids or run.get('split')!=args.split
+                or run.get('source_metadata','body-only-v1')!=args.source_metadata):
             raise RuntimeError('Existing benchmark ownership/configuration differs')
     else:
         if any(args.run_dir.iterdir()):raise RuntimeError('Benchmark directory is not empty')
         run={'schema_version':1,'run_id':uuid.uuid4().hex,'status':'PREPARING','created_at':stamp(),'split':args.split,'ids':ids,
-            'corpus_sha256':sha(manifest_path),'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}
+            'corpus_sha256':sha(manifest_path),'source_metadata':args.source_metadata,
+            'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}
         if args.seed_from:
             if args.split!='development':raise ValueError('Seed reuse is restricted to development comparisons')
             origin=args.seed_from.resolve();prior=json.loads((origin/'lcvmem-run.json').read_text())
-            if prior.get('status')!='ANSWERED' or prior.get('ids')!=ids or prior.get('corpus_sha256')!=run['corpus_sha256']:
+            if (prior.get('status')!='ANSWERED' or prior.get('ids')!=ids or prior.get('corpus_sha256')!=run['corpus_sha256']
+                    or prior.get('source_metadata','body-only-v1')!=args.source_metadata):
                 raise RuntimeError('Seed source is not a completed matching benchmark')
             expected={}
             for qid in ids:
@@ -155,7 +159,8 @@ def main():
             if args.phase=='seed':seed(args,run)
             else:asyncio.run(answer(args,run))
         return 0
-    common=['--run-dir',str(args.run_dir),'--output',str(args.output),'--split',args.split]+(['--limit',str(args.limit)] if args.limit else [])
+    common=['--run-dir',str(args.run_dir),'--output',str(args.output),'--split',args.split,
+            '--source-metadata',args.source_metadata]+(['--limit',str(args.limit)] if args.limit else [])
     with (args.run_dir/'orchestrator.lock').open('a+b') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         phases=('answer',) if run.get('seed_complete') else ('seed','answer')

@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T07:16:09.474417+00:00",
+  "created_at": "2026-10-13T08:31:10.555612+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 171,
+  "tests_run": 183,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -86,6 +86,10 @@
     },
     {
       "id": "test_data_restore.ApplicationRestoreTests.test_unbacked_newer_version_causes_refusal",
+      "status": "PASS"
+    },
+    {
+      "id": "test_lcvmem_protocol.SourceProtocolTests.test_annotated_fixture_matches_public_source_metadata_arguments",
       "status": "PASS"
     },
     {
@@ -213,6 +217,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_memory_context.MemoryContextTests.test_historical_source_date_and_speaker_are_not_storage_update_time",
+      "status": "PASS"
+    },
+    {
       "id": "test_memory_migration.MemoryMigrationTests.test_abort_refuses_unrelated_target",
       "status": "PASS"
     },
@@ -270,6 +278,46 @@
     },
     {
       "id": "test_memory_service.NativeMemoryBindingTests.test_wrong_collection_metadata_and_embedding_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceParserAsyncTests.test_parser_does_not_block_the_pipeline_event_loop",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceQueryTests.test_event_time_range_and_new_statements_are_not_source_dates",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceQueryTests.test_explicit_calendar_and_speaker_without_invented_year",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceQueryTests.test_invalid_metadata_and_conflicting_calendar_are_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceQueryTests.test_invalid_spoken_dates_do_not_abort_a_conversation",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceStorageTests.test_legacy_calls_remain_replayable",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceStorageTests.test_month_day_retains_years_in_returned_provenance",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceStorageTests.test_native_filters_apply_date_speaker_owner_namespace_before_topk",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceStorageTests.test_provenance_is_in_idempotency_and_correction_replaces_source",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_sources.SourceTranscriptTests.test_local_day_boundaries_owner_and_completed_status",
       "status": "PASS"
     },
     {
@@ -705,6 +753,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "21030d279fb4e087ee01b6c495ad81096ddfde87",
+  "source_commit": "45735c818cee314411e09dfa4a36105272e72059",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

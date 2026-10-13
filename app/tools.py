@@ -295,7 +295,8 @@ class ToolTurn:
             return {"memory_bytes":meminfo(),"scope":"current host memory; model health is separate"}
         if name=="remember":
             result=self.memory.remember(self.user_id,"fact",args["key"],args["content"],source_id=self.turn_id,
-                                        source_excerpt=self.user_text,request_id=request_id)
+                                        source_excerpt=self.user_text,request_id=request_id,
+                                        source_date=self.accepted_at.astimezone(ZoneInfo(self.timezone_name)).date().isoformat(),source_speaker='user')
             if self.records:
                 self.records.attach_memories(self.user_id, self.turn_id, [result["memory_id"]])
             return {**result,"user_message":"已记住。"}
@@ -308,7 +309,8 @@ class ToolTurn:
             return {"items":[{"memory_id": x["memory_id"], "version": x["version"], "content": x["content"][:160]} for x in items]}
         if name=="correct":
             result=self.memory.correct(self.user_id,args["memory_id"],args["content"],expected_version=args["expected_version"],
-                                       source_id=self.turn_id,source_excerpt=self.user_text,request_id=request_id)
+                                       source_id=self.turn_id,source_excerpt=self.user_text,request_id=request_id,
+                                       source_date=self.accepted_at.astimezone(ZoneInfo(self.timezone_name)).date().isoformat(),source_speaker='user')
             if self.records:
                 self.records.purge_memory(self.user_id, args["memory_id"], deleted=False, exclude_turn=self.turn_id)
                 self.records.attach_memories(self.user_id, self.turn_id, [args["memory_id"]])

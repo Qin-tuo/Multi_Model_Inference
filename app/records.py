@@ -5,11 +5,12 @@ retention, and note transactions; they do not infer facts or run conversations.
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 import fcntl
 import hashlib
 import json
 from pathlib import Path
+from zoneinfo import ZoneInfo
 import threading
 import uuid
 
@@ -126,11 +127,30 @@ class Records:
             db.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
         return count
 
-    def recent(self, user_id, *, session_id=None, limit=12):
+    def recent(self, user_id, *, session_id=None, limit=12,source_date=None,source_month_day=None,timezone_name='Asia/Shanghai'):
+        from sqlalchemy import and_,or_
+        from app.memory_sources import constraints
+        source_filters=constraints(source_date,source_month_day)
         if not 1 <= limit <= 100:
             raise ValueError("History limit must be 1..100")
         cutoff = (now() - timedelta(days=self.retention_days)).isoformat()
         statement = select(TURNS).where(TURNS.c.user_id == user_id, TURNS.c.status == "completed", TURNS.c.created_at >= cutoff)
+        if source_filters:
+            zone=ZoneInfo(timezone_name);days=[]
+            if source_date:days=[date.fromisoformat(source_date)]
+            else:
+                earliest=(now()-timedelta(days=self.retention_days)).astimezone(zone).year
+                latest=now().astimezone(zone).year
+                for year in range(earliest,latest+1):
+                    try:days.append(date.fromisoformat(f'{year}-{source_month_day}'))
+                    except ValueError:continue
+            periods=[]
+            for day in days:
+                start=datetime.combine(day,datetime.min.time(),tzinfo=zone).astimezone(timezone.utc).isoformat()
+                end=datetime.combine(day+timedelta(days=1),datetime.min.time(),tzinfo=zone).astimezone(timezone.utc).isoformat()
+                periods.append(and_(TURNS.c.created_at>=start,TURNS.c.created_at<end))
+            if not periods:return []
+            statement=statement.where(or_(*periods))
         if session_id is not None:
             statement = statement.where(TURNS.c.session_id == session_id)
         with self.gate, self.engine.connect() as db:

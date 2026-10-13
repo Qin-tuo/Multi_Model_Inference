@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T07:27:30.515891+00:00",
+  "updated_at": "2026-10-13T08:32:32.874933+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -312,10 +312,16 @@
         "tests/test_memory_context.py",
         "benchmarks/results/lcvmem-development-baseline.json",
         "benchmarks/results/lcvmem-development-compact.json",
-        "benchmarks/results/lcvmem-development-comparison.json"
+        "benchmarks/results/lcvmem-development-comparison.json",
+        "app/memory_sources.py",
+        "tests/test_memory_sources.py",
+        "tools/memory_sources_console_smoke.py",
+        "benchmarks/results/memory-sources-console-smoke.json",
+        "benchmarks/results/lcvmem-development-source.json",
+        "benchmarks/results/lcvmem-development-source-final.json"
       ],
-      "validation": "External official CLongEval LCvMem small dataset pinned by revision/SHA256, upstream scoring code pinned.358 questions/70 conversations split82 development,200 heldout,76 reserve with no conversation overlap.20 development questions use actual BGE/Mem0/authenticated Qdrant/llama/Pipecat and independent owner/session per question. Original lexical F1=12.923%, compact exact-duplicate source excerpts F1=16.176%; normalized exact match0% in both. Reference-text containment in injected evidence3->6 cases; same source state and retrieval order20/20. No request errors, unexpected writes or cross-owner evidence.171 framework tests PASS. Metrics are lexical diagnostics, not semantic correctness; heldout remains untouched and complete JT-10 NOT_VERIFIED.",
-      "next_action": "Implement and evaluate date/valid-time filtering and faithful dialogue-source/context handling using development cases; then freeze the reader and evaluate200 heldout questions plus the complete lifecycle/source/cancellation acceptance set."
+      "validation": "Pinned official CLongEval LCvMem small and upstream metric:358 questions/70 conversations,82 development/200 heldout/76 reserve by conversation.20 development questions use actual BGE/Mem0/authenticated Qdrant/llama/Pipecat. Baseline lexical F1=12.923%, duplicate-evidence removal=16.176%, original source-calendar/speaker metadata plus filtered retrieval and prompt changes=24.726%; normalized exact match0%. Latest reference-text containment in injected evidence10/20; errors, unexpected writes and cross-owner evidence0. New profile changes multiple factors, not a single-factor ablation or official full-context leaderboard reproduction. Public interact synthetic smoke PASS for dated saves, process restart, source roles, missing day and owner isolation.183 framework tests PASS. Scores are lexical diagnostics, not semantic correctness;200 heldout untouched and JT-10 NOT_VERIFIED.",
+      "next_action": "Improve source faithfulness and relevant context selection, qualify relative/range/event-time and historical-version behavior on development cases, then freeze the reader before200 heldout questions and complete lifecycle/source/cancellation acceptance."
     }
   ],
   "acceptance": {
@@ -408,7 +414,8 @@
     "Gesture greeting integration passes labelled ROS/TTS/file-output tests; real 50-positive/50-negative gesture quality and physical audio remain NOT_VERIFIED. Initial console startup also observed some pose messages beyond200ms; full coexistence timing remains pending.",
     "Public text/voice use managed authenticated native Qdrant with directory/collection/embedding binding.50k isolated capacity and current-control restoration pass their declared checks; independent memory quality, authenticated production-path full-load latency, pending-write/control-loss recovery and backup retention/quotas remain unverified.",
     "Backup and restoration with current SQLite authority, native snapshot/index recovery and exclusive cutover are implemented and tested; pending memory writes must be reconciled first. Loss of current controls, quota/retention policy, power-loss and complete restore fault/quality acceptance remain unverified.",
-    "External Chinese memory development evaluation remains weak:20 LCvMem questions lexical F1=16.176% after duplicate evidence removal, versus12.923% baseline; this is not semantic accuracy. Date-related retrieval and speaker attribution errors remain;200 conversation-disjoint heldout questions and complete JT-10 lifecycle acceptance have not run."
+    "External Chinese memory development evaluation remains weak:20 LCvMem questions lexical F1=24.726% with explicit source-date/speaker metadata, versus16.176% compact evidence and12.923% baseline. This is not semantic accuracy. Relative/range/event-time/version queries and faithful source/context selection remain incomplete;200 conversation-disjoint heldout questions and complete JT-10 acceptance have not run.",
+    "Framework test process reports CompleteASRTurnStop STT timeout tasks still present after voice cancellation (benchmarks/results/voice-cancel-task-observation.json). Tests pass, but task cleanup requires investigation before J3/J6 resource-release qualification; no deployed persistent leak has been established."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }
