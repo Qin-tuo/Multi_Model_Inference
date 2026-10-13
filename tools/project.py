@@ -406,11 +406,13 @@ def main():
     interact.add_argument("--session-id")
     interact.add_argument("--input-file", type=Path)
     interact.add_argument("--no-vision", action="store_true")
+    interact.add_argument('--visual-feedback', choices=['on','off'])
     voice = sub.add_parser("voice", help="Persistent Pipecat speech, memory, tools and vision")
     voice.add_argument("--user", default="owner")
     voice.add_argument("--data-dir", type=Path, default=DATA)
     voice.add_argument("--session-id")
     voice.add_argument("--no-vision", action="store_true")
+    voice.add_argument('--visual-feedback', choices=['on','off'])
     voice.add_argument("--input-wav", type=Path, nargs="+")
     voice.add_argument("--output-wav", type=Path)
     voice.add_argument("--report", type=Path)
@@ -444,6 +446,7 @@ def main():
             command = [str(ROOT / ".venv/bin/python"), "-m", module, "--user", args.user,
                        "--data-dir", str(args.data_dir)]
             if args.session_id: command += ["--session-id", args.session_id]
+            if args.visual_feedback is not None: command += ['--visual-feedback', args.visual_feedback]
             if args.action == "interact":
                 if args.input_file: command += ["--input-file", str(args.input_file)]
             else:
@@ -457,7 +460,9 @@ def main():
             from deploy.vision.serve import ros_environment
             setup = Path("/opt/ros/jazzy/setup.bash")
             if not setup.is_file(): raise RuntimeError("ROS is unavailable; use --no-vision for text-only operation")
-            script = "source " + shlex.quote(str(setup)) + " && exec " + shlex.join(command)
+            overlay = CACHE / 'workspaces/vision/install/setup.bash'
+            if not overlay.is_file(): raise RuntimeError('Vision workspace is unavailable; prepare vision or use --no-vision')
+            script = "source " + shlex.quote(str(setup)) + ' && source ' + shlex.quote(str(overlay)) + " && exec " + shlex.join(command)
             return subprocess.call(["bash", "-c", script], cwd=ROOT, env=ros_environment())
         return {"doctor": doctor, "prepare": prepare, "smoke": smoke, "test": tests, "serve": serve}[args.action](args)
     except (OSError, RuntimeError, TimeoutError, subprocess.CalledProcessError, ValueError) as e:

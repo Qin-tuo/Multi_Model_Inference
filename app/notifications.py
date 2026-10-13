@@ -32,9 +32,12 @@ class NotificationPump:
         self.stop_event = asyncio.Event()
         self.active = None
         self.results = []
+        self.before_claim = None
 
     async def run(self):
         while not self.stop_event.is_set():
+            if self.before_claim:
+                await asyncio.to_thread(self.before_claim)
             notice = await asyncio.to_thread(self.service.claim_next, self.user_id, occupied=self.occupied())
             if notice:
                 if self.stop_event.is_set():
@@ -52,6 +55,9 @@ class NotificationPump:
                                 notice["id"], attempt_id=notice["attempt_id"], evidence=receipt.evidence)
                             self.results.append({"notification_id": notice["id"], "confirmed": acknowledged,
                                                  "evidence": receipt.evidence})
+                            if not acknowledged:
+                                await asyncio.to_thread(self.service.fail_output, notice['id'],
+                                    attempt_id=notice['attempt_id'], reason='completion_no_longer_valid')
                         else:
                             await asyncio.to_thread(self.service.fail_output, notice["id"],
                                 attempt_id=notice["attempt_id"], reason=receipt.evidence)

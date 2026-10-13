@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-12T21:32:23.830622+00:00",
+  "created_at": "2026-10-13T02:16:44.751513+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 111,
+  "tests_run": 125,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -134,6 +134,62 @@
     },
     {
       "id": "test_ort_profile_evidence.ProfileEvidenceTests.test_provider_name_without_model_execution_does_not_pass",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_foreground_delay_expiry_and_no_late_greeting",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_greeting_reuses_outbox_and_is_not_a_user_reminder",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_mute_revokes_audio_and_unmute_never_replays_old_event",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_publisher_change_retains_profile_cooldown",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_restart_discards_old_event_and_retains_held_pose_latch",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_same_profile_has_bounded_pending_work",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_source_invalidates_claim_and_started_audio",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.FeedbackTest.test_started_output_can_finish_after_deadline_but_cancel_revokes_it",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.GestureTest.test_deadline_source_restart_and_stream_gap_revoke",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.GestureTest.test_duplicate_frames_invalid_data_and_bounds",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.GestureTest.test_noise_missing_joints_and_short_holds_do_not_trigger",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.GestureTest.test_occlusion_does_not_count_as_hold_or_rearm_emitted_pose",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.GestureTest.test_static_raise_deduplicates_then_neutral_rearms",
+      "status": "PASS"
+    },
+    {
+      "id": "test_perception.GestureTest.test_wave_requires_reversals_and_uses_one_based_ids",
       "status": "PASS"
     },
     {
@@ -465,6 +521,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "753d7bebea54b50f39ff9a80d3845b9b36237265",
+  "source_commit": "fd7ab34a7441bc15d96b9b6fcc621158b49a20d1",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

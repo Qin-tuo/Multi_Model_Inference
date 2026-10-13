@@ -46,7 +46,7 @@ python3 tools/project.py interact --user owner
 
 [真实图文会话初测](benchmarks/results/visual-session-smoke.json)覆盖三种已知颜色、图文后记忆召回、实时D435i输入、取消后恢复和断流拒绝；图文计数与实际模型usage一致。实时画面的目标准确率没有地面真值验证，完整JT质量集仍待完成。
 
-当前取消验证覆盖原生 interruption 到达管线末端的确认、HTTP生成请求停止、服务slot空闲及下一轮恢复。取消期间阻止新请求准入；视觉初测从取消到确认模型空闲约2.60秒，不代表声学停播时延。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU内存释放。到期提醒已在控制台按“提醒：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
+当前取消验证覆盖原生 interruption 到达管线末端的确认、HTTP生成请求停止、服务slot空闲及下一轮恢复。取消期间阻止新请求准入；视觉初测从取消到确认模型空闲约2.60秒，不代表声学停播时延。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU内存释放。到期提醒已在控制台按“通知：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
 
 提醒静音使用 `/mute-reminders on`、`/mute-reminders off`，设置按档案持久保存。未开始输出的失败最多重试3次，默认间隔5秒；提醒到期后默认有效1小时，可在`configs/runtime.yaml`配置。已开始输出但未确认的提醒保留为`uncertain`，重启后不自动重播，可查询后取消或重新设置。文字显示与音频播放分开记录。
 
@@ -82,6 +82,26 @@ python3 tools/project.py voice --no-vision --user owner \
 ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM缓存上限和12秒请求期限。连续发言中的第一段结果不能在后续分段尚未完成时触发模型；取消会使旧输入、迟到转写和旧错误失效。溢出会使整轮失败，不截断后继续执行。[真实ASR延迟回调验证](benchmarks/results/voice-asr-lifecycle-smoke.json)覆盖分段完整性、取消后无记忆副作用及下一轮恢复；它不代表物理打断或完整故障矩阵验收。
 
 设备模式使用 `python3 tools/project.py voice --input-device N --output-device M`，需要PyAudio及明确的PortAudio设备索引，详见[语音部署](deploy/speech/README.md)。ReSpeaker Lite和扬声器未连接，设备录播、AEC、真实双讲以及100次打断仍待验证；当前不能宣称完整实时语音助手已经验收。
+
+### 人物状态与手势主动回应
+
+启动 `python3 tools/project.py up --components all` 后，`interact` 和 `voice` 默认同时订阅 yolo_ros 的 `/pose/d435/detections_3d`。检测、姿态和跟踪继续由上游 C++/TensorRT 完成；应用只根据跟踪ID和关键点做时序规则。`/scene` 显示匿名人数、方位、有效深度距离及结果年龄，不做人脸识别或根据画面选择主人记忆。
+
+首轮规则为：关键点置信度≥0.6、连续确认≥0.3秒，手腕高于肩部且持续1.2秒形成举手事件；挥手需要1.2秒窗口内两次足够幅度的方向变化。同一手势只形成一次问候，双臂中立姿态持续0.5秒后才重新允许触发。输入消息年龄超过200ms拒绝使用，断流0.5秒后结果失效；最多16个跟踪状态和32个待消费事件。阈值是待真实语料验证的初始设置。
+
+手势问候复用提醒的 SQLAlchemy 持久输出记录及 Pipecat TTS 队列，默认文字为“你好，有什么可以帮你？”。准入冷却2秒，未开始输出的事件2秒后过期；当前对话优先。已开始但未确认的输出记录为 `uncertain`，不会自动重播。应用重启会丢弃旧视觉事件，并保留同一发布者、同一目标的手势锁存，直到看到中立姿态；发布者变化会开启新的跟踪范围。普通提醒查询不显示视觉事件。
+
+`interact` 中用 `/mute-visual on`、`/mute-visual off` 控制手势问候，偏好按当前档案保存；解除手势静音不会补播被关闭的旧事件。两个入口也接受 `--visual-feedback off` 或 `on`，省略参数则沿用偏好。`--no-vision` 同时关闭图像订阅与手势输入。
+
+[端到端报告](benchmarks/results/gesture-feedback-smoke.json)验证了真实D435i/姿态话题连接，以及隔离ROS域内的标注关键点→规则→SQLite输出记录→真实TTS→WAV与ASR回读；覆盖去重、静音、会话占用到过期、输出确认前断流和多发布者拒绝。WAV排空延迟注入明确标记，未产生物理播放回执。真实摄像头初测未观察到人物，**这些证据不证明手势识别准确率，JT-13所需50正例/50负例及实体扬声器验证仍待完成**。早期接口和测试时序问题保留在[接入记录](benchmarks/results/gesture-feedback-integration-baseline.json)。
+
+复现夹具验证（不会向实际运行域发布合成姿态，也不使用日常用户数据库）：
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source "$HOME/AI_Stack/workspaces/vision/install/setup.bash"
+.venv/bin/python tools/gesture_feedback_smoke.py
+```
 
 ### 依赖与单组件检查
 

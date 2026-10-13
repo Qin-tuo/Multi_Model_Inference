@@ -16,6 +16,7 @@ from app.records import Records
 from app.reminders import ReminderService
 from app.session import AssistantSession
 from app.notifications import NotificationPump, TextNotificationSink
+from app.proactive import VisualFeedback
 from tools.project import CACHE, DATA, ROOT
 
 
@@ -32,6 +33,10 @@ async def console(args):
         reminder_options = {key: runtime["reminders"][key] for key in
             ("notification_ttl_seconds", "max_delivery_attempts", "retry_delay_seconds") if key in runtime["reminders"]}
         reminders = stack.enter_context(ReminderService(args.data_dir / "reminders.sqlite", **reminder_options))
+        feedback = VisualFeedback(reminders, vision.perception, args.user) if vision else None
+        if feedback:
+            stack.callback(feedback.close)
+            if args.visual_feedback is not None: feedback.set_muted(args.visual_feedback == 'off')
         records = stack.enter_context(Records(args.data_dir / "records.sqlite",
             retention_days=runtime["memory"]["transcript_retention_days"]))
         session = AssistantSession(config, memory, reminders, records, user_id=args.user,
@@ -42,11 +47,12 @@ async def console(args):
         errors = []
 
         async def emit_notice(text):
-            print("提醒：" + text, flush=True)
+            print("通知：" + text, flush=True)
 
         occupied = lambda: session.busy.locked()
         notifications = NotificationPump(reminders, args.user,
             TextNotificationSink(reminders, emit_notice, occupied=occupied), occupied=occupied)
+        if feedback: notifications.before_claim = feedback.tick
         notification_task = asyncio.create_task(notifications.run())
 
         async def emit(text):
@@ -70,11 +76,19 @@ async def console(args):
                 await session.cancel()
                 if pending: await pending
                 return True
-            if pending and not pending.done():
+            if pending and not pending.done() and line not in {
+                    '/scene', '/mute-visual on', '/mute-visual off', '/mute-reminders on', '/mute-reminders off'}:
                 print("正在回答；可输入 /stop 停止。", flush=True)
                 return True
             if line == "/help":
-                print("直接输入中文对话。命令：/look [问题] 看当前画面，/new 新会话，/stop 停止，/memories 记忆，/notes 笔记，/reminders 提醒，/history 已输出历史，/mute-reminders on或off 提醒静音，/quit 退出。", flush=True)
+                print("直接输入中文对话。命令：/look [问题] 看当前画面，/scene 人物与手势状态，/new 新会话，/stop 停止，/memories 记忆，/notes 笔记，/reminders 提醒，/history 已输出历史，/mute-reminders on或off 通知静音，/mute-visual on或off 手势静音，/quit 退出。", flush=True)
+            elif line == '/scene':
+                print(json.dumps(feedback.status(),ensure_ascii=False,indent=2) if feedback else '视觉未启用。', flush=True)
+            elif line in {'/mute-visual on','/mute-visual off'}:
+                if feedback:
+                    feedback.set_muted(line.endswith(' on'))
+                    print('手势主动回应已静音。' if feedback.muted else '手势主动回应已开启。', flush=True)
+                else: print('视觉未启用。', flush=True)
             elif line == "/look" or line.startswith("/look "):
                 pending = asyncio.create_task(answer(line[5:].strip() or "你现在看到了什么？", visual=True))
             elif line in {"/mute-reminders on", "/mute-reminders off"}:
@@ -131,6 +145,7 @@ def main(argv=None):
     parser.add_argument("--session-id", help="Resume delivered text from this owner's session")
     parser.add_argument("--input-file", type=Path, help="Bounded local text script, executed sequentially")
     parser.add_argument("--no-vision", action="store_true", help="Text-only operation without a ROS image subscription")
+    parser.add_argument('--visual-feedback', choices=['on','off'], help='Persist gesture greeting preference; omit to retain it')
     args = parser.parse_args(argv)
     logger.remove()
     logger.add(sys.stderr, level="WARNING")

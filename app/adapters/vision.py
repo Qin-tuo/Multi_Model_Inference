@@ -4,13 +4,16 @@ import json
 from pathlib import Path
 import threading
 import time
+import hashlib
+import math
 
 from app.vision_frames import VisionFrameStore
+from app.perception import GestureRules, Person
 
 
 class RosVisionBridge:
     def __init__(self, *, domain_id=None, frame_bytes_limit=128 * 1024 * 1024,
-                 retention_seconds=2, stale_seconds=.5):
+                 retention_seconds=2, stale_seconds=.5, perception=False):
         # Reserve 16 MiB for the bounded DDS/synchronizer queues and one
         # in-progress copy/packed image. Admission is fixed at 640x480 RGB-D.
         self.transport_reserve = 16 * 1024 * 1024
@@ -27,11 +30,16 @@ class RosVisionBridge:
         self._source_times = {}
         self._arrival_times = {}
         self.pair_deltas_ms = []
+        self.perception = GestureRules() if perception else None
+        self.pose_subscription = None
+        self.pose_offset = None
+        self.boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
 
     @classmethod
     def configured(cls):
         settings = json.loads((Path(__file__).resolve().parents[2] / "configs/runtime.yaml").read_text())["vision"]
-        return cls(frame_bytes_limit=settings["frame_bytes_limit"], retention_seconds=settings["frame_window_seconds"])
+        return cls(frame_bytes_limit=settings["frame_bytes_limit"], retention_seconds=settings["frame_window_seconds"],
+                   perception=True)
 
     def start(self):
         import rclpy
@@ -41,6 +49,8 @@ class RosVisionBridge:
         from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
         from sensor_msgs.msg import Image
         from message_filters import TimeSynchronizer, Subscriber
+        if self.perception:
+            from yolo_msgs.msg import DetectionArray
 
         if self.thread is not None: raise RuntimeError("Vision bridge is already started")
         os.environ["ROS_AUTOMATIC_DISCOVERY_RANGE"] = "LOCALHOST"
@@ -83,6 +93,9 @@ class RosVisionBridge:
         # A 34 ms approximate window can incorrectly pair adjacent 30 Hz frames.
         self.sync = ResettableSynchronizer(self.subscribers, queue_size=3)
         self.sync.registerCallback(self._receive)
+        if self.perception:
+            self.pose_subscription = self.node.create_subscription(DetectionArray,
+                '/pose/d435/detections_3d', self._receive_pose, qos)
         self.executor = SingleThreadedExecutor(context=self.context)
         self.executor.add_node(self.node)
 
@@ -91,11 +104,42 @@ class RosVisionBridge:
             try: self.executor.spin()
             except ExternalShutdownException: pass
             except Exception as error:
-                self.failure = type(error).__name__
+                self.failure = f'{type(error).__name__}: {str(error)[:200]}'
                 self.frames.reset("ros_executor_failed")
+                if self.perception: self.perception.invalidate("ros_executor_failed")
         self.thread = threading.Thread(target=spin, name="assistant-ros-vision", daemon=True)
         self.thread.start()
         return self
+
+    def _receive_pose(self, message, info):
+        now = time.monotonic_ns()
+        offset = self.node.get_clock().now().nanoseconds - now
+        if self.pose_offset is not None and abs(offset-self.pose_offset)>100_000_000:
+            self.perception.invalidate('ros_clock_changed')
+        self.pose_offset = offset
+        stamp = message.header.stamp.sec*1_000_000_000 + message.header.stamp.nanosec
+        # This installed Jazzy rclpy exposes timestamps/sequence numbers but
+        # omits publisher_gid from callback metadata. Bind to the single
+        # discovered endpoint and reject ambiguous multi-publisher input.
+        endpoints = self.node.get_publishers_info_by_topic('/pose/d435/detections_3d')
+        if len(endpoints) != 1:
+            self.perception.invalidate('ambiguous_pose_publisher')
+            return
+        publisher = hashlib.sha256(self.boot_id.encode()+bytes(endpoints[0].endpoint_gid)).hexdigest()
+        if len(message.detections)>100:
+            self.perception.invalidate('oversized_detection_array')
+            return
+        people = []
+        for detection in message.detections:
+            if detection.class_id != 0 or len(detection.keypoints.data)>17: continue
+            z = detection.bbox3d.center.position.z
+            # Only optical-frame Z denotes range along the camera's view axis.
+            distance = z if ('optical' in detection.bbox3d.frame_id and math.isfinite(z) and 0<z<=20) else None
+            people.append(Person(str(detection.id), detection.score, detection.bbox.center.position.x,
+                detection.bbox.center.position.y, detection.bbox.size.x, detection.bbox.size.y,
+                {p.id:(p.point.x,p.point.y,p.score) for p in detection.keypoints.data}, distance))
+        self.perception.update(people, source_key=publisher, source_stamp_ns=stamp,
+            capture_ns=stamp-offset, arrival_ns=now)
 
     def _receive(self, color, depth):
         now = time.monotonic_ns()
@@ -117,11 +161,13 @@ class RosVisionBridge:
 
     def status(self):
         return {**self.frames.status(), "ros_domain": self.domain_id, "ros_failure": self.failure,
+                "perception": self.perception.snapshot() if self.perception else None,
                 "transport_reserve_bytes": self.transport_reserve,
                 "synchronizer_queue_depth": 3, "dds_queue_depth": 2,
                 "rgbd_pair_delta_max_ms": max(self.pair_deltas_ms) if self.pair_deltas_ms else None}
 
     def close(self):
+        if self.perception: self.perception.invalidate('bridge_closed')
         if self.executor: self.executor.shutdown(timeout_sec=3)
         if self.context: self.context.try_shutdown()
         if self.thread:

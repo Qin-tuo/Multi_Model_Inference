@@ -13,6 +13,7 @@ from app.memory import Mem0Adapter
 from app.records import Records
 from app.reminders import ReminderService
 from app.voice_assistant import VoiceAssistant
+from app.proactive import VisualFeedback
 from tools.project import ROOT, CACHE, DATA
 
 
@@ -28,12 +29,17 @@ async def run(args):
         options = {key: settings["reminders"][key] for key in
                    ("notification_ttl_seconds", "max_delivery_attempts", "retry_delay_seconds")}
         reminders = stack.enter_context(ReminderService(args.data_dir / "reminders.sqlite", **options))
+        feedback = VisualFeedback(reminders, bridge.perception, args.user) if bridge else None
+        if feedback:
+            stack.callback(feedback.close)
+            if args.visual_feedback is not None: feedback.set_muted(args.visual_feedback == 'off')
         records = stack.enter_context(Records(args.data_dir / "records.sqlite",
             retention_days=settings["memory"]["transcript_retention_days"]))
         voice = VoiceAssistant(LlamaConfig.from_manifest(ROOT / "models/manifest.json"), memory, reminders, records,
             user_id=args.user, session_id=args.session_id, vision_frames=bridge.frames if bridge else None,
             output_path=args.output_wav, input_device=args.input_device, output_device=args.output_device,
             context_tokens=settings["llama"]["context_tokens"])
+        if feedback: voice.notifications.before_claim = feedback.tick
         try:
             await voice.start()
             if args.input_wav:
@@ -60,6 +66,7 @@ def main(argv=None):
     parser.add_argument("--data-dir", type=Path, default=DATA)
     parser.add_argument("--session-id")
     parser.add_argument("--no-vision", action="store_true")
+    parser.add_argument('--visual-feedback', choices=['on','off'], help='Persist gesture greeting preference')
     parser.add_argument("--input-wav", type=Path, nargs="+", help="One spoken utterance per file, PCM16/16kHz/mono, at most 30s")
     parser.add_argument("--output-wav", type=Path, help="New WAV file for answers and reminders; never overwrites")
     parser.add_argument("--report", type=Path, help="Optional detailed local report, including transcripts")

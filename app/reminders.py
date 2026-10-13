@@ -141,6 +141,8 @@ class ReminderService:
         self._lock = threading.RLock()
         self._closed = False
         self._live_attempts = {}
+        self._started_attempts = set()
+        self.visual_guard = None
         self._muted_profiles = {}
         self._owner_file = open(self.database_path + ".owner.lock", "a+b")
         try:
@@ -219,6 +221,12 @@ class ReminderService:
                 update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.status == "claimed")
                 .values(status="pending", claimed_utc=None, attempt_id=None)
             )
+            # Gesture events belong to the old live scene. They never replay
+            # after a consumer restart; partially written output stays uncertain.
+            connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.id.startswith('visual:'),
+                _NOTIFICATIONS.c.status == 'pending').values(status='expired', delivery_evidence='visual_process_restart'))
+            connection.execute(update(_REMINDERS).where(_REMINDERS.c.id.startswith('visual:'),
+                _REMINDERS.c.status == 'fired').values(status='expired'))
             legacy = connection.execute(select(_REMINDERS).where(_REMINDERS.c.expires_utc.is_(None))).mappings().all()
             for row in legacy:
                 expiry = datetime.fromisoformat(row["due_utc"]) + timedelta(seconds=self.notification_ttl_seconds)
@@ -290,7 +298,8 @@ class ReminderService:
                 else:
                     outstanding = connection.execute(
                         select(func.count()).select_from(_REMINDERS).where(
-                            and_(_REMINDERS.c.user_id == user_id, _REMINDERS.c.status.in_(["active", "fired", "uncertain"]))
+                            and_(_REMINDERS.c.user_id == user_id, ~_REMINDERS.c.id.startswith('visual:'),
+                                 _REMINDERS.c.status.in_(["active", "fired", "uncertain"]))
                         )
                     ).scalar_one()
                     if outstanding >= self.max_pending:
@@ -326,7 +335,8 @@ class ReminderService:
                 if reminder is None:
                     result = {"status": "not_found", "reminder_id": reminder_id}
                 else:
-                    self._live_attempts.pop(f"reminder:{reminder_id}:due", None)
+                    notice_id = reminder_id if reminder_id.startswith('visual:') else f'reminder:{reminder_id}:due'
+                    self._clear_attempt(notice_id, self._live_attempts.get(notice_id))
                     connection.execute(update(_REMINDERS).where(_REMINDERS.c.id == reminder_id).values(status="cancelled"))
                     connection.execute(update(_NOTIFICATIONS).where(and_(
                         _NOTIFICATIONS.c.reminder_id == reminder_id,
@@ -347,7 +357,8 @@ class ReminderService:
         _validate_id(user_id, "user_id")
         with self._lock:
             self._check_open()
-            statement = select(_REMINDERS).where(_REMINDERS.c.user_id == user_id)
+            statement = select(_REMINDERS).where(_REMINDERS.c.user_id == user_id,
+                                                ~_REMINDERS.c.id.startswith('visual:'))
             if not include_inactive:
                 statement = statement.where(_REMINDERS.c.status.in_(["active", "fired", "uncertain", "failed"]))
             with self.engine.connect() as connection:
@@ -414,9 +425,15 @@ class ReminderService:
         on a database lock merely to decide whether an old PCM chunk is valid.
         """
         return (not self._closed and self._live_attempts.get(notice["id"]) == notice["attempt_id"]
-                and not self._muted_profiles.get(notice["user_id"], False))
+                and not self._muted_profiles.get(notice["user_id"], False)
+                and self._visual_allowed(notice['id'], started=notice['attempt_id'] in self._started_attempts))
+
+    def _visual_allowed(self, notification_id, *, started=False):
+        return (not notification_id.startswith('visual:') or
+                bool(self.visual_guard and self.visual_guard(notification_id, started=started)))
 
     def _clear_attempt(self, notification_id, attempt_id):
+        self._started_attempts.discard(attempt_id)
         if self._live_attempts.get(notification_id) == attempt_id:
             self._live_attempts.pop(notification_id, None)
 
@@ -424,6 +441,8 @@ class ReminderService:
         """Recheck immediately before playback; a later cancel blocks old claims."""
         with self._lock:
             self._check_open()
+            token = attempt_id or self._live_attempts.get(notification_id)
+            if not self._visual_allowed(notification_id, started=token in self._started_attempts): return False
             with self.engine.connect() as connection:
                 statement = select(_NOTIFICATIONS.c.id).join(
                     _REMINDERS, _REMINDERS.c.id == _NOTIFICATIONS.c.reminder_id
@@ -467,6 +486,7 @@ class ReminderService:
                 changed = connection.execute(update(_NOTIFICATIONS).where(_NOTIFICATIONS.c.id == notification_id,
                     _NOTIFICATIONS.c.attempt_id == attempt_id, _NOTIFICATIONS.c.status == "claimed")
                     .values(status="playing", output_started_utc=_utc_now(), output_channel=channel))
+                if changed.rowcount == 1: self._started_attempts.add(attempt_id)
                 return changed.rowcount == 1
 
     def fail_output(self, notification_id: str, *, attempt_id: str, reason: str) -> bool:
@@ -501,6 +521,7 @@ class ReminderService:
                     return True
                 if notification["status"] != "playing":
                     return False
+                if not self._visual_allowed(notification_id, started=True): return False
                 delivered_status = {"audio": "played", "text": "displayed", "fixture": "fixture_delivered"}[notification["output_channel"]]
                 changed = connection.execute(update(_NOTIFICATIONS).where(and_(
                     _NOTIFICATIONS.c.id == notification_id, _NOTIFICATIONS.c.status == "playing",
