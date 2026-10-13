@@ -1,0 +1,3746 @@
+{
+  "created_at": "2026-10-13T15:20:16.539983+00:00",
+  "status": "FEASIBILITY",
+  "error": null,
+  "checks": {
+    "frozen_seed_counts": true,
+    "no_owner_leaks": true
+  },
+  "counts": {
+    "owner": 10000,
+    "guest": 100
+  },
+  "server_version": "1.19.2",
+  "bm25_options": {
+    "tokenizer": "multilingual",
+    "stemmer": {
+      "type": "none"
+    },
+    "stopwords": {},
+    "lowercase": true
+  },
+  "summary": {
+    "bm25": {
+      "top5_hits": 100,
+      "long_hits": 50,
+      "short_hits": 50
+    },
+    "rrf": {
+      "top5_hits": 100,
+      "long_hits": 50,
+      "short_hits": 50
+    },
+    "dbsf": {
+      "top5_hits": 100,
+      "long_hits": 50,
+      "short_hits": 50
+    }
+  },
+  "rows": [
+    {
+      "index": 50,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00050",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00069",
+          "project-00050",
+          "project-00059",
+          "project-02797",
+          "project-00099"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00050",
+          "project-00069",
+          "project-00059",
+          "project-00099",
+          "project-00019"
+        ]
+      }
+    },
+    {
+      "index": 151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00151",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00151",
+          "project-00149",
+          "project-02797",
+          "project-01649",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00151",
+          "project-00149",
+          "project-01649",
+          "project-01749",
+          "project-00159"
+        ]
+      }
+    },
+    {
+      "index": 250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00250",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00250",
+          "project-00019",
+          "project-00069",
+          "project-02997",
+          "project-00059"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00250",
+          "project-00019",
+          "project-00069",
+          "project-00059",
+          "project-00551"
+        ]
+      }
+    },
+    {
+      "index": 351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00351",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00351",
+          "project-00359",
+          "project-02997",
+          "project-07359",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00351",
+          "project-00359",
+          "project-08351",
+          "project-00551",
+          "project-07359"
+        ]
+      }
+    },
+    {
+      "index": 450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00459",
+          "project-00450",
+          "project-02797",
+          "project-00359",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00450",
+          "project-00459",
+          "project-00359",
+          "project-00069",
+          "project-00079"
+        ]
+      }
+    },
+    {
+      "index": 551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00551",
+          "project-00559",
+          "project-00069",
+          "project-00436",
+          "project-06559"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00551",
+          "project-00559",
+          "project-00069",
+          "project-06559",
+          "project-00549"
+        ]
+      }
+    },
+    {
+      "index": 650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00650",
+          "project-00069",
+          "project-02797",
+          "project-00659",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00650",
+          "project-00069",
+          "project-00659",
+          "project-00059",
+          "project-00079"
+        ]
+      }
+    },
+    {
+      "index": 751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00751",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00751",
+          "project-00749",
+          "project-02997",
+          "project-00759",
+          "project-00709"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00751",
+          "project-00749",
+          "project-00759",
+          "project-00709",
+          "project-00769"
+        ]
+      }
+    },
+    {
+      "index": 850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00850",
+          "project-00869",
+          "project-02797",
+          "project-00069",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00850",
+          "project-00869",
+          "project-00069",
+          "project-00369",
+          "project-00079"
+        ]
+      }
+    },
+    {
+      "index": 951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00951",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00951",
+          "project-00949",
+          "project-02797",
+          "project-01169",
+          "project-01649"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00951",
+          "project-00949",
+          "project-01169",
+          "project-01649",
+          "project-01149"
+        ]
+      }
+    },
+    {
+      "index": 1050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01050",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01050",
+          "project-01049",
+          "project-02797",
+          "project-01029",
+          "project-07509"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01050",
+          "project-01049",
+          "project-01029",
+          "project-07509",
+          "project-01069"
+        ]
+      }
+    },
+    {
+      "index": 1151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01151",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01151",
+          "project-01169",
+          "project-02997",
+          "project-01149",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01151",
+          "project-01169",
+          "project-01149",
+          "project-01159",
+          "project-01179"
+        ]
+      }
+    },
+    {
+      "index": 1250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01250",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01250",
+          "project-01249",
+          "project-01259",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01250",
+          "project-01249",
+          "project-01259",
+          "project-01269",
+          "project-01209"
+        ]
+      }
+    },
+    {
+      "index": 1351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01351",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01351",
+          "project-01349",
+          "project-02997",
+          "project-01369",
+          "project-01649"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01351",
+          "project-01349",
+          "project-01369",
+          "project-01649",
+          "project-01359"
+        ]
+      }
+    },
+    {
+      "index": 1450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01459",
+          "project-01450",
+          "project-02797",
+          "project-01449",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01450",
+          "project-01459",
+          "project-01449",
+          "project-01409",
+          "project-01479"
+        ]
+      }
+    },
+    {
+      "index": 1551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01551",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01551",
+          "project-01549",
+          "project-01569",
+          "project-02997",
+          "project-01579"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01551",
+          "project-01549",
+          "project-01569",
+          "project-01579",
+          "project-01349"
+        ]
+      }
+    },
+    {
+      "index": 1650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01650",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01650",
+          "project-01649",
+          "project-02997",
+          "project-01619",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01650",
+          "project-01649",
+          "project-01619",
+          "project-01669",
+          "project-01616"
+        ]
+      }
+    },
+    {
+      "index": 1751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01751",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01751",
+          "project-01749",
+          "project-02797",
+          "project-01649",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01751",
+          "project-01749",
+          "project-01649",
+          "project-01779",
+          "project-01719"
+        ]
+      }
+    },
+    {
+      "index": 1850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01679",
+          "project-01850",
+          "project-02797",
+          "project-01669",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01850",
+          "project-01679",
+          "project-01669",
+          "project-01649",
+          "project-01659"
+        ]
+      }
+    },
+    {
+      "index": 1951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01951",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01951",
+          "project-06959",
+          "project-02797",
+          "project-06951",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01951",
+          "project-07951",
+          "project-06959",
+          "project-06951",
+          "project-02959"
+        ]
+      }
+    },
+    {
+      "index": 2050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02050",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05049",
+          "project-02050",
+          "project-01609",
+          "project-02997",
+          "project-01649"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02050",
+          "project-05049",
+          "project-01609",
+          "project-01649",
+          "project-00009"
+        ]
+      }
+    },
+    {
+      "index": 2151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02151",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02151",
+          "project-04159",
+          "project-02159",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02151",
+          "project-04159",
+          "project-02159",
+          "project-03159",
+          "project-05159"
+        ]
+      }
+    },
+    {
+      "index": 2250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02250",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07017",
+          "project-02250",
+          "project-02797",
+          "project-00017",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02250",
+          "project-07017",
+          "project-00017",
+          "project-09017",
+          "project-00057"
+        ]
+      }
+    },
+    {
+      "index": 2351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02351",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02351",
+          "project-02359",
+          "project-07359",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02351",
+          "project-02359",
+          "project-08351",
+          "project-07359",
+          "project-04359"
+        ]
+      }
+    },
+    {
+      "index": 2450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03459",
+          "project-02450",
+          "project-02459",
+          "project-02797",
+          "project-02359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02450",
+          "project-03459",
+          "project-02459",
+          "project-02359",
+          "project-05359"
+        ]
+      }
+    },
+    {
+      "index": 2551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02551",
+          "project-06559",
+          "project-02797",
+          "project-03559",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02551",
+          "project-06559",
+          "project-03559",
+          "project-07559",
+          "project-02559"
+        ]
+      }
+    },
+    {
+      "index": 2650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02650",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05659",
+          "project-02650",
+          "project-02997",
+          "project-00069",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02650",
+          "project-05659",
+          "project-00069",
+          "project-07659",
+          "project-01659"
+        ]
+      }
+    },
+    {
+      "index": 2751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02751",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02751",
+          "project-01679",
+          "project-02997",
+          "project-02759",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02751",
+          "project-01679",
+          "project-02759",
+          "project-02581",
+          "project-07759"
+        ]
+      }
+    },
+    {
+      "index": 2850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-01679",
+          "project-02850",
+          "project-02797",
+          "project-01669",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02850",
+          "project-01679",
+          "project-01669",
+          "project-01609",
+          "project-01649"
+        ]
+      }
+    },
+    {
+      "index": 2951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02951",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02951",
+          "project-02959",
+          "project-02797",
+          "project-06959",
+          "project-06951"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-02951",
+          "project-02959",
+          "project-07951",
+          "project-06959",
+          "project-06951"
+        ]
+      }
+    },
+    {
+      "index": 3050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03050",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05049",
+          "project-03050",
+          "project-02997",
+          "project-03059",
+          "project-05359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03050",
+          "project-05049",
+          "project-03059",
+          "project-05359",
+          "project-05069"
+        ]
+      }
+    },
+    {
+      "index": 3151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03151",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03151",
+          "project-03159",
+          "project-04159",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03151",
+          "project-03159",
+          "project-04159",
+          "project-05159",
+          "project-07359"
+        ]
+      }
+    },
+    {
+      "index": 3250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03250",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03250",
+          "project-00017",
+          "project-00057",
+          "project-02997",
+          "project-00019"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03250",
+          "project-00017",
+          "project-00057",
+          "project-00019",
+          "project-00027"
+        ]
+      }
+    },
+    {
+      "index": 3351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03351",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03351",
+          "project-03359",
+          "project-04359",
+          "project-02797",
+          "project-05359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03351",
+          "project-03359",
+          "project-04359",
+          "project-05359",
+          "project-07359"
+        ]
+      }
+    },
+    {
+      "index": 3450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03450",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03459",
+          "project-03450",
+          "project-05359",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03450",
+          "project-03459",
+          "project-05359",
+          "project-05459",
+          "project-03359"
+        ]
+      }
+    },
+    {
+      "index": 3551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03551",
+          "project-03559",
+          "project-02797",
+          "project-06559",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03551",
+          "project-03559",
+          "project-06559",
+          "project-07559",
+          "project-05559"
+        ]
+      }
+    },
+    {
+      "index": 3650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05659",
+          "project-03650",
+          "project-07659",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03650",
+          "project-05659",
+          "project-07659",
+          "project-03659",
+          "project-05679"
+        ]
+      }
+    },
+    {
+      "index": 3751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03751",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07759",
+          "project-03751",
+          "project-05759",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03751",
+          "project-07759",
+          "project-05759",
+          "project-03759",
+          "project-02759"
+        ]
+      }
+    },
+    {
+      "index": 3850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03850",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03850",
+          "project-05859",
+          "project-05369",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03850",
+          "project-05859",
+          "project-05369",
+          "project-03859",
+          "project-01679"
+        ]
+      }
+    },
+    {
+      "index": 3951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03951",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03951",
+          "project-03959",
+          "project-06959",
+          "project-02797",
+          "project-05959"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-03951",
+          "project-03959",
+          "project-06959",
+          "project-05959",
+          "project-07951"
+        ]
+      }
+    },
+    {
+      "index": 4050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04050",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04050",
+          "project-05049",
+          "project-02797",
+          "project-04059",
+          "project-05069"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04050",
+          "project-05049",
+          "project-04059",
+          "project-05069",
+          "project-05369"
+        ]
+      }
+    },
+    {
+      "index": 4151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04151",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04151",
+          "project-04159",
+          "project-05159",
+          "project-02997",
+          "project-07151"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04151",
+          "project-04159",
+          "project-05159",
+          "project-07151",
+          "project-05151"
+        ]
+      }
+    },
+    {
+      "index": 4250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04250",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00019",
+          "project-04250",
+          "project-02797",
+          "project-00059",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04250",
+          "project-00019",
+          "project-00059",
+          "project-01459",
+          "project-00069"
+        ]
+      }
+    },
+    {
+      "index": 4351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04351",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04351",
+          "project-04359",
+          "project-05359",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04351",
+          "project-04359",
+          "project-05359",
+          "project-07359",
+          "project-08351"
+        ]
+      }
+    },
+    {
+      "index": 4450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04459",
+          "project-04450",
+          "project-05459",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04450",
+          "project-04459",
+          "project-05459",
+          "project-04359",
+          "project-05359"
+        ]
+      }
+    },
+    {
+      "index": 4551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06559",
+          "project-04551",
+          "project-02797",
+          "project-07559",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04551",
+          "project-06559",
+          "project-07559",
+          "project-04549",
+          "project-03559"
+        ]
+      }
+    },
+    {
+      "index": 4650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04650",
+          "project-05659",
+          "project-02797",
+          "project-07659",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04650",
+          "project-05659",
+          "project-07659",
+          "project-00069",
+          "project-04659"
+        ]
+      }
+    },
+    {
+      "index": 4751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04751",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04751",
+          "project-07759",
+          "project-05759",
+          "project-02997",
+          "project-04759"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04751",
+          "project-07759",
+          "project-05759",
+          "project-04759",
+          "project-06559"
+        ]
+      }
+    },
+    {
+      "index": 4850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05369",
+          "project-04850",
+          "project-05859",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04850",
+          "project-05369",
+          "project-05859",
+          "project-04569",
+          "project-05049"
+        ]
+      }
+    },
+    {
+      "index": 4951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04951",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04951",
+          "project-06959",
+          "project-05959",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-04951",
+          "project-06959",
+          "project-05959",
+          "project-07951",
+          "project-04959"
+        ]
+      }
+    },
+    {
+      "index": 5050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05050",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05049",
+          "project-05050",
+          "project-02997",
+          "project-05059",
+          "project-05369"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05050",
+          "project-05049",
+          "project-05059",
+          "project-05369",
+          "project-05069"
+        ]
+      }
+    },
+    {
+      "index": 5151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05151",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05151",
+          "project-05159",
+          "project-02997",
+          "project-05149",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05151",
+          "project-05159",
+          "project-05149",
+          "project-04159",
+          "project-05369"
+        ]
+      }
+    },
+    {
+      "index": 5250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05250",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05250",
+          "project-00017",
+          "project-02797",
+          "project-05259",
+          "project-05017"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05250",
+          "project-00017",
+          "project-05259",
+          "project-05017",
+          "project-05197"
+        ]
+      }
+    },
+    {
+      "index": 5351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05351",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05351",
+          "project-05359",
+          "project-02997",
+          "project-04359",
+          "project-05369"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05351",
+          "project-05359",
+          "project-04359",
+          "project-05369",
+          "project-07359"
+        ]
+      }
+    },
+    {
+      "index": 5450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05450",
+          "project-05459",
+          "project-02797",
+          "project-05359",
+          "project-05369"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05450",
+          "project-05459",
+          "project-05359",
+          "project-05369",
+          "project-06459"
+        ]
+      }
+    },
+    {
+      "index": 5551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05551",
+          "project-06559",
+          "project-05559",
+          "project-00436",
+          "project-08906"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05551",
+          "project-06559",
+          "project-05559",
+          "project-05369",
+          "project-07559"
+        ]
+      }
+    },
+    {
+      "index": 5650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05659",
+          "project-05650",
+          "project-05679",
+          "project-02797",
+          "project-05369"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05650",
+          "project-05659",
+          "project-05679",
+          "project-05369",
+          "project-07659"
+        ]
+      }
+    },
+    {
+      "index": 5751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05751",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05751",
+          "project-05759",
+          "project-05369",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05751",
+          "project-05759",
+          "project-05369",
+          "project-07759",
+          "project-05569"
+        ]
+      }
+    },
+    {
+      "index": 5850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05859",
+          "project-05850",
+          "project-05369",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05850",
+          "project-05859",
+          "project-05369",
+          "project-05569",
+          "project-05739"
+        ]
+      }
+    },
+    {
+      "index": 5951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05951",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05951",
+          "project-05959",
+          "project-06959",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05951",
+          "project-05959",
+          "project-07951",
+          "project-06959",
+          "project-06951"
+        ]
+      }
+    },
+    {
+      "index": 6050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06050",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05069",
+          "project-06050",
+          "project-06059",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06050",
+          "project-05069",
+          "project-06059",
+          "project-05049",
+          "project-05369"
+        ]
+      }
+    },
+    {
+      "index": 6151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06151",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06151",
+          "project-06159",
+          "project-09157",
+          "project-02997",
+          "project-04159"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06151",
+          "project-06159",
+          "project-09157",
+          "project-04159",
+          "project-05159"
+        ]
+      }
+    },
+    {
+      "index": 6250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06250",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00017",
+          "project-06250",
+          "project-06077",
+          "project-02797",
+          "project-06557"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06250",
+          "project-00017",
+          "project-06077",
+          "project-06557",
+          "project-06017"
+        ]
+      }
+    },
+    {
+      "index": 6351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06351",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06351",
+          "project-07359",
+          "project-06359",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06351",
+          "project-07359",
+          "project-06359",
+          "project-05359",
+          "project-04359"
+        ]
+      }
+    },
+    {
+      "index": 6450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06450",
+          "project-06459",
+          "project-05459",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06450",
+          "project-06459",
+          "project-05459",
+          "project-06559",
+          "project-06509"
+        ]
+      }
+    },
+    {
+      "index": 6551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06551",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06551",
+          "project-06559",
+          "project-02997",
+          "project-07559",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06551",
+          "project-06559",
+          "project-07559",
+          "project-06499",
+          "project-05369"
+        ]
+      }
+    },
+    {
+      "index": 6650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07659",
+          "project-06650",
+          "project-02797",
+          "project-06659",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06650",
+          "project-07659",
+          "project-06659",
+          "project-05659",
+          "project-06679"
+        ]
+      }
+    },
+    {
+      "index": 6751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06751",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06751",
+          "project-06559",
+          "project-02797",
+          "project-06759",
+          "project-07759"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06751",
+          "project-06559",
+          "project-06759",
+          "project-07759",
+          "project-05759"
+        ]
+      }
+    },
+    {
+      "index": 6850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06850",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05369",
+          "project-06850",
+          "project-06859",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06850",
+          "project-05369",
+          "project-06859",
+          "project-05859",
+          "project-06509"
+        ]
+      }
+    },
+    {
+      "index": 6951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06951",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06951",
+          "project-06959",
+          "project-02997",
+          "project-00436",
+          "project-05959"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06951",
+          "project-06959",
+          "project-07951",
+          "project-05959",
+          "project-07959"
+        ]
+      }
+    },
+    {
+      "index": 7050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07050",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07050",
+          "project-05079",
+          "project-02797",
+          "project-07059",
+          "project-07569"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07050",
+          "project-05079",
+          "project-07059",
+          "project-07569",
+          "project-07509"
+        ]
+      }
+    },
+    {
+      "index": 7151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07151",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07151",
+          "project-07159",
+          "project-02997",
+          "project-08159",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07151",
+          "project-07159",
+          "project-08159",
+          "project-07359",
+          "project-04159"
+        ]
+      }
+    },
+    {
+      "index": 7250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07250",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07509",
+          "project-07250",
+          "project-00019",
+          "project-02797",
+          "project-07359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07250",
+          "project-07509",
+          "project-00019",
+          "project-07359",
+          "project-07659"
+        ]
+      }
+    },
+    {
+      "index": 7351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07351",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07351",
+          "project-07359",
+          "project-09359",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07351",
+          "project-07359",
+          "project-08351",
+          "project-09359",
+          "project-05359"
+        ]
+      }
+    },
+    {
+      "index": 7450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07450",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07359",
+          "project-07450",
+          "project-02997",
+          "project-07459",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07450",
+          "project-07359",
+          "project-07459",
+          "project-06459",
+          "project-05459"
+        ]
+      }
+    },
+    {
+      "index": 7551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07551",
+          "project-07559",
+          "project-02797",
+          "project-06559",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07551",
+          "project-07559",
+          "project-06559",
+          "project-07359",
+          "project-07569"
+        ]
+      }
+    },
+    {
+      "index": 7650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07650",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07659",
+          "project-07650",
+          "project-00069",
+          "project-02997",
+          "project-07359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07650",
+          "project-07659",
+          "project-00069",
+          "project-07359",
+          "project-05659"
+        ]
+      }
+    },
+    {
+      "index": 7751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07751",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07751",
+          "project-07759",
+          "project-02797",
+          "project-07569",
+          "project-07559"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07751",
+          "project-07759",
+          "project-07569",
+          "project-07559",
+          "project-07359"
+        ]
+      }
+    },
+    {
+      "index": 7850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07369",
+          "project-07850",
+          "project-02797",
+          "project-07569",
+          "project-07759"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07850",
+          "project-07369",
+          "project-07569",
+          "project-07759",
+          "project-05859"
+        ]
+      }
+    },
+    {
+      "index": 7951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07951",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07951",
+          "project-06959",
+          "project-00436",
+          "project-07959",
+          "project-05959"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07951",
+          "project-06959",
+          "project-07959",
+          "project-05959",
+          "project-06951"
+        ]
+      }
+    },
+    {
+      "index": 8050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08050",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-05369",
+          "project-08050",
+          "project-02797",
+          "project-00009",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08050",
+          "project-05369",
+          "project-00009",
+          "project-05049",
+          "project-08079"
+        ]
+      }
+    },
+    {
+      "index": 8151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08151",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08151",
+          "project-08159",
+          "project-04159",
+          "project-02797",
+          "project-06159"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08151",
+          "project-08159",
+          "project-04159",
+          "project-06159",
+          "project-09159"
+        ]
+      }
+    },
+    {
+      "index": 8250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08250",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-07509",
+          "project-08250",
+          "project-08159",
+          "project-02997",
+          "project-08079"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08250",
+          "project-07509",
+          "project-08159",
+          "project-08079",
+          "project-00019"
+        ]
+      }
+    },
+    {
+      "index": 8351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08351",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08351",
+          "project-07359",
+          "project-00436",
+          "project-09359",
+          "project-08359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08351",
+          "project-07359",
+          "project-09359",
+          "project-08359",
+          "project-05359"
+        ]
+      }
+    },
+    {
+      "index": 8450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09459",
+          "project-08450",
+          "project-08459",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08450",
+          "project-09459",
+          "project-08459",
+          "project-05459",
+          "project-06459"
+        ]
+      }
+    },
+    {
+      "index": 8551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-06559",
+          "project-08551",
+          "project-07559",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08551",
+          "project-06559",
+          "project-07559",
+          "project-08559",
+          "project-09559"
+        ]
+      }
+    },
+    {
+      "index": 8650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08659",
+          "project-08650",
+          "project-02797",
+          "project-07659",
+          "project-00069"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08650",
+          "project-08659",
+          "project-07659",
+          "project-00069",
+          "project-05659"
+        ]
+      }
+    },
+    {
+      "index": 8751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08751",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08751",
+          "project-07759",
+          "project-02797",
+          "project-08759",
+          "project-09759"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08751",
+          "project-07759",
+          "project-08759",
+          "project-09759",
+          "project-06759"
+        ]
+      }
+    },
+    {
+      "index": 8850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08850",
+          "project-08859",
+          "project-08079",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08850",
+          "project-08859",
+          "project-08079",
+          "project-07369",
+          "project-05859"
+        ]
+      }
+    },
+    {
+      "index": 8951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08951",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08951",
+          "project-06959",
+          "project-02997",
+          "project-08959",
+          "project-07959"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-08951",
+          "project-06959",
+          "project-07951",
+          "project-08959",
+          "project-07959"
+        ]
+      }
+    },
+    {
+      "index": 9050,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09050",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-00009",
+          "project-09050",
+          "project-05099",
+          "project-02797",
+          "project-09059"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09050",
+          "project-00009",
+          "project-05099",
+          "project-09059",
+          "project-09359"
+        ]
+      }
+    },
+    {
+      "index": 9151,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09151",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09151",
+          "project-09159",
+          "project-09359",
+          "project-02797",
+          "project-08159"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09151",
+          "project-09159",
+          "project-09359",
+          "project-08159",
+          "project-04159"
+        ]
+      }
+    },
+    {
+      "index": 9250,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09250",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09250",
+          "project-00009",
+          "project-00019",
+          "project-02797",
+          "project-09359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09250",
+          "project-00009",
+          "project-00019",
+          "project-09359",
+          "project-01409"
+        ]
+      }
+    },
+    {
+      "index": 9351,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09351",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09351",
+          "project-09359",
+          "project-07359",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09351",
+          "project-09359",
+          "project-07359",
+          "project-03359",
+          "project-05359"
+        ]
+      }
+    },
+    {
+      "index": 9450,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09450",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09450",
+          "project-09459",
+          "project-09359",
+          "project-00436",
+          "project-05359"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09450",
+          "project-09459",
+          "project-09359",
+          "project-05359",
+          "project-00009"
+        ]
+      }
+    },
+    {
+      "index": 9551,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09551",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09551",
+          "project-09559",
+          "project-02797",
+          "project-06559",
+          "project-07559"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09551",
+          "project-09559",
+          "project-06559",
+          "project-07559",
+          "project-09359"
+        ]
+      }
+    },
+    {
+      "index": 9650,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09650",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09650",
+          "project-00009",
+          "project-02797",
+          "project-09659",
+          "project-00069"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09650",
+          "project-00009",
+          "project-09659",
+          "project-00069",
+          "project-09359"
+        ]
+      }
+    },
+    {
+      "index": 9751,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09751",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09751",
+          "project-09759",
+          "project-02797",
+          "project-07759",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09751",
+          "project-09759",
+          "project-07759",
+          "project-09769",
+          "project-09359"
+        ]
+      }
+    },
+    {
+      "index": 9850,
+      "long_record": true,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09850",
+          "project-04701",
+          "project-02997",
+          "project-00436",
+          "project-02631"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09850",
+          "project-09859",
+          "project-09359",
+          "project-02797",
+          "project-00671"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09850",
+          "project-09859",
+          "project-09359",
+          "project-00009",
+          "project-09369"
+        ]
+      }
+    },
+    {
+      "index": 9951,
+      "long_record": false,
+      "bm25": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09951",
+          "project-02997",
+          "project-00436",
+          "project-02797",
+          "project-04701"
+        ]
+      },
+      "rrf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09951",
+          "project-06959",
+          "project-09959",
+          "project-02997",
+          "project-00436"
+        ]
+      },
+      "dbsf": {
+        "target_in_top5": true,
+        "owner_leaks": 0,
+        "keys": [
+          "project-09951",
+          "project-06959",
+          "project-09959",
+          "project-07959",
+          "project-09699"
+        ]
+      }
+    }
+  ],
+  "sources": [
+    "https://qdrant.tech/documentation/inference/inference-bm25/",
+    "https://qdrant.tech/documentation/search/text-search/full-text-search/"
+  ],
+  "scope": "Native local Qdrant BM25 and native RRF/DBSF,with unchanged seed MaxSim vectors and owner/namespace filters. Synthetic numbered stress only;source and production configuration unchanged. Other fixture preparation may overlap,no latency claim. Not Mem0 integration,forget/restore lifecycle,independent quality or JT acceptance."
+}
