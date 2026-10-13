@@ -89,5 +89,17 @@
       "executable_sha256": "5e62d077fb960e98f1c84f6e0c2aa8caa57f91e3b06d8f90e8e1f9377a195406"
     },
     "status": "managed_authenticated_bound_store_text_and_file_voice_smoke_pass"
+  },
+  "clongeval": {
+    "url": "https://github.com/zexuanqiu/CLongEval.git",
+    "commit": "81ba789bdbf83b88579c0a0ae780fa04090899cd",
+    "scope": "external Chinese long-conversation memory evaluation; no runtime replacement",
+    "data": {
+      "repo": "zexuanqiu22/CLongEval",
+      "revision": "178d74d88f525f494441f94ef8cff9185a3d3b3a",
+      "file": "1-2_long_conversation_memory/small.jsonl",
+      "sha256": "421fbf602154bcfcd55f943edf636ef8734183ffec68f4580de178b7ec3b5a25"
+    },
+    "scoring_requirements": "deploy/evaluation/metrics.lock"
   }
 }

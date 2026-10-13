@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T06:06:46.010850+00:00",
+  "created_at": "2026-10-13T07:16:09.474417+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 165,
+  "tests_run": 171,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -86,6 +86,22 @@
     },
     {
       "id": "test_data_restore.ApplicationRestoreTests.test_unbacked_newer_version_causes_refusal",
+      "status": "PASS"
+    },
+    {
+      "id": "test_lcvmem_protocol.SourceProtocolTests.test_dates_speakers_and_multiline_content_survive_without_task_footer",
+      "status": "PASS"
+    },
+    {
+      "id": "test_lcvmem_protocol.SourceProtocolTests.test_fixture_import_matches_sdk_content_and_never_reads_query_or_answer",
+      "status": "PASS"
+    },
+    {
+      "id": "test_lcvmem_protocol.SourceProtocolTests.test_frozen_partition_is_reproducible_and_conversation_disjoint",
+      "status": "PASS"
+    },
+    {
+      "id": "test_lcvmem_protocol.SourceProtocolTests.test_unrecognized_or_oversized_source_is_not_silently_dropped",
       "status": "PASS"
     },
     {
@@ -186,6 +202,14 @@
     },
     {
       "id": "test_mem0_adapter.Mem0LifecycleTests.test_serialized_adapter_cas_has_one_winner",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_context.MemoryContextTests.test_distinct_source_wording_is_preserved",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_context.MemoryContextTests.test_exact_duplicate_excerpt_does_not_displace_another_fact",
       "status": "PASS"
     },
     {
@@ -681,6 +705,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "7edd0776b17a4215e9effd90590214b3447c4ee5",
+  "source_commit": "21030d279fb4e087ee01b6c495ad81096ddfde87",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

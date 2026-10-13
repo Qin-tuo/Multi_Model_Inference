@@ -26,8 +26,13 @@ def memory_message(items, base_url: str, max_tokens: int = 512):
     if tokens > max_tokens:
         raise ValueError("Memory budget is smaller than its evidence header")
     for item in items[:5]:
+        # A verbatim source excerpt often equals the fact body. Retain its
+        # source ID while avoiding a second copy that displaces other evidence.
+        # Distinct original wording remains available to the model unchanged.
+        sources=[{key:value for key,value in source.items()
+                  if not (key=='evidence' and value==item['content'])} for source in item['sources']]
         evidence = {"id": item["memory_id"], "content": item["content"], "version": item["version"],
-                    "sources": item["sources"], "updated_at": item.get("updated_at")}
+                    "sources": sources, "updated_at": item.get("updated_at")}
         candidate = prefix + json.dumps(selected + [evidence], ensure_ascii=False, separators=(",", ":"))
         size = count(candidate)
         if size <= max_tokens:

@@ -417,11 +417,14 @@ def main():
     restore.add_argument('--data-dir',type=Path,required=True)
     restore.add_argument('--abort',action='store_true')
     bench = sub.add_parser('bench', help='Measured workloads; full B0-B3 scenarios remain separate work')
-    bench.add_argument('--suite', choices=['memory-capacity'], required=True)
-    bench.add_argument('--tier', type=int, choices=[1000,10000,50000], required=True)
+    bench.add_argument('--suite', choices=['memory-capacity','memory-quality'], required=True)
+    bench.add_argument('--tier', type=int, choices=[1000,10000,50000])
     bench.add_argument('--run-dir', type=Path, required=True)
     bench.add_argument('--output', type=Path, required=True)
     bench.add_argument('--seed-method', choices=['adapter','sdk-batch'], default='adapter')
+    bench.add_argument('--split',choices=['development','heldout','reserve'],default='development')
+    bench.add_argument('--limit',type=int)
+    bench.add_argument('--seed-from',type=Path)
     interact = sub.add_parser("interact", help="Persistent Pipecat text conversation")
     interact.add_argument("--user", default="owner")
     interact.add_argument("--data-dir", type=Path, default=DATA)
@@ -474,6 +477,13 @@ def main():
             env = os.environ.copy()
             env.setdefault('OPENBLAS_NUM_THREADS','1')
             env.setdefault('OMP_NUM_THREADS','2')
+            if args.suite=='memory-quality':
+                command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/lcvmem_eval.py'),'--run-dir',str(args.run_dir),
+                    '--output',str(args.output),'--split',args.split]
+                if args.limit is not None:command+=['--limit',str(args.limit)]
+                if args.seed_from is not None:command+=['--seed-from',str(args.seed_from)]
+                return subprocess.call(command,cwd=ROOT,env=env)
+            if args.tier is None:raise ValueError('memory-capacity requires --tier')
             return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/memory_capacity.py'),
                 '--tier',str(args.tier),'--run-dir',str(args.run_dir),'--output',str(args.output),
                 '--seed-method',args.seed_method],cwd=ROOT,env=env)

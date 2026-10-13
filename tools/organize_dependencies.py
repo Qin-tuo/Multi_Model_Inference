@@ -115,7 +115,7 @@ def main():
                          "cudnn": root / "sdk/cudnn", "tensorrt-sdk": root / "sdk/tensorrt"}.items():
         link(root / "system" / name, target)
     installed_packages = {}
-    for name in ("assistant", "speech", "vision", "ort-build"):
+    for name in ("assistant", "speech", "vision", "ort-build", "memory-eval"):
         python = root / "environments" / name / "bin/python"
         if not python.exists(): continue
         command = "import importlib.metadata as m,json; print(json.dumps(sorted([{'name':d.metadata['Name'],'version':d.version,'location':str(d.locate_file(''))} for d in m.distributions()],key=lambda d:d['name'].lower())))"

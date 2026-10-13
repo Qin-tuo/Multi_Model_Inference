@@ -10,6 +10,8 @@
 | `environments/assistant/` | Pipecat、Mem0、APScheduler、BGE、PyAudio 等主应用 Python 环境 |
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |
 | `environments/vision/` | Ultralytics、PyTorch CPU、ONNX 等模型导出/验证环境 |
+| `environments/memory-eval/` | CLongEval官方评分函数所需的jieba/rouge/jsonlines等隔离环境，不改变助手运行包 |
+| `datasets/CLongEval/` | 固定revision和SHA256的外部中文记忆数据，原始语料不进入业务仓库 |
 | `environments/ort-build/` | ORT后续构建和上游lintrunner/clang-format检查的隔离开发环境 |
 | `installed/` | 自行编译或官方发布的依赖程序；`onnxruntime-1.28.0-cuda13-sm87/` 包含已编译的 CUDA/TensorRT provider 库 |
 | `workspaces/` | ROS视觉工作区及colcon构建/安装目录 |
@@ -32,6 +34,7 @@
 
 | 框架 | 本机目录 | 形式 |
 |---|---|---|
+| CLongEval | `frameworks/CLongEval/` | 固定Git源码，复用官方评分；原始数据在`datasets/CLongEval/` |
 | llama.cpp | `frameworks/llama.cpp/` | Git 源码 |
 | Pipecat | `frameworks/pipecat/` | Git 源码；实际运行包在 `environments/assistant/` |
 | Qdrant server | `frameworks/qdrant/`、`installed/qdrant-1.19.2/` | 固定源码及校验过的官方ARM64程序；本机长期记忆服务 |
