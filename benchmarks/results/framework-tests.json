@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T05:31:21.905547+00:00",
+  "created_at": "2026-10-13T06:06:46.010850+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 153,
+  "tests_run": 165,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -45,6 +45,50 @@
       "status": "PASS"
     },
     {
+      "id": "test_data_restore.ApplicationRestoreTests.test_abort_resumes_after_source_retirement_but_rejects_active_target",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_corrupt_current_vector_can_use_same_confirmed_version_from_snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_current_deletions_versions_records_and_reminder_receipts_win",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_interrupted_cutover_resumes_and_never_reopens_both_sides",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_missing_dense_vector_can_be_recovered_from_snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_missing_vector_index_is_rebuilt_without_resurrecting_deleted_facts",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_notification_state_cannot_regress_to_unplayed",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_other_lineage_and_busy_source_are_rejected_before_fencing",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_second_cutover_preserves_lineage_and_resume_before_source_fence",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_source_control_change_after_interruption_is_rejected",
+      "status": "PASS"
+    },
+    {
+      "id": "test_data_restore.ApplicationRestoreTests.test_unbacked_newer_version_causes_refusal",
+      "status": "PASS"
+    },
+    {
       "id": "test_measurement_metrics.MeasurementTests.test_empty_and_invalid_observations_cannot_pass",
       "status": "PASS"
     },
@@ -66,6 +110,10 @@
     },
     {
       "id": "test_mem0_adapter.Mem0LifecycleTests.test_completed_barrier_filters_restored_old_vector",
+      "status": "PASS"
+    },
+    {
+      "id": "test_mem0_adapter.Mem0LifecycleTests.test_correction_cleans_lazy_entities_and_retries_failure",
       "status": "PASS"
     },
     {
@@ -633,6 +681,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "34fbcc33e76784762b30db85aa274c32a7c73f36",
+  "source_commit": "7edd0776b17a4215e9effd90590214b3447c4ee5",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

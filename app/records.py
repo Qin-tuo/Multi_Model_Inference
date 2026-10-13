@@ -52,6 +52,11 @@ class Records:
         except OSError:
             self.owner.close()
             raise RuntimeError("Another process owns the conversation records") from None
+        try:
+            from app.data_lifecycle import check_available
+            check_available(self.path.parent)
+        except BaseException:
+            self.owner.close();raise
         self.engine = create_engine("sqlite:///" + str(self.path), connect_args={"timeout": 10, "check_same_thread": False})
         @event.listens_for(self.engine, "connect")
         def configure(connection, _record):

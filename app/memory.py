@@ -156,6 +156,8 @@ class Mem0Adapter:
         self.cancelled_sources = Table("cancelled_sources", metadata,
                                        Column("user_id", String, primary_key=True), Column("source_id", String, primary_key=True))
         try:
+            from app.data_lifecycle import check_available
+            check_available(self.data_dir.parent)
             from app.memory_store import check_transition
             check_transition(self.data_dir)
             metadata.create_all(self.engine)
@@ -469,6 +471,7 @@ class Mem0Adapter:
     def correct(self, user_id: str, memory_id: str, content: str, *, expected_version: int,
                 source_id: str, source_excerpt: str | None = None, request_id: str | None = None,
                 expected_generation: int | None = None) -> dict:
+        from patches.mem0.purge_entities import purge_entities
         user_id, content = _text(user_id, "user_id", 128), _text(content, "content")
         source_id = _text(source_id, "source_id", 256)
         excerpt = _text(source_excerpt if source_excerpt is not None else content, "source_excerpt")
@@ -493,6 +496,7 @@ class Mem0Adapter:
                     if not any(entry.get("new_memory") == content and entry.get("event") == "UPDATE" for entry in history):
                         self.sdk.db.add_history(memory_id, None, content, "UPDATE", updated_at=record.get("updated_at"))
                     self._purge_descendants(user_id, memory_id, meta.get("namespace", "personal"))
+                    purge_entities(self.sdk,[memory_id],user_id)
                     return self._finish(user_id, request_id, {"memory_id": memory_id, "version": current_version,
                                                              "generation": self.generation(user_id), "durable": True,
                                                              "replayed": True, "atomicity": "reconciled_non_atomic"})
@@ -505,6 +509,7 @@ class Mem0Adapter:
                                                                   "generation": generation, "source_id": source_id,
                                                                   "source_excerpt": excerpt, "operation_key": request_id})
                 self._purge_descendants(user_id, memory_id, meta.get("namespace", "personal"))
+                purge_entities(self.sdk,[memory_id],user_id)
                 return self._finish(user_id, request_id, {"memory_id": memory_id, "version": expected_version + 1,
                                                          "generation": self.generation(user_id), "durable": True,
                                                          "replayed": False, "atomicity": "reconciled_non_atomic"})

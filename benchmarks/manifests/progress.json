@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T05:33:58.347789+00:00",
+  "updated_at": "2026-10-13T06:11:48.227312+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -272,7 +272,7 @@
         "benchmarks/results/memory-migration-recovery-smoke.json"
       ],
       "validation": "Embedded local baseline:1k query79.2ms/write146.1ms P95;10k350.4/906.3ms FAIL200/500ms gates. Native Qdrant1.19.2 exact-search comparison:10k47.5/56.6ms,50k61.6/59.2ms; no errors/owner leaks/unconfirmed writes.10k hit mask unchanged;50k numbered recall94/100 is not independent quality.40 native-server SIGKILLs pass4 phases10each. Authenticated directory/collection/embedding binding is used by public text/voice; real-model smokes pass. Strict owner-scoped entity erasure covers lazy restart and failure recovery. Explicit in-place legacy migration preserves IDs/payloads/versions/sources, checks embeddings and merges deletion intents including descendants/entities; real BGE public-CLI recall/forget and4 migration-process SIGKILL phases1each PASS.147 framework tests PASS, including partial-target abort/resume. Full backup restore, independent memory quality and authenticated full-workload latency remain pending; capacity runs did not sample per-frame vision rates.",
-      "next_action": "Implement full backup/restore with current deletion journals; measure authenticated/bound production path at10k with complete workload, and complete independent200-case memory quality."
+      "next_action": "Measure authenticated/bound production path at10k with complete workload, complete independent200-case memory quality, and qualify pending-write restore/control recovery and quotas."
     },
     {
       "task_id": "J6.5",
@@ -285,10 +285,16 @@
         "tests/test_data_backup.py",
         "benchmarks/results/data-backup-smoke.json",
         "benchmarks/results/snapshot-roundtrip-baseline.json",
-        "benchmarks/results/old-backup-controls-baseline.json"
+        "benchmarks/results/old-backup-controls-baseline.json",
+        "app/data_lifecycle.py",
+        "deploy/data/restore.py",
+        "tools/restore_data.py",
+        "tools/data_restore_smoke.py",
+        "tests/test_data_restore.py",
+        "benchmarks/results/data-restore-smoke.json"
       ],
-      "validation": "Public backup-data/verify-backup commands use application/collection writer locks, native Qdrant snapshots and SQLite backup including committed WAL. Native upload-to-new-collection and four SQLite logical roundtrips PASS on actual BGE/Mem0 and synthetic profiles.30 real copy-process SIGKILLs,3 phases10each, reject incomplete backups and resume successfully.153 framework tests PASS; fault fixtures cover write failure, corruption, source mutation and ownership. Initial file-URI recovery403 retained and fixed with upstream upload API. Raw old-backup policy baseline FAIL: later forgotten memory and later-cancelled reminder remain in the old snapshot; no restored application activated.",
-      "next_action": "Implement restoration with current deletion/correction/transcript/delivery controls and exclusive application cutover; verify no resurrection or duplicate reminder, then cover full retention/quota/index recovery and disk/fault acceptance."
+      "validation": "Public backup/verify use native Qdrant snapshots and SQLite backup including committed WAL;30 copy-process SIGKILLs,3 phases10each PASS. Public restore-data now uses current control databases, confirmed versions and entity/transcript/history erasure, restores current reminders without replaying delivered/cancelled/uncertain output, and fences both directories before exclusive cutover. Real BGE/Mem0/Qdrant/APScheduler and public interact recall corrected preference; actual collection loss rebuilds from a verified snapshot.30 restore-process SIGKILLs,3 phases10each PASS;165 framework tests PASS, including abort/resume, lineage continuity, late source changes, notification regression and corrupt/missing vector fallback. Raw old-backup FAIL baseline retained as comparison. Test profiles synthetic; playback receipts are fixture only. Pending writes, current-control loss, quotas, retention and full JT fault acceptance remain incomplete.",
+      "next_action": "Qualify pending-write and control-database recovery, implement retention/quotas, and continue independent memory quality plus complete-load latency and full J6 fault/stability acceptance."
     }
   ],
   "acceptance": {
@@ -379,8 +385,8 @@
     "Persistent voice file integration and two real delayed-ASR callback scenarios pass; real microphone/speaker, AEC, full voice interruption/fault matrix and end-to-end buffer/backpressure qualification remain unverified.",
     "The 14.1s reminder baseline is retained; native tool prefill removes its prose loop. Trusted-field bindings now preserve stated facts, note fields and parsed time. Latest six-turn file run has no repairs; reminder first PCM is4.61s. Full JT-04/JT-12 acceptance remains unverified.",
     "Gesture greeting integration passes labelled ROS/TTS/file-output tests; real 50-positive/50-negative gesture quality and physical audio remain NOT_VERIFIED. Initial console startup also observed some pose messages beyond200ms; full coexistence timing remains pending.",
-    "Public text/voice entry points now use managed authenticated native Qdrant with directory/collection/embedding binding.50k isolated capacity test passes declared latency limits, but independent memory quality, authenticated production-path full-load latency and complete backup/deletion-journal restore remain unverified.",
-    "Consistent application backup and native snapshot/SQLite roundtrip are implemented; complete application restore with current deletion/correction/notification controls, directory cutover, backup retention and quotas remains pending. Raw old-backup failure baseline demonstrates forgotten/cancelled state must not be restored unchanged."
+    "Public text/voice use managed authenticated native Qdrant with directory/collection/embedding binding.50k isolated capacity and current-control restoration pass their declared checks; independent memory quality, authenticated production-path full-load latency, pending-write/control-loss recovery and backup retention/quotas remain unverified.",
+    "Backup and restoration with current SQLite authority, native snapshot/index recovery and exclusive cutover are implemented and tested; pending memory writes must be reconciled first. Loss of current controls, quota/retention policy, power-loss and complete restore fault/quality acceptance remain unverified."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

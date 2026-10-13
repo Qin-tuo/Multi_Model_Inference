@@ -151,6 +151,8 @@ class ReminderService:
             self._owner_file.close()
             raise RuntimeError("another ReminderService owns this database") from None
         try:
+            from app.data_lifecycle import check_available
+            check_available(Path(self.database_path).parent)
             self.engine = _engine(self.database_path)
             _METADATA.create_all(self.engine)
             self._migrate_delivery_columns()

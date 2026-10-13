@@ -1,6 +1,6 @@
 # 应用数据备份与恢复进度
 
-现已提供一致备份及校验命令，复用Qdrant原生快照和Python SQLite backup接口。完整恢复仍需合并当前删除、会话清除和提醒回执，并完成应用目录切换；当前不提供把旧快照直接发布为活动应用的命令。
+现已提供一致备份、校验及恢复命令，复用Qdrant原生快照、SQLite backup和APScheduler恢复。恢复须提供当前控制数据库，在应用启动前合并删除、更正、会话及提醒状态；旧目录随后停止接受应用访问。
 
 ```bash
 # 先退出使用该应用数据目录的 interact/voice/notifications，Qdrant服务继续运行。
@@ -29,16 +29,49 @@ python3 tools/project.py verify-backup \
 
 数据复制前后核对SQLite逻辑内容、原生collection逐点内容及数据清单。只有文件校验和源一致性核对全部通过，manifest才标记`COMPLETE`。`verify-backup`检查固定文件清单、SHA256、SQLite完整性及逻辑内容；不会把不完整目录视为可用备份。备份使用过程中保持不可变，应用运行数据的保留策略不等于自动删除旧备份。
 
-Qdrant 1.19.2拒绝通过file URI读取其snapshot目录之外的文件，原始[失败证据](../../benchmarks/results/snapshot-roundtrip-baseline.json)已保留。还原检查使用官方SDK公开的snapshot upload接口，只上传到不存在的新collection；不放宽服务路径限制，不覆盖原库。此接口用于验证快照可还原，不代表已经完成产品恢复流程。
+Qdrant 1.19.2拒绝通过file URI读取其snapshot目录之外的文件，原始[失败证据](../../benchmarks/results/snapshot-roundtrip-baseline.json)已保留。恢复使用官方SDK公开的snapshot upload接口，只上传到不存在的新collection；不放宽服务路径限制，不覆盖原库。恢复续跑会核对已上传collection的身份及内容，不因观察超时直接重建或覆盖。
 
 已收到名称的服务端临时快照写入备份回执，正常结束及续跑只清理这些已确认属于本次备份的文件。若进程在服务器生成快照、客户端收到其名称之前终止，可能留下无法确认归属的服务端临时快照；当前不自动删除未登记文件，也未完成备份配额/保留策略验收。
 
-完整恢复的必要规则包括：先验证当前删除记录和主体归属；删除旧事实、派生摘要、历史和关联会话；核对备份后更正/新增的版本，无法恢复时明确失败；保留已完成、已取消和输出结果不确定的提醒状态；完成新目录绑定并阻止旧目录再次运行后，才能允许新实例开始交互。这些步骤仍在实施，不能仅凭快照上传成功宣称恢复完成。
+## 恢复与目录切换
+
+```bash
+python3 tools/project.py restore-data \
+  --backup "$HOME/AI_Stack/backups/assistant-20261013-01" \
+  --current-data-dir "$HOME/AI_Stack/runtime-data" \
+  --data-dir "$HOME/AI_Stack/assistant-restored"
+
+python3 tools/project.py interact --no-vision \
+  --data-dir "$HOME/AI_Stack/assistant-restored" --user owner
+
+# 仅撤销尚未启用的新目录，保留源数据库和备份：
+python3 tools/project.py restore-data --abort \
+  --data-dir "$HOME/AI_Stack/assistant-restored"
+```
+
+三个目录须彼此分离。`--current-data-dir`必须是当前活动档案，保有完整的最新SQLite控制数据库；它与备份须属于同一数据沿革，embedding指纹必须匹配。当前控制库缺失、损坏或早于备份时明确失败，不能只凭一份旧备份推断后来发生的遗忘和播报。存在未完成的remember/correct时，当前实现要求先用原请求重试并确认持久结果，再启动恢复；该部分恢复矩阵仍待扩展。
+
+恢复以当前journal/history、会话/笔记及提醒数据库为控制依据，保留备份之后的笔记、清除状态、幂等回执、取消来源及通知结果。事实从原生快照恢复，按当前journal核对主体、版本和操作ID；当前向量库中较新的更正或新增事实会合并进目标。每批向量经过当前BGE复算校验。同一已确认版本的当前向量缺失或损坏时可采用备份中的有效向量；若较新的确认版本在当前库和备份中都不存在，则拒绝发布。
+
+删除屏障和会话删除记录共同排除旧事实及派生摘要，并清除history/messages、实体关联及相关会话正文。实体索引缺少事实版本来源，因此恢复会失效更正过的事实关联；事实ID、正文和向量保留，其他有效实体关联继续使用。SDK正常更正路径也补充了严格实体清理，失败保留待重试状态。
+
+提醒采用当前的取消、已输出和结果不确定状态。复制的APScheduler jobs先清空，应用启动时由现有ReminderService根据有效提醒重建任务，避免反序列化旧任务或写回旧路径。先前处于playing且没有完成回执的通知按既有规则变为uncertain，不自动重复播报。复制过程不会启动scheduler。
+
+`data-transition.json`记录两边状态：新目录未完成时禁止访问，源目录冻结后也禁止启动；检查通过后先将源目录标记RETIRED，再允许新目录ACTIVE。记忆、会话和独立提醒入口均在取得自身写锁后检查该状态。中断时重复完全相同的恢复命令；已启用的新目录重复执行不会回放旧快照。未完成恢复可用`--abort`撤销，已启用的新目录不可回退。撤销保留未启用目标目录的诊断文件，不覆盖源控制数据。
+
+恢复不会移动模型或Qdrant服务目录，旧数据库和备份也会保留；日常命令须指定新`--data-dir`。不要删除或手工修改状态标记来绕过目录检查。后端服务可能仍位于原运行根目录，不能把整个原根目录当作废弃数据删除。
+
+当前验证范围是本机已注册服务、保留最新控制库情况下的恢复与索引重建。整盘丢失且没有最新删除/通知状态、磁盘级擦除、配额/保留策略及完整J6/JT故障验收仍未完成。
 
 [真实模型备份报告](../../benchmarks/results/data-backup-smoke.json)使用实际BGE/Mem0/受管理Qdrant及四份SQLite数据库，通过公开CLI完成备份与校验，核对原生快照逐点哈希及SQLite逻辑哈希。数据库复制、快照下载和最终发布前各10次真实SIGKILL，共30次，均能拒绝半成品并续跑完成。源码及数据为隔离的合成测试资料，没有启动还原后的交互应用。
 
-[旧备份状态基线](../../benchmarks/results/old-backup-controls-baseline.json)在备份后遗忘一个事实、取消一个提醒，再检查旧快照，确认其仍包含旧事实和active提醒。这是完整恢复尚未完成的明确失败项，后续必须用当前删除和通知状态覆盖。备份成功及传输校验不能代替这一产品约束。
+[旧备份状态基线](../../benchmarks/results/old-backup-controls-baseline.json)在备份后遗忘一个事实、取消一个提醒，再检查旧快照，确认其仍包含旧事实和active提醒。该原始失败保留作为对照；恢复入口通过当前控制库、删除清理及目录切换处理这个问题。
+
+[真实恢复报告](../../benchmarks/results/data-restore-smoke.json)使用实际BGE/Mem0/Qdrant/SQLite/APScheduler和公开backup/restore/interact命令。验证了备份后的更正与新增、遗忘及派生内容清除、历史/会话清除、访客隔离、最新笔记保留、提醒取消/完成/uncertain状态、新路径任务及旧入口禁用。真实文字问答读取更正后的偏好，实际删除原collection后也能从新备份重建索引。冻结源、合并完成、退休旧源三个阶段各10次SIGKILL，共30次，均续跑成功且无重复提醒。提醒完成回执为明确标记的fixture，不是扬声器播放证据。
+
+[恢复专项回归](../../tests/test_data_restore.py)另外覆盖新版本丢失拒绝、损坏/缺失向量修复、通知状态回退拒绝、六个切换检查点、来源变化、不同沿革、撤销及连续多次目录切换。完整框架回归为165项通过；这不改变整机JT仍待验收的状态。
 
 ```bash
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 .venv/bin/python tools/data_backup_smoke.py
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 .venv/bin/python tools/data_restore_smoke.py
 ```

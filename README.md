@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件153项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件165项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -48,7 +48,7 @@ python3 tools/project.py interact --user owner
 
 当前取消验证覆盖原生 interruption 到达管线末端的确认、HTTP生成请求停止、服务slot空闲及下一轮恢复。取消期间阻止新请求准入；视觉初测从取消到确认模型空闲约2.60秒，不代表声学停播时延。控制台按完整回答输出，尚未实现逐token显示；此验证不证明物理停播、AEC或GPU内存释放。到期提醒已在控制台按“通知：内容”显示，等待当前回答结束再输出。完整语音助手验收仍未完成。
 
-提醒数据库迁到新目录后，启动恢复会重建指向当前数据库的任务参数，避免到期任务写回旧目录；原始失败见[迁移基线](benchmarks/results/reminder-relocation-baseline.json)。一致备份已实现；旧备份恢复时的当前删除记录、提醒回执合并及应用切换仍待完成。
+提醒数据库迁到新目录后，启动恢复会重建指向当前数据库的任务参数，避免到期任务写回旧目录；原始失败见[迁移基线](benchmarks/results/reminder-relocation-baseline.json)。恢复工具使用当前通知回执，并由APScheduler重建有效任务，已完成或已取消的提醒不会从旧备份重新排队；结果不确定的播报不自动重试。
 
 提醒静音使用 `/mute-reminders on`、`/mute-reminders off`，设置按档案持久保存。未开始输出的失败最多重试3次，默认间隔5秒；提醒到期后默认有效1小时，可在`configs/runtime.yaml`配置。已开始输出但未确认的提醒保留为`uncertain`，重启后不自动重播，可查询后取消或重新设置。文字显示与音频播放分开记录。
 
@@ -99,7 +99,9 @@ ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM�
 
 退出使用目标数据目录的应用后，可执行`python3 tools/project.py backup-data --data-dir /应用数据目录 --output /独立备份目录`，再用`python3 tools/project.py verify-backup --backup /独立备份目录`校验。备份包含Qdrant原生快照及记忆、会话/笔记、提醒的SQLite数据，保留WAL中已提交内容，完成后不可覆盖，中断后可重复原命令续跑。模型、原始音视频和认证文件不进入备份。
 
-[真实备份与故障测试](benchmarks/results/data-backup-smoke.json)验证公开CLI、原生快照和SQLite还原，并完成三个阶段各10次真实SIGKILL续跑。[旧备份基线](benchmarks/results/old-backup-controls-baseline.json)保留了备份后遗忘/取消不能由旧快照体现的失败证据；完整应用恢复需要先合并当前状态，尚未交付。详见[数据维护说明](deploy/data/README.md)。
+[真实备份与故障测试](benchmarks/results/data-backup-smoke.json)验证公开CLI、原生快照和SQLite还原，并完成三个阶段各10次真实SIGKILL续跑。[旧备份基线](benchmarks/results/old-backup-controls-baseline.json)保留了备份后遗忘/取消不能由旧快照体现的失败证据。
+
+恢复入口为`python3 tools/project.py restore-data --backup /备份目录 --current-data-dir /当前数据目录 --data-dir /新目录`。它要求当前控制数据库完整，合并删除、更正、会话和提醒状态，检查通过后禁用旧目录、启用新目录。中断后可续跑，未完成恢复可通过`--abort --data-dir /新目录`撤销。较新的已确认事实丢失时会拒绝回退；待完成写入须先用原请求重试并确认结果。恢复后日常命令须指定新数据目录。详细范围、限制和验证见[数据维护说明](deploy/data/README.md)。
 
 ### 人物状态与手势主动回应
 

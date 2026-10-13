@@ -175,6 +175,8 @@ def create(data_directory,output,*,checkpoint=lambda phase:None):
         lock(stack,memory/'adapter.writer.lock')
         # Acquire all owners even if a database has never been created.
         lock(stack,source/'records.sqlite.owner.lock');lock(stack,source/'reminders.sqlite.owner.lock')
+        from app.data_lifecycle import check_available,read_state
+        check_available(source)
         check_transition(memory)
         binding=json.loads(binding_path.read_text())
         service=load(binding['service_directory'])
@@ -222,6 +224,7 @@ def create(data_directory,output,*,checkpoint=lambda phase:None):
         manifest.update(status='WRITING',started_at=now(),files={},databases={},collections={},server_snapshots=[],
             versions={name:importlib.metadata.version(name) for name in ('mem0ai','qdrant-client','SQLAlchemy','APScheduler')},
             qdrant_version=VERSION,embedding_sha256=binding['embedding_sha256'])
+        manifest['lineage_id']=(read_state(source) or {}).get('lineage_id',binding['store_id'])
         publish();checkpoint('marked')
         try:
             atomic_json(output/'store-binding.json',binding)

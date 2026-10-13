@@ -107,10 +107,10 @@ def source_digest(client,collections,directory,records):
     return digest.hexdigest()
 
 
-def deletion_policy(source,directory,records):
+def deletion_policy(source,directory,records,*,collection=SOURCE):
     """Merge existing authorized deletion intents and their derived memories."""
     owners={};children={}
-    for batch in pages(source,SOURCE):
+    for batch in pages(source,collection):
         for row in batch:
             p=row.payload or {};owner=p.get('user_id');parents=p.get('derived_from',[])
             if not isinstance(owner,str) or not owner or not isinstance(p.get('data'),str):
@@ -159,6 +159,8 @@ def migrate(directory,service,profile,*,records=None,checkpoint=lambda phase:Non
     marker=directory/'store-transition.json';binding_path=directory/'store.json'
     with ExitStack() as stack:
         lock(stack,directory/'adapter.writer.lock')
+        from app.data_lifecycle import check_available
+        check_available(directory.parent)
         if records:
             if not records.is_file():raise RuntimeError('Recorded conversation database is missing')
             lock(stack,str(records)+'.owner.lock')
@@ -267,6 +269,8 @@ def abort(directory,service,*,records=None,checkpoint=lambda phase:None):
     marker=directory/'store-transition.json';path=directory/'store.json'
     with ExitStack() as stack:
         lock(stack,directory/'adapter.writer.lock')
+        from app.data_lifecycle import check_available
+        check_available(directory.parent)
         if records:
             if not records.is_file():raise RuntimeError('Recorded conversation database is missing')
             lock(stack,str(records)+'.owner.lock')

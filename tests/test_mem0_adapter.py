@@ -213,6 +213,22 @@ class Mem0LifecycleTests(unittest.TestCase):
         self.assertEqual(self.adapter.sdk.vector_store.client.retrieve('assistant_memories_entities',[entity_id]),[])
         self.assertTrue(self.adapter.forget('owner',memory_id,request_id='forget-entity')['durable'])
 
+    def test_correction_cleans_lazy_entities_and_retries_failure(self):
+        mid=self.remember()['memory_id'];entity_id=str(uuid.uuid4())
+        self.adapter.sdk.entity_store.insert(vectors=[FixtureEmbedding().embed('旧实体')],ids=[entity_id],payloads=[
+            {'data':'旧实体','user_id':'owner','linked_memory_ids':[mid]}])
+        self.restart();client=self.adapter.sdk.vector_store.client;original=client.delete
+        def fail_entity(collection_name,*args,**kwargs):
+            if collection_name.endswith('_entities'):raise OSError('LABELLED entity failure')
+            return original(collection_name,*args,**kwargs)
+        client.delete=fail_entity
+        def correct():return self.adapter.correct('owner',mid,'更正内容',expected_version=1,source_id='correction',request_id='correct-entity')
+        self.assertCode('STORAGE_ERROR',correct)
+        self.assertEqual(self.adapter.operation_status('owner','correct-entity')['status'],'PENDING')
+        client.delete=original;self.restart()
+        self.assertTrue(correct()['replayed'])
+        self.assertEqual(self.adapter.sdk.vector_store.client.retrieve('assistant_memories_entities',[entity_id]),[])
+
     def test_correction_invalidates_old_derived_summary(self):
         parent = self.remember()["memory_id"]
         child = self.adapter.remember("owner", "summary", "summary", "我喜欢简短", source_id="summary", request_id="summary", derived_from=(parent,))

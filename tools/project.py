@@ -411,6 +411,11 @@ def main():
     backup.add_argument('--output',type=Path,required=True)
     verify=sub.add_parser('verify-backup',help='Verify backup completeness, checksums and SQLite contents')
     verify.add_argument('--backup',type=Path,required=True)
+    restore=sub.add_parser('restore-data',help='Restore snapshots with current control state and exclusive directory cutover')
+    restore.add_argument('--backup',type=Path)
+    restore.add_argument('--current-data-dir',type=Path)
+    restore.add_argument('--data-dir',type=Path,required=True)
+    restore.add_argument('--abort',action='store_true')
     bench = sub.add_parser('bench', help='Measured workloads; full B0-B3 scenarios remain separate work')
     bench.add_argument('--suite', choices=['memory-capacity'], required=True)
     bench.add_argument('--tier', type=int, choices=[1000,10000,50000], required=True)
@@ -448,6 +453,14 @@ def main():
     logs.add_argument("--lines", type=int, default=50)
     args = parser.parse_args()
     try:
+        if args.action=='restore-data':
+            env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
+            command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/restore_data.py'),'--data-dir',str(args.data_dir)]
+            if args.abort:command+=['--abort']
+            else:
+                if not args.backup or not args.current_data_dir:raise ValueError('Restoration requires --backup and --current-data-dir')
+                command+=['--backup',str(args.backup),'--current-data-dir',str(args.current_data_dir)]
+            return subprocess.call(command,cwd=ROOT,env=env)
         if args.action in {'backup-data','verify-backup'}:
             command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/backup_data.py')]
             if args.action=='backup-data':command+=['create','--data-dir',str(args.data_dir),'--output',str(args.output)]
