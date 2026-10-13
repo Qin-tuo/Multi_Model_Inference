@@ -75,6 +75,14 @@ class LocalLlamaService(OpenAILLMService):
     def build_chat_completion_params(self, params_from_context):
         return apply_required_tool_prefix(super().build_chat_completion_params(params_from_context), self.tool_call_prefix)
 
+    async def cleanup(self):
+        # The pinned upstream service joins its inference/tool tasks but leaves
+        # the SDK connection pool open. This adapter owns that client.
+        try:
+            await super().cleanup()
+        finally:
+            await self._client.close()
+
 
 def create_llama_service(config: LlamaConfig) -> OpenAILLMService:
     """Use the current upstream Settings API and the local OpenAI-compatible API."""

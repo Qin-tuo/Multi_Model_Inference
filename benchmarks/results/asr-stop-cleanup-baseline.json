@@ -1,0 +1,44 @@
+{
+  "created_at": "2026-10-13T08:44:49.527243+00:00",
+  "status": "FAIL",
+  "expected_regression_baseline": true,
+  "application_commit": "18fa236d81e4567bdafa789aa3936e32ee821ce5",
+  "tests_state": "New resource assertions against unchanged app/adapters/asr.py at the recorded commit",
+  "pipecat_version": "1.12.0",
+  "cases": [
+    {
+      "suite": "native_stop_timers",
+      "tests_run": 3,
+      "failures": 3,
+      "log_sha256": "6cb21005e9edb73bf0778e66b16c061539f1196ef040b91396cd3f9bb802057e",
+      "failure_lines": [
+        "FAIL: test_abort_reset_clears_waits_without_arming_new_timers (test_asr_stop_cleanup.StopTimerCleanupTests.test_abort_reset_clears_waits_without_arming_new_timers)",
+        "AssertionError: Lists differ: [<Task pending name='CompleteASRTurnStop#0[1821 chars]201>] != []",
+        "FAIL: test_duplicate_stop_keeps_one_timer_of_each_kind_and_cleanup_joins_both (test_asr_stop_cleanup.StopTimerCleanupTests.test_duplicate_stop_keeps_one_timer_of_each_kind_and_cleanup_joins_both)",
+        "AssertionError: 3 != 2",
+        "FAIL: test_final_transcription_and_repeated_stops_leave_no_old_stt_wait (test_asr_stop_cleanup.StopTimerCleanupTests.test_final_transcription_and_repeated_stops_leave_no_old_stt_wait)",
+        "AssertionError: 2 != 1"
+      ]
+    },
+    {
+      "suite": "voice_runner_teardown",
+      "tests_run": 10,
+      "failures": 5,
+      "log_sha256": "0b507c125a88930421cae307ea913320cbcb317c8e55fd4241331d6ec65d5438",
+      "failure_lines": [
+        "FAIL: test_asr_deadline_fails_without_partial_execution_and_recovers (test_voice_asr_scoping.VoiceASRScopeTests.test_asr_deadline_fails_without_partial_execution_and_recovers)",
+        "AssertionError: Lists differ: ['CompleteASRTurnStop#0::_stt_timeout_handler'] != []",
+        "FAIL: test_cancelled_asr_result_cannot_start_tools_and_next_input_recovers (test_voice_asr_scoping.VoiceASRScopeTests.test_cancelled_asr_result_cannot_start_tools_and_next_input_recovers)",
+        "AssertionError: Lists differ: ['CompleteASRTurnStop#2::_stt_timeout_handler'] != []",
+        "FAIL: test_capture_buffer_limit_is_finite_and_does_not_submit_truncated_audio (test_voice_asr_scoping.VoiceASRScopeTests.test_capture_buffer_limit_is_finite_and_does_not_submit_truncated_audio)",
+        "AssertionError: Lists differ: ['CompleteASRTurnStop#3::_stt_timeout_handler'] != []",
+        "FAIL: test_queue_overflow_refuses_the_whole_utterance_without_partial_execution (test_voice_asr_scoping.VoiceASRScopeTests.test_queue_overflow_refuses_the_whole_utterance_without_partial_execution)",
+        "AssertionError: Lists differ: ['CompleteASRTurnStop#8::_stt_timeout_handler'] != []",
+        "FAIL: test_queue_wait_counts_toward_the_segment_deadline (test_voice_asr_scoping.VoiceASRScopeTests.test_queue_wait_counts_toward_the_segment_deadline)",
+        "AssertionError: Lists differ: ['CompleteASRTurnStop#9::_stt_timeout_handler'] != []"
+      ]
+    }
+  ],
+  "root_cause": "A repeated VAD stop replaces the STT timer handle without cancelling/joining the prior task. Application input abort can generate this repeat.",
+  "scope": "Real Pipecat timers/task managers and native voice workers with controlled VAD/STT/model/audio fixtures. No hardware or GPU resource-release claim."
+}

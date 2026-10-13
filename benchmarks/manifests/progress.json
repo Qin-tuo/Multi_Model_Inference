@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T08:32:32.874933+00:00",
+  "updated_at": "2026-10-13T08:49:37.082591+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -195,10 +195,18 @@
         "app/voice_assistant.py",
         "tests/test_voice_asr_scoping.py",
         "benchmarks/results/asr-segment-ordering-baseline.json",
-        "benchmarks/results/voice-asr-lifecycle-smoke.json"
+        "benchmarks/results/voice-asr-lifecycle-smoke.json",
+        "app/adapters/llama.py",
+        "tests/test_asr_stop_cleanup.py",
+        "tests/test_llama_cleanup.py",
+        "tools/voice_resource_lifecycle_probe.py",
+        "benchmarks/results/asr-stop-cleanup-baseline.json",
+        "benchmarks/results/voice-resource-client-baseline.json",
+        "benchmarks/results/voice-resource-lifecycle.json",
+        "benchmarks/results/voice-resource-verification.json"
       ],
-      "validation": "Native segmented STT premature-prefix failure reproduced with labelled fixtures; scoped consumer, completion watermark, one pending segment, finite PCM/text and 12s queue-inclusive deadline tested. Two real-ASR delayed-callback scenarios pass paused-speech completeness, cancelled fact absence and recovery. No acoustic or GPU cancellation acceptance.; capture-time cancellation releases occupancy, and delayed/repeated native turn events are checked against consumed source text and sequence before model admission",
-      "next_action": "expand to the full ASR/LLM/TTS cancellation/fault matrix, output backpressure and physical echo/barge-in tests"
+      "validation": "Native segmented STT completeness, scoped callbacks/consumer, finite queues/PCM/text and12s queue-inclusive deadline verified. Reproduced repeated-VAD-stop orphan timer bug:3 timer regression failures and5/10 voice-close failures before fix. Source-tagged input reset now cancels waits without arming timers; duplicate stop joins the prior STT timer. Actual speech revealed unclosed LLM SDK client; native service cleanup now closes its owned pool.188 framework tests PASS, zero dangling-task warnings.20 real Silero/OVS ASR/llama/BGE/Mem0/authenticated Qdrant/TTS cases (10 cancellation/recovery,10 close-with-pending-callback) PASS: no late cancelled fact/history, recovered speech, no remaining app tasks, owned HTTP clients and WAV output closed. Probe FD count22 throughout. Synthetic audio with callbacks delayed after real provider completion; not GPU preemption, acoustics, broad fault matrix or8h acceptance.",
+      "next_action": "Qualify actual in-flight ASR/LLM/TTS failures and backend execution release, bound full transport queues/backpressure, and complete physical echo/barge-in plus representative8h acceptance."
     },
     {
       "task_id": "J4.tools.development",
@@ -415,7 +423,7 @@
     "Public text/voice use managed authenticated native Qdrant with directory/collection/embedding binding.50k isolated capacity and current-control restoration pass their declared checks; independent memory quality, authenticated production-path full-load latency, pending-write/control-loss recovery and backup retention/quotas remain unverified.",
     "Backup and restoration with current SQLite authority, native snapshot/index recovery and exclusive cutover are implemented and tested; pending memory writes must be reconciled first. Loss of current controls, quota/retention policy, power-loss and complete restore fault/quality acceptance remain unverified.",
     "External Chinese memory development evaluation remains weak:20 LCvMem questions lexical F1=24.726% with explicit source-date/speaker metadata, versus16.176% compact evidence and12.923% baseline. This is not semantic accuracy. Relative/range/event-time/version queries and faithful source/context selection remain incomplete;200 conversation-disjoint heldout questions and complete JT-10 acceptance have not run.",
-    "Framework test process reports CompleteASRTurnStop STT timeout tasks still present after voice cancellation (benchmarks/results/voice-cancel-task-observation.json). Tests pass, but task cleanup requires investigation before J3/J6 resource-release qualification; no deployed persistent leak has been established."
+    "The reproduced STT timer orphan and LLM SDK client cleanup omissions are fixed, with188 framework tests and20 real speech lifecycle cases. This covers delayed callbacks after actual ASR completion and application-owned tasks/connections/files, not backend GPU preemption, physical stop/AEC, complete fault classes or8h stability."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

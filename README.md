@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件183项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件188项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -84,6 +84,8 @@ python3 tools/project.py voice --no-vision --user owner \
 ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM缓存上限和12秒请求期限。连续发言中的第一段结果不能在后续分段尚未完成时触发模型；取消会使旧输入、迟到转写和旧错误失效。溢出会使整轮失败，不截断后继续执行。[真实ASR延迟回调验证](benchmarks/results/voice-asr-lifecycle-smoke.json)覆盖分段完整性、取消后无记忆副作用及下一轮恢复；它不代表物理打断或完整故障矩阵验收。
 
 设备模式使用 `python3 tools/project.py voice --input-device N --output-device M`，需要PyAudio及明确的PortAudio设备索引，详见[语音部署](deploy/speech/README.md)。ReSpeaker Lite和扬声器未连接，设备录播、AEC、真实双讲以及100次打断仍待验证；当前不能宣称完整实时语音助手已经验收。
+
+最近的语音资源验证修复了重复停止事件遗留STT定时器，以及LLM会话退出后未关闭SDK连接池的问题。[20次真实链路测试](benchmarks/results/voice-resource-lifecycle.json)覆盖取消后恢复对话、等待识别回调时关闭，每类10次，关闭后均无应用任务遗留，ASR/TTS/LLM/计数连接和输出文件均关闭。使用合成音频，并在真实识别完成后暂缓回调；物理停播、GPU抢占和8h稳定性仍待验收。复现与失败基线见[语音部署说明](deploy/speech/README.md#取消与关闭的资源检查)。
 
 ### 长期记忆服务
 

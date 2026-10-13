@@ -253,6 +253,21 @@ class CompleteASRTurnStop(SpeechTimeoutUserTurnStopStrategy):
         self.received_sequence = 0
         await super().handle_user_turn_started()
 
+    async def _handle_vad_user_stopped_speaking(self, frame):
+        if ABORT_GENERATION in frame.metadata:
+            # The aggregator has already checked this reset's generation. It
+            # updates native VAD state, but is not a new acoustic endpoint.
+            self.received_sequence = 0
+            await self.handle_user_turn_stopped()
+            return
+        # Pipecat 1.12 restarts the speech timer on every stop, but replaces the
+        # STT timer handle without cancelling its previous task. Duplicate stop
+        # events otherwise orphan that task and its later turn-stop callback.
+        if self._stt_timeout_task:
+            await self.task_manager.cancel_task(self._stt_timeout_task)
+            self._stt_timeout_task = None
+        await super()._handle_vad_user_stopped_speaking(frame)
+
     async def _handle_transcription(self, frame):
         self.received_sequence = max(self.received_sequence, frame.metadata.get(ASR_SEQUENCE, 0))
         await super()._handle_transcription(frame)

@@ -1,0 +1,26 @@
+{
+  "created_at": "2026-10-13T08:49:37.082591+00:00",
+  "status": "PASS",
+  "framework_tests": 188,
+  "real_speech_cases": 20,
+  "logs": {
+    "framework": {
+      "sha256": "44b5f9c3064947898e4ee136f70f3bf0b050515086c47bb2dca2702ae7e0881c",
+      "dangling_task_warnings": 0
+    },
+    "real_speech": {
+      "sha256": "eaa229e6448c427ed3189f6e35206ab7caff89825e890436e6bad0e740143156",
+      "dangling_task_warnings": 0
+    }
+  },
+  "application_files": {
+    "app/adapters/asr.py": "c4ff9a78dc0c648945aca7cdf2f1f1f3e8977373d9cbcb128e92cb1aed5ce22d",
+    "app/adapters/llama.py": "14e61859ffd00cc344eb78c9eca9ce8dc49bc69de818c34da71cab270d3438fa",
+    "app/voice_assistant.py": "b5c81dbc58e0a0413faf4d3ef4edb591e7ef5e18dd503fc929c94aac98026244"
+  },
+  "baseline": "benchmarks/results/asr-stop-cleanup-baseline.json",
+  "connection_baseline": "benchmarks/results/voice-resource-client-baseline.json",
+  "framework_report": "benchmarks/results/framework-tests.json",
+  "real_speech_report": "benchmarks/results/voice-resource-lifecycle.json",
+  "scope": "Fixes reproduced orphaned STT timers and unclosed local LLM SDK client. No general GPU release, physical audio, full fault matrix or8h acceptance claim."
+}

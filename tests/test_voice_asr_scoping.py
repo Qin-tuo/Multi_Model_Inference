@@ -68,9 +68,11 @@ class VoiceASRScopeTests(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self):
         for event in self.release: event.set()
         await self.voice.close()
+        remaining=[task.get_name() for task in self.voice.runner.task_manager.current_tasks() if not task.done()]
         await self.stt._client.close()
         self.evidence.stop()
         self.reminders.close(); self.records.close(); self.memory.close(); self.temp.cleanup()
+        self.assertEqual(remaining,[], 'Voice runner retained live tasks after close')
 
     async def wait_for(self, predicate, seconds=4):
         async with asyncio.timeout(seconds):

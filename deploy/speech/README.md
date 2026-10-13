@@ -125,3 +125,17 @@ PortAudio排空使用 `stop_stream()` / `start_stream()`，仍需真实设备验
 ```
 
 报告使用合成语音、真实Silero/ASR/LLM/BGE/Mem0/TTS，并在真实识别返回后延迟回调。它验证“请记住”与后续事实一起提交，以及取消的偏好不进入记忆；不宣称GPU请求已在计算中被抢占、真实麦克风停播时延或完整ASR质量已验收。
+
+## 取消与关闭的资源检查
+
+Pipecat1.12.0的结束策略在重复VAD停止事件上重建STT定时器，却没有先取消旧定时器。应用取消输入时也会经过带控制标签的结束事件，因此可能丢失旧任务引用。此前框架测试只检查回答和数据，没有断言worker关闭后的任务列表；加入断言后，3项定时器测试及10项语音生命周期测试中的5项失败，见[失败基线](../../benchmarks/results/asr-stop-cleanup-baseline.json)。
+
+`CompleteASRTurnStop`现在在重复停止前等待旧定时器取消；带取消标签的事件直接重置策略，不启动新的语音等待计时。分段完整性和代次校验仍由原有适配器承担。框架测试在每次语音关闭后检查原生task manager，防止只消除日志而保留后台任务。
+
+真实链路检查还发现本地LLM service退出后未关闭SDK连接池，见[连接关闭失败基线](../../benchmarks/results/voice-resource-client-baseline.json)。`LocalLlamaService.cleanup`在上游任务清理后关闭自己创建的客户端，父级清理抛错时也执行关闭。ASR、TTS、token计数连接和输出文件分别检查自身的关闭状态。
+
+```bash
+.venv/bin/python tools/voice_resource_lifecycle_probe.py --cycles 10
+```
+
+该探针使用真实Silero/OVS ASR/llama/BGE/Mem0/认证Qdrant/TTS，每轮分别执行“取消后恢复对话”和“等待识别回调时关闭”，结果见[资源生命周期报告](../../benchmarks/results/voice-resource-lifecycle.json)。识别服务先完成真实计算，探针随后暂缓回调；这验证应用任务、连接与文件释放，不证明GPU抢占或物理停播。合成输入、每类10次和短期句柄计数也不能替代完整故障矩阵、真实声学测试或8h稳定性验收。
