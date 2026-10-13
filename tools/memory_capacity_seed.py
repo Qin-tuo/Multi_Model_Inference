@@ -15,9 +15,12 @@ from tools.project import meminfo
 
 def populate(memory,corpus,profile,total,tier,start,fact,checkpoint):
     marker=memory.data_dir.parent/'capacity-run.json'
-    if not marker.is_file() or json.loads(marker.read_text()).get('seed_method')!='sdk-batch':
+    config=json.loads(marker.read_text()) if marker.is_file() else {}
+    if config.get('seed_method')!='sdk-batch':
         raise ValueError('Batch population requires a dedicated SDK capacity-fixture directory')
-    if corpus['namespace']!='capacity-v1' or corpus[profile] not in {'capacity-owner','capacity-guest'}:
+    personal_fixture=(corpus['namespace']=='personal' and config.get('namespace')=='personal'
+        and config.get('kind')=='managed-window-capacity-v1' and config.get('preference_record')==1)
+    if (corpus['namespace']!='capacity-v1' and not personal_fixture) or corpus[profile] not in {'capacity-owner','capacity-guest'}:
         raise ValueError('Batch import is restricted to synthetic capacity profiles')
     user=corpus[profile]
     generation=memory.generation(user)

@@ -20,24 +20,34 @@ from tools.memory_capacity_seed import populate
 from tools.project import stamp,write_json,sha256
 
 
-def main(args):
+def workload(tier, *, personal=False):
     corpus_path=ROOT/'benchmarks/corpora/memory-capacity-v1.json'
-    corpus=json.loads(corpus_path.read_text());folder=args.run_dir.resolve();marker=folder/'capacity-run.json'
+    corpus=json.loads(corpus_path.read_text())
     # Prefix deliberately excludes the project identity: long-record queries
     # need the tail, beyond the original encoder's single-window limit.
     prefix=documents()[0]['content'].split('本档案归属',1)[0]
     config={'kind':'managed-window-capacity-v1','schema_version':1,'dataset_sha256':sha256(corpus_path),
-        'tier':args.tier,'seed_method':'sdk-batch','profile':WINDOWS,'long_every':10,
+        'tier':tier,'seed_method':'sdk-batch','profile':WINDOWS,'long_every':10,
         'long_prefix_sha256':hashlib.sha256(prefix.encode()).hexdigest(),
         'query_indices':'floor(floor((j+0.5)*tier/100)/10)*10+j%2, j=0..99',
         'embedding_sha256':embedding_fingerprint(model_path(WINDOWS))}
+    if personal:
+        corpus['namespace']='personal'
+        config.update(namespace='personal',preference_record=1,preference_content='我的饮品偏好是茉莉花茶。')
+    def fact(index):
+        if personal and index==1:return config['preference_content']
+        k=index%len(corpus['topics']);short=corpus['record_template'].format(index=index,topic=corpus['topics'][k],value=corpus['values'][k])
+        return prefix+short if index%10==0 else short
+    return corpus,config,prefix,fact
+
+
+def main(args):
+    corpus,config,prefix,fact=workload(args.tier,personal=args.personal)
+    folder=args.run_dir.resolve();marker=folder/'capacity-run.json'
     if folder.exists():
         if not marker.exists() or json.loads(marker.read_text())!=config:raise RuntimeError('Capacity directory ownership/configuration differs')
     else:folder.mkdir(parents=True,mode=0o700);write_json(marker,config)
     progress_path=folder/'population.json';progress=json.loads(progress_path.read_text()) if progress_path.exists() else {'owner':0,'guest':0}
-    def fact(index):
-        k=index%len(corpus['topics']);short=corpus['record_template'].format(index=index,topic=corpus['topics'][k],value=corpus['values'][k])
-        return prefix+short if index%10==0 else short
     settings={'memory':{'vector_store':'qdrant_server','embedding_profile':WINDOWS}}
     with MemoryMonitor() as monitor:
         if args.phase=='prepare':
@@ -100,6 +110,7 @@ def main(args):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--phase',choices=['prepare','measure'],required=True)
+    parser.add_argument('--personal',action='store_true',help='Dedicated synthetic personal namespace for subsequent real voice co-load; one frozen preference replaces record1')
     parser.add_argument('--tier',type=int,choices=[1000,10000],default=10000);parser.add_argument('--run-dir',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     raise SystemExit(main(parser.parse_args()))

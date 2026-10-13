@@ -122,6 +122,29 @@ FP32多段SDK写入约0.75秒，超出目标500毫秒，因此用[Sentence Trans
   --output benchmarks/results/managed-window-capacity-10k.json
 ```
 
-100次查询按长短目标各50次分层，50次完整写入按长短各25次分层；写入持久性在计时后另行核对。首次准备可续跑，已有测量结果不可覆盖。脚本已准备，尚无本配置10k计时结果；该脚本记录后端驻留状态，没有前台语音负载或逐帧视觉测量，不能独自完成JT-11共存验收。
+100次查询按长短目标各50次分层，50次完整写入按长短各25次分层；写入持久性在计时后另行核对。首次准备可续跑，已有测量结果不可覆盖。[本配置10k计时结果](../../benchmarks/results/managed-window-capacity-10k.json)查询P95为46.97ms，完整写入P95为342.79ms；长写入单列P95为349.82ms，短写入为51.07ms。查询/写入无执行错误、无主体泄漏，50次写入均确认持久化，所观测六个模型/视觉服务的PID和重启计数未变化。该脚本记录后端驻留状态，没有前台语音负载或逐帧视觉测量，不能独自完成JT-11共存验收。
+
+这份报告的`PASS`仅针对声明的读写时延和持久性检查：**编号top5召回仅9/100，其中长目标0/50、短目标9/50**。这是大量相似编号资料的合成压力观测，不是独立语言质量，却明确暴露了检索缺口；不能用时延通过掩盖它。[只读诊断](../../benchmarks/results/numbered-window-recall-diagnostic.json)核对100条目标原文均完整，长目标0/50进入原生向量前60候选，短目标38/50进入候选。当前实际方法为`mem0_dense`，可选BM25未启用。开发诊断中将资料主题也写入问题，长/短top5分别为30/50、41/50；这不是正式修复，也不能要求用户用额外信息绕过编号查询。后续须基于成熟检索组件验证关键词与语义候选合并，并维持主体、来源、更正和遗忘约束。
+
+### 语音、视觉与记忆同时工作
+
+`tools/memory_voice_load.py`复用同一个真实`VoiceAssistant`与记忆适配器，在实际个人命名空间放入10000条主人记录和100条访客干扰记录，其中10%的主人记录为长资料，第1号记录替换为固定的茉莉花茶偏好。测试目录带专用标记，不使用日常用户档案。
+
+```bash
+.venv/bin/python tools/managed_memory_capacity.py --phase prepare --tier 10000 --personal \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/memory-voice-load-10k-v1" \
+  --output benchmarks/results/memory-voice-load-10k.json
+
+source /opt/ros/jazzy/setup.bash
+source "$HOME/AI_Stack/workspaces/vision/install/setup.bash"
+ROS_DOMAIN_ID=42 ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2 \
+  .venv/bin/python tools/memory_voice_load.py \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/memory-voice-load-10k-v1" \
+  --output benchmarks/results/memory-voice-load-10k.json
+```
+
+准备完成且其他导入/评测停止后再计时。固定语音文件轮流询问偏好、时间、实时画面和算术，至少20轮；同一适配器每两秒提交两次语义查询和一次明确事实写入，至少100次查询、50次写入。查询与写入都走个人命名空间，不能用空的语音档案绕开万条数据。周期采样检测/姿态的最新结果年龄和缺失比例，并记录20ms事件循环定时器的延误。音频回读在计时结束后执行。
+
+此脚本正在接入验证，尚无运行结果。它使用真实模型和相机、合成输入音频及WAV输出，不测声学停播，也没有画面内容的地面真值。提醒/手势负载、独立质量、B0–B3、正式JT及8小时验收仍须单独完成；两份容量准备配置也不是同数据单因素对照。
 
 后续先在开发集完善时间范围、对话来源与相关上下文检索，再冻结版本运行200题保留集。完整JT-10还须覆盖保存/更正/遗忘、无事实、取消、来源、重启和索引恢复；公开语言基准、词级F1以及框架回归均不能替代该验收。
