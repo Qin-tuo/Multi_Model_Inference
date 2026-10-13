@@ -1,0 +1,41 @@
+{
+  "created_at": "2026-10-13T10:11:02.343281+00:00",
+  "status": "PASS",
+  "cases": 30,
+  "fault": "SIGKILL of validated project service cgroups",
+  "by_stage": {
+    "asr": {
+      "cases": 10,
+      "passed": 10,
+      "old_processes_exited": true,
+      "manual_recovery_count": 0,
+      "ready_wait_seconds": {
+        "min": 7.3220326239970746,
+        "max": 7.986076209999737
+      }
+    },
+    "llm": {
+      "cases": 10,
+      "passed": 10,
+      "old_processes_exited": true,
+      "manual_recovery_count": 0,
+      "ready_wait_seconds": {
+        "min": 9.942317289998755,
+        "max": 18.997204295999836
+      }
+    },
+    "tts": {
+      "cases": 10,
+      "passed": 10,
+      "old_processes_exited": true,
+      "manual_recovery_count": 0,
+      "ready_wait_seconds": {
+        "min": 9.945656004998455,
+        "max": 10.631743380999978
+      }
+    }
+  },
+  "raw_report": "benchmarks/results/voice-worker-crash.json",
+  "raw_sha256": "83788244e2e66a43a2c2794e52e414a53d1459f13201dfd999f9945905b3c997",
+  "scope": "Actual ASR/LLM/TTS worker processes,10 crashes each, new process identity/readiness and recovery in same VoiceAssistant. Synthetic WAV capture/output. No probe/manual recovery used. Signal command auxiliary-process errors are retained; process exit is independently checked. Not physical devices,full fault matrix or8h acceptance."
+}

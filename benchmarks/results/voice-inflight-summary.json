@@ -14,6 +14,6 @@
     "llm": "PASS",
     "tts": "PASS"
   },
-  "extended_crash_qualification": "RUNNING,30 requested cases; not yet counted as passed",
-  "scope": "Synthetic capture and WAV output, actual models and stores.40 native-stage cancellation cases,3 initial real project-worker crash/recovery cases. Full crash repetition, physical audio/AEC, per-kernel GPU traces,8h and formal JT acceptance remain separate."
+  "extended_crash_qualification": "PASS,30 actual worker crash cases; see voice-worker-crash-summary.json",
+  "scope": "Synthetic capture and WAV output, actual models and stores.40 native-stage cancellation cases,3 initial real project-worker crash/recovery cases. Remaining fault classes, physical audio/AEC, per-kernel GPU traces,8h and formal JT acceptance remain separate."
 }
