@@ -76,4 +76,24 @@ python3 tools/project.py bench --suite memory-quality --split development \
   --output benchmarks/results/lcvmem-development-all-refs.json
 ```
 
+本轮[82题结果](../../benchmarks/results/lcvmem-development-all-refs.json)已完成：词级F1为26.33，归一化完全匹配1/82；含参考原文的检索题数58，实际注入57，平均注入4.80条。没有执行错误、意外写入或跨主体证据。它扩大了开发覆盖，仍不代表语义正确率达到JT-10要求；200题保留集未运行。
+
+## 已确认的长条目缺口
+
+`tools/long_memory_probe.py`保存8份合成档案，每份1058字符、3104字节，均通过当前工具参数校验并经真实MemoryAdapter/Mem0/BGE/Qdrant持久化，精确读回也完整。它们仅在尾部项目名和交付箱编号不同，但BGE输入被截为512 tokens，8份档案得到相同向量，语义top5仅命中5/8目标。完整证据需要1553个模型token，在512预算下全部被跳过。[失败基线](../../benchmarks/results/long-memory-boundary-baseline.json)验证的是存储/索引/装配边界，没有调用LLM回答，也不宣称公开自然语言保存已验证。
+
+隔离候选复用[Qdrant原生多向量](https://qdrant.tech/documentation/manage-data/vectors/#multivectors)：同一Mem0记忆ID保留完整正文，BGE使用原分词器的原文偏移切片，多个向量由Qdrant MaxSim检索；选中片段保留原文位置。未新增reranker模型。8份同内容档案各5个向量，目标首位命中8/8，所需证据降为223 tokens，同ID更新和整点删除通过；Mem0实体索引也需要相同的矩阵结构，已显式验证已加载实体关联的检索与清除。
+
+FP32多段SDK写入约0.75秒，超出目标500毫秒，因此用[Sentence Transformers的ARM64动态量化工具](https://www.sbert.net/docs/sentence_transformer/usage/efficiency.html#quantizing-onnx-models)导出独立候选。该int8模型约24MB，原模型约95MB；相同8份档案仍首位命中8/8，SDK写入观测0.304～0.330秒，查询0.018～0.022秒。时间不含正式适配器journal等开销，也不是容量/整机验收。原模型和应用配置未更换，汇总及原始证据见[可行性报告](../../benchmarks/results/long-memory-feasibility-summary.json)。
+
+```bash
+.venv/bin/python tools/long_memory_probe.py
+.venv/bin/python tools/quantize_bge_probe.py
+.venv/bin/python tools/multivector_memory_probe.py \
+  --embedding-path "$HOME/AI_Stack/models/bge-small-zh-v1.5-onnx-arm64-int8" \
+  --output benchmarks/results/multivector-memory-int8-feasibility.json
+```
+
+首个多向量探针误用了SDK已忽略的`limit`参数，结果保留为`multivector-memory-initial.json`并标记INCOMPLETE；正式候选结果已改用`top_k=5`并检查返回上限。当前候选尚未接入生产绑定、journal、重启遗忘、旧索引迁移及备份恢复，长条目缺口尚未在正式应用中修复。下一步须完成这些生命周期环节，并在更广数据上核验量化质量和完整路径时延。
+
 后续先在开发集完善时间范围、对话来源与相关上下文检索，再冻结版本运行200题保留集。完整JT-10还须覆盖保存/更正/遗忘、无事实、取消、来源、重启和索引恢复；公开语言基准、词级F1以及框架回归均不能替代该验收。

@@ -1,0 +1,180 @@
+{
+  "created_at": "2026-10-13T11:27:02.311940+00:00",
+  "status": "INCOMPLETE",
+  "checks": {
+    "one_point_per_record": true,
+    "all_original_texts_preserved": true,
+    "all_targets_top1": true,
+    "all_targets_top5": true,
+    "owner_filter_before_search": true,
+    "matching_verbatim_spans_fit512": true,
+    "update_keeps_identity_and_full_content": true,
+    "update_replaces_matrix": true,
+    "delete_removes_entire_point": true
+  },
+  "cases": [
+    {
+      "project": "海岚",
+      "memory_id": "26f42af4-26cc-4854-a2ba-e933df329ad7",
+      "content_sha256": "33d8fc458faf7f273f60a2f2528cff59ea209372f88bd2a944a6abcad9ce5452",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7540013500038185,
+      "search_seconds": 0.036664334998931736,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "青竹",
+      "memory_id": "b1646ea8-942f-47a1-9ab2-eb30f3108abb",
+      "content_sha256": "9c4616e9a85963c5a142e1f2ca635af739f7566de592f87ec539846fdd9a979d",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7322835020022467,
+      "search_seconds": 0.034728325001196936,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "云杉",
+      "memory_id": "7e77eaeb-ede4-4f43-aea0-6ca655d2ff08",
+      "content_sha256": "0628785f1bed66dd6f67e29c46420c422b69fcea2f9e16bc6bc8c796d9ead7d8",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.727730304999568,
+      "search_seconds": 0.03330644800007576,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "星河",
+      "memory_id": "594f2ad5-a9c9-45e6-be8b-4aecd766c67e",
+      "content_sha256": "6f8a062012d12830346e2c70640004a68b0f6770b4f2e919937f70ddc6f65597",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7315311529964674,
+      "search_seconds": 0.03280166000331519,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "远帆",
+      "memory_id": "da78a9a2-3952-4965-ac5a-ad6ef56b1f2e",
+      "content_sha256": "3274f5db54e7f6cc5ba6cde8b8e4da0fea95f9ab07379887c3a83e663ff00ad8",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7472575090068858,
+      "search_seconds": 0.03280783700029133,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "松林",
+      "memory_id": "c8a662fd-6243-4efa-a683-9ecf827d8c99",
+      "content_sha256": "703aa05bdba0774512cbca34b5d0a28e8825ede897a65702d57024f869ef1346",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7528895630020997,
+      "search_seconds": 0.03208416200504871,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "银沙",
+      "memory_id": "b5b1c574-a075-4272-b838-54afa9a92320",
+      "content_sha256": "998404d5c3bc1cc60bdbdeac52d389fe8b184618508eda163ec2495e55e2e807",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7369450219994178,
+      "search_seconds": 0.03452547000051709,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    },
+    {
+      "project": "南岭",
+      "memory_id": "cfdf1f52-704f-409c-bc19-ade5de6c6f1c",
+      "content_sha256": "9f97c3b581a6a95c3359f31e0a13810fb7e91872335b5a5eafb26510cbb48ca2",
+      "full_text_preserved": true,
+      "windows": 5,
+      "write_seconds": 0.7315702580017387,
+      "search_seconds": 0.03221437399770366,
+      "top1_correct": true,
+      "top5_correct": true,
+      "owner_isolation": true,
+      "selected_span": [
+        907,
+        1058
+      ],
+      "span_is_exact_original_substring": true,
+      "answer_in_selected_span": true,
+      "evidence_tokens": 223,
+      "selected_span_fits": true
+    }
+  ],
+  "schema": "One original Mem0 memory per Qdrant point;BGE token windows stored as native512-dimensional MaxSim multivectors. Query is one BGE query vector.",
+  "scope": "Isolated feasibility experiment through actual Mem0 SDK and authenticated Qdrant. Synthetic long documents and real BGE/native tokenizer; no new reranker. Single-point CRUD and span packing only. Production binding,journal,recovery,backup/migration,latency and full language quality are NOT qualified.",
+  "qualification_note": "Initial probe passed top1 checks but used ignored limit=5 instead of SDK top_k=5. It does not qualify a five-result bound; retained before correction."
+}

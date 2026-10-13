@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T10:42:44.757900+00:00",
+  "updated_at": "2026-10-13T12:48:14.333059+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -351,10 +351,27 @@
         "benchmarks/results/lcvmem-development-refs-speaker.json",
         "benchmarks/results/lcvmem-reference-comparison.json",
         "benchmarks/results/memory-speaker-baseline.json",
-        "benchmarks/results/managed-memory-console-smoke.json"
+        "benchmarks/results/managed-memory-console-smoke.json",
+        "benchmarks/results/lcvmem-development-all-refs.json"
       ],
-      "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run now preparing fresh data;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance.",
-      "next_action": "Finish the live82-question development evaluation without changing app code, inspect failures and output variability, then qualify temporal/source behavior and freeze for heldout/lifecycle acceptance."
+      "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run COMPLETE:lexical F1=26.329%,normalized exact1/82,reference-text retrieved58/injected57,errors/unexpected writes/cross-owner evidence0;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance.",
+      "next_action": "Address long-record indexing/packing and source/time failures without using heldout data; then qualify current profile and complete JT-10 lifecycle/source gates."
+    },
+    {
+      "task_id": "J4.memory.long_records",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/long_memory_probe.py",
+        "tools/multivector_memory_probe.py",
+        "tools/quantize_bge_probe.py",
+        "benchmarks/results/long-memory-boundary-baseline.json",
+        "benchmarks/results/multivector-memory-feasibility.json",
+        "benchmarks/results/multivector-memory-int8-feasibility.json",
+        "benchmarks/results/long-memory-feasibility-summary.json",
+        "benchmarks/results/bge-int8-export.json"
+      ],
+      "validation": "Eight accepted1058-character/3104-byte records persist exactly,but current BGE truncation produces one identical vector for all8,top5 recall5/8 and0 evidence injection under512 tokens (1553 needed). Isolated real Mem0/Qdrant MaxSim preserves one point per memory with5 BGE windows,top1 recall8/8,verbatim selected evidence223 tokens,and same-ID update/delete. Existing BGE ARM64 dynamic-int8 candidate keeps8/8,SDK write0.304-0.330s versusFP32~0.75s. Loaded entity index also qualified with matching multivector schema. Production adapter,history erasure/restart,migration and backup remain unqualified; runtime model/index unchanged.",
+      "next_action": "Integrate native multivector profiles and exact source spans into existing Mem0 adapter; preserve canonical IDs,version and erasure behavior; implement explicit legacy reindex and compatible backup/restore before switching production. Qualify quantized embeddings on broader data and measure complete adapter latency."
     }
   ],
   "acceptance": {
@@ -450,7 +467,8 @@
     "The reproduced STT timer orphan and LLM SDK client cleanup omissions are fixed, with188 framework tests and20 real speech lifecycle cases. This covers delayed callbacks after actual ASR completion and application-owned tasks/connections/files, not backend GPU preemption, physical stop/AEC, complete fault classes or8h stability.",
     "50 native-stage backend cancellation/deadline/stream interruption cases now pass, with delayed ASR/TTS release explicitly observed. Remaining voice-application fault paths, TTS timeout, per-kernel release traces and physical interruption remain unverified; model-worker crash/restart now has30 passing cases; frontend timeout is not backend completion.",
     "Full voice application cancellation passes40 synthetic-WAV scenarios. A single-number response2 was once read back as 啊; independent ASR/TTS quality remains open. 30 actual worker crash/recovery cases pass (10 per ASR/LLM/TTS), without probe repair. Physical capture/playback,AEC,backpressure,all fault classes and8h remain unverified.",
-    "External Chinese memory remains incomplete:20 development questions lexical F1=27.049% with compact source references and corrected companion pronouns. A same-format rerun changed8/20 answers despite identical retrieval/injection/token counts. Full82 development run is active;200 heldout and complete JT-10 acceptance remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness are still incomplete."
+    "External Chinese memory remains incomplete:20 development questions lexical F1=27.049% with compact source references and corrected companion pronouns. A same-format rerun changed8/20 answers despite identical retrieval/injection/token counts. Full82 development completed with lexical F1=26.329%;200 heldout and complete JT-10 acceptance remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness are still incomplete.",
+    "Verified long-record gap:current runtime can persist accepted long facts but truncates their embeddings and drops over-budget evidence. Eight synthetic3104-byte documents expose identical vectors,5/8 recall and0/8 injection. Native multivector/int8 feasibility passes isolated cases; production integration,reindex and full lifecycle/performance validation are pending."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }
