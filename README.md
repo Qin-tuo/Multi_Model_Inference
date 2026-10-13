@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件188项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件190项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -86,6 +86,8 @@ ASR复用上游分段任务，并增加一个待处理段的队列上限、PCM�
 设备模式使用 `python3 tools/project.py voice --input-device N --output-device M`，需要PyAudio及明确的PortAudio设备索引，详见[语音部署](deploy/speech/README.md)。ReSpeaker Lite和扬声器未连接，设备录播、AEC、真实双讲以及100次打断仍待验证；当前不能宣称完整实时语音助手已经验收。
 
 最近的语音资源验证修复了重复停止事件遗留STT定时器，以及LLM会话退出后未关闭SDK连接池的问题。[20次真实链路测试](benchmarks/results/voice-resource-lifecycle.json)覆盖取消后恢复对话、等待识别回调时关闭，每类10次，关闭后均无应用任务遗留，ASR/TTS/LLM/计数连接和输出文件均关闭。使用合成音频，并在真实识别完成后暂缓回调；物理停播、GPU抢占和8h稳定性仍待验收。复现与失败基线见[语音部署说明](deploy/speech/README.md#取消与关闭的资源检查)。
+
+另有[50次后端执行中测试](benchmarks/results/backend-cancellation-summary.json)：LLM取消/应用超时、ASR取消/HTTP读取超时、TTS流中断各10次通过，均观察活动执行状态、服务释放及后续请求恢复。ASR/TTS在客户端退出后仍会继续处理，不能据此前端状态认定后端已经空闲。LLM应用取消确认现已拒绝空或格式错误的执行槽状态，避免错误恢复准入。ASR/TTS部分直接测试OVS接口，完整语音应用故障矩阵、GPU逐kernel轨迹及物理打断仍待验收。
 
 ### 长期记忆服务
 

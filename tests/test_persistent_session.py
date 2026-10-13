@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import AsyncMock, patch
 
+import httpx
+
 from app.adapters.llama import LlamaConfig
 from app.memory import Mem0Adapter
 from app.records import Records
@@ -76,6 +78,23 @@ class PersistentSessionTests(unittest.IsolatedAsyncioTestCase):
         drained.set()
         with self.assertRaises(asyncio.CancelledError): await task
         self.assertEqual(self.records.recent("owner"), [])
+
+    async def test_empty_provider_observation_cannot_reopen_admission(self):
+        entered,release=asyncio.Event(),asyncio.Event()
+        async def emit(_text):entered.set();await release.wait()
+        task=asyncio.create_task(self.session.ask('你好',emit=emit))
+        await asyncio.wait_for(entered.wait(),3)
+        self.session.real_model=True
+        client=httpx.AsyncClient(transport=httpx.MockTransport(lambda _:httpx.Response(200,json=[])))
+        try:
+            with patch('app.session.httpx.AsyncClient',return_value=client):
+                with self.assertRaisesRegex(RuntimeError,'Invalid provider slot observation'):await self.session.cancel()
+            self.assertFalse(self.session.backend_available)
+            release.set();await asyncio.gather(task,return_exceptions=True)
+            self.assertEqual(self.records.recent('owner'),[])
+            with self.assertRaisesRegex(RuntimeError,'尚未确认'):await self.session.ask('继续',emit=emit)
+        finally:
+            release.set();await asyncio.gather(task,return_exceptions=True);await client.aclose()
 
     async def test_missing_time_uses_native_response_without_model_and_stop_clears_it(self):
         async def emit(_text): pass

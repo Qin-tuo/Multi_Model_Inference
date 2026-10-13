@@ -84,6 +84,14 @@ class LocalLlamaService(OpenAILLMService):
             await self._client.close()
 
 
+def provider_slots_idle(slots):
+    """Only a nonempty, typed provider observation can confirm release."""
+    if (not isinstance(slots,list) or not slots
+            or any(not isinstance(slot,dict) or type(slot.get('is_processing')) is not bool for slot in slots)):
+        raise RuntimeError('Invalid provider slot observation; release is unconfirmed')
+    return all(not slot['is_processing'] for slot in slots)
+
+
 def create_llama_service(config: LlamaConfig) -> OpenAILLMService:
     """Use the current upstream Settings API and the local OpenAI-compatible API."""
     return LocalLlamaService(

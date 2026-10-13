@@ -139,3 +139,19 @@ Pipecat1.12.0的结束策略在重复VAD停止事件上重建STT定时器，却�
 ```
 
 该探针使用真实Silero/OVS ASR/llama/BGE/Mem0/认证Qdrant/TTS，每轮分别执行“取消后恢复对话”和“等待识别回调时关闭”，结果见[资源生命周期报告](../../benchmarks/results/voice-resource-lifecycle.json)。识别服务先完成真实计算，探针随后暂缓回调；这验证应用任务、连接与文件释放，不证明GPU抢占或物理停播。合成输入、每类10次和短期句柄计数也不能替代完整故障矩阵、真实声学测试或8h稳定性验收。
+
+## 执行中的取消和期限
+
+`tools/backend_cancellation_probe.py`使用真实模型和音频服务，不延迟模型返回。LLM通过`AssistantSession`执行取消或0.8秒应用期限；ASR通过OVS执行HTTP取消或0.8秒读取期限；TTS在收到首段真实PCM且OVS占用仍存在时中断流。所有场景先观察原生执行槽或活动语音流，再触发取消/等待期限，最后确认后端空闲并发起恢复请求。
+
+```bash
+.venv/bin/python tools/backend_cancellation_probe.py --cycles 10
+```
+
+结果和采样轨迹见[后端取消报告](../../benchmarks/results/backend-cancellation.json)。`/slots`与`ovs_sessions_active`为服务状态，不是逐kernel的GPU时间戳。ASR的两个端点不是原子快照：若读到槽忙而占用为零，探针再次读取槽状态，避免把刚完成的请求误判为提前释放。当前部署为一个语音会话和一个LLM槽，探针要求后端初始空闲并按顺序独占测试。
+
+本次五类场景各10次，共50次通过，汇总见[结果摘要](../../benchmarks/results/backend-cancellation-summary.json)。ASR取消后约1.38～1.71秒、读取超时返回后约0.90～1.02秒才观察到服务空闲；TTS中断后约0.33～0.70秒释放服务占用。LLM取消或应用超时返回时执行槽已空闲。上述范围来自受控短测，不能作为声学打断或通用尾延迟指标；190项框架回归通过，包括异常状态保持准入关闭。
+
+实测ASR与TTS在客户端取消后仍会继续当前计算或清理阶段；只有确认服务释放后才执行探针的恢复请求。LLM的应用入口原本就等待原生中断确认和非忙执行槽，现在还拒绝空列表、缺失字段和非布尔状态，保留准入关闭；[异常状态失败基线](../../benchmarks/results/provider-observation-baseline.json)记录了修复前的误判。
+
+首次扩大测试采用0.2秒ASR读取期限，10次均在观察到原生忙槽之前超时，未计为推理中超时通过；[完整原始结果](../../benchmarks/results/backend-cancellation-short-deadline.json)保留40项通过及这10项未满足测试前提的失败。后续将注入期限改为0.8秒，不改变产品的12秒ASR期限。服务崩溃/重启、TTS超时、完整应用在各阶段的连续打断及GPU执行trace仍需单独验收。

@@ -291,11 +291,12 @@ class AssistantSession:
             self.backend_available = True
             return
         deadline = time.monotonic() + 10
-        async with httpx.AsyncClient(timeout=2) as client:
+        from app.adapters.llama import provider_slots_idle
+        async with httpx.AsyncClient(timeout=2,trust_env=False) as client:
             while time.monotonic() < deadline:
                 result = await client.get(self.budget.base + "/slots")
                 result.raise_for_status()
-                if all(not slot.get("is_processing", True) for slot in result.json()):
+                if provider_slots_idle(result.json()):
                     self.backend_available = True
                     return
                 await asyncio.sleep(0.05)

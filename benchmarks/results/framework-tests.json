@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-13T08:46:00.016989+00:00",
+  "created_at": "2026-10-13T09:06:23.392295+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 188,
+  "tests_run": 190,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -126,6 +126,10 @@
     },
     {
       "id": "test_llama_cleanup.LlamaClientCleanupTests.test_parent_cleanup_failure_still_releases_owned_client",
+      "status": "PASS"
+    },
+    {
+      "id": "test_llama_cleanup.LlamaClientCleanupTests.test_provider_observation_requires_real_boolean_slot_states",
       "status": "PASS"
     },
     {
@@ -434,6 +438,10 @@
     },
     {
       "id": "test_persistent_session.PersistentSessionTests.test_cancel_after_model_completion_prevents_a_late_output_receipt",
+      "status": "PASS"
+    },
+    {
+      "id": "test_persistent_session.PersistentSessionTests.test_empty_provider_observation_cannot_reopen_admission",
       "status": "PASS"
     },
     {
@@ -773,6 +781,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "18fa236d81e4567bdafa789aa3936e32ee821ce5",
+  "source_commit": "c628bcd487fc7c74be3bb190c46dc4806a7739b9",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

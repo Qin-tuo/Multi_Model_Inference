@@ -8,10 +8,16 @@ from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineWorker
 from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.workers.runner import WorkerRunner
-from app.adapters.llama import LlamaConfig,create_llama_service
+from app.adapters.llama import LlamaConfig,create_llama_service,provider_slots_idle
 
 
 class LlamaClientCleanupTests(unittest.IsolatedAsyncioTestCase):
+    def test_provider_observation_requires_real_boolean_slot_states(self):
+        for value in ([],{},None,[{}],[False],[{'is_processing':None}],[{'is_processing':0}],[{'is_processing':'false'}]):
+            with self.subTest(value=value),self.assertRaises(RuntimeError):provider_slots_idle(value)
+        self.assertTrue(provider_slots_idle([{'is_processing':False}]))
+        self.assertFalse(provider_slots_idle([{'is_processing':False},{'is_processing':True}]))
+
     async def test_native_end_and_cancel_close_the_client(self):
         for mode in ('end','cancel'):
             with self.subTest(mode=mode):

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T08:49:37.082591+00:00",
+  "updated_at": "2026-10-13T09:12:31.235343+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -203,10 +203,17 @@
         "benchmarks/results/asr-stop-cleanup-baseline.json",
         "benchmarks/results/voice-resource-client-baseline.json",
         "benchmarks/results/voice-resource-lifecycle.json",
-        "benchmarks/results/voice-resource-verification.json"
+        "benchmarks/results/voice-resource-verification.json",
+        "tools/backend_cancellation_probe.py",
+        "tests/test_persistent_session.py",
+        "benchmarks/results/provider-observation-baseline.json",
+        "benchmarks/results/backend-cancellation-baseline.json",
+        "benchmarks/results/backend-cancellation-short-deadline.json",
+        "benchmarks/results/backend-cancellation.json",
+        "benchmarks/results/backend-cancellation-summary.json"
       ],
-      "validation": "Native segmented STT completeness, scoped callbacks/consumer, finite queues/PCM/text and12s queue-inclusive deadline verified. Reproduced repeated-VAD-stop orphan timer bug:3 timer regression failures and5/10 voice-close failures before fix. Source-tagged input reset now cancels waits without arming timers; duplicate stop joins the prior STT timer. Actual speech revealed unclosed LLM SDK client; native service cleanup now closes its owned pool.188 framework tests PASS, zero dangling-task warnings.20 real Silero/OVS ASR/llama/BGE/Mem0/authenticated Qdrant/TTS cases (10 cancellation/recovery,10 close-with-pending-callback) PASS: no late cancelled fact/history, recovered speech, no remaining app tasks, owned HTTP clients and WAV output closed. Probe FD count22 throughout. Synthetic audio with callbacks delayed after real provider completion; not GPU preemption, acoustics, broad fault matrix or8h acceptance.",
-      "next_action": "Qualify actual in-flight ASR/LLM/TTS failures and backend execution release, bound full transport queues/backpressure, and complete physical echo/barge-in plus representative8h acceptance."
+      "validation": "Native segmented STT completeness, scoped callbacks/consumer, finite queues/PCM/text and12s queue-inclusive deadline verified. Reproduced repeated-VAD-stop orphan timer bug:3 timer regression failures and5/10 voice-close failures before fix. Source-tagged input reset now cancels waits without arming timers; duplicate stop joins the prior STT timer. Actual speech revealed unclosed LLM SDK client; native service cleanup now closes its owned pool.188 framework tests PASS, zero dangling-task warnings.20 real Silero/OVS ASR/llama/BGE/Mem0/authenticated Qdrant/TTS cases (10 cancellation/recovery,10 close-with-pending-callback) PASS: no late cancelled fact/history, recovered speech, no remaining app tasks, owned HTTP clients and WAV output closed. Probe FD count22 throughout. Synthetic audio with callbacks delayed after real provider completion; not GPU preemption, acoustics, broad fault matrix or8h acceptance. Subsequent native-stage provider tests:50/50 PASS across LLM cancel/deadline,ASR cancel/read-deadline,TTS stream interruption (10 each), with actual busy slots/active stream observed and next request recovery. LLM waits for interruption acknowledgement and typed nonempty idle-slot state; malformed/empty observation keeps admission closed. ASR/TTS remain occupied after caller exit and are observed to release later; ASR admission retained while native slot busy. Initial0.2s ASR deadline cases did not reach the required active-stage observation and remain in a separate failed prerequisite baseline;0.8s injection used for qualified cases.190 framework tests PASS. Backend transport checks do not qualify the full voice application or GPU-kernel timing.",
+      "next_action": "Validate the complete voice application during in-flight ASR/LLM/TTS failures and restart/recovery, transport backpressure and device disconnects; continue independent quality and representative8h acceptance."
     },
     {
       "task_id": "J4.tools.development",
@@ -423,7 +430,8 @@
     "Public text/voice use managed authenticated native Qdrant with directory/collection/embedding binding.50k isolated capacity and current-control restoration pass their declared checks; independent memory quality, authenticated production-path full-load latency, pending-write/control-loss recovery and backup retention/quotas remain unverified.",
     "Backup and restoration with current SQLite authority, native snapshot/index recovery and exclusive cutover are implemented and tested; pending memory writes must be reconciled first. Loss of current controls, quota/retention policy, power-loss and complete restore fault/quality acceptance remain unverified.",
     "External Chinese memory development evaluation remains weak:20 LCvMem questions lexical F1=24.726% with explicit source-date/speaker metadata, versus16.176% compact evidence and12.923% baseline. This is not semantic accuracy. Relative/range/event-time/version queries and faithful source/context selection remain incomplete;200 conversation-disjoint heldout questions and complete JT-10 acceptance have not run.",
-    "The reproduced STT timer orphan and LLM SDK client cleanup omissions are fixed, with188 framework tests and20 real speech lifecycle cases. This covers delayed callbacks after actual ASR completion and application-owned tasks/connections/files, not backend GPU preemption, physical stop/AEC, complete fault classes or8h stability."
+    "The reproduced STT timer orphan and LLM SDK client cleanup omissions are fixed, with188 framework tests and20 real speech lifecycle cases. This covers delayed callbacks after actual ASR completion and application-owned tasks/connections/files, not backend GPU preemption, physical stop/AEC, complete fault classes or8h stability.",
+    "50 native-stage backend cancellation/deadline/stream interruption cases now pass, with delayed ASR/TTS release explicitly observed. Full voice-application fault paths, TTS timeout, service crash/restart, per-kernel release traces and physical interruption remain unverified; frontend timeout is not backend completion."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

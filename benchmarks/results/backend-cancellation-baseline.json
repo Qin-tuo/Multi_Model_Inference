@@ -1,0 +1,1585 @@
+{
+  "created_at": "2026-10-13T08:57:45.157915+00:00",
+  "status": "PASS",
+  "cycles": 1,
+  "cases": [
+    {
+      "kind": "llm",
+      "cycle": 1,
+      "checks": {
+        "started_idle": true,
+        "native_active_stage_observed": true,
+        "request_pending_at_cancel": true,
+        "caller_cancelled": true,
+        "provider_idle_before_recovery": true,
+        "cancelled_answer_not_emitted": true,
+        "cancelled_answer_not_completed_history": true,
+        "no_memory_side_effect": true,
+        "recovered_llm": true,
+        "session_admission_restored": true
+      },
+      "caller_cancel_seconds": 0.22087111799919512,
+      "provider_busy_after_caller_cancel": false,
+      "provider_idle_observed_seconds_after_cancel": 0.22828285099967616,
+      "recovery_answer": "2",
+      "trace": [
+        {
+          "seconds": 0.0033194839998031966,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.019126120998407714,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.032425497000076575,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.04618450699854293,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.05997343700073543,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.07415684599982342,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.08927305799807073,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.10145818399905693,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.11542414499854203,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.12849720899976091,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.14912133799953153,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.16309085100147058,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.23947686799874646,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.2533413210003346,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3970,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.26577144900147687,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3988,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "busy": true
+        },
+        {
+          "seconds": 0.49100711299979594,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3988,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.49405410699910135,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3988,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.8413817180007754,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3999,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        },
+        {
+          "seconds": 0.8446481749997474,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 3999,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "busy": false
+        }
+      ],
+      "seconds": 0.8446673120015475,
+      "status": "PASS"
+    },
+    {
+      "kind": "asr",
+      "cycle": 1,
+      "checks": {
+        "started_idle": true,
+        "native_active_stage_observed": true,
+        "request_pending_at_cancel": true,
+        "caller_cancelled": true,
+        "provider_idle_before_recovery": true,
+        "speech_lease_retained_while_slot_busy": true,
+        "recovered_asr": true
+      },
+      "caller_cancel_seconds": 0.000922626000829041,
+      "provider_busy_after_caller_cancel": true,
+      "provider_idle_observed_seconds_after_cancel": 1.7581487099996593,
+      "recovery_transcript": "一加一等于几？",
+      "trace": [
+        {
+          "seconds": 0.01709529400250176,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 0.027742346999730216,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 0.046663724999234546,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.2158096810017014,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.23413558100219234,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.257323453999561,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.28025781299947994,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.30191148499943665,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.32064981599978637,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.3406156800010649,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.362739161002537,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.3846254180025426,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4069973879995814,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4283669850010483,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4484621350020461,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 453,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.47478631700141705,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4862419119999686,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.49513645200204337,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.5271851030011021,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.5608536229992751,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.5926881859995774,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 104
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.6273198779999802,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 104
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.6604749700018147,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 104
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.6915202880009019,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 130
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.7236568150001403,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.755137061001733,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.7869360069998947,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.8194680359993072,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.851273319000029,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.8835800279994146,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.9145282860008592,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.9462336920005328,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.9753692750018672,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.0067226680002932,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.0378211720017134,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.0690669780015014,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.1002863819994673,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.1314049829998112,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.163371039001504,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.1944072049991519,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.227007109002443,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.2586992030010151,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.2899949300008302,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.3222366120025981,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.3540658000019903,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.3858511770013138,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.4171230310021201,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.4485344749991782,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.4798965090012643,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.511409940001613,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.5430153109991807,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 136
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.5707345530026942,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 482,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.602384597001219,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.6339655830015545,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.6655388250001124,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 78
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.6983233120008663,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 78
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.7299837240025226,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.7617589900000894,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.7934263790011755,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.825056678000692,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.857188533002045,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.88922358399941,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.9213150530013081,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.9526802220025274,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 1.9830557230015984,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.013959052001155,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.045965494002303,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.077129984001658,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.108254761002172,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.1396477400012373,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.1709672120014147,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.2023083490021236,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": true,
+              "n_prompt_tokens_processed": 84
+            }
+          ],
+          "slot_busy": true,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 2.2329428039993218,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 554,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 2.582352635999996,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 598,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 2.5935945910023293,
+          "slots": [
+            {
+              "id": 0,
+              "id_task": 598,
+              "is_processing": false,
+              "n_prompt_tokens_processed": 0
+            }
+          ],
+          "slot_busy": false,
+          "speech_sessions": 0.0,
+          "busy": false
+        }
+      ],
+      "seconds": 2.593616672002099,
+      "status": "PASS"
+    },
+    {
+      "kind": "tts",
+      "cycle": 1,
+      "checks": {
+        "started_idle": true,
+        "native_active_stage_observed": true,
+        "request_pending_at_cancel": true,
+        "caller_cancelled": true,
+        "provider_idle_before_recovery": true,
+        "recovered_tts": true
+      },
+      "caller_cancel_seconds": 0.0005077950008853804,
+      "provider_busy_after_caller_cancel": true,
+      "provider_idle_observed_seconds_after_cancel": 0.8110101530000975,
+      "pcm_bytes_received_before_cancel": 139520,
+      "recovery_pcm_bytes": 53760,
+      "trace": [
+        {
+          "seconds": 0.0036841369983449113,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 0.04682910599876777,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 0.06503128899930744,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.07988525099790422,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.09679954599778284,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.11087891899660463,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.12548387999777333,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.13966207299745292,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.1555043599983037,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.1707833299988124,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.17858525299743633,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.18215799399695243,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.20824559099855833,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.23547505499664112,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.2633373419994314,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.2906869699982053,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.318965432998084,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.34686189700005343,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.3747277039983601,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4025181809993228,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.43153807899943786,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4634057959992788,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.4910866679965693,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.518409222997434,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.5468282349975198,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.574829471999692,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.6036879239982227,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.6324524849987938,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.661402524998266,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.6893505749976612,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.7177145770001516,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.7463304279990552,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.7740401979972376,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.8029738209988864,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.8326498079986777,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.8617964309996751,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.8899978989975352,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.918581780999375,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.9528817799982789,
+          "speech_sessions": 1.0,
+          "busy": true
+        },
+        {
+          "seconds": 0.9817873059982958,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 1.0693441399998846,
+          "speech_sessions": 0.0,
+          "busy": false
+        },
+        {
+          "seconds": 1.0749736619982286,
+          "speech_sessions": 0.0,
+          "busy": false
+        }
+      ],
+      "seconds": 1.0749968949967297,
+      "status": "PASS"
+    }
+  ],
+  "artifacts": "/home/nvidia/.local/share/multi-model-assistant/fixtures/backend-cancel-e8a226fdea5c4533ba9f17a13f0b3f97",
+  "source_commit": "c628bcd487fc7c74be3bb190c46dc4806a7739b9",
+  "source_state": "working tree; see checkpoint commit containing this report",
+  "audio_sha256": "c9318b3828002fd025c9147f5316c1548e0fc27d4670159bd63d2f2bfc87ee1f",
+  "scope": "Actual llama LLM/ASR slots and OVS HTTP admission; LLM uses public AssistantSession, ASR/TTS use OVS transport. Cancels pending work after native active-state observation, waits for provider idle then verifies recovery. Synthetic WAV and TTS text; no per-kernel timing, physical barge-in/AEC, full timeout/fault matrix or8h acceptance."
+}
