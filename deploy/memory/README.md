@@ -43,7 +43,7 @@ python3 tools/project.py reindex-memory --data-dir /实际应用数据目录 \
 
 [实际模型集成](../../benchmarks/results/hybrid-memory-integration.json)已通过8条长资料的ID/原文/片段召回、公开保存及跨会话回忆、更正、旧备份恢复、主体隔离、遗忘及实体清理。实际服务回归另验证语义前60之外的词项候选、过滤条件、连续升级撤销/续跑、旧备份不复活，以及同配置恢复时重建损坏的词项向量。这些合成集成检查不替代扩展故障、开发质量与独立JT验收；默认配置暂未更改。
 
-后续[30次实际迁移SIGKILL](../../benchmarks/results/hybrid-reindex-recovery.json)全部通过；[万条正式适配器测试](../../benchmarks/results/managed-hybrid-capacity-10k.json)编号top5为100/100，查询/完整写入P95为62.29/355.66ms，没有错误或主体泄漏。该计时包含真实BGE、Mem0、schema3绑定、原生融合及持久控制路径；没有前台语音负载。82题中文开发质量评测正在运行，旧/当前备份的扩展恢复故障、独立语义质量和完整共存验收仍待完成。
+后续[30次实际迁移SIGKILL](../../benchmarks/results/hybrid-reindex-recovery.json)全部通过；[万条正式适配器测试](../../benchmarks/results/managed-hybrid-capacity-10k.json)编号top5为100/100，查询/完整写入P95为62.29/355.66ms，没有错误或主体泄漏。该计时包含真实BGE、Mem0、schema3绑定、原生融合及持久控制路径；没有前台语音负载。82题开发评测已完成；8条/768tokens的候选词级F1为29.58，实际提示包含参考原文65/82题，不等于语义正确率。旧/当前备份的扩展恢复故障、独立质量和完整共存验收仍待完成。
 
 `prepare.py`校验官方ARM64 musl归档SHA256、固定Qdrant 1.19.2及源码commit。程序和源码分别位于`~/AI_Stack/installed/qdrant-1.19.2/`、`~/AI_Stack/frameworks/qdrant/`，生产入口使用项目的systemd用户单元`mmassistant-qdrant.service`，未修改系统包。
 

@@ -432,6 +432,8 @@ def main():
     bench.add_argument('--seed-from',type=Path)
     bench.add_argument('--source-metadata',choices=['body-only-v1','calendar-speaker-v1'],default='body-only-v1')
     bench.add_argument('--memory-profile',choices=['bge-fp32-single-v1','bge-int8-windows-v1','bge-int8-windows-bm25-v1'],help='Explicit memory-quality candidate; existing bindings must match')
+    bench.add_argument('--memory-top-k',type=int,choices=range(1,21),help='memory-quality development retrieval count')
+    bench.add_argument('--memory-token-limit',type=int,help='memory-quality evidence token budget')
     interact = sub.add_parser("interact", help="Persistent Pipecat text conversation")
     interact.add_argument("--user", default="owner")
     interact.add_argument("--data-dir", type=Path, default=DATA)
@@ -493,8 +495,11 @@ def main():
                 if args.limit is not None:command+=['--limit',str(args.limit)]
                 if args.seed_from is not None:command+=['--seed-from',str(args.seed_from)]
                 if args.memory_profile:command+=['--memory-profile',args.memory_profile]
+                if args.memory_top_k is not None:command+=['--memory-top-k',str(args.memory_top_k)]
+                if args.memory_token_limit is not None:command+=['--memory-token-limit',str(args.memory_token_limit)]
                 return subprocess.call(command,cwd=ROOT,env=env)
-            if args.memory_profile:raise ValueError('memory-profile applies to memory-quality; use managed_memory_capacity.py for bound capacity profiles')
+            if args.memory_profile or args.memory_top_k is not None or args.memory_token_limit is not None:
+                raise ValueError('Memory reader options apply to memory-quality; use managed_memory_capacity.py for bound capacity profiles')
             if args.tier is None:raise ValueError('memory-capacity requires --tier')
             return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/memory_capacity.py'),
                 '--tier',str(args.tier),'--run-dir',str(args.run_dir),'--output',str(args.output),

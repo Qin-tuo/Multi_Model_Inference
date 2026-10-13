@@ -1,5 +1,7 @@
 """Native long-lived Pipecat wiring; model/tokenizer are labelled fixtures."""
 import asyncio
+import io
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -47,6 +49,37 @@ class PersistentSessionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.llm.context_frames_seen, 2)
         self.assertEqual(len(emitted), 2)
         self.assertEqual(len(self.records.recent("owner")), 2)
+
+    async def test_configured_retrieval_count_reaches_store_and_evidence_budget(self):
+        await self.session.close();self.evidence.stop()
+        # Equal fixture vectors isolate count/filter/budget wiring from model
+        # quality, using the actual Mem0/Qdrant store and native session worker.
+        self.memory.sdk.embedding_model.embed=lambda *_args,**_kwargs:[1.0]+[0.0]*31
+        for i in range(9):
+            self.memory.remember('owner','fact',f'bounded-{i}',f'合成资料{i}需要保留原文。',source_id=f's{i}',request_id=f'save-{i}')
+        self.memory.remember('guest','fact','private','访客资料不得进入主人上下文。',source_id='guest',request_id='guest')
+        self.session=AssistantSession(LlamaConfig('fixture'),self.memory,self.reminders,self.records,
+            llm=FrameworkFakeLLM(),memory_top_k=8,memory_context_tokens=256)
+        self.session.budget.count=AsyncMock(return_value=100)
+        def tokenize(request,**_kwargs):
+            text=json.loads(request.data)['content']
+            return io.BytesIO(json.dumps({'tokens':list(range(len(text)))}).encode())
+        async def emit(_text):pass
+        with patch('app.context_memory.urlopen',tokenize):
+            await self.session.start();result=await self.session.ask('请回忆这些合成资料。',emit=emit)
+        self.assertEqual(result['retrieval']['retrieved_count'],8)
+        self.assertEqual(result['retrieval']['requested_top_k'],8)
+        self.assertEqual(result['retrieval']['evidence_token_limit'],256)
+        self.assertLessEqual(result['retrieval']['memory_tokens'],256)
+        self.assertTrue(result['retrieval']['injected_memory_ids'])
+        self.assertLess(len(result['retrieval']['injected_memory_ids']),8)
+        self.assertTrue(all(x['user_id']=='owner' for x in self.session.turn.memory_candidates))
+
+    async def test_invalid_memory_limits_fail_before_pipeline_resources_exist(self):
+        for kwargs in ({'memory_top_k':True},{'memory_top_k':0},{'memory_top_k':21},
+                       {'memory_context_tokens':True},{'memory_context_tokens':0},{'memory_context_tokens':2048}):
+            with self.subTest(kwargs=kwargs),self.assertRaises(ValueError):
+                AssistantSession(LlamaConfig('fixture'),self.memory,self.reminders,self.records,**kwargs)
 
     async def test_failed_output_is_not_completed_history(self):
         async def broken_output(_text): raise OSError("fixture output failure")

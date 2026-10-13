@@ -143,7 +143,7 @@ FP32多段SDK写入约0.75秒，超出目标500毫秒，因此用[Sentence Trans
 | 原窗口dense | 9/100 | 0/50、9/50 | 46.97ms | 342.79ms |
 | 本地BM25＋DBSF候选 | 100/100 | 50/50、50/50 | 62.29ms | 355.66ms |
 
-候选长写入单列P95为359.30ms，50次写入全部持久确认，没有查询/写入错误或主体泄漏。这证明该编号压力集的改进已进入真实Mem0路径，并保持本轮200/500ms目标。每种配置仅一轮，包含各自真实的绑定和索引校验开销，没有前台语音负载；这不是独立语义正确率、单因素优化收益或完整JT-11通过。[候选迁移故障测试](../../benchmarks/results/hybrid-reindex-recovery.json)三个阶段各10次真实SIGKILL共30次全部通过。82题候选开发评测已启动，保留集继续不用。
+候选长写入单列P95为359.30ms，50次写入全部持久确认，没有查询/写入错误或主体泄漏。这证明该编号压力集的改进已进入真实Mem0路径，并保持本轮200/500ms目标。每种配置仅一轮，包含各自真实的绑定和索引校验开销，没有前台语音负载；这不是独立语义正确率、单因素优化收益或完整JT-11通过。[候选迁移故障测试](../../benchmarks/results/hybrid-reindex-recovery.json)三个阶段各10次真实SIGKILL共30次全部通过。82题候选开发评测与预算对照已完成，结果见下；保留集继续不用。
 
 ### 语音、视觉与记忆同时工作
 
@@ -197,3 +197,41 @@ python3 tools/project.py bench --suite memory-quality --split development \
 ```
 
 此命令的准备配置、实际绑定及报告均记录profile；复用或续跑的索引不匹配时拒绝继续。候选容量使用`managed_memory_capacity.py --profile bge-int8-windows-bm25-v1`在新的专用目录准备和计时；计时必须等待其他重负载评测结束。
+
+## 候选开发质量与证据预算
+
+候选的完整82题已完成，原结果和后续开发对照均保留。下表每行都有0执行错误、0意外写入、0跨主体证据，归一化完全匹配均为1/82；200题保留集和76题备用集未运行。
+
+| 配置 | 词级F1 | 检索包含参考原文 | 实际提示包含参考原文 |
+|---|---:|---:|---:|
+| 原窗口dense，5条/512tokens | 26.69 | 58 | 56 |
+| [DBSF候选，5条/512tokens](../../benchmarks/results/lcvmem-development-hybrid.json) | 25.97 | 57 | 57 |
+| [直接回答，5条/512tokens](../../benchmarks/results/lcvmem-development-hybrid-direct.json) | 26.96 | 57 | 57 |
+| [取8条但装配仍截5条的失败对照](../../benchmarks/results/lcvmem-development-hybrid-top8.json) | 26.96 | 65 | 57 |
+| [修正装配后，8条/512tokens](../../benchmarks/results/lcvmem-development-hybrid-top8-packed.json) | 26.95 | 65 | 57 |
+| [8条/768tokens](../../benchmarks/results/lcvmem-development-hybrid-top8-768.json) | 29.58 | 65 | 65 |
+
+第一份[候选对照](../../benchmarks/results/lcvmem-hybrid-comparison.json)有3题失去、4题新增可见参考原文，整体F1没有提高。错例同时包含真正的漏召回、作品类型混淆，以及正确诗句出现在第二行导致官方首行评分为0。通用提示现要求短事实直接用简短完整句回答，引用原话时不加标题；[同证据对照](../../benchmarks/results/lcvmem-hybrid-direct-comparison.json)82题检索/注入顺序一致，F1只小幅变化。全文包含参考字符串的题数由51变50，不能把格式得分上升当作语义质量提升。
+
+随后发现两处配置未生效：持续会话固定使用5条/512tokens，装配函数又独立截取前5条。现在文本入口、`/new`、语音入口和评测均传递配置；装配遍历全部已限定候选，使用真实token计数决定是否加入，保留未注入原因与真实ID/来源。检索API的硬上限为20条；日常默认仍为5条、512tokens。证据预算必须至少64tokens，并为模型输出留出空间；完整提示仍由原生计数再次检查。实际Mem0/Qdrant回归验证8条检索、预算约束和主人/访客隔离，220项框架测试通过。
+
+[未完全修正时的对照](../../benchmarks/results/lcvmem-hybrid-top8-comparison.json)确认82题的实际证据、提示token数和回答完全相同，说明仅取回更多条目没有生效。修正装配后，512预算下依然没有新增包含参考原文的提示；[预算对照](../../benchmarks/results/lcvmem-hybrid-top8-768-comparison.json)保持8条检索顺序82/82一致，只将预算改为768，在2K模型上下文中新增8题可见参考原文、无丢失，F1为29.58。全文出现参考字符串的题数为55；这只是词级/可见证据诊断，尚不是人工语义正确率或JT-10通过。
+
+复现预算候选使用已核验的开发种子及新的回答目录：
+
+```bash
+python3 tools/project.py bench --suite memory-quality --split development \
+  --source-metadata calendar-speaker-v1 --memory-profile bge-int8-windows-bm25-v1 \
+  --memory-top-k 8 --memory-token-limit 768 \
+  --seed-from "$HOME/AI_Stack/runtime-data/benchmarks/lcvmem-development-hybrid-v1" \
+  --run-dir "$HOME/AI_Stack/runtime-data/benchmarks/lcvmem-hybrid-8x768-new-run" \
+  --output benchmarks/results/lcvmem-hybrid-8x768-new-run.json
+```
+
+每次续跑核对检索参数；非法预算在创建评测目录前拒绝。`tools/lcvmem_compare.py`只用于完成后的开发集分析，参考答案不进入运行期。默认存储配置和5条/512tokens暂未切换；8条/768tokens的语音共存仍待测。
+
+## 当前候选的语音共存基线
+
+[20轮未插桩结果](../../benchmarks/results/memory-voice-hybrid-10k.json)使用DBSF、直接回答提示、5条/512tokens和独立万条个人档案，完成106次查询与53次写入。查询/写入P95为161.22/462.00ms，全部写入持久确认，0执行错误或主体泄漏。检测/姿态约11.49/11.42Hz，最新结果年龄P95约175/182ms。
+
+偏好/时间/算术的首段文件PCM P95分别为2.902/2.859/2.701秒，图像为5.202秒，因此整体仍为`FAIL`。每类只有5轮，图像内容没有地面真值，也没有物理可听回执。该配置同时改变检索与答复提示，不能把与旧窗口方案的差异当成单因素收益。事件循环最大延误约145ms，原因仍待实际阶段追踪确认。

@@ -26,6 +26,14 @@ from typing import Any
 # This applies to this process before importing Mem0, not to any user's shell
 # startup files or global configuration. Model endpoints are explicit below.
 os.environ["MEM0_TELEMETRY"] = "false"
+MAX_RETRIEVAL_ITEMS = 20
+
+
+def validate_retrieval_limits(top_k,max_tokens,context_tokens,output_tokens):
+    if type(top_k) is not int or not 1<=top_k<=MAX_RETRIEVAL_ITEMS:
+        raise ValueError(f'memory_top_k must be1..{MAX_RETRIEVAL_ITEMS}')
+    if type(max_tokens) is not int or not 64<=max_tokens<=context_tokens-output_tokens-16:
+        raise ValueError('Memory evidence budget must be at least64 tokens and leave the model output reserve')
 
 
 class MemoryAdapterError(RuntimeError):
@@ -458,8 +466,8 @@ class Mem0Adapter:
         try:source_filters=constraints(source_date,source_month_day,source_speaker)
         except (ValueError,TypeError) as error:raise MemoryAdapterError('INVALID_ARGUMENT',str(error)) from error
         user_id, namespace = _text(user_id, "user_id", 128), _text(namespace, "namespace", 128)
-        if isinstance(top_k, bool) or not isinstance(top_k, int) or not 1 <= top_k <= 5:
-            raise MemoryAdapterError("INVALID_ARGUMENT", "top_k must be 1..5")
+        if type(top_k) is not int or not 1 <= top_k <= MAX_RETRIEVAL_ITEMS:
+            raise MemoryAdapterError("INVALID_ARGUMENT", f"top_k must be 1..{MAX_RETRIEVAL_ITEMS}")
         with self._gate:
             self._check_open()
             filters = {"user_id": user_id, "namespace": namespace,**source_filters}

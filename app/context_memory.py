@@ -26,6 +26,8 @@ def presentation(item):
 
 
 def memory_message(items, base_url: str, max_tokens: int = 512, *, compact_references: bool = False):
+    from app.memory import MAX_RETRIEVAL_ITEMS
+    if len(items)>MAX_RETRIEVAL_ITEMS:raise ValueError('Too many memory candidates for bounded evidence packing')
     endpoint = urlsplit(base_url)
     if endpoint.scheme != "http" or endpoint.hostname not in {"127.0.0.1", "localhost", "::1"}:
         raise ValueError("Tokenizer endpoint must be local")
@@ -51,7 +53,7 @@ def memory_message(items, base_url: str, max_tokens: int = 512, *, compact_refer
     tokens = count(content)
     if tokens > max_tokens:
         raise ValueError("Memory budget is smaller than its evidence header")
-    for rank,item in enumerate(items[:5],1):
+    for rank,item in enumerate(items,1):
         visible,source_views,window=presentation(item)
         # A verbatim source excerpt often equals the fact body. Retain its
         # source ID while avoiding a second copy that displaces other evidence.

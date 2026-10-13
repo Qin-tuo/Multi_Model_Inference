@@ -120,7 +120,7 @@ class SourceParserAsyncTests(unittest.IsolatedAsyncioTestCase):
             return {}
         class ReachedSearch(RuntimeError):pass
         def search(*args,**kwargs):raise ReachedSearch()
-        session=SimpleNamespace(memory=SimpleNamespace(search=search),user_id='owner')
+        session=SimpleNamespace(memory=SimpleNamespace(search=search),user_id='owner',memory_top_k=5,memory_context_tokens=512)
         turn=SimpleNamespace(requested_lookup=lambda:None,required_operation=lambda:None,cancelled=False)
         with patch('app.memory_sources.dialogue_lookup',parser):
             task=asyncio.create_task(AssistantSession._messages(session,'4月27日我分享了什么？',turn))

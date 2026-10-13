@@ -54,7 +54,7 @@ class VoiceContextBridge(FrameProcessor):
 class VoiceAssistant:
     def __init__(self, config, memory, reminders, records, *, user_id="owner", vision_frames=None,
                  output_path=None, input_device=None, output_device=None, session_id=None,
-                 context_tokens=2048, stt=None, llm=None, tts=None):
+                 context_tokens=2048, stt=None, llm=None, tts=None,memory_top_k=5,memory_context_tokens=512):
         self.user_id, self.reminders = user_id, reminders
         self.user_speaking = False
         self.answer_task = self.interrupt_task = self.runner_task = self.notification_task = None
@@ -76,7 +76,7 @@ class VoiceAssistant:
         self.notices = PipecatNotificationSink(reminders, occupied=self.occupied)
         self.session = AssistantSession(config, memory, reminders, records, user_id=user_id,
             session_id=session_id, vision_frames=vision_frames, llm=llm, context_tokens=context_tokens,
-            output_channel="fixture" if self.file_mode else "audio")
+            output_channel="fixture" if self.file_mode else "audio",memory_top_k=memory_top_k,memory_context_tokens=memory_context_tokens)
         params = dict(audio_out_enabled=True, audio_out_sample_rate=16000, audio_out_channels=1,
                       audio_out_10ms_chunks=2, audio_out_end_silence_secs=0)
         processors = []

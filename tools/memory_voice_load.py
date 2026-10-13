@@ -55,6 +55,7 @@ async def main(args):
         if digest!=prior['cases'][index]['input_sha256']:raise RuntimeError('Frozen synthetic voice input changed')
         inputs.append((label,path,digest))
     reader=fingerprint();before=backend_state();artifacts=folder/'coexistence';artifacts.mkdir()
+    runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
     write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'trace_stages':args.trace_stages,'debug_loop':args.debug_loop,
         'inputs':[{'label':a,'sha256':c} for a,_,c in inputs]})
     queries=[];writes=[];turns=[];lag=[];errors=[];checks={};voice=None;probe=None;bridge=None;thread=None
@@ -124,7 +125,9 @@ async def main(args):
                 while bridge.status()['state']!='READY' or not all(row['latest'] and time.monotonic_ns()-row['latest']<500_000_000 for row in probe.rows.values()):
                     await asyncio.sleep(.1)
             voice=VoiceAssistant(LlamaConfig.from_manifest(ROOT/'models/manifest.json'),memory,reminders,records,
-                user_id=corpus['owner'],vision_frames=bridge.frames,output_path=artifacts/'answers.wav')
+                user_id=corpus['owner'],vision_frames=bridge.frames,output_path=artifacts/'answers.wav',
+                context_tokens=runtime['llama']['context_tokens'],memory_top_k=runtime['memory']['top_k'],
+                memory_context_tokens=runtime['memory']['context_token_limit'])
             if stage_trace:stage_trace.attach(voice,memory)
             await voice.start();begin=time.monotonic_ns();probe.started_ns=begin;probe.measuring=True
             lag_task=asyncio.create_task(sample_loop());memory_task=asyncio.create_task(memory_load(memory))
@@ -205,6 +208,7 @@ async def main(args):
             'app_unchanged':reader==fingerprint()}
         report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'errors':errors,
             'reader_fingerprint':reader,'config':config,'initial_population':counts,'run_directory':str(folder),
+            'retrieval_config':{key:runtime['memory'][key] for key in ('top_k','context_token_limit')},
             'workload_begin_ns':begin,'workload_end_ns':end,'query_summary':qstat,'write_summary':wstat,
             'foreground_begin_ns':foreground_begin,'foreground_end_ns':foreground_end,
             'queries_overlapping_foreground':statistics(overlap_queries),'writes_overlapping_foreground':statistics(overlap_writes),

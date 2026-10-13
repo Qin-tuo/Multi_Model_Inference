@@ -104,7 +104,11 @@ class ToolContinuationBudget(FrameProcessor):
 
 class AssistantSession:
     def __init__(self, config, memory, reminders, records, *, user_id="owner", context_tokens=2048,
-                 session_id=None, llm=None, vision_frames=None, output_channel="text"):
+                 session_id=None, llm=None, vision_frames=None, output_channel="text",
+                 memory_top_k=5, memory_context_tokens=512):
+        from app.memory import validate_retrieval_limits
+        validate_retrieval_limits(memory_top_k,memory_context_tokens,context_tokens,config.max_tokens)
+        self.memory_top_k=memory_top_k;self.memory_context_tokens=memory_context_tokens
         self.config, self.memory, self.reminders, self.records = config, memory, reminders, records
         self.user_id = user_id
         if output_channel not in {"text", "audio", "fixture"}: raise ValueError("Unknown output channel")
@@ -360,14 +364,14 @@ class AssistantSession:
         # Notes/task state have their own authoritative store. Irrelevant
         # semantic matches must not be presented as evidence for those queries.
         found = ({"items": [], "generation": self.memory.generation(self.user_id)} if task_lookup else
-                 await asyncio.to_thread(self.memory.search, self.user_id, text, top_k=5,**source_query))
+                 await asyncio.to_thread(self.memory.search, self.user_id, text, top_k=self.memory_top_k,**source_query))
         found["items"] = self.records.filter_memories(self.user_id, found["items"])
         turn.memory_candidates = found["items"]
         # Maintenance needs real IDs/version in model context. Ordinary recall
         # can use turn-local references while records keep the real IDs below.
         compact_references=turn.required_operation() not in {'correct','forget'}
         evidence, metrics = await asyncio.to_thread(memory_message, found["items"], self.config.base_url,
-            compact_references=compact_references)
+            max_tokens=self.memory_context_tokens,compact_references=compact_references)
         self.records.attach_memories(self.user_id, turn.turn_id, metrics["injected_memory_ids"])
         history = self.records.recent(self.user_id, session_id=self.session_id, limit=8)
         # Explicit cross-session history questions use dated, delivered records.
@@ -407,9 +411,10 @@ class AssistantSession:
             elif evidence["content"].endswith("[]"):
                 raise ValueError("问题与工具定义超过当前模型上下文容量，请缩短问题。")
             else:
-                evidence, metrics = await asyncio.to_thread(memory_message, [], self.config.base_url,
+                evidence, metrics = await asyncio.to_thread(memory_message, [], self.config.base_url,max_tokens=self.memory_context_tokens,
                     compact_references=compact_references)
         self.retrieval = {**metrics, "history_turns_dropped": dropped, "initial_prompt_tokens": tokens,
+                          "requested_top_k":self.memory_top_k,"evidence_token_limit":self.memory_context_tokens,
                           "source_query":source_query,
                           "memory_generation": found["generation"], "personal_recall": bool(personal_recall),
                           "task_lookup": task_lookup}

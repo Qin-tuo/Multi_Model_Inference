@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件217项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件220项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -242,6 +242,8 @@ source /opt/ros/jazzy/setup.bash
 
 新格式的[82题开发评测](benchmarks/results/lcvmem-development-windows.json)已完成：词级F1为26.69，归一化完全匹配1/82，参考原文实际注入56题，执行错误、意外写入及跨主体证据均为0。旧格式F1为26.33，这个小幅差异不足以证明整体质量提升，200题保留集未使用。旧格式备份恢复到当前格式的[40次SIGKILL](benchmarks/results/window-restore-fault-recovery.json)全部续跑成功，保留当前更正和新增事实，未复活已遗忘内容；这轮没有生成模型回答。
 
-[万条混合长短记忆计时](benchmarks/results/managed-window-capacity-10k.json)查询P95约47ms、完整写入约343ms，无执行错误或主体泄漏，50次写入均持久确认。但编号top5召回只有9/100；[诊断](benchmarks/results/numbered-window-recall-diagnostic.json)确认原文完整，长目标却没有进入前60候选。随后在独立索引复用Qdrant本地BM25及原生RRF/DBSF，[三种候选均命中100/100](benchmarks/results/qdrant-lexical-numbered-feasibility.json)；这些属于合成可行性结果。现已将原生DBSF接入可显式选择的`bge-int8-windows-bm25-v1`候选，保留Mem0存储与journal；[实际模型集成](benchmarks/results/hybrid-memory-integration.json)通过长资料保存/召回、更正、旧备份恢复和遗忘，217项框架测试通过。默认仍用原窗口配置。候选已通过[30次迁移SIGKILL](benchmarks/results/hybrid-reindex-recovery.json)；[万条正式适配器测试](benchmarks/results/managed-hybrid-capacity-10k.json)编号命中100/100，查询/完整写入P95约62/356ms，无错误或主体泄漏。82题中文开发质量评测正在运行；这不是独立正确率或完整语音共存验收。
+[万条混合长短记忆计时](benchmarks/results/managed-window-capacity-10k.json)查询P95约47ms、完整写入约343ms，无执行错误或主体泄漏，50次写入均持久确认。但编号top5召回只有9/100；[诊断](benchmarks/results/numbered-window-recall-diagnostic.json)确认原文完整，长目标却没有进入前60候选。随后在独立索引复用Qdrant本地BM25及原生RRF/DBSF，[三种候选均命中100/100](benchmarks/results/qdrant-lexical-numbered-feasibility.json)；这些属于合成可行性结果。现已将原生DBSF接入可显式选择的`bge-int8-windows-bm25-v1`候选，保留Mem0存储与journal；[实际模型集成](benchmarks/results/hybrid-memory-integration.json)通过长资料保存/召回、更正、旧备份恢复和遗忘，217项框架测试通过。默认仍用原窗口配置。候选已通过[30次迁移SIGKILL](benchmarks/results/hybrid-reindex-recovery.json)；[万条正式适配器测试](benchmarks/results/managed-hybrid-capacity-10k.json)编号命中100/100，查询/完整写入P95约62/356ms，无错误或主体泄漏。82题候选开发评测和证据预算对照已完成，见下文；这些仍不是独立正确率或完整语音共存验收。
 
 同一万条个人档案下的[语音/相机/记忆并发基线](benchmarks/results/memory-voice-load-10k.json)完成20轮语音、106次查询与53次写入：查询/写入P95约127/459ms，检测/姿态约11.64Hz，最新年龄P95约174/178ms，以上检查通过。偏好/时间问答首段PCM P95约3.09/3.10秒，图像问答约5.55秒，超过3/5秒目标，整轮报告为FAIL。输出为WAV；每类问题仅5轮，没有物理声学或画面准确率结论。独立质量、完整负载和JT-10/11继续待验收。
+
+目前完整开发对照已进一步定位到检索配置和提示装配的固定上限。配置现在贯通文字、`/new`和语音入口，候选数有20条硬上限，实际注入继续受token预算约束；默认仍为原窗口配置、5条/512tokens。DBSF的[8条/768tokens开发结果](benchmarks/results/lcvmem-development-hybrid-top8-768.json)F1为29.58，参考原文实际注入65/82题，没有执行错误、意外写入或跨主体证据；不等于语义正确率达标。此前[5条/512tokens候选语音共存](benchmarks/results/memory-voice-hybrid-10k.json)短问答首段文件音频P95最高2.902秒，但图像为5.202秒，整轮仍FAIL。完整对照、无效实验与范围见[评测说明](deploy/evaluation/README.md#候选开发质量与证据预算)。

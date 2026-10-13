@@ -40,7 +40,8 @@ async def console(args):
             retention_days=runtime["memory"]["transcript_retention_days"]))
         session = AssistantSession(config, memory, reminders, records, user_id=args.user,
             session_id=args.session_id, context_tokens=runtime["llama"]["context_tokens"],
-            vision_frames=vision.frames if vision else None)
+            vision_frames=vision.frames if vision else None,memory_top_k=runtime['memory']['top_k'],
+            memory_context_tokens=runtime['memory']['context_token_limit'])
         await session.start()
         pending = None
         errors = []
@@ -97,7 +98,8 @@ async def console(args):
             elif line == "/new":
                 await session.close()
                 session = await AssistantSession(config, memory, reminders, records, user_id=args.user,
-                    context_tokens=runtime["llama"]["context_tokens"], vision_frames=vision.frames if vision else None).start()
+                    context_tokens=runtime["llama"]["context_tokens"], vision_frames=vision.frames if vision else None,
+                    memory_top_k=runtime['memory']['top_k'],memory_context_tokens=runtime['memory']['context_token_limit']).start()
                 print("已开启新会话。", flush=True)
             elif line in {"/memories", "/notes", "/reminders", "/history"}:
                 if line == "/memories": rows = memory.list_memories(args.user, limit=20)

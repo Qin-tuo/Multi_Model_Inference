@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T16:31:10.512022+00:00",
+  "updated_at": "2026-10-13T18:12:45.778809+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -419,10 +419,25 @@
         "benchmarks/results/managed-hybrid-capacity-10k.json",
         "benchmarks/results/hybrid-memory-capacity-comparison.json",
         "tools/voice_stage_trace.py",
-        "tools/memory_voice_load.py"
+        "tools/memory_voice_load.py",
+        "benchmarks/results/lcvmem-development-hybrid.json",
+        "benchmarks/results/lcvmem-development-hybrid-direct.json",
+        "benchmarks/results/lcvmem-development-hybrid-top8.json",
+        "benchmarks/results/lcvmem-development-hybrid-top8-packed.json",
+        "benchmarks/results/lcvmem-development-hybrid-top8-768.json",
+        "benchmarks/results/lcvmem-hybrid-comparison.json",
+        "benchmarks/results/lcvmem-hybrid-direct-comparison.json",
+        "benchmarks/results/lcvmem-hybrid-top8-comparison.json",
+        "benchmarks/results/lcvmem-hybrid-top8-packed-comparison.json",
+        "benchmarks/results/lcvmem-hybrid-top8-768-comparison.json",
+        "benchmarks/results/memory-voice-hybrid-10k.json",
+        "benchmarks/results/framework-retrieval-config-baseline.json",
+        "tools/lcvmem_compare.py",
+        "tests/test_memory_context.py",
+        "tests/test_persistent_session.py"
       ],
-      "validation": "Native local BM25+DBSF integrated per Mem0 provider instance with owner/namespace/source filters; no global SDK factory replacement or external inference. Schema3 binds retrieval configuration,existing schema1/2 stores remain unchanged until explicit reindex. Canonical writes/corrections/reindex/restore regenerate sparse data;strict dense verification retained.6 native lifecycle/provider tests and217 complete framework tests PASS. Real BGE/llama/publicCLI integration PASS:8long records,canonical ID/body/source windows,save/new-session recall,correction,legacy-backup restoration,forget/entity purge andowner isolation. Successive upgrades support abort/resume and refuse downgrade. Candidate not default.30 actual reindexSIGKILLs(3phases10each) PASS. Managed native-DBSF10k:100query numbered recall100/100(long50/50,short50/50),query P95=62.290ms;50complete writes P95=355.660ms,long-write P95=359.303ms;zero errors/leaks,all durable. Frozen recipe/query indices/write sizes/embedding artifact and observed six model/vision backend identities match earlier dense9/100 run. No competing heavy evaluations during timing,no foreground voice;not independent quality or single-factor optimization.82development run active. Optional native stage tracer passed frame-clock/privacy/wrapper checks but real voice tracing/observer-overhead qualification not yet run.",
-      "next_action": "Inspect live82development hybrid quality run without changing app/config/models;complete old/current backup restoration fault repetitions,then assess promotion and foreground coexistence/stage diagnosis.200heldout and76reserve remain untouched."
+      "validation": "Native local BM25+DBSF integrated per Mem0 provider instance with owner/namespace/source filters; no global SDK factory replacement or external inference. Schema3 binds retrieval configuration,existing schema1/2 stores remain unchanged until explicit reindex. Canonical writes/corrections/reindex/restore regenerate sparse data;strict dense verification retained.6 native lifecycle/provider tests and217 complete framework tests PASS. Real BGE/llama/publicCLI integration PASS:8long records,canonical ID/body/source windows,save/new-session recall,correction,legacy-backup restoration,forget/entity purge andowner isolation. Successive upgrades support abort/resume and refuse downgrade. Candidate not default.30 actual reindexSIGKILLs(3phases10each) PASS. Managed native-DBSF10k:100query numbered recall100/100(long50/50,short50/50),query P95=62.290ms;50complete writes P95=355.660ms,long-write P95=359.303ms;zero errors/leaks,all durable. Frozen recipe/query indices/write sizes/embedding artifact and observed six model/vision backend identities match earlier dense9/100 run. No competing heavy evaluations during timing,no foreground voice;not independent quality or single-factor optimization.82development COMPLETE:F1=25.966%,visible reference57/82,no errors/writes/leaks. Direct-answer prompt=26.958%,same82/82 evidence. Config wiring andhidden five-item packing cap fixed;220core tests PASS. Top8/512 retrieves reference65but injects57,F1=26.951%;top8/768 same82/82 retrieval injects65,F1=29.585%,no errors/writes/leaks. Not95% semantic correctness. Untraced hybrid5/512+direct-prompt20-turn voice load:106queries161.22ms P95,53writes462.00ms;visual11.49/11.42Hz age175/182ms. Short-file-first-PCMmax-typeP95=2.902s passes3s,butimage5.202s fails5s;overallFAIL. Only5/type,no acoustic/scene-truth qualification. Optional native stage tracer passed frame-clock/privacy/wrapper checks but real voice tracing/observer-overhead qualification not yet run.",
+      "next_action": "Inspect live40-case hybrid legacy-backup restore faults;qualify8/768 foreground voice/stage timing andremaining contextual/temporal answer quality before promotion. Default remainsWINDOWS5/512;200heldout76reserve untouched."
     }
   ],
   "acceptance": {
@@ -521,7 +536,7 @@
     "External Chinese memory remains incomplete:full82 development lexical F1=26.329% with scalar FP32 and26.685% with int8 windows;no execution errors,unexpected writes or cross-owner evidence. Small changes do not prove broad quality improvement;200 heldout and76 reserve remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness remain incomplete.",
     "Long-record indexing/packing is integrated with locked BGE int8. Public save/recall/correction/old-backup restore,30 reindex SIGKILLs and40 cross-profile restore SIGKILLs pass. Dynamic quantization must remain record-wise.10k complete-adapter/foreground coexistence timing,other fault classes including control-loss/pending writes and independent JT gates remain incomplete.",
     "Managed current-profile10k timing passes47ms query/343ms write P95,but numbered top5 recall9/100(long0/50). Native local BM25/RRF/DBSF isolated candidates each recover100/100,not production-integrated/lifecycle-qualified. Actual20-turn shared10k voice/live-camera load passes memory127/459ms and visual11.64Hz/174-178ms but FAILS file first-PCM3/5s targets(3.098/5.545s);loop max154.90ms needs diagnosis. Physical audio,independent quality,full scenes and JT gates remain unverified.",
-    "Native BM25/DBSF candidate now passes217core,public integration,30actual reindexSIGKILLs and10k managed timing/numbered stress(100/100 top5,62/356ms query/write P95). Default remains window dense;82development quality is running. Expanded restore faults,independent semantic quality,full foreground coexistence and all JT gates remain incomplete. Earlier voice3/5s targets still FAIL;native-stage tracing is prepared,not yet run."
+    "Hybrid dev82 remains below semantic acceptance:direct5/512 lexicalF1=26.958%;fixed8/768=29.585%,visible reference65/82. Configuration nowreaches store andpacker;defaultstillWINDOWS5/512. Hybrid5/512 voice image5.202s fails5s;8/768 voice andreal-stage tracing untested.40cross-profile restoreSIGKILLs running. AllJT remainNOT_VERIFIED."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

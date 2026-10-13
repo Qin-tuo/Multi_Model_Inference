@@ -15,6 +15,19 @@ class MemoryContextTests(unittest.TestCase):
         text=json.loads(request.data)['content']
         return BytesIO(json.dumps({'tokens':[0]*len(text)}).encode())
 
+    def test_candidates_after_fifth_are_packed_when_budget_allows(self):
+        items=[{'memory_id':f'fact-{i}','content':f'合成事实{i}','version':1,
+            'sources':[{'source_id':f'source-{i}','evidence':f'合成事实{i}'}]} for i in range(8)]
+        with patch('app.context_memory.urlopen',self.tokenize):
+            message,metrics=memory_message(items,'http://127.0.0.1:8088/v1',max_tokens=4096,compact_references=True)
+            _,bounded=memory_message(items,'http://127.0.0.1:8088/v1',max_tokens=500,compact_references=True)
+        self.assertEqual(metrics['injected_memory_ids'],[item['memory_id'] for item in items])
+        self.assertEqual(metrics['evidence_references']['M8']['memory_id'],'fact-7')
+        self.assertEqual(len(json.loads(message['content'].split('\n',1)[1])),8)
+        self.assertLess(bounded['injected_count'],8);self.assertLessEqual(bounded['memory_tokens'],500)
+        self.assertEqual(len(bounded['omitted_evidence']),8-bounded['injected_count'])
+        with self.assertRaises(ValueError):memory_message(items*3,'http://127.0.0.1:8088/v1')
+
     def test_exact_duplicate_excerpt_does_not_displace_another_fact(self):
         items=[{'memory_id':str(i),'content':('甲' if i==0 else '乙')*60,'version':1,
                 'sources':[{'source_id':f'turn-{i}','evidence':('甲' if i==0 else '乙')*60}]} for i in range(2)]
