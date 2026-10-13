@@ -1,0 +1,42 @@
+{
+  "created_at": "2026-10-13T16:28:24.017744+00:00",
+  "status": "DEVELOPMENT_COMPARISON",
+  "checks": {
+    "same_seed_and_embedding_recipe": true,
+    "same_query_indices": true,
+    "same_write_sizes": true,
+    "observed_six_backend_identities_same": true,
+    "both_timing_and_durability_checks_pass": true
+  },
+  "profiles": [
+    {
+      "profile": "bge-int8-windows-v1",
+      "label": "window_dense",
+      "queries": 100,
+      "top5_hits": 9,
+      "long_hits": 0,
+      "short_hits": 9,
+      "query_p95_ms": 46.970073,
+      "write_p95_ms": 342.789785,
+      "long_write_p95_ms": 349.820351,
+      "reader_fingerprint": "f21d93dc9aa867baf7bcf87e57abca374092e20ac455820a3c26763990183829"
+    },
+    {
+      "profile": "bge-int8-windows-bm25-v1",
+      "label": "native_dbsf",
+      "queries": 100,
+      "top5_hits": 100,
+      "long_hits": 50,
+      "short_hits": 50,
+      "query_p95_ms": 62.290037,
+      "write_p95_ms": 355.659824,
+      "long_write_p95_ms": 359.302553,
+      "reader_fingerprint": "127a536c655afb3fc35c5eda1f51071e533a79e6372fb462f87788727b55fc9f"
+    }
+  ],
+  "source_reports": [
+    "benchmarks/results/managed-window-capacity-10k.json",
+    "benchmarks/results/managed-hybrid-capacity-10k.json"
+  ],
+  "scope": "Same frozen synthetic10k workload recipe,query indices,write sizes and embedding artifact;two full adapter implementations including their actual binding/index verification costs. Backend residency only,no foreground voice. One run per configuration,not B0-B3,a single-factor performance improvement claim,independent semantic quality or JT acceptance."
+}

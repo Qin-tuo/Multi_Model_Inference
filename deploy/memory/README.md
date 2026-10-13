@@ -41,7 +41,9 @@ python3 tools/project.py reindex-memory --data-dir /实际应用数据目录 \
 
 支持先前已完成窗口升级的档案再次升级；未发布的新升级可撤销并恢复上一份完成标记，已发布的升级继续续跑。工具拒绝降级索引。不要在正在使用该数据目录的应用旁执行升级；退出应用后重复相同命令即可续跑。
 
-[实际模型集成](../../benchmarks/results/hybrid-memory-integration.json)已通过8条长资料的ID/原文/片段召回、公开保存及跨会话回忆、更正、旧备份恢复、主体隔离、遗忘及实体清理。实际服务回归另验证语义前60之外的词项候选、过滤条件、连续升级撤销/续跑、旧备份不复活，以及同配置恢复时重建损坏的词项向量。完整故障重复、10k正式时延、开发质量对照与独立JT验收继续进行，暂未更改默认配置。
+[实际模型集成](../../benchmarks/results/hybrid-memory-integration.json)已通过8条长资料的ID/原文/片段召回、公开保存及跨会话回忆、更正、旧备份恢复、主体隔离、遗忘及实体清理。实际服务回归另验证语义前60之外的词项候选、过滤条件、连续升级撤销/续跑、旧备份不复活，以及同配置恢复时重建损坏的词项向量。这些合成集成检查不替代扩展故障、开发质量与独立JT验收；默认配置暂未更改。
+
+后续[30次实际迁移SIGKILL](../../benchmarks/results/hybrid-reindex-recovery.json)全部通过；[万条正式适配器测试](../../benchmarks/results/managed-hybrid-capacity-10k.json)编号top5为100/100，查询/完整写入P95为62.29/355.66ms，没有错误或主体泄漏。该计时包含真实BGE、Mem0、schema3绑定、原生融合及持久控制路径；没有前台语音负载。82题中文开发质量评测正在运行，旧/当前备份的扩展恢复故障、独立语义质量和完整共存验收仍待完成。
 
 `prepare.py`校验官方ARM64 musl归档SHA256、固定Qdrant 1.19.2及源码commit。程序和源码分别位于`~/AI_Stack/installed/qdrant-1.19.2/`、`~/AI_Stack/frameworks/qdrant/`，生产入口使用项目的systemd用户单元`mmassistant-qdrant.service`，未修改系统包。
 

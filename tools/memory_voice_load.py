@@ -21,6 +21,7 @@ sys.path.insert(0,str(ROOT))
 from app.adapters.llama import LlamaConfig
 from app.adapters.vision import RosVisionBridge
 from app.memory_runtime import open_memory
+from app.memory_profiles import WINDOWS,HYBRID
 from app.records import Records
 from app.reminders import ReminderService
 from app.voice_assistant import VoiceAssistant
@@ -41,7 +42,7 @@ def vision_summary(node,elapsed):
 
 async def main(args):
     logger.remove();logger.add(sys.stderr,level='WARNING')
-    folder=args.run_dir.resolve();corpus,config,prefix,_=workload(10000,personal=True)
+    folder=args.run_dir.resolve();corpus,config,prefix,_=workload(10000,personal=True,profile=args.profile)
     if json.loads((folder/'capacity-run.json').read_text())!=config:raise RuntimeError('Expected the exact personal10k synthetic workload')
     if json.loads((folder/'population.json').read_text())!={'owner':10000,'guest':100}:raise RuntimeError('Finish preparation first')
     started_marker=folder/'coexistence-started.json'
@@ -54,10 +55,17 @@ async def main(args):
         if digest!=prior['cases'][index]['input_sha256']:raise RuntimeError('Frozen synthetic voice input changed')
         inputs.append((label,path,digest))
     reader=fingerprint();before=backend_state();artifacts=folder/'coexistence';artifacts.mkdir()
-    write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'inputs':[{'label':a,'sha256':c} for a,_,c in inputs]})
+    write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'trace_stages':args.trace_stages,'debug_loop':args.debug_loop,
+        'inputs':[{'label':a,'sha256':c} for a,_,c in inputs]})
     queries=[];writes=[];turns=[];lag=[];errors=[];checks={};voice=None;probe=None;bridge=None;thread=None
     observe_stop=threading.Event();voice_done=asyncio.Event();memory_minimum=asyncio.Event();sampling_done=asyncio.Event()
     memory_task=lag_task=None;begin=end=None;vision={};bridge_state={};asr_state={}
+    stage_trace=None
+    if args.trace_stages:
+        from tools.voice_stage_trace import StageTrace
+        stage_trace=StageTrace()
+    if args.debug_loop:
+        loop=asyncio.get_running_loop();loop.set_debug(True);loop.slow_callback_duration=.02
     async def sample_loop():
         loop=asyncio.get_running_loop();target=loop.time()+.02
         while not sampling_done.is_set():
@@ -94,6 +102,7 @@ async def main(args):
             await asyncio.sleep(max(0,next_cycle-asyncio.get_running_loop().time()))
     with MemoryMonitor() as monitor,ExitStack() as stack:
         memory=stack.enter_context(open_memory(folder/'memory'))
+        if memory.capabilities()['embedding_profile']!=args.profile:raise RuntimeError('Bound memory index differs from requested workload')
         from qdrant_client import models
         counts={label:memory.sdk.vector_store.client.count(memory.sdk.collection_name,exact=True,count_filter=models.Filter(must=[
             models.FieldCondition(key='user_id',match=models.MatchValue(value=corpus[label])),
@@ -116,6 +125,7 @@ async def main(args):
                     await asyncio.sleep(.1)
             voice=VoiceAssistant(LlamaConfig.from_manifest(ROOT/'models/manifest.json'),memory,reminders,records,
                 user_id=corpus['owner'],vision_frames=bridge.frames,output_path=artifacts/'answers.wav')
+            if stage_trace:stage_trace.attach(voice,memory)
             await voice.start();begin=time.monotonic_ns();probe.started_ns=begin;probe.measuring=True
             lag_task=asyncio.create_task(sample_loop());memory_task=asyncio.create_task(memory_load(memory))
             # Keep real foreground turns active until at least100 searches and
@@ -156,6 +166,7 @@ async def main(args):
                 asr_state=voice.stt.status()
                 try:await voice.close()
                 except Exception as error:errors.append({'stage':'close','error':str(error)})
+            if stage_trace:stage_trace.detach()
         # Readbacks are deliberately outside all timed workload intervals.
         if (artifacts/'answers.wav').exists():
             with wave.open(str(artifacts/'answers.wav')) as wav:
@@ -202,6 +213,7 @@ async def main(args):
             'voice_latency':latencies,'queries':queries,'writes':writes,'turns':turns,'vision':vision,'bridge':bridge_state,
             'event_loop_lag':{**statistics(lag),'missed20ms_periods':sum(row['missed_periods'] for row in lag)},
             'event_loop_samples':lag,'asr_state':asr_state,'backends_before':before,'backends_after':backend_state(),'resources':monitor.report(),
+            'stage_trace':stage_trace.report() if stage_trace else None,'debug_loop':args.debug_loop,
             'scope':'Same real VoiceAssistant and bound int8-window MemoryAdapter;10k personal owner records plus100 guest distractors,10% long owner records. Paced real memory searches/writes overlap repeated frozen synthetic speech inputs,real ASR/LLM/TTS and live RGB-D/detection/pose. File PCM is not physical playback. Periodic visual result age is measured,visual content has no scene ground truth. No reminder/gesture workload,no formal JT,independent quality,B0-B3 or8h acceptance.'}
         write_json(args.output,report)
         print(json.dumps({key:report[key] for key in ('status','checks','query_summary','write_summary','voice_latency','event_loop_lag')},ensure_ascii=False),flush=True)
@@ -211,6 +223,9 @@ async def main(args):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--run-dir',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True);parser.add_argument('--turns',type=int,default=20)
+    parser.add_argument('--profile',choices=[WINDOWS,HYBRID],default=WINDOWS)
+    parser.add_argument('--trace-stages',action='store_true',help='Diagnostic native frames and wall spans; qualify observer overhead before comparisons')
+    parser.add_argument('--debug-loop',action='store_true',help='Diagnostic asyncio callbacks slower than20ms; affects measured execution')
     args=parser.parse_args()
     if not 4<=args.turns<=100:parser.error('turns must be4..100')
     raise SystemExit(asyncio.run(main(args)))
