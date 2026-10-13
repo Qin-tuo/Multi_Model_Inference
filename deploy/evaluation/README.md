@@ -268,3 +268,27 @@ python3 tools/project.py bench --suite memory-quality --split development \
 [GC诊断](../../benchmarks/results/voice-gc-pause-diagnostic.json)记录328次回收、0丢弃；一次generation2回收耗时580.1ms，与最大573.5ms事件循环延误重叠，所在时段为第15轮图像请求。相机输入再次重置epoch，但该轮没有形成问答失败。这是明确的时间相关证据，尚未完整隔离因果；回收策略保持原样，没有禁用GC或改阈值。启动期静态对象管理、关闭后的释放和长时内存曲线需要进一步验证。
 
 `clone_capacity_fixture.py --from-snapshot`只重用此前完整回执绑定的不可变`seed-backup`，核对其manifest哈希并再次验证点/SQL/合成内容；不会复制已测工作目录新增的事实。`memory_voice_load.py --skip-literal-arithmetic/--no-skip-literal-arithmetic --turn-interval 10`选择开发条件；`--observe-gc`只记录回收时间。已测目录和失败结果不可覆盖。
+
+## 启动期对象冻结实验
+
+针对已观测的generation2停顿，增加独立文件测试进程`tools/heap_voice_worker.py`，比较启动时`collect`与`collect`后`freeze`。[冻结协议](../../benchmarks/manifests/startup-heap-v1.json)要求相同种子、20个固定到达输入、8条/768tokens、算式路由开启及相同缓存上限；两轮自动GC都保持开启、阈值不变。普通应用入口不启用这项策略。
+
+本机CPython3.12.3启动即有375个永久代对象；`gc.unfreeze()`后为0，但完整回收后再次为375。[上游实现](https://github.com/python/cpython/blob/v3.12.3/Modules/gcmodule.c#L397)在`update_refs`中将不适用普通引用计数循环检测的immortal对象移入永久代。因此实验不再把“永久代必须为0”当作恢复条件，[前置条件记录](../../benchmarks/results/startup-heap-precondition.json)保留该修正。
+
+专用工作进程在导入应用前记录启动基线；`StartupHeapPolicy`只在此基线上取得独占实验权。启动收集发生在语音输入开放前，冻结后新建对象仍参与自动回收；结束后解冻、回收，并核对永久代基线、GC开启状态和阈值均恢复。外来冻结状态或并发实验会被拒绝。实际弱引用/循环对象测试验证新对象可回收、冻结旧循环延迟至关闭后释放，227项框架回归通过。
+
+启动、运行期和关闭回收区间分别记录，不能把启动开销藏入“运行期优化”。即使短测中没有完整回收，也可能只是把停顿推到测试窗口之外。该策略还没有成为生产默认，8h内存趋势、反复关闭/重开和真实音频采集生命周期仍待验证。
+
+[短测对照](../../benchmarks/results/voice-heap-comparison.json)现已完成，两份原始结果均保留：
+
+| 同一输入/种子，20轮 | 只在启动时回收 | 启动回收后冻结 |
+|---|---:|---:|
+| 启动处理 | 541ms | 536ms |
+| 运行期间最大GC | 5.07ms | 10.30ms |
+| 运行期间第二代GC次数 | 0 | 0 |
+| 最大事件循环延误 | 167ms | 373ms |
+| 回忆首段文件PCM P95 | 4.310秒 | 4.274秒 |
+| 关闭处理 | 552ms | 641ms |
+| GC恢复 | 原永久代基线375、开启、原阈值 | 原永久代基线375、开启、原阈值 |
+
+[collect原始报告](../../benchmarks/results/voice-heap-collect.json)与[freeze原始报告](../../benchmarks/results/voice-heap-freeze.json)都完成20轮、无执行错误，仍因短问答时延超标记为FAIL。冻结轮启动时约54.6万个对象进入永久代，关闭后按约定恢复；测试证明生命周期机制可运行，但没有证明冻结改善整体延迟。两轮均未遇到运行期间第二代GC，无法据此判断长时间运行是否仍会停顿，故不启用为默认策略。首次回忆约4.3秒的问题将单独做冷启动阶段追踪。

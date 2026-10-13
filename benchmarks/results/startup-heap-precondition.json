@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-10-13T20:18:14.065106+00:00",
+  "status": "EXPERIMENT_PRECONDITION_CORRECTED",
+  "python": "3.12.3",
+  "observed": [
+    "Freshpythonandpython-S startwith375permanent objects.",
+    "gc.unfreeze gives0;fullgc.collect returns375."
+  ],
+  "source": "https://github.com/python/cpython/blob/v3.12.3/Modules/gcmodule.c#L397",
+  "finding": "CPython update_refs moves immortal objects to permanentgeneration. Zero-permanent assumption fails even after ownedbootstrap reset.",
+  "resolution": "Dedicated benchmarkworker records baseline after unfreeze+collect;helper preserves thatbaseline,enablesautomaticGC unchanged,and refuses foreignfrozenobjects beyondbaseline. Tests runinownedchildren ratherthanmutatingthetest-suitesGC state.",
+  "validation": "Actual startup-cycle/new-cycle weakref tests PASS;automaticGC andthresholds unchanged,oldcyclesreleasedonclose,foreignfreeze notoverridden. No defaultapplicationGCpolicy change."
+}

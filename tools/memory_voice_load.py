@@ -43,6 +43,9 @@ def vision_summary(node,elapsed):
 
 async def main(args):
     logger.remove();logger.add(sys.stderr,level='WARNING')
+    bootstrap=globals().get('GC_BOOTSTRAP_STATE')
+    if args.startup_heap!='none' and (not bootstrap or not bootstrap.get('owned_process')):
+        raise RuntimeError('Use heap_voice_worker.py for the owned heap experiment')
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
     top_k=args.memory_top_k if args.memory_top_k is not None else runtime['memory']['top_k']
     memory_tokens=args.memory_token_limit if args.memory_token_limit is not None else runtime['memory']['context_token_limit']
@@ -68,12 +71,18 @@ async def main(args):
     write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'trace_stages':args.trace_stages,'debug_loop':args.debug_loop,
         'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
         'skip_literal_arithmetic':skip_arithmetic,'turn_interval_seconds':args.turn_interval,
+        'startup_heap_policy':args.startup_heap,
+        'gc_bootstrap_state':globals().get('GC_BOOTSTRAP_STATE'),
         'inputs':[{'label':a,'sha256':c} for a,_,c in inputs]})
     queries=[];writes=[];turns=[];lag=[];errors=[];checks={};voice=None;probe=None;bridge=None;thread=None
     observe_stop=threading.Event();voice_done=asyncio.Event();memory_minimum=asyncio.Event();sampling_done=asyncio.Event()
     memory_task=lag_task=None;begin=end=None;vision={};bridge_state={};asr_state={}
     stage_trace=None
     gc_observer=None
+    heap_policy=None
+    if args.startup_heap!='none':
+        from tools.startup_heap_policy import StartupHeapPolicy
+        heap_policy=StartupHeapPolicy(args.startup_heap,permanent_baseline=bootstrap['permanent_baseline_after_collect'])
     if args.observe_gc:
         from tools.gc_observation import GCObservation
         gc_observer=GCObservation()
@@ -145,6 +154,9 @@ async def main(args):
                 memory_skip_literal_arithmetic=skip_arithmetic)
             if stage_trace:stage_trace.attach(voice,memory)
             if gc_observer:gc_observer.start()
+            # File input begins only after this explicit startup phase. The
+            # experiment does not freeze an already-listening device pipeline.
+            if heap_policy:heap_policy.start()
             await voice.start();begin=time.monotonic_ns();probe.started_ns=begin;probe.measuring=True
             lag_task=asyncio.create_task(sample_loop());memory_task=asyncio.create_task(memory_load(memory))
             # Keep real foreground turns active until at least100 searches and
@@ -192,6 +204,9 @@ async def main(args):
                 try:await voice.close()
                 except Exception as error:errors.append({'stage':'close','error':str(error)})
             if stage_trace:stage_trace.detach()
+            if heap_policy:
+                try:heap_policy.close()
+                except Exception as error:errors.append({'stage':'heap_policy_close','error':str(error)})
             if gc_observer:gc_observer.stop()
         # Readbacks are deliberately outside all timed workload intervals.
         if (artifacts/'answers.wav').exists():
@@ -215,6 +230,7 @@ async def main(args):
         latencies={label:statistics([{'elapsed_ms':row.get('scheduled_end_to_first_pcm_seconds',row['inferred_speech_end_to_first_pcm_seconds'])*1000} for row in turns
             if row['label']==label and 'inferred_speech_end_to_first_pcm_seconds' in row]) for label,_,_ in inputs}
         checks={'workload_completed':not errors,'minimum_memory_samples':len(queries)>=100 and len(writes)>=50,
+            'heap_policy_restored':heap_policy is None or heap_policy.report().get('policy_restored',False),
             'minimum_overlapping_samples':len(overlap_queries)>=100 and len(overlap_writes)>=50,
             'minimum_voice_turns':len(turns)>=args.turns,'all_voice_outputs':bool(turns) and all(row.get('speech_receipt',{}).get('completion')=='wav_file_flushed' for row in turns),
             'no_voice_errors':voice is not None and not voice.errors,'no_query_errors':qstat['errors']==0,
@@ -245,6 +261,8 @@ async def main(args):
             'event_loop_samples':lag,'asr_state':asr_state,'backends_before':before,'backends_after':backend_state(),'resources':monitor.report(),
             'stage_trace':stage_trace.report() if stage_trace else None,'debug_loop':args.debug_loop,
             'gc_observation':gc_observer.report() if gc_observer else None,
+            'startup_heap_policy':heap_policy.report() if heap_policy else None,
+            'gc_bootstrap_state':globals().get('GC_BOOTSTRAP_STATE'),
             'scope':'Same real VoiceAssistant and bound int8-window MemoryAdapter;10k personal owner records plus100 guest distractors,10% long owner records. Paced real memory searches/writes overlap repeated frozen synthetic speech inputs,real ASR/LLM/TTS and live RGB-D/detection/pose. File PCM is not physical playback. Periodic visual result age is measured,visual content has no scene ground truth. No reminder/gesture workload,no formal JT,independent quality,B0-B3 or8h acceptance.'}
         write_json(args.output,report)
         print(json.dumps({key:report[key] for key in ('status','checks','query_summary','write_summary','voice_latency','event_loop_lag')},ensure_ascii=False),flush=True)
@@ -262,7 +280,9 @@ if __name__=='__main__':
     parser.add_argument('--trace-stages',action='store_true',help='Diagnostic native frames and wall spans; qualify observer overhead before comparisons')
     parser.add_argument('--debug-loop',action='store_true',help='Diagnostic asyncio callbacks slower than20ms; affects measured execution')
     parser.add_argument('--observe-gc',action='store_true',help='Passive diagnostic GC timing;does not disable or tune collection')
+    parser.add_argument('--startup-heap',choices=['none','collect','freeze'],default='none',help='Opt-in file-workload startup experiment;GC stays enabled')
     args=parser.parse_args()
     if not 4<=args.turns<=100:parser.error('turns must be4..100')
     if args.turn_interval and not 8<=args.turn_interval<=20:parser.error('fixed turn interval must be8..20s')
+    if args.startup_heap!='none' and not args.observe_gc:parser.error('startup heap experiments require GC observation')
     raise SystemExit(asyncio.run(main(args)))

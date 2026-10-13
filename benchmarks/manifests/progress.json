@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T19:57:08.955208+00:00",
+  "updated_at": "2026-10-13T20:28:59.843819+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -480,6 +480,23 @@
       ],
       "validation": "Opt-in complete literal arithmetic skips onlylong-termsearch;modelstillruns,activehistory/refsretained. Personal/unit/variable/date/phone/extra-instruction inputsfallthrough;82existingmemorydevquestions notrouted. Versionread remainsreal/off-eventloop.225corePASS. Samepristinesealedseed,fixed20releases10s,coldmodels:baseline mathP95=3.165s,recall4.262s;candidatev1fails15thimageCAMERA_EPOCH_CHANGED,staleanswerrefused,retained. PassiveGCv2completes20:math1.941s,recall4.348s,time3.130s,image4.826s;overallFAILshort3s. GCgen2=580.123ms overlapsmaxloop573.457ms;cameraepochreset1. Observationmodes differ,no strictsinglefactor gain claim;noGCpolicychange.",
       "next_action": "Isolate and test startup/static-heap collection policy with explicit cleanup and memory-growth checks;repeat complete workloads without relaxing camera/audio guards. Keep routingopt-in until widerqualification;formalB0-B3/5runs100events/8h notmet."
+    },
+    {
+      "task_id": "J5.runtime.startup_heap",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/startup_heap_policy.py",
+        "tools/heap_voice_worker.py",
+        "tools/compare_heap_runs.py",
+        "tests/test_startup_heap_policy.py",
+        "benchmarks/manifests/startup-heap-v1.json",
+        "benchmarks/results/startup-heap-precondition.json",
+        "benchmarks/results/voice-heap-collect.json",
+        "benchmarks/results/voice-heap-freeze.json",
+        "benchmarks/results/voice-heap-comparison.json"
+      ],
+      "validation": "Owned-process startupcollect vscollect+freeze,automaticGC enabledandthresholds unchanged. CPython3.12 immortal permanentbaseline375 explicitly recorded;foreignfreeze/concurrentpolicy rejected,newcycles collect,oldcycles releaseonclose.227corePASS. Both20-turn realmodels/livecamera/fileaudio runs completebutFAILshortlatency:recall4.310/4.274s. WorkloadGCmax5.07/10.30ms,gen2count0/0;loopmax167/373ms. Startup541/536ms,close552/641ms reportedseparately;freeze54.6万objects thenrestore375. No provenbenefit or8hqualification,no defaultpolicy change.",
+      "next_action": "Trace cold first-turn stages;do not adoptfreeze fromshortabsenceofgen2. Longerrepresentative memory/resource tests andphysicalaudio lifecycle remainneeded."
     }
   ],
   "acceptance": {
@@ -580,7 +597,8 @@
     "Managed current-profile10k timing passes47ms query/343ms write P95,but numbered top5 recall9/100(long0/50). Native local BM25/RRF/DBSF isolated candidates each recover100/100,not production-integrated/lifecycle-qualified. Actual20-turn shared10k voice/live-camera load passes memory127/459ms and visual11.64Hz/174-178ms but FAILS file first-PCM3/5s targets(3.098/5.545s);loop max154.90ms needs diagnosis. Physical audio,independent quality,full scenes and JT gates remain unverified.",
     "Hybrid dev82 remains below semantic acceptance:direct5/512 lexicalF1=26.958%;fixed8/768=29.585%,visible reference65/82. Configuration nowreaches store andpacker;defaultstillWINDOWS5/512. Hybrid5/512 voice image5.202s fails5s;8/768 voice andreal-stage tracing untested.40cross-profile restoreSIGKILLs passed with declared idlemodelservice intervention. AllJT remainNOT_VERIFIED.",
     "Current8/768 + bounded256/64MiB prompt-cache20turn baseline stillFAILshort3s(firstPCMmax-typeP95=3.271s),image4.895s;no acousticgroundtruth. Nativephase trace shows irrelevant memorycostfor arithmetic butrouting change notyetimplemented. GlobalRSS/memory and8h remainunqualified;prompt-cache cap isnot a totalprocesscap.",
-    "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED."
+    "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED.",
+    "Startupcollect/freeze20-turn pairdidnotproveoverallgain:neitherrunhadworkloadgen2GC andrecallP95stays~4.3s. GCownership/cleanupmechanism testedbutbenchmark-only;longdurationmemory,8h,andcoldstartupstagesremainunqualified."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

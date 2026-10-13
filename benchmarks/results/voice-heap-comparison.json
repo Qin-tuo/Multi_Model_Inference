@@ -1,0 +1,153 @@
+{
+  "created_at": "2026-10-13T20:27:45.338967+00:00",
+  "status": "DEVELOPMENT_COMPARISON",
+  "checks": {
+    "same_application": true,
+    "same_memory_recipe": true,
+    "same_retrieval": true,
+    "same_routing": true,
+    "same_interval": true,
+    "same_inputs": true,
+    "twenty_attempts": true,
+    "same_owned_bootstrap": true,
+    "both_automatic_gc_enabled": true,
+    "same_gc_thresholds": true,
+    "both_policies_restored": true,
+    "same_pristine_snapshot": true
+  },
+  "variants": [
+    {
+      "mode": "collect",
+      "status": "FAIL",
+      "workload_completed": true,
+      "voice_latency": {
+        "recall": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2896.700864,
+          "p95_ms": 4310.269033,
+          "max_ms": 4310.269033
+        },
+        "time": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2917.801018,
+          "p95_ms": 3167.813616,
+          "max_ms": 3167.813616
+        },
+        "image": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 4169.727427,
+          "p95_ms": 4749.9916969999995,
+          "max_ms": 4749.9916969999995
+        },
+        "arithmetic": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 1967.975549,
+          "p95_ms": 1977.066797,
+          "max_ms": 1977.066797
+        }
+      },
+      "event_loop_lag": {
+        "count": 9744,
+        "errors": 0,
+        "p50_ms": 1.06729194521904,
+        "p95_ms": 5.5150970292743295,
+        "max_ms": 166.88040528970305,
+        "missed20ms_periods": 57
+      },
+      "workload_gc_count": 317,
+      "workload_gc_by_generation": {
+        "0": 290,
+        "1": 27
+      },
+      "workload_gc_max_ms": 5.070434,
+      "startup_collection_ms": 541.417402,
+      "closing_collection_ms": 551.898971,
+      "frozen_objects": 375,
+      "restored_permanent_objects": 375,
+      "query_p95_ms": 158.318036,
+      "write_p95_ms": 468.691668,
+      "resources_including_startup_and_readbacks": {
+        "minimum_available_bytes": 4408668160,
+        "peak_process_rss_bytes": 857010176,
+        "external_pid": null,
+        "peak_external_rss_bytes": 0,
+        "sample_count": 2080,
+        "period_seconds": 0.1
+      },
+      "bridge_epoch_resets_including_startup": 1
+    },
+    {
+      "mode": "freeze",
+      "status": "FAIL",
+      "workload_completed": true,
+      "voice_latency": {
+        "recall": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2952.406298,
+          "p95_ms": 4274.4441289999995,
+          "max_ms": 4274.4441289999995
+        },
+        "time": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2875.092519,
+          "p95_ms": 3233.602161,
+          "max_ms": 3233.602161
+        },
+        "image": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 4117.91313,
+          "p95_ms": 4919.141512,
+          "max_ms": 4919.141512
+        },
+        "arithmetic": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 1950.498277,
+          "p95_ms": 1960.888113,
+          "max_ms": 1960.888113
+        }
+      },
+      "event_loop_lag": {
+        "count": 9734,
+        "errors": 0,
+        "p50_ms": 1.1023171828128397,
+        "p95_ms": 5.489977993420325,
+        "max_ms": 373.26087086694315,
+        "missed20ms_periods": 67
+      },
+      "workload_gc_count": 321,
+      "workload_gc_by_generation": {
+        "0": 294,
+        "1": 27
+      },
+      "workload_gc_max_ms": 10.30084,
+      "startup_collection_ms": 536.37565,
+      "closing_collection_ms": 641.229008,
+      "frozen_objects": 546022,
+      "restored_permanent_objects": 375,
+      "query_p95_ms": 166.158751,
+      "write_p95_ms": 467.987064,
+      "resources_including_startup_and_readbacks": {
+        "minimum_available_bytes": 4421787648,
+        "peak_process_rss_bytes": 819752960,
+        "external_pid": null,
+        "peak_external_rss_bytes": 0,
+        "sample_count": 2078,
+        "period_seconds": 0.1
+      },
+      "bridge_epoch_resets_including_startup": 1
+    }
+  ],
+  "source_reports": [
+    "benchmarks/results/voice-heap-collect.json",
+    "benchmarks/results/voice-heap-freeze.json"
+  ],
+  "scope": "One short file-workload pair withlivecamera and realmodels. Workload GC excludes explicitly reported startup/close collections. A short collect-only run withoutgeneration2 cannot establish long-term elimination;no8h/memory-leak,acoustic,independentquality orfinalJT claim. Startupfreezing remains benchmark-only."
+}
