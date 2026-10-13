@@ -19,6 +19,8 @@ import os
 from pathlib import Path
 import threading
 import uuid
+import re
+from urllib.parse import urlsplit
 from typing import Any
 
 # This applies to this process before importing Mem0, not to any user's shell
@@ -52,7 +54,8 @@ def _text(value, label, limit=8192):
 def build_mem0_config(data_dir: str | Path, bge_path: str | Path, *,
                       llama_base_url: str = "http://127.0.0.1:8088/v1",
                       llama_model: str = "assistant-vlm", dimensions: int = 512,
-                      embedding_backend: str = "torch") -> dict:
+                      embedding_backend: str = "torch", qdrant_url: str | None = None,
+                      qdrant_collection: str | None = None) -> dict:
     """Exact mem0ai 2.2.1 configuration. No model is downloaded by this helper.
 
     The ONNX path is explicit and requires the matching cached ONNX artifact and
@@ -69,6 +72,23 @@ def build_mem0_config(data_dir: str | Path, bge_path: str | Path, *,
     if embedding_backend == "onnx":
         model_kwargs.update({"backend": "onnx", "model_kwargs": {
             "provider": "CPUExecutionProvider", "file_name": "onnx/model.onnx"}})
+    vector_config = {"collection_name": "assistant_memories", "path": str(data / "qdrant"),
+                     "embedding_model_dims": dimensions, "on_disk": True}
+    if qdrant_url is not None:
+        try:
+            endpoint = urlsplit(qdrant_url)
+            port = endpoint.port
+        except (TypeError,ValueError):
+            raise MemoryAdapterError('INVALID_ARGUMENT','Invalid Qdrant endpoint') from None
+        if (endpoint.scheme != 'http' or endpoint.hostname not in {'127.0.0.1','::1'}
+                or port is None or not 1024<=port<=65535 or endpoint.username or endpoint.password
+                or endpoint.path not in {'','/'} or endpoint.query or endpoint.fragment
+                or not isinstance(qdrant_collection,str) or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]{0,62}',qdrant_collection)):
+            raise MemoryAdapterError('INVALID_ARGUMENT','Qdrant evaluation requires a numeric loopback HTTP endpoint and explicit collection')
+        vector_config.pop('path')
+        vector_config.update(host=endpoint.hostname,port=port,path=None,collection_name=qdrant_collection)
+    elif qdrant_collection is not None:
+        raise MemoryAdapterError('INVALID_ARGUMENT','Explicit Qdrant collection requires a loopback endpoint')
     return {
         "version": "v1.1",
         "history_db_path": str(data / "history.sqlite"),
@@ -77,9 +97,7 @@ def build_mem0_config(data_dir: str | Path, bge_path: str | Path, *,
             "temperature": 0, "max_tokens": 128}},
         "embedder": {"provider": "huggingface", "config": {
             "model": str(model), "embedding_dims": dimensions, "model_kwargs": model_kwargs}},
-        "vector_store": {"provider": "qdrant", "config": {
-            "collection_name": "assistant_memories", "path": str(data / "qdrant"),
-            "embedding_model_dims": dimensions, "on_disk": True}},
+        "vector_store": {"provider": "qdrant", "config": vector_config},
     }
 
 
@@ -202,7 +220,8 @@ class Mem0Adapter:
                     client.close()
 
     def capabilities(self):
-        return {"provider": "mem0ai", "version": "2.2.1", "vector_store": "qdrant_local",
+        return {"provider": "mem0ai", "version": "2.2.1", "vector_store":
+                'qdrant_local' if self.sdk.vector_store.is_local else 'qdrant_server',
                 "embedding_scope": self.embedding_scope, "explicit_memory_infer": False,
                 "cas": "serialized_adapter_writer", "cross_store_atomicity": False,
                 "operation_recovery": "retry_reconciliation", "owner_id_checks": True,

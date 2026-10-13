@@ -54,6 +54,17 @@ def actual_sdk(data_dir):
 
 
 class ConfigTests(unittest.TestCase):
+    def test_server_evaluation_requires_explicit_numeric_loopback_and_collection(self):
+        config=build_mem0_config('/tmp/config-test','/tmp/cached-bge',qdrant_url='http://127.0.0.1:16333',
+                                 qdrant_collection='capacity_10000')['vector_store']['config']
+        self.assertEqual((config['host'],config['port'],config['path'],config['collection_name']),
+                         ('127.0.0.1',16333,None,'capacity_10000'))
+        for url,collection in [('http://example.com:6333','capacity_1'),('http://127.0.0.1:invalid','capacity_1'),
+                ('http://127.0.0.1:6333/path','capacity_1'),('http://user:password@127.0.0.1:6333','capacity_1'),
+                ('http://127.0.0.1:6333',None),('http://127.0.0.1:6333','../collection'),(None,'capacity_1')]:
+            with self.subTest(url=url),self.assertRaises(MemoryAdapterError):
+                build_mem0_config('/tmp/config-test','/tmp/cached-bge',qdrant_url=url,qdrant_collection=collection)
+
     def test_config_pins_local_llm_cpu_embedding_and_persistent_paths(self):
         config = build_mem0_config("/tmp/config-test", "/tmp/cached-bge", embedding_backend="onnx")
         self.assertEqual("http://127.0.0.1:8088/v1", config["llm"]["config"]["openai_base_url"])

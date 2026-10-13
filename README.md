@@ -116,7 +116,9 @@ source "$HOME/AI_Stack/workspaces/vision/install/setup.bash"
 
 各档另加100条访客硬负例，未观察到主体泄漏，全部50次写入均在计时后检查了正文、历史及journal完成状态。编号近似记录的Top-5命中分别为0/100、86/100；各档查询编号集合不同，召回率仅作各自压力观察。这不是独立200例记忆质量集，1k档低时延也不代表记忆质量或JT验收通过。50k压力档仍待测量；当前先处理10k档已暴露的瓶颈。
 
-[分段诊断](benchmarks/results/memory-capacity-10k-profile.json)在已完成数据的隔离副本上进行：10次查询平均总耗时333ms，其中Qdrant查询296ms；10次写入平均846ms，两次Qdrant过滤列表合计约773ms。主耗时在嵌入式存储的过滤/查询路径。上游说明[local模式面向小规模使用，payload索引不生效](https://github.com/qdrant/qdrant-client/blob/v1.19.1/qdrant_client/local/qdrant_local.py)。后续评估同一Mem0/Qdrant技术栈的本机服务模式和原生索引，保留此失败基线；当前应用尚未切换。
+隔离的[Qdrant本机服务对照](benchmarks/results/qdrant-native-10k-comparison.json)已完成：相同10k种子记录、ID、向量、BGE与完整写入路径下，查询/写入P95降至47.5/56.6ms，100个查询的目标命中结果逐项一致。使用精确向量扫描及原生字段索引；[40次进程强杀恢复检查](benchmarks/results/qdrant-recovery-smoke.json)通过。应用默认仍为Qdrant local，50k压力档正在独立准备，部署与迁移尚未完成。复现方式见[本机服务评估说明](deploy/memory/README.md)。
+
+[分段诊断](benchmarks/results/memory-capacity-10k-profile.json)在已完成数据的隔离副本上进行：10次查询平均总耗时333ms，其中Qdrant查询296ms；10次写入平均846ms，两次Qdrant过滤列表合计约773ms。主耗时在嵌入式存储的过滤/查询路径。上游说明[local模式面向小规模使用，payload索引不生效](https://github.com/qdrant/qdrant-client/blob/v1.19.1/qdrant_client/local/qdrant_local.py)。已评估同一Mem0/Qdrant技术栈的本机服务模式和原生索引，保留此失败基线；当前应用尚未切换。
 
 ```bash
 python3 tools/project.py bench --suite memory-capacity --tier 10000 \

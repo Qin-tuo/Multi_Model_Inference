@@ -11,7 +11,7 @@
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |
 | `environments/vision/` | Ultralytics、PyTorch CPU、ONNX 等模型导出/验证环境 |
 | `environments/ort-build/` | ORT后续构建和上游lintrunner/clang-format检查的隔离开发环境 |
-| `installed/` | 自行编译的依赖安装前缀；`onnxruntime-1.28.0-cuda13-sm87/` 包含已编译的 CUDA/TensorRT provider 库 |
+| `installed/` | 自行编译或官方发布的依赖程序；`onnxruntime-1.28.0-cuda13-sm87/` 包含已编译的 CUDA/TensorRT provider 库 |
 | `workspaces/` | ROS视觉工作区及colcon构建/安装目录 |
 | `sdk/` | 本机 CUDA 构建所需的 cuDNN/TensorRT 头文件和库链接布局，以及 CUDA 13.2 CCCL 兼容头文件覆盖层 |
 | `system/` | 系统 CUDA、TensorRT、cuDNN、ROS 2 Jazzy、PortAudio 的访问入口，实际文件由系统包管理器维护 |
@@ -34,6 +34,7 @@
 |---|---|---|
 | llama.cpp | `frameworks/llama.cpp/` | Git 源码 |
 | Pipecat | `frameworks/pipecat/` | Git 源码；实际运行包在 `environments/assistant/` |
+| Qdrant server（隔离评估） | `frameworks/qdrant/`、`installed/qdrant-1.19.2/` | 固定源码及校验过的官方ARM64程序；应用尚未切换 |
 | Mem0 / APScheduler / Qdrant client | `frameworks/mem0/`、`frameworks/apscheduler/`、`frameworks/qdrant-client/` | 指向实际使用的已安装包 |
 | OpenVoiceStream / voice-engine | `frameworks/openvoicestream/`、`frameworks/voice-engine/` | Git 源码及其子模块 |
 | yolo_ros / ONNX Runtime | `frameworks/yolo_ros/`、`frameworks/onnxruntime/` | Git 源码 |
