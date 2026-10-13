@@ -200,6 +200,7 @@ def prepare(args):
         return 0
     if args.component == "memory":
         subprocess.run([str(ROOT / ".venv/bin/python"), str(ROOT / "tools/memory_model.py"), "prepare"], check=True)
+        subprocess.run([str(ROOT / '.venv/bin/python'),str(ROOT/'deploy/memory/prepare_windows.py')],check=True)
         return 0
     if args.component != "llama":
         raise RuntimeError(f"prepare for {args.component} has not been implemented")
@@ -406,6 +407,9 @@ def main():
     migration=sub.add_parser('migrate-memory',help='Resume legacy local memory migration to the managed Qdrant service')
     migration.add_argument('--data-dir',type=Path,required=True)
     migration.add_argument('--abort',action='store_true')
+    reindex=sub.add_parser('reindex-memory',help='Re-embed a native store into the bound long-document profile')
+    reindex.add_argument('--data-dir',type=Path,required=True)
+    reindex.add_argument('--abort',action='store_true')
     backup=sub.add_parser('backup-data',help='Quiescent native Qdrant and SQLite application backup')
     backup.add_argument('--data-dir',type=Path,required=True)
     backup.add_argument('--output',type=Path,required=True)
@@ -457,6 +461,9 @@ def main():
     logs.add_argument("--lines", type=int, default=50)
     args = parser.parse_args()
     try:
+        if args.action=='reindex-memory':
+            env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
+            return subprocess.call([str(ROOT/'.venv/bin/python'),str(ROOT/'tools/reindex_memory.py'),'--data-dir',str(args.data_dir)]+(['--abort'] if args.abort else []),cwd=ROOT,env=env)
         if args.action=='restore-data':
             env=os.environ.copy();env.setdefault('OPENBLAS_NUM_THREADS','1');env.setdefault('OMP_NUM_THREADS','2')
             command=[str(ROOT/'.venv/bin/python'),str(ROOT/'tools/restore_data.py'),'--data-dir',str(args.data_dir)]

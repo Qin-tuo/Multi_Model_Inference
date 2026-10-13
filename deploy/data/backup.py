@@ -136,7 +136,10 @@ def validate(directory):
     if not {'memory/operations.sqlite','memory/history.sqlite','memory.snapshot','store-binding.json'}<=files.keys() or set(files)-FILES:
         raise RuntimeError('Backup file inventory is incomplete or unsupported')
     binding=manifest.get('source_binding',{})
+    from app.memory_profiles import profile_of,WINDOWS
+    profile=profile_of(binding)
     roles=manifest.get('collections',{})
+    if profile==WINDOWS and 'entities' not in roles:raise RuntimeError('Window backup is missing its entity index snapshot')
     if (binding.get('backend')!='qdrant_server' or binding.get('status')!='READY'
             or not re.fullmatch('[0-9a-f]{32}',binding.get('store_id',''))
             or binding.get('collection')!='assistant_'+binding['store_id']
@@ -187,15 +190,19 @@ def create(data_directory,output,*,checkpoint=lambda phase:None):
         lock(stack,service.directory/'leases'/(binding['collection']+'.lock'))
         client=stack.enter_context(closing(service.client(timeout=60)))
         info=client.get_collection(binding['collection'])
-        if info.config.metadata!=collection_metadata(binding) or info.config.params.vectors.size!=binding['dimensions']:
+        from app.memory_profiles import profile_of,layout_matches,entity_metadata,WINDOWS
+        profile=profile_of(binding)
+        if info.config.metadata!=collection_metadata(binding) or not layout_matches(info.config.params.vectors,binding['dimensions'],profile):
             raise RuntimeError('Native collection metadata differs from source binding')
         roles={'memory':binding['collection']}
         entity=binding['collection']+'_entities'
         if client.collection_exists(entity):
             info=client.get_collection(entity)
-            if info.config.metadata not in (None,{},dict(collection_metadata(binding),role='entities')):
+            allowed=(entity_metadata(binding),) if profile==WINDOWS else (None,{},entity_metadata(binding))
+            if info.config.metadata not in allowed or not layout_matches(info.config.params.vectors,binding['dimensions'],profile):
                 raise RuntimeError('Entity collection has unrelated ownership metadata')
             roles['entities']=entity
+        elif profile==WINDOWS:raise RuntimeError('Required window entity collection is missing')
         databases=[name for name in DATABASES if (source/name).is_file()]
         if not set(DATABASES[:2])<=set(databases):raise RuntimeError('Memory journal or history is missing')
         before={name:sqlite_state(source/name,REQUIRED[name]) for name in databases}

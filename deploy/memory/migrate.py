@@ -31,9 +31,10 @@ class EmbeddingProfile:
     fingerprint:str
     dimensions:int
     scope:str
+    profile_id:str='bge-fp32-single-v1'
 
 
-def production_profile(model):
+def production_profile(model,profile_id='bge-fp32-single-v1'):
     from app.adapters.embedding import BGEQueryAdapter
     from mem0.utils.factory import EmbedderFactory
     import onnxruntime as ort
@@ -41,7 +42,13 @@ def production_profile(model):
     options=ort.SessionOptions();options.intra_op_num_threads=2;options.inter_op_num_threads=1
     config['embedder']['config']['model_kwargs']['model_kwargs']['session_options']=options
     embedder=EmbedderFactory.create('huggingface',config['embedder']['config'],config['vector_store']['config'])
-    return EmbeddingProfile(BGEQueryAdapter(embedder),embedding_fingerprint(model),512,'PRODUCTION')
+    from app.memory_profiles import LEGACY,WINDOWS
+    if profile_id==WINDOWS:
+        from app.adapters.embedding_windows import BGEWindowAdapter
+        encoder=BGEWindowAdapter(embedder)
+    elif profile_id==LEGACY:encoder=BGEQueryAdapter(embedder)
+    else:raise ValueError('Unknown embedding profile')
+    return EmbeddingProfile(encoder,embedding_fingerprint(model),512,'PRODUCTION',profile_id)
 
 
 def lock(stack,path):
@@ -74,6 +81,11 @@ def dense(vector,dimensions):
 
 
 def matching(left,right,dimensions):
+    left=left.get('') if isinstance(left,dict) else left
+    right=right.get('') if isinstance(right,dict) else right
+    if isinstance(right,list) and right and isinstance(right[0],list):
+        if not isinstance(left,list) or len(left)!=len(right):return False
+        return all(matching(a,b,dimensions) for a,b in zip(left,right))
     a,b=dense(left,dimensions),dense(right,dimensions)
     cosine=sum(x*y for x,y in zip(a,b))/math.sqrt(sum(x*x for x in a)*sum(x*x for x in b))
     return cosine>=.99999

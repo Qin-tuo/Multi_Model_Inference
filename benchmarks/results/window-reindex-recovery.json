@@ -1,0 +1,427 @@
+{
+  "created_at": "2026-10-13T13:56:26.414713+00:00",
+  "status": "PASS",
+  "cases": [
+    {
+      "phase": "batch",
+      "iteration": 1,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 2,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 3,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 4,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 5,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 6,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 7,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 8,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 9,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "batch",
+      "iteration": 10,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 1,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 2,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 3,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 4,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 5,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 6,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 7,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 8,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 9,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "verified",
+      "iteration": 10,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 1,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 2,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 3,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 4,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 5,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 6,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 7,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 8,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 9,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    },
+    {
+      "phase": "published",
+      "iteration": 10,
+      "checks": {
+        "terminated_by_sigkill": true,
+        "partial_store_blocked": true,
+        "public_resume_completed": true,
+        "canonical_fact_and_source_preserved": true,
+        "tail_retrievable": true,
+        "completed_rerun_is_idempotent": true,
+        "forgotten_fact_not_replayed": true
+      },
+      "status": "PASS"
+    }
+  ],
+  "scope": "Real native Qdrant,BGE int8 and production adapter/CLI;3 reindex stages with actual SIGKILL,strict access fence,same-ID/source recovery and no replay after forget. Synthetic data; not power-loss/disk-loss or full JT acceptance."
+}

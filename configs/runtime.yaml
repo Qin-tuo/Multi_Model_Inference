@@ -17,7 +17,8 @@
     "embedding_threads": 2,
     "transcript_retention_days": 7,
     "provider": "mem0",
-    "vector_store": "qdrant_server"
+    "vector_store": "qdrant_server",
+    "embedding_profile": "bge-int8-windows-v1"
   },
   "vision": {
     "capture_hz": 30,

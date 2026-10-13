@@ -86,3 +86,22 @@ class NativeMemoryBindingTests(unittest.TestCase):
         path=self.directory('legacy');(path/'qdrant').mkdir()
         with self.assertRaisesRegex(RuntimeError,'migration'):self.bind(path)
         self.assertFalse((path/'store.json').exists())
+
+    def test_window_profile_binds_both_native_collections_and_refuses_scalar_reopen(self):
+        from app.memory_profiles import WINDOWS,LEGACY,entity_name
+        path=self.directory('window-profile')
+        binding=StoreBinding(path,self.service,embedding_sha256='c'*64,dimensions=8,profile=WINDOWS)
+        name=binding.collection
+        try:
+            self.assertEqual(binding.binding['schema_version'],2)
+            self.assertIsNotNone(binding.client.get_collection(name).config.params.vectors.multivector_config)
+            self.assertIsNotNone(binding.client.get_collection(entity_name(name)).config.params.vectors.multivector_config)
+            binding.ready()
+        finally:binding.close()
+        with self.assertRaisesRegex(RuntimeError,'migration'):
+            StoreBinding(path,self.service,embedding_sha256='c'*64,dimensions=8,profile=LEGACY)
+        reopened=StoreBinding(path,self.service,embedding_sha256='c'*64,dimensions=8)
+        self.assertEqual(reopened.profile,WINDOWS);reopened.close()
+        with closing(self.service.client()) as client:client.delete_collection(entity_name(name))
+        with self.assertRaisesRegex(RuntimeError,'missing'):
+            StoreBinding(path,self.service,embedding_sha256='c'*64,dimensions=8)

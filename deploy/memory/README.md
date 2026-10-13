@@ -2,6 +2,30 @@
 
 公开文字和语音入口默认使用 Mem0 2.2.1 + 本机Qdrant服务。原Qdrant local仍用于兼容SDK测试和历史基准。10k嵌入式基线的查询/写入P95为350/906ms，主要耗时在过滤和查询。这里评估同一SDK连接本机原生Qdrant服务，不更换BGE或事实事务边界。
 
+## 长条目索引与已有档案升级
+
+新建档案默认采用`bge-int8-windows-v1`：同一BGE-small-zh-v1.5的ARM64 int8 ONNX，256个BGE token窗口、32个重叠token，以及Qdrant原生MaxSim。每条记忆仍只有一个ID、完整正文和版本，多个向量存在同一个点中；实体索引使用相同向量结构。模型目录、完整artifact指纹及窗口参数锁定在`models/manifest.json`，通过`prepare --component memory`准备并核验。
+
+语义检索选中与问题最相关的原文窗口，保留Unicode位置和正文哈希；提示不会改写原文，完整正文及来源仍保留在Mem0和本轮来源映射中。更正/遗忘继续操作规范记忆ID。超出预算而未展示的条目记录原因，不把本轮没取到证据解释为用户从未保存。
+
+已存在的schema1档案继续按原FP32单向量配置读取，升级需要退出该档案的应用进程后执行：
+
+```bash
+python3 tools/project.py prepare --component memory
+python3 tools/project.py reindex-memory --data-dir "$HOME/AI_Stack/runtime-data"
+
+# 仅撤销尚未发布的新索引：
+python3 tools/project.py reindex-memory --data-dir "$HOME/AI_Stack/runtime-data" --abort
+```
+
+旧的Qdrant local档案先按下文`migrate-memory`迁移到受管理服务，再执行`reindex-memory`。升级保持原事实ID、正文、版本、来源、SQLite控制库及数据沿革；先合并遗忘屏障，再重建主索引和有效实体关联。未完成remember/correct须先用原请求修复。新索引逐点校验后才发布，随后清理经过归属核验的旧原生collection。
+
+`memory/reindex-transition.json`阻止中断期间的应用访问。重复相同命令续跑；完成后再次执行只检查当前绑定，不回放旧索引。发布前可撤销，发布后须续跑。不要删除或手工改写标记绕过检查。恢复得到的旧档案同样可以升级，其原有lineage保持不变。
+
+动态int8量化受同批其他文本影响，因此窗口按单条记忆编码，写入、更新、迁移和恢复使用同一分组方式；没有放宽原向量一致性校验。[失败基线](../../benchmarks/results/window-restore-batch-baseline.json)和修复后的[正式适配器集成](../../benchmarks/results/window-memory-integration.json)均保留。公开入口已验证迁移后长资料回忆、更正、遗忘和备份恢复；[旧格式备份验证](../../benchmarks/results/window-legacy-backup-integration.json)还覆盖新档案直接保存长原文后跨会话回忆。
+
+[迁移故障报告](../../benchmarks/results/window-reindex-recovery.json)在批次完成、校验完成和发布后三个阶段各执行10次真实SIGKILL，共30次，全部可续跑，且完成后重试不会复活已遗忘内容。这些合成资料验证不替代独立语义质量、10k完整负载时延、磁盘/断电及全部JT验收；新配置的82题开发评测另行运行。
+
 `prepare.py`校验官方ARM64 musl归档SHA256、固定Qdrant 1.19.2及源码commit。程序和源码分别位于`~/AI_Stack/installed/qdrant-1.19.2/`、`~/AI_Stack/frameworks/qdrant/`，生产入口使用项目的systemd用户单元`mmassistant-qdrant.service`，未修改系统包。
 
 ```bash

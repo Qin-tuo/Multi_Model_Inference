@@ -23,8 +23,10 @@ def main():
         if args.abort:result=abort(args.data_dir)
         else:
             if not args.backup or not args.current_data_dir:raise ValueError('Restoration requires --backup and --current-data-dir')
+            from app.memory_profiles import profile_of,model_path
+            selected=profile_of(json.loads((args.current_data_dir/'memory/store.json').read_text()))
             result=restore(args.backup,args.current_data_dir,args.data_dir,load(DATA/'qdrant'),
-                production_profile(CACHE/'models/bge-small-zh-v1.5-onnx'))
+                production_profile(model_path(selected),selected))
         print(json.dumps(dict(result,data_directory=str(args.data_dir.resolve())),ensure_ascii=False,indent=2));return 0
     except Exception as error:
         print(json.dumps({'status':'FAIL','error':str(error),'action':'Keep both directories and repeat the same restore-data command after resolving the cause; do not remove transition files'},ensure_ascii=False),file=sys.stderr);return 1

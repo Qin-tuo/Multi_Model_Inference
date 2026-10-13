@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件198项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件211项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
@@ -236,4 +236,6 @@ source /opt/ros/jazzy/setup.bash
 
 最新[20题开发对照](benchmarks/results/lcvmem-reference-comparison.json)在保持top5和512-token预算时，将完整标识符换成本轮短引用，并保留实际ID、版本和来源映射；更正/遗忘继续使用完整ID。平均注入证据由2.65增至4.7条，含参考原文的注入题数由10增至14；“我跟你分享”的说话者误判也已修复。新基线F1为21.17，最终为27.05，均无意外写入。旧格式重跑仍有回答变化，词级分数不能当成稳定正确率。198项框架回归和公开保存/更正/遗忘闭环通过。[82题完整开发集](benchmarks/results/lcvmem-development-all-refs.json)已完成，词级F1为26.33，错误/意外写入/跨主体证据均为0；200题保留集尚未使用。
 
-新增[长条目边界检查](benchmarks/results/long-memory-feasibility-summary.json)确认当前应用仍有缺口：8份约3.1KiB资料保存完整，但尾部差异被嵌入截断，语义top5命中5/8，且没有一份完整证据能装入512-token预算。隔离的Mem0/Qdrant原生多向量候选将目标首位命中提高至8/8，原文片段可装入预算；同一BGE的ARM64 int8候选进一步降低SDK写入耗时。该候选尚未接入正式绑定、journal、旧库迁移和备份恢复，当前运行模型/索引未切换，不能据此宣布长记忆或JT-10/11验收通过。
+[长条目失败基线](benchmarks/results/long-memory-feasibility-summary.json)中，8份约3.1KiB资料的尾部被嵌入截断，语义top5命中5/8，完整证据均未装入512-token预算。现已将原生多向量和BGE ARM64 int8接入正式适配器，新建档案默认启用，已有档案保留原绑定并用`reindex-memory --data-dir ...`显式升级。规范ID、完整正文、版本和来源保持一致，提示使用可核验的原文片段。
+
+[公开入口集成](benchmarks/results/window-legacy-backup-integration.json)验证了长资料保存、跨会话回忆、迁移、更正和旧格式备份恢复，已遗忘内容未复活；[30次迁移SIGKILL](benchmarks/results/window-reindex-recovery.json)均可续跑，完成后重试不会回放已删除记录。单次约3.1KiB资料的完整适配器写入观测约0.36秒，不代表10k规模或整机时延验收。新格式的完整82题开发评测正在运行，独立质量、容量和JT-10/11仍待验收。准备、升级及撤销方法见[记忆部署说明](deploy/memory/README.md#长条目索引与已有档案升级)。

@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-10-13T14:20:38.384292+00:00",
+  "status": "PASS",
+  "profile": "bge-int8-windows-v1",
+  "default_for_new_stores": true,
+  "existing_stores": "retain recorded profile until explicit reindex-memory",
+  "framework_tests": 211,
+  "migration_sigkill_cases": 30,
+  "actual_long_records": 8,
+  "public_save_and_recall": true,
+  "current_and_legacy_backup_restore": true,
+  "observed_adapter_long_write_seconds": 0.3564053949958179,
+  "scope": "Production integration on synthetic records with real BGE/Mem0/Qdrant/llama and public commands. Broad82-question quality and10k full-path latency remain pending; no complete JT acceptance claim.",
+  "evidence": [
+    "benchmarks/results/window-memory-integration.json",
+    "benchmarks/results/window-legacy-backup-integration.json",
+    "benchmarks/results/window-reindex-recovery.json",
+    "benchmarks/results/framework-tests.json"
+  ]
+}

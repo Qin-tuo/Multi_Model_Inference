@@ -126,8 +126,77 @@ def erase_restored(client,collection,directory,records,changed):
     return barriers
 
 
+def reembed_snapshots(client,backup,manifest,state,directory,records,operations,profile,publish,checkpoint):
+    """Import an older layout privately, then rebuild only currently live facts."""
+    from qdrant_client import models
+    from app.memory_profiles import profile_of,layout_matches,vector_params
+    base=state['binding']['collection'];staged={}
+    for role,evidence in manifest['collections'].items():
+        name=base+('_entities' if role=='entities' else '')+'_source'
+        source_meta=collection_metadata(manifest['source_binding'])
+        if role=='entities':source_meta=dict(source_meta,role='entities')
+        owned=dict(collection_metadata(state['binding']),role=role,reindex_source=True)
+        state.setdefault('staged_snapshots',{})[role]=name;publish()
+        if not client.collection_exists(name):
+            upload_snapshot_to_new_collection(client,name,backup/evidence['file'],manifest['files'][evidence['file']]['sha256'])
+        info=client.get_collection(name)
+        allowed=(source_meta,owned) if role=='memory' else (source_meta,owned,None,{})
+        if info.config.metadata not in allowed or not layout_matches(info.config.params.vectors,manifest['source_binding']['dimensions'],profile_of(manifest['source_binding'])):
+            raise RuntimeError('Cross-profile snapshot staging differs from its recorded source')
+        if collection_state(client,name)!={key:evidence[key] for key in ('sha256','points')}:
+            raise RuntimeError('Cross-profile snapshot upload is unverified')
+        client.update_collection(name,metadata=owned);staged[role]=name
+        publish();checkpoint('snapshot_staged')
+    _,barriers=deletion_policy(client,directory,records,collection=staged['memory'])
+    expected=expected_memories(operations);active={mid:v for mid,v in expected.items() if mid not in barriers}
+    for role in ('memory','entities'):
+        target=base+('_entities' if role=='entities' else '');metadata=collection_metadata(state['binding'])
+        if role=='entities':metadata=dict(metadata,role='entities')
+        if not client.collection_exists(target):
+            client.create_collection(target,vectors_config=vector_params(profile.dimensions,profile.profile_id),
+                sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},hnsw_config=models.HnswConfigDiff(m=0),metadata=metadata)
+        info=client.get_collection(target)
+        if info.config.metadata!=metadata or not layout_matches(info.config.params.vectors,profile.dimensions,profile.profile_id):
+            raise RuntimeError('Cross-profile restore target is unrelated')
+        if role not in staged:continue
+        for batch in pages(client,staged[role]):
+            chosen=[]
+            for point in batch:
+                mid=str(point.id);p=dict(point.payload or {});owner=p.get('user_id')
+                if role=='memory':
+                    if mid in barriers:continue
+                    want=active.get(mid)
+                    if want is None:raise RuntimeError('Snapshot contains an unconfirmed fact')
+                    if owner!=want['owner']:raise RuntimeError('Snapshot fact crosses owners')
+                    # Newer versions must come from current confirmed data.
+                    if p.get('version')!=want['version'] or p.get('operation_key')!=want['request_id']:continue
+                else:
+                    links=p.get('linked_memory_ids')
+                    if not isinstance(links,list) or not isinstance(owner,str):raise RuntimeError('Unsupported snapshot entity')
+                    if any(mid in expected and expected[mid]['owner']!=owner for mid in links):raise RuntimeError('Snapshot entity crosses owners')
+                    p['linked_memory_ids']=[mid for mid in links if mid in active and active[mid]['version']==1]
+                    if not p['linked_memory_ids']:continue
+                if not isinstance(p.get('data'),str):raise RuntimeError('Snapshot embedding source is missing')
+                chosen.append((point.id,p))
+            vectors=profile.embedder.embed_batch([p['data'] for _,p in chosen],'add')
+            if len(vectors)!=len(chosen):raise RuntimeError('Snapshot re-embedding length differs')
+            if chosen:client.upsert(target,[models.PointStruct(id=mid,vector={'':vector},payload=p) for (mid,p),vector in zip(chosen,vectors)],wait=True)
+        state['snapshots'][role]='REEMBEDDED';publish();checkpoint('snapshot')
+
+
+def cleanup_staged(client,state):
+    for role,name in state.get('staged_snapshots',{}).items():
+        expected_name=state['binding']['collection']+('_entities' if role=='entities' else '')+'_source'
+        expected=dict(collection_metadata(state['binding']),role=role,reindex_source=True)
+        if role not in {'memory','entities'} or name!=expected_name:raise RuntimeError('Invalid staged snapshot ownership')
+        if client.collection_exists(name) and client.get_collection(name).config.metadata!=expected:raise RuntimeError('Staged snapshot metadata changed')
+    for name in state.get('staged_snapshots',{}).values():
+        if client.collection_exists(name):client.delete_collection(name)
+
+
 def merge_vectors(client,collection,current_client,current_collection,directory,records,operations,profile):
     from qdrant_client import models
+    from app.memory_profiles import vector_params
     expected=expected_memories(operations)
     deleted={x['memory_id']:x['user_id'] for x in rows(directory/'operations.sqlite','deletion_barriers')}
     if records:
@@ -180,7 +249,7 @@ def merge_vectors(client,collection,current_client,current_collection,directory,
     entities=collection+'_entities'
     if current_client and current_client.collection_exists(current_collection+'_entities'):
         if not client.collection_exists(entities):
-            client.create_collection(entities,vectors_config=models.VectorParams(size=profile.dimensions,distance=models.Distance.COSINE,on_disk=True),
+            client.create_collection(entities,vectors_config=vector_params(profile.dimensions,profile.profile_id),
                 sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},hnsw_config=models.HnswConfigDiff(m=0),
                 metadata=dict(client.get_collection(collection).config.metadata,role='entities'))
         for batch in pages(current_client,current_collection+'_entities'):
@@ -227,12 +296,14 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
     manifest=validate(backup);backup_hash=file_info(backup/'manifest.json')['sha256']
     if manifest['qdrant_version']!=VERSION or manifest['versions']['mem0ai']!='2.2.1':raise RuntimeError('Backup framework versions are incompatible')
     original=json.loads((source/'memory/store.json').read_text())
-    if (original.get('schema_version')!=1 or original.get('backend')!='qdrant_server' or original.get('status')!='READY'
+    from app.memory_profiles import profile_of,layout_matches
+    if (profile_of(original)!=profile.profile_id or original.get('backend')!='qdrant_server' or original.get('status')!='READY'
             or original.get('directory')!=str(source/'memory') or not re.fullmatch('[0-9a-f]{32}',original.get('store_id',''))
             or original.get('collection')!='assistant_'+original['store_id']):
         raise RuntimeError('Current memory binding is invalid')
-    if original['embedding_sha256']!=profile.fingerprint or original['dimensions']!=profile.dimensions or manifest['embedding_sha256']!=profile.fingerprint:
+    if original['embedding_sha256']!=profile.fingerprint or original['dimensions']!=profile.dimensions:
         raise RuntimeError('Restore embedding profile differs')
+    reembedding=(profile_of(manifest['source_binding'])!=profile.profile_id or manifest['embedding_sha256']!=profile.fingerprint)
     with ExitStack() as stack:
         data_locks(stack,source);source_state=read_state(source)
         state=read_state(destination) if destination.exists() else None
@@ -262,7 +333,7 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
             destination.mkdir(parents=True,exist_ok=True,mode=0o700);(destination/'memory').mkdir(mode=0o700)
             state={'schema_version':1,'directory':str(destination),'status':'RESTORING','restore_id':uuid.uuid4().hex,
                 'source':str(source),'backup_sha256':backup_hash,'lineage_id':lineage,'control_sha256':control_hash,
-                'binding':new_binding(destination/'memory',service,profile.fingerprint,profile.dimensions),
+                'binding':new_binding(destination/'memory',service,profile.fingerprint,profile.dimensions,profile.profile_id),
                 'original_binding':original,'backup_binding':manifest['source_binding'],'source_previous_state':source_state,
                 'embedding_scope':profile.scope,'snapshots':{},'created_at':now()}
         data_locks(stack,destination)
@@ -281,7 +352,10 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
         elif current_client.get_collection(original['collection']).config.metadata!=collection_metadata(original):
             raise RuntimeError('Current native store metadata differs')
         for name in current_state:sqlite_copy(source/name,destination/name)
-        for role,evidence in manifest['collections'].items():
+        records=destination/'records.sqlite' if 'records.sqlite' in current_state else None
+        if reembedding:
+            reembed_snapshots(client,backup,manifest,state,destination/'memory',records,operations,profile,publish,checkpoint)
+        for role,evidence in ([] if reembedding else manifest['collections'].items()):
             name=state['binding']['collection']+('_entities' if role=='entities' else '')
             expected=collection_metadata(state['binding'])
             if role=='entities':expected=dict(expected,role='entities')
@@ -294,8 +368,7 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
             allowed=(source_metadata,expected) if role=='memory' else (source_metadata,expected,None,{})
             if info.config.metadata not in allowed:raise RuntimeError('Restore target collection metadata is unrelated')
             from qdrant_client import models
-            if (not isinstance(info.config.params.vectors,models.VectorParams) or info.config.params.vectors.size!=profile.dimensions
-                    or info.config.params.vectors.distance!=models.Distance.COSINE or info.config.hnsw_config.m!=0):
+            if (not layout_matches(info.config.params.vectors,profile.dimensions,profile.profile_id) or info.config.hnsw_config.m!=0):
                 raise RuntimeError('Restored vector configuration differs from the qualified profile')
             if role not in state['snapshots']:
                 if collection_state(client,name)!={key:evidence[key] for key in ('sha256','points')}:
@@ -303,7 +376,6 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
                 state['snapshots'][role]='UPLOADED';publish()
             client.update_collection(name,metadata=expected)
             checkpoint('snapshot')
-        records=destination/'records.sqlite' if 'records.sqlite' in current_state else None
         result=merge_vectors(client,state['binding']['collection'],current_client,original['collection'],destination/'memory',records,operations,profile)
         checkpoint('merged')
         if 'reminders.sqlite' in current_state:
@@ -319,6 +391,7 @@ def restore(backup,source,destination,service,profile,*,checkpoint=lambda phase:
             scope='Native snapshot plus current SQLite authority and exclusive directory cutover; newer missing facts cause refusal, no disk-level erasure')
         state.update(status='VERIFIED',result=result);publish();checkpoint('verified')
         atomic_json(source/MARKER,dict(source_fence,status='RETIRED'));checkpoint('source_retired')
+        cleanup_staged(client,state)
         state.update(status='ACTIVE',completed_at=now());state.pop('source_previous_state',None);publish()
         return result
 
@@ -351,10 +424,16 @@ def abort(destination,*,checkpoint=lambda phase:None):
             owned_metadata=expected if role=='memory' else dict(expected,role='entities')
             if role not in state['snapshots'] and metadata!=owned_metadata:
                 raise RuntimeError('Snapshot operation outcome is not recorded; resume verification before aborting')
+        # Validate staged copies before changing either directory's state.
+        for role,name in state.get('staged_snapshots',{}).items():
+            expected_name=base+('_entities' if role=='entities' else '')+'_source'
+            metadata=dict(expected,role=role,reindex_source=True)
+            if name!=expected_name or (client.collection_exists(name) and client.get_collection(name).config.metadata!=metadata):raise RuntimeError('Unrelated staged restore collection')
         state['status']='ABORTING';atomic_json(destination/MARKER,state)
         for name in (base+'_entities',base):
             if client.collection_exists(name):client.delete_collection(name)
             checkpoint('collection_removed')
+        cleanup_staged(client,state)
         state['status']='ABORTED';atomic_json(destination/MARKER,state);checkpoint('target_aborted')
         if state['source_previous_state'] is None:
             marker=source/MARKER

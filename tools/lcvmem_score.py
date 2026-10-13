@@ -10,6 +10,11 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from tools.lcvmem_data import load
 from tools.lcvmem_prepare import CODE,sha
+from app.context_memory import presentation
+
+
+def reference_in_visible_body(item,normalized_reference,normalize):
+    return bool(normalized_reference) and normalized_reference in normalize(presentation(item)[0])
 
 
 def main():
@@ -33,7 +38,7 @@ def main():
         injected=set(row.get('retrieval',{}).get('injected_memory_ids',[]))
         hits=[item for item in row.get('retrieved',[]) if normalized and normalized in normalize_zh_answer(item['content'])]
         item={'id':qid,'f1':qa_f1_zh_score(prediction,expected),'normalized_exact':bool(prediction) and normalize_zh_answer(prediction)==normalized,
-            'reference_verbatim_in_retrieved':bool(hits),'reference_verbatim_in_injected':any(hit['memory_id'] in injected for hit in hits),
+            'reference_verbatim_in_retrieved':bool(hits),'reference_verbatim_in_injected':any(hit['memory_id'] in injected and reference_in_visible_body(hit,normalized,normalize_zh_answer) for hit in hits),
             'injected_count':len(injected),'retrieved_count':len(row.get('retrieved',[])),'response_sha256':hashlib.sha256(prediction.encode()).hexdigest(),
             'error_type':row.get('error',{}).get('type') if row.get('error') else None,'side_effect':row.get('side_effect',False),
             'cross_owner_evidence':row.get('cross_owner_evidence',False),'seconds':row.get('seconds'),

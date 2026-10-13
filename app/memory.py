@@ -114,7 +114,7 @@ class Mem0Adapter:
     def __init__(self, data_dir: str | Path, *, bge_path: str | Path | None = None,
                  llama_base_url: str = "http://127.0.0.1:8088/v1",
                  llama_model: str = "assistant-vlm", embedding_backend: str = "torch",
-                 sdk=None, embedding_scope: str = "PRODUCTION", server_config=None):
+                 sdk=None, embedding_scope: str = "PRODUCTION", server_config=None,embedding_profile=None):
         from sqlalchemy import Column, Integer, MetaData, String, Table, Text, create_engine, event
 
         if importlib.metadata.version("mem0ai") != "2.2.1":
@@ -175,7 +175,7 @@ class Mem0Adapter:
                     if embedding_backend!='onnx':
                         raise MemoryAdapterError('INVALID_ARGUMENT','Native store profile requires the qualified ONNX embedding')
                     from app.memory_store import StoreBinding,embedding_fingerprint
-                    self._binding=StoreBinding(self.data_dir,server_config,embedding_sha256=embedding_fingerprint(bge_path))
+                    self._binding=StoreBinding(self.data_dir,server_config,embedding_sha256=embedding_fingerprint(bge_path),profile=embedding_profile)
                     config=build_mem0_config(self.data_dir,bge_path,llama_base_url=llama_base_url,llama_model=llama_model,
                         embedding_backend=embedding_backend,qdrant_url=server_config.url,qdrant_collection=self._binding.collection)
                     # Mem0's maintained provider accepts a public Qdrant client;
@@ -189,7 +189,11 @@ class Mem0Adapter:
                     config["embedder"]["config"]["model_kwargs"]["model_kwargs"]["session_options"] = options
                 sdk = Memory.from_config(config)
                 from app.adapters.embedding import BGEQueryAdapter
-                sdk.embedding_model = BGEQueryAdapter(sdk.embedding_model)
+                from app.memory_profiles import WINDOWS
+                if self._binding and self._binding.profile==WINDOWS:
+                    from app.adapters.embedding_windows import BGEWindowAdapter
+                    sdk.embedding_model=BGEWindowAdapter(sdk.embedding_model)
+                else:sdk.embedding_model = BGEQueryAdapter(sdk.embedding_model)
             self.sdk = sdk
             from mem0.memory.telemetry import MEM0_TELEMETRY
             if MEM0_TELEMETRY:
@@ -249,7 +253,8 @@ class Mem0Adapter:
                 "operation_recovery": "retry_reconciliation", "owner_id_checks": True,
                 "history_purge": "project_patch_for_2.2.1",
                 "backup_erasure": "requires_current_deletion_journal",
-                "semantic_quality_verified": False}
+                "semantic_quality_verified": False,
+                'embedding_profile':self._binding.profile if self._binding else 'legacy_local'}
 
     def _check_open(self):
         if self._closed:
@@ -470,7 +475,23 @@ class Mem0Adapter:
                 bm25_ready = bool(getattr(self.sdk.vector_store, "_bm25_encoder", None)
                                   and getattr(self.sdk.vector_store, "_has_bm25_slot", False))
                 method = "mem0_hybrid" if bm25_ready else "mem0_dense"
-            return {"items": [self._record(record) for record in records], "retrieval_method": method,
+            items=[self._record(record) for record in records]
+            from app.memory_profiles import WINDOWS
+            if key is None and self._binding and self._binding.profile==WINDOWS:
+                encoder=self.sdk.embedding_model
+                long_items=[item for item in items if len(encoder.spans(item['content']))>1]
+                if long_items:
+                    points={str(p.id):p for p in self._binding.client.retrieve(self._binding.collection,
+                        ids=[item['memory_id'] for item in long_items],with_payload=True,with_vectors=True)}
+                    for item in long_items:
+                        point=points.get(item['memory_id'])
+                        if (point is None or point.payload.get('user_id')!=user_id or point.payload.get('data')!=item['content']
+                                or point.payload.get('version',1)!=item['version']):
+                            raise MemoryAdapterError('UNAVAILABLE','Memory changed while selecting source window')
+                        vectors=point.vector.get('') if isinstance(point.vector,dict) else point.vector
+                        try:item['evidence_window']=encoder.best_window(item['content'],vectors,query)
+                        except ValueError as error:raise MemoryAdapterError('UNAVAILABLE',str(error)) from error
+            return {"items": items, "retrieval_method": method,
                     "source_filters":source_filters,
                     "embedding_scope": self.embedding_scope, "generation": self.generation(user_id),
                     "degraded": method == "mem0_dense", "semantic_quality_verified": False}

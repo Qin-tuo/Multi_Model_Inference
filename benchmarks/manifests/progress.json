@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T12:48:14.333059+00:00",
+  "updated_at": "2026-10-13T14:20:38.384292+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -355,7 +355,7 @@
         "benchmarks/results/lcvmem-development-all-refs.json"
       ],
       "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run COMPLETE:lexical F1=26.329%,normalized exact1/82,reference-text retrieved58/injected57,errors/unexpected writes/cross-owner evidence0;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance.",
-      "next_action": "Address long-record indexing/packing and source/time failures without using heldout data; then qualify current profile and complete JT-10 lifecycle/source gates."
+      "next_action": "Inspect the live82-question window-profile result with visible-window-aware grounding metrics; compare quality before any heldout run and continue source/time behavior qualification."
     },
     {
       "task_id": "J4.memory.long_records",
@@ -368,10 +368,24 @@
         "benchmarks/results/multivector-memory-feasibility.json",
         "benchmarks/results/multivector-memory-int8-feasibility.json",
         "benchmarks/results/long-memory-feasibility-summary.json",
-        "benchmarks/results/bge-int8-export.json"
+        "benchmarks/results/bge-int8-export.json",
+        "app/adapters/embedding_windows.py",
+        "app/memory_profiles.py",
+        "deploy/memory/reindex.py",
+        "deploy/memory/prepare_windows.py",
+        "tools/reindex_memory.py",
+        "tools/window_memory_integration.py",
+        "tools/window_reindex_recovery.py",
+        "tests/test_embedding_windows.py",
+        "tests/test_memory_reindex.py",
+        "benchmarks/results/window-memory-production-summary.json",
+        "benchmarks/results/window-memory-integration.json",
+        "benchmarks/results/window-legacy-backup-integration.json",
+        "benchmarks/results/window-reindex-recovery.json",
+        "benchmarks/results/window-restore-batch-baseline.json"
       ],
-      "validation": "Eight accepted1058-character/3104-byte records persist exactly,but current BGE truncation produces one identical vector for all8,top5 recall5/8 and0 evidence injection under512 tokens (1553 needed). Isolated real Mem0/Qdrant MaxSim preserves one point per memory with5 BGE windows,top1 recall8/8,verbatim selected evidence223 tokens,and same-ID update/delete. Existing BGE ARM64 dynamic-int8 candidate keeps8/8,SDK write0.304-0.330s versusFP32~0.75s. Loaded entity index also qualified with matching multivector schema. Production adapter,history erasure/restart,migration and backup remain unqualified; runtime model/index unchanged.",
-      "next_action": "Integrate native multivector profiles and exact source spans into existing Mem0 adapter; preserve canonical IDs,version and erasure behavior; implement explicit legacy reindex and compatible backup/restore before switching production. Qualify quantized embeddings on broader data and measure complete adapter latency."
+      "validation": "Native MaxSim/BGE int8 now integrated into production MemoryAdapter,versioned primary/entity binding,exact original-source windows,and current/legacy snapshot restoration. Single canonical ID/full body/version/journal remains authoritative. Reindex retains lineage,filters existing erasures,verifies all points,blocks partial access and deletes retired indexes;30 real SIGKILLs across3 stages PASS,including no replay after later forget. Public interact saves a3104-byte literal fact and recalls its tail in a new session;public migration/correction/restore retains IDs/versions/owners and does not revive forgotten facts/entities. Dynamic-int8 cross-record batching mismatch was reproduced;record-wise encoding restores strict verification without relaxing tolerance.211 framework tests PASS. New stores default to locked windows profile;old bindings retain legacy until explicit reindex. One full-adapter long write0.356s,not10k/JT-11 qualification. New-profile82 development quality run is active.",
+      "next_action": "Finish the live82-question window-profile evaluation; qualify10k full adapter/coexistence latency and remaining restore/fault classes,then complete independent memory and system acceptance."
     }
   ],
   "acceptance": {
@@ -468,7 +482,7 @@
     "50 native-stage backend cancellation/deadline/stream interruption cases now pass, with delayed ASR/TTS release explicitly observed. Remaining voice-application fault paths, TTS timeout, per-kernel release traces and physical interruption remain unverified; model-worker crash/restart now has30 passing cases; frontend timeout is not backend completion.",
     "Full voice application cancellation passes40 synthetic-WAV scenarios. A single-number response2 was once read back as 啊; independent ASR/TTS quality remains open. 30 actual worker crash/recovery cases pass (10 per ASR/LLM/TTS), without probe repair. Physical capture/playback,AEC,backpressure,all fault classes and8h remain unverified.",
     "External Chinese memory remains incomplete:20 development questions lexical F1=27.049% with compact source references and corrected companion pronouns. A same-format rerun changed8/20 answers despite identical retrieval/injection/token counts. Full82 development completed with lexical F1=26.329%;200 heldout and complete JT-10 acceptance remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness are still incomplete.",
-    "Verified long-record gap:current runtime can persist accepted long facts but truncates their embeddings and drops over-budget evidence. Eight synthetic3104-byte documents expose identical vectors,5/8 recall and0/8 injection. Native multivector/int8 feasibility passes isolated cases; production integration,reindex and full lifecycle/performance validation are pending."
+    "Long-record indexing/packing is integrated and new stores default to native multivectors with locked BGE int8.8 synthetic long records,public save/recall/correction/old-backup restore,and30 reindex SIGKILLs pass. Dynamic quantization must stay record-wise. New-profile82 development quality,10k full-load timing,all cross-profile restore fault stages and independent JT gates remain incomplete."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

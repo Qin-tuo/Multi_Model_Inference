@@ -11,11 +11,13 @@ import sqlite3
 import uuid
 
 from deploy.memory.runtime import atomic_json
+from app.memory_profiles import LEGACY,WINDOWS,profile_of,vector_params,layout_matches,entity_name,entity_metadata
 
 
-def new_binding(directory, service, embedding_sha256, dimensions=512):
+def new_binding(directory, service, embedding_sha256, dimensions=512,profile=LEGACY):
+    if profile not in {LEGACY,WINDOWS}:raise ValueError('Unsupported memory embedding profile')
     store_id=uuid.uuid4().hex
-    return {'schema_version':1,'backend':'qdrant_server','store_id':store_id,
+    return {'schema_version':1 if profile==LEGACY else 2,**({'embedding_profile':profile} if profile!=LEGACY else {}),'backend':'qdrant_server','store_id':store_id,
         'collection':'assistant_'+store_id,'directory':str(Path(directory).resolve()),'instance_id':service.instance_id,
         'service_directory':str(service.directory),'embedding_sha256':embedding_sha256,'dimensions':dimensions,'status':'PREPARING'}
 
@@ -23,6 +25,13 @@ def new_binding(directory, service, embedding_sha256, dimensions=512):
 def check_transition(directory):
     """A crashed migration must never reopen the retired local store."""
     directory=Path(directory)
+    reindex=directory/'reindex-transition.json'
+    if reindex.exists():
+        state=json.loads(reindex.read_text());path=directory/'store.json'
+        if (state.get('status')!='COMPLETED' or not path.exists()
+                or json.loads(path.read_text())!=dict(state.get('binding',{}),status='READY')):
+            raise RuntimeError('Memory reindex is incomplete; resume reindex-memory before opening this store')
+        return
     marker=directory/'store-transition.json'
     if not marker.exists():return
     transition=json.loads(marker.read_text())
@@ -36,13 +45,15 @@ def check_transition(directory):
 
 
 def collection_metadata(binding):
+    profile=profile_of(binding)
     return {'assistant_store_id':binding['store_id'],'instance_id':binding['instance_id'],
         'directory_sha256':hashlib.sha256(binding['directory'].encode()).hexdigest(),
-        'embedding_sha256':binding['embedding_sha256'],'dimensions':binding['dimensions']}
+        'embedding_sha256':binding['embedding_sha256'],'dimensions':binding['dimensions'],
+        **({'embedding_profile':profile} if profile!=LEGACY else {})}
 
 
 class StoreBinding:
-    def __init__(self,directory,service,*,embedding_sha256,dimensions=512):
+    def __init__(self,directory,service,*,embedding_sha256,dimensions=512,profile=None):
         from qdrant_client import models
         self.directory=Path(directory).resolve();self.service=service
         self.client=self.lease=None
@@ -50,7 +61,8 @@ class StoreBinding:
         try:
             if self.path.exists():
                 self.binding=json.loads(self.path.read_text())
-                if (self.binding.get('schema_version')!=1 or self.binding.get('backend')!='qdrant_server'
+                recorded=profile_of(self.binding)
+                if ((profile is not None and recorded!=profile) or self.binding.get('backend')!='qdrant_server'
                         or self.binding.get('directory')!=str(self.directory)
                         or self.binding.get('instance_id')!=service.instance_id
                         or self.binding.get('service_directory')!=str(service.directory)
@@ -64,8 +76,9 @@ class StoreBinding:
                 if journal.exists():
                     with sqlite3.connect(journal) as db:
                         if db.execute('SELECT count(*) FROM operations').fetchone()[0]:raise RuntimeError('Existing memory journal requires explicit migration')
-                self.binding=new_binding(self.directory,service,embedding_sha256,dimensions)
+                self.binding=new_binding(self.directory,service,embedding_sha256,dimensions,profile or LEGACY)
                 atomic_json(self.path,self.binding)
+            self.profile=profile_of(self.binding)
             store_id=self.binding['store_id']
             if len(store_id)!=32 or any(x not in '0123456789abcdef' for x in store_id) or self.binding['collection']!='assistant_'+store_id:
                 raise RuntimeError('Invalid collection binding')
@@ -78,9 +91,16 @@ class StoreBinding:
             if not exists:
                 if self.binding['status']=='READY':raise RuntimeError('Bound memory collection is missing; refusing to create an empty replacement')
                 self.client.create_collection(self.collection,
-                    vectors_config=models.VectorParams(size=dimensions,distance=models.Distance.COSINE,on_disk=True),
+                    vectors_config=vector_params(dimensions,self.profile),
                     sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},
                     hnsw_config=models.HnswConfigDiff(m=0),metadata=self.expected)
+            if self.profile==WINDOWS:
+                entity=entity_name(self.collection)
+                if not self.client.collection_exists(entity):
+                    if self.binding['status']=='READY':raise RuntimeError('Bound entity collection is missing; explicit recovery is required')
+                    self.client.create_collection(entity,vectors_config=vector_params(dimensions,self.profile),
+                        sparse_vectors_config={'bm25':models.SparseVectorParams(modifier=models.Modifier.IDF)},
+                        hnsw_config=models.HnswConfigDiff(m=0),metadata=entity_metadata(self.binding))
             self.validate()
             for field in ('user_id','namespace','key','memory_type','operation_key','derived_from','source_date','source_month_day','source_speaker'):
                 self.client.create_payload_index(self.collection,field,models.PayloadSchemaType.KEYWORD,wait=True)
@@ -94,8 +114,13 @@ class StoreBinding:
     def validate(self):
         info=self.client.get_collection(self.collection)
         if (info.config.metadata!=self.expected or info.config.hnsw_config.m!=0
-                or info.config.params.vectors.size!=self.binding['dimensions']):
+                or not layout_matches(info.config.params.vectors,self.binding['dimensions'],self.profile)):
             raise RuntimeError('Native collection metadata/configuration does not match this journal')
+        if self.profile==WINDOWS:
+            entity=self.client.get_collection(entity_name(self.collection))
+            if (entity.config.metadata!=entity_metadata(self.binding) or entity.config.hnsw_config.m!=0
+                    or not layout_matches(entity.config.params.vectors,self.binding['dimensions'],self.profile)):
+                raise RuntimeError('Native entity collection configuration differs from the memory profile')
         return info
 
     def ready(self):
