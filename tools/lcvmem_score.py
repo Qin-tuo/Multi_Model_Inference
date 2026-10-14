@@ -62,7 +62,8 @@ def main():
         'zero_injected_cases':sum(item['injected_count']==0 for item in cases),
         'verbatim_reference_retrieved_cases':sum(item['reference_verbatim_in_retrieved'] for item in cases),
         'verbatim_reference_injected_cases':sum(item['reference_verbatim_in_injected'] for item in cases),'cases':cases,
-        'scope':'External Chinese LCvMem source questions and reference scoring, adapted to current bounded retrieval plus real AssistantSession. F1/EM and literal-reference containment are not the JT-10 95% correctness/lifecycle gate or official full-context leaderboard reproduction. No scoring failures are dropped from the denominator.',
+        'reference_presence_definition':'Legacy fields named verbatim_reference/reference_verbatim count normalized answer-substring presence. This can match a different entity,work,date or speaker;it is not proof that the correct answer source was retrieved or injected.',
+        'scope':'External Chinese LCvMem source questions and reference scoring, adapted to current bounded retrieval plus real AssistantSession. F1/EM and normalized-reference containment are not the JT-10 95% correctness/lifecycle gate or official full-context leaderboard reproduction. No scoring failures are dropped from the denominator.',
         'raw_results_directory':str(args.run_dir/'answers'),'jt10':'NOT_VERIFIED'}
     args.output.parent.mkdir(parents=True,exist_ok=True);args.output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({key:report[key] for key in ('status','selected','upstream_qa_f1_percent','normalized_exact_percent','errors','zero_injected_cases','unexpected_mutations')},ensure_ascii=False))

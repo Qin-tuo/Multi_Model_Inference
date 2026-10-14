@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-10-14T03:16:45.658972+00:00",
+  "protocol_id": "evidence-format-development-v1",
+  "status": "FROZEN_BEFORE_RUN",
+  "reader_fingerprint": "e2d6be5e9ea789a339662cecf3003e8cca69a0874e2b2d7e1e62cb6688fd689a",
+  "runtime_sha256": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+  "model_manifest_sha256": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+  "source_run": "/home/nvidia/AI_Stack/runtime-data/benchmarks/lcvmem-development-hybrid-top8-768-v1",
+  "source_run_sha256": "e2ea11404d1acfaa514e2cee54efc43e2cb9374f272db154f95dcd51a4ab8ac4",
+  "questions": 82,
+  "partition": "development",
+  "memory_profile": "bge-int8-windows-bm25-v1",
+  "top_k": 8,
+  "memory_tokens": 768,
+  "embedding_threads": 4,
+  "variants": [
+    "nested_v1",
+    "flat_v2"
+  ],
+  "scoring": "Pinned original CLongEval metric;all82questions retained,no reference answers passed to runtime. Fresh sessions/records/reminders,verified unchanged source memory reused.",
+  "scope": "Single paired development comparison. Packing changes only;no heldout/reserve use,independent quality or JT acceptance."
+}

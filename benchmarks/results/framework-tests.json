@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-14T02:40:32.819550+00:00",
+  "created_at": "2026-10-14T03:17:46.218800+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 227,
+  "tests_run": 231,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -273,6 +273,18 @@
       "status": "PASS"
     },
     {
+      "id": "test_memory_context.MemoryContextTests.test_flat_candidate_retains_multiple_or_extended_sources_and_maintenance_ids",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_context.MemoryContextTests.test_flat_single_source_preserves_text_roles_and_complete_reference_map",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_context.MemoryContextTests.test_flat_window_keeps_both_spans_and_unabridged_original_source",
+      "status": "PASS"
+    },
+    {
       "id": "test_memory_context.MemoryContextTests.test_historical_source_date_and_speaker_are_not_storage_update_time",
       "status": "PASS"
     },
@@ -282,6 +294,10 @@
     },
     {
       "id": "test_memory_context.MemoryContextTests.test_skipped_fact_has_no_injected_reference",
+      "status": "PASS"
+    },
+    {
+      "id": "test_memory_context.MemoryContextTests.test_unknown_evidence_format_fails_before_tokenizer_request",
       "status": "PASS"
     },
     {
@@ -929,6 +945,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "c17fd5c91c484e5d77f0120c721394abf6125341",
+  "source_commit": "0f4f02198748c6dfa2afe8578a20bf8388ed7dfd",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

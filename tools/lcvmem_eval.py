@@ -16,6 +16,7 @@ sys.path.insert(0,str(ROOT))
 from tools.lcvmem_data import load,messages
 from tools.lcvmem_prepare import SCORER,sha
 from tools.project import stamp,write_json
+from app.context_memory import EVIDENCE_FORMATS, validate_evidence_format
 
 
 def fingerprint():
@@ -77,7 +78,9 @@ async def answer(args,run):
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text());memory_options=runtime['memory']
     memory_top_k=args.memory_top_k if args.memory_top_k is not None else memory_options['top_k']
     memory_tokens=args.memory_token_limit if args.memory_token_limit is not None else memory_options['context_token_limit']
-    effective={'top_k':memory_top_k,'context_token_limit':memory_tokens,'model_context_tokens':runtime['llama']['context_tokens']}
+    evidence_format=args.memory_evidence_format or memory_options.get('evidence_format','nested_v1')
+    effective={'top_k':memory_top_k,'context_token_limit':memory_tokens,'model_context_tokens':runtime['llama']['context_tokens'],
+        'evidence_format':evidence_format}
     if run.get('retrieval_config') not in (None,effective):raise RuntimeError('Retrieval settings changed during benchmark')
     run['retrieval_config']=effective;write_json(args.run_dir/'lcvmem-run.json',run)
     with open_memory(Path(run.get('memory_directory',args.run_dir/'data/memory'))) as memory:
@@ -101,7 +104,8 @@ async def answer(args,run):
                 records=stack.enter_context(Records(path/'records.sqlite'))
                 reminders=stack.enter_context(ReminderService(path/'reminders.sqlite'))
                 session=AssistantSession(config,memory,reminders,records,user_id=user,
-                    context_tokens=runtime['llama']['context_tokens'],memory_top_k=memory_top_k,memory_context_tokens=memory_tokens)
+                    context_tokens=runtime['llama']['context_tokens'],memory_top_k=memory_top_k,memory_context_tokens=memory_tokens,
+                    memory_evidence_format=evidence_format)
                 result={};error=None;started=time.monotonic()
                 try:
                     await session.start()
@@ -140,9 +144,11 @@ def main():
     parser.add_argument('--memory-profile',choices=['bge-fp32-single-v1','bge-int8-windows-v1','bge-int8-windows-bm25-v1'])
     parser.add_argument('--memory-top-k',type=int,choices=range(1,21))
     parser.add_argument('--memory-token-limit',type=int)
+    parser.add_argument('--memory-evidence-format',choices=EVIDENCE_FORMATS)
     args=parser.parse_args();args.run_dir=args.run_dir.resolve()
     from app.memory import validate_retrieval_limits
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
+    validate_evidence_format(args.memory_evidence_format or runtime['memory'].get('evidence_format','nested_v1'))
     output_tokens=json.loads((ROOT/'models/manifest.json').read_text())['models']['vlm']['max_output_tokens']
     validate_retrieval_limits(args.memory_top_k if args.memory_top_k is not None else runtime['memory']['top_k'],
         args.memory_token_limit if args.memory_token_limit is not None else runtime['memory']['context_token_limit'],
@@ -158,13 +164,15 @@ def main():
         if (run.get('corpus_sha256')!=sha(manifest_path) or run.get('ids')!=ids or run.get('split')!=args.split
                 or run.get('source_metadata','body-only-v1')!=args.source_metadata
                 or run.get('requested_profile')!=args.memory_profile
-                or run.get('requested_top_k')!=args.memory_top_k or run.get('requested_memory_tokens')!=args.memory_token_limit):
+                or run.get('requested_top_k')!=args.memory_top_k or run.get('requested_memory_tokens')!=args.memory_token_limit
+                or run.get('requested_memory_evidence_format')!=args.memory_evidence_format):
             raise RuntimeError('Existing benchmark ownership/configuration differs')
     else:
         if any(args.run_dir.iterdir()):raise RuntimeError('Benchmark directory is not empty')
         run={'schema_version':1,'run_id':uuid.uuid4().hex,'status':'PREPARING','created_at':stamp(),'split':args.split,'ids':ids,
             'corpus_sha256':sha(manifest_path),'source_metadata':args.source_metadata,'requested_profile':args.memory_profile,
             'requested_top_k':args.memory_top_k,'requested_memory_tokens':args.memory_token_limit,
+            'requested_memory_evidence_format':args.memory_evidence_format,
             'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}
         if args.seed_from:
             if args.split!='development':raise ValueError('Seed reuse is restricted to development comparisons')
@@ -196,6 +204,7 @@ def main():
     if args.memory_profile:common+=['--memory-profile',args.memory_profile]
     if args.memory_top_k is not None:common+=['--memory-top-k',str(args.memory_top_k)]
     if args.memory_token_limit is not None:common+=['--memory-token-limit',str(args.memory_token_limit)]
+    if args.memory_evidence_format is not None:common+=['--memory-evidence-format',args.memory_evidence_format]
     with (args.run_dir/'orchestrator.lock').open('a+b') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         phases=('answer',) if run.get('seed_complete') else ('seed','answer')

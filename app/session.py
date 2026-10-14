@@ -22,7 +22,7 @@ from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.workers.runner import WorkerRunner
 
-from app.context_memory import memory_message
+from app.context_memory import memory_message, validate_evidence_format
 from app.adapters.llama import apply_required_tool_prefix
 from app.pipecat_bot import SYSTEM_MESSAGE, build_pipeline
 from app.tools import ToolResponseGuard, ToolTurn
@@ -105,9 +105,12 @@ class ToolContinuationBudget(FrameProcessor):
 class AssistantSession:
     def __init__(self, config, memory, reminders, records, *, user_id="owner", context_tokens=2048,
                  session_id=None, llm=None, vision_frames=None, output_channel="text",
-                 memory_top_k=5, memory_context_tokens=512,memory_skip_literal_arithmetic=False):
+                 memory_top_k=5, memory_context_tokens=512,memory_skip_literal_arithmetic=False,
+                 memory_evidence_format='nested_v1'):
         from app.memory import validate_retrieval_limits
         validate_retrieval_limits(memory_top_k,memory_context_tokens,context_tokens,config.max_tokens)
+        validate_evidence_format(memory_evidence_format)
+        self.memory_evidence_format=memory_evidence_format
         if type(memory_skip_literal_arithmetic) is not bool:raise ValueError('Arithmetic retrieval routing must be a boolean')
         self.memory_skip_literal_arithmetic=memory_skip_literal_arithmetic
         self.memory_top_k=memory_top_k;self.memory_context_tokens=memory_context_tokens
@@ -376,7 +379,8 @@ class AssistantSession:
         # can use turn-local references while records keep the real IDs below.
         compact_references=turn.required_operation() not in {'correct','forget'}
         evidence, metrics = await asyncio.to_thread(memory_message, found["items"], self.config.base_url,
-            max_tokens=self.memory_context_tokens,compact_references=compact_references)
+            max_tokens=self.memory_context_tokens,compact_references=compact_references,
+            evidence_format=self.memory_evidence_format)
         self.records.attach_memories(self.user_id, turn.turn_id, metrics["injected_memory_ids"])
         history = self.records.recent(self.user_id, session_id=self.session_id, limit=8)
         # Explicit cross-session history questions use dated, delivered records.
@@ -417,7 +421,7 @@ class AssistantSession:
                 raise ValueError("问题与工具定义超过当前模型上下文容量，请缩短问题。")
             else:
                 evidence, metrics = await asyncio.to_thread(memory_message, [], self.config.base_url,max_tokens=self.memory_context_tokens,
-                    compact_references=compact_references)
+                    compact_references=compact_references,evidence_format=self.memory_evidence_format)
         self.retrieval = {**metrics, "history_turns_dropped": dropped, "initial_prompt_tokens": tokens,
                           "requested_top_k":self.memory_top_k,"evidence_token_limit":self.memory_context_tokens,
                           "retrieval_skipped_reason":'literal_arithmetic' if arithmetic_lookup else ('authoritative_tool_store' if task_lookup else None),

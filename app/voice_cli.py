@@ -39,7 +39,8 @@ async def run(args):
             output_path=args.output_wav, input_device=args.input_device, output_device=args.output_device,
             context_tokens=settings["llama"]["context_tokens"],memory_top_k=settings['memory']['top_k'],
             memory_context_tokens=settings['memory']['context_token_limit'],
-            memory_skip_literal_arithmetic=settings['memory'].get('skip_literal_arithmetic',False))
+            memory_skip_literal_arithmetic=settings['memory'].get('skip_literal_arithmetic',False),
+            memory_evidence_format=settings['memory'].get('evidence_format','nested_v1'))
         if feedback: voice.notifications.before_claim = feedback.tick
         try:
             await voice.start()

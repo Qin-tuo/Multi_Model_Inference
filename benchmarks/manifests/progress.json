@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T03:01:14.760430+00:00",
+  "updated_at": "2026-10-14T03:24:46.767790+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -561,6 +561,19 @@
       ],
       "validation": "Reviewedall4devcases withzero wordF1 andreported reference presence:2core paraphrases,1reader error withcorrectfirstsource injected,1correctsource droppedby768token packing despite normalizedsubstring matchfromwrongdate/work. Officialscore unchanged;not an independentsemanticaccuracy measurement.",
       "next_action": "Reduce evidence representation overhead without dropping provenance andcompare complete82dev before heldout;separately qualify reader capability."
+    },
+    {
+      "task_id": "J4.memory.evidence_format",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/context_memory.py",
+        "tests/test_memory_context.py",
+        "tools/evidence_format_probe.py",
+        "benchmarks/results/evidence-format-packing.json",
+        "benchmarks/manifests/evidence-format-v1.json"
+      ],
+      "validation": "Opt-in flat_v2 representation conserves original text,date,speaker,window offsets,canonical IDs/version andfullsource maps;multisource/extended data andmaintenance IDs staynested.231corePASS. Replay ofall82dev retrieved snapshots usingrealnative tokenizer:18cases gain1source,0losspreviously admitted sources,626->644facts,57870->53042tokens under768each. Correctday/source previouslyomitted nowfits inknownmusic case. No modelquality claim frompacking;fresh82+82actualanswer pair underway.",
+      "next_action": "Complete nested/flat paired full82development runs underidentical4thread/8item/768token settings. Retain errors,losses andofficial scores;qualify actualanswers beforedefaultchange."
     }
   ],
   "acceptance": {

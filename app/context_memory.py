@@ -6,6 +6,13 @@ import hashlib
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+EVIDENCE_FORMATS = ('nested_v1', 'flat_v2')
+
+
+def validate_evidence_format(value):
+    if value not in EVIDENCE_FORMATS:
+        raise ValueError('Unknown memory evidence format')
+
 
 def presentation(item):
     """Project exact source ranges; the stored memory and sources stay intact."""
@@ -25,8 +32,10 @@ def presentation(item):
     return window['text'],sources,dict(window)
 
 
-def memory_message(items, base_url: str, max_tokens: int = 512, *, compact_references: bool = False):
+def memory_message(items, base_url: str, max_tokens: int = 512, *, compact_references: bool = False,
+                   evidence_format: str = 'nested_v1'):
     from app.memory import MAX_RETRIEVAL_ITEMS
+    validate_evidence_format(evidence_format)
     if len(items)>MAX_RETRIEVAL_ITEMS:raise ValueError('Too many memory candidates for bounded evidence packing')
     endpoint = urlsplit(base_url)
     if endpoint.scheme != "http" or endpoint.hostname not in {"127.0.0.1", "localhost", "::1"}:
@@ -74,6 +83,14 @@ def memory_message(items, base_url: str, max_tokens: int = 512, *, compact_refer
         # An explicit source day is the provenance for historical dialogue;
         # the storage update timestamp is not the date it was originally said.
         if not any(source.get('date') for source in sources):evidence['updated_at']=item.get('updated_at')
+        if (compact_references and evidence_format == 'flat_v2' and len(sources) == 1
+                and set(sources[0]) <= {'ref', 'date', 'speaker', 'evidence', 'span'}):
+            # One fact and its only source share the displayed fact reference.
+            # Keep the full fact/source IDs and original excerpt in the same
+            # external reference map as v1. Source text,dates,roles and spans
+            # are copied verbatim; multiple/extended sources retain nesting.
+            evidence.pop('sources')
+            evidence.update({key: value for key, value in sources[0].items() if key != 'ref'})
         candidate = prefix + json.dumps(selected + [evidence], ensure_ascii=False, separators=(",", ":"))
         size = count(candidate)
         if size <= max_tokens:
@@ -87,5 +104,5 @@ def memory_message(items, base_url: str, max_tokens: int = 512, *, compact_refer
     return {"role": "user", "content": content}, {"injected_memory_ids": selected_ids,
                                                       "memory_tokens": tokens,
                                                       "retrieved_count": len(items), "injected_count": len(selected),
-                                                      "reference_format":'turn_refs_v1' if compact_references else 'full_ids_v1',
+                                                      "reference_format":('turn_refs_flat_v2' if evidence_format == 'flat_v2' else 'turn_refs_v1') if compact_references else 'full_ids_v1',
                                                       "evidence_references":references,"omitted_evidence":omitted}

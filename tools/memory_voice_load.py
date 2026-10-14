@@ -50,6 +50,9 @@ async def main(args):
     top_k=args.memory_top_k if args.memory_top_k is not None else runtime['memory']['top_k']
     memory_tokens=args.memory_token_limit if args.memory_token_limit is not None else runtime['memory']['context_token_limit']
     skip_arithmetic=args.skip_literal_arithmetic if args.skip_literal_arithmetic is not None else runtime['memory'].get('skip_literal_arithmetic',False)
+    evidence_format=runtime['memory'].get('evidence_format','nested_v1')
+    from app.context_memory import validate_evidence_format
+    validate_evidence_format(evidence_format)
     model=LlamaConfig.from_manifest(ROOT/'models/manifest.json')
     validate_retrieval_limits(top_k,memory_tokens,runtime['llama']['context_tokens'],model.max_tokens)
     folder=args.run_dir.resolve();corpus,config,prefix,_=workload(10000,personal=True,profile=args.profile)
@@ -69,7 +72,7 @@ async def main(args):
         inputs.append((label,path,digest))
     reader=fingerprint();before=backend_state();artifacts=folder/'coexistence';artifacts.mkdir()
     write_json(started_marker,{'created_at':stamp(),'reader_fingerprint':reader,'trace_stages':args.trace_stages,'debug_loop':args.debug_loop,
-        'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
+        'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens,'evidence_format':evidence_format},
         'skip_literal_arithmetic':skip_arithmetic,'turn_interval_seconds':args.turn_interval,
         'startup_heap_policy':args.startup_heap,
         'gc_bootstrap_state':globals().get('GC_BOOTSTRAP_STATE'),
@@ -157,7 +160,7 @@ async def main(args):
             voice=VoiceAssistant(model,memory,reminders,records,
                 user_id=corpus['owner'],vision_frames=bridge.frames,output_path=artifacts/'answers.wav',
                 context_tokens=runtime['llama']['context_tokens'],memory_top_k=top_k,memory_context_tokens=memory_tokens,
-                memory_skip_literal_arithmetic=skip_arithmetic)
+                memory_skip_literal_arithmetic=skip_arithmetic,memory_evidence_format=evidence_format)
             if stage_trace:stage_trace.attach(voice,memory)
             if gc_observer:gc_observer.start()
             # File input begins only after this explicit startup phase. The
@@ -255,7 +258,7 @@ async def main(args):
             'embedding_runtime':embedding_runtime,
             'reader_fingerprint':reader,'config':config,'initial_population':counts,'run_directory':str(folder),
             'preparation_method':prepared.get('method','sdk-batch-real-bge'),'preparation_sha256':sha256(folder/'prepared.json'),
-            'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},
+            'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens,'evidence_format':evidence_format},
             'skip_literal_arithmetic':skip_arithmetic,'turn_interval_seconds':args.turn_interval,
             'latency_origin':'inferred actual speech end plus file-release lateness' if args.turn_interval else 'inferred end from actual paced input',
             'workload_begin_ns':begin,'workload_end_ns':end,'query_summary':qstat,'write_summary':wstat,
