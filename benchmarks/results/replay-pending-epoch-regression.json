@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-10-14T08:44:48.184336+00:00",
+  "status": "PASS",
+  "scope": "NativePipecat pipeline withlabelled2x2images andcontrolledframe-storeepoch;notcameraaccuracy ormodelquality. Pendingrequestbeforeseek mustnotacquirethepostseekimage.",
+  "before": {
+    "status": "FAIL",
+    "log": "/home/nvidia/AI_Stack/runtime-data/benchmarks/replay-pending-epoch-baseline.log",
+    "sha256": "5b119e04a7dd25d1ad5be050ede26d3b772b35269d8a30bd9afc1e8263f54eb6"
+  },
+  "after": {
+    "log": "/home/nvidia/AI_Stack/runtime-data/benchmarks/replay-unit-tests-fixed.log",
+    "sha256": "392f990a900df906512310de4aebe58d11d9bbf390c74f9225c7364809236d65"
+  },
+  "source_sha256": "0a5d72de93586399f6bbc8f3bb23dc3882e0e214686f3b42a93e4793870db649"
+}

@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-10-14T09:00:48.246822+00:00",
+  "status": "PASS",
+  "scope": "Controlled clock/cache regression: a late frame withrecent arrivalcannot beacquiredorvalidatedonce the replayclockstops;notphysicalcameraquality.",
+  "before": {
+    "status": "FAIL",
+    "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/replay-cached-clock-baseline.log",
+    "sha256": "a6d7062ffeb39c78a44e1bd906fcfd0285efd71d80e96494ca4004da3e0b8807"
+  },
+  "after": {
+    "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/replay-clock-guard-tests.log",
+    "sha256": "53e09f1ce58ffdb47c2cc1e79aa1a7d7a263f311a55c0e8b6af7a5e42c0e4574"
+  },
+  "test_source_sha256": "fe403c8da6ee66ace8b1b7a9e15f8d31d79712e506d4eb10a167be749dcb31ea"
+}

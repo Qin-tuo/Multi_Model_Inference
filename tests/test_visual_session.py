@@ -87,6 +87,13 @@ class VisualSessionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.records.recent("owner"), [])
         self.assertFalse(self.emitted)
 
+    async def test_recorded_source_is_explicit_in_model_input_and_result(self):
+        self.frames.source_kind='recorded_replay'
+        capture=self.add_frame()
+        result=await self.session.ask('图片里是什么？',emit=self.emit,question_time_ns=capture)
+        self.assertEqual(result['image']['source_kind'],'recorded_replay')
+        self.assertIn('不能视为当前实时场景',str(self.llm.contexts[0]))
+
     async def test_camera_epoch_change_during_budgeting_prevents_model_admission(self):
         self.add_frame()
         async def reset(_context):

@@ -221,6 +221,9 @@ class AssistantSession:
         meta = self.image_frame.metadata
         self.image_metrics = {key: meta[key] for key in ("frame_id", "worker_epoch", "capture_time_ns",
             "question_time_ns", "source_timestamp_ns")}
+        self.image_metrics["source_kind"] = meta.get("source_kind", "unspecified")
+        if meta.get("source_kind") == "recorded_replay":
+            text = "这张图片来自已录制画面的回放，不能视为当前实时场景。\n" + text
         self.image_metrics.update(size=list(self.image_frame.size), encoding="Pipecat JPEG (Pillow default quality 75)",
             question_frame_skew_ms=abs(meta["capture_time_ns"] - question_time_ns) / 1e6)
         # Pipecat owns image encoding. Keep the source alive if the caller is

@@ -7,6 +7,15 @@
     "ros-jazzy-rosbag2-transport": "0.26.11-1noble.20260911.225152"
   },
   "source": "https://github.com/ros2/rosbag2",
-  "native_adapter_sha256": "c5051dd037315498dcc06e01c513e42ec23a1bfdb4618df38320cdb4ebd9bbee",
-  "scope": "InstalledJazzy0.26.11 public/protectedPlayer API; framing/storage/replay ownedbyrosbag2. Localwrapperaddsboundedrecording,artifactidentity,domainisolation andactualpublisher-readeradmission."
+  "native_adapter_sha256": "9e6e9e8eb8b2297f0da29e907a0023047a21c0aba3bcd9dc00d9dd70ca42e53f",
+  "scope": "InstalledJazzy0.26.11 public/protectedPlayer API; framing/storage/replay ownedbyrosbag2. Localwrapperaddsboundedrecording,artifactidentity,domainisolation andactualpublisher-readeradmission.",
+  "updated_at": "2026-10-14T08:44:48.178494+00:00",
+  "playback_profile": {
+    "rate": 1.0,
+    "periodic_clock_hz": 50,
+    "clock_on_each_topic": true,
+    "rgbd_delivery": "reliable; live camera subscriptions unchanged",
+    "read_ahead_messages": 8,
+    "admission": "actual matched readers before resume"
+  }
 }

@@ -25,6 +25,7 @@ class RGBDFrame:
     depth_step: int
     depth: bytes
     optical_frame: str
+    source_kind: str = "unspecified"
 
     @property
     def payload_bytes(self): return len(self.rgb) + len(self.depth)
@@ -43,6 +44,7 @@ class FrameLease:
 
     def validate(self):
         if self.closed: raise VisionUnavailable("FRAME_RELEASED")
+        self.store.check_source_clock(self.store.clock())
         with self.store.lock:
             if self.frame.epoch != self.store.epoch: raise VisionUnavailable("CAMERA_EPOCH_CHANGED")
             if self.store.clock() - self.frame.capture_time_ns > self.store.retention_ns:
@@ -66,10 +68,18 @@ class VisionFrameStore:
     """
     def __init__(self, *, max_bytes=118 * 1024 * 1024, retention_seconds=2,
                  stale_seconds=.5, max_frame_bytes=4 * 1024 * 1024, max_leases=1,
-                 clock=time.monotonic_ns):
+                 clock=time.monotonic_ns, source_kind="unspecified", source_available=None):
         if min(max_bytes, max_frame_bytes, max_leases, retention_seconds, stale_seconds) <= 0:
             raise ValueError("Vision cache bounds must be positive")
         self.max_bytes, self.max_frame_bytes, self.max_leases = max_bytes, max_frame_bytes, max_leases
+        if source_kind not in {"unspecified", "live_camera", "recorded_replay", "synthetic_fixture"}:
+            raise ValueError("Unknown vision source kind")
+        self.source_kind = source_kind
+        if source_available is not None and not callable(source_available):
+            raise ValueError("Source availability guard must be callable")
+        self.source_available = source_available
+        # Guards run inside status()'s cache lock: inspect local state only,
+        # without ROS calls, I/O, blocking waits or additional lock ownership.
         self.retention_ns, self.stale_ns = int(retention_seconds * 1e9), int(stale_seconds * 1e9)
         self.clock, self.lock = clock, threading.RLock()
         self.epoch = uuid.uuid4().hex
@@ -77,6 +87,10 @@ class VisionFrameStore:
         self.bytes = self.peak_bytes = 0
         self.last_arrival = self.last_source = None
         self.counts = Counter()
+
+    def check_source_clock(self, now):
+        if self.source_available is not None and not self.source_available(now):
+            raise VisionUnavailable("SOURCE_CLOCK_UNAVAILABLE")
 
     def reset(self, reason):
         with self.lock:
@@ -126,7 +140,7 @@ class VisionFrameStore:
                 return False
             key = f"{self.epoch}:{source_time_ns}"
             frame = RGBDFrame(key, self.epoch, source_time_ns, capture_time_ns, arrival_time_ns,
-                width, height, rgb_step, rgb_encoding, bytes(rgb), depth_step, bytes(depth), optical_frame)
+                width, height, rgb_step, rgb_encoding, bytes(rgb), depth_step, bytes(depth), optical_frame, self.source_kind)
             self.resident[key] = frame
             self.queue.append(key)
             self.bytes += size
@@ -137,6 +151,7 @@ class VisionFrameStore:
 
     def acquire(self, question_time_ns=None, *, max_skew_ms=150):
         now = self.clock()
+        self.check_source_clock(now)
         target = now if question_time_ns is None else question_time_ns
         if max_skew_ms <= 0 or target > now: raise VisionUnavailable("INVALID_QUESTION_TIME")
         with self.lock:
@@ -164,8 +179,10 @@ class VisionFrameStore:
         now = self.clock()
         with self.lock:
             self._prune(now)
-            fresh = bool(self.queue) and self.last_arrival is not None and now - self.last_arrival <= self.stale_ns
+            fresh = (bool(self.queue) and self.last_arrival is not None and now - self.last_arrival <= self.stale_ns
+                and (self.source_available is None or self.source_available(now)))
             return {"state": "READY" if fresh else "STALE", "epoch": self.epoch,
+                    "source_kind": self.source_kind,
                     "frames": len(self.queue), "resident_payload_bytes": self.bytes, "peak_payload_bytes": self.peak_bytes,
                     "max_payload_bytes": self.max_bytes, "leased_frames": sum(self.pins.values()), "counts": dict(self.counts),
                     "last_arrival_age_ms": (now - self.last_arrival) / 1e6 if self.last_arrival is not None else None}

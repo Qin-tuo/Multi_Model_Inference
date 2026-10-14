@@ -1,0 +1,78 @@
+{
+  "created_at": "2026-10-14T08:18:57.368815+00:00",
+  "status": "FAIL",
+  "scope": "Exercise historical MCAP → ROS simulated clock → actual assistant image path.\n\nImages are labelled synthetic640x480 blue RGB and aligned constant depth.\nThe live camera/domain and personal database are not used or modified.\n",
+  "checks": {
+    "wall_clock_bridge_rejects_history": true,
+    "historical_stamp_preserved": true,
+    "source_is_recorded_replay": true,
+    "rgb_depth_preserved": true,
+    "mapped_capture_is_fresh": true,
+    "closed_bridge_resources": true
+  },
+  "errors": [
+    {
+      "type": "TimeoutError",
+      "error": "native Pipecat image request"
+    }
+  ],
+  "historical_start_ns": 1600000000000000000,
+  "fixture_frames": 300,
+  "source_sha256": "58f3b1cebf810d573d66ff49a63e219470c79aa09edbaf92e6808b040aa9a5a2",
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-replay-clock-v1",
+  "with_actual_assistant": false,
+  "limitations": "Syntheticrecordedpixels,notactualD435ibandwidth,sceneaccuracy,gesture/voicequality orfinalJTacceptance.",
+  "source_sample": {
+    "source_timestamp_ns": 1600000000900000000,
+    "capture_time_ns": 109481110073470,
+    "arrival_time_ns": 109481132470544,
+    "source_kind": "recorded_replay"
+  },
+  "failed_bridge_state": {
+    "state": "READY",
+    "epoch": "316ab5339f594d969e4a93c24d8041d5",
+    "source_kind": "recorded_replay",
+    "frames": 19,
+    "resident_payload_bytes": 29184000,
+    "peak_payload_bytes": 30720000,
+    "max_payload_bytes": 117440512,
+    "leased_frames": 0,
+    "counts": {
+      "accepted": 146,
+      "expired": 127
+    },
+    "last_arrival_age_ms": 85.973615,
+    "ros_domain": 195,
+    "ros_failure": null,
+    "use_sim_time": true,
+    "clock_progress_age_ms": 9.067468,
+    "perception": null,
+    "transport_reserve_bytes": 16777216,
+    "synchronizer_queue_depth": 3,
+    "dds_queue_depth": 2,
+    "rgbd_pair_delta_max_ms": 0.0
+  },
+  "completed_at": "2026-10-14T08:19:17.617592+00:00",
+  "raw_artifacts": [
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-replay-clock-v1/play-first.log",
+      "sha256": "4e3d119da27e0103d15b057c7b949f6931bc61d9fa7dcd9e5b9fd79a8aa53c92",
+      "bytes": 562
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-replay-clock-v1/probe-source.py",
+      "sha256": "58f3b1cebf810d573d66ff49a63e219470c79aa09edbaf92e6808b040aa9a5a2",
+      "bytes": 12908
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-replay-clock-v1/bag/bag_0.mcap",
+      "sha256": "30e9972e22260119824b9cc3eaec57e0fa27c96419244bff03dc16c45c8da96b",
+      "bytes": 261683
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-replay-clock-v1/bag/metadata.yaml",
+      "sha256": "da56d67d65fbb2829e0d49d6d052fdb36d6861e9b974448c2ee29514977d9f4c",
+      "bytes": 1289
+    }
+  ]
+}

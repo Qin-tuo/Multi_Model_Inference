@@ -13,15 +13,22 @@ from app.perception import GestureRules, Person
 
 class RosVisionBridge:
     def __init__(self, *, domain_id=None, frame_bytes_limit=128 * 1024 * 1024,
-                 retention_seconds=2, stale_seconds=.5, perception=False):
+                 retention_seconds=2, stale_seconds=.5, perception=False, use_sim_time=False):
+        if type(use_sim_time) is not bool: raise ValueError("use_sim_time must be boolean")
+        production_domain = int(os.environ.get("ASSISTANT_ROS_DOMAIN_ID", "42"))
+        if use_sim_time and (domain_id is None or domain_id in {42, production_domain}):
+            raise ValueError("Recorded replay requires an explicit isolated ROS domain")
+        self.use_sim_time = use_sim_time
         # Reserve 16 MiB for the bounded DDS/synchronizer queues and one
         # in-progress copy/packed image. Admission is fixed at 640x480 RGB-D.
         self.transport_reserve = 16 * 1024 * 1024
         if frame_bytes_limit <= self.transport_reserve: raise ValueError("Vision budget is smaller than its transport reserve")
         self.frames = VisionFrameStore(max_bytes=frame_bytes_limit - self.transport_reserve,
-            retention_seconds=retention_seconds, stale_seconds=stale_seconds)
+            retention_seconds=retention_seconds, stale_seconds=stale_seconds,
+            source_kind="recorded_replay" if use_sim_time else "live_camera",
+            source_available=self._replay_clock_available if use_sim_time else None)
         self.domain_id = int(os.environ.get("ASSISTANT_ROS_DOMAIN_ID", "42")) if domain_id is None else domain_id
-        if not isinstance(self.domain_id, int) or not 0 <= self.domain_id <= 232:
+        if type(self.domain_id) is not int or not 0 <= self.domain_id <= 232:
             raise ValueError("ROS domain must be 0..232")
         self.clock_offset = None
         self.failure = None
@@ -34,6 +41,34 @@ class RosVisionBridge:
         self.pose_subscription = None
         self.pose_offset = None
         self.boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+        self.clock_jump = None
+        self.last_clock_progress_ns = None
+
+    def _replay_clock_available(self, now_ns):
+        progress = self.last_clock_progress_ns
+        return progress is not None and now_ns-progress<=self.frames.stale_ns
+
+    def _observe_replay_clock(self, delta_ns, changed, now_ns, active=True):
+        previous = self.last_clock_progress_ns
+        if changed or (previous is not None and abs(delta_ns - (now_ns - previous)) > 100_000_000):
+            self.frames.reset("replay_clock_discontinuity")
+            if self.perception: self.perception.invalidate("replay_clock_discontinuity")
+            if self.sync:
+                with self.sync.lock:
+                    for queue in self.sync.queues: queue.clear()
+            self._source_times.clear(); self._arrival_times.clear()
+            self.clock_offset = self.pose_offset = None
+        self.last_clock_progress_ns = now_ns if active else None
+
+    def _clock_offset_at(self, now_ns):
+        clock = self.node.get_clock()
+        source_now = clock.now().nanoseconds
+        progress = self.last_clock_progress_ns
+        if self.use_sim_time and (not clock.ros_time_is_active or source_now <= 0
+                or progress is None or now_ns - progress > self.frames.stale_ns):
+            with self.frames.lock: self.frames.counts["replay_clock_not_advancing"] += 1
+            return None
+        return source_now - now_ns
 
     @classmethod
     def configured(cls):
@@ -46,6 +81,7 @@ class RosVisionBridge:
         from rclpy.context import Context
         from rclpy.executors import SingleThreadedExecutor
         from rclpy.node import Node
+        from rclpy.parameter import Parameter
         from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
         from sensor_msgs.msg import Image
         from message_filters import TimeSynchronizer, Subscriber
@@ -57,8 +93,19 @@ class RosVisionBridge:
         os.environ.pop("ROS_LOCALHOST_ONLY", None)
         self.context = Context()
         rclpy.init(context=self.context, domain_id=self.domain_id)
-        self.node = Node("assistant_vision_bridge", context=self.context)
-        qos = QoSProfile(depth=2, reliability=ReliabilityPolicy.BEST_EFFORT, history=HistoryPolicy.KEEP_LAST)
+        self.node = Node("assistant_vision_replay_bridge" if self.use_sim_time else "assistant_vision_bridge", context=self.context,
+            parameter_overrides=[Parameter("use_sim_time", value=self.use_sim_time)])
+        if self.use_sim_time:
+            from rclpy.clock import ClockChange, JumpThreshold
+            from rclpy.duration import Duration
+            self.clock_jump = self.node.get_clock().create_jump_callback(
+                JumpThreshold(min_forward=Duration(nanoseconds=1), min_backward=Duration(nanoseconds=-1)),
+                post_callback=lambda jump: self._observe_replay_clock(jump.delta.nanoseconds,
+                    int(jump.clock_change) != int(ClockChange.ROS_TIME_NO_CHANGE), time.monotonic_ns(),
+                    active=int(jump.clock_change) != int(ClockChange.ROS_TIME_DEACTIVATED)))
+        qos = QoSProfile(depth=2,
+            reliability=ReliabilityPolicy.RELIABLE if self.use_sim_time else ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST)
         self.subscribers = [Subscriber(self.node, Image, topic, qos_profile=qos) for topic in (
             "/camera/camera/color/image_raw", "/camera/camera/aligned_depth_to_color/image_raw")]
         bridge = self
@@ -70,7 +117,8 @@ class RosVisionBridge:
                     return
                 now = time.monotonic_ns()
                 source = message.header.stamp.sec * 1_000_000_000 + message.header.stamp.nanosec
-                offset = bridge.node.get_clock().now().nanoseconds - now
+                offset = bridge._clock_offset_at(now)
+                if offset is None: return
                 previous = bridge._source_times.get(index)
                 last_arrival = bridge._arrival_times.get(index)
                 reset = ((previous is not None and previous - source > bridge.frames.stale_ns)
@@ -113,7 +161,10 @@ class RosVisionBridge:
 
     def _receive_pose(self, message, info):
         now = time.monotonic_ns()
-        offset = self.node.get_clock().now().nanoseconds - now
+        offset = self._clock_offset_at(now)
+        if offset is None:
+            self.perception.invalidate('replay_clock_not_advancing')
+            return
         if self.pose_offset is not None and abs(offset-self.pose_offset)>100_000_000:
             self.perception.invalidate('ros_clock_changed')
         self.pose_offset = offset
@@ -160,7 +211,10 @@ class RosVisionBridge:
             self.pair_deltas_ms = self.pair_deltas_ms[-1000:]
 
     def status(self):
+        progress = self.last_clock_progress_ns
         return {**self.frames.status(), "ros_domain": self.domain_id, "ros_failure": self.failure,
+                "use_sim_time": self.use_sim_time,
+                "clock_progress_age_ms": max(0,time.monotonic_ns()-progress)/1e6 if progress is not None else None,
                 "perception": self.perception.snapshot() if self.perception else None,
                 "transport_reserve_bytes": self.transport_reserve,
                 "synchronizer_queue_depth": 3, "dds_queue_depth": 2,
@@ -169,10 +223,14 @@ class RosVisionBridge:
     def close(self):
         if self.perception: self.perception.invalidate('bridge_closed')
         if self.executor: self.executor.shutdown(timeout_sec=3)
+        if self.clock_jump: self.clock_jump.unregister(); self.clock_jump = None
         if self.context: self.context.try_shutdown()
         if self.thread:
             self.thread.join(3)
             if self.thread.is_alive(): raise RuntimeError("ROS vision thread did not stop")
         if self.node: self.node.destroy_node()
         self.thread = self.node = self.context = self.executor = None
+        self.sync = self.subscribers = None
+        self.clock_offset = self.pose_offset = self.last_clock_progress_ns = None
+        self._source_times.clear(); self._arrival_times.clear()
         self.frames.reset("bridge_closed")

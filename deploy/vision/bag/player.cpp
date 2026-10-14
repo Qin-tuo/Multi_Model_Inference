@@ -32,6 +32,13 @@ int main(int argc, char **argv) {
   options.rate = 1.; options.read_ahead_queue_size = 8;
   options.start_paused = true; options.disable_keyboard_controls = true;
   options.clock_publish_on_topic_publish = true;
+  options.clock_publish_frequency = 50.;
+  for (const auto &topic : {
+      "/camera/camera/color/image_raw",
+      "/camera/camera/aligned_depth_to_color/image_raw",
+      "/camera/camera/aligned_depth_to_color/camera_info"}) {
+    options.topic_qos_profile_overrides.emplace(topic, rclcpp::QoS(10).reliable());
+  }
   auto player = std::make_shared<MatchedPlayer>(storage, options);
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(player);

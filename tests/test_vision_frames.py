@@ -157,5 +157,14 @@ class SnapshotPipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.errors)
         self.assertEqual(self.store.counts["stale_requests_dropped"], 1)
 
+    async def test_pending_request_cannot_select_a_new_camera_epoch(self):
+        request=self.provider.request('before seek',user_id='owner',turn_id='old',question_time_ns=self.clock.now)
+        self.store.reset('recording seek')
+        add(self.store,self.clock,rgb=bytes([0,0,255])*4)
+        await self.worker.queue_frame(request)
+        await self.wait_for(lambda:bool(self.collector.images) or bool(self.errors))
+        self.assertFalse(self.collector.images)
+        self.assertIn('CAMERA_EPOCH_CHANGED',self.errors)
+
 
 if __name__ == "__main__": unittest.main()

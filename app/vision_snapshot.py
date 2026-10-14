@@ -41,6 +41,7 @@ class VisionSnapshotProcessor(FrameProcessor):
         frame = UserImageRequestFrame(user_id=user_id, text=text, video_source="d435", append_to_context=append_to_context)
         frame.metadata.update(metadata_schema_version=1, request_id=uuid.uuid4().hex, turn_id=turn_id,
             task_type="vision_snapshot", cancellation_generation=self.generation,
+            source_epoch=self.frames.epoch,
             question_time_ns=question_time_ns if question_time_ns is not None else time.monotonic_ns())
         return frame
 
@@ -67,6 +68,9 @@ class VisionSnapshotProcessor(FrameProcessor):
                 if not key or not metadata.get("turn_id") or metadata.get("cancellation_generation") != self.generation:
                     raise VisionUnavailable("STALE_OR_UNSCOPED_IMAGE_REQUEST")
                 lease = self.frames.acquire(metadata.get("question_time_ns"))
+                if lease.frame.epoch != metadata.get("source_epoch"):
+                    lease.close()
+                    raise VisionUnavailable("CAMERA_EPOCH_CHANGED")
                 self.leases[key] = lease
                 # Requests are SystemFrames. Return immediately so image packing
                 # cannot block the native interruption/control queue.
@@ -98,6 +102,7 @@ class VisionSnapshotProcessor(FrameProcessor):
             response.metadata.update(metadata, frame_id=snapshot.frame_id, worker_epoch=snapshot.epoch,
                 capture_time_ns=snapshot.capture_time_ns, arrival_time_ns=snapshot.arrival_time_ns,
                 source_timestamp_ns=snapshot.source_time_ns,
+                source_kind=snapshot.source_kind,
                 deadline_ns=snapshot.capture_time_ns + self.frames.retention_ns,
                 payload_ref=f"vision-frame:{snapshot.frame_id}")
             await self.push_frame(response, FrameDirection.DOWNSTREAM)
