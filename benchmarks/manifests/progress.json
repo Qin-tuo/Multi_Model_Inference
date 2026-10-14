@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T02:15:56.809281+00:00",
+  "updated_at": "2026-10-14T02:49:49.634344+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -528,6 +528,33 @@
       ],
       "validation": "Native 42 request/output pairs identical;84 expected checks pass,draft432 accepted240. Native report retains FAIL due transient extra speech cgroup PID with unchanged primary PIDs/counters. Full fresh-snapshot pair completed20 turns+196 queries+98 writes each:timeP95 3.224->2.297s,arithmetic2.003->1.746s,recall4.377->4.098s,image4.772->4.840s. Both no errors/leaks/lost writes;vision rates/age pass. Candidate writeP95 514ms exceeds500ms,so both workload reports FAIL and no default promotion. Original config byte-restored,native speculative=false,seven backends READY. Two launcher tests and bounded-parameter checks pass.",
       "next_action": "Diagnose write tail latency and improve memory answer quality. Keep speculative mode opt-in pending broader quality, cancellation/recovery and long-duration qualification;formal B0-B3/5runs100events/8h remain incomplete."
+    },
+    {
+      "task_id": "J5.memory.embedding_threads",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/voice_stage_trace.py",
+        "benchmarks/results/memory-write-stage.json",
+        "benchmarks/results/memory-write-stage-diagnostic.json",
+        "tools/embedding_threads_probe.py",
+        "benchmarks/results/embedding-threads-1.json",
+        "benchmarks/results/embedding-threads-2.json",
+        "benchmarks/results/embedding-threads-4.json",
+        "benchmarks/results/embedding-thread-comparison.json",
+        "app/memory.py",
+        "app/memory_runtime.py"
+      ],
+      "validation": "20-turn default-decoder trace:97writes encode once each,long mean440ms with322ms encoding,longP95544ms. Tail also has101ms pre-validation interval andone197ms nativeinsert. Real isolated CPUORT1/2/4-thread encoder longP95559/289/165ms;all60vector arrays bit-identical to2threads,backendidentities unchanged. Runtime embedding_threads forwarding fixed,integer1..4 validated before state creation;227corePASS. Complete2/4thread voice pair running.",
+      "next_action": "Finish full-load2/4thread comparison and check realORToptions,visualrates/age,voice/memory latency and restoration beforechoosing runtime default."
+    },
+    {
+      "task_id": "J4.memory.source_review",
+      "status": "RUNNING",
+      "artifacts": [
+        "benchmarks/results/lcvmem-reader-error-diagnostic.json"
+      ],
+      "validation": "Reviewedall4devcases withzero wordF1 andreported reference presence:2core paraphrases,1reader error withcorrectfirstsource injected,1correctsource droppedby768token packing despite normalizedsubstring matchfromwrongdate/work. Officialscore unchanged;not an independentsemanticaccuracy measurement.",
+      "next_action": "Reduce evidence representation overhead without dropping provenance andcompare complete82dev before heldout;separately qualify reader capability."
     }
   ],
   "acceptance": {

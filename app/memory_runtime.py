@@ -22,4 +22,5 @@ def open_memory(directory,*,settings=None):
         service=load(DATA/'qdrant')
     elif backend!='qdrant_local':raise ValueError('Unknown configured memory store')
     if is_window_profile(profile) and service is None:raise ValueError('Token windows require the managed native Qdrant service')
-    return Mem0Adapter(directory,bge_path=model_path(profile),embedding_backend='onnx',server_config=service,embedding_profile=profile)
+    return Mem0Adapter(directory,bge_path=model_path(profile),embedding_backend='onnx',server_config=service,embedding_profile=profile,
+        embedding_threads=settings['memory'].get('embedding_threads',2))

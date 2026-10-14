@@ -5,6 +5,8 @@ mapped from each native pipeline clock, not from delayed observer delivery.
 Wall spans include awaits/locks; they are not GPU or exclusive CPU durations.
 """
 import functools
+import hashlib
+from pathlib import Path
 import threading
 import time
 
@@ -15,6 +17,7 @@ from pipecat.observers.base_observer import BaseObserver
 class StageTrace:
     def __init__(self,limit=20000):
         self.limit=limit;self.events=[];self.dropped=0;self._lock=threading.Lock();self._restore=[]
+        self.source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
     def add(self,event):
         with self._lock:
@@ -45,6 +48,18 @@ class StageTrace:
 
     def attach(self,voice,memory):
         for name in ('search','remember','generation'):self.sync(memory,name,'memory.'+name)
+        # Opt-in timing only: retain the real locks, SDK operations, embedding
+        # batches and durability checks. Thread IDs and nested intervals allow
+        # long writes to be separated from concurrent foreground searches.
+        for name in ('_start','_guard_source','_find','_owned','_finish'):
+            self.sync(memory,name,'memory.'+name)
+        self.sync(memory.sdk,'add','mem0.add')
+        self.sync(memory.sdk.embedding_model,'embed_batch','embedding.embed_batch')
+        self.sync(memory.sdk.embedding_model.model,'encode','embedding.encode')
+        self.sync(memory.sdk.vector_store,'insert','qdrant.insert')
+        self.sync(memory.sdk.db,'add_history','mem0.add_history')
+        if memory._binding:
+            self.sync(memory._binding,'validate','binding.validate')
         for name in ('_messages','_image_message'):self.async_call(voice.session,name,'session.'+name)
         self.async_call(voice.session.budget,'count','native_prompt_count')
         self.async_call(voice.speech,'deliver','speech.deliver_to_receipt')
@@ -57,7 +72,7 @@ class StageTrace:
 
     def report(self):
         with self._lock:return {'events':sorted(self.events,key=lambda e:e.get('begin_ns',e.get('monotonic_ns',0))),
-            'dropped':self.dropped,'limit':self.limit,
+            'dropped':self.dropped,'limit':self.limit,'instrumentation_sha256':self.source_sha256,
             'scope':'Opt-in diagnostic instrumentation; wall spans include nested awaits/locks,not exclusive CPU or GPU time. Native metric semantics retained. No raw content. Observer overhead has not been qualified against an uninstrumented equivalent run.'}
 
 

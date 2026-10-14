@@ -1,0 +1,67 @@
+{
+  "created_at": "2026-10-14T02:47:33.698995+00:00",
+  "status": "DEVELOPMENT_DIAGNOSTIC",
+  "source_report": "benchmarks/results/lcvmem-development-hybrid-top8-768.json",
+  "source_sha256": "481d45ad9e26859fe74ec677f73594d81de100e849bed1f7c7f54f7d6b79bc6a",
+  "official_f1_percent_unchanged": 29.584558592174,
+  "selection": "All4development cases with officialF1zero and normalized reference-substring presence;not random orrepresentative semanticaccuracy.",
+  "cases": [
+    {
+      "id": "ccc8268d-b494-4841-a97c-f10b440800ea",
+      "official_f1": 0,
+      "response_sha256": "8a2bb245aa5d24ea358a7ddc74f529a78cb99540f104ed24b6cd014e592ecb57",
+      "raw_result_sha256": "d69d73761f28a217c8bb0584eb4c37c3477542e13afe83a15b6a1481acfcccd4",
+      "reference_sha256": "88e95fccabdf6ea7e30fca699bdc235ab9ebb14cb8436011936557e6db255862",
+      "injected_count": 8,
+      "assessment": "CORE_MEANING_MATCH",
+      "reason": "Reference animal and more specific breed wording agree;word segmentation can produce zero overlap.",
+      "omitted_evidence": []
+    },
+    {
+      "id": "4dc1c383-a934-4427-a76a-4b6660984093",
+      "official_f1": 0,
+      "response_sha256": "06667f51624d9e53912134b517591564422666e2888a55efa55a42d61794f6e5",
+      "raw_result_sha256": "5a3687a5b6483d6d82ccc6549c17c14ad02df8004b38203e8769d083cd381ed1",
+      "reference_sha256": "030fdb9a62594f11685fcaecd41bd049f673fe13f3c629919b7566b389883385",
+      "injected_count": 7,
+      "assessment": "CORE_MEANING_MATCH",
+      "reason": "Reference activity and response paraphrase agree on writing;not a complete audit of added details.",
+      "omitted_evidence": [
+        {
+          "memory_id": "d1b09372-946d-594e-83e4-7e9eadc94ec7",
+          "reason": "TOKEN_BUDGET"
+        }
+      ]
+    },
+    {
+      "id": "964bb989-9146-4c31-8a02-fa5e087b3916",
+      "official_f1": 0,
+      "response_sha256": "627c6dcc41a4377f63d390ebca73c7e2148c98d971353cc7b6bbdd7e870661bf",
+      "raw_result_sha256": "1b4e79d459c79f13a1f879530c39b476773dc60caad025d9e11a9b1413e23a30",
+      "reference_sha256": "e34e978328890f5f2cd573d8429c0bd321dcd966a1bc8251dad2ad53352a283e",
+      "injected_count": 8,
+      "assessment": "MISSED_VISIBLE_ANSWER",
+      "reason": "Requested equipment is in first injected assistant source on the requested day;response gives adjacent photography advice instead.",
+      "omitted_evidence": []
+    },
+    {
+      "id": "d1e9d186-902e-40a7-958a-23f13fdbfe1b",
+      "official_f1": 0,
+      "response_sha256": "1a0d031eca4f57c6846286999a51e282798266cc0b809f830890af77363bd091",
+      "raw_result_sha256": "bbf1b8b3976d479227c2a104fb468261cc7aa01d7624db7a1c0e6a221de0b98c",
+      "reference_sha256": "af2aff476decebdfd5097f9e34f69ec74ca5490825be9359a1ff2ba1cd7e9d51",
+      "injected_count": 7,
+      "assessment": "ANSWER_SOURCE_OMITTED",
+      "reason": "Correct user source on requested day is candidate8,omitted by token budget. Earlier-date source6 names a different musical work. Normalized reference substring overlap falsely suggests correct evidence was visible.",
+      "omitted_evidence": [
+        {
+          "memory_id": "a97f91f6-2c63-5923-b214-0071299f9e15",
+          "reason": "TOKEN_BUDGET"
+        }
+      ]
+    }
+  ],
+  "assessment_method": "Assistant qualitative review against existing retrieved/injected source identities and reference targets. No independent human adjudication,scorer change or new runtime inference. Raw corpus remains outside repository.",
+  "decision": "Do not equate wordF1 with semantic accuracy or normalized reference substring with correct-source inclusion. Improve bounded evidence packing and reader grounding independently;preserve official scores.",
+  "heldout_or_reserve_inspected": false
+}

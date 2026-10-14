@@ -127,6 +127,12 @@ async def main(args):
             await asyncio.sleep(max(0,next_cycle-asyncio.get_running_loop().time()))
     with MemoryMonitor() as monitor,ExitStack() as stack:
         memory=stack.enter_context(open_memory(folder/'memory'))
+        ort_session=memory.sdk.embedding_model.model[0].auto_model.model
+        embedding_runtime={'intra_op_threads':ort_session.get_session_options().intra_op_num_threads,
+            'inter_op_threads':ort_session.get_session_options().inter_op_num_threads,
+            'providers':ort_session.get_providers()}
+        if embedding_runtime['intra_op_threads']!=runtime['memory'].get('embedding_threads',2):
+            raise RuntimeError('Actual embedding threads differ from runtime configuration')
         if memory.capabilities()['embedding_profile']!=args.profile:raise RuntimeError('Bound memory index differs from requested workload')
         from qdrant_client import models
         counts={label:memory.sdk.vector_store.client.count(memory.sdk.collection_name,exact=True,count_filter=models.Filter(must=[
@@ -246,6 +252,7 @@ async def main(args):
             'recall_text_and_audio':any(row['label']=='recall' for row in turns) and all('茉莉' in row.get('response','') and '茉莉' in row.get('audio_readback','') for row in turns if row['label']=='recall'),
             'app_unchanged':reader==fingerprint()}
         report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,'errors':errors,
+            'embedding_runtime':embedding_runtime,
             'reader_fingerprint':reader,'config':config,'initial_population':counts,'run_directory':str(folder),
             'preparation_method':prepared.get('method','sdk-batch-real-bge'),'preparation_sha256':sha256(folder/'prepared.json'),
             'retrieval_config':{'top_k':top_k,'context_token_limit':memory_tokens},

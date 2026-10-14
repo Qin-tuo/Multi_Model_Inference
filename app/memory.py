@@ -122,11 +122,14 @@ class Mem0Adapter:
     def __init__(self, data_dir: str | Path, *, bge_path: str | Path | None = None,
                  llama_base_url: str = "http://127.0.0.1:8088/v1",
                  llama_model: str = "assistant-vlm", embedding_backend: str = "torch",
-                 sdk=None, embedding_scope: str = "PRODUCTION", server_config=None,embedding_profile=None):
+                 sdk=None, embedding_scope: str = "PRODUCTION", server_config=None,embedding_profile=None,
+                 embedding_threads: int = 2):
         from sqlalchemy import Column, Integer, MetaData, String, Table, Text, create_engine, event
 
         if importlib.metadata.version("mem0ai") != "2.2.1":
             raise MemoryAdapterError("UNAVAILABLE", "Mem0 adapter is pinned to mem0ai 2.2.1")
+        if type(embedding_threads) is not int or not 1 <= embedding_threads <= 4:
+            raise MemoryAdapterError("INVALID_ARGUMENT", "embedding_threads must be an integer from 1 to 4")
         if os.environ.get("OPENROUTER_API_KEY"):
             # Upstream checks this before its explicit OpenAI base_url. Preserve
             # the user's environment and reject accidental endpoint switching.
@@ -192,7 +195,7 @@ class Mem0Adapter:
                 if embedding_backend == "onnx":
                     import onnxruntime as ort
                     options = ort.SessionOptions()
-                    options.intra_op_num_threads = 2
+                    options.intra_op_num_threads = embedding_threads
                     options.inter_op_num_threads = 1
                     config["embedder"]["config"]["model_kwargs"]["model_kwargs"]["session_options"] = options
                 sdk = Memory.from_config(config)

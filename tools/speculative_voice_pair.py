@@ -1,4 +1,4 @@
-"""Run the existing full voice/memory/vision workload with two native policies.
+"""Compare one runtime factor in the existing voice/memory/vision workload.
 
 Clone sealed synthetic seeds before measurement. Restore the original runtime
 configuration and managed model services in finally. The observer/GC/input
@@ -39,14 +39,16 @@ def main(args):
     (args.run_dir / 'original-runtime.json').write_bytes(original)
     variants = [('baseline', {'type': 'none'}), ('ngram_simple', {
         'type': 'ngram-simple', 'match_tokens': 2, 'draft_tokens': 4, 'min_hits': 1})]
+    if args.factor == 'embedding_threads':
+        variants = [('baseline', {'embedding_threads': 2}), ('threads4', {'embedding_threads': 4})]
     report = {'created_at': stamp(), 'status': 'PREPARING', 'source_sha256': sha256(Path(__file__)),
         'original_runtime_sha256': sha256(runtime), 'seed_source': str(args.seed_source),
         'seed_snapshot_sha256': sha256(args.seed_source / 'seed-backup/manifest.json'),
-        'variants': {}, 'errors': [],
-        'scope': 'Two20-turn fixed10s file-input runs withrealPipecat/ASR/LLM/TTS,10kpersonal-memory queries/writes'
-            ' andlivecamera/detection/pose. New identicalsnapshot clones,coldVLM/ASR/speech pervariant;'
-            ' startupcollect andpassiveGC observer inboth. OnlyLLM speculative configuration differs.'
-            ' Liveimages/timeanswers mayvary;5samples percategory,notphysicalaudio,independentquality,B0-B3 orJTacceptance.'}
+        'variants': {}, 'errors': [], 'factor': args.factor,
+        'scope': 'Two 20-turn fixed 10s file-input runs with real Pipecat/ASR/LLM/TTS,10k personal-memory queries/writes'
+            ' and live camera/detection/pose. New identical snapshot clones,cold VLM/ASR/speech per variant;'
+            ' startup collect and passive GC observer in both. Only the named runtime factor differs.'
+            ' Live images/time answers may vary;5 samples per category,not physical audio,independent quality,B0-B3 or JT acceptance.'}
     write_json(args.output, report)
     stopped = False
     try:
@@ -64,7 +66,10 @@ def main(args):
             stopped = True
             row['stopped'] = services.stop(['llama', 'asr'])
             config = json.loads(original)
-            config['llama']['speculative'] = policy
+            if args.factor == 'embedding_threads':
+                config['memory'].update(policy)
+            else:
+                config['llama']['speculative'] = policy
             expected_current = (json.dumps(config, ensure_ascii=False, indent=2) + '\n').encode()
             runtime.write_bytes(expected_current)
             row['runtime_sha256'] = sha256(runtime)
@@ -72,7 +77,7 @@ def main(args):
             with httpx.Client(timeout=5, trust_env=False) as client:
                 response = client.get('http://127.0.0.1:8088/slots'); response.raise_for_status()
                 row['native_slots'] = response.json()
-                enabled = policy['type'] != 'none'
+                enabled = config['llama'].get('speculative', {}).get('type', 'none') != 'none'
                 if not row['native_slots'] or any(slot.get('speculative') is not enabled for slot in row['native_slots']):
                     raise RuntimeError('Actual native speculative state differs from requested policy')
             output = args.output.parent / (args.output.stem + '-' + label + '.json')
@@ -89,9 +94,12 @@ def main(args):
             if not output.exists():
                 raise RuntimeError(f'{label} produced no workload report')
             measured = json.loads(output.read_text())
+            if measured['embedding_runtime']['intra_op_threads'] != config['memory'].get('embedding_threads', 2):
+                raise RuntimeError('Measured ORT thread count differs from requested configuration')
             row.update(phase='FINISHED', status=measured['status'], checks=measured['checks'],
                 voice_latency=measured['voice_latency'], query_summary=measured['query_summary'],
-                write_summary=measured['write_summary'], reader_fingerprint=measured['reader_fingerprint'])
+                write_summary=measured['write_summary'], reader_fingerprint=measured['reader_fingerprint'],
+                embedding_runtime=measured['embedding_runtime'])
             write_json(args.output, report)
             print(json.dumps({'variant': label, 'status': row['status'], 'voice_latency': row['voice_latency']}, ensure_ascii=False), flush=True)
             if not measured['checks'].get('workload_completed'):
@@ -121,6 +129,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--factor', choices=['speculative', 'embedding_threads'], default='speculative')
     parser.add_argument('--seed-source', type=Path, required=True)
     parser.add_argument('--run-dir', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
