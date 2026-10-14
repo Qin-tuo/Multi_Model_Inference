@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T09:50:07.423858+00:00",
+  "updated_at": "2026-10-14T10:28:29.272440+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -674,10 +674,14 @@
         "benchmarks/results/mmbench-preparation.json",
         "tools/mmbench_eval.py",
         "tools/mmbench_scoring.py",
-        "tools/mmbench_audit.py"
+        "tools/mmbench_audit.py",
+        "benchmarks/results/mmbench-cn-development-inference.json",
+        "benchmarks/results/mmbench-cn-development-audit.json",
+        "benchmarks/results/mmbench-cn-development-score.json",
+        "benchmarks/results/mmbench-cn-model-screening.json"
       ],
-      "validation": "PinnedofficialChineseMMBenchdevsourceandVLMEvalKit exactmatching;three100-question splits withdisjointdecodedimagehashes,allprovidedrotationsverifiedsamesourceimage. Development372actualassistantcalls running;heldout/reserve notinferred. No cloudjudge,answerlabels excludedfromruntime files.",
-      "next_action": "Completefullfixeddevelopmentrun,thenauditimage/token/stateevidence andscorecanonical/circular accuracybefore anymodel orpromptchanges."
+      "validation": "Completed all 372 development variants through the real assistant with Qwen2.5-VL-3B. Canonical accuracy 70/100; every provided rotation correct in 55/100 question groups. Input/image/native-token/state audit PASS; execution errors, unintended mutations and image leaks all zero. Below the 80% development screening target. Public MCQ screening does not qualify natural image QA or JT-07. Heldout/reserve remain unused.",
+      "next_action": "Complete the already running Qwen3.5-4B comparison under the frozen input/context/output protocol, audit and score after all answers, and verify default service restoration. Do not promote based solely on development accuracy."
     }
   ],
   "acceptance": {
