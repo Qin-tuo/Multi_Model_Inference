@@ -1,0 +1,72 @@
+{
+  "created_at": "2026-10-14T07:40:07.863799+00:00",
+  "status": "PASS",
+  "checks": {
+    "record_native_cleanup": true,
+    "interruption_recorded_as_failure": true,
+    "replay_native_cleanup": true
+  },
+  "cases": [
+    {
+      "action": "record",
+      "native_pid": 226617,
+      "exit_code": 1,
+      "exit_seconds": 0.31490897900948767,
+      "native_child_gone": true,
+      "manifest_status": "FAIL"
+    },
+    {
+      "action": "replay",
+      "native_pid": 226695,
+      "exit_code": 1,
+      "exit_seconds": 0.16412284600664862,
+      "native_child_gone": true
+    }
+  ],
+  "source_sha256": "93b5f7f109d3fc0cceba478150c9a6588888e0f3ee2d233425e2ece12f91f18e",
+  "wrapper_sha256": "d1b6a83438c1ea422a1502e53af0ed86aa7cb0b988854c03b24ae9e12e7f4679",
+  "scope": "ActualSIGTERM ofrecord/replay controllers withnativechild observed; isolateddomains193/194,noactualscene orphysicaldevicevalidation.",
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1",
+  "raw_artifacts": [
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/replay.log",
+      "sha256": "2b6df05254f15a180af022c1c1828492a5212a13b5954232c0293c37f923c9a1",
+      "bytes": 915
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/record.log",
+      "sha256": "1837daacd00a476bb61246ac207c1a2a22a6f49f0593b98c009054a222cd0352",
+      "bytes": 119
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/probe.py",
+      "sha256": "93b5f7f109d3fc0cceba478150c9a6588888e0f3ee2d233425e2ece12f91f18e",
+      "bytes": 2715
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/clip/record.log",
+      "sha256": "d3426c637bad4c55c1de6eb0590a1d95a9677190e9be9e51d06907ca010497db",
+      "bytes": 854
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/clip/qos.json",
+      "sha256": "7964274ef70de7991138ef53401b3bc6621a7bdc1a67a9652828f75ee840f3c2",
+      "bytes": 492
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/clip/manifest.json",
+      "sha256": "4f75158ae743a13db4d5df33a03eac157260e713daef8b7f50d7a1f34d19fc64",
+      "bytes": 2381
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/clip/bag/bag_0.mcap",
+      "sha256": "f7461362fe58b96d8319c6e9e55eb0f391e071c6221c0feee12953aec5d14c6d",
+      "bytes": 1253
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-cancel-v1/clip/bag/metadata.yaml",
+      "sha256": "eea657f07833eee4dbd98a1f2eafc173e915e684d1f792a20caeef501e71b61a",
+      "bytes": 513
+    }
+  ]
+}

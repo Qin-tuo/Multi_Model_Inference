@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-10-14T07:51:05.445884+00:00",
+  "status": "PASS",
+  "checks": {
+    "detection_all5000_predictions_equal_after_old_publication_filter": true,
+    "pose_all5000_predictions_equal_after_old_publication_filter": true
+  },
+  "scope": "Read-only exact comparison ofall5000nativepredictionlists,excludingwalltime. Reapplyingold0.5keypointpublicationfiltertofixedoutputreproducesoldposeoutput. No reference/qualitythresholdchange.",
+  "baseline_report_sha256": "911f6fba44a8830a1852bd2bf3c8725c09a7222773a0a16159cad5db50c820cf",
+  "fixed_report_sha256": "32038d02d3500512fb329fdaf87d279b2cc6ab9f313b64751cb25080560c46aa"
+}

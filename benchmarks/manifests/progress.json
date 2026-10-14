@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T07:04:22.182765+00:00",
+  "updated_at": "2026-10-14T07:52:16.230737+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -62,10 +62,16 @@
         "deploy/vision/eval/runner.cpp",
         "tools/vision_quality.py",
         "benchmarks/results/vision-input-diagnostic.json",
-        "benchmarks/results/coco-detection-deployment-baseline.json"
+        "benchmarks/results/coco-detection-deployment-baseline.json",
+        "patches/vision/pose-preserve-keypoints.patch",
+        "benchmarks/manifests/vision-quality-v2.json",
+        "benchmarks/results/vision-quality-coco-baseline.json",
+        "benchmarks/results/vision-quality-coco-preserved.json",
+        "benchmarks/results/pose-publication-causal-comparison.json",
+        "benchmarks/results/pose-publication-regression.json"
       ],
-      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence. New graph-granularity capture PASS:188944 standalone kernels+177graphs,all189121device activities correlated tosuccessful launches. Reverse coverage identifies6674capture-only calls within8balanced capture intervals,no unexplained omissions. Six live requests overlap VLM+bothvision models;7functional roles/6active engines/8inactive variants inventoried. JT-02qualified byits explicit requirements;node trace failures retained. Quality,capacity anduninstumented full-scenario timing remain open. Public COCO2017 full5000-image regression protocol anddataset sealed before corpus inference. Native yolo_ros TensorRT adapter andofficial COCOeval wiring verified;onebus box hasIoU0.9737vsPyTorch,retainedFAIL rather thanprecision assumption. Fullcomparison RUNNING;do not inferquality acceptance frompartial predictions. Full5000-image detection paircomplete:PyTorchbboxAP26.4618,nativeORTTensorRT26.4240,drop0.0378ppwithin1pp. JPEGdecodeidentical;singlebusboxdriftlocalized toOpenCVresizepixels withsamePyTorchmodel/NMS control. Posefullrunstillactive;independentrecordings andJT07remainunverified.",
-      "next_action": "Let the frozen full5000-image reference/native detection+pose comparison finish;inspect primary AP drops andretained failures;then qualifyindependent recorded scenes andfullscenario timing"
+      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence. New graph-granularity capture PASS:188944 standalone kernels+177graphs,all189121device activities correlated tosuccessful launches. Reverse coverage identifies6674capture-only calls within8balanced capture intervals,no unexplained omissions. Six live requests overlap VLM+bothvision models;7functional roles/6active engines/8inactive variants inventoried. JT-02qualified byits explicit requirements;node trace failures retained. Quality,capacity anduninstumented full-scenario timing remain open. Public COCO2017 full5000-image regression protocol anddataset sealed before corpus inference. Native yolo_ros TensorRT adapter andofficial COCOeval wiring verified;onebus box hasIoU0.9737vsPyTorch,retainedFAIL rather thanprecision assumption. Fullcomparison RUNNING;do not inferquality acceptance frompartial predictions. Full5000-image detection paircomplete:PyTorchbboxAP26.4618,nativeORTTensorRT26.4240,drop0.0378ppwithin1pp. JPEGdecodeidentical;singlebusboxdriftlocalized toOpenCVresizepixels withsamePyTorchmodel/NMS control. Posefullrunstillactive;independentrecordings andJT07remainunverified. Full5000posebaseline FAIL:45.3190referencevs39.6258native,drop5.6933pp. Nativepublication nowpreservesall17coords/scores;no model/engine/gesturethresholdchange. Samefullcorpus recheckPASS:pose45.2875(drop0.0315pp),detection26.4240(drop0.0378pp). Oldfilterreapplication exactlyreproducesall5000oldnativeposeoutputs;15gesture/outboxtestsPASS. Publiccorpus only,independentrecordings/visualQA/ASR/TTS/fullJT07stillopen.",
+      "next_action": "Verify updatedruntimecoexistence; collectindependentrecordedscenes whenhumanparticipationavailable; completevisualQA/ASR/TTS/shortQAquality andfullscenario timing"
     },
     {
       "task_id": "J0.4",
@@ -634,6 +640,19 @@
       ],
       "validation": "Memorytopic/inventory distinction andsingle-query continuation verified onreal3B/4B. Twofull100tool replays each99/100 with0unexpectedmutations/replayfailures retained:noteheading wronglylookedlike newwrite,then title omitted. Finalnote inventory renders actualreturned title/body/display scope(andrequestedcreationtime),not modelguess. Maintenance precursor retainsfollowup operation.236corePASS andfinalfresh100/100actualmodel/SDKtoolsPASS with0unexpectedmutations/replayfailures. Evaluation snapshots nowseparate initialsemanticresults andposttool candidates. No independentquality/physical/JTclaim.",
       "next_action": "Preserve finaltool regression andbothfailure baselines. Continue fullacceptance audit,independent language quality,voice/backpressure/resource andlong-duration requirements."
+    },
+    {
+      "task_id": "J4.recording",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/vision_bag.py",
+        "deploy/vision/bag/player.cpp",
+        "deploy/vision/recording.lock.json",
+        "benchmarks/results/vision-bag-fixture.json",
+        "benchmarks/results/vision-bag-cancellation.json"
+      ],
+      "validation": "NativeMCAP/zstd androsbag2Player fieldroundtripPASS onisolatedsmallsyntheticImage/CameraInfo;actualpublisher matching preventsinitialloss,controllerSIGTERMcleansnativechildren. Allcapturesunannotated;noactualroomimagescaptured.",
+      "next_action": "Independenthuman/scene recording andannotations,real640x480bandwidth/dropvalidation,andassistant simulated-clock replayintegration"
     }
   ],
   "acceptance": {
@@ -749,7 +768,8 @@
     "Flat evidence remainsoptional after82-case quality gain andonegenuine regression. Qwen3.5-4B artifacts/native/API/full82dev evaluated;31.35F1 vs30.58 andhigherwalltimes do notjustifyreplacement,so3B retained. Oneapp-driven inventory error fixedseparately;historicalscore/error preserved. Full independentquality andallformalJT remainNOT_VERIFIED.",
     "Latest tool fixes pass236framework checks andfresh100/100synthetic development cases aftertwo99/100failure baselines. This doesnotreplace independenttool corpus,physical reminders/audio,complete natural-language coverage orformal JT acceptance.",
     "Node-granularity GPU trace remains FAIL with720 GraphId/GraphNodeId errors inboth Nsight2026.3.1 and2025.6.3. Graph-granularity capture andfullengine inventory nowqualify JT-02;all189121device records have launch matches andreverse missing records arefullyexplained byCUDAcapture. This doesnot qualifySMresidency,quality,physicalaudio orperformance gates.",
-    "FullpublicCOCO2017 regression startedwithfrozenFP32reference andexistingnativeORTTensorRT engines;all5000images hashed,scorewiring rejects omissions. Primarypose reference retainsallcoordinates;publication-matched scoreisdiagnostic only. Runtimecore singlebusdetectorbox IoU0.9737fails0.98alignment. Publicregression doesnot replaceindependent camera recordings/gesture/visualQA orcloseJT-07."
+    "FullpublicCOCO2017 regression startedwithfrozenFP32reference andexistingnativeORTTensorRT engines;all5000images hashed,scorewiring rejects omissions. Primarypose reference retainsallcoordinates;publication-matched scoreisdiagnostic only. Runtimecore singlebusdetectorbox IoU0.9737fails0.98alignment. Publicregression doesnot replaceindependent camera recordings/gesture/visualQA orcloseJT-07.",
+    "FullCOCOdeploymentregressionpasses afterpreservingposecoordinates;rawfailed5.69ppbaseline andoldfilterexactcausalcomparison retained. Independentrecordedscenes,imageQA,ASR/TTS/shortQA andJT07stillopen. Nativebagfixture/cancellation checksPASSbutnot realcapture bandwidth orassistant historical-clock replay."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

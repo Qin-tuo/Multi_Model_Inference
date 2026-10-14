@@ -21,4 +21,5 @@ backup.owner.lock
 *.pcm
 *.nsys-rep
 *.qdrep
+*.mcap
 benchmarks/raw/

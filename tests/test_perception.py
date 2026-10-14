@@ -55,6 +55,20 @@ class GestureTest(unittest.TestCase):
         self.assertFalse(self.f.rules.drain_events())
         for _ in range(30): self.f.feed([self.f.person(raised=False,x=.01)])
         self.assertFalse(self.f.rules.drain_events())
+    def test_preserving_weak_coordinates_keeps_gesture_decisions(self):
+        for confidence in (.1,.49,.59,.6,.9):
+            with self.subTest(confidence=confidence):
+                full,sparse=PoseFixture(),PoseFixture()
+                for x in [0,.3,-.3,.3,-.3]+[0]*20:
+                    person=full.person(x=x)
+                    points={i:(320,240,.1) for i in range(1,18)}
+                    points.update(person.keypoints)
+                    px,py,_=points[10];points[10]=(px,py,confidence)
+                    full.feed([replace(person,keypoints=points)])
+                    sparse.feed([replace(person,keypoints={i:p for i,p in points.items() if p[2]>=.5})])
+                events=lambda f:[(e['kind'],e['event_id'],e['capture_ns']) for e in f.rules.drain_events()]
+                self.assertEqual(events(full),events(sparse))
+                self.assertEqual(full.rules.counts['invalid_person'],0)
     def test_occlusion_does_not_count_as_hold_or_rearm_emitted_pose(self):
         self.f.feed(steps=7)
         self.f.feed([],steps=7)

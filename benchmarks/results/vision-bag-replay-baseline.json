@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-10-14T07:15:31.148208+00:00",
+  "status": "FAIL",
+  "checks": {
+    "nonempty_each_topic": true,
+    "all_recorded_payloads_were_emitted": false,
+    "recorded_and_replayed_payloads_identical": false,
+    "synthetic_headers_preserved": true,
+    "live_domain_replay_rejected": true
+  },
+  "emitted_messages": 141,
+  "recorded_messages": 141,
+  "replayed_messages": 99,
+  "record_domain": 191,
+  "replay_domain": 192,
+  "source_sha256": "fe45a8eef647f2bd7ff6d9a622155ada68e1090452471f671108e2c003f4e64b",
+  "recorder_sha256": "3b4d41c767f2a947d3cb71fc9599370350b7b57ba5cd09f8b59670abb781043d",
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-bag-fixture-v2",
+  "scope": "Small8x6syntheticImage/CameraInfo messages throughactualMCAP/zstdrecording andROSreplay. No real camera capture, bandwidth claim, human labels, assistant simulated-clock integration, accuracy orJTacceptance."
+}

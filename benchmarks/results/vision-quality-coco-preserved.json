@@ -1,0 +1,884 @@
+{
+  "created_at": "2026-10-14T07:43:51.423771+00:00",
+  "status": "PASS",
+  "source_hashes": {
+    "configs/runtime.yaml": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+    "models/manifest.json": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+    "deploy/vision/source-lock.json": "5bd82661303f377f153c62cdf55bd75d98de0503773562ac24faad40d21b01b4",
+    "deploy/vision/serve.py": "db8c2ea1b95ffe30b9382cff7f74ebb5435eabd27ed9f6ace484cf683ea1bc92",
+    "deploy/vision/eval/runner.cpp": "3e49570befd2c215f0f0ee4578143b576fbc597fb3ebaf67f8b63564661ce0e7",
+    "tools/vision_quality.py": "d79dcee3dd62eada0658855973fde377fcfe9e4ddada1097910fc0d22877e1c9",
+    "/home/nvidia/Multi_Model_Inference/benchmarks/manifests/vision-quality-v2.json": "455656d02f8f71486bf59f920d7b1f5b978817a446a09b1d8b023f649bb90eb7",
+    "/home/nvidia/AI_Stack/workspaces/vision/build/yolo_ros/libyolo_ros_core.so": "70e872dde689a99f93c46955066e97d1984975990ddcc3e2e5b8c39980212ea3",
+    "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime.so.1.28.0": "52367cb29098e4ea1823850edf3bb2aac201c9fe29a2ca784626cc6ba2db89dc"
+  },
+  "source_commit": "d45b4cd9249eeac34a9763deb611abb764cd5e43",
+  "dataset_manifest": "benchmarks/manifests/coco2017-quality-v1.json",
+  "dataset_sha256": "26eddee83158e160309ea1a714b08ede303779317e42d859bfb355fce965e121",
+  "verified_image_hashes": 5000,
+  "native_binary": "/home/nvidia/AI_Stack/builds/vision-eval/vision-eval",
+  "native_binary_sha256": "500a43d2ddd1818ad0b11e0b747d2c30374877aeb27fe4d88eab51baa0798b54",
+  "engines_before": {
+    "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/detection/yolov8n/TensorrtExecutionProvider_TRTKernel_graph_main_graph_17254864328571302711_0_0_sm87.engine": "88b8e9c3e2f09794cc46986cec591f9af38fc920936bc4e2d869050551458a02",
+    "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/pose/yolov8n-pose/TensorrtExecutionProvider_TRTKernel_graph_main_graph_11553024953600363046_0_0_sm87.engine": "1188a009dd88ce117611e9730c6a6686ffd1052ba0689fda9eceb95a7ac057d0"
+  },
+  "backends_before": {
+    "created_at": "2026-10-14T07:43:51.346277+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "929344",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 929344,
+        "cgroup_pids": [
+          929344,
+          929356
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          230906,
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 59.188703,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "227177",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 227177,
+        "cgroup_pids": [
+          227177,
+          227191,
+          227239
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 83.663447,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "227326",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 227326,
+        "cgroup_pids": [
+          227326,
+          227334,
+          227397
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 80.79869,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "results": {
+    "detection": {
+      "torch": {
+        "created_at": "2026-10-14T07:44:09.858546+00:00",
+        "status": "COMPLETE",
+        "task": "detection",
+        "images": 5000,
+        "predictions": 15303,
+        "prediction_sha256": "c43a15fa5618278a8763bc77b2ed95224a8f7c1d7d58e5ee0ace7212f38458f1",
+        "annotation_sha256": "e8c7f7908f1d7278341fae127d0da654f102f11bd7b21d8aeefa635b8c810b6f",
+        "metrics": {
+          "bbox": {
+            "AP_percent": 26.46181057709483,
+            "stats": [
+              0.2646181057709483,
+              0.340877906208166,
+              0.29353089333709576,
+              0.07354478302070308,
+              0.2831894594010406,
+              0.4291125845917175,
+              0.2250918227219726,
+              0.29064343046367275,
+              0.2914149851410628,
+              0.07595995725356114,
+              0.3085082101205835,
+              0.47681445302182807
+            ],
+            "max_detections": [
+              1,
+              10,
+              100
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          }
+        },
+        "scope": "Public COCO regression under deployment thresholds; not standard low-confidence Ultralytics leaderboard settings or independent recorded scenes."
+      },
+      "tensorrt": {
+        "created_at": "2026-10-14T07:46:24.264493+00:00",
+        "status": "COMPLETE",
+        "task": "detection",
+        "images": 5000,
+        "predictions": 15291,
+        "prediction_sha256": "2fb5241a8673e4c89e779098f6c2eef42fb17bc4193503580bfd807d34aabe39",
+        "annotation_sha256": "e8c7f7908f1d7278341fae127d0da654f102f11bd7b21d8aeefa635b8c810b6f",
+        "metrics": {
+          "bbox": {
+            "AP_percent": 26.424007319545645,
+            "stats": [
+              0.26424007319545645,
+              0.3409388743974088,
+              0.29351165652143907,
+              0.07290572049229652,
+              0.2825920293802113,
+              0.4285430522616336,
+              0.2248750502308527,
+              0.29016017980330405,
+              0.29092625877943373,
+              0.07536688077827308,
+              0.3077333897182373,
+              0.4767718885254316
+            ],
+            "max_detections": [
+              1,
+              10,
+              100
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          }
+        },
+        "scope": "Public COCO regression under deployment thresholds; not standard low-confidence Ultralytics leaderboard settings or independent recorded scenes."
+      }
+    },
+    "pose": {
+      "torch": {
+        "created_at": "2026-10-14T07:46:33.715341+00:00",
+        "status": "COMPLETE",
+        "task": "pose",
+        "images": 5000,
+        "predictions": 5378,
+        "prediction_sha256": "122ec1338ad1baa6cbedcb95f2b03ab6c988ce9b17e123dc5fbcbd7dcf6bb52f",
+        "annotation_sha256": "788e2dae83c86bd547be7fab269d6399df5671063d29a61360cdb2cc370d2b14",
+        "metrics": {
+          "bbox": {
+            "AP_percent": 35.43113088983452,
+            "stats": [
+              0.35431130889834517,
+              0.447764450568057,
+              0.3974860908728258,
+              0.022585905223786427,
+              0.4717037135694104,
+              0.730501198192395,
+              0.17881599703071355,
+              0.37348983947295167,
+              0.37528996937923353,
+              0.017688022284122563,
+              0.49546065001343004,
+              0.7748361252731245
+            ],
+            "max_detections": [
+              1,
+              10,
+              100
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          },
+          "keypoints": {
+            "AP_percent": 45.31904600191699,
+            "stats": [
+              0.45319046001916985,
+              0.6808764587129802,
+              0.5000428899242677,
+              0.35606131022217363,
+              0.6029035722454886,
+              0.5064074307304786,
+              0.7098551637279596,
+              0.5574622166246851,
+              0.38598743512701444,
+              0.6734299516908211
+            ],
+            "max_detections": [
+              20
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          },
+          "keypoints_publication_filter": {
+            "AP_percent": 39.77777182823816,
+            "stats": [
+              0.39777771828238156,
+              0.6517324775129324,
+              0.4142063581839621,
+              0.3133040902912814,
+              0.5288536475499587,
+              0.4603274559193954,
+              0.6818324937027708,
+              0.49086901763224183,
+              0.34673586451789123,
+              0.617688591601635
+            ],
+            "max_detections": [
+              20
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          }
+        },
+        "scope": "Public COCO regression under deployment thresholds; not standard low-confidence Ultralytics leaderboard settings or independent recorded scenes."
+      },
+      "tensorrt": {
+        "created_at": "2026-10-14T07:48:47.711676+00:00",
+        "status": "COMPLETE",
+        "task": "pose",
+        "images": 5000,
+        "predictions": 5385,
+        "prediction_sha256": "2063f5611c526c112a126bdccc71c2dcc3b34406fb4d7ac0c81e6ac6cbc59b7c",
+        "annotation_sha256": "788e2dae83c86bd547be7fab269d6399df5671063d29a61360cdb2cc370d2b14",
+        "metrics": {
+          "bbox": {
+            "AP_percent": 35.41218588461618,
+            "stats": [
+              0.3541218588461618,
+              0.4477679121361858,
+              0.3972155799095363,
+              0.0235454144050107,
+              0.46979793216866184,
+              0.7306399980586716,
+              0.17862113760786863,
+              0.3733042590702421,
+              0.3750951099563886,
+              0.01789693593314763,
+              0.4946011281224818,
+              0.7749089584850692
+            ],
+            "max_detections": [
+              1,
+              10,
+              100
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          },
+          "keypoints": {
+            "AP_percent": 45.2875212884759,
+            "stats": [
+              0.452875212884759,
+              0.6806431923478414,
+              0.49881587815758466,
+              0.35464229600472585,
+              0.6027775504370801,
+              0.5052581863979849,
+              0.7090680100755667,
+              0.5554156171284634,
+              0.3842665938268233,
+              0.6730211817168338
+            ],
+            "max_detections": [
+              20
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          },
+          "keypoints_publication_filter": {
+            "AP_percent": 39.62579290618834,
+            "stats": [
+              0.3962579290618834,
+              0.6519758966719129,
+              0.4075308526893575,
+              0.31207656614529145,
+              0.5293300718927005,
+              0.4594301007556675,
+              0.6816750629722922,
+              0.4883501259445844,
+              0.3451242829827916,
+              0.6177257525083613
+            ],
+            "max_detections": [
+              20
+            ],
+            "iou_thresholds": [
+              0.5,
+              0.55,
+              0.6,
+              0.65,
+              0.7,
+              0.75,
+              0.8,
+              0.85,
+              0.8999999999999999,
+              0.95
+            ]
+          }
+        },
+        "scope": "Public COCO regression under deployment thresholds; not standard low-confidence Ultralytics leaderboard settings or independent recorded scenes."
+      }
+    }
+  },
+  "errors": [],
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1",
+  "scope": "Public full-corpus deployment regression, not independent recorded scenes, tracking/gesture quality, visual question answering, real-time performance or whole JT-07 acceptance. Pretrained models may already have been evaluated on this public validation corpus.",
+  "protocol": "benchmarks/manifests/vision-quality-v2.json",
+  "protocol_sha256": "455656d02f8f71486bf59f920d7b1f5b978817a446a09b1d8b023f649bb90eb7",
+  "reference_reuse": {
+    "report": "benchmarks/results/vision-quality-coco-baseline.json",
+    "sha256": "911f6fba44a8830a1852bd2bf3c8725c09a7222773a0a16159cad5db50c820cf",
+    "reason": "Reuse unchanged frozen FP32 predictions after a native publication-only fix; rescore all5000images withsameCOCOeval andprimaryreference.",
+    "original_source_commit": "326a56a6922bce35ca3c31b724f1ec6e821815bb",
+    "original_source_hashes": {
+      "configs/runtime.yaml": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+      "models/manifest.json": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+      "benchmarks/manifests/vision-quality-v1.json": "620ac63bece412d76b722c2bbad92ffa8c50184d3e5d9d4a26c4aa511d547c93",
+      "deploy/vision/source-lock.json": "c00c3871f3d64bce7de3dd492c2c9a452d333e719aae8bcb7f08507e0fcacf9c",
+      "deploy/vision/serve.py": "db8c2ea1b95ffe30b9382cff7f74ebb5435eabd27ed9f6ace484cf683ea1bc92",
+      "deploy/vision/eval/runner.cpp": "3e49570befd2c215f0f0ee4578143b576fbc597fb3ebaf67f8b63564661ce0e7",
+      "tools/vision_quality.py": "fc562cb1673dda23240e69dc5d804471b0134aed1d17ab2f625d1167e8f3b6b6",
+      "/home/nvidia/AI_Stack/workspaces/vision/build/yolo_ros/libyolo_ros_core.so": "0a658ef06cdde9e840c6398d62504cc57d107fba76c16bbb697233b6de1ea9af",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime.so.1.28.0": "52367cb29098e4ea1823850edf3bb2aac201c9fe29a2ca784626cc6ba2db89dc"
+    }
+  },
+  "current": {
+    "task": "pose",
+    "backend": "tensorrt",
+    "command": [
+      "bash",
+      "-c",
+      "source /opt/ros/jazzy/setup.bash && source /home/nvidia/.cache/multi-model-assistant/workspaces/vision/install/setup.bash && exec /home/nvidia/AI_Stack/builds/vision-eval/vision-eval /home/nvidia/.cache/multi-model-assistant/models/yolo/yolov8n-pose.onnx pose tensorrt /home/nvidia/.cache/multi-model-assistant/models/yolo/ort-trt-fp32/pose /home/nvidia/AI_Stack/datasets/coco2017/inputs.tsv /home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-tensorrt.jsonl"
+    ]
+  },
+  "restored": {
+    "created_at": "2026-10-14T07:48:58.903616+00:00",
+    "components": {
+      "vision": {
+        "MainPID": "236473",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 236473,
+        "cgroup_pids": [
+          236473,
+          236501,
+          236551
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 83.887139,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "236614",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 236614,
+        "cgroup_pids": [
+          236614,
+          236622,
+          236676
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 83.745183,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "backends_after": {
+    "created_at": "2026-10-14T07:49:09.128418+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "929344",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 929344,
+        "cgroup_pids": [
+          929344,
+          929356
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 54.933478,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "236473",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 236473,
+        "cgroup_pids": [
+          236473,
+          236501,
+          236551
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 71.877398,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "236614",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 236614,
+        "cgroup_pids": [
+          236614,
+          236622,
+          236676
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 87.72427,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "memory_observation": {
+    "minimum_available_bytes": 5005037568,
+    "peak_process_rss_bytes": 32505856,
+    "external_pid": null,
+    "peak_external_rss_bytes": 0,
+    "sample_count": 3147,
+    "period_seconds": 0.1
+  },
+  "checks": {
+    "no_errors": true,
+    "both_models_complete": true,
+    "source_unchanged": true,
+    "engines_unchanged": true,
+    "backends_ready": true,
+    "quality_drop_within_one_point": true
+  },
+  "comparisons": {
+    "detection": {
+      "reference_AP_percent": 26.46181057709483,
+      "native_AP_percent": 26.424007319545645,
+      "drop_percentage_points": 0.03780325754918579,
+      "within_one_percentage_point": true
+    },
+    "pose": {
+      "reference_AP_percent": 45.31904600191699,
+      "native_AP_percent": 45.2875212884759,
+      "drop_percentage_points": 0.03152471344108676,
+      "within_one_percentage_point": true,
+      "reference_publication_filtered_AP_percent": 39.77777182823816
+    }
+  },
+  "completed_at": "2026-10-14T07:49:09.252051+00:00",
+  "raw_artifacts": [
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-tensorrt-metrics.json",
+      "sha256": "1c065c2fa5f8ac32342505d369980620b6b1da90b896dcdb19880336da559993",
+      "bytes": 1185
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-tensorrt-metrics.log",
+      "sha256": "85c15a14005a9f0c3fa23816f1fa7e451c4376b1eaaba58fd39db52e92584d4c",
+      "bytes": 1256
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-tensorrt-score.log",
+      "sha256": "3cb1d0820987bb0f6fa8fedea861516315bbfcf70e609c47926bf210812bd7bd",
+      "bytes": 474
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-tensorrt.jsonl",
+      "sha256": "2fb5241a8673e4c89e779098f6c2eef42fb17bc4193503580bfd807d34aabe39",
+      "bytes": 1709281
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-tensorrt.log",
+      "sha256": "9622ef43b0b7e81480d1cb25de6f3ab1637d750929f235906f5410f27dc7ee8a",
+      "bytes": 3765
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-torch-metrics.json",
+      "sha256": "7db6656236a1ade3f247cdce4732dd8132f5ba355b5e110b9952ce92c9a98756",
+      "bytes": 1182
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-torch-metrics.log",
+      "sha256": "3041f4313d0ff0a79bbf65947d69fa2450d489e6123c55407f30ca5fe52ad19b",
+      "bytes": 1256
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-torch-score.log",
+      "sha256": "4e1e47e77d74a40f477f3f30330d88b421788797420b34e83bed9d270f810e04",
+      "bytes": 471
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/detection-torch.jsonl",
+      "sha256": "c43a15fa5618278a8763bc77b2ed95224a8f7c1d7d58e5ee0ace7212f38458f1",
+      "bytes": 2326570
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-tensorrt-metrics.json",
+      "sha256": "b16ef56efc8e3a2e04a5ce4d0c42a520373d38a5ab496c8ea91fac17f63ad5b7",
+      "bytes": 2393
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-tensorrt-metrics.log",
+      "sha256": "c705fd9fd58c6e5a1797361e4904fae6dbcac6705764f6bd153dd6d531b69737",
+      "bytes": 3289
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-tensorrt-score.log",
+      "sha256": "d08500f3e9740e0bfe8f5fd54d11c98653d2330c312ad01cc7bad6ba207b60c1",
+      "bytes": 1231
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-tensorrt.jsonl",
+      "sha256": "2063f5611c526c112a126bdccc71c2dcc3b34406fb4d7ac0c81e6ac6cbc59b7c",
+      "bytes": 4207572
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-tensorrt.log",
+      "sha256": "4e520b7b02a2675e831d19d1f1079e88afc304d155308a6294a92bcd1a25119d",
+      "bytes": 3862
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-torch-metrics.json",
+      "sha256": "e3d73761ef8daa1b4070d6950195b01371f5e0cdf017bb3b1d56f9f2107a6ab8",
+      "bytes": 2401
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-torch-metrics.log",
+      "sha256": "2ec006ad75035c9bd40abe682569f60d7421e03b48973fa528b6033472c40db8",
+      "bytes": 3289
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-torch-score.log",
+      "sha256": "ada85c5200f617bb3043fbaa3d7326cf4593eb2a45b3849d30b95a480b7b5322",
+      "bytes": 1239
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/pose-torch.jsonl",
+      "sha256": "122ec1338ad1baa6cbedcb95f2b03ab6c988ce9b17e123dc5fbcbd7dcf6bb52f",
+      "bytes": 6410771
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/runner.cpp",
+      "sha256": "3e49570befd2c215f0f0ee4578143b576fbc597fb3ebaf67f8b63564661ce0e7",
+      "bytes": 3908
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-preserved-v1/source.py",
+      "sha256": "d79dcee3dd62eada0658855973fde377fcfe9e4ddada1097910fc0d22877e1c9",
+      "bytes": 16094
+    }
+  ]
+}
