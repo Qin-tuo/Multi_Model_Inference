@@ -1,0 +1,1586 @@
+{
+  "created_at": "2026-10-14T03:30:03.016507+00:00",
+  "status": "DEVELOPMENT_DIAGNOSTIC",
+  "summary": {
+    "questions": 82,
+    "baseline_f1_percent": 28.974526616350747,
+    "candidate_f1_percent": 30.579608831457453,
+    "same_retrieved_evidence_order": 82,
+    "same_visible_evidence_order": 64,
+    "same_prompt_token_counts": 2,
+    "same_response": 46,
+    "lost_visible_reference": 0,
+    "gained_visible_reference": 0,
+    "baseline_full_response_literal_hits": 54,
+    "baseline_first_line_literal_hits": 54,
+    "candidate_full_response_literal_hits": 58,
+    "candidate_first_line_literal_hits": 58
+  },
+  "cases": [
+    {
+      "id": "01751539-bade-419d-8386-3eca6ef74f96",
+      "baseline_f1": 0.7368421052631579,
+      "candidate_f1": 0.7368421052631579,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "03677166-53ea-422e-84d0-484778a24511",
+      "baseline_f1": 0.23529411764705882,
+      "candidate_f1": 0.18181818181818182,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "04f61d5a-4380-4a00-82e0-57defa1470e6",
+      "baseline_f1": 0.06896551724137931,
+      "candidate_f1": 0.2222222222222222,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "07267a79-f874-4423-b071-50d24d8bfe80",
+      "baseline_f1": 0.14285714285714288,
+      "candidate_f1": 0.14285714285714288,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "0939763e-c942-445c-b15f-fbc9c73b520c",
+      "baseline_f1": 0.5263157894736842,
+      "candidate_f1": 0.625,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "0f6b2ec4-8549-4264-9ae7-940e959dbcad",
+      "baseline_f1": 0.25,
+      "candidate_f1": 0.25,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "0fe8370f-e024-4eb3-972d-111c2a128c5b",
+      "baseline_f1": 0.6153846153846153,
+      "candidate_f1": 0.6153846153846153,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "1224191f-87ad-4bf7-9465-5d778e6314da",
+      "baseline_f1": 0.5384615384615384,
+      "candidate_f1": 0.5384615384615384,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": true,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "16d6d4c6-7b6f-4529-8f65-6c5d68850c75",
+      "baseline_f1": 0.34782608695652173,
+      "candidate_f1": 0.34782608695652173,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "1e9a8673-9ac7-4aa2-93cd-7c49b8032910",
+      "baseline_f1": 0.41379310344827586,
+      "candidate_f1": 0.6,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "204ac07b-078b-483a-9592-0d16a9c877be",
+      "baseline_f1": 0.08,
+      "candidate_f1": 0.08,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "20bb8ca4-1cb0-4198-ab95-715bca9410ac",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "291e2841-310d-4e37-9b0b-c23aaa5244bb",
+      "baseline_f1": 0.2903225806451613,
+      "candidate_f1": 0.41860465116279066,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "2f8a2ee1-2695-4d39-9466-8a0691d094cf",
+      "baseline_f1": 0.35294117647058826,
+      "candidate_f1": 0.35294117647058826,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "3485cca6-08d3-47d8-846f-4b37715cd0d0",
+      "baseline_f1": 0.16666666666666666,
+      "candidate_f1": 0.13888888888888887,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "34c16a25-ddae-4efe-be81-0e0ca38cfafa",
+      "baseline_f1": 0.09523809523809523,
+      "candidate_f1": 0.09523809523809523,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "3b18109b-05b4-404c-a1ec-2c0cdcc0f277",
+      "baseline_f1": 0.33333333333333337,
+      "candidate_f1": 0.33333333333333337,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "3b3427e9-b57d-4c2a-ab0b-c58e809b6c65",
+      "baseline_f1": 0.07692307692307691,
+      "candidate_f1": 0.09999999999999999,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "3b3b8816-f8ef-430b-b940-3f3b7b8d8814",
+      "baseline_f1": 0.5714285714285715,
+      "candidate_f1": 0.5714285714285715,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "3f0adb41-f1ce-49df-ba36-d46587bc86cd",
+      "baseline_f1": 0.2666666666666667,
+      "candidate_f1": 0.2666666666666667,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "4211fc16-bf9e-40f0-bf01-d5a67afcd144",
+      "baseline_f1": 0.7272727272727273,
+      "candidate_f1": 0.7272727272727273,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "43422056-890f-4e6f-98c3-96cc7a76f8fb",
+      "baseline_f1": 0.1,
+      "candidate_f1": 0.1,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "436b4a57-6896-4aa1-aeb0-5ad4364ddfd4",
+      "baseline_f1": 0.15584415584415584,
+      "candidate_f1": 0.30303030303030304,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "45470f5f-1f84-4af9-a0ea-755261cb584b",
+      "baseline_f1": 0.125,
+      "candidate_f1": 0.125,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "469c1aa8-bcd0-473d-9621-75c14057fbf6",
+      "baseline_f1": 0.4444444444444445,
+      "candidate_f1": 0.4444444444444445,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "4cc3d780-1e05-42c1-83e7-2dc925c10dc8",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "4dc1c383-a934-4427-a76a-4b6660984093",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "4ec3b9b9-9e11-4ae3-90d6-5295f29c1632",
+      "baseline_f1": 0.4615384615384615,
+      "candidate_f1": 0.20689655172413793,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "4f2ca80c-0e42-4f6c-b3d5-58c3f31b94a9",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "5437f7c7-e073-4061-8fda-d2014a8a5db9",
+      "baseline_f1": 0.2727272727272727,
+      "candidate_f1": 0.2727272727272727,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "583ab364-23ba-4ed8-9a81-ac70811a3a86",
+      "baseline_f1": 0.4,
+      "candidate_f1": 0.4,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "58688749-8733-4a8b-aba5-f13282915fbf",
+      "baseline_f1": 0.05128205128205128,
+      "candidate_f1": 0.05128205128205128,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "5aaa74ce-9ee7-4099-8b9d-6b8c7ae5791b",
+      "baseline_f1": 0.38095238095238093,
+      "candidate_f1": 0.5333333333333333,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "5afa57be-153a-4fb1-b5b5-f6e105772097",
+      "baseline_f1": 0.18181818181818182,
+      "candidate_f1": 0.18181818181818182,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "5b52ffed-168b-4c50-a7c9-199e223dd9d3",
+      "baseline_f1": 0.3076923076923077,
+      "candidate_f1": 0.3076923076923077,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "5bc993ca-06b0-4e15-98ba-e603227e0e46",
+      "baseline_f1": 0.07999999999999999,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "5e00766b-4adf-456c-b9e8-f69975fb6fdc",
+      "baseline_f1": 0.47058823529411764,
+      "candidate_f1": 0.47058823529411764,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "5ec70221-7943-4cc8-bfeb-b773c6d9383e",
+      "baseline_f1": 0.5,
+      "candidate_f1": 0.6,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "604316fa-8b07-44a6-be93-c4cd5c09730d",
+      "baseline_f1": 0.09999999999999999,
+      "candidate_f1": 0.10526315789473684,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "60fe156b-cb2f-43c5-ae12-d10a3e120f49",
+      "baseline_f1": 0.3870967741935484,
+      "candidate_f1": 0.3870967741935484,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "64dba33d-048a-46c4-b83f-c2dc28eb157d",
+      "baseline_f1": 0.07999999999999999,
+      "candidate_f1": 0.07999999999999999,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "652fd116-9084-474e-bc9d-49c90855cdd0",
+      "baseline_f1": 0.3076923076923077,
+      "candidate_f1": 0.3076923076923077,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "66830bcb-1bf9-49de-a8a5-4aba3f586a05",
+      "baseline_f1": 0.9818181818181818,
+      "candidate_f1": 0.9818181818181818,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "6d7becdf-1c20-4f77-8826-32eafe16c5fc",
+      "baseline_f1": 0.6792452830188679,
+      "candidate_f1": 0.6792452830188679,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "6f89fbcd-9315-4bcb-9cb6-7cc656fcfd6f",
+      "baseline_f1": 0.6,
+      "candidate_f1": 0.6,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "797ea67d-d1fc-4aa4-b137-8e552f5e24e0",
+      "baseline_f1": 0.18181818181818182,
+      "candidate_f1": 0.18181818181818182,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "7df30845-bcf8-438d-ae5d-cc4e64d98f14",
+      "baseline_f1": 0.1111111111111111,
+      "candidate_f1": 0.14285714285714285,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "7f7048a9-d1e9-4372-a27f-ad6a7d1dc9b9",
+      "baseline_f1": 0.5454545454545454,
+      "candidate_f1": 0.5454545454545454,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "86047564-16e1-4dfe-af3d-b4438cc03441",
+      "baseline_f1": 0.2857142857142857,
+      "candidate_f1": 0.2857142857142857,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "8b20d019-3761-45e2-8a69-12d3b06945ab",
+      "baseline_f1": 0.43750000000000006,
+      "candidate_f1": 0.43750000000000006,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "909f43f1-c120-44a2-a0b0-f7a43c8efe7e",
+      "baseline_f1": 0.07843137254901959,
+      "candidate_f1": 0.07843137254901959,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "91a0135e-07a0-49aa-bafa-a3e87174cb11",
+      "baseline_f1": 0.3076923076923077,
+      "candidate_f1": 0.3076923076923077,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "93d0ccd0-4deb-4bad-97e7-5e1e5418f70b",
+      "baseline_f1": 0.13333333333333333,
+      "candidate_f1": 0.13333333333333333,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "964bb989-9146-4c31-8a02-fa5e087b3916",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "97134d4b-b939-4711-bfc3-e82049789e88",
+      "baseline_f1": 0.09523809523809525,
+      "candidate_f1": 0.09523809523809525,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "9b84ce0b-f5f1-40b3-a83c-cd13a8ccb8e9",
+      "baseline_f1": 0.2222222222222222,
+      "candidate_f1": 0.16666666666666669,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "9c3c41d8-0ec3-45b6-8e5a-8f6fb996b8d3",
+      "baseline_f1": 0.3636363636363636,
+      "candidate_f1": 0.3636363636363636,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "9e242853-8bc0-438b-85da-2fea88fdd96a",
+      "baseline_f1": 0.2222222222222222,
+      "candidate_f1": 0.2222222222222222,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "ac4092d7-c392-49fa-b4ad-0ee242dab3ce",
+      "baseline_f1": 0.125,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "ad837f12-717d-4e9b-88aa-2adace521fdb",
+      "baseline_f1": 0.6363636363636364,
+      "candidate_f1": 0.56,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "b0136056-0f35-46bb-bcce-48f401ef24be",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "b8022f96-3337-40cd-ba20-5cb787801f5b",
+      "baseline_f1": 0.11764705882352941,
+      "candidate_f1": 0.1081081081081081,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "baea97ff-cdcb-4a62-98f5-d0467b1b2857",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "bd13828f-a477-4333-98bd-78b11d116bc0",
+      "baseline_f1": 1.0,
+      "candidate_f1": 1.0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "c11b6645-8c7c-414f-a1ff-87f15dbaec7c",
+      "baseline_f1": 0.25,
+      "candidate_f1": 0.25,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "ccc8268d-b494-4841-a97c-f10b440800ea",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "d1664376-eb92-4b3b-a1ac-280b8d8bb6d8",
+      "baseline_f1": 0,
+      "candidate_f1": 0,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "d18c38c7-e1e4-4a79-8c03-415f1181230d",
+      "baseline_f1": 0.4799999999999999,
+      "candidate_f1": 0.4799999999999999,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "d1e9d186-902e-40a7-958a-23f13fdbfe1b",
+      "baseline_f1": 0,
+      "candidate_f1": 0.23529411764705882,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "d2681ec1-7ed8-4a96-b38e-acd08efb04eb",
+      "baseline_f1": 0.8,
+      "candidate_f1": 0.8,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "d3417e8d-59f9-473c-bc4b-702c78fd2b2b",
+      "baseline_f1": 0.8484848484848484,
+      "candidate_f1": 0.8484848484848484,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "da836756-dc9e-4b6b-b34e-4c58692ad338",
+      "baseline_f1": 0.08333333333333333,
+      "candidate_f1": 0.33333333333333337,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "e34ce096-c6bf-4d01-8560-a151279110d2",
+      "baseline_f1": 0.5454545454545454,
+      "candidate_f1": 0.2711864406779661,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "e827c7c9-2912-4749-8bb1-2e996390b89f",
+      "baseline_f1": 0.12121212121212122,
+      "candidate_f1": 0.06060606060606061,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    },
+    {
+      "id": "ec14bf6d-2a4a-49b1-b594-7f5cd0e223ac",
+      "baseline_f1": 0.23529411764705882,
+      "candidate_f1": 0.5,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "ef8091c8-64e4-4685-985b-b96a11eb782b",
+      "baseline_f1": 0.15384615384615385,
+      "candidate_f1": 0.15384615384615385,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "ef911254-0bde-4fae-a264-f3123de44c41",
+      "baseline_f1": 0.33333333333333337,
+      "candidate_f1": 0.33333333333333337,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "f10b2662-5e84-49bd-ac13-a24a05b6b464",
+      "baseline_f1": 0.1904761904761905,
+      "candidate_f1": 0.1904761904761905,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "f33947a8-1582-4a40-8d06-c38bce7c72d0",
+      "baseline_f1": 0.1904761904761905,
+      "candidate_f1": 0.1904761904761905,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": true,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "f42febeb-5d13-4741-8b25-866ca934d3bc",
+      "baseline_f1": 0.15384615384615385,
+      "candidate_f1": 0.15384615384615385,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": false,
+      "same_prompt_token_counts": true,
+      "same_response": true,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "f5a6b7df-a358-4142-bfd9-1076fe234d61",
+      "baseline_f1": 0.2608695652173913,
+      "candidate_f1": 0.8181818181818181,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": true,
+      "candidate_visible_reference": true,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": true,
+        "literal_reference_in_first_line": true
+      }
+    },
+    {
+      "id": "fe32cacd-2740-42a8-9a40-ed09341bb2cd",
+      "baseline_f1": 0.3448275862068966,
+      "candidate_f1": 0.3448275862068966,
+      "same_retrieved_evidence_order": true,
+      "same_visible_evidence_order": true,
+      "same_prompt_token_counts": false,
+      "same_response": false,
+      "baseline_visible_reference": false,
+      "candidate_visible_reference": false,
+      "baseline": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      },
+      "candidate": {
+        "literal_reference_in_full_response": false,
+        "literal_reference_in_first_line": false
+      }
+    }
+  ],
+  "baseline_report": "benchmarks/results/lcvmem-development-evidence-nested.json",
+  "candidate_report": "benchmarks/results/lcvmem-development-evidence-flat.json",
+  "reader_fingerprints": [
+    "e2d6be5e9ea789a339662cecf3003e8cca69a0874e2b2d7e1e62cb6688fd689a",
+    "e2d6be5e9ea789a339662cecf3003e8cca69a0874e2b2d7e1e62cb6688fd689a"
+  ],
+  "scope": "All selected development questions retained. Official lexical F1 unchanged;full-response literal presence diagnoses first-line formatting effects,not semantic correctness. Matching evidence/token counts do not prove identical full prompts. Comparison is offline;reference answers are never passed to runtime. No heldout or JT accuracy claim."
+}

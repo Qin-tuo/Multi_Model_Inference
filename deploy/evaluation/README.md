@@ -391,3 +391,9 @@ python3 tools/project.py bench --suite memory-quality --split development \
 [82题装配复放](../../benchmarks/results/evidence-format-packing.json)使用原开发集检索快照和真实llama.cpp tokenizer，没有重新检索或生成答案。每个新条目可还原为完整旧表示，来源映射完全一致。18题增加了一个来源，没有题目丢失原先保留的来源；总注入条目626→644，总证据tokens为57870→53042，均保持768上限。此前音乐问题从696tokens/7条变为691tokens/8条，实际目标日期的用户来源重新进入提示。这只证明装配与数据保留，不证明模型正确回答。
 
 新增四项契约测试覆盖原文/角色/来源映射、窗口双重偏移、多来源/扩展字段/维护ID及非法格式，完整231项框架回归通过。[冻结协议](../../benchmarks/manifests/evidence-format-v1.json)要求同一代码、模型、4线程编码、8条检索、768tokens和原生评分，对全部82题分别运行nested/flat两种格式。使用新会话与已核验未变化的原存储，参考答案只用于事后评分；200题保留集及76题备用集不进入实验。当前默认仍为nested_v1，是否采用候选以完整质量结果为依据。
+
+[本轮nested基线](../../benchmarks/results/lcvmem-development-evidence-nested.json)与[flat候选](../../benchmarks/results/lcvmem-development-evidence-flat.json)均完成82题，执行错误、意外写入、主体泄漏均为0，应用指纹与冻结协议一致。[比较](../../benchmarks/results/lcvmem-evidence-format-comparison.json)确认82题检索顺序相同，18题的可见来源增加，官方词级F1为28.9745→30.5796，逐题14项升、10项降、58项相同。归一化参考答案在完整回复中的出现次数54→58；这些仍不是语义正确率。
+
+来源级检查确认此前音乐问题现在得到目标日期用户原话，模型回答正确作品和作曲家；已有首条证据的器材问题仍然漏读。另一个植物问题在来源相同的情况下，从具体困难退化为泛泛描述。[决策记录](../../benchmarks/results/evidence-format-decision.json)因此保留候选，未切换默认。此次[nested重复检查](../../benchmarks/results/lcvmem-nested-repeat-diagnostic.json)也发现与此前版本相比，82题检索、可见来源和提示token数一致，仍有6题回复不同、F1为29.5846→28.9745；两次运行还隔着资源配置/缓存历史等变化，不能据此声称确定的随机误差分布。单次小幅分数提升不足以证明稳定质量收益。
+
+为进一步区分装配问题和阅读模型能力，已锁定[Qwen3.5-4B Q4_K_M候选及F16图像投影](../../models/candidates/qwen3.5-4b.json)的仓库revision、文件大小和SHA256，准备单独评估。候选使用官方文档提供的`enable_thinking=false`模式，继续走本地llama.cpp/Pipecat接口；[Qwen官方模型说明](https://huggingface.co/Qwen/Qwen3.5-4B#instruct-or-non-thinking-mode)、[量化产物来源](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF)。产物准备不证明本机兼容、质量或速度，当前主模型manifest和默认配置未切换。

@@ -12,6 +12,8 @@
 
 记忆编码现采用 **4个ORT内部线程**，并修复了`memory.embedding_threads`配置未生效的问题。[新一轮2/4线程完整对照](benchmarks/results/embedding-voice-comparison.json)中，写入P95从484降到357ms，查询从159降到140ms，视觉频率/时效通过；编码器60组向量逐元素一致。[公开语音保存与回忆](benchmarks/results/embedding-threads4-public-voice.json)也通过。冷启动记忆问答仍约4.37秒，完整时延和长期验收继续推进。记忆开发集的词级F1及参考答案子串命中不能直接当作语义正确率或正确来源可见率，已有[来源级复核](benchmarks/results/lcvmem-reader-error-diagnostic.json)区分同义表达、证据被预算丢弃和模型漏读。
 
+单来源`flat_v2`格式完成[82题完整对照](benchmarks/results/lcvmem-evidence-format-comparison.json)：同一检索顺序下，18题多保留一条来源，词级F1从28.97到30.58；但也出现具体答案退为泛泛回答的案例，因此[继续作为可选项](benchmarks/results/evidence-format-decision.json)，当前仍用`nested_v1`。下一步在既有llama.cpp框架内评估[Qwen3.5-4B候选](models/candidates/qwen3.5-4b.json)的阅读质量和容量；当前运行模型仍由[主manifest](models/manifest.json)指定为Qwen2.5-VL-3B。
+
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
 | 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机/语音文件会话、记忆与工具通过初测；真实设备、完整打断和质量验证继续推进 |

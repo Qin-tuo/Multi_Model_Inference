@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T03:24:46.767790+00:00",
+  "updated_at": "2026-10-14T03:41:29.500505+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -570,10 +570,24 @@
         "tests/test_memory_context.py",
         "tools/evidence_format_probe.py",
         "benchmarks/results/evidence-format-packing.json",
-        "benchmarks/manifests/evidence-format-v1.json"
+        "benchmarks/manifests/evidence-format-v1.json",
+        "benchmarks/results/lcvmem-development-evidence-nested.json",
+        "benchmarks/results/lcvmem-development-evidence-flat.json",
+        "benchmarks/results/lcvmem-evidence-format-comparison.json",
+        "benchmarks/results/lcvmem-nested-repeat-diagnostic.json",
+        "benchmarks/results/evidence-format-decision.json"
       ],
-      "validation": "Opt-in flat_v2 representation conserves original text,date,speaker,window offsets,canonical IDs/version andfullsource maps;multisource/extended data andmaintenance IDs staynested.231corePASS. Replay ofall82dev retrieved snapshots usingrealnative tokenizer:18cases gain1source,0losspreviously admitted sources,626->644facts,57870->53042tokens under768each. Correctday/source previouslyomitted nowfits inknownmusic case. No modelquality claim frompacking;fresh82+82actualanswer pair underway.",
-      "next_action": "Complete nested/flat paired full82development runs underidentical4thread/8item/768token settings. Retain errors,losses andofficial scores;qualify actualanswers beforedefaultchange."
+      "validation": "231corePASS. Lossless82-case native-tokenizer replay:18source gains,0source losses,626->644facts,57870->53042tokens. Fullnested/flat82+82actualanswer runs:identicalreader fingerprints/retrieval order,0errors/mutations/leaks,F1 28.9745->30.5796;14up10down58same. Correct musical source nowincluded andanswered,butanother same-source case regresses. Previousnested run withsame evidence/tokencounts had6differentanswers. Default remainsnested_v1;no independentquality/JTclaim.",
+      "next_action": "Keepflat_v2 optional. Evaluate reader/model capacity with preserved baseline,then repeat broader source-faithfulness andquality before defaultpromotion."
+    },
+    {
+      "task_id": "J0.model.reader_candidate",
+      "status": "RUNNING",
+      "artifacts": [
+        "models/candidates/qwen3.5-4b.json"
+      ],
+      "validation": "Public official modelcard andquantization artifact metadata inspected. Candidate revision e87f176479d0855a907a41277aca2f8ee7a09523 locked with Q4_K_M/F16projector hashes;data download underway. Main manifest remainsQwen2.5-VL3B,no candidate loading orquality/performance evidence yet.",
+      "next_action": "Finish hash-verified artifacts,then isolate native compatibility/template/token-budget checks andcontrolled development quality/capacity comparison. Preserve existing model andframework."
     }
   ],
   "acceptance": {
@@ -677,7 +691,8 @@
     "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED.",
     "Startupcollect/freeze20turnpairdidnotproveoverallgain;GCownership/cleanupbenchmark-only. Coldstageevidence nowshowsfirstrecallprefill1928ms/TTFB2166ms. LongdurationGC,memory/resources and8hremainunqualified.",
     "Native ngram-simple candidate improves time/quoted-text generation in development but full voice candidate still FAILS cold recall4.098s and memory writeP95514ms. Runtime restored to default none;broader quality, cancellation/recovery,5-run100-event comparisons and8h remain unverified.",
-    "4-thread CPU embedding adopted after exact60-array comparisons,full20turn pair andpublicvoice smoke. WriteP95improves484->357ms;fullshortvoice stillFAIL(coldrecall4.373s),longduration/fault/formal5-run100event/8h remainunverified. Normalized reference substring presence canmatch wrong-source text;source-level devreview found genuine omitted evidence andreader errors."
+    "4-thread CPU embedding adopted after exact60-array comparisons,full20turn pair andpublicvoice smoke. WriteP95improves484->357ms;fullshortvoice stillFAIL(coldrecall4.373s),longduration/fault/formal5-run100event/8h remainunverified. Normalized reference substring presence canmatch wrong-source text;source-level devreview found genuine omitted evidence andreader errors.",
+    "Flat evidence candidate improves packing andwordF1 inone82-case pair buthas a genuine answer regression;default remainsnested_v1. Reader/model qualification is stillneeded;Qwen3.5-4B is artifact-preparation only,not selected orvalidated. AllformalJT remainNOT_VERIFIED."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

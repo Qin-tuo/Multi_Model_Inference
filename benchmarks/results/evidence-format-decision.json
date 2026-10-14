@@ -1,0 +1,42 @@
+{
+  "created_at": "2026-10-14T03:38:43.495933+00:00",
+  "status": "CANDIDATE_NOT_DEFAULT",
+  "protocol_sha256": "0891f015e07a0beb77acb3667e619b1c64a47bb9237119b344c0266dc429a176",
+  "pair_report": "benchmarks/results/lcvmem-evidence-format-comparison.json",
+  "pair_sha256": "0f79013c11a5c4397bfadd5f8fd785fd1faf9012d5661341f21414774079b046",
+  "reader_fingerprints_identical": true,
+  "questions": 82,
+  "baseline_f1": 28.974526616350747,
+  "candidate_f1": 30.579608831457453,
+  "f1_case_changes": {
+    "improved": 14,
+    "regressed": 10,
+    "same": 58
+  },
+  "normalized_response_target_gains": [
+    "04f61d5a-4380-4a00-82e0-57defa1470e6",
+    "3485cca6-08d3-47d8-846f-4b37715cd0d0",
+    "b8022f96-3337-40cd-ba20-5cb787801f5b",
+    "d1e9d186-902e-40a7-958a-23f13fdbfe1b",
+    "f5a6b7df-a358-4142-bfd9-1076fe234d61"
+  ],
+  "normalized_response_target_losses": [
+    "5bc993ca-06b0-4e15-98ba-e603227e0e46"
+  ],
+  "source_level_observations": [
+    {
+      "id": "d1e9d186-902e-40a7-958a-23f13fdbfe1b",
+      "observation": "Correct-date user source now injected;response names the correct musical title and composer."
+    },
+    {
+      "id": "964bb989-9146-4c31-8a02-fa5e087b3916",
+      "observation": "Correct equipment evidence stillfirst andvisible inboth,but reader stillgives unrelated generic advice."
+    },
+    {
+      "id": "5bc993ca-06b0-4e15-98ba-e603227e0e46",
+      "observation": "Same sources visible;candidate replaces specific reference problem with vague plant-growth difficulty,a regression."
+    }
+  ],
+  "decision": "Keep flat_v2 optional. More complete evidence andsome improved answers,but reader sensitivity andobserved regression preclude defaultpromotion fromthis singlepair. Evaluate candidate reading model using unchanged framework andpreserved3B baseline.",
+  "scope": "Development only. F1 andnormalized substrings are not semantic accuracy;qualitative observations are assistant review,not independent adjudication. No heldout/reserve orJT qualification."
+}
