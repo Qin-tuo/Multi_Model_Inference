@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T10:32:54.995237+00:00",
+  "updated_at": "2026-10-14T10:38:20.155299+00:00",
   "plan": "v1.2 (long-term memory deferred to the next delivery phase by user request)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -702,10 +702,15 @@
         "benchmarks/results/mmbench-cn-development-inference.json",
         "benchmarks/results/mmbench-cn-development-audit.json",
         "benchmarks/results/mmbench-cn-development-score.json",
-        "benchmarks/results/mmbench-cn-model-screening.json"
+        "benchmarks/results/mmbench-cn-model-screening.json",
+        "benchmarks/results/mmbench-cn-qwen35-inference.json",
+        "benchmarks/results/mmbench-cn-qwen35-audit.json",
+        "benchmarks/results/mmbench-cn-qwen35-score.json",
+        "benchmarks/results/qwen35-mmbench-controller.json",
+        "benchmarks/results/mmbench-reader-comparison.json"
       ],
-      "validation": "Completed all 372 development variants through the real assistant with Qwen2.5-VL-3B. Canonical accuracy 70/100; every provided rotation correct in 55/100 question groups. Input/image/native-token/state audit PASS; execution errors, unintended mutations and image leaks all zero. Below the 80% development screening target. Public MCQ screening does not qualify natural image QA or JT-07. Heldout/reserve remain unused.",
-      "next_action": "Complete the already running Qwen3.5-4B comparison under the frozen input/context/output protocol, audit and score after all answers, and verify default service restoration. Do not promote based solely on development accuracy."
+      "validation": "Both readers completed all 372 development variants with unchanged application/runtime/inputs. Qwen2.5-VL-3B canonical/circular 70/55 percent; Qwen3.5-4B 75/58 percent. Both input/image/native-token/state audits PASS; no execution errors, unintended mutations or image leaks. Candidate gains 13 canonical questions and loses 8. Both below the 80% screening target. Candidate native compatibility 13/14; quote-long adds forbidden surrounding quotes. Default 3B restored and all seven managed services READY. Heldout/reserve unused; no natural freeform QA or JT-07 claim.",
+      "next_action": "Continue phase-one reader/input-quality diagnosis and model selection, followed by ordinary conversation/tool quality and speech timing. Do not spend effort on deferred long-term memory benchmarks or promote from development scores alone."
     }
   ],
   "acceptance": {

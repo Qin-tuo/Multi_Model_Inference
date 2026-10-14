@@ -431,3 +431,36 @@ python3 tools/project.py bench --suite memory-quality --split development \
 更新后的236项框架回归通过，覆盖工具输出漏标题、误说删除时仍返回真实只读结果，以及无成功读取时不能伪造存储状态。最终100条实际模型/SDK工具回归仍在运行；之前两份99/100报告保留，不拼接成一次新的100/100。
 
 [最终全量工具复跑](../../benchmarks/results/tool-quality-authoritative-inventory.json)现已完成，100/100通过、意外持久化变更0、重放额外变更0。T082实际输出包含工具返回的“会议”标题和相应正文。完整236项框架回归也通过。这是同一冻结合成开发语料的独立新运行；不是独立人类语言测试集、ASR/声学测试或JT-04验收。
+
+## 当前阶段的中文图文模型筛选
+
+2026-10-14起，长期记忆专项按用户要求延期；以下图文筛选继续服务于当前语音/视觉/工具阶段。
+
+[数据清单](../../benchmarks/manifests/mmbench-cn-v1.json)固定MMBench中文V1.1开发源，按解码后图片哈希隔离开发、保留、备用各100题。开发组包含372个上游原有选项轮换；只使用开发组，不推理保留/备用组。数据、图片和原始回答保存在AI_Stack；Git登记哈希和统计。参考答案与运行输入分开，真实AssistantSession/Pipecat接收固定640×480图像、相同提问、空的独立用户记忆、2048上下文及128输出上限。
+
+评分复用[锁定的VLMEvalKit组件](mmbench.lock.json)。仅加载校验过的匹配及循环评分函数，避免执行上游包初始化中的TLS设置；没有云端判卷或无法解析时的随机猜测。运行错误、状态异常及未解析答案均计错。
+
+| 开发筛选 | Qwen2.5-VL-3B | Qwen3.5-4B |
+|---|---:|---:|
+| 标准选项顺序正确 | 70/100 | 75/100 |
+| 全部提供的轮换都正确 | 55/100 | 58/100 |
+| 全部372次回答正确 | 251/372 | 272/372 |
+| 未解析/执行错误/意外写入/图像引用残留 | 0/0/0/0 | 0/0/0/0 |
+| 每次请求墙钟中位数 | 2.397秒 | 2.108秒 |
+| 每次请求墙钟P95 | 2.627秒 | 2.489秒 |
+
+[逐题比较及证据](../../benchmarks/results/mmbench-reader-comparison.json)显示标准顺序13题改善、8题退步；两种模型都未达到预先登记的80%开发筛选目标。墙钟包括独立会话启动/清理，输出通常只有一个字母，不是语音首播时延。候选改变整个模型、tokenizer、模板和projector；单轮数据不能证明统计稳定收益或参数量因果关系。候选控制进程额外驻留的资源开销也保留在报告范围中。
+
+4B的图像/token/状态审计通过；14项原生兼容检查仍有一项失败：原样复述时多加引号。父报告因此保留FAIL，图文评分报告单独记录完整有效结果。候选退出后原3B恢复，七个受管理服务就绪。当前不切换默认模型，不将公开选择题分数视作自然图文问答或JT-07通过。
+
+已有完整结果可用以下命令重新审计、评分及比较；输出使用新文件名：
+
+```bash
+.venv/bin/python tools/mmbench_audit.py \
+  --run-report benchmarks/results/mmbench-cn-qwen35-inference.json \
+  --output /tmp/mmbench-qwen35-audit-recheck.json
+/home/nvidia/AI_Stack/environments/evaluation/bin/python tools/mmbench_eval.py score \
+  --run-report benchmarks/results/mmbench-cn-qwen35-inference.json \
+  --output /tmp/mmbench-qwen35-score-recheck.json
+.venv/bin/python tools/mmbench_compare.py --output /tmp/mmbench-comparison-recheck.json
+```
