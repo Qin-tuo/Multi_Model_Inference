@@ -1,0 +1,154 @@
+{
+  "created_at": "2026-10-14T07:04:22.180903+00:00",
+  "status": "PASS",
+  "task": "detection",
+  "scope": "Complete5000-image publicCOCO deployment regression. Sameconf.5/NMS.45/maxdet100;notstandardlow-confidenceleaderboardscore,independentlocalrecordings,tracking,visualQAorwholeJT07acceptance. PosepartofparentrunstillRUNNING.",
+  "dataset_manifest": "benchmarks/manifests/coco2017-quality-v1.json",
+  "dataset_sha256": "26eddee83158e160309ea1a714b08ede303779317e42d859bfb355fce965e121",
+  "source_commit": "326a56a6922bce35ca3c31b724f1ec6e821815bb",
+  "source_hashes": {
+    "configs/runtime.yaml": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+    "models/manifest.json": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+    "benchmarks/manifests/vision-quality-v1.json": "620ac63bece412d76b722c2bbad92ffa8c50184d3e5d9d4a26c4aa511d547c93",
+    "deploy/vision/source-lock.json": "c00c3871f3d64bce7de3dd492c2c9a452d333e719aae8bcb7f08507e0fcacf9c",
+    "deploy/vision/serve.py": "db8c2ea1b95ffe30b9382cff7f74ebb5435eabd27ed9f6ace484cf683ea1bc92",
+    "deploy/vision/eval/runner.cpp": "3e49570befd2c215f0f0ee4578143b576fbc597fb3ebaf67f8b63564661ce0e7",
+    "tools/vision_quality.py": "fc562cb1673dda23240e69dc5d804471b0134aed1d17ab2f625d1167e8f3b6b6",
+    "/home/nvidia/AI_Stack/workspaces/vision/build/yolo_ros/libyolo_ros_core.so": "0a658ef06cdde9e840c6398d62504cc57d107fba76c16bbb697233b6de1ea9af",
+    "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime.so.1.28.0": "52367cb29098e4ea1823850edf3bb2aac201c9fe29a2ca784626cc6ba2db89dc"
+  },
+  "reference_AP_percent": 26.46181057709483,
+  "native_AP_percent": 26.424007319545645,
+  "drop_percentage_points": 0.03780325754918579,
+  "maximum_drop_percentage_points": 1.0,
+  "metrics": {
+    "torch": {
+      "created_at": "2026-10-14T07:00:10.702725+00:00",
+      "status": "COMPLETE",
+      "task": "detection",
+      "images": 5000,
+      "predictions": 15303,
+      "prediction_sha256": "c43a15fa5618278a8763bc77b2ed95224a8f7c1d7d58e5ee0ace7212f38458f1",
+      "annotation_sha256": "e8c7f7908f1d7278341fae127d0da654f102f11bd7b21d8aeefa635b8c810b6f",
+      "metrics": {
+        "bbox": {
+          "AP_percent": 26.46181057709483,
+          "stats": [
+            0.2646181057709483,
+            0.340877906208166,
+            0.29353089333709576,
+            0.07354478302070308,
+            0.2831894594010406,
+            0.4291125845917175,
+            0.2250918227219726,
+            0.29064343046367275,
+            0.2914149851410628,
+            0.07595995725356114,
+            0.3085082101205835,
+            0.47681445302182807
+          ],
+          "max_detections": [
+            1,
+            10,
+            100
+          ],
+          "iou_thresholds": [
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.8999999999999999,
+            0.95
+          ]
+        }
+      },
+      "scope": "Public COCO regression under deployment thresholds; not standard low-confidence Ultralytics leaderboard settings or independent recorded scenes."
+    },
+    "tensorrt": {
+      "created_at": "2026-10-14T07:02:26.638638+00:00",
+      "status": "COMPLETE",
+      "task": "detection",
+      "images": 5000,
+      "predictions": 15291,
+      "prediction_sha256": "2fc0a971b29f93b908707827e7c71e46c149a096aa63b66fb69aa9c0db4fab63",
+      "annotation_sha256": "e8c7f7908f1d7278341fae127d0da654f102f11bd7b21d8aeefa635b8c810b6f",
+      "metrics": {
+        "bbox": {
+          "AP_percent": 26.424007319545645,
+          "stats": [
+            0.26424007319545645,
+            0.3409388743974088,
+            0.29351165652143907,
+            0.07290572049229652,
+            0.2825920293802113,
+            0.4285430522616336,
+            0.2248750502308527,
+            0.29016017980330405,
+            0.29092625877943373,
+            0.07536688077827308,
+            0.3077333897182373,
+            0.4767718885254316
+          ],
+          "max_detections": [
+            1,
+            10,
+            100
+          ],
+          "iou_thresholds": [
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.8999999999999999,
+            0.95
+          ]
+        }
+      },
+      "scope": "Public COCO regression under deployment thresholds; not standard low-confidence Ultralytics leaderboard settings or independent recorded scenes."
+    }
+  },
+  "predictions": [
+    {
+      "backend": "torch",
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-v1/detection-torch.jsonl",
+      "sha256": "c43a15fa5618278a8763bc77b2ed95224a8f7c1d7d58e5ee0ace7212f38458f1",
+      "images": 5000
+    },
+    {
+      "backend": "tensorrt",
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-v1/detection-tensorrt.jsonl",
+      "sha256": "2fc0a971b29f93b908707827e7c71e46c149a096aa63b66fb69aa9c0db4fab63",
+      "images": 5000
+    }
+  ],
+  "native_binary_sha256": "500a43d2ddd1818ad0b11e0b747d2c30374877aeb27fe4d88eab51baa0798b54",
+  "engines": {
+    "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/detection/yolov8n/TensorrtExecutionProvider_TRTKernel_graph_main_graph_17254864328571302711_0_0_sm87.engine": "88b8e9c3e2f09794cc46986cec591f9af38fc920936bc4e2d869050551458a02",
+    "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/pose/yolov8n-pose/TensorrtExecutionProvider_TRTKernel_graph_main_graph_11553024953600363046_0_0_sm87.engine": "1188a009dd88ce117611e9730c6a6686ffd1052ba0689fda9eceb95a7ac057d0"
+  },
+  "parent_run": "benchmarks/results/vision-quality-coco-baseline.json",
+  "parent_stage_at_extraction": {
+    "task": "pose",
+    "backend": "torch",
+    "command": [
+      "/home/nvidia/AI_Stack/environments/vision/bin/python",
+      "/home/nvidia/Multi_Model_Inference/tools/vision_quality.py",
+      "reference",
+      "--task",
+      "pose",
+      "--inputs",
+      "/home/nvidia/AI_Stack/datasets/coco2017/inputs.tsv",
+      "--predictions",
+      "/home/nvidia/AI_Stack/runtime-data/benchmarks/vision-quality-coco-v1/pose-torch.jsonl"
+    ]
+  },
+  "known_diagnostic": "benchmarks/results/vision-input-diagnostic.json"
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T06:40:35.754033+00:00",
+  "updated_at": "2026-10-14T07:04:22.182765+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -60,9 +60,11 @@
         "benchmarks/manifests/coco2017-quality-v1.json",
         "benchmarks/results/vision-quality-plumbing.json",
         "deploy/vision/eval/runner.cpp",
-        "tools/vision_quality.py"
+        "tools/vision_quality.py",
+        "benchmarks/results/vision-input-diagnostic.json",
+        "benchmarks/results/coco-detection-deployment-baseline.json"
       ],
-      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence. New graph-granularity capture PASS:188944 standalone kernels+177graphs,all189121device activities correlated tosuccessful launches. Reverse coverage identifies6674capture-only calls within8balanced capture intervals,no unexplained omissions. Six live requests overlap VLM+bothvision models;7functional roles/6active engines/8inactive variants inventoried. JT-02qualified byits explicit requirements;node trace failures retained. Quality,capacity anduninstumented full-scenario timing remain open. Public COCO2017 full5000-image regression protocol anddataset sealed before corpus inference. Native yolo_ros TensorRT adapter andofficial COCOeval wiring verified;onebus box hasIoU0.9737vsPyTorch,retainedFAIL rather thanprecision assumption. Fullcomparison RUNNING;do not inferquality acceptance frompartial predictions.",
+      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence. New graph-granularity capture PASS:188944 standalone kernels+177graphs,all189121device activities correlated tosuccessful launches. Reverse coverage identifies6674capture-only calls within8balanced capture intervals,no unexplained omissions. Six live requests overlap VLM+bothvision models;7functional roles/6active engines/8inactive variants inventoried. JT-02qualified byits explicit requirements;node trace failures retained. Quality,capacity anduninstumented full-scenario timing remain open. Public COCO2017 full5000-image regression protocol anddataset sealed before corpus inference. Native yolo_ros TensorRT adapter andofficial COCOeval wiring verified;onebus box hasIoU0.9737vsPyTorch,retainedFAIL rather thanprecision assumption. Fullcomparison RUNNING;do not inferquality acceptance frompartial predictions. Full5000-image detection paircomplete:PyTorchbboxAP26.4618,nativeORTTensorRT26.4240,drop0.0378ppwithin1pp. JPEGdecodeidentical;singlebusboxdriftlocalized toOpenCVresizepixels withsamePyTorchmodel/NMS control. Posefullrunstillactive;independentrecordings andJT07remainunverified.",
       "next_action": "Let the frozen full5000-image reference/native detection+pose comparison finish;inspect primary AP drops andretained failures;then qualifyindependent recorded scenes andfullscenario timing"
     },
     {
