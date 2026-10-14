@@ -134,9 +134,10 @@ def main(args):
                 report['worker']={'status':'RUNNING','command':args.worker,'report':str(args.worker_report)}
                 write_json(args.output,report)
                 with (args.run_dir/'worker.log').open('w') as log:
-                    subprocess.run(args.worker,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=1800)
+                    subprocess.run(args.worker,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=args.worker_timeout)
                 measured=json.loads(args.worker_report.read_text())
-                report['worker'].update(status=measured['status'],checks=measured.get('checks'))
+                report['worker'].update(status=measured['status'],checks=measured.get('checks'),
+                    errors=measured.get('errors',0),timeout_seconds=args.worker_timeout)
                 with httpx.Client(timeout=5,trust_env=False) as client:
                     response=client.get('http://127.0.0.1:8088/slots');response.raise_for_status()
                     report['idle_after']=provider_slots_idle(response.json())
@@ -173,7 +174,10 @@ def main(args):
             result = report.get('quality', {})
             checks['quality_completed'] = result.get('status') == 'COMPLETE' and result.get('questions') == 82
             checks['quality_no_errors_or_mutations'] = all(result.get(key) == 0 for key in ('errors','mutations','owner_leaks'))
-        if args.worker:checks['worker_passed']=report.get('worker',{}).get('status')=='PASS'
+        if args.worker:
+            result=report.get('worker',{})
+            checks['worker_passed']=(result.get('status') in {'PASS','ANSWERED'} and result.get('errors',0) in (0,[])
+                and all((result.get('checks') or {}).values()))
         report.update(checks=checks,status='PASS' if all(checks.values()) else 'FAIL',completed_at=stamp())
         write_json(args.output, report)
     print(json.dumps({'status': report['status'], 'checks': checks, 'errors': report['errors']}), flush=True)
@@ -190,5 +194,6 @@ if __name__ == '__main__':
     parser.add_argument('--seed-source', type=Path)
     parser.add_argument('--evidence-format', choices=['nested_v1','flat_v2'], default='flat_v2')
     parser.add_argument('--worker-report',type=Path)
+    parser.add_argument('--worker-timeout',type=int,default=1800,choices=range(30,7201),metavar='SECONDS')
     parser.add_argument('--worker',nargs=argparse.REMAINDER,help='Explicit local validation command while candidate owns the endpoint')
     raise SystemExit(main(parser.parse_args()))

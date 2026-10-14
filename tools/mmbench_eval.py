@@ -37,6 +37,20 @@ def prompt(row):
     return text+'问题：'+row['question']+'\n选项：\n'+''.join(k+'. '+v+'\n' for k,v in row['choices'].items())
 
 
+def backend_snapshot(candidate_pid=None):
+    from deploy import services
+    state=services.state(list(services.ORDER),health=True)
+    if candidate_pid is None:
+        state['evaluation_ready']=state['backend_status']=='READY'
+    else:
+        others=[name for name in services.ORDER if name!='llama']
+        state['candidate']={'pid':candidate_pid,'owns_vlm_port':services.owns_port('llama',[candidate_pid])}
+        state['evaluation_ready']=(state['components']['llama']['main_pid']==0
+            and state['candidate']['owns_vlm_port'] and all(state['components'][name]['health']['ready'] for name in others))
+        state['scope']='Temporary explicit candidate replaces the stopped managedVLM;original unit status retained. Other six managed services must be ready.'
+    return state
+
+
 async def answer(args):
     from PIL import Image
     import httpx
@@ -55,26 +69,41 @@ async def answer(args):
     logger.remove();logger.add(sys.stderr,level='WARNING')
     corpus,part,rows=inputs(args.split)
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
-    manifest=json.loads((ROOT/'models/manifest.json').read_text());entry=manifest['models']['vlm']
-    expected=(CACHE/'models'/next(r['name'] for r in entry['files'] if not r['name'].startswith('mmproj'))).resolve()
+    model_manifest=args.model_manifest.resolve()
+    manifest=json.loads(model_manifest.read_text());entry=manifest['models']['vlm']
+    directory=Path(manifest.get('artifact_directory',CACHE/'models'))
+    expected=(directory/next(r['name'] for r in entry['files'] if not r['name'].startswith('mmproj'))).resolve()
+    if entry['context_tokens']!=runtime['llama']['context_tokens']:raise RuntimeError('Keep the frozen context capacity')
+    candidate_pid=None
+    if args.candidate_report:
+        parent=json.loads(args.candidate_report.read_text())
+        if parent['status']!='RUNNING' or parent['candidate_manifest_sha256']!=sha256(model_manifest):
+            raise RuntimeError('Candidate controller manifest/state differs')
+        candidate_pid=parent['candidate_pid']
+    elif model_manifest!=(ROOT/'models/manifest.json').resolve():
+        raise RuntimeError('A candidate requires an explicit controller report and live ownership verification')
     with httpx.Client(timeout=5,trust_env=False) as client:
         response=client.get('http://127.0.0.1:8088/props');response.raise_for_status();props=response.json()
-    if Path(props['model_path']).resolve()!=expected:raise RuntimeError('Running model differs from selected model')
-    before=services.state(list(services.ORDER),health=True)
-    if before['backend_status']!='READY':raise RuntimeError('All managed backends must be ready')
+    if Path(props['model_path']).resolve()!=expected or props.get('model_alias')!=entry['server_model_id']:
+        raise RuntimeError('Running model differs from selected model')
+    before=backend_snapshot(candidate_pid)
+    if not before['evaluation_ready']:raise RuntimeError('Evaluation backends/explicit candidate must be ready')
     args.run_dir.mkdir(parents=True,mode=0o700)
     (args.run_dir/'answers').mkdir()
     (args.run_dir/'eval-source.py').write_bytes(Path(__file__).read_bytes())
-    identity=fingerprint()
+    identity=fingerprint(model_manifest)
     report={'created_at':stamp(),'status':'RUNNING','split':args.split,'base_questions':100,'variants':len(rows),
         'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         'source_sha256':sha256(Path(__file__)),'application_fingerprint':identity,'corpus_sha256':sha256(CORPUS),
         'protocol_sha256':sha256(PROTOCOL),'input_sha256':part['inputs_sha256'],
         'model_identity':{k:props.get(k) for k in ('model_path','model_alias','build_info')},
+        'selected_model_manifest':str(model_manifest),'selected_model_manifest_sha256':sha256(model_manifest),
+        'active_model_manifest_sha256':sha256(ROOT/'models/manifest.json'),
+        'candidate_controller_report':str(args.candidate_report) if args.candidate_report else None,
         'backends_before':before,'completed':0,'errors':0,'unexpected_mutations':0,'image_leaks':0,
         'artifacts':str(args.run_dir.resolve()),'scope':json.loads(PROTOCOL.read_text())['scope']}
     write_json(args.output,report)
-    config=LlamaConfig.from_manifest(ROOT/'models/manifest.json')
+    config=LlamaConfig.from_manifest(model_manifest)
     with ExitStack() as stack:
         memory=stack.enter_context(open_memory(args.run_dir/'data/memory',settings=runtime))
         records=stack.enter_context(Records(args.run_dir/'data/records.sqlite'))
@@ -137,14 +166,15 @@ async def answer(args):
                 print(json.dumps({'completed':number,'total':len(rows),'errors':report['errors'],
                     'unexpected_mutations':report['unexpected_mutations'],'last_id':row['id']}),flush=True)
         report['resources']=monitor.report()
-    report['backends_after']=services.state(list(services.ORDER),health=True)
-    checks={'all_variants':report['completed']==len(rows),'application_unchanged':fingerprint()==identity,
+    report['backends_after']=backend_snapshot(candidate_pid)
+    checks={'all_variants':report['completed']==len(rows),'application_unchanged':fingerprint(model_manifest)==identity,
+        'active_model_manifest_unchanged':sha256(ROOT/'models/manifest.json')==report['active_model_manifest_sha256'],
         'data_unchanged':inputs(args.split)[1]['inputs_sha256']==part['inputs_sha256'],
         'evaluator_unchanged':sha256(Path(__file__))==report['source_sha256'],
         'protocol_unchanged':sha256(PROTOCOL)==report['protocol_sha256'],
         'corpus_manifest_unchanged':sha256(CORPUS)==report['corpus_sha256'],
         'no_mutations':report['unexpected_mutations']==0,'no_image_leaks':report['image_leaks']==0,
-        'backends_ready':report['backends_after']['backend_status']=='READY'}
+        'backends_ready':report['backends_after']['evaluation_ready']}
     report.update(checks=checks,status='ANSWERED' if all(checks.values()) else 'FAIL',completed_at=stamp())
     write_json(args.output,report)
     print(json.dumps({'status':report['status'],'checks':checks,'errors':report['errors']}),flush=True)
@@ -197,5 +227,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);sub=parser.add_subparsers(dest='action',required=True)
     run=sub.add_parser('answer');run.add_argument('--run-dir',type=Path,required=True);run.add_argument('--output',type=Path,required=True)
     run.add_argument('--split',choices=['development','heldout','reserve'],default='development')
+    run.add_argument('--model-manifest',type=Path,default=ROOT/'models/manifest.json')
+    run.add_argument('--candidate-report',type=Path)
     scoring=sub.add_parser('score');scoring.add_argument('--run-report',type=Path,required=True);scoring.add_argument('--output',type=Path,required=True)
     args=parser.parse_args();raise SystemExit(asyncio.run(answer(args)) if args.action=='answer' else score(args))

@@ -1,0 +1,20 @@
+{
+  "created_at": "2026-10-14T10:03:12.330711+00:00",
+  "status": "BASELINE_BELOW_SCREENING_TARGET",
+  "baseline_model": "Qwen2.5-VL-3B-Instruct Q4_K_M",
+  "canonical_correct": 70,
+  "canonical_total": 100,
+  "circular_correct": 55,
+  "circular_total": 100,
+  "variants": 372,
+  "execution_errors": 0,
+  "unparsed": 0,
+  "tool_calls": 0,
+  "prompt_token_range": [
+    936,
+    1303
+  ],
+  "observation": "No toolrouting,contextorformat failure explains this run. Smallcategorysamplecounts:objectlocalization1/6,spatial2/6,imagequality0/6;OCR6/6canonical. Resize/JPEGprocessing canaffectfineimage-quality judgments andispartofthedeclareddeploymentprofile. Do notattributeallfailuressolelytoparametercount.",
+  "decision": "EvaluatealreadylockedQwen3.5-4B candidateonexactlythesame developmentinputs/profile;keepdefaultunchanged andheldout/reserveunused.",
+  "scope": "PublicChineseMCQcapabilityscreening,notfullMMBench leaderboard,unseenpretraining guarantee,naturalfreeform imageQA,realcamera/acoustics,latencyorwholeJT07acceptance. Projectheldout/reserve remainunused untilthe schemeisfrozen."
+}

@@ -20,7 +20,7 @@ def main(args):
         'exact_answer_membership':files==set(part['ids']),
         'runtime_inputs_still_match':part['inputs_sha256']==run['input_sha256'],
         'input_groups_disjoint':all(not set(corpus['partitions'][a]['image_groups'])&set(corpus['partitions'][b]['image_groups'])
-            for a,b in (('development','heldout'),('development','reserve'),('heldout','reserve'))}
+            for a,b in (('development','heldout'),('development','reserve'),('heldout','reserve')))}
     image_missing=[];usage_mismatch=[];bad_binding=[];mutations=[];leaks=[];execution_errors=[]
     references=[]
     for row in rows:
@@ -40,10 +40,14 @@ def main(args):
         if not usage or answer['prompt_tokens']!=[r['prompt_tokens'] for r in usage]:usage_mismatch.append(row['id'])
     checks.update(no_image_binding_errors=not bad_binding,successful_turns_have_images=not image_missing,
         native_input_counts_match_usage=not usage_mismatch,no_unexpected_mutations=not mutations,no_image_leaks=not leaks,
-        all_backends_ready=run.get('backends_after',{}).get('backend_status')=='READY')
+        evaluation_backends_ready=run.get('backends_after',{}).get('evaluation_ready',
+            run.get('backends_after',{}).get('backend_status')=='READY'))
     if run.get('backends_after'):
         checks['managed_processes_unchanged']=all(v['main_pid']==run['backends_after']['components'][k]['main_pid']
             for k,v in run['backends_before']['components'].items())
+        if run['backends_before'].get('candidate'):
+            checks['candidate_process_unchanged']=(run['backends_before']['candidate']==run['backends_after'].get('candidate')
+                and run['backends_after']['candidate']['owns_vlm_port'])
     report={'created_at':stamp(),'status':'PASS' if all(checks.values()) else 'FAIL','checks':checks,
         'source_sha256':sha256(Path(__file__)),'inference_report':str(args.run_report),'inference_report_sha256':sha256(args.run_report),
         'image_missing':image_missing,'usage_mismatch':usage_mismatch,'bad_binding':bad_binding,
