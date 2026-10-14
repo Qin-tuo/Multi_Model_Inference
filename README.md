@@ -4,6 +4,8 @@
 
 ## 当前进度
 
+2026-10-14按用户要求调整交付顺序：**长期记忆相关开发、优化和专项验收移到下一阶段**。当前集中完成语音/视觉对话、当前会话上下文、打断、工具提醒、手势与稳定运行。已有Mem0/Qdrant及数据保留；JT-10/11和其他条款中的长期记忆场景标记延期，原始验收门槛保留。具体范围及当前卡点见[阶段调整](02-jetson-multimodel-inference.md#0-当前交付阶段调整2026-10-14)。
+
 项目处于框架接入与功能闭环验证阶段。框架/插件246项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 中文图文能力按[冻结协议](benchmarks/manifests/mmbench-evaluation-v1.json)评测：[MMBench中文清单](benchmarks/manifests/mmbench-cn-v1.json)按图片哈希分成开发、保留、备用各100题，开发组保留372个原始选项轮换。使用固定版本VLMEvalKit的本地匹配组件，通过真实AssistantSession/Pipecat/llama.cpp运行；推理输入不含答案，每个轮换使用独立会话/用户和隔离数据。3B模型已完成全部开发请求：[标准选项顺序正确70/100，全部原始轮换都正确55/100](benchmarks/results/mmbench-cn-development-score.json)，低于预定80%的主筛选目标；执行错误、意外写入及图像引用残留均为0，[图像、原生token计数和状态审计通过](benchmarks/results/mmbench-cn-development-audit.json)。Qwen3.5-4B正在按[同条件比较协议](benchmarks/manifests/mmbench-reader-comparison-v1.json)评测，默认模型清单保持3B，保留和备用组尚未运行。选择题结果只支持模型筛选，自然语言图文问答、真机场景及完整JT-07验收仍待完成；数据、框架及评测环境位于`~/AI_Stack/`。

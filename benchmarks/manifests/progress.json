@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T10:28:29.272440+00:00",
-  "plan": "v1.1 (mature-framework revision of v1.0 scope)",
+  "updated_at": "2026-10-14T10:32:54.995237+00:00",
+  "plan": "v1.2 (long-term memory deferred to the next delivery phase by user request)",
   "overall_status": "RUNNING",
   "tasks": [
     {
@@ -285,7 +285,7 @@
     },
     {
       "task_id": "J4.memory.capacity",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "tools/memory_capacity.py",
         "tools/memory_capacity_seed.py",
@@ -334,7 +334,10 @@
         "benchmarks/results/qdrant-lexical-numbered-feasibility.json"
       ],
       "validation": "Embedded local baseline:1k query79.2ms/write146.1ms P95;10k350.4/906.3ms FAIL200/500ms gates. Native Qdrant1.19.2 exact-search comparison:10k47.5/56.6ms,50k61.6/59.2ms; no errors/owner leaks/unconfirmed writes.10k hit mask unchanged;50k numbered recall94/100 is not independent quality.40 native-server SIGKILLs pass4 phases10each. Authenticated directory/collection/embedding binding is used by public text/voice; real-model smokes pass. Strict owner-scoped entity erasure covers lazy restart and failure recovery. Explicit in-place legacy migration preserves IDs/payloads/versions/sources, checks embeddings and merges deletion intents including descendants/entities; real BGE public-CLI recall/forget and4 migration-process SIGKILL phases1each PASS.147 framework tests PASS, including partial-target abort/resume. Full backup restore, independent memory quality and authenticated full-workload latency remain pending; capacity runs did not sample per-frame vision rates.  Managed int8-window10k mixed-record timing COMPLETE:100query P95=46.970ms,50complete-write P95=342.790ms,long-write P95=349.820ms;zero errors/owner leaks,all writes durable,observed service PIDs/restart counts unchanged. Timing PASS does not prove retrieval quality:numbered recall9/100(long0/50,short9/50). Read-only diagnostics verify all expected bodies;long0/50 andshort38/50 enter native dense60. Adding topic to query yields30/50 and41/50 but is not a production fix.  Actual20-turn voice/live-camera/shared personal10k adapter workload COMPLETE with106query P95=126.799ms and53write P95=459.140ms,all overlapping foreground,zero errors/leaks and all durable. Detection/pose11.64Hz,periodic age P95=173.94/178.13ms. OverallFAIL:recall/time/image first-file-PCM P95=3.091/3.098/5.545s exceed3/5s gates. Only5 turns/type,synthetic input and file output,no acoustic/visual quality claim. Event-loop lag max154.90ms,cause unproven. Separate native local Qdrant BM25/RRF/DBSF feasibility each recalls100/100 unchanged numbered questions,zero owner leaks;not integrated or lifecycle-qualified.",
-      "next_action": "Integrate and qualify native lexical+semantic candidate union with profile-bound indexing and existing Mem0 lifecycle;diagnose measured voice latency/event-loop stalls using stage traces before optimization,then freeze independent/system acceptance."
+      "next_action": "Integrate and qualify native lexical+semantic candidate union with profile-bound indexing and existing Mem0 lifecycle;diagnose measured voice latency/event-loop stalls using stage traces before optimization,then freeze independent/system acceptance.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J6.5",
@@ -362,7 +365,7 @@
     },
     {
       "task_id": "J4.memory.quality",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "benchmarks/corpora/lcvmem-v1.json",
         "deploy/evaluation/README.md",
@@ -393,11 +396,14 @@
         "benchmarks/results/lcvmem-development-windows.json"
       ],
       "validation": "Pinned CLongEval LCvMem358 questions/70 conversations,82 development/200 heldout/76 reserve.20 real-model development questions: earlier source-date/speaker run lexical F1=24.726%; fresh same-format repeat=21.173% with same20/20 retrieval/injection/token counts but8 changed answers, cause not established. Turn-local reference presentation=27.131%, then companion-pronoun speaker fix=27.049%. Source state unchanged20/20; packing comparison same retrieval20/20; final role fix changes1/20 retrieval. Average injected evidence2.65->4.7, reference-text containment10->14 cases. All selected references bind actual IDs/versions/sources;top5 and512-token cap unchanged; maintenance retains full IDs. No errors,unexpected writes or cross-owner evidence.198 framework tests and public save/recall/correct/forget console smoke PASS. Full82 development run COMPLETE:lexical F1=26.329%,normalized exact1/82,reference-text retrieved58/injected57,errors/unexpected writes/cross-owner evidence0;200 heldout untouched. These are lexical/grounding diagnostics,not95% semantic accuracy or full JT-10 acceptance. Current int8-window82 development COMPLETE:lexical F1=26.685%,normalized exact1/82,reference-text retrieved58/visible injected56,errors/unexpected writes/cross-owner evidence0. Small change versus old26.329% does not establish broad quality improvement.",
-      "next_action": "Improve source/time/context retrieval and answer faithfulness on development evidence before freezing any heldout run;200 heldout and76 reserve remain untouched."
+      "next_action": "Improve source/time/context retrieval and answer faithfulness on development evidence before freezing any heldout run;200 heldout and76 reserve remain untouched.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J4.memory.long_records",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "tools/long_memory_probe.py",
         "tools/multivector_memory_probe.py",
@@ -427,11 +433,14 @@
         "benchmarks/results/window-restore-fault-recovery.json"
       ],
       "validation": "Native MaxSim/BGE int8 now integrated into production MemoryAdapter,versioned primary/entity binding,exact original-source windows,and current/legacy snapshot restoration. Single canonical ID/full body/version/journal remains authoritative. Reindex retains lineage,filters existing erasures,verifies all points,blocks partial access and deletes retired indexes;30 real SIGKILLs across3 stages PASS,including no replay after later forget. Public interact saves a3104-byte literal fact and recalls its tail in a new session;public migration/correction/restore retains IDs/versions/owners and does not revive forgotten facts/entities. Dynamic-int8 cross-record batching mismatch was reproduced;record-wise encoding restores strict verification without relaxing tolerance.211 framework tests PASS. New stores default to locked windows profile;old bindings retain legacy until explicit reindex. One full-adapter long write0.356s,not10k/JT-11 qualification. New-profile82 development COMPLETE:F1=26.685%,exact1/82,no errors/unexpected writes/cross-owner evidence;not semantic acceptance. First4 cross-profile restore SIGKILLs PASS,with current versions/new facts/erasure barriers/guest isolation/history and reminder receipts retained;conversation skipped explicitly. Extended cross-profile restore fault run COMPLETE:40 actual SIGKILLs,4 stages10each,all PASS;conversation_tested=false.",
-      "next_action": "Qualify native BM25/fusion integration beyond feasibility,including versioned indexing,exact source windows,forget/correct/backup/restore;retain failed coexistence latency baseline and finish independent quality."
+      "next_action": "Qualify native BM25/fusion integration beyond feasibility,including versioned indexing,exact source windows,forget/correct/backup/restore;retain failed coexistence latency baseline and finish independent quality.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J4.memory.hybrid",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "app/adapters/qdrant_hybrid.py",
         "app/memory_lexical.py",
@@ -470,7 +479,10 @@
         "tools/clone_capacity_fixture.py"
       ],
       "validation": "Native local BM25+DBSF integrated per Mem0 provider instance with owner/namespace/source filters; no global SDK factory replacement or external inference. Schema3 binds retrieval configuration,existing schema1/2 stores remain unchanged until explicit reindex. Canonical writes/corrections/reindex/restore regenerate sparse data;strict dense verification retained.6 native lifecycle/provider tests and217 complete framework tests PASS. Real BGE/llama/publicCLI integration PASS:8long records,canonical ID/body/source windows,save/new-session recall,correction,legacy-backup restoration,forget/entity purge andowner isolation. Successive upgrades support abort/resume and refuse downgrade. Candidate not default.30 actual reindexSIGKILLs(3phases10each) PASS. Managed native-DBSF10k:100query numbered recall100/100(long50/50,short50/50),query P95=62.290ms;50complete writes P95=355.660ms,long-write P95=359.303ms;zero errors/leaks,all durable. Frozen recipe/query indices/write sizes/embedding artifact and observed six model/vision backend identities match earlier dense9/100 run. No competing heavy evaluations during timing,no foreground voice;not independent quality or single-factor optimization.82development COMPLETE:F1=25.966%,visible reference57/82,no errors/writes/leaks. Direct-answer prompt=26.958%,same82/82 evidence. Config wiring andhidden five-item packing cap fixed;220core tests PASS. Top8/512 retrieves reference65but injects57,F1=26.951%;top8/768 same82/82 retrieval injects65,F1=29.585%,no errors/writes/leaks. Not95% semantic correctness. Untraced hybrid5/512+direct-prompt20-turn voice load:106queries161.22ms P95,53writes462.00ms;visual11.49/11.42Hz age175/182ms. Short-file-first-PCMmax-typeP95=2.902s passes3s,butimage5.202s fails5s;overallFAIL. Only5/type,no acoustic/scene-truth qualification. Optional native stage tracer passed frame-clock/privacy/wrapper checks but real voice tracing/observer-overhead qualification not yet run. Hybrid legacy-backup restoration40 actualSIGKILLs PASS;idle model services were restarted withbounded caches during this skip-conversation test after observed memorypressure,so not fullcoexistence. Hybrid8/768 withcache256/64 untraced20turns:110queries153.421ms P95,55writes468.514ms,shortmax-typeP95=3.271s FAIL3s,image4.895s PASS5s;visual gates anddurability/isolation pass. Actual native-stage trace1150events0dropped shows slowmath1339prompt/707evidence tokens,LLM TTFB~1.67s. Main-thread memorygeneration10-17ms doesnot overlapmax136msloopdelay. Diagnostic trace notobserver-overheadorGPUtrace acceptance.",
-      "next_action": "Selective literal arithmetic implemented as opt-in;qualify GC/startup pauses and broad memory/source quality while preserving exact ownership/history. Current natural-language default andformalJT remainunverified."
+      "next_action": "Selective literal arithmetic implemented as opt-in;qualify GC/startup pauses and broad memory/source quality while preserving exact ownership/history. Current natural-language default andformalJT remainunverified.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J6.runtime.prompt_cache",
@@ -489,7 +501,7 @@
     },
     {
       "task_id": "J5.memory.selective_retrieval",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "app/memory_sources.py",
         "app/session.py",
@@ -506,7 +518,10 @@
         "benchmarks/results/voice-gc-pause-diagnostic.json"
       ],
       "validation": "Opt-in complete literal arithmetic skips onlylong-termsearch;modelstillruns,activehistory/refsretained. Personal/unit/variable/date/phone/extra-instruction inputsfallthrough;82existingmemorydevquestions notrouted. Versionread remainsreal/off-eventloop.225corePASS. Samepristinesealedseed,fixed20releases10s,coldmodels:baseline mathP95=3.165s,recall4.262s;candidatev1fails15thimageCAMERA_EPOCH_CHANGED,staleanswerrefused,retained. PassiveGCv2completes20:math1.941s,recall4.348s,time3.130s,image4.826s;overallFAILshort3s. GCgen2=580.123ms overlapsmaxloop573.457ms;cameraepochreset1. Observationmodes differ,no strictsinglefactor gain claim;noGCpolicychange.",
-      "next_action": "Isolate and test startup/static-heap collection policy with explicit cleanup and memory-growth checks;repeat complete workloads without relaxing camera/audio guards. Keep routingopt-in until widerqualification;formalB0-B3/5runs100events/8h notmet."
+      "next_action": "Isolate and test startup/static-heap collection policy with explicit cleanup and memory-growth checks;repeat complete workloads without relaxing camera/audio guards. Keep routingopt-in until widerqualification;formalB0-B3/5runs100events/8h notmet.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J5.runtime.startup_heap",
@@ -558,7 +573,7 @@
     },
     {
       "task_id": "J5.memory.embedding_threads",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "tools/voice_stage_trace.py",
         "benchmarks/results/memory-write-stage.json",
@@ -578,20 +593,26 @@
         "configs/runtime.yaml"
       ],
       "validation": "Long-write stage diagnosis identifies322ms mean encoding within440ms total. Isolated1/2/4thread long encodingP95559/289/165ms,60arrays perpolicy bit-identical. Threadsetting forwarding fixed;227corePASS and invalid values rejected before state creation. Full2/4thread20turnpair verifies actualORToptions andonlyfactorchange:queryP95158.66->140.42ms,write484.26->357.08ms,longwrite492.10->382.89ms;noerrors/leaks/lostwrites,visual11.4-11.6Hz/age<185ms. Both stillFAILshortvoice3s,coldrecall4.232->4.373s. Originalconfig restored afterexperiment,then adopted4 asdevelopment applicationdefault;publicWINDOWSvoice remember/recall PASS. Decoder remainsnone.",
-      "next_action": "Retain4-thread developmentdefault;qualify broader/long-duration resources andformal5-run100-event comparisons. Next improve evidence packing andsource-grounded answers;do not confuse memorywrite improvement withshortvoice/JTcompletion."
+      "next_action": "Retain4-thread developmentdefault;qualify broader/long-duration resources andformal5-run100-event comparisons. Next improve evidence packing andsource-grounded answers;do not confuse memorywrite improvement withshortvoice/JTcompletion.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J4.memory.source_review",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "benchmarks/results/lcvmem-reader-error-diagnostic.json"
       ],
       "validation": "Reviewedall4devcases withzero wordF1 andreported reference presence:2core paraphrases,1reader error withcorrectfirstsource injected,1correctsource droppedby768token packing despite normalizedsubstring matchfromwrongdate/work. Officialscore unchanged;not an independentsemanticaccuracy measurement.",
-      "next_action": "Reduce evidence representation overhead without dropping provenance andcompare complete82dev before heldout;separately qualify reader capability."
+      "next_action": "Reduce evidence representation overhead without dropping provenance andcompare complete82dev before heldout;separately qualify reader capability.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J4.memory.evidence_format",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "app/context_memory.py",
         "tests/test_memory_context.py",
@@ -605,7 +626,10 @@
         "benchmarks/results/evidence-format-decision.json"
       ],
       "validation": "231corePASS. Lossless82-case native-tokenizer replay:18source gains,0source losses,626->644facts,57870->53042tokens. Fullnested/flat82+82actualanswer runs:identicalreader fingerprints/retrieval order,0errors/mutations/leaks,F1 28.9745->30.5796;14up10down58same. Correct musical source nowincluded andanswered,butanother same-source case regresses. Previousnested run withsame evidence/tokencounts had6differentanswers. Default remainsnested_v1;no independentquality/JTclaim.",
-      "next_action": "Keepflat_v2 optional. Evaluate reader/model capacity with preserved baseline,then repeat broader source-faithfulness andquality before defaultpromotion."
+      "next_action": "Keepflat_v2 optional. Evaluate reader/model capacity with preserved baseline,then repeat broader source-faithfulness andquality before defaultpromotion.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "next_long_term_memory",
+      "deferral_reason": "User requested long-term memory tasks move to the next phase on 2026-10-14."
     },
     {
       "task_id": "J0.model.reader_candidate",
@@ -733,12 +757,18 @@
       "evidence": []
     },
     "JT-10": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "DEFERRED",
+      "evidence": [],
+      "status_before_deferral": "NOT_VERIFIED",
+      "delivery_phase": "next_long_term_memory",
+      "reason": "Deferred by user request; no acceptance pass claimed."
     },
     "JT-11": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "DEFERRED",
+      "evidence": [],
+      "status_before_deferral": "NOT_VERIFIED",
+      "delivery_phase": "next_long_term_memory",
+      "reason": "Deferred by user request; no acceptance pass claimed."
     },
     "JT-12": {
       "status": "NOT_VERIFIED",
@@ -804,5 +834,25 @@
     "FullCOCOdeploymentregressionpasses afterpreservingposecoordinates;rawfailed5.69ppbaseline andoldfilterexactcausalcomparison retained. Independentrecordedscenes,imageQA,ASR/TTS/shortQA andJT07stillopen. Nativebagfixture/cancellation checksPASSbutnot realcapture bandwidth orassistant historical-clock replay.",
     "HistoricalassistantimageAPI nowqualifiedonsynthetic640x480MCAPwithactualmodel/memoryandexplicit sourceprovenance;publicinteractionCLI stilllivebydefault. Realrecordedscenes/bandwidth andfullscenereplay remainopen. Concurrentcoretests causedoneof20liveimage requests tofailNO_FRAME_NEAR_QUESTION;failurekeptandquiescent20/20reportedseparately,withouta load-causality claim."
   ],
-  "dependency_root": "/home/nvidia/AI_Stack"
+  "dependency_root": "/home/nvidia/AI_Stack",
+  "delivery_phases": {
+    "active": "voice_vision_tools",
+    "decision_date": "2026-10-14",
+    "authority": "User requested long-term memory tasks move to the next phase.",
+    "current": [
+      "Chinese speech and current-session context",
+      "live vision and image questions",
+      "interruption and AEC",
+      "time/status/notes/reminders",
+      "gesture feedback",
+      "performance, stability, faults and reproducible deployment"
+    ],
+    "next": [
+      "long-term memory quality and temporal/source reasoning",
+      "memory capacity and performance",
+      "memory-specific migration, restoration and concurrency qualification"
+    ],
+    "preservation": "Keep existing Mem0/Qdrant integration, data and all prior evidence. Mixed tasks retain their non-memory work.",
+    "acceptance": "JT-10/11 and memory-specific clauses of other JTs are deferred, not passed. Original thresholds and full product objective retained."
+  }
 }
