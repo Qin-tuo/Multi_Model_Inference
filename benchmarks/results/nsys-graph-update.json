@@ -1,0 +1,139 @@
+{
+  "created_at": "2026-10-14T05:47:19.550876+00:00",
+  "source_sha256": "2c6f36412405b91ae11804809c9fcbe9f914a075631d701b52f6d40c3d5ce0a8",
+  "build_command": [
+    "/usr/local/cuda-13.2/bin/nvcc",
+    "-arch=sm_87",
+    "-O2",
+    "/home/nvidia/Multi_Model_Inference/benchmarks/fixtures/cuda_graph_update.cu",
+    "-o",
+    "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/graph-update"
+  ],
+  "scope": "12 synthetic one-kernel capture/update/launch cycles; collector compatibility only, not full model execution or performance.",
+  "cases": [
+    {
+      "version": "2026.3.1",
+      "granularity": "node",
+      "command": [
+        "/opt/nvidia/nsight-systems/2026.3.1/target-linux-sbsa-armv8/nsys",
+        "profile",
+        "--trace=cuda",
+        "--sample=none",
+        "--cpuctxsw=none",
+        "--cuda-graph-trace=node",
+        "--export=sqlite",
+        "--output=/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-node",
+        "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/graph-update"
+      ],
+      "exit_code": 0,
+      "activity_counts": {
+        "CUPTI_ACTIVITY_KIND_KERNEL": 12
+      },
+      "diagnostics": {
+        "CUDA device 0: Unified Memory trace is not supported by the current driver version or configuration.": 1
+      }
+    },
+    {
+      "version": "2026.3.1",
+      "granularity": "graph",
+      "command": [
+        "/opt/nvidia/nsight-systems/2026.3.1/target-linux-sbsa-armv8/nsys",
+        "profile",
+        "--trace=cuda",
+        "--sample=none",
+        "--cpuctxsw=none",
+        "--cuda-graph-trace=graph",
+        "--export=sqlite",
+        "--output=/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-graph",
+        "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/graph-update"
+      ],
+      "exit_code": 0,
+      "activity_counts": {
+        "CUPTI_ACTIVITY_KIND_GRAPH_TRACE": 12
+      },
+      "diagnostics": {
+        "CUDA device 0: Unified Memory trace is not supported by the current driver version or configuration.": 1
+      }
+    },
+    {
+      "version": "2025.6.3",
+      "granularity": "node",
+      "command": [
+        "/opt/nvidia/nsight-systems/2025.6.3/target-linux-sbsa-armv8/nsys",
+        "profile",
+        "--trace=cuda",
+        "--sample=none",
+        "--cpuctxsw=none",
+        "--cuda-graph-trace=node",
+        "--export=sqlite",
+        "--output=/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2025.6.3-node",
+        "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/graph-update"
+      ],
+      "exit_code": 0,
+      "activity_counts": {
+        "CUPTI_ACTIVITY_KIND_KERNEL": 12
+      },
+      "diagnostics": {
+        "CUDA device 0: Unified Memory trace is not supported by the current driver version or configuration.": 1
+      }
+    }
+  ],
+  "completed_at": "2026-10-14T05:47:27.940349+00:00",
+  "artifacts": [
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2025.6.3-node.log",
+      "sha256": "06e9efb014848d80affb0effafc25ba696923103b46e421704918d7a618928c2",
+      "bytes": 6612
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2025.6.3-node.nsys-rep",
+      "sha256": "85463fdf69cd0065da1a7d67c0006e5b978f0b047602e25addfea6f1af3186b6",
+      "bytes": 90093
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2025.6.3-node.sqlite",
+      "sha256": "60ad01e017196e1bb07d8680b178f04b492d075c2c18b17cecd0def31049733d",
+      "bytes": 360448
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-graph.log",
+      "sha256": "e9fb9fa781a87877d92409ec9fbba7af11322cd9b240bb50c4833d592cb6b5c0",
+      "bytes": 7101
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-graph.nsys-rep",
+      "sha256": "a3c1846d0dc68ae35c8cb6d675d872e506a715bd4b2be061b5842d38f9504efc",
+      "bytes": 94492
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-graph.sqlite",
+      "sha256": "bfc5922d189b1d914dcfa065452558959ae99a66a1027163ca1719280d211d30",
+      "bytes": 389120
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-node.log",
+      "sha256": "1e3a634d44667e01b69083bb114dfa5fa09a15584cb68da7a580a9e89fa31668",
+      "bytes": 7044
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-node.nsys-rep",
+      "sha256": "14a812b93f26d0bc4f531f63add28a097afd3ed31b8f7dc045241aecd3f6e7a1",
+      "bytes": 93950
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/2026.3.1-node.sqlite",
+      "sha256": "28d31d5140d5df8388b100689602ff5f313f25b55f86112501b91e43740a672b",
+      "bytes": 389120
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/cuda_graph_update.cu",
+      "sha256": "2c6f36412405b91ae11804809c9fcbe9f914a075631d701b52f6d40c3d5ce0a8",
+      "bytes": 1592
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/nsys-graph-update-v1/graph-update",
+      "sha256": "fadca36cc57f5ec6f866809e07c0c4ba6295d39d8f5bee3a0c7542c4ebee04c3",
+      "bytes": 1060824
+    }
+  ]
+}

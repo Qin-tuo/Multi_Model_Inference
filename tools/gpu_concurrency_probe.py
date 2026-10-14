@@ -323,8 +323,12 @@ def analyze(path, worker_report):
         processes = {r['globalPid']: r['pid'] for r in connection.execute('SELECT * FROM PROCESSES')}
         pid_names = {member['pid']: name for name, row in worker_report['processes'].items()
                      for member in row.get('members', [])}
-        kernels = [dict(r) for r in connection.execute(
-            'SELECT start,end,deviceId,globalPid FROM CUPTI_ACTIVITY_KIND_KERNEL')]
+        tables = {r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        kernels = []
+        for table, kind in (('CUPTI_ACTIVITY_KIND_KERNEL','kernel'),('CUPTI_ACTIVITY_KIND_GRAPH_TRACE','graph')):
+            if table in tables:
+                kernels.extend(dict(r,kind=kind) for r in connection.execute(
+                    f'SELECT start,end,deviceId,globalPid FROM {table}'))
         for row in kernels:
             row['pid'] = processes.get(row['globalPid'])
             row['component'] = pid_names.get(row['pid'])
@@ -338,13 +342,16 @@ def analyze(path, worker_report):
                 for r in measured if r['component'] == name) for name in COMPONENTS}
             phases.append({'label': window['text'], 'start_ns': start, 'end_ns': end,
                 'duration_ms': (end-start)/1e6,
-                'components': {name: {'kernel_count': sum(r['component'] == name for r in measured),
-                    'kernel_interval_union_ms': sum(b-a for a,b in times)/1e6} for name,times in timelines.items()},
-                'pairwise_kernel_interval_overlap_ms': {a+'+'+b: overlap_ns(timelines[a],timelines[b])/1e6
+                'components': {name: {'kernel_count': sum(r['component'] == name and r['kind']=='kernel' for r in measured),
+                    'graph_count': sum(r['component'] == name and r['kind']=='graph' for r in measured),
+                    'device_activity_interval_union_ms': sum(b-a for a,b in times)/1e6} for name,times in timelines.items()},
+                'pairwise_device_activity_interval_overlap_ms': {a+'+'+b: overlap_ns(timelines[a],timelines[b])/1e6
                     for a,b in [('llama','vision'),('llama','pose'),('vision','pose')]}})
         diagnostics = [dict(r) for r in connection.execute('SELECT * FROM DIAGNOSTIC_EVENT')]
-        return {'kernel_count': len(kernels), 'kernel_pids': sorted({r['pid'] for r in kernels if r['pid'] is not None}),
-            'unmapped_kernel_count': sum(r['component'] is None for r in kernels),
+        return {'kernel_count': sum(r['kind']=='kernel' for r in kernels),
+            'graph_count': sum(r['kind']=='graph' for r in kernels),
+            'device_activity_pids': sorted({r['pid'] for r in kernels if r['pid'] is not None}),
+            'unmapped_device_activity_count': sum(r['component'] is None for r in kernels),
             'device_ids': sorted({r['deviceId'] for r in kernels}), 'phases': phases,
             'diagnostic_messages': dict(Counter(r['text'] for r in diagnostics)),
             'diagnostic_severity_counts': dict(Counter(r['severity'] for r in diagnostics)),
@@ -352,8 +359,9 @@ def analyze(path, worker_report):
                 and r['text'] != 'CUDA device 0: Unified Memory trace is not supported by the current driver version or configuration.')),
             'excluded_error_scope': 'Unsupported Unified Memory tracing is retained in diagnostics; memory-fault metrics were not requested and are not claimed.',
             'trace_method': 'CUPTI software instrumentation; hardware tracing availability is recorded in native diagnostics',
-            'scope': 'CUPTI GPU kernel intervals clipped to NVTX request ranges; unions avoid double-counting concurrent streams.'
-                ' Overlapping kernel lifetimes do not establish simultaneous SM instruction execution (preemption may occur).'
+            'scope': 'CUPTI device intervals clipped to NVTX request ranges; unions avoid double-counting concurrent streams.'
+                ' Whole-graph events include internal gaps and are counted separately from kernels; they are not kernel-active time.'
+                ' Overlapping kernel/graph lifetimes do not establish simultaneous SM instruction execution (preemption may occur).'
                 ' No GPU occupancy, scheduler-residency or slowdown causal claim.'}
 
 
@@ -369,7 +377,8 @@ def controller(args):
     files = inventory()
     args.run_dir.mkdir(parents=True, mode=0o700)
     (args.run_dir / 'probe-source.py').write_bytes(Path(__file__).read_bytes())
-    header = NSYS.parent / 'nvtx/include'
+    nsys = args.nsys.resolve()
+    header = nsys.parent / 'nvtx/include'
     source = args.run_dir / 'ranges.c'
     source.write_text('#include <nvtx3/nvToolsExt.h>\n'
         'void range_push(const char *s) { nvtxRangePushA(s); }\n'
@@ -379,15 +388,17 @@ def controller(args):
     report = {'created_at': stamp(), 'status': 'RUNNING', 'scope': __doc__,
         'source_commit': subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
         'source_fingerprints': fingerprints(), 'verified_models_engines': files,
-        'profiler_version': subprocess.check_output([str(NSYS),'--version'], text=True).strip(),
+        'profiler_version': subprocess.check_output([str(nsys),'--version'], text=True).strip(),
+        'profiler_path':str(nsys), 'profiler_binary_sha256':sha256(nsys),
+        'graph_trace_granularity':args.graph_trace,
         'backends_before': before, 'errors': [], 'artifacts': str(args.run_dir.resolve())}
     write_json(args.output, report)
     script = ' && '.join('source ' + shlex.quote(str(p)) for p in (
         Path('/opt/ros/jazzy/setup.bash'), CACHE / 'workspaces/vision/install/setup.bash'))
     script += ' && exec ' + shlex.join(['/usr/bin/python3', str(Path(__file__).resolve()),
         '--worker', '--run-dir', str(args.run_dir.resolve())])
-    command = [str(NSYS), 'profile', '--trace=cuda,nvtx', '--sample=none', '--cpuctxsw=none',
-        '--cuda-graph-trace=node', '--wait=all', '--export=sqlite',
+    command = [str(nsys), 'profile', '--trace=cuda,nvtx', '--sample=none', '--cpuctxsw=none',
+        '--cuda-graph-trace='+args.graph_trace, '--wait=all', '--export=sqlite',
         '--output=' + str(args.run_dir / 'timeline'), '/bin/bash', '-c', script]
     report['command'] = command
     env = os.environ.copy()
@@ -436,8 +447,8 @@ def controller(args):
         checks = {'no_errors': not report['errors'], 'worker_pass': report.get('worker',{}).get('status') == 'PASS',
             'six_traced_requests': len(requests) == 6,
             'each_request_has_three_gpu_models': bool(requests) and all(
-                all(c['kernel_count'] > 0 for c in r['components'].values()) for r in requests),
-            'all_kernels_mapped': report.get('trace',{}).get('unmapped_kernel_count') == 0,
+                all(c['kernel_count']+c['graph_count'] > 0 for c in r['components'].values()) for r in requests),
+            'all_device_activities_mapped': report.get('trace',{}).get('unmapped_device_activity_count') == 0,
             'one_gpu': len(report.get('trace',{}).get('device_ids',[])) == 1,
             'no_kernel_trace_errors': report.get('trace',{}).get('kernel_trace_errors') == {},
             'source_unchanged': fingerprints() == report['source_fingerprints'],
@@ -457,6 +468,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-dir', type=Path, required=True)
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--nsys', type=Path, default=NSYS, help='Explicit installed collector; recorded with version and hash')
+    parser.add_argument('--graph-trace', choices=['node','graph'], default='graph', help='Collector granularity; node mode retains known graph-attribution errors on this host')
     parser.add_argument('--worker', action='store_true', help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not args.worker and args.output is None:
