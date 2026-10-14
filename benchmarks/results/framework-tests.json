@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-14T03:17:46.218800+00:00",
+  "created_at": "2026-10-14T05:07:21.662692+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 231,
+  "tests_run": 236,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -809,6 +809,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_explicit_inventory_and_maintenance_keep_real_memory_lookup",
+      "status": "PASS"
+    },
+    {
       "id": "test_tool_policy.TrustedToolPolicyTests.test_explicit_note_fields_override_a_confused_model_title",
       "status": "PASS"
     },
@@ -817,11 +821,27 @@
       "status": "PASS"
     },
     {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_maintenance_lookup_keeps_followup_cancel_even_with_listing_words",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_memory_topic_does_not_admit_an_inventory_even_if_model_requests_it",
+      "status": "PASS"
+    },
+    {
       "id": "test_tool_policy.TrustedToolPolicyTests.test_negated_or_withdrawn_requests_never_write",
       "status": "PASS"
     },
     {
       "id": "test_tool_policy.TrustedToolPolicyTests.test_no_time_means_no_invented_schedule",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_read_listing_heading_preserves_data_without_claiming_new_write",
+      "status": "PASS"
+    },
+    {
+      "id": "test_tool_policy.TrustedToolPolicyTests.test_successful_explicit_inventory_cannot_loop_in_model_continuation",
       "status": "PASS"
     },
     {
@@ -945,6 +965,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "0f4f02198748c6dfa2afe8578a20bf8388ed7dfd",
+  "source_commit": "3483ce4ddff2462e60794b831301cd0156e0abf8",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

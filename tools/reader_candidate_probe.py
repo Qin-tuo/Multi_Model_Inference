@@ -31,6 +31,10 @@ def main(args):
         raise RuntimeError('Quality run,output andseed source must be supplied together')
     if args.quality_run_dir and (args.quality_run_dir.exists() or args.quality_output.exists()):
         raise RuntimeError('Use new quality paths;preserve earlier answers')
+    if bool(args.worker) != bool(args.worker_report):
+        raise RuntimeError('A candidate worker requires its explicit report path')
+    if args.worker_report and args.worker_report.exists():
+        raise RuntimeError('Preserve earlier worker reports')
     candidate = json.loads(args.manifest.read_text())
     entry = candidate['models']['vlm']
     directory = Path(candidate['artifact_directory'])
@@ -126,6 +130,16 @@ def main(args):
                 with httpx.Client(timeout=5, trust_env=False) as client:
                     response = client.get('http://127.0.0.1:8088/slots'); response.raise_for_status()
                     report['idle_after'] = provider_slots_idle(response.json())
+            if args.worker:
+                report['worker']={'status':'RUNNING','command':args.worker,'report':str(args.worker_report)}
+                write_json(args.output,report)
+                with (args.run_dir/'worker.log').open('w') as log:
+                    subprocess.run(args.worker,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=1800)
+                measured=json.loads(args.worker_report.read_text())
+                report['worker'].update(status=measured['status'],checks=measured.get('checks'))
+                with httpx.Client(timeout=5,trust_env=False) as client:
+                    response=client.get('http://127.0.0.1:8088/slots');response.raise_for_status()
+                    report['idle_after']=provider_slots_idle(response.json())
             report['resources'] = monitor.report()
     except Exception as error:
         report['errors'].append({'stage': 'candidate', 'type': type(error).__name__, 'error': str(error)})
@@ -159,6 +173,7 @@ def main(args):
             result = report.get('quality', {})
             checks['quality_completed'] = result.get('status') == 'COMPLETE' and result.get('questions') == 82
             checks['quality_no_errors_or_mutations'] = all(result.get(key) == 0 for key in ('errors','mutations','owner_leaks'))
+        if args.worker:checks['worker_passed']=report.get('worker',{}).get('status')=='PASS'
         report.update(checks=checks,status='PASS' if all(checks.values()) else 'FAIL',completed_at=stamp())
         write_json(args.output, report)
     print(json.dumps({'status': report['status'], 'checks': checks, 'errors': report['errors']}), flush=True)
@@ -174,4 +189,6 @@ if __name__ == '__main__':
     parser.add_argument('--quality-output', type=Path)
     parser.add_argument('--seed-source', type=Path)
     parser.add_argument('--evidence-format', choices=['nested_v1','flat_v2'], default='flat_v2')
+    parser.add_argument('--worker-report',type=Path)
+    parser.add_argument('--worker',nargs=argparse.REMAINDER,help='Explicit local validation command while candidate owns the endpoint')
     raise SystemExit(main(parser.parse_args()))

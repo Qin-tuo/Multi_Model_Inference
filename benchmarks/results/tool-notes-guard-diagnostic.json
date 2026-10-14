@@ -1,0 +1,18 @@
+{
+  "created_at": "2026-10-14T04:46:12.150869+00:00",
+  "status": "DIAGNOSTIC",
+  "case": "T082",
+  "fixed_note_timestamp": "2026-10-14T04:41:16.835787+00:00",
+  "guard_calls": [
+    {
+      "input": "我已经保存了以下笔记：\n- 标题：会议\n- 内容：周四讨论接口\n- 创建时间：2026-10-14T12:41:16.835787+08:00",
+      "output": "明白了。",
+      "lookup": "list_notes",
+      "successful_tools": [
+        "list_notes"
+      ]
+    }
+  ],
+  "returncode": 1,
+  "scope": "Real model/SDK reproduction with a fixed synthetic note timestamp andread-only wrapper aroundthe existing outputguard;not a new fullcorpus run."
+}

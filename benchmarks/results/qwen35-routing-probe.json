@@ -1,0 +1,1037 @@
+{
+  "created_at": "2026-10-14T04:31:16.507414+00:00",
+  "status": "FAIL",
+  "candidate_manifest": "models/candidates/qwen3.5-4b.json",
+  "candidate_manifest_sha256": "868cee23fdeb93b21ad4b6c2dff45434c2e12aa99853f15c46bda633a2856aad",
+  "source_sha256": "b07dd97deb2dad6bc1493c1724ed80c41a37067744abe9401e155d1db8f1f7c0",
+  "request_helper_sha256": "2209cf94fa1e339e317c036a7ec534a5fef7159be80287a9688fef288168e1b7",
+  "active_manifest_sha256": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+  "runtime_sha256": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+  "verified_files": [
+    {
+      "path": "/home/nvidia/AI_Stack/models/qwen3.5-4b-candidate/Qwen3.5-4B-Q4_K_M.gguf",
+      "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+      "bytes": 2740937888
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/qwen3.5-4b-candidate/mmproj-Qwen3.5-4B-f16.gguf",
+      "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+      "bytes": 672423616
+    }
+  ],
+  "command": [
+    "/home/nvidia/.cache/multi-model-assistant/build/llama/bin/llama-server",
+    "-lv",
+    "4",
+    "--jinja",
+    "--alias",
+    "assistant-vlm",
+    "-m",
+    "/home/nvidia/AI_Stack/models/qwen3.5-4b-candidate/Qwen3.5-4B-Q4_K_M.gguf",
+    "--mmproj",
+    "/home/nvidia/AI_Stack/models/qwen3.5-4b-candidate/mmproj-Qwen3.5-4B-f16.gguf",
+    "-ngl",
+    "99",
+    "-c",
+    "2048",
+    "-t",
+    "4",
+    "-np",
+    "1",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8088",
+    "--cache-ram",
+    "256",
+    "--chat-template-kwargs",
+    "{\"enable_thinking\":false}"
+  ],
+  "corpus_sha256": "ed9d2ad37082167eb2feb7010122a6113f2b4bc4c0b5a930ebc2f281950bb0e5",
+  "backends_before": {
+    "created_at": "2026-10-14T04:31:16.287371+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "802028",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 802028,
+        "cgroup_pids": [
+          802028,
+          802030
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334,
+          828984
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 54.390611,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "8274",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 8274,
+        "cgroup_pids": [
+          8274,
+          8282,
+          8324
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 81.193326,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "8356",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 8356,
+        "cgroup_pids": [
+          8356,
+          8364,
+          8406
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 72.617128,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/qwen35-routing-regression-v1",
+  "cases": [
+    {
+      "elapsed_ms": 1203.148326,
+      "first_output_ms": 725.606136,
+      "content": "我喜欢喝茉莉花茶。",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 6,
+        "prompt_tokens": 164,
+        "total_tokens": 170,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 164,
+        "prompt_ms": 716.388,
+        "prompt_per_token_ms": 4.368219512195122,
+        "prompt_per_second": 228.9262243365327,
+        "predicted_n": 6,
+        "predicted_ms": 477.717,
+        "predicted_per_token_ms": 95.54339999999999,
+        "predicted_per_second": 10.466447708580604
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "recall-tea",
+      "kind": "recall",
+      "native_prompt_tokens": 164,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 1273.396251,
+      "first_output_ms": 738.237674,
+      "content": "你的项目现在叫晨曦。",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 7,
+        "prompt_tokens": 181,
+        "total_tokens": 188,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 181,
+        "prompt_ms": 729.459,
+        "prompt_per_token_ms": 4.030160220994475,
+        "prompt_per_second": 248.12909293051428,
+        "predicted_n": 7,
+        "predicted_ms": 534.865,
+        "predicted_per_token_ms": 89.14416666666666,
+        "predicted_per_second": 11.217783926785263
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "recall-update",
+      "kind": "recall",
+      "native_prompt_tokens": 181,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 1601.090261,
+      "first_output_ms": 689.164676,
+      "content": "用户原话：我计划周六去杭州。",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 159,
+        "total_tokens": 170,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 159,
+        "prompt_ms": 684.249,
+        "prompt_per_token_ms": 4.30345283018868,
+        "prompt_per_second": 232.37154895367038,
+        "predicted_n": 11,
+        "predicted_ms": 911.06,
+        "predicted_per_token_ms": 91.106,
+        "predicted_per_second": 10.976225495576582
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "recall-speaker",
+      "kind": "recall",
+      "native_prompt_tokens": 159,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 1395.264474,
+      "first_output_ms": 609.125293,
+      "content": "今天下午整理书架，明天上午浇花。",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 143,
+        "total_tokens": 153,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 143,
+        "prompt_ms": 600.012,
+        "prompt_per_token_ms": 4.195888111888111,
+        "prompt_per_second": 238.3285667619981,
+        "predicted_n": 10,
+        "predicted_ms": 785.519,
+        "predicted_per_token_ms": 87.27988888888889,
+        "predicted_per_second": 11.45739313753073
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "quote-short",
+      "kind": "quote",
+      "native_prompt_tokens": 143,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 2572.620933,
+      "first_output_ms": 588.319988,
+      "content": "每次完成实验后，先保存原始数据，再检查相机和语音服务，最后记录测试时间和结果。",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 24,
+        "prompt_tokens": 157,
+        "total_tokens": 181,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 157,
+        "prompt_ms": 584.484,
+        "prompt_per_token_ms": 3.7228280254777073,
+        "prompt_per_second": 268.6129988160497,
+        "predicted_n": 24,
+        "predicted_ms": 1983.454,
+        "predicted_per_token_ms": 86.2371304347826,
+        "predicted_per_second": 11.595933154991243
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "quote-medium",
+      "kind": "quote",
+      "native_prompt_tokens": 157,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 3901.504093,
+      "first_output_ms": 623.770316,
+      "content": "“这份测试记录只包含合成资料。系统需要准确回答问题，保留事实来源，在无法确定答案时说明原因，并在用户要求停止时及时结束当前操作。”",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 169,
+        "total_tokens": 206,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 169,
+        "prompt_ms": 614.505,
+        "prompt_per_token_ms": 3.6361242603550297,
+        "prompt_per_second": 275.01810400240845,
+        "predicted_n": 37,
+        "predicted_ms": 3277.091,
+        "predicted_per_token_ms": 91.03030555555556,
+        "predicted_per_second": 10.985352558107175
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "quote-long",
+      "kind": "quote",
+      "native_prompt_tokens": 169,
+      "token_count_matches_usage": true,
+      "expected_check": false
+    },
+    {
+      "elapsed_ms": 753.072476,
+      "first_output_ms": 564.394606,
+      "content": "42",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 132,
+        "total_tokens": 135,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 132,
+        "prompt_ms": 555.833,
+        "prompt_per_token_ms": 4.21085606060606,
+        "prompt_per_second": 237.4814017879471,
+        "predicted_n": 3,
+        "predicted_ms": 188.097,
+        "predicted_per_token_ms": 94.0485,
+        "predicted_per_second": 10.632811793914842
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "arithmetic-add",
+      "kind": "arithmetic",
+      "native_prompt_tokens": 132,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 763.533245,
+      "first_output_ms": 558.029829,
+      "content": "72",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 130,
+        "total_tokens": 133,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 130,
+        "prompt_ms": 548.203,
+        "prompt_per_token_ms": 4.216946153846154,
+        "prompt_per_second": 237.1384322960655,
+        "predicted_n": 3,
+        "predicted_ms": 204.808,
+        "predicted_per_token_ms": 102.404,
+        "predicted_per_second": 9.765243545174018
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "arithmetic-multiply",
+      "kind": "arithmetic",
+      "native_prompt_tokens": 130,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 757.458048,
+      "first_output_ms": 548.585804,
+      "content": "63",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 3,
+        "prompt_tokens": 133,
+        "total_tokens": 136,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 133,
+        "prompt_ms": 539.585,
+        "prompt_per_token_ms": 4.05703007518797,
+        "prompt_per_second": 246.4857251406173,
+        "predicted_n": 3,
+        "predicted_ms": 208.195,
+        "predicted_per_token_ms": 104.0975,
+        "predicted_per_second": 9.606378635413915
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "arithmetic-subtract",
+      "kind": "arithmetic",
+      "native_prompt_tokens": 133,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 2159.317327,
+      "first_output_ms": 2063.265129,
+      "content": "红色",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 429,
+        "total_tokens": 431,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 429,
+        "prompt_ms": 2028.718,
+        "prompt_per_token_ms": 4.7289463869463875,
+        "prompt_per_second": 211.46359425016192,
+        "predicted_n": 2,
+        "predicted_ms": 95.412,
+        "predicted_per_token_ms": 95.412,
+        "predicted_per_second": 10.480861946086446
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "image-red",
+      "kind": "image",
+      "native_prompt_tokens": 429,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 2110.373525,
+      "first_output_ms": 2016.516126,
+      "content": "绿色",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 429,
+        "total_tokens": 431,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 429,
+        "prompt_ms": 1855.694,
+        "prompt_per_token_ms": 4.325627039627039,
+        "prompt_per_second": 231.180356244079,
+        "predicted_n": 2,
+        "predicted_ms": 93.073,
+        "predicted_per_token_ms": 93.073,
+        "predicted_per_second": 10.74425450990083
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "image-green",
+      "kind": "image",
+      "native_prompt_tokens": 429,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 2111.50628,
+      "first_output_ms": 2015.186263,
+      "content": "蓝色",
+      "tool_calls": [],
+      "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 429,
+        "total_tokens": 431,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 429,
+        "prompt_ms": 1838.008,
+        "prompt_per_token_ms": 4.284400932400932,
+        "prompt_per_second": 233.40486004413472,
+        "predicted_n": 2,
+        "predicted_ms": 95.772,
+        "predicted_per_token_ms": 95.772,
+        "predicted_per_second": 10.44146514638934
+      },
+      "finish_reason": "stop",
+      "reasoning_characters": 0,
+      "case_id": "image-blue",
+      "kind": "image",
+      "native_prompt_tokens": 429,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 4063.920505,
+      "first_output_ms": 2030.297355,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "add_note",
+          "arguments": {
+            "content": "明天买牛奶和面包。"
+          }
+        }
+      ],
+      "usage": {
+        "completion_tokens": 31,
+        "prompt_tokens": 390,
+        "total_tokens": 421,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 390,
+        "prompt_ms": 1217.375,
+        "prompt_per_token_ms": 3.1214743589743588,
+        "prompt_per_second": 320.3614334120546,
+        "predicted_n": 31,
+        "predicted_ms": 2692.373,
+        "predicted_per_token_ms": 89.74576666666667,
+        "predicted_per_second": 11.14258685553599
+      },
+      "finish_reason": "tool_calls",
+      "reasoning_characters": 0,
+      "case_id": "tool-note",
+      "kind": "tool",
+      "native_prompt_tokens": 390,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    },
+    {
+      "elapsed_ms": 3978.082954,
+      "first_output_ms": 1999.329291,
+      "content": "",
+      "tool_calls": [
+        {
+          "name": "remember",
+          "arguments": {
+            "content": "我喜欢喝茉莉花茶。"
+          }
+        }
+      ],
+      "usage": {
+        "completion_tokens": 30,
+        "prompt_tokens": 387,
+        "total_tokens": 417,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 387,
+        "prompt_ms": 1198.667,
+        "prompt_per_token_ms": 3.097330749354005,
+        "prompt_per_second": 322.8586421416457,
+        "predicted_n": 30,
+        "predicted_ms": 2621.036,
+        "predicted_per_token_ms": 90.38055172413793,
+        "predicted_per_second": 11.064327235490088
+      },
+      "finish_reason": "tool_calls",
+      "reasoning_characters": 0,
+      "case_id": "tool-memory",
+      "kind": "tool",
+      "native_prompt_tokens": 387,
+      "token_count_matches_usage": true,
+      "expected_check": true
+    }
+  ],
+  "errors": [],
+  "scope": "Real locked llama.cpp model/projector load plus14 fixed synthetic text/tool/image requests. Native token-count preflight compared with usage;tools parsed,not executed. Other backends stay resident/live;no foreground speech/memory load or visual rate measurement. Compatibility screening,not independent quality,voice latency or JT acceptance.",
+  "stopped_backend": {
+    "created_at": "2026-10-14T04:31:17.396329+00:00",
+    "components": {
+      "llama": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      }
+    },
+    "backend_status": "STOPPED",
+    "health_checked": false,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "candidate_pid": 829374,
+  "owned_listening_socket": true,
+  "native_properties": {
+    "model_path": "/home/nvidia/AI_Stack/models/qwen3.5-4b-candidate/Qwen3.5-4B-Q4_K_M.gguf",
+    "model_alias": "assistant-vlm",
+    "modalities": {
+      "vision": true,
+      "video": true,
+      "audio": false
+    },
+    "total_slots": 1,
+    "default_generation_settings": {
+      "params": {
+        "seed": 4294967295,
+        "temperature": 0.800000011920929,
+        "dynatemp_range": 0.0,
+        "dynatemp_exponent": 1.0,
+        "top_k": 40,
+        "top_p": 0.949999988079071,
+        "min_p": 0.05000000074505806,
+        "top_n_sigma": -1.0,
+        "xtc_probability": 0.0,
+        "xtc_threshold": 0.10000000149011612,
+        "typical_p": 1.0,
+        "repeat_last_n": 64,
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "dry_multiplier": 0.0,
+        "dry_base": 1.75,
+        "dry_allowed_length": 2,
+        "dry_penalty_last_n": 64,
+        "mirostat": 0,
+        "mirostat_tau": 5.0,
+        "mirostat_eta": 0.10000000149011612,
+        "adaptive_target": -1.0,
+        "adaptive_decay": 0.8999999761581421,
+        "max_tokens": -1,
+        "n_predict": -1,
+        "n_keep": 0,
+        "n_discard": 0,
+        "ignore_eos": false,
+        "stream": false,
+        "n_probs": 0,
+        "min_keep": 0,
+        "chat_format": "Content-only",
+        "reasoning_format": "none",
+        "reasoning_in_content": false,
+        "generation_prompt": "",
+        "samplers": [
+          "penalties",
+          "dry",
+          "top_n_sigma",
+          "top_k",
+          "typ_p",
+          "top_p",
+          "min_p",
+          "xtc",
+          "temperature"
+        ],
+        "speculative.types": "none",
+        "timings_per_token": false,
+        "post_sampling_probs": false,
+        "backend_sampling": false,
+        "lora": []
+      },
+      "n_ctx": 2048
+    },
+    "chat_template_caps": {
+      "supports_object_arguments": true,
+      "supports_parallel_tool_calls": true,
+      "supports_preserve_reasoning": false,
+      "supports_reasoning_effort": false,
+      "supports_string_content": true,
+      "supports_system_role": true,
+      "supports_tool_calls": true,
+      "supports_tools": true,
+      "supports_typed_content": true
+    },
+    "build_info": "b1-08ffba2"
+  },
+  "native_chat_template_sha256": "7f0e529032c25183bcd66c7f238da2d377f43be754a94e2725a58c4e16d2ed67",
+  "idle_after": true,
+  "worker": {
+    "status": "PASS",
+    "command": [
+      "/home/nvidia/Multi_Model_Inference/.venv/bin/python",
+      "tools/memory_topic_probe.py",
+      "--source-run",
+      "/home/nvidia/AI_Stack/runtime-data/benchmarks/lcvmem-development-hybrid-top8-768-v1",
+      "--case-id",
+      "f33947a8-1582-4a40-8d06-c38bce7c72d0",
+      "--expected",
+      "记忆宫殿",
+      "--manifest",
+      "models/candidates/qwen3.5-4b.json",
+      "--run-dir",
+      "/home/nvidia/AI_Stack/runtime-data/benchmarks/memory-topic-qwen35-regression-v1",
+      "--output",
+      "benchmarks/results/memory-topic-qwen35-regression.json"
+    ],
+    "report": "benchmarks/results/memory-topic-qwen35-regression.json",
+    "checks": {
+      "two_complete_turns": true,
+      "no_errors": true,
+      "source_unchanged": true,
+      "topic_uses_retrieval": true,
+      "topic_no_inventory": true,
+      "topic_target_answer": true,
+      "inventory_called_once": true
+    }
+  },
+  "resources": {
+    "minimum_available_bytes": 4333830144,
+    "peak_process_rss_bytes": 88907776,
+    "external_pid": 829374,
+    "peak_external_rss_bytes": 5496258560,
+    "sample_count": 780,
+    "period_seconds": 0.1
+  },
+  "candidate_exit_code": 0,
+  "restored_backend": {
+    "created_at": "2026-10-14T04:32:50.987682+00:00",
+    "components": {
+      "llama": {
+        "MainPID": "830894",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 830894,
+        "cgroup_pids": [
+          830894,
+          830898
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "backends_after": {
+    "created_at": "2026-10-14T04:32:58.645782+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "830894",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 830894,
+        "cgroup_pids": [
+          830894,
+          830898
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 56.003599,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "8274",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 8274,
+        "cgroup_pids": [
+          8274,
+          8282,
+          8324
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 73.783524,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "8356",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 8356,
+        "cgroup_pids": [
+          8356,
+          8364,
+          8406
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 85.603817,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "checks": {
+    "all_cases": true,
+    "no_errors": true,
+    "all_expected_checks": false,
+    "native_preflight_matches_usage": true,
+    "nonthinking_output": true,
+    "idle_after": true,
+    "active_manifest_unchanged": true,
+    "runtime_unchanged": true,
+    "backends_ready_after": true,
+    "other_service_main_pids_unchanged": true,
+    "worker_passed": true
+  },
+  "completed_at": "2026-10-14T04:32:58.646615+00:00"
+}

@@ -1,0 +1,47 @@
+{
+  "created_at": "2026-10-14T04:26:31.660760+00:00",
+  "status": "PASS",
+  "checks": {
+    "two_complete_turns": true,
+    "no_errors": true,
+    "source_unchanged": true,
+    "topic_uses_retrieval": true,
+    "topic_no_inventory": true,
+    "topic_target_answer": true,
+    "inventory_called_once": true
+  },
+  "errors": [],
+  "case_id": "f33947a8-1582-4a40-8d06-c38bce7c72d0",
+  "reader_fingerprint": "59b63d7e89c92ab8445d458efacf720bd725c4c17ef1a5f946ace4b64f76d486",
+  "model_manifest_sha256": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+  "source_sha256": "94a25ca08ab6c1cd2bf34236fdeac3fefe9a01703ab909e4f2caed7258c13beb",
+  "turns": [
+    {
+      "kind": "topic",
+      "response_sha256": "3e90becfef084787cb1f9758b1348d7b53f5e9bfc59129d4c1b439e8d68ebfb5",
+      "tools": [],
+      "prompt_tokens": [
+        1107
+      ],
+      "seconds": 3.7877153500012355
+    },
+    {
+      "kind": "inventory",
+      "response_sha256": "f7bed7e76f1ca06407f1fa3099acf37519ac5db8644033102f1c95d39f17239f",
+      "tools": [
+        {
+          "name": "list_memories",
+          "ok": true,
+          "code": null
+        }
+      ],
+      "prompt_tokens": [
+        1028,
+        1396
+      ],
+      "seconds": 12.906731618000777
+    }
+  ],
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/memory-topic-regression-v1",
+  "scope": "One existing development question plus explicit inventory through real AssistantSession/BGE/nativeLLM andunchanged source store. Target checked only after inference. Raw corpus/answers outside repository. Regression only,not a new full development score orindependent quality/JT acceptance."
+}

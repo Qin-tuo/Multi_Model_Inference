@@ -1,5 +1,5 @@
 """Actual SDK guards and mature temporal parsing, with fixture memory vectors."""
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import tempfile
 import unittest
@@ -9,11 +9,79 @@ from app.memory import Mem0Adapter
 from app.records import Records
 from app.reminders import ReminderService
 from app.temporal import resolve_reminder_time
-from app.tools import ToolTurn, CreateReminderArgs, RememberArgs, CreateNoteArgs, ForgetArgs, CancelReminderArgs
+from app.tools import Args, ToolTurn, CreateReminderArgs, RememberArgs, CreateNoteArgs, ForgetArgs, CancelReminderArgs
 from test_mem0_adapter import actual_sdk
 
 
 class TrustedToolPolicyTests(unittest.IsolatedAsyncioTestCase):
+    async def test_memory_topic_does_not_admit_an_inventory_even_if_model_requests_it(self):
+        for text in ('我在研究关于记忆的心理学理论，特别是什么技巧？',
+                     '短期记忆有哪些特点？','列出提高记忆的方法。',
+                     '我记住了什么英语单词？','请解释“列出我的记忆”是什么意思。'):
+            with self.subTest(text=text):
+                turn=self.turn(text)
+                self.assertIsNone(turn.requested_lookup())
+                self.assertEqual(turn.initial_tool_choice(),'auto')
+                self.assertEqual(turn.schemas(names={'list_memories'}).standard_tools,[])
+                result=await turn.execute('list_memories',Args,{})
+                self.assertEqual(result['code'],'EXPLICIT_REQUEST_REQUIRED')
+
+    async def test_explicit_inventory_and_maintenance_keep_real_memory_lookup(self):
+        self.memory.remember('owner','fact','fixture','合成已保存事实',source_id='source',request_id='source')
+        for text in ('列出我的记忆。','查询已经记住了什么。','你还记住了哪些信息？',
+                     '查看所有已保存的记忆。','我的记忆列表有哪些？','请告诉我你记住了什么。'):
+            with self.subTest(text=text):
+                turn=self.turn(text)
+                self.assertEqual(turn.requested_lookup(),'list_memories')
+                self.assertEqual(turn.initial_tool_choice(),'required')
+                result=await turn.execute('list_memories',Args,{})
+                self.assertTrue(result['ok'])
+                self.assertEqual(result['result']['items'][0]['content'],'合成已保存事实')
+        for text in ('请忘记合成已保存事实。','更正合成已保存事实为新事实。'):
+            result=await self.turn(text).execute('list_memories',Args,{})
+            self.assertTrue(result['ok'])
+
+    async def test_successful_explicit_inventory_cannot_loop_in_model_continuation(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock
+        from pipecat.processors.aggregators.llm_context import LLMContext
+        from pipecat.utils.types import NOT_GIVEN
+        turn=self.turn('列出我的记忆。')
+        schema=turn.schemas()
+        context=LLMContext(messages=[],tools=schema,tool_choice='required')
+        callback=AsyncMock()
+        params=SimpleNamespace(arguments={},context=context,tool_call_id='inventory',result_callback=callback)
+        await schema.standard_tools[0].handler(params)
+        self.assertTrue(turn.calls[0]['outcome']['ok'])
+        self.assertIs(context.tools,NOT_GIVEN)
+        self.assertEqual(context.tool_choice,'auto')
+        callback.assert_awaited_once()
+
+    async def test_read_listing_heading_preserves_data_without_claiming_new_write(self):
+        self.records.create_note('owner',title='会议',body='周四讨论接口',source_id='fixture',request_id='fixture')
+        turn=self.turn('列出已经保存的笔记。')
+        self.assertTrue((await turn.execute('list_notes',Args,{}))['ok'])
+        body='\n- 标题：会议\n- 内容：周四讨论接口'
+        expected='当前笔记：\n1. 会议：周四讨论接口'
+        self.assertEqual(turn.safe_response('我已经保存了以下笔记：'+body),expected)
+        self.assertEqual(turn.safe_response('已保存的笔记如下：'+body),expected)
+        self.assertEqual(turn.safe_response('周四讨论接口。'),expected)
+        self.assertEqual(turn.safe_response('我已经删除了这条笔记。'),expected)
+        self.assertEqual(self.turn('你好').safe_response('我已经保存了以下笔记：'+body),'明白了。')
+
+    async def test_maintenance_lookup_keeps_followup_cancel_even_with_listing_words(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock
+        from pipecat.processors.aggregators.llm_context import LLMContext
+        self.reminders.create('owner','喝水',datetime.now(timezone.utc)+timedelta(days=1),request_id='fixture')
+        turn=self.turn('取消刚才列出的提醒。')
+        self.assertEqual(turn.required_operation(),'cancel_reminder')
+        self.assertEqual(turn.requested_lookup(),'list_reminders')
+        schemas=turn.schemas();context=LLMContext(messages=[],tools=schemas,tool_choice='required')
+        handler=next(s.handler for s in schemas.standard_tools if s.name=='list_reminders')
+        await handler(SimpleNamespace(arguments={},context=context,tool_call_id='lookup',result_callback=AsyncMock()))
+        self.assertIn('cancel_reminder',[s.name for s in context.tools.standard_tools])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)

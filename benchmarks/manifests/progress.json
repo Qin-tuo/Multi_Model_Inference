@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T04:05:35.982075+00:00",
+  "updated_at": "2026-10-14T05:12:45.256783+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -588,10 +588,34 @@
         "benchmarks/results/qwen35-candidate-artifacts.json",
         "benchmarks/results/qwen35-native-probe.json",
         "tools/reader_candidate_probe.py",
-        "benchmarks/manifests/reader-candidate-v1.json"
+        "benchmarks/manifests/reader-candidate-v1.json",
+        "benchmarks/results/qwen35-quality-probe.json",
+        "benchmarks/results/lcvmem-development-qwen35-flat.json",
+        "benchmarks/results/lcvmem-reader-model-comparison.json",
+        "benchmarks/results/qwen35-reader-decision.json"
       ],
-      "validation": "LockedQ4_K_M/F16projector artifacts verified. Nativecandidate loads33/33GPUlayers atctx2048.14text/tool/image requests complete,tokenpreflight==usage,tools parse and0reasoningoutput;13expectedchecks pass,longquote hasextraquotes so originalreportFAIL retained. MinimumMemAvailable4.48GiB,notfullforegroundcoexistence. Native tools~3.9s,not assumedfaster. Mainmanifest/config unchanged,3B restoredafterfirstprobe. Explicitreader-manifest path/hash andnativeendpoint identity checks implemented;10relatedprotocol/launcher testsPASS. Full82candidate evaluation running.",
-      "next_action": "Finishall82questions andcompare source-aware errors,quality andelapsedtimes. Restore3B afterrun;do notpromote fromnative compatibility ormodelcard claims."
+      "validation": "Artifacts verified;native33/33GPUlayers,2Kctx,all14requests completedwith13strictchecks;longquoteextraquotesFAILretained. Full82dev4B F1=31.3466 vs3Bflat30.5796,1error,0mutations/leaks;fullresponse normalizedtargethits58/82both. PerquestionwallP50/P95 4B4.766/9.532s vs3B2.755/5.909s includesapp lifecycle. Reader stillmakes grounding mistakes. Mainmodel remains3B;4B notselected. Identifiedforcedinventory bug fixedseparately afterrun,old error/score retained.",
+      "next_action": "Keep3B baseline;complete broader intent/source-grounding andfullacceptance work. Anyfurther model/sampling proposal needscontrolled evidence,not modelcard orisolated compatibility."
+    },
+    {
+      "task_id": "J3.tools.inventory_intent",
+      "status": "RUNNING",
+      "artifacts": [
+        "app/tool_policy.py",
+        "app/tools.py",
+        "tests/test_tool_policy.py",
+        "tools/memory_topic_probe.py",
+        "benchmarks/results/memory-topic-regression.json",
+        "benchmarks/results/memory-topic-qwen35-regression.json",
+        "benchmarks/results/qwen35-routing-probe.json",
+        "benchmarks/results/tool-quality-memory-routing.json",
+        "benchmarks/results/tool-notes-guard-reproduction.json",
+        "benchmarks/results/tool-notes-guard-diagnostic.json",
+        "benchmarks/results/tool-quality-read-guard.json",
+        "benchmarks/results/tool-quality-authoritative-inventory.json"
+      ],
+      "validation": "Memorytopic/inventory distinction andsingle-query continuation verified onreal3B/4B. Twofull100tool replays each99/100 with0unexpectedmutations/replayfailures retained:noteheading wronglylookedlike newwrite,then title omitted. Finalnote inventory renders actualreturned title/body/display scope(andrequestedcreationtime),not modelguess. Maintenance precursor retainsfollowup operation.236corePASS andfinalfresh100/100actualmodel/SDKtoolsPASS with0unexpectedmutations/replayfailures. Evaluation snapshots nowseparate initialsemanticresults andposttool candidates. No independentquality/physical/JTclaim.",
+      "next_action": "Preserve finaltool regression andbothfailure baselines. Continue fullacceptance audit,independent language quality,voice/backpressure/resource andlong-duration requirements."
     }
   ],
   "acceptance": {
@@ -696,7 +720,8 @@
     "Startupcollect/freeze20turnpairdidnotproveoverallgain;GCownership/cleanupbenchmark-only. Coldstageevidence nowshowsfirstrecallprefill1928ms/TTFB2166ms. LongdurationGC,memory/resources and8hremainunqualified.",
     "Native ngram-simple candidate improves time/quoted-text generation in development but full voice candidate still FAILS cold recall4.098s and memory writeP95514ms. Runtime restored to default none;broader quality, cancellation/recovery,5-run100-event comparisons and8h remain unverified.",
     "4-thread CPU embedding adopted after exact60-array comparisons,full20turn pair andpublicvoice smoke. WriteP95improves484->357ms;fullshortvoice stillFAIL(coldrecall4.373s),longduration/fault/formal5-run100event/8h remainunverified. Normalized reference substring presence canmatch wrong-source text;source-level devreview found genuine omitted evidence andreader errors.",
-    "Flat evidence candidate improves packing andwordF1 inone82-case pair buthas a genuine answer regression;default remainsnested_v1. Reader/model qualification is stillneeded;Qwen3.5-4B is artifact-preparation only,not selected orvalidated. AllformalJT remainNOT_VERIFIED."
+    "Flat evidence remainsoptional after82-case quality gain andonegenuine regression. Qwen3.5-4B artifacts/native/API/full82dev evaluated;31.35F1 vs30.58 andhigherwalltimes do notjustifyreplacement,so3B retained. Oneapp-driven inventory error fixedseparately;historicalscore/error preserved. Full independentquality andallformalJT remainNOT_VERIFIED.",
+    "Latest tool fixes pass236framework checks andfresh100/100synthetic development cases aftertwo99/100failure baselines. This doesnotreplace independenttool corpus,physical reminders/audio,complete natural-language coverage orformal JT acceptance."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

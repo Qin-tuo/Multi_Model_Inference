@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-项目处于框架接入与功能闭环验证阶段。框架/插件231项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
+项目处于框架接入与功能闭环验证阶段。框架/插件236项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
 最新[冷启动阶段分析](benchmarks/results/voice-cold-stage-diagnostic.json)确认首轮记忆问答的主要等待在模型处理提示：1146个输入token，原生提示计算约1.93秒，模型首token约2.17秒；该轮文件首PCM约4.35秒。已用固定版本的`llama-bench`完成[三种微批量、三个输入长度、各五次测量](benchmarks/results/llama-prefill-screening.json)，没有发现值得采用的收益，当前512微批量保持不变。筛选末尾一次姿态就绪探测未取得新样本，原报告保留FAIL；[后续复查](benchmarks/results/llama-prefill-readiness-recheck.json)七个后端全部READY。原生基准不包含图像编码或完整语音链路，也不替代JT验收。
 
@@ -12,7 +12,9 @@
 
 记忆编码现采用 **4个ORT内部线程**，并修复了`memory.embedding_threads`配置未生效的问题。[新一轮2/4线程完整对照](benchmarks/results/embedding-voice-comparison.json)中，写入P95从484降到357ms，查询从159降到140ms，视觉频率/时效通过；编码器60组向量逐元素一致。[公开语音保存与回忆](benchmarks/results/embedding-threads4-public-voice.json)也通过。冷启动记忆问答仍约4.37秒，完整时延和长期验收继续推进。记忆开发集的词级F1及参考答案子串命中不能直接当作语义正确率或正确来源可见率，已有[来源级复核](benchmarks/results/lcvmem-reader-error-diagnostic.json)区分同义表达、证据被预算丢弃和模型漏读。
 
-单来源`flat_v2`格式完成[82题完整对照](benchmarks/results/lcvmem-evidence-format-comparison.json)：同一检索顺序下，18题多保留一条来源，词级F1从28.97到30.58；但也出现具体答案退为泛泛回答的案例，因此[继续作为可选项](benchmarks/results/evidence-format-decision.json)，当前仍用`nested_v1`。下一步在既有llama.cpp框架内评估[Qwen3.5-4B候选](models/candidates/qwen3.5-4b.json)的阅读质量和容量；当前运行模型仍由[主manifest](models/manifest.json)指定为Qwen2.5-VL-3B。
+单来源`flat_v2`格式完成[82题完整对照](benchmarks/results/lcvmem-evidence-format-comparison.json)：同一检索顺序下，18题多保留一条来源，词级F1从28.97到30.58；但也出现具体答案退为泛泛回答的案例，因此[继续作为可选项](benchmarks/results/evidence-format-decision.json)，当前仍用`nested_v1`。[Qwen3.5-4B候选](models/candidates/qwen3.5-4b.json)已完成加载和82题对照：词级F1为31.35，单题墙钟更长且仍有来源理解问题，因此[未选为默认](benchmarks/results/qwen35-reader-decision.json)。当前运行模型仍由[主manifest](models/manifest.json)指定为Qwen2.5-VL-3B。
+
+工具路由已修复“记忆心理学”等普通问题误触记忆清单、查询结果重复积累，以及笔记列表漏标题的问题。3B与4B均通过专项回归；[最新100条工具开发集](benchmarks/results/tool-quality-authoritative-inventory.json)100/100通过，无意外写入或重放新增。此前两轮99/100及输出过滤诊断保留在[评估记录](deploy/evaluation/README.md#记忆主题误判与查询续轮修复)，独立质量和物理验收继续进行。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|

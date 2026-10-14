@@ -31,6 +31,24 @@ def negated(text):
     return "提醒" in plain and bool(re.search(r"不用|不必|无需|不需要|不要|别", prefix))
 
 
+def memory_listing_request(text):
+    """Recognize an inventory request,not discussion of human memory.
+
+    Specific historical/factual questions already use semantic retrieval.
+    Enumeration supplies arbitrary stored IDs and is appropriate only for a
+    requested inventory or as a prerequisite of correction/forgetting.
+    """
+    if withdrawn(text) or negated(text):return False
+    plain=re.sub(r'\s+','',command_text(unquoted(text))).rstrip('。？！?!')
+    inventory=r'(?:(?:我的|你(?:为我)?(?:保存|存储|记住)的|已(?:经)?(?:保存|存储|记住)的|全部|所有|当前|现有))*记忆(?:列表|清单)?'
+    if re.fullmatch(r'(?:查询|查看|列出|展示|显示|读出|回顾)(?:一下)?'+inventory,plain):return True
+    if re.fullmatch(inventory+r'(?:里有什么|有哪些|是什么|包含什么)(?:内容|信息)?(?:吗|呢)?',plain):return True
+    subject=r'(?:(?:查询|查看|告诉我)(?:一下)?)?(?:你)?(?:还|已经|都|曾经)?'
+    remembered=r'(?:记住|记得|保存|存储)(?:了)?(?:什么|哪些)(?:关于我的)?(?:内容|信息|事情|事实)?'
+    if re.fullmatch(subject+remembered+r'(?:吗|呢)?',plain):return True
+    return re.fullmatch(r'我(?:有|还有)哪些(?:已(?:经)?(?:保存|存储|记住)的)?记忆(?:吗|呢)?',plain) is not None
+
+
 def literal_fact(text):
     value = command_text(text)
     if re.fullmatch(r"(?:记住|记下|保存)(?:一下|这条偏好|这条信息|这个事实|这句话|这段话)?[，,:：。\s]*", value): return None

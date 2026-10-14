@@ -191,6 +191,30 @@ class ToolTurn:
         for call in reversed(self.calls):
             if call["tool"] == required and call["outcome"].get("ok"):
                 if message := call["outcome"].get("result", {}).get("user_message"): return message
+                if required == 'list_notes':
+                    result=call['outcome']['result'];items=result.get('items',[])
+                    if not items:return '当前没有已保存的笔记。'
+                    lines=[]
+                    for index,item in enumerate(items,1):
+                        created=''
+                        if re.search(r'时间|日期|何时|什么时候',self.user_text):
+                            created='（创建于'+datetime.fromisoformat(item['created_at']).strftime('%Y年%m月%d日 %H:%M')+'）'
+                        lines.append(f"{index}. {item['title']}{created}：{item['body']}")
+                    return result.get('display_scope','当前笔记')+'：\n'+'\n'.join(lines)
+        inventory = {
+            'list_notes': ('保存|创建|记录', '笔记', '当前已保存的笔记：'),
+            'list_memories': ('记住|保存|记录', '记忆|信息|内容|事实|事情', '当前已保存的记忆：'),
+            'list_reminders': ('设置|创建|保存', '提醒', '当前已设置的提醒：'),
+        }
+        if required in inventory and any(c['tool']==required and c['outcome'].get('ok') for c in self.calls):
+            verbs,nouns,heading=inventory[required]
+            prefix=re.match(r'^(?:(?:好的|好|没问题|收到|明白了)[，,:：。\s]*)?(?:我)?已(?:经)?'
+                +r'(?:'+verbs+r')(?:了)?(?:(?:以下|这些|如下)(?:的)?|的)(?:'+nouns+r')(?:如下)?[：:,，]?',text.strip())
+            if prefix:
+                # A successful read can describe already-saved state. Make
+                # that heading explicit,without claiming a new mutation or
+                # discarding the actual returned listing.
+                return heading+text.strip()[prefix.end():]
         # A model cannot turn a chat statement or a denied command into an
         # apparent mutation. Quoted explanations are not matched by this prefix.
         if re.match(r"^(?:(?:好的|好|没问题|收到|明白了)[，,:：。\s]*)?(?:我)?(?:已(?:经)?(?:记住|保存|删除|清除|取消|设置|创建|更正|更新)|提醒已设置)", text.strip()):
@@ -199,6 +223,9 @@ class ToolTurn:
         return text
 
     def _write_allowed(self, name):
+        if name == 'list_memories':
+            from app.tool_policy import memory_listing_request
+            return memory_listing_request(self.user_text) or self._write_allowed('correct') or self._write_allowed('forget')
         if name not in {"remember", "correct", "forget", "create_note", "create_reminder", "cancel_reminder"}:
             return True
         if withdrawn(self.user_text) or negated(self.user_text): return False
@@ -241,7 +268,8 @@ class ToolTurn:
             return "list_notes"
         if "提醒" in text and re.search(r"查询|查看|列出|哪些|有什么", text):
             return "list_reminders"
-        if re.search(r"记忆|记住", text) and re.search(r"查询|查看|列出|哪些|什么", text):
+        from app.tool_policy import memory_listing_request
+        if memory_listing_request(text):
             return "list_memories"
         if re.search(r"现在几点|现在的?时间|今天.*日期|今天.*星期", text):
             return "get_time"
@@ -398,6 +426,8 @@ class ToolTurn:
             allowed -= {"create_note", "list_notes"}
         if required in related:
             allowed.add(related[required])
+        if not self._write_allowed('list_memories'):
+            allowed.discard('list_memories')
         names = allowed if names is None else allowed.intersection(names)
         definitions=[
             ("get_time","查询真实日期时间，禁止猜测。",Args),
@@ -439,8 +469,9 @@ class ToolTurn:
                                 pending.append(message)
                         params.context.set_messages([messages[0], {"role": "user", "content": "请根据本轮工具真实结果确认刚才的记忆维护操作。"}, *pending])
                     completed_write = result.get("ok") and tool_name in {"remember","correct","forget","create_note","create_reminder","cancel_reminder"}
+                    completed_lookup = result.get('ok') and self.required_operation() == self.requested_lookup() == tool_name
                     params.context.set_tool_choice("auto")
-                    if completed_write or self.clarification_prompt or self._attempts >= 3 or result.get("code")=="TOOL_LIMIT":
+                    if completed_write or completed_lookup or self.clarification_prompt or self._attempts >= 3 or result.get("code")=="TOOL_LIMIT":
                         params.context.set_tools([])
                     elif tool_name in {"list_memories","list_reminders"}:
                         params.context.set_tools(self.schemas())

@@ -1,6 +1,7 @@
 """Source-only preparation then real persistent-storage Chinese memory questions."""
 import argparse
 import asyncio
+import copy
 from contextlib import ExitStack
 import hashlib
 import fcntl
@@ -120,6 +121,14 @@ async def answer(args,run):
                 session=AssistantSession(config,memory,reminders,records,user_id=user,
                     context_tokens=runtime['llama']['context_tokens'],memory_top_k=memory_top_k,memory_context_tokens=memory_tokens,
                     memory_evidence_format=evidence_format)
+                initial_search=[]
+                original_search=memory.search
+                def capture_search(*values,**options):
+                    found=original_search(*values,**options)
+                    if not initial_search and values and values[0]==user and options.get('key') is None:
+                        initial_search.append(copy.deepcopy(found['items']))
+                    return found
+                memory.search=capture_search
                 result={};error=None;started=time.monotonic()
                 try:
                     await session.start()
@@ -127,8 +136,15 @@ async def answer(args,run):
                     result=await session.ask(row['query'],emit=emit,timeout=60)
                 except Exception as failure:
                     error={'type':type(failure).__name__,'message':str(failure)}
-                    if getattr(session,'turn',None):result={'calls':session.turn.calls,'response':''}
-                candidates=list(session.turn.memory_candidates) if getattr(session,'turn',None) else []
+                    if getattr(session,'turn',None):result={'calls':session.turn.calls,'response':'',
+                        'retrieval':dict(session.retrieval),'prompt_tokens':list(session.budget.measurements),
+                        'model_usage':list(session.budget.actual_usage)}
+                finally:
+                    memory.search=original_search
+                # Tool listings can replace turn.memory_candidates. They must
+                # not be mislabeled as the initial semantic retrieval snapshot.
+                candidates=initial_search[0] if initial_search else []
+                post_tool_candidates=list(session.turn.memory_candidates or []) if getattr(session,'turn',None) else []
                 try:await session.close()
                 except Exception as failure:error=error or {'type':type(failure).__name__,'message':str(failure)}
                 after=owner_state(memory,user)
@@ -139,6 +155,8 @@ async def answer(args,run):
                     record=memory.sdk.get(item['memory_id'])
                     if record is not None and record.get('user_id')!=user:cross=True
                 entry={'id':row['id'],'query':row['query'],**result,'error':error,'retrieved':candidates,
+                    'retrieval_snapshot_kind':'initial_semantic_search' if initial_search else 'not_requested',
+                    'post_tool_memory_candidates':post_tool_candidates if post_tool_candidates!=candidates else [],
                     'side_effect':mutation,'cross_owner_evidence':cross,'before':before,'after':after,'seconds':time.monotonic()-started}
                 write_json(output,entry)
             print(json.dumps({'phase':'answer','completed':index,'total':len(run['ids']),'id':row['id'],
