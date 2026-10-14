@@ -35,6 +35,11 @@
       "path": "patches/vision/ort-public-headers.patch",
       "sha256": "7dcdb2681a39b499bbb1de5ee982ad4ebc4fc633effaad3ee033656efbacf982",
       "purpose": "Package split ORT1.28 public headers and permit build-only continuation without reconfiguration"
+    },
+    {
+      "path": "patches/vision/pose-preserve-keypoints.patch",
+      "sha256": "5d4014de497cdd80de3c113b0047c01935cc0dbed01400a60b1bd8d30f2f1b3e",
+      "purpose": "Preserve all17pose coordinates andscores; bboxconfidence/NMS anddownstream gestureconfidence remainunchanged. Addresses measured5.69ppCOCOOKSloss frompublication filtering."
     }
   ],
   "hfhub_vendor": {

@@ -7,6 +7,7 @@ import math
 import os
 from pathlib import Path
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -17,7 +18,7 @@ from tools.project import CACHE,sha256,stamp,write_json
 
 VISION_PY=Path('/home/nvidia/AI_Stack/environments/vision/bin/python')
 EXECUTABLE=Path('/home/nvidia/AI_Stack/builds/vision-eval/vision-eval')
-PROTOCOL=ROOT/'benchmarks/manifests/vision-quality-v1.json'
+PROTOCOL=ROOT/'benchmarks/manifests/vision-quality-v2.json'
 
 
 def reference(args):
@@ -107,10 +108,11 @@ def score(args):
     return 0
 
 
-def hashes():
-    names=['configs/runtime.yaml','models/manifest.json','benchmarks/manifests/vision-quality-v1.json',
+def hashes(protocol=PROTOCOL):
+    names=['configs/runtime.yaml','models/manifest.json',
         'deploy/vision/source-lock.json','deploy/vision/serve.py','deploy/vision/eval/runner.cpp','tools/vision_quality.py']
     result={name:sha256(ROOT/name) for name in names}
+    result[str(protocol.resolve())]=sha256(protocol)
     for relative in ('workspaces/vision/install/yolo_ros/lib/libyolo_ros_core.so',
             'install/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime.so'):
         path=CACHE/relative
@@ -133,6 +135,13 @@ def run(args):
         row=json.loads(line)
         if sha256(Path(data['root'])/'val2017'/row['file_name'])!=row['sha256']:
             raise RuntimeError('Image differs from frozen index')
+    reused=None
+    if args.reference_run:
+        reused=json.loads(args.reference_run.read_text())
+        if (reused['dataset_sha256']!=sha256(args.dataset) or reused['errors']
+                or not reused['checks']['source_unchanged'] or not reused['checks']['both_models_complete']
+                or any(reused['source_hashes'][name]!=sha256(ROOT/name) for name in ('configs/runtime.yaml','models/manifest.json'))):
+            raise RuntimeError('Reference run is incomplete or uses different data/models/runtime')
     before=services.state(list(services.ORDER),health=True)
     if before['backend_status']!='READY':raise RuntimeError('All backends must be ready')
     model=json.loads((ROOT/'models/manifest.json').read_text())['models']
@@ -142,13 +151,18 @@ def run(args):
     args.run_dir.mkdir(parents=True,mode=0o700)
     (args.run_dir/'source.py').write_bytes(Path(__file__).read_bytes())
     (args.run_dir/'runner.cpp').write_bytes((ROOT/'deploy/vision/eval/runner.cpp').read_bytes())
-    report={'created_at':stamp(),'status':'RUNNING','source_hashes':hashes(),
+    report={'created_at':stamp(),'status':'RUNNING','source_hashes':hashes(args.protocol),
         'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         'dataset_manifest':str(args.dataset),'dataset_sha256':sha256(args.dataset),
         'verified_image_hashes':5000,
         'native_binary':str(EXECUTABLE),'native_binary_sha256':sha256(EXECUTABLE),
         'engines_before':engines,'backends_before':before,'results':{},'errors':[],
-        'artifacts':str(args.run_dir.resolve()),'scope':json.loads(PROTOCOL.read_text())['scope']}
+        'artifacts':str(args.run_dir.resolve()),'scope':json.loads(args.protocol.read_text())['scope'],
+        'protocol':str(args.protocol),'protocol_sha256':sha256(args.protocol)}
+    if reused:
+        report['reference_reuse']={'report':str(args.reference_run),'sha256':sha256(args.reference_run),
+            'reason':'Reuse unchanged frozen FP32 predictions after a native publication-only fix; rescore all5000images withsameCOCOeval andprimaryreference.',
+            'original_source_commit':reused['source_commit'],'original_source_hashes':reused['source_hashes']}
     write_json(args.output,report)
     lease=hold_model_lease()
     monitor=MemoryMonitor();monitor.__enter__()
@@ -174,9 +188,18 @@ def run(args):
                 env.update(OMP_NUM_THREADS='2',OPENBLAS_NUM_THREADS='1',HF_HUB_OFFLINE='1')
                 env['LD_LIBRARY_PATH']=str(CACHE/'install/onnxruntime-1.28.0-cuda13-sm87/lib')+':'+env.get('LD_LIBRARY_PATH','')
                 report['current']={'task':task,'backend':backend,'command':command};write_json(args.output,report)
-                with (args.run_dir/(name+'.log')).open('w') as log:
-                    subprocess.run(command,cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,
-                        check=True,timeout=7200,pass_fds=(lease.fileno(),))
+                if backend=='torch' and reused:
+                    old=Path(reused['artifacts'])/(name+'.jsonl')
+                    if sha256(old)!=reused['results'][task]['torch']['prediction_sha256']:
+                        raise RuntimeError('Frozen reference predictions changed')
+                    shutil.copyfile(old,predictions)
+                    report['current']['execution']='reused frozen predictions; no new Torch inference'
+                    report['current']['reference_source']=str(old)
+                    write_json(args.output,report)
+                else:
+                    with (args.run_dir/(name+'.log')).open('w') as log:
+                        subprocess.run(command,cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,
+                            check=True,timeout=7200,pass_fds=(lease.fileno(),))
                 scored=args.run_dir/(name+'-metrics.json')
                 command=[str(VISION_PY),str(Path(__file__).resolve()),'score','--task',task,
                     '--dataset',str(args.dataset.resolve()),'--predictions',str(predictions),'--output',str(scored)]
@@ -203,7 +226,7 @@ def run(args):
                 'drop_percentage_points':reference-candidate,'within_one_percentage_point':reference-candidate<=1.0}
             if task=='pose':comparisons[task]['reference_publication_filtered_AP_percent']=result['torch']['metrics']['keypoints_publication_filter']['AP_percent']
         checks={'no_errors':not report['errors'],'both_models_complete':len(comparisons)==2,
-            'source_unchanged':hashes()==report['source_hashes'],
+            'source_unchanged':hashes(args.protocol)==report['source_hashes'],
             'engines_unchanged':{str(p.resolve()):sha256(p) for p in sorted((CACHE/'models/yolo/ort-trt-fp32').rglob('*.engine'))}==engines,
             'backends_ready':report['backends_after']['backend_status']=='READY',
             'quality_drop_within_one_point':len(comparisons)==2 and all(r['within_one_percentage_point'] for r in comparisons.values())}
@@ -223,5 +246,7 @@ if __name__=='__main__':
     sc=sub.add_parser('score');sc.add_argument('--task',choices=['detection','pose'],required=True)
     sc.add_argument('--dataset',type=Path,required=True);sc.add_argument('--predictions',type=Path,required=True);sc.add_argument('--output',type=Path,required=True)
     full=sub.add_parser('run');full.add_argument('--dataset',type=Path,required=True);full.add_argument('--run-dir',type=Path,required=True);full.add_argument('--output',type=Path,required=True)
+    full.add_argument('--protocol',type=Path,default=PROTOCOL)
+    full.add_argument('--reference-run',type=Path,help='Completed frozen run whose unchanged FP32 predictions can be reused')
     args=parser.parse_args()
     raise SystemExit({'reference':reference,'score':score,'run':run}[args.action](args))
