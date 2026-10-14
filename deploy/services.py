@@ -199,7 +199,9 @@ def probe(component):
     env = os.environ.copy()
     env.update(ROS_DOMAIN_ID=env.get("ASSISTANT_ROS_DOMAIN_ID", "42"), ROS_AUTOMATIC_DISCOVERY_RANGE="LOCALHOST")
     try:
-        result = command(["bash", "-c", script], timeout=8, check=False, env=env)
+        # Include interpreter startup, explicit DDS discovery and the separate
+        # sample window. An observation timeout never proves backend death.
+        result = command(["bash", "-c", script], timeout=12, check=False, env=env)
     except subprocess.TimeoutExpired:
         return {'ready':False,'reason':'ROS_probe_timeout','scope':'Observation timed out; backend termination is not implied'}
     try: return json.loads(result.stdout)

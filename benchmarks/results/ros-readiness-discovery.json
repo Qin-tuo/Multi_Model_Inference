@@ -1,0 +1,46 @@
+{
+  "created_at": "2026-10-14T10:16:22.914508+00:00",
+  "status": "PASS",
+  "checks": {
+    "silent_not_ready": true,
+    "stale_not_ready": true,
+    "fresh_ready": true,
+    "freshness_limit_unchanged": true
+  },
+  "cases": [
+    {
+      "ready": false,
+      "topic": "/pose/d435/detections_3d",
+      "reason": "no_fresh_sample",
+      "matched_publishers": 1,
+      "discovery_wait_ms": 0.025760993594303727,
+      "observation_wait_ms": 503.342951007653,
+      "freshness_limit_ms": 2000,
+      "fixture": "silent"
+    },
+    {
+      "ready": false,
+      "topic": "/pose/d435/detections_3d",
+      "reason": "no_fresh_sample",
+      "matched_publishers": 1,
+      "discovery_wait_ms": 1310.66866000765,
+      "observation_wait_ms": 506.71622999652755,
+      "freshness_limit_ms": 2000,
+      "fixture": "stale"
+    },
+    {
+      "ready": true,
+      "topic": "/pose/d435/detections_3d",
+      "capture_age_ms": 1.337397,
+      "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+      "matched_publishers": 1,
+      "discovery_wait_ms": 1511.093241002527,
+      "observation_wait_ms": 10.375480007496662,
+      "freshness_limit_ms": 2000,
+      "fixture": "fresh"
+    }
+  ],
+  "source_sha256": "649234e7ed7c8c8cdf60098b60699ec703bcfe001d5cc17c44879dd16984b8ba",
+  "health_source_sha256": "dcb16704ef886ffcad8b33ae340465e664c7103f5cce51fe9828f7535dcd606d",
+  "scope": "ActualisolatedROSmatchedpublisher withsilent/stale/freshheaders. Readinessonly,notGPUaccuracy orJT03timing."
+}

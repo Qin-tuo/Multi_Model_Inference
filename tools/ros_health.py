@@ -12,7 +12,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("component", choices=["camera", "vision", "pose"])
     parser.add_argument("--seconds", type=float, default=3)
+    parser.add_argument("--discovery-seconds", type=float, default=5)
     args = parser.parse_args()
+    if not 0<args.seconds<=30 or not 0<=args.discovery_seconds<=30:
+        parser.error('Observation must be positive and bounded; discovery must be0..30seconds')
     if args.component == "camera":
         from sensor_msgs.msg import Image
         topic, message_type = "/camera/camera/color/image_raw", Image
@@ -33,10 +36,21 @@ def main():
                   "scope": "fresh ROS message; not model accuracy or GPU-placement verification"}
     subscription = node.create_subscription(message_type, topic, receive, qos_profile_sensor_data)
     try:
+        started=time.monotonic()
+        discovery_deadline=started+args.discovery_seconds
+        while result is None and subscription.get_publisher_count()==0 and time.monotonic()<discovery_deadline:
+            rclpy.spin_once(node,timeout_sec=.1)
+        discovered=time.monotonic()
+        matched=subscription.get_publisher_count()
         deadline = time.monotonic() + args.seconds
-        while result is None and time.monotonic() < deadline:
+        while result is None and matched>0 and time.monotonic() < deadline:
             rclpy.spin_once(node, timeout_sec=.1)
-        print(json.dumps(result or {"ready": False, "topic": topic, "reason": "no_fresh_sample"}))
+        observation=result or {"ready": False, "topic": topic,
+            "reason": "no_fresh_sample" if matched>0 else "no_matched_publisher"}
+        observation.update(matched_publishers=matched,discovery_wait_ms=(discovered-started)*1000,
+            observation_wait_ms=(time.monotonic()-discovered)*1000,
+            freshness_limit_ms=2000)
+        print(json.dumps(observation))
         return 0 if result else 1
     finally:
         node.destroy_subscription(subscription)
