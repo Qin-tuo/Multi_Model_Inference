@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "purpose": "Synthetic development screening of native prompt-lookup decoding; no real user facts or held-out questions. Expected fields are used only by the evaluator.",
+  "repetitions": 3,
+  "cases": [
+    {"id":"recall-tea","kind":"recall","evidence":"用户原话：我喜欢喝茉莉花茶。助手原话：也可以考虑咖啡。","question":"根据用户原话，我喜欢喝什么？用一句话回答。","expected":"茉莉花茶"},
+    {"id":"recall-update","kind":"recall","evidence":"2026年3月1日用户原话：我的项目叫蓝鲸。2026年3月5日用户原话：项目已改名为晨曦，原名称作废。","question":"我的项目现在叫什么？","expected":"晨曦"},
+    {"id":"recall-speaker","kind":"recall","evidence":"用户原话：我计划周六去杭州。助手原话：也可以周日去苏州。","question":"我自己计划在什么时间去哪里？","expected_all":["周六","杭州"]},
+    {"id":"quote-short","kind":"quote","question":"请只原样复述引号内原话，不添加引号：“今天下午整理书架，明天上午浇花。”","expected":"今天下午整理书架，明天上午浇花。"},
+    {"id":"quote-medium","kind":"quote","question":"请只原样复述引号内原话，不添加引号：“每次完成实验后，先保存原始数据，再检查相机和语音服务，最后记录测试时间和结果。”","expected":"每次完成实验后，先保存原始数据，再检查相机和语音服务，最后记录测试时间和结果。"},
+    {"id":"quote-long","kind":"quote","question":"请只原样复述引号内原话，不添加引号：“这份测试记录只包含合成资料。系统需要准确回答问题，保留事实来源，在无法确定答案时说明原因，并在用户要求停止时及时结束当前操作。”","expected":"这份测试记录只包含合成资料。系统需要准确回答问题，保留事实来源，在无法确定答案时说明原因，并在用户要求停止时及时结束当前操作。"},
+    {"id":"arithmetic-add","kind":"arithmetic","question":"17加25等于多少？只给出阿拉伯数字。","expected":"42"},
+    {"id":"arithmetic-multiply","kind":"arithmetic","question":"9乘8等于多少？只给出阿拉伯数字。","expected":"72"},
+    {"id":"arithmetic-subtract","kind":"arithmetic","question":"100减37等于多少？只给出阿拉伯数字。","expected":"63"},
+    {"id":"image-red","kind":"image","question":"这张图片主要是什么颜色？只说颜色。","rgb":[255,0,0],"expected":"红"},
+    {"id":"image-green","kind":"image","question":"这张图片主要是什么颜色？只说颜色。","rgb":[0,220,0],"expected":"绿"},
+    {"id":"image-blue","kind":"image","question":"这张图片主要是什么颜色？只说颜色。","rgb":[0,0,255],"expected":"蓝"},
+    {"id":"tool-note","kind":"tool","question":"调用add_note，content字段必须是：明天买牛奶和面包。","tool":"add_note","arguments":{"content":"明天买牛奶和面包。"}},
+    {"id":"tool-memory","kind":"tool","question":"调用remember，content字段必须是：我喜欢喝茉莉花茶。","tool":"remember","arguments":{"content":"我喜欢喝茉莉花茶。"}}
+  ]
+}

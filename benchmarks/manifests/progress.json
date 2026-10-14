@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T01:52:03.056227+00:00",
+  "updated_at": "2026-10-14T02:15:56.809281+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -509,7 +509,25 @@
         "benchmarks/results/llama-prefill-readiness-recheck.json"
       ],
       "validation": "Cold20turn alloutputs/noerrors butFAILshort/image latency4.350/5.202s. Firstrecall1146tokens:nativeprefill1928ms,LLMTTFB2166ms,ASR693ms,context367ms,TTSfirstchunk102ms. Pinnednative llama-bench9configurations x5reps:ubatch256/512/1024 at512/1024/1536input tokens;no gainover512 so no parameterchange. Vision11.86/11.89Hz,ageP95174/189ms. Finalposehealth no_fresh_sample preservesFAIL;laterall7READY,otherbackendPIDsunchanged. Isolatedtoken-prefill,noprojector/fullspeech/memoryload orJTacceptance.",
-      "next_action": "Evaluate upstream prompt-lookup speculative decoding with identical synthetic text/tool/image requests and actual draftacceptance. Qualify candidate in real voice/memory/vision onlyif output andlatency justifyit;keep defaults untilthen."
+      "next_action": "Prompt-lookup candidate now measured in full voice/memory/vision:time improves but cold recall4.098s and write514ms still FAIL. Prioritize memory quality and write tail diagnosis;retain default decoding."
+    },
+    {
+      "task_id": "J5.runtime.speculative",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/llama_speculative_probe.py",
+        "tools/speculative_voice_pair.py",
+        "benchmarks/corpora/llama-speculative-v1.json",
+        "benchmarks/results/llama-speculative-screening.json",
+        "benchmarks/results/llama-speculative-diagnostic.json",
+        "tools/project.py",
+        "benchmarks/results/speculative-voice-pair.json",
+        "benchmarks/results/speculative-voice-pair-baseline.json",
+        "benchmarks/results/speculative-voice-pair-ngram_simple.json",
+        "benchmarks/results/speculative-voice-comparison.json"
+      ],
+      "validation": "Native 42 request/output pairs identical;84 expected checks pass,draft432 accepted240. Native report retains FAIL due transient extra speech cgroup PID with unchanged primary PIDs/counters. Full fresh-snapshot pair completed20 turns+196 queries+98 writes each:timeP95 3.224->2.297s,arithmetic2.003->1.746s,recall4.377->4.098s,image4.772->4.840s. Both no errors/leaks/lost writes;vision rates/age pass. Candidate writeP95 514ms exceeds500ms,so both workload reports FAIL and no default promotion. Original config byte-restored,native speculative=false,seven backends READY. Two launcher tests and bounded-parameter checks pass.",
+      "next_action": "Diagnose write tail latency and improve memory answer quality. Keep speculative mode opt-in pending broader quality, cancellation/recovery and long-duration qualification;formal B0-B3/5runs100events/8h remain incomplete."
     }
   ],
   "acceptance": {
@@ -611,7 +629,8 @@
     "Hybrid dev82 remains below semantic acceptance:8/768 lexicalF1=29.585%,visible reference65/82;defaultstillWINDOWS5/512. Real8/768 voice traces nowcompleted butFAILlatency.40cross-profile restoreSIGKILLs passedwithdeclared modelservice intervention. Independentheldoutquality andallJT remainNOT_VERIFIED.",
     "Current8/768 + bounded256/64MiB promptcache stillFAILshortlatency. Arithmetic routingimplementedbutopt-in;currentcoldtrace recall4.350s,image5.202s,LLMprefilllargestfirstrecallstage. Nativeubatch256/512/1024 screeningdidnotimproveruntime;default512 retained. Wholeprocessmemory/8h/physicalaudio remainunqualified.",
     "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED.",
-    "Startupcollect/freeze20turnpairdidnotproveoverallgain;GCownership/cleanupbenchmark-only. Coldstageevidence nowshowsfirstrecallprefill1928ms/TTFB2166ms. LongdurationGC,memory/resources and8hremainunqualified."
+    "Startupcollect/freeze20turnpairdidnotproveoverallgain;GCownership/cleanupbenchmark-only. Coldstageevidence nowshowsfirstrecallprefill1928ms/TTFB2166ms. LongdurationGC,memory/resources and8hremainunqualified.",
+    "Native ngram-simple candidate improves time/quoted-text generation in development but full voice candidate still FAILS cold recall4.098s and memory writeP95514ms. Runtime restored to default none;broader quality, cancellation/recovery,5-run100-event comparisons and8h remain unverified."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

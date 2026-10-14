@@ -310,3 +310,36 @@ python3 tools/project.py bench --suite memory-quality --split development \
 每组5次，逻辑批量2048、4线程、GPU offload99及默认原生warmup，权重相同。[原始报告](../../benchmarks/results/llama-prefill-screening.json)没有显示调整微批量能改善提示处理，因此保留当前512。测试期间检测/姿态为11.86/11.89Hz，最新结果年龄P95为174/189ms，最低可用内存约5.61GiB；该内存数不包含生产VLM图像编码器，不能代表整机完整负载。
 
 结束时姿态的单次就绪探测返回`no_fresh_sample`，报告整体保留FAIL，没有据此重启姿态或覆盖失败。随后[独立复查](../../benchmarks/results/llama-prefill-readiness-recheck.json)七个服务全部READY。除计划中的VLM替换外，其余后端PID保持一致，配置文件没有变化。这是参数筛选，未达到B0–B3、每配置5轮至少100事件或JT门槛。下一候选是原生提示复用式推测解码，须先验证真实文字/工具/图像输出、草稿接受量和耗时，再考虑接入应用；默认推理解码策略未改变。
+
+## 原生提示匹配推测解码候选
+
+`tools/llama_speculative_probe.py`使用固定版本原生`llama-server`，分别冷启动默认解码和`ngram-simple`，匹配长度2、草稿长度4、最少命中1。它复用提示中已有token生成草稿，并由同一个目标模型验证，不加载第二个模型，也不在应用中实现解码器。其他后端继续驻留，两个临时VLM退出后恢复受管理服务。全部请求关闭提示缓存，权重、图像投影、聊天模板、温度0及输出上限相同。
+
+[固定合成输入](../../benchmarks/corpora/llama-speculative-v1.json)共有14题，覆盖来源事实、更正、角色区分、原文引用、算术、3个纯色图像、2种工具JSON；每种模式重复3次。预设答案只进入评估器，工具调用仅解析而不执行。[原始结果](../../benchmarks/results/llama-speculative-screening.json)的42对请求、输出正文、工具名称/参数及结束原因全部一致，84个预设答案检查通过，没有提示缓存命中。原生slot明确报告候选已启用，逐请求timings与原生Prometheus计数都记录草稿432tokens、接受240tokens。
+
+| 请求类别 | 默认总响应P95 | ngram-simple总响应P95 | 每种模式样本数 |
+|---|---:|---:|---:|
+| 来源事实 | 850ms | 627ms | 9 |
+| 原文引用 | 2546ms | 914ms | 9 |
+| 工具JSON | 1945ms | 1283ms | 6 |
+| 算术 | 446ms | 458ms | 9 |
+| 纯色图像 | 2404ms | 2418ms | 9 |
+
+这些是完整原生HTTP响应耗时，不是语音首PCM；算术和图像没有显示收益。结束快照的speech cgroup多出PID663421，使原报告的全进程集合不变检查失败，整体保留FAIL。语音服务原来的两个PID及重启计数不变，之后额外PID已消失，但未捕获其用途，不将其直接认定为某种探测子进程。[诊断汇总](../../benchmarks/results/llama-speculative-diagnostic.json)保留这个限制；本轮没有连续视觉频率测量，也不能代表独立质量、真实工具执行或JT验收。
+
+启动器已提供默认关闭的`llama.speculative`配置。省略该字段或设置`{"type":"none"}`保持原路径；实验候选为`{"type":"ngram-simple","match_tokens":2,"draft_tokens":4,"min_hits":1}`。参数只转发给原生VLM服务，不用于ASR；匹配长度限定1–32，草稿长度和最少命中限定1–16，并拒绝布尔值、未知字段和模式。完整语音对照使用`tools/speculative_voice_pair.py`，新建同种子10k记忆库、冷启动VLM/ASR/TTS，每组20轮固定间隔输入；结束时恢复原配置和服务。候选是否进入默认配置，仍取决于完整负载、质量、取消/恢复和长期稳定性验证。
+
+[完整对照执行记录](../../benchmarks/results/speculative-voice-pair.json)已完成：每组20轮、196次真实记忆查询及98次持久写入，启动回收与被动GC观察相同，没有执行错误、主体泄漏或丢失写入。[比较核验](../../benchmarks/results/speculative-voice-comparison.json)确认输入波形/顺序、初始数量、封存快照、8条/768token检索及10秒间隔相同；按唯一不同的推测解码配置重建的应用指纹与两份报告完全匹配，原生slot分别确认关闭/开启。
+
+| 完整文件语音P95 | 默认 | ngram-simple |
+|---|---:|---:|
+| 记忆问答 | 4.377秒 | 4.098秒 |
+| 时间问答 | 3.224秒 | 2.297秒 |
+| 看图问答 | 4.772秒 | 4.840秒 |
+| 算术问答 | 2.003秒 | 1.746秒 |
+| 记忆查询 | 161.03ms | 155.19ms |
+| 记忆写入 | 496.19ms | 514.23ms |
+
+[默认报告](../../benchmarks/results/speculative-voice-pair-baseline.json)因短问答超过3秒而FAIL；[候选报告](../../benchmarks/results/speculative-voice-pair-ngram_simple.json)同时未满足短问答和写入500ms门槛，保留FAIL。候选时间/算术P95在本轮分别下降约28.8%/12.8%，并未解决冷启动回忆，也没有改善看图。两组检测/姿态约11.5–11.7Hz，年龄P95约174/190ms；事件循环最大延误约150/282ms。这里仅一组配对、每类5个样本，真实时间和相机画面可能变化，不能把百分比当作统计显著性或正式单因素验收。
+
+测试后核对原始配置字节完全恢复，受管理VLM的原生slot回到`speculative=false`，七个后端READY。两项启动器缓存回归及默认/候选参数校验通过；现有227项框架报告没有被这组性能实验覆盖或冒充重新执行。下一步需解释写入尾延迟并改善记忆回答质量；候选仍待更广质量、取消/恢复和长期资源验证，不晋升为默认方案。

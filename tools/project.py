@@ -246,6 +246,30 @@ def prompt_cache_args(settings,component):
     return ['--cache-ram',str(value)]
 
 
+def speculative_args(config):
+    """Opt-in upstream prompt lookup; no extra model or custom decoder."""
+    policy = config.get('speculative', {'type': 'none'})
+    if not isinstance(policy, dict) or set(policy) - {'type', 'match_tokens', 'draft_tokens', 'min_hits'}:
+        raise ValueError('Invalid llama speculative configuration')
+    kind = policy.get('type', 'none')
+    if kind == 'none':
+        if set(policy) - {'type'}:
+            raise ValueError('Disabled speculative decoding cannot have active parameters')
+        return []
+    if kind != 'ngram-simple':
+        raise ValueError('Only none or the experimental ngram-simple candidate is supported')
+    # Keep this single-slot Jetson candidate bounded. The upstream engine
+    # verifies drafts with the target model; this layer only supplies flags.
+    match = policy.get('match_tokens', 2)
+    draft = policy.get('draft_tokens', 4)
+    hits = policy.get('min_hits', 1)
+    if any(type(value) is not int or not 1 <= value <= limit
+           for value, limit in ((match, 32), (draft, 16), (hits, 16))):
+        raise ValueError('Invalid bounded ngram-simple parameters')
+    return ['--spec-type', kind, '--spec-ngram-simple-size-n', str(match),
+            '--spec-ngram-simple-size-m', str(draft), '--spec-ngram-simple-min-hits', str(hits)]
+
+
 def server_command(port=None):
     _, models = manifests()
     model = models["models"]["vlm"]
@@ -261,6 +285,7 @@ def server_command(port=None):
             "-c", str(config["context_tokens"]), "-t", str(config["threads"]),
             "-np", str(config["parallel"]), "--host", "127.0.0.1", "--port", str(port or config["port"])]
     command+=prompt_cache_args(settings,'llama')
+    command+=speculative_args(config)
     if template := model.get("chat_template"):
         path = CACHE / "upstreams/llama.cpp" / template["relative_source_path"]
         if sha256(path) != template["sha256"]: raise RuntimeError("Chat template differs from the model manifest")
