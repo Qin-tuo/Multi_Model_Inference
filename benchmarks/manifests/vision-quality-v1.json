@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "protocol": "public-coco2017-deployment-regression-v1",
+  "declared_before_corpus_inference": true,
+  "dataset": "Complete COCO 2017 validation: 5000 images; instances and person keypoints annotations",
+  "reference": "Locked YOLOv8n and YOLOv8n-pose checkpoints, Ultralytics 8.4.175, PyTorch 2.9.1 CPU FP32",
+  "candidate": "Installed pinned yolo_ros core, existing ORT 1.28 TensorRT FP32/TF32 cache, native preprocessing and published 2D outputs",
+  "input": {"network_shape": [1, 3, 640, 640], "letterbox": true, "rect": false, "batch": 1},
+  "publication": {"confidence": 0.5, "nms_iou": 0.45, "max_detections": 100, "keypoint_confidence": 0.5},
+  "metrics": {
+    "detector": "pycocotools bbox AP@[.50:.95], percent",
+    "pose": "pycocotools keypoints OKS AP@[.50:.95], percent",
+    "primary_reference_keypoints": "Keep all reference coordinates and scores, exposing losses caused by the native publication filter",
+    "secondary_reference_keypoints": "Also report reference with keypoints below0.5 set tozero; diagnostic decomposition only",
+    "maximum_drop_percentage_points": 1.0
+  },
+  "evaluation": "pycocotools2.0.11 standard COCOeval maxDets and IoU/OKS thresholds; same ordered images for all backends",
+  "failure_policy": "No missing images or silent skips; preserve all primary failures. Do not substitute the policy-matched secondary reference to pass the primary threshold.",
+  "service_lifecycle": "Stop managed detector/pose during sequential offline evaluation; other backends stay resident; restore in finally and verify health. Record engine hashes before and after.",
+  "scope": "Public full-corpus deployment regression, not independent recorded scenes, tracking/gesture quality, visual question answering, real-time performance or whole JT-07 acceptance. Pretrained models may already have been evaluated on this public validation corpus."
+}

@@ -6,6 +6,8 @@
 
 项目处于框架接入与功能闭环验证阶段。框架/插件236项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
+视觉质量进入[完整COCO2017公开验证集回归](benchmarks/manifests/vision-quality-v1.json)准备阶段：参考为锁定的PyTorch FP32权重，候选直接调用已安装的yolo_ros原生库和现有TensorRT engine；不另写预处理/NMS。保持640输入、置信度0.5、NMS IoU0.45和100个结果上限，以pycocotools评价bbox/OKS AP。姿态主参考保留全部关键点，另列相同发布过滤后的次要参考，不能用次要口径掩盖质量损失。[单图接线报告](benchmarks/results/vision-quality-plumbing.json)确认完整TensorRT节点执行，但检测框最小IoU为0.9737，未过0.98接线对齐门槛；这一失败保留，继续测完整标注集。公开回归不能替代计划要求的独立真机场次、跟踪/手势或视觉问答验收。
+
 **JT-02多模型竞争专项验收已通过**，见[逐条审计](benchmarks/results/jt02-multimodel-audit.json)。[当前模型/engine清单](benchmarks/results/model-engine-inventory.json)登记7类功能模型（TTS包含Matcha与Vocos）、6个在用TensorRT engine及8个未启用版本；逐项记录路径、SHA256、配置绑定、运行证据及已加载原生库。[同一次原生追踪](benchmarks/results/gpu-concurrency-graph-trace.json)覆盖D435i检测、姿态和6次文本/实时图文请求：188,944条独立kernel记录、177条CUDA Graph整体记录，189,121条设备活动全部关联到成功的启动调用。反向检查中，177次图启动全部有执行记录，6,674次仅捕获调用均位于8个成对捕获区间，没有无法解释的遗漏。
 
 在该次插桩诊断中，检测/姿态启动API返回后的排队P95由视觉阶段的14.34/13.32ms，变为VLM请求阶段的20.69/19.85ms；这是同次追踪的阶段观察，不作为因果收益或性能达标结论。26.74秒采样的检测/姿态约11.67/11.78Hz，最新结果年龄P95为179.87/184.83ms。三模型进程正常退出，七个原服务恢复READY。图整体区间包含内部空隙，不等于kernel活跃时间或SM指令同时执行；物理语音、问答质量、JT-03/04/06/07/08及整机验收仍未完成。
