@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-14T05:07:21.662692+00:00",
+  "created_at": "2026-10-14T09:01:15.953284+00:00",
   "status": "PASS",
   "scope": "framework and plugin contract tests; no model or acoustic quality acceptance",
   "embedding_input": "deterministic fixture; not BGE semantic verification",
   "llm_input": "labelled Pipecat test processor; not real model inference",
   "storage": "real temporary Qdrant and SQLite",
   "scheduler": "real APScheduler",
-  "tests_run": 236,
+  "tests_run": 246,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
@@ -118,6 +118,18 @@
     },
     {
       "id": "test_embedding_windows.EmbeddingWindowTests.test_unicode_source_fully_covered_and_windows_bounded",
+      "status": "PASS"
+    },
+    {
+      "id": "test_gpu_concurrency_probe.GpuConcurrencyProbeTests.test_capture_calls_are_distinct_from_missing_device_events",
+      "status": "PASS"
+    },
+    {
+      "id": "test_gpu_concurrency_probe.GpuConcurrencyProbeTests.test_clips_requests_unions_streams_and_maps_native_processes",
+      "status": "PASS"
+    },
+    {
+      "id": "test_gpu_concurrency_probe.GpuConcurrencyProbeTests.test_reaps_grandchild_when_launcher_exits_on_group_signal",
       "status": "PASS"
     },
     {
@@ -549,6 +561,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_perception.GestureTest.test_preserving_weak_coordinates_keeps_gesture_decisions",
+      "status": "PASS"
+    },
+    {
       "id": "test_perception.GestureTest.test_static_raise_deduplicates_then_neutral_rearms",
       "status": "PASS"
     },
@@ -709,6 +725,22 @@
       "status": "PASS"
     },
     {
+      "id": "test_replay_clock.ReplayClockTests.test_clock_seek_retires_frames_and_invalidates_existing_lease",
+      "status": "PASS"
+    },
+    {
+      "id": "test_replay_clock.ReplayClockTests.test_frozen_sim_clock_cannot_make_late_input_fresh",
+      "status": "PASS"
+    },
+    {
+      "id": "test_replay_clock.ReplayClockTests.test_late_cached_frame_is_unavailable_when_source_clock_stops",
+      "status": "PASS"
+    },
+    {
+      "id": "test_replay_clock.ReplayClockTests.test_simulation_requires_explicit_isolated_domain",
+      "status": "PASS"
+    },
+    {
       "id": "test_service_config.ServiceConfigTests.test_dependencies_and_rejected_component_names",
       "status": "PASS"
     },
@@ -865,6 +897,10 @@
       "status": "PASS"
     },
     {
+      "id": "test_vision_frames.SnapshotPipelineTests.test_pending_request_cannot_select_a_new_camera_epoch",
+      "status": "PASS"
+    },
+    {
       "id": "test_vision_frames.VisionCacheTests.test_age_and_question_skew_are_enforced",
       "status": "PASS"
     },
@@ -906,6 +942,10 @@
     },
     {
       "id": "test_visual_session.VisualSessionTests.test_oversized_multimodal_prompt_releases_image_without_inference",
+      "status": "PASS"
+    },
+    {
+      "id": "test_visual_session.VisualSessionTests.test_recorded_source_is_explicit_in_model_input_and_result",
       "status": "PASS"
     },
     {
@@ -965,6 +1005,6 @@
       "status": "PASS"
     }
   ],
-  "source_commit": "3483ce4ddff2462e60794b831301cd0156e0abf8",
+  "source_commit": "8b8f9ef0056534eac62277e697f01ffc78ba8ec1",
   "source_state": "working tree; see checkpoint commit containing this report"
 }

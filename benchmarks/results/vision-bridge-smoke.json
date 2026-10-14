@@ -1,26 +1,43 @@
 {
-  "created_at": "2026-10-12T15:25:05.954733+00:00",
+  "created_at": "2026-10-14T09:03:34.351274+00:00",
   "status": "PASS",
   "scope": "live RGB-D transport, byte ownership, source-time selection and Pipecat image-request frames; not visual inference, image QA, or JT-03 acceptance",
   "raw_images_saved": false,
-  "requests": 21,
-  "responses": 21,
+  "requests": 20,
+  "responses": 20,
   "errors": [],
   "active": {
     "state": "READY",
-    "epoch": "4c758607db4240dd8bda8ae2c7539837",
-    "frames": 55,
-    "resident_payload_bytes": 84480000,
+    "epoch": "a82d7d93f9b6461dac3c65b89e5f10a0",
+    "source_kind": "live_camera",
+    "frames": 57,
+    "resident_payload_bytes": 87552000,
     "peak_payload_bytes": 89088000,
     "max_payload_bytes": 117440512,
     "leased_frames": 0,
     "counts": {
-      "accepted": 129,
-      "expired": 74
+      "accepted": 128,
+      "expired": 71
     },
-    "last_arrival_age_ms": 11.921604,
+    "last_arrival_age_ms": 16.789887,
     "ros_domain": 42,
     "ros_failure": null,
+    "use_sim_time": false,
+    "clock_progress_age_ms": null,
+    "perception": {
+      "state": "READY",
+      "epoch": "c9ec60785db64cd4ac79c52f3d3512ba",
+      "source_key": "c61f9cd92e9279a4f1bacea6155e21444a96ab0ef4ef063e635d38f9a3bf89b6",
+      "people": [],
+      "person_count": 0,
+      "tracked_state_count": 0,
+      "latest_result_age_ms": 105.135752,
+      "counts": {
+        "reset:publisher_changed": 1,
+        "frames": 59
+      },
+      "scope": "anonymous tracked detections; no identity or ground-truth accuracy claim"
+    },
     "transport_reserve_bytes": 16777216,
     "synchronizer_queue_depth": 3,
     "dds_queue_depth": 2,
@@ -28,53 +45,50 @@
   },
   "final_stream": {
     "state": "READY",
-    "epoch": "38e3792b754a45ddbd614e18816826da",
-    "frames": 7,
-    "resident_payload_bytes": 10752000,
+    "epoch": "a82d7d93f9b6461dac3c65b89e5f10a0",
+    "source_kind": "live_camera",
+    "frames": 57,
+    "resident_payload_bytes": 87552000,
     "peak_payload_bytes": 89088000,
     "max_payload_bytes": 117440512,
     "leased_frames": 0,
     "counts": {
-      "accepted": 136,
-      "expired": 129,
-      "reset:ros_input_epoch": 1
+      "accepted": 128,
+      "expired": 71
     },
-    "last_arrival_age_ms": 14.488202,
+    "last_arrival_age_ms": 16.937989,
     "ros_domain": 42,
     "ros_failure": null,
+    "use_sim_time": false,
+    "clock_progress_age_ms": null,
+    "perception": {
+      "state": "READY",
+      "epoch": "c9ec60785db64cd4ac79c52f3d3512ba",
+      "source_key": "c61f9cd92e9279a4f1bacea6155e21444a96ab0ef4ef063e635d38f9a3bf89b6",
+      "people": [],
+      "person_count": 0,
+      "tracked_state_count": 0,
+      "latest_result_age_ms": 105.199659,
+      "counts": {
+        "reset:publisher_changed": 1,
+        "frames": 59
+      },
+      "scope": "anonymous tracked detections; no identity or ground-truth accuracy claim"
+    },
     "transport_reserve_bytes": 16777216,
     "synchronizer_queue_depth": 3,
     "dds_queue_depth": 2,
     "rgbd_pair_delta_max_ms": 0.0
   },
-  "stale_frame_refused": true,
-  "while_camera_stopped": {
-    "state": "STALE",
-    "epoch": "4c758607db4240dd8bda8ae2c7539837",
-    "frames": 3,
-    "resident_payload_bytes": 4608000,
-    "peak_payload_bytes": 89088000,
-    "max_payload_bytes": 117440512,
-    "leased_frames": 1,
-    "counts": {
-      "accepted": 129,
-      "expired": 126
-    },
-    "last_arrival_age_ms": 1880.562615,
-    "ros_domain": 42,
-    "ros_failure": null,
-    "transport_reserve_bytes": 16777216,
-    "synchronizer_queue_depth": 3,
-    "dds_queue_depth": 2,
-    "rgbd_pair_delta_max_ms": 0.0
-  },
-  "driver_restart_epoch_verified": true,
+  "stale_frame_refused": null,
+  "while_camera_stopped": null,
+  "driver_restart_epoch_verified": null,
   "samples": [
     {
-      "request_id": "a18d433390ea40f5beb7379321cf8cee",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818697678038330",
-      "capture_to_consumer_ms": 69.220246,
-      "question_frame_skew_ms": 67.52548,
+      "request_id": "4940016080d84e1db4587384ac2791eb",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612077761230",
+      "capture_to_consumer_ms": 59.604947,
+      "question_frame_skew_ms": 56.242099,
       "size": [
         640,
         480
@@ -83,10 +97,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "b68c84697dad42b2b3d7c07124b9378c",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818697778109863",
-      "capture_to_consumer_ms": 69.758426,
-      "question_frame_skew_ms": 68.529112,
+      "request_id": "818c7d6a99924293a42c169615c2da1d",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612144476807",
+      "capture_to_consumer_ms": 92.640081,
+      "question_frame_skew_ms": 90.500128,
       "size": [
         640,
         480
@@ -95,10 +109,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "5e56192034ad492eb8ab5c250b8e8105",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818697878181152",
-      "capture_to_consumer_ms": 70.237742,
-      "question_frame_skew_ms": 69.083182,
+      "request_id": "4b702a5636e84eaeacfc7a5fb22bc131",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612277908203",
+      "capture_to_consumer_ms": 59.752481,
+      "question_frame_skew_ms": 57.77215,
       "size": [
         640,
         480
@@ -107,10 +121,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "8764c3f9bdf3474884d8ca384571b4d4",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818697978252686",
-      "capture_to_consumer_ms": 70.48724,
-      "question_frame_skew_ms": 69.51867,
+      "request_id": "77453e130ff943c6b64f54803b95a57b",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612377981445",
+      "capture_to_consumer_ms": 60.4521,
+      "question_frame_skew_ms": 58.31365,
       "size": [
         640,
         480
@@ -119,10 +133,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "1666f188a12446f18b76614d21632222",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698078324219",
-      "capture_to_consumer_ms": 72.319342,
-      "question_frame_skew_ms": 71.217392,
+      "request_id": "46fc2ebb83634d54bb47c05f2e3fb329",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612478054932",
+      "capture_to_consumer_ms": 60.858984,
+      "question_frame_skew_ms": 58.968864,
       "size": [
         640,
         480
@@ -131,10 +145,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "2663023cf7ac4292a43eb3f414672669",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698178395752",
-      "capture_to_consumer_ms": 72.700813,
-      "question_frame_skew_ms": 71.602351,
+      "request_id": "016ea0682946452bb2134c001fd3976d",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612578128418",
+      "capture_to_consumer_ms": 62.223473,
+      "question_frame_skew_ms": 60.354537,
       "size": [
         640,
         480
@@ -143,10 +157,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "1482dbc1cf84454d964484f10c5689bc",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698278467285",
-      "capture_to_consumer_ms": 73.227537,
-      "question_frame_skew_ms": 72.022768,
+      "request_id": "6be1c8c7ba0144bea10135bf946903ca",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612678201904",
+      "capture_to_consumer_ms": 63.689852,
+      "question_frame_skew_ms": 61.730577,
       "size": [
         640,
         480
@@ -155,10 +169,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "db5ce445f7ef400faa8c32605ef59f53",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698378538574",
-      "capture_to_consumer_ms": 76.154408,
-      "question_frame_skew_ms": 72.573319,
+      "request_id": "6f64a3c8ef0a47988356fe07f5308100",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612778275391",
+      "capture_to_consumer_ms": 64.148098,
+      "question_frame_skew_ms": 62.20236,
       "size": [
         640,
         480
@@ -167,10 +181,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "8c131c1dc0984fc1a6eaf51c89d5cb43",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698511967285",
-      "capture_to_consumer_ms": 43.420052,
-      "question_frame_skew_ms": 41.018675,
+      "request_id": "576f4000ae78457f942e5d6aa366631d",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612878348877",
+      "capture_to_consumer_ms": 64.747309,
+      "question_frame_skew_ms": 62.692415,
       "size": [
         640,
         480
@@ -179,10 +193,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "78b4c2216ce84140a36df7d357cfff32",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698578681641",
-      "capture_to_consumer_ms": 77.065289,
-      "question_frame_skew_ms": 76.046861,
+      "request_id": "b579e99940d048c79af5a43b1e7e110d",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968612978422363",
+      "capture_to_consumer_ms": 65.532831,
+      "question_frame_skew_ms": 63.259529,
       "size": [
         640,
         480
@@ -191,10 +205,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "8e56765e4b3e4f8bb510868969849ddb",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698712110352",
-      "capture_to_consumer_ms": 43.889992,
-      "question_frame_skew_ms": 42.964719,
+      "request_id": "28f819de65a14be1a6499d408e55dabe",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613078495850",
+      "capture_to_consumer_ms": 66.090185,
+      "question_frame_skew_ms": 64.02521,
       "size": [
         640,
         480
@@ -203,10 +217,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "336a3909522a494d869dcaedeb8e8f7c",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698812181885",
-      "capture_to_consumer_ms": 45.090717,
-      "question_frame_skew_ms": 44.15274,
+      "request_id": "f5d4b6befe5b4992a3836e3f55d0f7b3",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613178568359",
+      "capture_to_consumer_ms": 66.726854,
+      "question_frame_skew_ms": 64.643543,
       "size": [
         640,
         480
@@ -215,10 +229,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "fd11a44b25eb45ca9d3716072345cea0",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818698912253418",
-      "capture_to_consumer_ms": 46.226288,
-      "question_frame_skew_ms": 45.281111,
+      "request_id": "2bd309da4e85407ba291aef95784119c",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613278641113",
+      "capture_to_consumer_ms": 67.305644,
+      "question_frame_skew_ms": 65.251166,
       "size": [
         640,
         480
@@ -227,10 +241,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "2e8068811ecd4a8e8c53d1c16172d6f8",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699012324951",
-      "capture_to_consumer_ms": 47.399173,
-      "question_frame_skew_ms": 46.484364,
+      "request_id": "2e52fd1c0a754b8eba85aae41a4cea7b",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613378713867",
+      "capture_to_consumer_ms": 68.052698,
+      "question_frame_skew_ms": 65.868358,
       "size": [
         640,
         480
@@ -239,10 +253,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "6a3901842be24024b6dd9767cc030f53",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699112396484",
-      "capture_to_consumer_ms": 48.643676,
-      "question_frame_skew_ms": 47.684002,
+      "request_id": "5d0615ba256a4fe19d37197b743e9037",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613478786621",
+      "capture_to_consumer_ms": 68.644,
+      "question_frame_skew_ms": 66.59653,
       "size": [
         640,
         480
@@ -251,10 +265,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "9b7ae8a404fc4f7d8ee6320f63d94116",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699212467773",
-      "capture_to_consumer_ms": 49.954696,
-      "question_frame_skew_ms": 48.9267,
+      "request_id": "3c9294aab1e94abbaa77bc773f73469c",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613578859375",
+      "capture_to_consumer_ms": 69.278504,
+      "question_frame_skew_ms": 67.162423,
       "size": [
         640,
         480
@@ -263,10 +277,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "429f6d2f145e44ff9db1fa597a03b31c",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699312539307",
-      "capture_to_consumer_ms": 50.216227,
-      "question_frame_skew_ms": 49.213704,
+      "request_id": "2998c5ca08d5466387f94d11ba334d0e",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613678931885",
+      "capture_to_consumer_ms": 69.820033,
+      "question_frame_skew_ms": 67.85007,
       "size": [
         640,
         480
@@ -275,10 +289,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "8c2662dc9d8044e78647ae0847874a28",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699412610840",
-      "capture_to_consumer_ms": 50.429534,
-      "question_frame_skew_ms": 49.473572,
+      "request_id": "a6d64f58aa474e5cab931f3b02e46a75",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613779004639",
+      "capture_to_consumer_ms": 70.147903,
+      "question_frame_skew_ms": 68.288409,
       "size": [
         640,
         480
@@ -287,10 +301,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "d822c896897a401086d19e03c182bd51",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699512682373",
-      "capture_to_consumer_ms": 51.648148,
-      "question_frame_skew_ms": 50.679097,
+      "request_id": "1c0561a0bcda4939bf42a0723f4f9c94",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613879077393",
+      "capture_to_consumer_ms": 72.006839,
+      "question_frame_skew_ms": 69.653469,
       "size": [
         640,
         480
@@ -299,22 +313,10 @@
       "format": "RGB"
     },
     {
-      "request_id": "dd98ddc9b1884742973070b70885e57e",
-      "frame_id": "4c758607db4240dd8bda8ae2c7539837:1791818699612753662",
-      "capture_to_consumer_ms": 52.869086,
-      "question_frame_skew_ms": 51.893667,
-      "size": [
-        640,
-        480
-      ],
-      "bytes": 921600,
-      "format": "RGB"
-    },
-    {
-      "request_id": "95738da60cd14f10be5616805de510bb",
-      "frame_id": "38e3792b754a45ddbd614e18816826da:1791818705698625000",
-      "capture_to_consumer_ms": 55.593762,
-      "question_frame_skew_ms": 54.654728,
+      "request_id": "dcb372d0f3b74eed852c12db7c5cb1de",
+      "frame_id": "a82d7d93f9b6461dac3c65b89e5f10a0:1791968613979149902",
+      "capture_to_consumer_ms": 72.794106,
+      "question_frame_skew_ms": 70.596518,
       "size": [
         640,
         480

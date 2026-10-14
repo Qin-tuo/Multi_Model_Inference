@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T08:01:27.051530+00:00",
+  "updated_at": "2026-10-14T09:03:26.231184+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -652,10 +652,17 @@
         "deploy/vision/bag/player.cpp",
         "deploy/vision/recording.lock.json",
         "benchmarks/results/vision-bag-fixture.json",
-        "benchmarks/results/vision-bag-cancellation.json"
+        "benchmarks/results/vision-bag-cancellation.json",
+        "app/adapters/vision.py",
+        "app/vision_frames.py",
+        "app/vision_snapshot.py",
+        "tools/vision_replay_probe.py",
+        "benchmarks/results/vision-replay-assistant-verified.json",
+        "benchmarks/results/replay-pending-epoch-regression.json",
+        "benchmarks/results/replay-cached-clock-regression.json"
       ],
-      "validation": "NativeMCAP/zstd androsbag2Player fieldroundtripPASS onisolatedsmallsyntheticImage/CameraInfo;actualpublisher matching preventsinitialloss,controllerSIGTERMcleansnativechildren. Allcapturesunannotated;noactualroomimagescaptured.",
-      "next_action": "Independenthuman/scene recording andannotations,real640x480bandwidth/dropvalidation,andassistant simulated-clock replayintegration"
+      "validation": "NativeMCAP/zstd androsbag2Player fieldroundtripPASS onisolatedsmallsyntheticImage/CameraInfo;actualpublisher matching preventsinitialloss,controllerSIGTERMcleansnativechildren. Allcapturesunannotated;noactualroomimagescaptured. Historical640x480fixture nowreachesactualAssistantSession/Pipecat/llama/BGE/Mem0withsource_kind recorded_replayandoriginalstamps;blueanswer andnativeusage PASS. IsolatedexplicitROSsimtime,reliableRGBD,50Hzclock;pause/EOF/seek/restart andclosedbyteownershipPASS. Queuedrequestsbindsourceepoch;clock-unavailablecacheguardprevents lateframeslookingfresh. Full246coretestsPASS.",
+      "next_action": "Expose explicit recorded-scene workflow in public interaction entry; validate realcapture duration/bandwidth andgroupedhumanlabels; then fullS0–S11 timing replay. KeepordinaryCLI/livecamera modeunchanged."
     }
   ],
   "acceptance": {
@@ -775,7 +782,8 @@
     "Latest tool fixes pass236framework checks andfresh100/100synthetic development cases aftertwo99/100failure baselines. This doesnotreplace independenttool corpus,physical reminders/audio,complete natural-language coverage orformal JT acceptance.",
     "Node-granularity GPU trace remains FAIL with720 GraphId/GraphNodeId errors inboth Nsight2026.3.1 and2025.6.3. Graph-granularity capture andfullengine inventory nowqualify JT-02;all189121device records have launch matches andreverse missing records arefullyexplained byCUDAcapture. This doesnot qualifySMresidency,quality,physicalaudio orperformance gates.",
     "FullpublicCOCO2017 regression startedwithfrozenFP32reference andexistingnativeORTTensorRT engines;all5000images hashed,scorewiring rejects omissions. Primarypose reference retainsallcoordinates;publication-matched scoreisdiagnostic only. Runtimecore singlebusdetectorbox IoU0.9737fails0.98alignment. Publicregression doesnot replaceindependent camera recordings/gesture/visualQA orcloseJT-07.",
-    "FullCOCOdeploymentregressionpasses afterpreservingposecoordinates;rawfailed5.69ppbaseline andoldfilterexactcausalcomparison retained. Independentrecordedscenes,imageQA,ASR/TTS/shortQA andJT07stillopen. Nativebagfixture/cancellation checksPASSbutnot realcapture bandwidth orassistant historical-clock replay."
+    "FullCOCOdeploymentregressionpasses afterpreservingposecoordinates;rawfailed5.69ppbaseline andoldfilterexactcausalcomparison retained. Independentrecordedscenes,imageQA,ASR/TTS/shortQA andJT07stillopen. Nativebagfixture/cancellation checksPASSbutnot realcapture bandwidth orassistant historical-clock replay.",
+    "HistoricalassistantimageAPI nowqualifiedonsynthetic640x480MCAPwithactualmodel/memoryandexplicit sourceprovenance;publicinteractionCLI stilllivebydefault. Realrecordedscenes/bandwidth andfullscenereplay remainopen. Concurrentcoretests causedoneof20liveimage requests tofailNO_FRAME_NEAR_QUESTION;failurekeptandquiescent20/20reportedseparately,withouta load-causality claim."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }
