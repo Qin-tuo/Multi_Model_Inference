@@ -360,7 +360,23 @@ python3 tools/project.py bench --suite memory-quality --split development \
 
 [比较报告](../../benchmarks/results/embedding-thread-comparison.json)确认输入、模型、脚本和驻留后端相同，1/4线程的60组float32向量分别与2线程逐元素一致，最大差为0。这是编码器筛选，未包含完整写入、前台语音或连续视觉频率测量；不据此宣称完整负载提速或所有输入的数值等价。
 
-同时修复`memory.embedding_threads`原先未传入初始化代码的问题：`open_memory`现在将它交给Mem0适配器的真实ORT SessionOptions，支持整数1–4，默认2。非法值会在创建持久目录之前拒绝。完整227项框架回归通过。`memory_voice_load.py`记录实际ORT线程数/provider并与配置核对；已有成对语音执行器新增`--factor embedding_threads`，用于相同冷启动、记忆快照和20轮输入下比较2/4线程，再恢复原配置。
+同时修复`memory.embedding_threads`原先未传入初始化代码的问题：`open_memory`现在将它交给Mem0适配器的真实ORT SessionOptions，支持整数1–4；未提供该参数的旧调用回退到2。非法值会在创建持久目录之前拒绝。完整227项框架回归通过。`memory_voice_load.py`记录实际ORT线程数/provider并与配置核对；已有成对语音执行器新增`--factor embedding_threads`，用于相同冷启动、记忆快照和20轮输入下比较2/4线程，再恢复原配置。
+
+[完整2/4线程执行记录](../../benchmarks/results/embedding-voice-pair.json)已完成，两组实际ORT分别为intra2/4、inter1、CPUExecutionProvider。比较脚本按线程配置重建应用指纹，确认其余应用内容、输入波形与顺序、8条/768token检索、10秒间隔和封存种子一致。
+
+| 完整负载P95 | 2线程 | 4线程 |
+|---|---:|---:|
+| 记忆查询 | 158.66ms | 140.42ms |
+| 记忆写入 | 484.26ms | 357.08ms |
+| 其中长记录写入 | 492.10ms | 382.89ms |
+| 记忆问答首文件PCM | 4.232秒 | 4.373秒 |
+| 时间问答首文件PCM | 3.247秒 | 3.153秒 |
+| 看图问答首文件PCM | 4.867秒 | 4.790秒 |
+| 算术问答首文件PCM | 2.016秒 | 1.966秒 |
+
+[默认组](../../benchmarks/results/embedding-voice-pair-baseline.json)194次查询/97次写入，[4线程组](../../benchmarks/results/embedding-voice-pair-threads4.json)196次查询/98次写入；后台持续到语音结束，末尾数量可不同，每组均包含49次长记录写入。两组无执行错误/主体泄漏/丢失写入，检测/姿态频率保持约11.4–11.6Hz，年龄P95低于185ms。候选最长写入仍有506ms，不能声称每次写入都小于500ms；两个总报告仍因短问答3秒门槛失败。单次配对中写入P95下降约26.3%，不替代5轮/100事件、显著性或8h验收。
+
+[比较报告](../../benchmarks/results/embedding-voice-comparison.json)记录原配置及服务已在实验结束时恢复、七个后端READY；随后基于同向量与完整负载结果，将`configs/runtime.yaml`中的应用默认改为4线程。使用当前默认窗口记忆档案的[公开语音入口复测](../../benchmarks/results/embedding-threads4-public-voice.json)完成真实ASR/记忆写入/再次回忆/LLM/TTS到文件，事实实际持久化、输出完整。推测解码继续关闭，长期稳定性与所有JT仍待验证。
 
 ## 词级低分与来源级错误复核
 

@@ -10,6 +10,8 @@
 
 原生`ngram-simple`推测解码已作为默认关闭的配置候选。[两组各20轮语音/记忆/视觉对照](benchmarks/results/speculative-voice-comparison.json)中，时间问答首文件PCM P95从3.224降到2.297秒，算术从2.003降到1.746秒；冷启动记忆问答仍需4.098秒，候选记忆写入P95为514ms，未满足500ms门槛，因此没有切换默认。两组均无执行错误，检测和姿态时效通过；原配置已恢复，七个后端全部就绪。详细范围与失败项见[评估说明](deploy/evaluation/README.md#原生提示匹配推测解码候选)。
 
+记忆编码现采用 **4个ORT内部线程**，并修复了`memory.embedding_threads`配置未生效的问题。[新一轮2/4线程完整对照](benchmarks/results/embedding-voice-comparison.json)中，写入P95从484降到357ms，查询从159降到140ms，视觉频率/时效通过；编码器60组向量逐元素一致。[公开语音保存与回忆](benchmarks/results/embedding-threads4-public-voice.json)也通过。冷启动记忆问答仍约4.37秒，完整时延和长期验收继续推进。记忆开发集的词级F1及参考答案子串命中不能直接当作语义正确率或正确来源可见率，已有[来源级复核](benchmarks/results/lcvmem-reader-error-diagnostic.json)区分同义表达、证据被预算丢弃和模型漏读。
+
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
 | 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机/语音文件会话、记忆与工具通过初测；真实设备、完整打断和质量验证继续推进 |
@@ -135,7 +137,7 @@ source "$HOME/AI_Stack/workspaces/vision/install/setup.bash"
 
 ### 记忆容量测量
 
-入口 `bench --suite memory-capacity` 已实现，其余B0–B3整机负载和完整 `acceptance` 入口仍待完成。使用[冻结合成语料定义](benchmarks/corpora/memory-capacity-v1.json)，在六个后端驻留、真实检测/姿态持续运行、无并发对话时，对每档100次查询和50次明确事实写入计时。BGE为真实CPU ONNX，查询包括embedding、主体过滤、检索及适配器返回；写入包括SDK、history和operation journal确认。默认基准线程配置为OpenBLAS1、OMP2、ORT intra2/inter1，报告记录实际值。
+入口 `bench --suite memory-capacity` 已实现，其余B0–B3整机负载和完整 `acceptance` 入口仍待完成。使用[冻结合成语料定义](benchmarks/corpora/memory-capacity-v1.json)，在六个后端驻留、真实检测/姿态持续运行、无并发对话时，对每档100次查询和50次明确事实写入计时。BGE为真实CPU ONNX，查询包括embedding、主体过滤、检索及适配器返回；写入包括SDK、history和operation journal确认。这一原始容量基准使用OpenBLAS1、OMP2、ORT intra2/inter1；当前应用通过`memory.embedding_threads`采用ORT intra4，历史报告按各自实际配置解读。
 
 | 当前Qdrant local基线 | 查询P95 | 完整写入P95 | 容量时延目标 |
 | --- | --- | --- | --- |

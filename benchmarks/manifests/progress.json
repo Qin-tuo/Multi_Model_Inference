@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T02:49:49.634344+00:00",
+  "updated_at": "2026-10-14T03:01:14.760430+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -542,10 +542,16 @@
         "benchmarks/results/embedding-threads-4.json",
         "benchmarks/results/embedding-thread-comparison.json",
         "app/memory.py",
-        "app/memory_runtime.py"
+        "app/memory_runtime.py",
+        "benchmarks/results/embedding-voice-pair.json",
+        "benchmarks/results/embedding-voice-pair-baseline.json",
+        "benchmarks/results/embedding-voice-pair-threads4.json",
+        "benchmarks/results/embedding-voice-comparison.json",
+        "benchmarks/results/embedding-threads4-public-voice.json",
+        "configs/runtime.yaml"
       ],
-      "validation": "20-turn default-decoder trace:97writes encode once each,long mean440ms with322ms encoding,longP95544ms. Tail also has101ms pre-validation interval andone197ms nativeinsert. Real isolated CPUORT1/2/4-thread encoder longP95559/289/165ms;all60vector arrays bit-identical to2threads,backendidentities unchanged. Runtime embedding_threads forwarding fixed,integer1..4 validated before state creation;227corePASS. Complete2/4thread voice pair running.",
-      "next_action": "Finish full-load2/4thread comparison and check realORToptions,visualrates/age,voice/memory latency and restoration beforechoosing runtime default."
+      "validation": "Long-write stage diagnosis identifies322ms mean encoding within440ms total. Isolated1/2/4thread long encodingP95559/289/165ms,60arrays perpolicy bit-identical. Threadsetting forwarding fixed;227corePASS and invalid values rejected before state creation. Full2/4thread20turnpair verifies actualORToptions andonlyfactorchange:queryP95158.66->140.42ms,write484.26->357.08ms,longwrite492.10->382.89ms;noerrors/leaks/lostwrites,visual11.4-11.6Hz/age<185ms. Both stillFAILshortvoice3s,coldrecall4.232->4.373s. Originalconfig restored afterexperiment,then adopted4 asdevelopment applicationdefault;publicWINDOWSvoice remember/recall PASS. Decoder remainsnone.",
+      "next_action": "Retain4-thread developmentdefault;qualify broader/long-duration resources andformal5-run100-event comparisons. Next improve evidence packing andsource-grounded answers;do not confuse memorywrite improvement withshortvoice/JTcompletion."
     },
     {
       "task_id": "J4.memory.source_review",
@@ -657,7 +663,8 @@
     "Current8/768 + bounded256/64MiB promptcache stillFAILshortlatency. Arithmetic routingimplementedbutopt-in;currentcoldtrace recall4.350s,image5.202s,LLMprefilllargestfirstrecallstage. Nativeubatch256/512/1024 screeningdidnotimproveruntime;default512 retained. Wholeprocessmemory/8h/physicalaudio remainunqualified.",
     "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED.",
     "Startupcollect/freeze20turnpairdidnotproveoverallgain;GCownership/cleanupbenchmark-only. Coldstageevidence nowshowsfirstrecallprefill1928ms/TTFB2166ms. LongdurationGC,memory/resources and8hremainunqualified.",
-    "Native ngram-simple candidate improves time/quoted-text generation in development but full voice candidate still FAILS cold recall4.098s and memory writeP95514ms. Runtime restored to default none;broader quality, cancellation/recovery,5-run100-event comparisons and8h remain unverified."
+    "Native ngram-simple candidate improves time/quoted-text generation in development but full voice candidate still FAILS cold recall4.098s and memory writeP95514ms. Runtime restored to default none;broader quality, cancellation/recovery,5-run100-event comparisons and8h remain unverified.",
+    "4-thread CPU embedding adopted after exact60-array comparisons,full20turn pair andpublicvoice smoke. WriteP95improves484->357ms;fullshortvoice stillFAIL(coldrecall4.373s),longduration/fault/formal5-run100event/8h remainunverified. Normalized reference substring presence canmatch wrong-source text;source-level devreview found genuine omitted evidence andreader errors."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

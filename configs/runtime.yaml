@@ -15,7 +15,7 @@
   "memory": {
     "top_k": 5,
     "context_token_limit": 512,
-    "embedding_threads": 2,
+    "embedding_threads": 4,
     "transcript_retention_days": 7,
     "provider": "mem0",
     "vector_store": "qdrant_server",

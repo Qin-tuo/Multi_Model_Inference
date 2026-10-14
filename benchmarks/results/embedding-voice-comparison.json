@@ -1,0 +1,140 @@
+{
+  "created_at": "2026-10-14T02:55:36.554669+00:00",
+  "status": "DEVELOPMENT_COMPARISON",
+  "source_pair_report": "benchmarks/results/embedding-voice-pair.json",
+  "source_sha256": "f7d28db871a1dd91beba9c8c36f0de17a13770f21220fea32873fcac710c683b",
+  "checks": {
+    "twenty_turns_each": true,
+    "same_input_waves": true,
+    "same_retrieval": true,
+    "same_routing": true,
+    "same_interval": true,
+    "same_seed": true,
+    "only_threads_change_in_reader_fingerprint": true,
+    "actual_ort_options": true,
+    "both_app_unchanged": true,
+    "original_config_restored_at_end": true,
+    "backends_ready": true
+  },
+  "queries": {
+    "baseline": {
+      "count": 194,
+      "errors": 0,
+      "p50_ms": 106.969763,
+      "p95_ms": 158.659051,
+      "max_ms": 234.419089
+    },
+    "threads4": {
+      "count": 196,
+      "errors": 0,
+      "p50_ms": 87.236206,
+      "p95_ms": 140.41731,
+      "max_ms": 216.026517
+    }
+  },
+  "writes": {
+    "baseline": {
+      "count": 97,
+      "errors": 0,
+      "p50_ms": 356.732825,
+      "p95_ms": 484.259996,
+      "max_ms": 737.267965
+    },
+    "threads4": {
+      "count": 98,
+      "errors": 0,
+      "p50_ms": 146.026166,
+      "p95_ms": 357.084809,
+      "max_ms": 506.004537
+    }
+  },
+  "long_writes": {
+    "baseline": {
+      "count": 49,
+      "errors": 0,
+      "p50_ms": 430.562208,
+      "p95_ms": 492.099269,
+      "max_ms": 737.267965
+    },
+    "threads4": {
+      "count": 49,
+      "errors": 0,
+      "p50_ms": 303.81194,
+      "p95_ms": 382.894784,
+      "max_ms": 506.004537
+    }
+  },
+  "voice_latency": {
+    "baseline": {
+      "recall": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 2938.207501,
+        "p95_ms": 4232.334725,
+        "max_ms": 4232.334725
+      },
+      "time": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 2904.7276959999995,
+        "p95_ms": 3246.712446,
+        "max_ms": 3246.712446
+      },
+      "image": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 4192.561049,
+        "p95_ms": 4867.384977999999,
+        "max_ms": 4867.384977999999
+      },
+      "arithmetic": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 1952.562168,
+        "p95_ms": 2016.171418,
+        "max_ms": 2016.171418
+      }
+    },
+    "threads4": {
+      "recall": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 2879.929177,
+        "p95_ms": 4373.16828,
+        "max_ms": 4373.16828
+      },
+      "time": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 2743.239114,
+        "p95_ms": 3153.462156,
+        "max_ms": 3153.462156
+      },
+      "image": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 4107.73385,
+        "p95_ms": 4790.131518,
+        "max_ms": 4790.131518
+      },
+      "arithmetic": {
+        "count": 5,
+        "errors": 0,
+        "p50_ms": 1910.6590680000002,
+        "p95_ms": 1966.315963,
+        "max_ms": 1966.315963
+      }
+    }
+  },
+  "write_p95_observed_reduction_percent": 26.261757743871122,
+  "failed_checks": {
+    "baseline": [
+      "file_short_first_pcm_p95_under3s"
+    ],
+    "threads4": [
+      "file_short_first_pcm_p95_under3s"
+    ]
+  },
+  "decision": "Adopt4threads as development runtime default based on verified vectors,lower writeP95 and maintained visual gates. Keep shortvoice latency failures andformal acceptance open.",
+  "scope": "One matched pair with5voice samples percategory. Background runs untilvoice completes,so tails differ:baseline194queries97writes,candidate196queries98writes. All49longwrites pervariant retained. Liveimage/timeanswers canchange. Not statistical significance,B0-B3,5runs100events or8h acceptance."
+}

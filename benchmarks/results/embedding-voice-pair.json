@@ -1,0 +1,737 @@
+{
+  "created_at": "2026-10-14T02:41:47.295338+00:00",
+  "status": "COMPLETED_COMPARISON",
+  "source_sha256": "ddc4e4d2c777d9a9ab77704b15972036a7a38829fa7d55bd7eefaa1f89f73233",
+  "original_runtime_sha256": "2b63a0e63b42d6dbdecefcdc4252dabafa48e635129d1b03d9f07bbe15ac32e4",
+  "seed_source": "/home/nvidia/AI_Stack/runtime-data/benchmarks/memory-voice-hybrid-8x768-trace-v1",
+  "seed_snapshot_sha256": "9e7e2511c662a2e9628082551bd94e20f4ba587cf84d3491d8162456fd361c69",
+  "variants": {
+    "baseline": {
+      "policy": {
+        "embedding_threads": 2
+      },
+      "folder": "/home/nvidia/AI_Stack/runtime-data/benchmarks/embedding-voice-pair-v1/baseline",
+      "phase": "FINISHED",
+      "stopped": {
+        "created_at": "2026-10-14T02:42:26.804287+00:00",
+        "components": {
+          "llama": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          },
+          "asr": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          },
+          "speech": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          }
+        },
+        "backend_status": "STOPPED",
+        "health_checked": false,
+        "assistant_acceptance": "NOT_VERIFIED",
+        "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+      },
+      "runtime_sha256": "2b63a0e63b42d6dbdecefcdc4252dabafa48e635129d1b03d9f07bbe15ac32e4",
+      "started": {
+        "created_at": "2026-10-14T02:43:17.070793+00:00",
+        "components": {
+          "llama": {
+            "MainPID": "708197",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+            "main_pid": 708197,
+            "cgroup_pids": [
+              708197,
+              708199
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "scope": "local backend readiness",
+              "owned_listening_socket": true
+            }
+          },
+          "asr": {
+            "MainPID": "709038",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+            "main_pid": 709038,
+            "cgroup_pids": [
+              709038,
+              709049
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "scope": "local backend readiness",
+              "owned_listening_socket": true
+            }
+          },
+          "speech": {
+            "MainPID": "709155",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+            "main_pid": 709155,
+            "cgroup_pids": [
+              709155,
+              709161
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "scope": "local backend readiness",
+              "owned_listening_socket": true
+            }
+          }
+        },
+        "backend_status": "READY",
+        "health_checked": true,
+        "assistant_acceptance": "NOT_VERIFIED",
+        "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+      },
+      "native_slots": [
+        {
+          "id": 0,
+          "n_ctx": 2048,
+          "speculative": false,
+          "is_processing": false
+        }
+      ],
+      "command": [
+        "/home/nvidia/Multi_Model_Inference/.venv/bin/python",
+        "/home/nvidia/Multi_Model_Inference/tools/heap_voice_worker.py",
+        "--startup-heap",
+        "collect",
+        "--observe-gc",
+        "--profile",
+        "bge-int8-windows-bm25-v1",
+        "--memory-top-k",
+        "8",
+        "--memory-token-limit",
+        "768",
+        "--skip-literal-arithmetic",
+        "--turn-interval",
+        "10",
+        "--turns",
+        "20",
+        "--run-dir",
+        "/home/nvidia/AI_Stack/runtime-data/benchmarks/embedding-voice-pair-v1/baseline",
+        "--output",
+        "benchmarks/results/embedding-voice-pair-baseline.json"
+      ],
+      "report": "benchmarks/results/embedding-voice-pair-baseline.json",
+      "returncode": 1,
+      "status": "FAIL",
+      "checks": {
+        "workload_completed": true,
+        "minimum_memory_samples": true,
+        "heap_policy_restored": true,
+        "minimum_overlapping_samples": true,
+        "minimum_voice_turns": true,
+        "all_voice_outputs": true,
+        "no_voice_errors": true,
+        "no_query_errors": true,
+        "no_write_errors": true,
+        "no_owner_leaks": true,
+        "durable_writes": true,
+        "query_p95_under200ms": true,
+        "write_p95_under500ms": true,
+        "file_short_first_pcm_p95_under3s": false,
+        "file_image_first_pcm_p95_under5s": true,
+        "visual_rates": true,
+        "visual_age": true,
+        "recall_text_and_audio": true,
+        "app_unchanged": true
+      },
+      "voice_latency": {
+        "recall": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2938.207501,
+          "p95_ms": 4232.334725,
+          "max_ms": 4232.334725
+        },
+        "time": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2904.7276959999995,
+          "p95_ms": 3246.712446,
+          "max_ms": 3246.712446
+        },
+        "image": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 4192.561049,
+          "p95_ms": 4867.384977999999,
+          "max_ms": 4867.384977999999
+        },
+        "arithmetic": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 1952.562168,
+          "p95_ms": 2016.171418,
+          "max_ms": 2016.171418
+        }
+      },
+      "query_summary": {
+        "count": 194,
+        "errors": 0,
+        "p50_ms": 106.969763,
+        "p95_ms": 158.659051,
+        "max_ms": 234.419089
+      },
+      "write_summary": {
+        "count": 97,
+        "errors": 0,
+        "p50_ms": 356.732825,
+        "p95_ms": 484.259996,
+        "max_ms": 737.267965
+      },
+      "reader_fingerprint": "335ed030216b54e02ae200ec9ca3e3d4045e78e5017ec6ea228fd713b771e689",
+      "embedding_runtime": {
+        "intra_op_threads": 2,
+        "inter_op_threads": 1,
+        "providers": [
+          "CPUExecutionProvider"
+        ]
+      }
+    },
+    "threads4": {
+      "policy": {
+        "embedding_threads": 4
+      },
+      "folder": "/home/nvidia/AI_Stack/runtime-data/benchmarks/embedding-voice-pair-v1/threads4",
+      "phase": "FINISHED",
+      "stopped": {
+        "created_at": "2026-10-14T02:47:05.400209+00:00",
+        "components": {
+          "llama": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          },
+          "asr": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          },
+          "speech": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          }
+        },
+        "backend_status": "STOPPED",
+        "health_checked": false,
+        "assistant_acceptance": "NOT_VERIFIED",
+        "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+      },
+      "runtime_sha256": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+      "started": {
+        "created_at": "2026-10-14T02:47:22.219669+00:00",
+        "components": {
+          "llama": {
+            "MainPID": "713514",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+            "main_pid": 713514,
+            "cgroup_pids": [
+              713514,
+              713522
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "scope": "local backend readiness",
+              "owned_listening_socket": true
+            }
+          },
+          "asr": {
+            "MainPID": "713675",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+            "main_pid": 713675,
+            "cgroup_pids": [
+              713675,
+              713677
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "scope": "local backend readiness",
+              "owned_listening_socket": true
+            }
+          },
+          "speech": {
+            "MainPID": "713778",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+            "main_pid": 713778,
+            "cgroup_pids": [
+              713778,
+              713780
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "scope": "local backend readiness",
+              "owned_listening_socket": true
+            }
+          }
+        },
+        "backend_status": "READY",
+        "health_checked": true,
+        "assistant_acceptance": "NOT_VERIFIED",
+        "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+      },
+      "native_slots": [
+        {
+          "id": 0,
+          "n_ctx": 2048,
+          "speculative": false,
+          "is_processing": false
+        }
+      ],
+      "command": [
+        "/home/nvidia/Multi_Model_Inference/.venv/bin/python",
+        "/home/nvidia/Multi_Model_Inference/tools/heap_voice_worker.py",
+        "--startup-heap",
+        "collect",
+        "--observe-gc",
+        "--profile",
+        "bge-int8-windows-bm25-v1",
+        "--memory-top-k",
+        "8",
+        "--memory-token-limit",
+        "768",
+        "--skip-literal-arithmetic",
+        "--turn-interval",
+        "10",
+        "--turns",
+        "20",
+        "--run-dir",
+        "/home/nvidia/AI_Stack/runtime-data/benchmarks/embedding-voice-pair-v1/threads4",
+        "--output",
+        "benchmarks/results/embedding-voice-pair-threads4.json"
+      ],
+      "report": "benchmarks/results/embedding-voice-pair-threads4.json",
+      "returncode": 1,
+      "status": "FAIL",
+      "checks": {
+        "workload_completed": true,
+        "minimum_memory_samples": true,
+        "heap_policy_restored": true,
+        "minimum_overlapping_samples": true,
+        "minimum_voice_turns": true,
+        "all_voice_outputs": true,
+        "no_voice_errors": true,
+        "no_query_errors": true,
+        "no_write_errors": true,
+        "no_owner_leaks": true,
+        "durable_writes": true,
+        "query_p95_under200ms": true,
+        "write_p95_under500ms": true,
+        "file_short_first_pcm_p95_under3s": false,
+        "file_image_first_pcm_p95_under5s": true,
+        "visual_rates": true,
+        "visual_age": true,
+        "recall_text_and_audio": true,
+        "app_unchanged": true
+      },
+      "voice_latency": {
+        "recall": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2879.929177,
+          "p95_ms": 4373.16828,
+          "max_ms": 4373.16828
+        },
+        "time": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 2743.239114,
+          "p95_ms": 3153.462156,
+          "max_ms": 3153.462156
+        },
+        "image": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 4107.73385,
+          "p95_ms": 4790.131518,
+          "max_ms": 4790.131518
+        },
+        "arithmetic": {
+          "count": 5,
+          "errors": 0,
+          "p50_ms": 1910.6590680000002,
+          "p95_ms": 1966.315963,
+          "max_ms": 1966.315963
+        }
+      },
+      "query_summary": {
+        "count": 196,
+        "errors": 0,
+        "p50_ms": 87.236206,
+        "p95_ms": 140.41731,
+        "max_ms": 216.026517
+      },
+      "write_summary": {
+        "count": 98,
+        "errors": 0,
+        "p50_ms": 146.026166,
+        "p95_ms": 357.084809,
+        "max_ms": 506.004537
+      },
+      "reader_fingerprint": "830c4af6203f7cfc413d68114359feb5d291e5b1163faba88d4e7e92a995a523",
+      "embedding_runtime": {
+        "intra_op_threads": 4,
+        "inter_op_threads": 1,
+        "providers": [
+          "CPUExecutionProvider"
+        ]
+      }
+    }
+  },
+  "errors": [],
+  "factor": "embedding_threads",
+  "scope": "Two 20-turn fixed 10s file-input runs with real Pipecat/ASR/LLM/TTS,10k personal-memory queries/writes and live camera/detection/pose. New identical snapshot clones,cold VLM/ASR/speech per variant; startup collect and passive GC observer in both. Only the named runtime factor differs. Live images/time answers may vary;5 samples per category,not physical audio,independent quality,B0-B3 or JT acceptance.",
+  "restored": {
+    "created_at": "2026-10-14T02:52:10.396930+00:00",
+    "components": {
+      "llama": {
+        "MainPID": "718245",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 718245,
+        "cgroup_pids": [
+          718245,
+          718248
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "configuration_restored": true,
+  "backends_after": {
+    "created_at": "2026-10-14T02:52:17.560630+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "718245",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 718245,
+        "cgroup_pids": [
+          718245,
+          718248
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 47.590925,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "8274",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 8274,
+        "cgroup_pids": [
+          8274,
+          8282,
+          8324
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 71.622876,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "8356",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 8356,
+        "cgroup_pids": [
+          8356,
+          8364,
+          8406
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 86.640825,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "completed_at": "2026-10-14T02:52:17.560693+00:00"
+}
