@@ -19,10 +19,12 @@ from tools.project import stamp,write_json
 from app.context_memory import EVIDENCE_FORMATS, validate_evidence_format
 
 
-def fingerprint():
+def fingerprint(model_manifest=None):
     digest=hashlib.sha256()
-    for path in sorted((ROOT/'app').rglob('*.py'))+[ROOT/'configs/runtime.yaml',ROOT/'models/manifest.json']:
-        digest.update(str(path.relative_to(ROOT)).encode());digest.update(path.read_bytes())
+    manifest=Path(model_manifest) if model_manifest is not None else ROOT/'models/manifest.json'
+    for path in sorted((ROOT/'app').rglob('*.py'))+[ROOT/'configs/runtime.yaml',manifest]:
+        label=str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
+        digest.update(label.encode());digest.update(path.read_bytes())
     return digest.hexdigest()
 
 
@@ -70,11 +72,23 @@ async def answer(args,run):
     from loguru import logger
     logger.remove();logger.add(sys.stderr,level='WARNING')
     if not run.get('seed_complete'):raise RuntimeError('Complete the separate seed process before inference')
-    current=fingerprint()
+    model_manifest=Path(run.get('model_manifest_path',ROOT/'models/manifest.json'))
+    selected_model=json.loads(model_manifest.read_text())
+    entry=selected_model['models']['vlm']
+    from tools.project import CACHE
+    import httpx
+    model_directory=Path(selected_model.get('artifact_directory',CACHE/'models'))
+    expected_model=(model_directory/next(f['name'] for f in entry['files'] if not f['name'].startswith('mmproj'))).resolve()
+    async with httpx.AsyncClient(timeout=5,trust_env=False) as client:
+        response=await client.get('http://127.0.0.1:8088/props');response.raise_for_status();props=response.json()
+    if Path(props.get('model_path','')).resolve()!=expected_model or props.get('model_alias')!=entry['server_model_id']:
+        raise RuntimeError('Actual native reader differs from selected model manifest')
+    run['backend_identity']={key:props.get(key) for key in ('model_path','model_alias','model_ftype','build_info','total_slots')}
+    current=fingerprint(model_manifest)
     if run.get('reader_fingerprint') not in (None,current):raise RuntimeError('Application changed during this benchmark run; use a new run directory')
     run['reader_fingerprint']=current;run['reader_started_at']=stamp();run['status']='RUNNING';write_json(args.run_dir/'lcvmem-run.json',run)
     (args.run_dir/'answers').mkdir(exist_ok=True)
-    config=LlamaConfig.from_manifest(ROOT/'models/manifest.json')
+    config=LlamaConfig.from_manifest(model_manifest)
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text());memory_options=runtime['memory']
     memory_top_k=args.memory_top_k if args.memory_top_k is not None else memory_options['top_k']
     memory_tokens=args.memory_token_limit if args.memory_token_limit is not None else memory_options['context_token_limit']
@@ -130,7 +144,7 @@ async def answer(args,run):
             print(json.dumps({'phase':'answer','completed':index,'total':len(run['ids']),'id':row['id'],
                 'error':error['type'] if error else None,'injected':result.get('retrieval',{}).get('injected_count'),
                 'side_effect':mutation,'seconds':round(entry['seconds'],2)},ensure_ascii=False),flush=True)
-    if fingerprint()!=current:raise RuntimeError('Application changed during benchmark execution')
+    if fingerprint(model_manifest)!=current:raise RuntimeError('Application or selected model manifest changed during benchmark execution')
     run['status']='ANSWERED';run['reader_finished_at']=stamp();write_json(args.run_dir/'lcvmem-run.json',run)
 
 
@@ -145,11 +159,16 @@ def main():
     parser.add_argument('--memory-top-k',type=int,choices=range(1,21))
     parser.add_argument('--memory-token-limit',type=int)
     parser.add_argument('--memory-evidence-format',choices=EVIDENCE_FORMATS)
+    parser.add_argument('--model-manifest',type=Path,help='Explicit candidate identity;does not start or replace a server')
     args=parser.parse_args();args.run_dir=args.run_dir.resolve()
     from app.memory import validate_retrieval_limits
     runtime=json.loads((ROOT/'configs/runtime.yaml').read_text())
     validate_evidence_format(args.memory_evidence_format or runtime['memory'].get('evidence_format','nested_v1'))
-    output_tokens=json.loads((ROOT/'models/manifest.json').read_text())['models']['vlm']['max_output_tokens']
+    model_manifest=(args.model_manifest or ROOT/'models/manifest.json').resolve()
+    model_entry=json.loads(model_manifest.read_text())['models']['vlm']
+    if model_entry['backend']!='llama.cpp' or model_entry['context_tokens']!=runtime['llama']['context_tokens']:
+        raise ValueError('Selected model must use llama.cpp and the current explicit context budget')
+    output_tokens=model_entry['max_output_tokens']
     validate_retrieval_limits(args.memory_top_k if args.memory_top_k is not None else runtime['memory']['top_k'],
         args.memory_token_limit if args.memory_token_limit is not None else runtime['memory']['context_token_limit'],
         runtime['llama']['context_tokens'],output_tokens)
@@ -165,7 +184,9 @@ def main():
                 or run.get('source_metadata','body-only-v1')!=args.source_metadata
                 or run.get('requested_profile')!=args.memory_profile
                 or run.get('requested_top_k')!=args.memory_top_k or run.get('requested_memory_tokens')!=args.memory_token_limit
-                or run.get('requested_memory_evidence_format')!=args.memory_evidence_format):
+                or run.get('requested_memory_evidence_format')!=args.memory_evidence_format
+                or run.get('model_manifest_path',str(ROOT/'models/manifest.json'))!=str(model_manifest)
+                or run.get('model_manifest_sha256',sha(model_manifest))!=sha(model_manifest)):
             raise RuntimeError('Existing benchmark ownership/configuration differs')
     else:
         if any(args.run_dir.iterdir()):raise RuntimeError('Benchmark directory is not empty')
@@ -173,6 +194,7 @@ def main():
             'corpus_sha256':sha(manifest_path),'source_metadata':args.source_metadata,'requested_profile':args.memory_profile,
             'requested_top_k':args.memory_top_k,'requested_memory_tokens':args.memory_token_limit,
             'requested_memory_evidence_format':args.memory_evidence_format,
+            'model_manifest_path':str(model_manifest),'model_manifest_sha256':sha(model_manifest),'model_identity':model_entry,
             'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}
         if args.seed_from:
             if args.split!='development':raise ValueError('Seed reuse is restricted to development comparisons')
@@ -205,6 +227,7 @@ def main():
     if args.memory_top_k is not None:common+=['--memory-top-k',str(args.memory_top_k)]
     if args.memory_token_limit is not None:common+=['--memory-token-limit',str(args.memory_token_limit)]
     if args.memory_evidence_format is not None:common+=['--memory-evidence-format',args.memory_evidence_format]
+    if args.model_manifest is not None:common+=['--model-manifest',str(model_manifest)]
     with (args.run_dir/'orchestrator.lock').open('a+b') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         phases=('answer',) if run.get('seed_complete') else ('seed','answer')

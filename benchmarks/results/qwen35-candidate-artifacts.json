@@ -1,0 +1,22 @@
+{
+  "created_at": "2026-10-14T03:49:52.777263+00:00",
+  "status": "VERIFIED_ARTIFACTS_ONLY",
+  "candidate_manifest": "models/candidates/qwen3.5-4b.json",
+  "candidate_manifest_sha256": "868cee23fdeb93b21ad4b6c2dff45434c2e12aa99853f15c46bda633a2856aad",
+  "artifact_directory": "/home/nvidia/AI_Stack/models/qwen3.5-4b-candidate",
+  "files": [
+    {
+      "name": "Qwen3.5-4B-Q4_K_M.gguf",
+      "remote_name": "Qwen3.5-4B-Q4_K_M.gguf",
+      "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+      "size": 2740937888
+    },
+    {
+      "name": "mmproj-Qwen3.5-4B-f16.gguf",
+      "remote_name": "mmproj-F16.gguf",
+      "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+      "size": 672423616
+    }
+  ],
+  "scope": "Downloaded data files verified by locked byte count and SHA256. No native loading,quality,speed,capacity or default-model change."
+}

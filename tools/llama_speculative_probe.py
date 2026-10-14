@@ -49,7 +49,7 @@ def body_for(case, model):
                 'properties': {'content': {'type': 'string'}}, 'required': ['content'],
                 'additionalProperties': False}}}]
         body['tool_choice'] = 'required'
-        body = apply_required_tool_prefix(body, model['chat_template']['required_tool_call_prefix'])
+        body = apply_required_tool_prefix(body, model.get('chat_template',{}).get('required_tool_call_prefix'))
     return body
 
 
@@ -62,6 +62,7 @@ def request(client, body):
     timings = None
     finish = None
     done = False
+    reasoning_characters = 0
     with client.stream('POST', 'http://127.0.0.1:8088/v1/chat/completions', json=body) as response:
         response.raise_for_status()
         for line in response.iter_lines():
@@ -77,6 +78,7 @@ def request(client, body):
             for choice in packet.get('choices', []):
                 finish = choice.get('finish_reason') or finish
                 delta = choice.get('delta', {})
+                reasoning_characters += len(delta.get('reasoning_content') or delta.get('reasoning') or '')
                 token = delta.get('content') or ''
                 if first is None and (token or delta.get('tool_calls')):
                     first = time.monotonic_ns()
@@ -91,7 +93,7 @@ def request(client, body):
     canonical_calls = [{'name': calls[i]['name'], 'arguments': json.loads(calls[i]['arguments'])} for i in sorted(calls)]
     return {'elapsed_ms': (time.monotonic_ns() - started) / 1e6,
         'first_output_ms': (first - started) / 1e6, 'content': content, 'tool_calls': canonical_calls,
-        'usage': usage, 'timings': timings, 'finish_reason': finish}
+        'usage': usage, 'timings': timings, 'finish_reason': finish,'reasoning_characters':reasoning_characters}
 
 
 def output_ok(case, row):

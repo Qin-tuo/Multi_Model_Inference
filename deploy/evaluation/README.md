@@ -397,3 +397,13 @@ python3 tools/project.py bench --suite memory-quality --split development \
 来源级检查确认此前音乐问题现在得到目标日期用户原话，模型回答正确作品和作曲家；已有首条证据的器材问题仍然漏读。另一个植物问题在来源相同的情况下，从具体困难退化为泛泛描述。[决策记录](../../benchmarks/results/evidence-format-decision.json)因此保留候选，未切换默认。此次[nested重复检查](../../benchmarks/results/lcvmem-nested-repeat-diagnostic.json)也发现与此前版本相比，82题检索、可见来源和提示token数一致，仍有6题回复不同、F1为29.5846→28.9745；两次运行还隔着资源配置/缓存历史等变化，不能据此声称确定的随机误差分布。单次小幅分数提升不足以证明稳定质量收益。
 
 为进一步区分装配问题和阅读模型能力，已锁定[Qwen3.5-4B Q4_K_M候选及F16图像投影](../../models/candidates/qwen3.5-4b.json)的仓库revision、文件大小和SHA256，准备单独评估。候选使用官方文档提供的`enable_thinking=false`模式，继续走本地llama.cpp/Pipecat接口；[Qwen官方模型说明](https://huggingface.co/Qwen/Qwen3.5-4B#instruct-or-non-thinking-mode)、[量化产物来源](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF)。产物准备不证明本机兼容、质量或速度，当前主模型manifest和默认配置未切换。
+
+## 4B候选的加载与接口验证
+
+[权重与投影文件](../../benchmarks/results/qwen35-candidate-artifacts.json)已按固定revision、字节数和SHA256校验。`tools/project.py`启动器支持显式模型条目、独立产物目录和布尔`enable_thinking`模板参数，原有默认入口保持原模型。`tools/reader_candidate_probe.py`先确认受管理VLM空闲，再由独立原生进程加载候选；检查该PID确实拥有模型端口，并在退出路径恢复3B受管理服务。原生模板只记录SHA，测试脚本快照放在各自AI_Stack产物目录并核对源码SHA。
+
+[首次原生检查](../../benchmarks/results/qwen35-native-probe.json)成功加载33/33层到GPU，仍使用2048上下文；14个固定文字/工具/纯色图像请求均完成，原生token预检与实际usage逐项一致，工具名/参数可解析，未观察到reasoning输出。13个请求符合严格预期；长引用多输出一对引号，因此整体保留FAIL，不改写判定来获得通过。模型进程与主manifest/配置分离，结束后七个受管理后端READY。
+
+该短检查最低MemAvailable为4806303744字节（约4.48GiB），包含其他驻留后端，但没有前台语音/记忆并发或连续视觉速率测量。原生工具JSON请求约3.9秒，不能据此认为候选更快；原生RSS、CUDA统一内存和文件映射也不能直接相加解释整机占用。
+
+质量入口新增显式`--model-manifest`，在推理前核对真实`/props`模型路径与别名，将所选manifest纳入读者指纹并写入评分报告，防止模型身份错记。[冻结的读者对照协议](../../benchmarks/manifests/reader-candidate-v1.json)使用同一AssistantSession、4线程BGE、hybrid检索、8条/768tokens、flat_v2、2K上下文和128输出上限，比较既有3B结果与4B的完整82题开发集。温度0用于本轮受控比较，不声称复现上游推荐采样；更换分词器和原生模板可能改变实际提示token数与可见来源，必须在结果中检查。200题保留集和76题备用集不参与此次比较。

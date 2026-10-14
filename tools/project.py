@@ -270,18 +270,19 @@ def speculative_args(config):
             '--spec-ngram-simple-size-m', str(draft), '--spec-ngram-simple-min-hits', str(hits)]
 
 
-def server_command(port=None):
+def server_command(port=None, *, model_entry=None, model_directory=None):
     _, models = manifests()
-    model = models["models"]["vlm"]
+    model = models["models"]["vlm"] if model_entry is None else model_entry
+    directory = CACHE / 'models' if model_directory is None else Path(model_directory)
     settings=json.loads((ROOT / "configs/runtime.yaml").read_text());config=settings['llama']
     main = next(x for x in model["files"] if not x["name"].startswith("mmproj"))
     projector = next(x for x in model["files"] if x["name"].startswith("mmproj"))
     binary = CACHE / "build/llama/bin/llama-server"
-    for path in (binary, CACHE / "models" / main["name"], CACHE / "models" / projector["name"]):
+    for path in (binary, directory / main["name"], directory / projector["name"]):
         if not path.exists(): raise RuntimeError(f"Missing prepared artifact: {path}")
     command = [str(binary), "-lv", "4", "--jinja", "--alias", model.get("server_model_id", "assistant-vlm"),
-            "-m", str(CACHE / "models" / main["name"]), "--mmproj",
-            str(CACHE / "models" / projector["name"]), "-ngl", str(config["gpu_layers"]),
+            "-m", str(directory / main["name"]), "--mmproj",
+            str(directory / projector["name"]), "-ngl", str(config["gpu_layers"]),
             "-c", str(config["context_tokens"]), "-t", str(config["threads"]),
             "-np", str(config["parallel"]), "--host", "127.0.0.1", "--port", str(port or config["port"])]
     command+=prompt_cache_args(settings,'llama')
@@ -290,6 +291,11 @@ def server_command(port=None):
         path = CACHE / "upstreams/llama.cpp" / template["relative_source_path"]
         if sha256(path) != template["sha256"]: raise RuntimeError("Chat template differs from the model manifest")
         command += ["--chat-template-file", str(path)]
+    if kwargs := model.get('chat_template_kwargs'):
+        if (not isinstance(kwargs,dict) or set(kwargs)-{'enable_thinking'}
+                or any(type(value) is not bool for value in kwargs.values())):
+            raise ValueError('Only an explicit boolean enable_thinking template setting is supported')
+        command += ['--chat-template-kwargs', json.dumps(kwargs,separators=(',',':'))]
     return command
 
 
