@@ -6,6 +6,8 @@
 
 项目处于框架接入与功能闭环验证阶段。框架/插件246项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
+中文图文能力正在按[冻结协议](benchmarks/manifests/mmbench-evaluation-v1.json)评测：[MMBench中文清单](benchmarks/manifests/mmbench-cn-v1.json)按图片哈希分成开发、保留、备用各100题，开发组保留372个原始选项轮换。使用固定版本VLMEvalKit的本地匹配组件，通过真实AssistantSession/Pipecat/llama.cpp运行；推理输入不含答案，每个轮换使用独立会话/用户和隔离数据，统计错误、写入与图像泄漏。当前只运行开发组。选择题筛查与自然语言图文问答、真机场景及完整JT-07验收分开；数据/框架/评测环境均在`~/AI_Stack/`，依赖索引已更新。
+
 视觉质量已完成[完整5,000张COCO回归](benchmarks/results/vision-quality-coco-preserved.json)：检测AP为26.4240，对FP32参考下降0.0378个百分点；姿态AP为45.2875，下降0.0315个百分点，两项均满足公开回归的1个百分点门槛。原始[失败基线](benchmarks/results/vision-quality-coco-baseline.json)保留：姿态AP曾为39.6258，主要损失来自发布层丢弃低置信度关键点坐标。现通过[锁定的yolo_ros局部补丁](patches/vision/pose-preserve-keypoints.patch)保留全部17个坐标和原始分数，检测阈值/NMS、权重、engine及手势0.6置信度要求均未改。[逐图因果复核](benchmarks/results/pose-publication-causal-comparison.json)确认重新施加旧过滤后，全部5,000张姿态输出与旧版完全一致；检测输出也完全一致。[15项手势/通知规则测试](benchmarks/results/pose-publication-regression.json)通过。固定FP32参考预测经过模型/数据/预测哈希核验后复用并重新评分；[v2协议](benchmarks/manifests/vision-quality-v2.json)明确记录这次候选发布策略变更，主门槛未降低。
 
 [单图输入诊断](benchmarks/results/vision-input-diagnostic.json)另外定位了OpenCV4.8/5缩放像素差异；该差异未通过修改参考口径消除。公开COCO不能替代独立真机场次、跟踪/手势、至少100个单图问题及其他语音/对话质量验证，因此JT-07仍未完成。

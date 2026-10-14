@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-10-14T09:40:59.699847+00:00",
+  "status": "PASS",
+  "checks": {
+    "upstream_checksum_matched": true,
+    "three100question_splits": true,
+    "disjoint_images": true,
+    "no_labels_in_inference_files": true,
+    "all_supplied_rotations_use_same_source_image": true
+  },
+  "corpus_sha256": "26ef9e95e47185bc360eb4bb21573cc1c07ffbabfe2db272cb8212b385a03979",
+  "protocol_sha256": "e356ad3e16aed383113ad1a53c737be556a2936db79fb9c7b1d9136c08e736d9",
+  "scorer_tests": "2 native-function wiring tests passed:all rotations/readonlyinput/TLS unchanged,wrong or unparsed rotation fails.",
+  "source": "deploy/evaluation/test_mmbench_scoring.py",
+  "scope": "Preparation andscoring-component checks only; no modelquality orheldout evaluation.",
+  "image_reference_bindings_checked": 1114
+}

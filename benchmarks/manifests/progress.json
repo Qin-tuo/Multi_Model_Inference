@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T09:03:26.231184+00:00",
+  "updated_at": "2026-10-14T09:50:07.423858+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -663,6 +663,21 @@
       ],
       "validation": "NativeMCAP/zstd androsbag2Player fieldroundtripPASS onisolatedsmallsyntheticImage/CameraInfo;actualpublisher matching preventsinitialloss,controllerSIGTERMcleansnativechildren. Allcapturesunannotated;noactualroomimagescaptured. Historical640x480fixture nowreachesactualAssistantSession/Pipecat/llama/BGE/Mem0withsource_kind recorded_replayandoriginalstamps;blueanswer andnativeusage PASS. IsolatedexplicitROSsimtime,reliableRGBD,50Hzclock;pause/EOF/seek/restart andclosedbyteownershipPASS. Queuedrequestsbindsourceepoch;clock-unavailablecacheguardprevents lateframeslookingfresh. Full246coretestsPASS.",
       "next_action": "Expose explicit recorded-scene workflow in public interaction entry; validate realcapture duration/bandwidth andgroupedhumanlabels; then fullS0–S11 timing replay. KeepordinaryCLI/livecamera modeunchanged."
+    },
+    {
+      "task_id": "J2.7.visual_mcq",
+      "status": "RUNNING",
+      "artifacts": [
+        "deploy/evaluation/mmbench.lock.json",
+        "benchmarks/manifests/mmbench-cn-v1.json",
+        "benchmarks/manifests/mmbench-evaluation-v1.json",
+        "benchmarks/results/mmbench-preparation.json",
+        "tools/mmbench_eval.py",
+        "tools/mmbench_scoring.py",
+        "tools/mmbench_audit.py"
+      ],
+      "validation": "PinnedofficialChineseMMBenchdevsourceandVLMEvalKit exactmatching;three100-question splits withdisjointdecodedimagehashes,allprovidedrotationsverifiedsamesourceimage. Development372actualassistantcalls running;heldout/reserve notinferred. No cloudjudge,answerlabels excludedfromruntime files.",
+      "next_action": "Completefullfixeddevelopmentrun,thenauditimage/token/stateevidence andscorecanonical/circular accuracybefore anymodel orpromptchanges."
     }
   ],
   "acceptance": {
