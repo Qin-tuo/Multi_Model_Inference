@@ -50,7 +50,7 @@ class PromptBudget(FrameProcessor):
     async def count(self, context):
         params = self.adapter.get_llm_invocation_params(context, convert_developer_to_user=True)
         params = apply_required_tool_prefix(params, self.tool_call_prefix)
-        body = {key: value for key, value in params.items() if isinstance(value, (dict, list, str))}
+        body = {key: value for key, value in params.items() if isinstance(value, (dict, list, str, bool))}
         # This pinned llama.cpp endpoint uses the actual chat template AND
         # mtmd processor. Text-only /tokenize misses image embedding tokens.
         tokens = await self.client.post(self.base + "/v1/chat/completions/input_tokens", json=body)

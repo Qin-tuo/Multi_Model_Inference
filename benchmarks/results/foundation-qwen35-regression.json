@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-10-14T10:54:23.675705+00:00",
+  "status": "PASS",
+  "tests": 42,
+  "command": "PYTHONPATH=tests .venv/bin/python -m unittest test_prompt_budget test_llama_cleanup test_tool_handlers test_tool_policy test_persistent_session",
+  "log": "/home/nvidia/AI_Stack/runtime-data/benchmarks/foundation-qwen35-regression.log",
+  "log_sha256": "c9bceec5fb8ad1253ec6dc5ff880521f9bb22ed2b0a57026a339c8348df28b2f",
+  "source_sha256": {
+    "app/adapters/llama.py": "1b62ef7394d72576d8522a58fadd98992f70ffe45a9b9b1cbebbbefae2989abb",
+    "app/session.py": "ddf60d990c6d3e85883255ec320f9edf3894127c86651ee499a6ed95913a77af",
+    "tests/test_prompt_budget.py": "aa69bb91b6d7aabb0c4d1770ef4fd1e131d4f66aa5706739d8c36770366525df"
+  },
+  "scope": "Targeted framework budget, serial tool policy, client cleanup, tool policy/handlers and persistent session contracts; not real audio or whole-stage qualification."
+}

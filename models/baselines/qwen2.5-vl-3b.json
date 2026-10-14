@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "models": {
+    "vlm": {
+      "role": "initial_functional_capacity_baseline",
+      "backend": "llama.cpp",
+      "repository": "ggml-org/Qwen2.5-VL-3B-Instruct-GGUF",
+      "revision": "5037fcf163dd95d1e41d1974465f0898ed108ca2",
+      "files": [
+        {
+          "name": "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+          "sha256": "d02fe9b69ad8cadbbd228e387667af66612c44bed29ffc8eb1e7caf9ac486c12",
+          "size": 1929901056
+        },
+        {
+          "name": "mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
+          "sha256": "b9160fe9d814d1fadf68395677468534778b39ac33c2e7561b7b218626e60d5e",
+          "size": 1338428128
+        }
+      ],
+      "context_tokens": 2048,
+      "max_output_tokens": 128,
+      "threads": 4,
+      "gpu_layers": 99,
+      "parallel": 1,
+      "server_model_id": "assistant-vlm",
+      "chat_template": {
+        "required_tool_call_prefix": "<tool_call>\n",
+        "relative_source_path": "models/templates/Qwen-Qwen2.5-7B-Instruct.jinja",
+        "sha256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
+        "status": "text_image_and_scoped_tool_smoke_verified",
+        "reason": "Embedded Qwen2.5-VL template exposes supports_tools=false"
+      }
+    },
+    "asr": {
+      "model": "Qwen3-ASR-0.6B",
+      "backend": "llama.cpp_cuda_via_ovs",
+      "repository": "ggml-org/Qwen3-ASR-0.6B-GGUF",
+      "revision": "928ab958557df9aa2ef1c93e0e83c7ad0933fae2",
+      "files": [
+        {
+          "name": "Qwen3-ASR-0.6B-Q8_0.gguf",
+          "size": 804749248,
+          "sha256": "bca259818b50ca7c4c05e9bdb35a5dc04fa039653a6d6f3f0f331f96f6aa1971"
+        },
+        {
+          "name": "mmproj-Qwen3-ASR-0.6B-bf16.gguf",
+          "size": 378575520,
+          "sha256": "dae36c855f9a82a8916bea2238b24bda69a39d8da8b2f46dee7c103775656039"
+        }
+      ],
+      "context_tokens": 2048,
+      "max_output_tokens": 256,
+      "port": 8089,
+      "status": "local_file_transcription_verified",
+      "reason": "OVS JP6.2 ASR artifact contains serialized TRT10.3 engines without rebuild ONNX; probe mature llama.cpp audio backend for same model"
+    },
+    "tts": {
+      "model": "Matcha",
+      "backend": "ovs_voxedge_matcha_tensorrt_host",
+      "status": "host_build_and_file_synthesis_verified",
+      "source_revision": "737422aea690cd7604eae893a2168d0840a094dc"
+    },
+    "detection": {
+      "model": "yolov8n",
+      "backend": "onnxruntime_tensorrt_pending",
+      "checkpoint": {
+        "name": "yolov8n.pt",
+        "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
+        "size": 6549796,
+        "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+        "sha256_source": "observed after official HTTPS release download"
+      },
+      "onnx": {
+        "name": "yolov8n.onnx",
+        "sha256": "e2970d69e3d726825547ca6d3b09e9c030c76a351cdc13d657fb1a1418e273f0",
+        "size": 12824165
+      },
+      "input_shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "precision": "FP32 ONNX / TensorRT FP32 with TF32 allowed; FP16 retained for later measured comparison",
+      "exporter": "ultralytics8.4.175 / torch2.9.1+cpu / opset17",
+      "license": "AGPL-3.0",
+      "status": "trtexec_fp32_tf32_smoke_pass_ros_gpu_runtime_pending",
+      "runtime_profile": {
+        "trt_fp16_enable": false,
+        "tf32_allowed": true,
+        "input_shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "batch": 1,
+        "max_fps": 15,
+        "selection_reason": "Preserve the initial box/keypoint parity thresholds; FP16 detection score tie failed box gate"
+      }
+    },
+    "pose": {
+      "model": "yolov8n-pose",
+      "backend": "onnxruntime_tensorrt_pending",
+      "checkpoint": {
+        "name": "yolov8n-pose.pt",
+        "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt",
+        "size": 6832633,
+        "sha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212",
+        "sha256_source": "observed after official HTTPS release download"
+      },
+      "onnx": {
+        "name": "yolov8n-pose.onnx",
+        "sha256": "4deecd30760dac3d18371d0c762a3f8b7198c53af8c46362a16fb590c9bb7761",
+        "size": 13484674
+      },
+      "input_shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "precision": "FP32 ONNX / TensorRT FP32 with TF32 allowed; FP16 retained for later measured comparison",
+      "exporter": "ultralytics8.4.175 / torch2.9.1+cpu / opset17",
+      "license": "AGPL-3.0",
+      "status": "trtexec_fp32_tf32_smoke_pass_ros_gpu_runtime_pending",
+      "runtime_profile": {
+        "trt_fp16_enable": false,
+        "tf32_allowed": true,
+        "input_shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "batch": 1,
+        "max_fps": 15,
+        "selection_reason": "Preserve the initial box/keypoint parity thresholds; FP16 detection score tie failed box gate"
+      }
+    },
+    "vad": {
+      "model": "Silero VAD bundled by Pipecat 1.12.0",
+      "backend": "onnxruntime_cpu",
+      "artifact_sha256": "597d30b3ec076608d059477bb14cfeffdf951bf5cae370d38f65d33bbfe82004",
+      "artifact_size": 2327524,
+      "sample_rate": 16000,
+      "stop_secs": 0.4,
+      "status": "real_file_vad_pipeline_verified"
+    },
+    "embedding": {
+      "model": "BAAI/bge-small-zh-v1.5",
+      "repository": "BAAI/bge-small-zh-v1.5",
+      "revision": "7999e1d3359715c523056ef9478215996d62a620",
+      "files": [
+        {
+          "name": "1_Pooling/config.json",
+          "sha256": "aaa8861589f80c961a03cc86c7eeaef7605c1676b9ab55329d33a304738769c6",
+          "size": 190
+        },
+        {
+          "name": "config.json",
+          "sha256": "3853a7979202c348751b753e36f579c41d8da7d36af617d3d907e1fc9b441f2a",
+          "size": 776
+        },
+        {
+          "name": "config_sentence_transformers.json",
+          "sha256": "940d5f50db195fa6e5e6a4f122c095f77880de259d74b14a65779ed48bdd7c56",
+          "size": 124
+        },
+        {
+          "name": "model.safetensors",
+          "sha256": "354763b9b1357bc9c44f62c6be2276321081ed2567773608c0d0785b61d5a026",
+          "size": 95827648
+        },
+        {
+          "name": "modules.json",
+          "sha256": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+          "size": 349
+        },
+        {
+          "name": "sentence_bert_config.json",
+          "sha256": "84e39fda68ccbff05bfa723ae9c0e70e23e2ec373b76e0f8c6e71af72a693cbf",
+          "size": 52
+        },
+        {
+          "name": "special_tokens_map.json",
+          "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+          "size": 125
+        },
+        {
+          "name": "tokenizer.json",
+          "sha256": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+          "size": 439125
+        },
+        {
+          "name": "tokenizer_config.json",
+          "sha256": "e6f3b96db926a37d4039995fbf5ad17de158dfb8f6343d607e4dbaad18d75f5a",
+          "size": 367
+        },
+        {
+          "name": "vocab.txt",
+          "sha256": "45bbac6b341c319adc98a532532882e91a9cefc0329aa57bac9ae761c27b291c",
+          "size": 109540
+        }
+      ],
+      "dimensions": 512,
+      "backend": "sentence_transformers_onnx_cpu",
+      "status": "conversion_verified",
+      "query_instruction": "为这个句子生成表示以用于检索相关文章：",
+      "max_sequence_length": 512,
+      "threads": 2,
+      "onnx_artifact": {
+        "name": "onnx/model.onnx",
+        "sha256": "a6f1078ed75a289b442218a9d8b9f353399a827a91c900dc3117bc189f40d59e",
+        "size": 94835368
+      }
+    }
+  },
+  "memory_profiles": {
+    "bge-int8-windows-v1": {
+      "model_directory": "bge-small-zh-v1.5-onnx-arm64-int8",
+      "embedding_sha256": "2e273ef07b8e6a6c7b029bf0651ae058b4dc6d9adf6e1a3d2399b1944e7f1136",
+      "window_tokens": 256,
+      "window_overlap": 32,
+      "backend": "sentence-transformers-onnx-cpu",
+      "vector_layout": "qdrant-max-sim",
+      "source_export": "benchmarks/results/bge-int8-export.json"
+    },
+    "bge-int8-windows-bm25-v1": {
+      "model_directory": "bge-small-zh-v1.5-onnx-arm64-int8",
+      "embedding_sha256": "2e273ef07b8e6a6c7b029bf0651ae058b4dc6d9adf6e1a3d2399b1944e7f1136",
+      "window_tokens": 256,
+      "window_overlap": 32,
+      "backend": "sentence-transformers-onnx-cpu",
+      "vector_layout": "qdrant-max-sim",
+      "source_export": "benchmarks/results/bge-int8-export.json",
+      "retrieval": {
+        "server_version": "1.19.2",
+        "model": "qdrant/bm25",
+        "slot": "bm25",
+        "fusion": "dbsf",
+        "prefetch": 60,
+        "options": {
+          "tokenizer": "multilingual",
+          "stemmer": {
+            "type": "none"
+          },
+          "stopwords": {},
+          "lowercase": true
+        }
+      },
+      "status": "candidate_integration"
+    }
+  }
+}

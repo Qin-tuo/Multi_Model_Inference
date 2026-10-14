@@ -225,7 +225,7 @@ def prepare(args):
     if not args.build_only:
         model = models["models"]["vlm"]
         for file in model["files"]:
-            url = f"https://huggingface.co/{model['repository']}/resolve/{model['revision']}/{file['name']}"
+            url = f"https://huggingface.co/{model['repository']}/resolve/{model['revision']}/{file.get('remote_name', file['name'])}"
             download_file(url, CACHE / "models" / file["name"], file["sha256"], file["size"])
     return 0
 

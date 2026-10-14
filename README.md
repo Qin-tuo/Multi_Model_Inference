@@ -4,11 +4,13 @@
 
 ## 当前进度
 
-2026-10-14按用户要求调整交付顺序：**长期记忆相关开发、优化和专项验收移到下一阶段**。当前集中完成语音/视觉对话、当前会话上下文、打断、工具提醒、手势与稳定运行。已有Mem0/Qdrant及数据保留；JT-10/11和其他条款中的长期记忆场景标记延期，原始验收门槛保留。具体范围及当前卡点见[阶段调整](02-jetson-multimodel-inference.md#0-当前交付阶段调整2026-10-14)。
+2026-10-14按用户要求调整：**当前目标是打通整体框架、夯实软件基础，发现并修复整机集成问题**。主模型暂用Qwen3.5-4B；围绕真实调用链、取消与状态一致性、工具持久化、资源释放、异常恢复和可运行部署验收。长期记忆专项、性能优化及正确率百分比门槛移到后续阶段。已有模块、数据和历史证据保留，具体SF-01～06标准见[阶段调整](02-jetson-multimodel-inference.md#0-当前交付阶段调整2026-10-14)。
+
+[当前4B软件基础验证](benchmarks/results/phase-one-qwen35-main-serial.json)已完成四轮文字和四轮文件语音：笔记保存/查询、提醒创建/取消、时间、图像、算术和到期提醒输出通过。首轮[失败记录](benchmarks/results/phase-one-qwen35-main.json)发现同一回复批量重复工具请求，触发额外生成及跨轮token记录；幂等处理保证实际笔记和提醒未重复写入。现使用llama.cpp原生`parallel_tool_calls=false`逐次决策，并同步到输入token计数；[相同模型/输入复测](benchmarks/results/qwen35-serial-tool-comparison.json)通过，[42项相关回归](benchmarks/results/foundation-qwen35-regression.json)通过。文件回执保持fixture标记，公开入口、持续运行和故障恢复继续验证，见[问题台账](benchmarks/manifests/foundation-issues.json)。
 
 项目处于框架接入与功能闭环验证阶段。框架/插件246项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
-中文图文能力按[冻结协议](benchmarks/manifests/mmbench-evaluation-v1.json)评测：[MMBench中文清单](benchmarks/manifests/mmbench-cn-v1.json)按图片哈希分成开发、保留、备用各100题，开发组保留372个原始选项轮换。使用固定版本VLMEvalKit的本地匹配组件，通过真实AssistantSession/Pipecat/llama.cpp运行；推理输入不含答案，每个轮换使用独立会话/用户和隔离数据。3B模型已完成全部开发请求：[标准选项顺序正确70/100，全部原始轮换都正确55/100](benchmarks/results/mmbench-cn-development-score.json)，低于预定80%的主筛选目标；执行错误、意外写入及图像引用残留均为0，[图像、原生token计数和状态审计通过](benchmarks/results/mmbench-cn-development-audit.json)。Qwen3.5-4B已完成[同条件比较](benchmarks/results/mmbench-reader-comparison.json)：标准选项顺序75/100，全部轮换都正确58/100，仍未达到80%主筛选目标；两轮均无执行错误或意外状态变更。逐题比较为13题改善、8题退步、79题正确性不变。候选14项基础检查中13项通过，原样复述多加引号的失败保留。候选已退出，原3B和七个受管理后端恢复就绪；默认模型尚未切换，保留和备用组尚未运行。选择题结果只支持模型筛选，自然语言图文问答、真机场景及完整JT-07验收仍待完成；数据、框架及评测环境位于`~/AI_Stack/`。
+中文图文能力按[冻结协议](benchmarks/manifests/mmbench-evaluation-v1.json)评测：[MMBench中文清单](benchmarks/manifests/mmbench-cn-v1.json)按图片哈希分成开发、保留、备用各100题，开发组保留372个原始选项轮换。使用固定版本VLMEvalKit的本地匹配组件，通过真实AssistantSession/Pipecat/llama.cpp运行；推理输入不含答案，每个轮换使用独立会话/用户和隔离数据。3B模型已完成全部开发请求：[标准选项顺序正确70/100，全部原始轮换都正确55/100](benchmarks/results/mmbench-cn-development-score.json)，低于预定80%的主筛选目标；执行错误、意外写入及图像引用残留均为0，[图像、原生token计数和状态审计通过](benchmarks/results/mmbench-cn-development-audit.json)。Qwen3.5-4B已完成[同条件比较](benchmarks/results/mmbench-reader-comparison.json)：标准选项顺序75/100，全部轮换都正确58/100，仍未达到80%主筛选目标；两轮均无执行错误或意外状态变更。逐题比较为13题改善、8题退步、79题正确性不变。候选14项基础检查中13项通过，原样复述多加引号的失败保留。该比较结束时已恢复原3B；随后按用户要求将Qwen3.5-4B设为当前默认，见[切换检查](benchmarks/results/qwen35-main-activation.json)。保留和备用组尚未运行，后续质量优化暂停。选择题结果只支持模型筛选，自然语言图文问答、真机场景及完整JT-07验收仍待完成；数据、框架及评测环境位于`~/AI_Stack/`。
 
 视觉质量已完成[完整5,000张COCO回归](benchmarks/results/vision-quality-coco-preserved.json)：检测AP为26.4240，对FP32参考下降0.0378个百分点；姿态AP为45.2875，下降0.0315个百分点，两项均满足公开回归的1个百分点门槛。原始[失败基线](benchmarks/results/vision-quality-coco-baseline.json)保留：姿态AP曾为39.6258，主要损失来自发布层丢弃低置信度关键点坐标。现通过[锁定的yolo_ros局部补丁](patches/vision/pose-preserve-keypoints.patch)保留全部17个坐标和原始分数，检测阈值/NMS、权重、engine及手势0.6置信度要求均未改。[逐图因果复核](benchmarks/results/pose-publication-causal-comparison.json)确认重新施加旧过滤后，全部5,000张姿态输出与旧版完全一致；检测输出也完全一致。[15项手势/通知规则测试](benchmarks/results/pose-publication-regression.json)通过。固定FP32参考预测经过模型/数据/预测哈希核验后复用并重新评分；[v2协议](benchmarks/manifests/vision-quality-v2.json)明确记录这次候选发布策略变更，主门槛未降低。
 
@@ -18,7 +20,7 @@
 
 [合成ROS传输测试](benchmarks/results/vision-bag-fixture.json)确认录制和回放字段一致，[中断测试](benchmarks/results/vision-bag-cancellation.json)确认SIGTERM后原生录制/播放进程均退出。早期[延时启动丢帧](benchmarks/results/vision-bag-replay-baseline.json)与[仅图发现判定不足](benchmarks/results/vision-bag-graph-admission-baseline.json)均保留。测试只有8×6合成消息，不证明640×480录制带宽或真实场景质量；实际房间画面尚未录制。历史时间戳保持原样。助手图像适配器新增显式`RosVisionBridge(domain_id=195, use_sim_time=True)`，只允许隔离域，输出标记为`recorded_replay`；默认实时相机模式继续使用实际时钟。回放采用50Hz模拟时钟和可靠RGB-D传输，暂停/结束时旧帧不可用，跳转或重启会更换来源代次，旧请求不能跨代取图。公开交互CLI仍默认实时相机；真实录制带宽、完整S0–S11场景回放和独立人工标签继续待验。[真实助手回放验证](benchmarks/results/vision-replay-assistant-verified.json)已通过：历史640×480合成RGB-D经MCAP、ROS模拟时钟、Pipecat和真实llama.cpp回答“蓝色”，原始时间戳、来源标记、token计数及图像释放均核对通过；暂停/结束、向后跳转和重放的旧帧/引用拒绝也通过。另有[旧请求跨来源代次回归](benchmarks/results/replay-pending-epoch-regression.json)和[时钟停止后的迟到缓存帧回归](benchmarks/results/replay-cached-clock-regression.json)。[并行核心测试时的实时探针](benchmarks/results/vision-bridge-replay-concurrent-tests.json)保留19/20的失败，单独复查20/20；这不能替代完整负载时效验收。
 
-**JT-02多模型竞争专项验收已通过**，见[修复后逐条审计](benchmarks/results/jt02-pose-preserved-audit.json)。[当前模型/engine清单](benchmarks/results/model-engine-inventory-pose-preserved.json)登记7类功能模型（TTS包含Matcha与Vocos）、6个在用TensorRT engine及8个未启用版本；逐项记录路径、SHA256、配置绑定、运行证据及已加载原生库。[首轮原生追踪](benchmarks/results/gpu-concurrency-graph-trace.json)覆盖D435i检测、姿态和6次文本/实时图文请求：188,944条独立kernel记录、177条CUDA Graph整体记录，189,121条设备活动全部关联到成功的启动调用。反向检查中，177次图启动全部有执行记录，6,674次仅捕获调用均位于8个成对捕获区间，没有无法解释的遗漏。
+**原3B配置的JT-02多模型竞争专项验收已通过**，见[修复后逐条审计](benchmarks/results/jt02-pose-preserved-audit.json)。[当前模型/engine清单](benchmarks/results/model-engine-inventory-pose-preserved.json)登记7类功能模型（TTS包含Matcha与Vocos）、6个在用TensorRT engine及8个未启用版本；逐项记录路径、SHA256、配置绑定、运行证据及已加载原生库。[首轮原生追踪](benchmarks/results/gpu-concurrency-graph-trace.json)覆盖D435i检测、姿态和6次文本/实时图文请求：188,944条独立kernel记录、177条CUDA Graph整体记录，189,121条设备活动全部关联到成功的启动调用。反向检查中，177次图启动全部有执行记录，6,674次仅捕获调用均位于8个成对捕获区间，没有无法解释的遗漏。
 
 保留姿态坐标的补丁之后，[新一轮追踪](benchmarks/results/gpu-concurrency-pose-preserved.json)再次通过，174,877条设备活动完整关联，检测/姿态为11.82/11.78Hz，年龄P95为177.96/179.86ms。
 
@@ -34,14 +36,14 @@
 
 记忆编码现采用 **4个ORT内部线程**，并修复了`memory.embedding_threads`配置未生效的问题。[新一轮2/4线程完整对照](benchmarks/results/embedding-voice-comparison.json)中，写入P95从484降到357ms，查询从159降到140ms，视觉频率/时效通过；编码器60组向量逐元素一致。[公开语音保存与回忆](benchmarks/results/embedding-threads4-public-voice.json)也通过。冷启动记忆问答仍约4.37秒，完整时延和长期验收继续推进。记忆开发集的词级F1及参考答案子串命中不能直接当作语义正确率或正确来源可见率，已有[来源级复核](benchmarks/results/lcvmem-reader-error-diagnostic.json)区分同义表达、证据被预算丢弃和模型漏读。
 
-单来源`flat_v2`格式完成[82题完整对照](benchmarks/results/lcvmem-evidence-format-comparison.json)：同一检索顺序下，18题多保留一条来源，词级F1从28.97到30.58；但也出现具体答案退为泛泛回答的案例，因此[继续作为可选项](benchmarks/results/evidence-format-decision.json)，当前仍用`nested_v1`。[Qwen3.5-4B候选](models/candidates/qwen3.5-4b.json)已完成加载和82题对照：词级F1为31.35，单题墙钟更长且仍有来源理解问题，因此[未选为默认](benchmarks/results/qwen35-reader-decision.json)。当前运行模型仍由[主manifest](models/manifest.json)指定为Qwen2.5-VL-3B。
+单来源`flat_v2`格式完成[82题完整对照](benchmarks/results/lcvmem-evidence-format-comparison.json)：同一检索顺序下，18题多保留一条来源，词级F1从28.97到30.58；但也出现具体答案退为泛泛回答的案例，因此[继续作为可选项](benchmarks/results/evidence-format-decision.json)，当前仍用`nested_v1`。[Qwen3.5-4B候选](models/candidates/qwen3.5-4b.json)已完成加载和82题对照：词级F1为31.35，单题墙钟更长且仍有来源理解问题，当时[未选为默认](benchmarks/results/qwen35-reader-decision.json)。随后用户将长期记忆延期并要求先用4B，当前[主manifest](models/manifest.json)已指定Qwen3.5-4B；原3B清单保存在`models/baselines/`，历史分数不改写。
 
 工具路由已修复“记忆心理学”等普通问题误触记忆清单、查询结果重复积累，以及笔记列表漏标题的问题。3B与4B均通过专项回归；[最新100条工具开发集](benchmarks/results/tool-quality-authoritative-inventory.json)100/100通过，无意外写入或重放新增。此前两轮99/100及输出过滤诊断保留在[评估记录](deploy/evaluation/README.md#记忆主题误判与查询续轮修复)，独立质量和物理验收继续进行。
 
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
 | 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机/语音文件会话、记忆与工具通过初测；真实设备、完整打断和质量验证继续推进 |
-| 文本/图文模型 | llama.cpp CUDA + Qwen2.5-VL-3B Q4_K_M | 37/37层GPU offload及CUDA图像编码；两项问答sanity通过 |
+| 文本/图文模型 | llama.cpp CUDA + Qwen3.5-4B Q4_K_M | 已完成候选加载、图文评测和默认服务切换；当前继续软件基础集成验证 |
 | 长期记忆 | Mem0 2.2.1 + 本机Qdrant 1.19.2服务 + SQLite历史/journal | BGE CPU ONNX、重启召回、更正/遗忘问答通过；完整语义质量集待验证 |
 | 提醒 | APScheduler 3.11.3 + SQLAlchemy | 到期文字通知、静音、过期、重启去重通过；语音创建与真实TTS到期文件输出通过，实机播报待验证 |
 | 时间语义 | JioNLP 1.5.29 + Python datetime | 按用户原文和请求时间解析中文日期/时长；缺少具体时间时先询问 |
@@ -231,9 +233,9 @@ python3 tools/project.py smoke --component memory
 
 最后一条命令需要llama服务已启动，使用独立临时库及合成偏好，验证保存/更正/遗忘后的真实回答；不读写用户记忆。实际查询指定 `--memory-dir` 与手选 `--user`，记忆证据按本地llama tokenizer限制在512token内。BGE运行使用CPU ONNX，PyTorch CPU仅用于转换和参考回归；锁文件固定官方ARM64 CPU wheel，避免额外安装CUDA运行库。
 
-真实模型工具调用测试使用独立临时库：`.venv/bin/python tools/tool_smoke.py`。当前 llama.cpp 使用其上游 Qwen2.5 工具模板，原 Qwen2.5-VL 内嵌模板未提供工具能力。工具按当前明确请求筛选，参数经校验后交给 Mem0/APScheduler；未收到实际写入成功结果时，Pipecat 输出插件会阻止口头成功确认。三条测试不代表完整工具质量或语音打断验收。
+真实模型工具调用测试使用独立临时库：`.venv/bin/python tools/tool_smoke.py`。原3B基线使用上游Qwen2.5工具模板；当前Qwen3.5-4B使用自身原生模板并关闭thinking，不沿用旧3B的工具预填前缀。工具按当前明确请求筛选，参数经校验后交给 Mem0/APScheduler；未收到实际写入成功结果时，Pipecat 输出插件会阻止口头成功确认。三条测试不代表完整工具质量或语音打断验收。
 
-当前Qwen模板在 `tool_choice=required` 时通过 llama.cpp 原生assistant prefill从 `<tool_call>` 开始；普通问答和工具回传后的回答不添加此前缀。该值固定在模型manifest，更换模板时一并核验。预算与推理使用相同的请求转换，前缀不写入会话历史。[固定请求五组对照](benchmarks/results/required-tool-prefill.json)中，原格式5次用完128token仍未调用工具；预填格式5次均返回参数正确的调用。对照只生成工具计划，未执行工具，不替代完整工具质量集或B0–B3性能实验。
+原3B基线的Qwen模板在 `tool_choice=required` 时通过 llama.cpp 原生assistant prefill从 `<tool_call>` 开始；普通问答和工具回传后的回答不添加此前缀。该值固定在模型manifest，更换模板时一并核验。预算与推理使用相同的请求转换，前缀不写入会话历史。[固定请求五组对照](benchmarks/results/required-tool-prefill.json)中，原格式5次用完128token仍未调用工具；预填格式5次均返回参数正确的调用。对照只生成工具计划，未执行工具，不替代完整工具质量集或B0–B3性能实验。
 
 工具参数中，明确的记忆原文、笔记标题/正文、提醒事项和时间由应用保留或规范化，再交给实际SDK执行；模型只填写尚未明确的字段。时间复用JioNLP实体/时长解析，按请求时间计算，不让模型自行换算“一个半小时”等数值。候选ID来自真实存储，找不到对应项可以返回不匹配；否定、撤回和模糊目标会阻止写入。写入回执和当前时间回答以工具真实结果为准。
 

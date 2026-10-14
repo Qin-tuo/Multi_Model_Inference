@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T10:38:20.155299+00:00",
-  "plan": "v1.2 (long-term memory deferred to the next delivery phase by user request)",
+  "updated_at": "2026-10-14T10:58:37.442709+00:00",
+  "plan": "v1.3 (software foundation first; long-term memory and performance targets deferred by user)",
   "overall_status": "RUNNING",
   "tasks": [
     {
@@ -525,7 +525,7 @@
     },
     {
       "task_id": "J5.runtime.startup_heap",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "tools/startup_heap_policy.py",
         "tools/heap_voice_worker.py",
@@ -538,11 +538,14 @@
         "benchmarks/results/voice-heap-comparison.json"
       ],
       "validation": "Owned-process startupcollect vscollect+freeze,automaticGC enabledandthresholds unchanged. CPython3.12 immortal permanentbaseline375 explicitly recorded;foreignfreeze/concurrentpolicy rejected,newcycles collect,oldcycles releaseonclose.227corePASS. Both20-turn realmodels/livecamera/fileaudio runs completebutFAILshortlatency:recall4.310/4.274s. WorkloadGCmax5.07/10.30ms,gen2count0/0;loopmax167/373ms. Startup541/536ms,close552/641ms reportedseparately;freeze54.6万objects thenrestore375. No provenbenefit or8hqualification,no defaultpolicy change.",
-      "next_action": "Cold-stage trace nowidentifies nativeLLM prefill aslargest firstrecallstage;startupGC remainsbenchmark-only. Longerrepresentative memory/resource tests andphysicalaudio lifecycle remainneeded."
+      "next_action": "Cold-stage trace nowidentifies nativeLLM prefill aslargest firstrecallstage;startupGC remainsbenchmark-only. Longerrepresentative memory/resource tests andphysicalaudio lifecycle remainneeded.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "later_performance_quality",
+      "deferral_reason": "User prioritizes software foundations; performance and percentage quality gates later."
     },
     {
       "task_id": "J5.runtime.prefill",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "tools/llama_prefill_probe.py",
         "benchmarks/results/voice-cold-stage.json",
@@ -551,11 +554,14 @@
         "benchmarks/results/llama-prefill-readiness-recheck.json"
       ],
       "validation": "Cold20turn alloutputs/noerrors butFAILshort/image latency4.350/5.202s. Firstrecall1146tokens:nativeprefill1928ms,LLMTTFB2166ms,ASR693ms,context367ms,TTSfirstchunk102ms. Pinnednative llama-bench9configurations x5reps:ubatch256/512/1024 at512/1024/1536input tokens;no gainover512 so no parameterchange. Vision11.86/11.89Hz,ageP95174/189ms. Finalposehealth no_fresh_sample preservesFAIL;laterall7READY,otherbackendPIDsunchanged. Isolatedtoken-prefill,noprojector/fullspeech/memoryload orJTacceptance.",
-      "next_action": "Prompt-lookup candidate now measured in full voice/memory/vision:time improves but cold recall4.098s and write514ms still FAIL. Prioritize memory quality and write tail diagnosis;retain default decoding."
+      "next_action": "Prompt-lookup candidate now measured in full voice/memory/vision:time improves but cold recall4.098s and write514ms still FAIL. Prioritize memory quality and write tail diagnosis;retain default decoding.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "later_performance_quality",
+      "deferral_reason": "User prioritizes software foundations; performance and percentage quality gates later."
     },
     {
       "task_id": "J5.runtime.speculative",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "tools/llama_speculative_probe.py",
         "tools/speculative_voice_pair.py",
@@ -569,7 +575,10 @@
         "benchmarks/results/speculative-voice-comparison.json"
       ],
       "validation": "Native 42 request/output pairs identical;84 expected checks pass,draft432 accepted240. Native report retains FAIL due transient extra speech cgroup PID with unchanged primary PIDs/counters. Full fresh-snapshot pair completed20 turns+196 queries+98 writes each:timeP95 3.224->2.297s,arithmetic2.003->1.746s,recall4.377->4.098s,image4.772->4.840s. Both no errors/leaks/lost writes;vision rates/age pass. Candidate writeP95 514ms exceeds500ms,so both workload reports FAIL and no default promotion. Original config byte-restored,native speculative=false,seven backends READY. Two launcher tests and bounded-parameter checks pass.",
-      "next_action": "Diagnose write tail latency and improve memory answer quality. Keep speculative mode opt-in pending broader quality, cancellation/recovery and long-duration qualification;formal B0-B3/5runs100events/8h remain incomplete."
+      "next_action": "Diagnose write tail latency and improve memory answer quality. Keep speculative mode opt-in pending broader quality, cancellation/recovery and long-duration qualification;formal B0-B3/5runs100events/8h remain incomplete.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "later_performance_quality",
+      "deferral_reason": "User prioritizes software foundations; performance and percentage quality gates later."
     },
     {
       "task_id": "J5.memory.embedding_threads",
@@ -690,7 +699,7 @@
     },
     {
       "task_id": "J2.7.visual_mcq",
-      "status": "RUNNING",
+      "status": "DEFERRED",
       "artifacts": [
         "deploy/evaluation/mmbench.lock.json",
         "benchmarks/manifests/mmbench-cn-v1.json",
@@ -710,16 +719,31 @@
         "benchmarks/results/mmbench-reader-comparison.json"
       ],
       "validation": "Both readers completed all 372 development variants with unchanged application/runtime/inputs. Qwen2.5-VL-3B canonical/circular 70/55 percent; Qwen3.5-4B 75/58 percent. Both input/image/native-token/state audits PASS; no execution errors, unintended mutations or image leaks. Candidate gains 13 canonical questions and loses 8. Both below the 80% screening target. Candidate native compatibility 13/14; quote-long adds forbidden surrounding quotes. Default 3B restored and all seven managed services READY. Heldout/reserve unused; no natural freeform QA or JT-07 claim.",
-      "next_action": "Continue phase-one reader/input-quality diagnosis and model selection, followed by ordinary conversation/tool quality and speech timing. Do not spend effort on deferred long-term memory benchmarks or promote from development scores alone."
+      "next_action": "Continue phase-one reader/input-quality diagnosis and model selection, followed by ordinary conversation/tool quality and speech timing. Do not spend effort on deferred long-term memory benchmarks or promote from development scores alone.",
+      "status_before_deferral": "RUNNING",
+      "delivery_phase": "later_performance_quality",
+      "deferral_reason": "User prioritizes software foundations; performance and percentage quality gates later."
+    },
+    {
+      "task_id": "SF.main_model_and_tools",
+      "status": "RUNNING",
+      "validation": "User-selected Qwen3.5-4B active;7servicesREADY. Reproduced tool batching/per-turn count mismatch. Serial native policy passes8real integration turns and42targetedcontracts; baselinefailure retained.",
+      "artifacts": [
+        "benchmarks/results/qwen35-main-activation.json",
+        "benchmarks/results/qwen35-serial-tool-comparison.json",
+        "benchmarks/manifests/foundation-issues.json"
+      ],
+      "next_action": "Public-entry, cancellation and fault/resource lifecycle under foundation scope."
     }
   ],
   "acceptance": {
     "JT-01": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-02": {
-      "status": "PASS",
+      "status": "NOT_VERIFIED",
       "verified_at": "2026-10-14T08:01:27.051580+00:00",
       "evidence": [
         "benchmarks/results/gpu-concurrency-graph-trace.json",
@@ -731,57 +755,75 @@
       ],
       "validation": "Seven functional model roles and all selected TensorRT engines registered. Same native trace proves mandatory visual/VLM overlapping requests,device execution andqueue intervals,with complete bidirectional launch/trace accounting at kernel+whole-graph granularity. Requalified afterposepublicationpatch:174877device activities,completeforward/reversecorrelation,no unexplainedlaunches,allmanagedbackendsREADY.",
       "scope": "JT-02 only;whole graphs include internal gaps/preemption. No SM residency,uninstumented performance,physical audio,quality orwhole-assistant acceptance.",
-      "limitations": "Node-granularity attribution remains broken in both installed collectors;graph-granularity device tracing succeeds. Hardware/UnifiedMemory traces unsupported andnot claimed. Original failed traces retained."
+      "limitations": "Node-granularity attribution remains broken in both installed collectors;graph-granularity device tracing succeeds. Hardware/UnifiedMemory traces unsupported andnot claimed. Original failed traces retained.",
+      "verification_phase": "later_complete_product",
+      "prior_qualification": {
+        "status": "PASS",
+        "verified_at": "2026-10-14T08:01:27.051580+00:00",
+        "model": "Qwen2.5-VL-3B"
+      },
+      "reason": "Prior trace qualifies original3B configuration; current4B configuration requires later requalification."
     },
     "JT-03": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-04": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-05": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-06": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-07": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-08": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-09": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-10": {
       "status": "DEFERRED",
       "evidence": [],
       "status_before_deferral": "NOT_VERIFIED",
       "delivery_phase": "next_long_term_memory",
-      "reason": "Deferred by user request; no acceptance pass claimed."
+      "reason": "Deferred by user request; no acceptance pass claimed.",
+      "verification_phase": "later_complete_product"
     },
     "JT-11": {
       "status": "DEFERRED",
       "evidence": [],
       "status_before_deferral": "NOT_VERIFIED",
       "delivery_phase": "next_long_term_memory",
-      "reason": "Deferred by user request; no acceptance pass claimed."
+      "reason": "Deferred by user request; no acceptance pass claimed.",
+      "verification_phase": "later_complete_product"
     },
     "JT-12": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     },
     "JT-13": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [],
+      "verification_phase": "later_complete_product"
     }
   },
   "hardware": {
@@ -841,23 +883,78 @@
   ],
   "dependency_root": "/home/nvidia/AI_Stack",
   "delivery_phases": {
-    "active": "voice_vision_tools",
+    "active": "software_foundation",
     "decision_date": "2026-10-14",
-    "authority": "User requested long-term memory tasks move to the next phase.",
+    "authority": "User requested4B main model and relaxed current acceptance to framework integration/software reliability; performance later.",
     "current": [
-      "Chinese speech and current-session context",
-      "live vision and image questions",
-      "interruption and AEC",
-      "time/status/notes/reminders",
-      "gesture feedback",
-      "performance, stability, faults and reproducible deployment"
+      "SF-01 real end-to-end framework integration",
+      "SF-02 cancellation and state consistency",
+      "SF-03 durable notes/reminders and idempotency",
+      "SF-04 bounded resource lifecycle",
+      "SF-05 backend failure and recovery",
+      "SF-06 reproducible operation and issue ledger"
     ],
     "next": [
-      "long-term memory quality and temporal/source reasoning",
-      "memory capacity and performance",
-      "memory-specific migration, restoration and concurrency qualification"
+      "long-term memory-specific implementation and qualification",
+      "model quality optimization and independent percentage targets",
+      "latency/throughput/visual-rate optimization, B0-B3 and formal 8h acceptance"
     ],
     "preservation": "Keep existing Mem0/Qdrant integration, data and all prior evidence. Mixed tasks retain their non-memory work.",
-    "acceptance": "JT-10/11 and memory-specific clauses of other JTs are deferred, not passed. Original thresholds and full product objective retained."
+    "acceptance": "Current phase uses SF-01..06. Original JT requirements retained for later product qualification, not claimed passed."
+  },
+  "foundation_acceptance": {
+    "SF-01": {
+      "status": "RUNNING",
+      "evidence": [
+        "benchmarks/results/phase-one-qwen35-main-serial.json",
+        "benchmarks/results/foundation-qwen35-regression.json"
+      ],
+      "remaining": "Public-entry, new perception scope, lifecycle and recovery coverage; physical audio separate."
+    },
+    "SF-02": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "SF-03": {
+      "status": "RUNNING",
+      "evidence": [
+        "benchmarks/results/phase-one-qwen35-main-serial.json",
+        "benchmarks/results/foundation-qwen35-regression.json"
+      ],
+      "remaining": "Public-entry, new perception scope, lifecycle and recovery coverage; physical audio separate."
+    },
+    "SF-04": {
+      "status": "RUNNING",
+      "evidence": [
+        "benchmarks/results/phase-one-qwen35-main-serial.json",
+        "benchmarks/results/foundation-qwen35-regression.json"
+      ],
+      "remaining": "Public-entry, new perception scope, lifecycle and recovery coverage; physical audio separate."
+    },
+    "SF-05": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "SF-06": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    }
+  },
+  "active_main_model": {
+    "name": "Qwen3.5-4B Q4_K_M",
+    "selection": "user requested provisional4B main; quality optimization deferred",
+    "evidence": "benchmarks/results/qwen35-main-activation.json"
+  },
+  "foundation_issues": "benchmarks/manifests/foundation-issues.json",
+  "foundation_user_scenario": {
+    "flow": [
+      "body/face/gesture perception",
+      "spoken instruction",
+      "main-model semantic understanding",
+      "speaker output"
+    ],
+    "identity_authentication": false,
+    "authority": "User scenario and explicit removal of identity verification in project review",
+    "gesture_action_mapping": "PENDING_USER_REPLY"
   }
 }

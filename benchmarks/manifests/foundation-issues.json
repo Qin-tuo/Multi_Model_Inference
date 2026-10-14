@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-14T10:58:37.441726+00:00",
+  "phase": "software_foundation",
+  "scope": "Observed issues and verification gaps; not a claim that all possible defects are known.",
+  "issues": [
+    {
+      "id": "SF-BUG-001",
+      "title": "Batched tool decisions cause repeated continuations and late per-turn accounting",
+      "status": "FIXED_IN_COVERED_SCENARIO",
+      "verification": [
+        "benchmarks/results/qwen35-serial-tool-comparison.json",
+        "benchmarks/results/foundation-qwen35-regression.json"
+      ],
+      "remaining": "Native cancellation/failure and sustained-loop coverage."
+    },
+    {
+      "id": "SF-BUG-002",
+      "title": "Preparation used local projector filename as upstream filename",
+      "status": "FIXED",
+      "verification": [
+        "benchmarks/results/qwen35-prepare-path-check.json"
+      ],
+      "remaining": "Clean-machine full redeployment qualification."
+    },
+    {
+      "id": "SF-GAP-001",
+      "title": "Physical microphone/speaker/AEC verification",
+      "status": "AWAITING_HARDWARE",
+      "reason": "User-confirmed ReSpeaker Lite and speaker not connected."
+    },
+    {
+      "id": "SF-GAP-002",
+      "title": "Current4B public-entry, recovery and resource lifecycle qualification",
+      "status": "OPEN"
+    },
+    {
+      "id": "SF-GAP-003",
+      "title": "User-requested face detection and explicit gesture behaviors",
+      "status": "OPEN",
+      "scope": "Body/face/gesture perception followed by voice instruction, model understanding and speaker output. User explicitly removed identity authentication; face detection/localization only. Gesture/action mapping pending interview reply."
+    }
+  ]
+}

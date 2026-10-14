@@ -2,35 +2,34 @@
   "schema_version": 1,
   "models": {
     "vlm": {
-      "role": "initial_functional_capacity_baseline",
+      "role": "phase_one_provisional_main",
       "backend": "llama.cpp",
-      "repository": "ggml-org/Qwen2.5-VL-3B-Instruct-GGUF",
-      "revision": "5037fcf163dd95d1e41d1974465f0898ed108ca2",
+      "repository": "unsloth/Qwen3.5-4B-GGUF",
+      "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
       "files": [
         {
-          "name": "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
-          "sha256": "d02fe9b69ad8cadbbd228e387667af66612c44bed29ffc8eb1e7caf9ac486c12",
-          "size": 1929901056
+          "name": "Qwen3.5-4B-Q4_K_M.gguf",
+          "remote_name": "Qwen3.5-4B-Q4_K_M.gguf",
+          "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4",
+          "size": 2740937888
         },
         {
-          "name": "mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
-          "sha256": "b9160fe9d814d1fadf68395677468534778b39ac33c2e7561b7b218626e60d5e",
-          "size": 1338428128
+          "name": "mmproj-Qwen3.5-4B-f16.gguf",
+          "remote_name": "mmproj-F16.gguf",
+          "sha256": "cd88edcf8d031894960bb0c9c5b9b7e1fea6ebee02b9f7ce925a00d12891f864",
+          "size": 672423616
         }
       ],
+      "server_model_id": "assistant-vlm",
       "context_tokens": 2048,
       "max_output_tokens": 128,
       "threads": 4,
       "gpu_layers": 99,
       "parallel": 1,
-      "server_model_id": "assistant-vlm",
-      "chat_template": {
-        "required_tool_call_prefix": "<tool_call>\n",
-        "relative_source_path": "models/templates/Qwen-Qwen2.5-7B-Instruct.jinja",
-        "sha256": "cd8e9439f0570856fd70470bf8889ebd8b5d1107207f67a5efb46e342330527f",
-        "status": "text_image_and_scoped_tool_smoke_verified",
-        "reason": "Embedded Qwen2.5-VL template exposes supports_tools=false"
-      }
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "status": "selected_by_user_pending_stage_acceptance"
     },
     "asr": {
       "model": "Qwen3-ASR-0.6B",
@@ -252,5 +251,19 @@
       },
       "status": "candidate_integration"
     }
+  },
+  "selection": {
+    "updated_at": "2026-10-14T10:45:46.525704+00:00",
+    "reason": "User requested using a 4B main model for now. Select already measured Qwen3.5-4B to proceed with phase-one integration.",
+    "candidate_manifest": "models/candidates/qwen3.5-4b.json",
+    "candidate_manifest_sha256": "868cee23fdeb93b21ad4b6c2dff45434c2e12aa99853f15c46bda633a2856aad",
+    "previous_manifest": "models/baselines/qwen2.5-vl-3b.json",
+    "previous_manifest_sha256": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+    "known_limits": [
+      "Development visual MCQ canonical75/100, circular58/100; below80percent screening target",
+      "Native quote-long adds surrounding quotation marks; 13/14checks passed",
+      "Full conversation/tool/physical voice/latency/stability qualification still required"
+    ],
+    "memory_phase": "Long-term memory-specific work deferred by user; retain existing data and integration."
   }
 }

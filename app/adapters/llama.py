@@ -56,12 +56,17 @@ class LlamaConfig:
 
 
 def apply_required_tool_prefix(params, prefix):
-    """Use llama.cpp's native assistant prefill only for an explicit tool turn.
+    """Serialize native tool decisions and apply legacy prefill when required.
 
     Keep the prefix out of the persistent Pipecat context: its tool-result
     aggregator owns the completed assistant/tool messages. The same helper is
     used by native token preflight so budget and inference see identical input.
+    Our tools update their schemas after each result; the model must wait for
+    that result before proposing another call. Sequential multi-step tools
+    remain available through the framework's normal result continuation.
     """
+    if isinstance(params.get("tools"), list) and params["tools"]:
+        params = {**params, "parallel_tool_calls": False}
     if prefix and params.get("tool_choice") == "required" and isinstance(params.get("tools"), list) and params["tools"]:
         return {**params, "messages": [*params["messages"], {"role": "assistant", "content": prefix}]}
     return params

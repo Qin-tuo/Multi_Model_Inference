@@ -24,11 +24,38 @@ class NativeBudgetTests(unittest.IsolatedAsyncioTestCase):
             params = service.build_chat_completion_params(budget.adapter.get_llm_invocation_params(context, convert_developer_to_user=True))
             await budget.count(context)
             self.assertEqual(sent[0]["messages"], params["messages"])
+            self.assertIs(sent[0]["parallel_tool_calls"], False)
+            self.assertIs(params["parallel_tool_calls"], False)
             self.assertEqual(params["messages"][-1], {"role": "assistant", "content": "<tool_call>\n"})
             self.assertEqual(len(context.get_messages()), 1)
             context.set_tool_choice("auto")
             plain = service.build_chat_completion_params(budget.adapter.get_llm_invocation_params(context, convert_developer_to_user=True))
             self.assertEqual(plain["messages"][-1]["role"], "user")
+            self.assertIs(plain["parallel_tool_calls"], False)
+        finally:
+            await budget.client.aclose()
+            await service._client.close()
+
+    async def test_native_template_tool_turn_has_matching_serial_policy(self):
+        turn = ToolTurn("FIXTURE", "保存笔记，标题是检查，内容是整理桌面。", None, None, records=object())
+        context = LLMContext(messages=[{"role": "user", "content": turn.user_text}],
+            tools=turn.schemas(), tool_choice="required")
+        config = LlamaConfig("fixture")
+        service = create_llama_service(config)
+        budget = PromptBudget(config.base_url, context_tokens=2048, output_tokens=128)
+        sent = []
+        await budget.client.aclose()
+        budget.client = httpx.AsyncClient(transport=httpx.MockTransport(lambda request:
+            (sent.append(json.loads(request.content)) or httpx.Response(200, json={"input_tokens": 100}))))
+        try:
+            params = service.build_chat_completion_params(budget.adapter.get_llm_invocation_params(context, convert_developer_to_user=True))
+            await budget.count(context)
+            self.assertIs(params["parallel_tool_calls"], False)
+            self.assertIs(sent[0]["parallel_tool_calls"], False)
+            self.assertEqual(params["messages"], context.get_messages())
+            context.set_tools([])
+            params = service.build_chat_completion_params(budget.adapter.get_llm_invocation_params(context, convert_developer_to_user=True))
+            self.assertNotIn("parallel_tool_calls", params)
         finally:
             await budget.client.aclose()
             await service._client.close()

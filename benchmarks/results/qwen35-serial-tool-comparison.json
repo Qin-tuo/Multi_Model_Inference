@@ -1,0 +1,32 @@
+{
+  "created_at": "2026-10-14T10:58:37.439133+00:00",
+  "status": "PASS",
+  "same_model": true,
+  "same_voice_inputs": true,
+  "fix": "Native parallel_tool_calls=false with the same boolean in input-token preflight; framework sequential continuation and durable idempotency retained.",
+  "scope": "Four typed and four file-voice integration turns. Synthetic image/audio, one run before/after, no latency or physical playback claim.",
+  "baseline": {
+    "report": "benchmarks/results/phase-one-qwen35-main.json",
+    "sha256": "d2e4d2da640c71d9d61bbd8dba539708d6d26722c2c33109a7968db68255ee10",
+    "typed_calls": [
+      6,
+      1,
+      6,
+      1
+    ],
+    "native_counts_match": false,
+    "stored_notes": 1
+  },
+  "fixed": {
+    "report": "benchmarks/results/phase-one-qwen35-main-serial.json",
+    "sha256": "e0cbf238580f004ffd7dce162982b83e71f82e1c94f22ae61878f038837cf14f",
+    "typed_calls": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "native_counts_match": true,
+    "stored_notes": 1
+  }
+}
