@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T05:12:45.256783+00:00",
+  "updated_at": "2026-10-14T05:44:52.814159+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -44,10 +44,15 @@
         "benchmarks/results/vision-pose-provider.json",
         "benchmarks/results/vision-runtime-smoke.json",
         "benchmarks/results/vision-with-file-speech.json",
-        "benchmarks/results/concurrent-file-speech.json"
+        "benchmarks/results/concurrent-file-speech.json",
+        "tools/gpu_concurrency_probe.py",
+        "tests/test_gpu_concurrency_probe.py",
+        "benchmarks/results/gpu-concurrency-cleanup-baseline.json",
+        "benchmarks/results/gpu-concurrency-baseline-analysis.json",
+        "benchmarks/results/gpu-concurrency-trace.json"
       ],
-      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending",
-      "next_action": "integrate visual context with the assistant and validate independent scene quality, workload capacity and GPU overlap traces"
+      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence.",
+      "next_action": "Resolve or qualify Nsight/CUPTI graph correlation limitations; complete engine inventory and actual execution/contention evidence, then independent scenario quality/capacity and repeated uninstrumented baselines"
     },
     {
       "task_id": "J0.4",
@@ -625,7 +630,10 @@
     },
     "JT-02": {
       "status": "NOT_VERIFIED",
-      "evidence": []
+      "evidence": [
+        "benchmarks/results/gpu-concurrency-trace.json"
+      ],
+      "remaining": "CUDA Graph correlation errors prevent complete trace qualification; full required model/engine inventory and representative workload evidence remain pending."
     },
     "JT-03": {
       "status": "NOT_VERIFIED",
@@ -721,7 +729,8 @@
     "Native ngram-simple candidate improves time/quoted-text generation in development but full voice candidate still FAILS cold recall4.098s and memory writeP95514ms. Runtime restored to default none;broader quality, cancellation/recovery,5-run100-event comparisons and8h remain unverified.",
     "4-thread CPU embedding adopted after exact60-array comparisons,full20turn pair andpublicvoice smoke. WriteP95improves484->357ms;fullshortvoice stillFAIL(coldrecall4.373s),longduration/fault/formal5-run100event/8h remainunverified. Normalized reference substring presence canmatch wrong-source text;source-level devreview found genuine omitted evidence andreader errors.",
     "Flat evidence remainsoptional after82-case quality gain andonegenuine regression. Qwen3.5-4B artifacts/native/API/full82dev evaluated;31.35F1 vs30.58 andhigherwalltimes do notjustifyreplacement,so3B retained. Oneapp-driven inventory error fixedseparately;historicalscore/error preserved. Full independentquality andallformalJT remainNOT_VERIFIED.",
-    "Latest tool fixes pass236framework checks andfresh100/100synthetic development cases aftertwo99/100failure baselines. This doesnotreplace independenttool corpus,physical reminders/audio,complete natural-language coverage orformal JT acceptance."
+    "Latest tool fixes pass236framework checks andfresh100/100synthetic development cases aftertwo99/100failure baselines. This doesnotreplace independenttool corpus,physical reminders/audio,complete natural-language coverage orformal JT acceptance.",
+    "GPU trace now records three model processes and six overlapping visual/VLM requests with hashed native artifacts; ROS descendant cleanup fixed and verified. Nsight2026.3.1 reports720 GraphId/GraphNodeId CUPTI errors and unsupported hardware tracing onOrin, so trace integrity andJT-02 remain unverified. Kernel lifetime overlap does not prove simultaneous SM residency."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

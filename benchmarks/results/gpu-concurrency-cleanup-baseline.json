@@ -1,0 +1,912 @@
+{
+  "created_at": "2026-10-14T05:36:06.493265+00:00",
+  "status": "FAIL",
+  "scope": "Collect native CUDA timelines for the current VLM and two live ROS models.\n\nThis is an instrumented diagnostic, not an end-to-end performance acceptance.\nThe controller temporarily replaces idle managed llama/vision/pose processes\nwith the same commands beneath one Nsight process tree, then restores them.\nCamera, ASR, TTS and storage remain running. No captured images are persisted.\n",
+  "source_commit": "a99c6f7f65869636aed626c56f631c84a0b5e79b",
+  "source_fingerprints": {
+    "configs/runtime.yaml": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+    "models/manifest.json": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+    "deploy/upstreams.lock.json": "ef1aa2c492991d05138a4a40ab350cbc1c1f27b889e67c68b77e92acb65e35bd",
+    "deploy/vision/source-lock.json": "c00c3871f3d64bce7de3dd492c2c9a452d333e719aae8bcb7f08507e0fcacf9c",
+    "tools/project.py": "574691c6a1468caeaf3c75f902d76eda72dbefe4007d3e8c437ad0b96b99f706",
+    "deploy/vision/serve.py": "db8c2ea1b95ffe30b9382cff7f74ebb5435eabd27ed9f6ace484cf683ea1bc92",
+    "tools/vision_runtime_probe.py": "fa76628b9dfda7bd4e7655c06c9cecfd1ab5503d919483426f94ba7ac288bf8e",
+    "tools/gpu_concurrency_probe.py": "626e1279ec8fc2f1a8b22c01e7b17a450067c5e16117d2f1696fc8cbc1246957"
+  },
+  "verified_models_engines": [
+    {
+      "component": "llama",
+      "path": "/home/nvidia/AI_Stack/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+      "sha256": "d02fe9b69ad8cadbbd228e387667af66612c44bed29ffc8eb1e7caf9ac486c12",
+      "bytes": 1929901056
+    },
+    {
+      "component": "llama",
+      "path": "/home/nvidia/AI_Stack/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
+      "sha256": "b9160fe9d814d1fadf68395677468534778b39ac33c2e7561b7b218626e60d5e",
+      "bytes": 1338428128
+    },
+    {
+      "component": "detection",
+      "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n.onnx",
+      "sha256": "e2970d69e3d726825547ca6d3b09e9c030c76a351cdc13d657fb1a1418e273f0",
+      "bytes": 12824165
+    },
+    {
+      "component": "detection",
+      "path": "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/detection/yolov8n/TensorrtExecutionProvider_TRTKernel_graph_main_graph_17254864328571302711_0_0_sm87.engine",
+      "sha256": "88b8e9c3e2f09794cc46986cec591f9af38fc920936bc4e2d869050551458a02",
+      "bytes": 14005068
+    },
+    {
+      "component": "pose",
+      "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n-pose.onnx",
+      "sha256": "4deecd30760dac3d18371d0c762a3f8b7198c53af8c46362a16fb590c9bb7761",
+      "bytes": 13484674
+    },
+    {
+      "component": "pose",
+      "path": "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/pose/yolov8n-pose/TensorrtExecutionProvider_TRTKernel_graph_main_graph_11553024953600363046_0_0_sm87.engine",
+      "sha256": "1188a009dd88ce117611e9730c6a6686ffd1052ba0689fda9eceb95a7ac057d0",
+      "bytes": 14819852
+    }
+  ],
+  "profiler_version": "NVIDIA Nsight Systems version 2026.3.1.157-263138048394v0",
+  "backends_before": {
+    "created_at": "2026-10-14T05:35:58.304799+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "830894",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 830894,
+        "cgroup_pids": [
+          830894,
+          830898
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 53.93052,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "8274",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 8274,
+        "cgroup_pids": [
+          8274,
+          8282,
+          8324
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 83.986278,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "8356",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 8356,
+        "cgroup_pids": [
+          8356,
+          8364,
+          8406
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 83.120399,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "errors": [
+    {
+      "stage": "trace",
+      "type": "RuntimeError",
+      "error": "Nsight or its workload exited with code 1"
+    }
+  ],
+  "artifacts": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1",
+  "command": [
+    "/opt/nvidia/nsight-systems/2026.3.1/target-linux-sbsa-armv8/nsys",
+    "profile",
+    "--trace=cuda,nvtx",
+    "--sample=none",
+    "--cpuctxsw=none",
+    "--cuda-graph-trace=node",
+    "--wait=all",
+    "--export=sqlite",
+    "--output=/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/timeline",
+    "/bin/bash",
+    "-c",
+    "source /opt/ros/jazzy/setup.bash && source /home/nvidia/.cache/multi-model-assistant/workspaces/vision/install/setup.bash && exec /usr/bin/python3 /home/nvidia/Multi_Model_Inference/tools/gpu_concurrency_probe.py --worker --run-dir /home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1"
+  ],
+  "stopped": {
+    "created_at": "2026-10-14T05:36:14.574168+00:00",
+    "components": {
+      "llama": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "vision": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "pose": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      }
+    },
+    "backend_status": "STOPPED",
+    "health_checked": false,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "worker": {
+    "created_at": "2026-10-14T05:36:17.536529+00:00",
+    "status": "FAIL",
+    "worker_pid": 907429,
+    "processes": {
+      "llama": {
+        "leader_pid": 907543,
+        "command": [
+          "/usr/bin/python3",
+          "/home/nvidia/Multi_Model_Inference/tools/project.py",
+          "serve",
+          "--component",
+          "llama"
+        ],
+        "members": [
+          {
+            "pid": 907543,
+            "start_ticks": 9971653,
+            "state": "S",
+            "command": "/home/nvidia/.cache/multi-model-assistant/build/llama/bin/llama-server -lv 4 --jinja --alias assistant-vlm -m /home/nvidia/.cache/multi-model-assistant/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf --mmproj /home/nvidia/.cache/multi-model-assistant/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf -ngl 99 -c 2048 -t 4 -np 1 --host 127.0.0.1 --port 8088 --cache-ram 256 --chat-template-file /home/nvidia/.cache/multi-model-assistant/upstreams/llama.cpp/models/templates/Qwen-Qwen2.5-7B-Instruct.jinja "
+          }
+        ],
+        "cleaned_up": true,
+        "exit_code": 0
+      },
+      "vision": {
+        "leader_pid": 907688,
+        "command": [
+          "/usr/bin/python3",
+          "/home/nvidia/Multi_Model_Inference/tools/project.py",
+          "serve",
+          "--component",
+          "vision"
+        ],
+        "members": [
+          {
+            "pid": 907688,
+            "start_ticks": 9972276,
+            "state": "S",
+            "command": "/usr/bin/python3 /opt/ros/jazzy/bin/ros2 run yolo_ros yolo_node --ros-args -r __ns:=/vision -r __node:=yolo_node --params-file /home/nvidia/.local/share/multi-model-assistant/config/ros-detection.json "
+          },
+          {
+            "pid": 907895,
+            "start_ticks": 9972716,
+            "state": "S",
+            "command": "/home/nvidia/.cache/multi-model-assistant/workspaces/vision/install/yolo_ros/lib/yolo_ros/yolo_node --ros-args -r __ns:=/vision -r __node:=yolo_node --params-file /home/nvidia/.local/share/multi-model-assistant/config/ros-detection.json "
+          }
+        ]
+      },
+      "pose": {
+        "leader_pid": 908130,
+        "command": [
+          "/usr/bin/python3",
+          "/home/nvidia/Multi_Model_Inference/tools/project.py",
+          "serve",
+          "--component",
+          "pose"
+        ],
+        "members": [
+          {
+            "pid": 908130,
+            "start_ticks": 9973502,
+            "state": "S",
+            "command": "/usr/bin/python3 /opt/ros/jazzy/bin/ros2 run yolo_ros yolo_node --ros-args -r __ns:=/pose -r __node:=yolo_node --params-file /home/nvidia/.local/share/multi-model-assistant/config/ros-pose.json "
+          },
+          {
+            "pid": 908316,
+            "start_ticks": 9973920,
+            "state": "S",
+            "command": "/home/nvidia/.cache/multi-model-assistant/workspaces/vision/install/yolo_ros/lib/yolo_ros/yolo_node --ros-args -r __ns:=/pose -r __node:=yolo_node --params-file /home/nvidia/.local/share/multi-model-assistant/config/ros-pose.json "
+          }
+        ]
+      }
+    },
+    "requests": [
+      {
+        "id": 0,
+        "kind": "text",
+        "started_monotonic_ns": 99754438361882,
+        "finished_monotonic_ns": 99757542822403,
+        "usage": {
+          "completion_tokens": 41,
+          "prompt_tokens": 40,
+          "total_tokens": 81,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 40,
+          "prompt_ms": 154.153,
+          "prompt_per_token_ms": 3.8538249999999996,
+          "prompt_per_second": 259.4824622290841,
+          "predicted_n": 41,
+          "predicted_ms": 2915.429,
+          "predicted_per_token_ms": 72.88572500000001,
+          "predicted_per_second": 13.720107744006114
+        },
+        "answer_characters": 78,
+        "elapsed_ms": 3104.460521
+      },
+      {
+        "id": 1,
+        "kind": "image",
+        "camera": {
+          "source_timestamp_ns": 1791956218467079834,
+          "age_ms": 79.984866,
+          "width": 640,
+          "height": 480
+        },
+        "started_monotonic_ns": 99757578189730,
+        "finished_monotonic_ns": 99760649113804,
+        "usage": {
+          "completion_tokens": 11,
+          "prompt_tokens": 429,
+          "total_tokens": 440,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 429,
+          "prompt_ms": 2268.935,
+          "prompt_per_token_ms": 5.288892773892774,
+          "prompt_per_second": 189.07549136489146,
+          "predicted_n": 11,
+          "predicted_ms": 744.901,
+          "predicted_per_token_ms": 74.4901,
+          "predicted_per_second": 13.42460273244364
+        },
+        "answer_characters": 21,
+        "elapsed_ms": 3070.924074
+      },
+      {
+        "id": 2,
+        "kind": "text",
+        "started_monotonic_ns": 99760650876783,
+        "finished_monotonic_ns": 99763574248146,
+        "usage": {
+          "completion_tokens": 41,
+          "prompt_tokens": 40,
+          "total_tokens": 81,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 40,
+          "prompt_ms": 115.207,
+          "prompt_per_token_ms": 2.880175,
+          "prompt_per_second": 347.2011249316448,
+          "predicted_n": 41,
+          "predicted_ms": 2777.787,
+          "predicted_per_token_ms": 69.44467499999999,
+          "predicted_per_second": 14.399952192158722
+        },
+        "answer_characters": 78,
+        "elapsed_ms": 2923.371363
+      },
+      {
+        "id": 3,
+        "kind": "image",
+        "camera": {
+          "source_timestamp_ns": 1791956224504826416,
+          "age_ms": 74.325715,
+          "width": 640,
+          "height": 480
+        },
+        "started_monotonic_ns": 99763584970633,
+        "finished_monotonic_ns": 99766771094524,
+        "usage": {
+          "completion_tokens": 16,
+          "prompt_tokens": 429,
+          "total_tokens": 445,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 429,
+          "prompt_ms": 2082.008,
+          "prompt_per_token_ms": 4.853165501165501,
+          "prompt_per_second": 206.05108145597904,
+          "predicted_n": 16,
+          "predicted_ms": 1047.7,
+          "predicted_per_token_ms": 69.84666666666666,
+          "predicted_per_second": 14.317075498711462
+        },
+        "answer_characters": 26,
+        "elapsed_ms": 3186.123891
+      },
+      {
+        "id": 4,
+        "kind": "text",
+        "started_monotonic_ns": 99766773112713,
+        "finished_monotonic_ns": 99769756178971,
+        "usage": {
+          "completion_tokens": 41,
+          "prompt_tokens": 40,
+          "total_tokens": 81,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 40,
+          "prompt_ms": 114.309,
+          "prompt_per_token_ms": 2.857725,
+          "prompt_per_second": 349.928702026962,
+          "predicted_n": 41,
+          "predicted_ms": 2823.885,
+          "predicted_per_token_ms": 70.597125,
+          "predicted_per_second": 14.164882776741969
+        },
+        "answer_characters": 78,
+        "elapsed_ms": 2983.066258
+      },
+      {
+        "id": 5,
+        "kind": "image",
+        "camera": {
+          "source_timestamp_ns": 1791956230675959961,
+          "age_ms": 84.573503,
+          "width": 640,
+          "height": 480
+        },
+        "started_monotonic_ns": 99769770175534,
+        "finished_monotonic_ns": 99772698620449,
+        "usage": {
+          "completion_tokens": 12,
+          "prompt_tokens": 429,
+          "total_tokens": 441,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 429,
+          "prompt_ms": 2084.445,
+          "prompt_per_token_ms": 4.858846153846154,
+          "prompt_per_second": 205.8101796881184,
+          "predicted_n": 12,
+          "predicted_ms": 796.488,
+          "predicted_per_token_ms": 72.408,
+          "predicted_per_second": 13.810628659816594
+        },
+        "answer_characters": 23,
+        "elapsed_ms": 2928.444915
+      }
+    ],
+    "errors": [
+      {
+        "stage": "cleanup",
+        "component": "pose",
+        "error": "Profiled process group did not exit"
+      },
+      {
+        "stage": "cleanup",
+        "component": "vision",
+        "error": "Profiled process group did not exit"
+      }
+    ],
+    "visual_streams": {
+      "camera": {
+        "received": 767,
+        "effective_hz": 29.188377882618145,
+        "latest_age_p95_ms": 84.445978,
+        "p95_has_no_finite_observation": false,
+        "latest_age_max_ms": 140.997893,
+        "no_result_fraction": 0.0,
+        "stale_over_200ms_fraction": 0.0,
+        "sample_count": 526,
+        "percentile_method": "nearest-rank; missing samples rank after all finite ages",
+        "invalid_clock": 0
+      },
+      "detection": {
+        "received": 314,
+        "effective_hz": 11.949348963679398,
+        "latest_age_p95_ms": 174.867444,
+        "p95_has_no_finite_observation": false,
+        "latest_age_max_ms": 197.371757,
+        "no_result_fraction": 0.0,
+        "stale_over_200ms_fraction": 0.0,
+        "sample_count": 526,
+        "percentile_method": "nearest-rank; missing samples rank after all finite ages",
+        "invalid_clock": 0
+      },
+      "pose": {
+        "received": 311,
+        "effective_hz": 11.83518320924934,
+        "latest_age_p95_ms": 178.739626,
+        "p95_has_no_finite_observation": false,
+        "latest_age_max_ms": 221.384372,
+        "no_result_fraction": 0.0,
+        "stale_over_200ms_fraction": 0.0019011406844106464,
+        "sample_count": 526,
+        "percentile_method": "nearest-rank; missing samples rank after all finite ages",
+        "invalid_clock": 0
+      }
+    },
+    "measurement_seconds": 26.277582231,
+    "completed_at": "2026-10-14T05:37:58.936532+00:00"
+  },
+  "restored": {
+    "created_at": "2026-10-14T05:38:39.007869+00:00",
+    "components": {
+      "llama": {
+        "MainPID": "910164",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 910164,
+        "cgroup_pids": [
+          910164,
+          910166
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "vision": {
+        "MainPID": "910396",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 910396,
+        "cgroup_pids": [
+          910396,
+          910404,
+          910470
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 81.68081,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "910516",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 910516,
+        "cgroup_pids": [
+          910516,
+          910524,
+          910593
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 86.415304,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "backends_after": {
+    "created_at": "2026-10-14T05:38:45.058387+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "910164",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 910164,
+        "cgroup_pids": [
+          910164,
+          910166
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 56.566856,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "910396",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 910396,
+        "cgroup_pids": [
+          910396,
+          910404,
+          910470
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 74.993963,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "910516",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 910516,
+        "cgroup_pids": [
+          910516,
+          910524,
+          910593
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 84.258894,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "checks": {
+    "no_errors": false,
+    "worker_pass": false,
+    "six_traced_requests": false,
+    "each_request_has_three_gpu_models": false,
+    "all_kernels_mapped": false,
+    "one_gpu": false,
+    "source_unchanged": true,
+    "models_engines_unchanged": true,
+    "backends_ready_after": true,
+    "other_services_not_restarted": true
+  },
+  "completed_at": "2026-10-14T05:38:49.171455+00:00",
+  "raw_artifacts": [
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/llama.log",
+      "sha256": "96172f9c7858f925645aeff61406430340f6cd8bcb9b1bb01fddef26c9bc07b1",
+      "bytes": 36292
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/pose.log",
+      "sha256": "af37a13601624b0b64f49e6018ffd2003a3ff44f5528541e34f0e5651f19944c",
+      "bytes": 3629
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/probe-source.py",
+      "sha256": "626e1279ec8fc2f1a8b22c01e7b17a450067c5e16117d2f1696fc8cbc1246957",
+      "bytes": 22378
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/profiler.log",
+      "sha256": "43d4e5327c825671833c076c8b0fa06de03983c58af8259be96c98cb70a4e2cb",
+      "bytes": 7384
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/ranges.c",
+      "sha256": "80b2811b9d9d22ccef71d5e1d16efcad31dc0561cb08fcfc847e813724dd8da0",
+      "bytes": 125
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/ranges.so",
+      "sha256": "582d9f1eeb0f826bcad990c59e7c511d65cc1427de8cfc5d53d3b3a632feeebf",
+      "bytes": 75592
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/timeline.nsys-rep",
+      "sha256": "1779e44ee8b98c84ce3ebb1995cc85565c971c7a77a24e471dcdf67d3bd7469f",
+      "bytes": 22311670
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/timeline.sqlite",
+      "sha256": "a06b75790e709bfaa0c7442837108573dafd1472dbac2d74b411730e43f66f67",
+      "bytes": 63909888
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/vision.log",
+      "sha256": "9ad7d7876803208e1ac4f22091858f4fb26f5e9c7f84d7a9a75e3b269cff01c3",
+      "bytes": 3538
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v1/worker.json",
+      "sha256": "efec35303b791d0ba4eb2266e837c07557d3d24ab7cc5850209c1f87a8d79aef",
+      "bytes": 9602
+    }
+  ]
+}

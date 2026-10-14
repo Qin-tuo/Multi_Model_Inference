@@ -6,6 +6,10 @@
 
 项目处于框架接入与功能闭环验证阶段。框架/插件236项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
+新增[三进程GPU追踪](benchmarks/results/gpu-concurrency-trace.json)：同一次Nsight采集覆盖真实D435i检测、姿态和6次文本/图文请求，记录345,062条CUDA kernel区间，并核对模型、TensorRT engine及进程归属。29秒采样中检测/姿态为11.97/11.79Hz，最新结果年龄P95为173.89/177.30ms。采集进程已全部退出，七个原服务恢复READY。**报告仍为FAIL**：当前Nsight/CUPTI对CUDA Graph关联产生720条错误，不能据此宣称追踪完整或JT-02通过；kernel生命周期重叠也不能证明SM指令同时执行。首次ROS子进程回收失败的[原始记录](benchmarks/results/gpu-concurrency-cleanup-baseline.json)保留，修复后通过真实后代进程回收测试与复测。原始文件保存在`/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-v2/`，Git报告登记其SHA256；不保存摄像头图像或公开场景回答。本次采用软件追踪，未测完整语音/记忆前台负载，不能替代无插桩性能基线或质量验收。
+
+需要复现时使用新路径，保持后台空闲：`.venv/bin/python tools/gpu_concurrency_probe.py --run-dir /home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-NEW --output benchmarks/results/gpu-concurrency-NEW.json`。脚本会临时停止并恢复受项目管理的llama、vision、pose服务，其余服务继续运行；当前CUDA Graph关联问题未解决前，命令预期返回失败并保存证据。
+
 最新[冷启动阶段分析](benchmarks/results/voice-cold-stage-diagnostic.json)确认首轮记忆问答的主要等待在模型处理提示：1146个输入token，原生提示计算约1.93秒，模型首token约2.17秒；该轮文件首PCM约4.35秒。已用固定版本的`llama-bench`完成[三种微批量、三个输入长度、各五次测量](benchmarks/results/llama-prefill-screening.json)，没有发现值得采用的收益，当前512微批量保持不变。筛选末尾一次姿态就绪探测未取得新样本，原报告保留FAIL；[后续复查](benchmarks/results/llama-prefill-readiness-recheck.json)七个后端全部READY。原生基准不包含图像编码或完整语音链路，也不替代JT验收。
 
 原生`ngram-simple`推测解码已作为默认关闭的配置候选。[两组各20轮语音/记忆/视觉对照](benchmarks/results/speculative-voice-comparison.json)中，时间问答首文件PCM P95从3.224降到2.297秒，算术从2.003降到1.746秒；冷启动记忆问答仍需4.098秒，候选记忆写入P95为514ms，未满足500ms门槛，因此没有切换默认。两组均无执行错误，检测和姿态时效通过；原配置已恢复，七个后端全部就绪。详细范围与失败项见[评估说明](deploy/evaluation/README.md#原生提示匹配推测解码候选)。
