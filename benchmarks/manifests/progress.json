@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T06:02:51.139119+00:00",
+  "updated_at": "2026-10-14T06:40:35.754033+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -55,10 +55,15 @@
         "benchmarks/results/gpu-concurrency-graph-trace.json",
         "benchmarks/results/model-engine-inventory.json",
         "benchmarks/results/jt02-multimodel-audit.json",
-        "benchmarks/results/gpu-trace-tests.json"
+        "benchmarks/results/gpu-trace-tests.json",
+        "benchmarks/manifests/vision-quality-v1.json",
+        "benchmarks/manifests/coco2017-quality-v1.json",
+        "benchmarks/results/vision-quality-plumbing.json",
+        "deploy/vision/eval/runner.cpp",
+        "tools/vision_quality.py"
       ],
-      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence. New graph-granularity capture PASS:188944 standalone kernels+177graphs,all189121device activities correlated tosuccessful launches. Reverse coverage identifies6674capture-only calls within8balanced capture intervals,no unexplained omissions. Six live requests overlap VLM+bothvision models;7functional roles/6active engines/8inactive variants inventoried. JT-02qualified byits explicit requirements;node trace failures retained. Quality,capacity anduninstumented full-scenario timing remain open.",
-      "next_action": "Independent detection/pose andvisual-answer quality; frozen representative S1/S2/S3 timing withfull assistant load, followed bycapacity andlong-duration stability"
+      "validation": "GPU ORT CUDA/TensorRT shared libraries and final five ROS packages built; real D435i detector/pose full-model TRT execution proven by native traces; 30s steady and 40s file-speech coexistence timing PASS; short-workload min MemAvailable 3.38GiB; complete workload capacity and scenario quality pending; Native Nsight captures three model PIDs and345062 CUDA kernel intervals across6 real text/live-camera image requests;29s visual rates11.97/11.79Hz andsampled ageP95173.89/177.30ms. Temporary services cleanly stopped and7managed backends restored. Trace remains FAIL due720 CUDA Graph correlation errors; instrumented lifetime overlap is not SM residency or complete JT-02 evidence. New graph-granularity capture PASS:188944 standalone kernels+177graphs,all189121device activities correlated tosuccessful launches. Reverse coverage identifies6674capture-only calls within8balanced capture intervals,no unexplained omissions. Six live requests overlap VLM+bothvision models;7functional roles/6active engines/8inactive variants inventoried. JT-02qualified byits explicit requirements;node trace failures retained. Quality,capacity anduninstumented full-scenario timing remain open. Public COCO2017 full5000-image regression protocol anddataset sealed before corpus inference. Native yolo_ros TensorRT adapter andofficial COCOeval wiring verified;onebus box hasIoU0.9737vsPyTorch,retainedFAIL rather thanprecision assumption. Fullcomparison RUNNING;do not inferquality acceptance frompartial predictions.",
+      "next_action": "Let the frozen full5000-image reference/native detection+pose comparison finish;inspect primary AP drops andretained failures;then qualifyindependent recorded scenes andfullscenario timing"
     },
     {
       "task_id": "J0.4",
@@ -741,7 +746,8 @@
     "4-thread CPU embedding adopted after exact60-array comparisons,full20turn pair andpublicvoice smoke. WriteP95improves484->357ms;fullshortvoice stillFAIL(coldrecall4.373s),longduration/fault/formal5-run100event/8h remainunverified. Normalized reference substring presence canmatch wrong-source text;source-level devreview found genuine omitted evidence andreader errors.",
     "Flat evidence remainsoptional after82-case quality gain andonegenuine regression. Qwen3.5-4B artifacts/native/API/full82dev evaluated;31.35F1 vs30.58 andhigherwalltimes do notjustifyreplacement,so3B retained. Oneapp-driven inventory error fixedseparately;historicalscore/error preserved. Full independentquality andallformalJT remainNOT_VERIFIED.",
     "Latest tool fixes pass236framework checks andfresh100/100synthetic development cases aftertwo99/100failure baselines. This doesnotreplace independenttool corpus,physical reminders/audio,complete natural-language coverage orformal JT acceptance.",
-    "Node-granularity GPU trace remains FAIL with720 GraphId/GraphNodeId errors inboth Nsight2026.3.1 and2025.6.3. Graph-granularity capture andfullengine inventory nowqualify JT-02;all189121device records have launch matches andreverse missing records arefullyexplained byCUDAcapture. This doesnot qualifySMresidency,quality,physicalaudio orperformance gates."
+    "Node-granularity GPU trace remains FAIL with720 GraphId/GraphNodeId errors inboth Nsight2026.3.1 and2025.6.3. Graph-granularity capture andfullengine inventory nowqualify JT-02;all189121device records have launch matches andreverse missing records arefullyexplained byCUDAcapture. This doesnot qualifySMresidency,quality,physicalaudio orperformance gates.",
+    "FullpublicCOCO2017 regression startedwithfrozenFP32reference andexistingnativeORTTensorRT engines;all5000images hashed,scorewiring rejects omissions. Primarypose reference retainsallcoordinates;publication-matched scoreisdiagnostic only. Runtimecore singlebusdetectorbox IoU0.9737fails0.98alignment. Publicregression doesnot replaceindependent camera recordings/gesture/visualQA orcloseJT-07."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }
