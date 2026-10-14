@@ -1,0 +1,29 @@
+{
+  "created_at": "2026-10-14T09:18:36.704915+00:00",
+  "toolkit": "VLMEvalKit",
+  "repository": "https://github.com/open-compass/VLMEvalKit",
+  "commit": "d8d34b399b2f78293ba852644f6a3caffe34e3d8",
+  "toolkit_directory": "/home/nvidia/AI_Stack/frameworks/VLMEvalKit",
+  "license": "Apache-2.0",
+  "source_sha256": {
+    "vlmeval/utils/matching_util.py": "06088ed4da68cd9d8c3018e7630d0503f1365e6dd31f651cbedd8aa44dc14466",
+    "vlmeval/dataset/utils/multiple_choice.py": "39188c274e60899ceeff9f4180cbf0f9c798dd8954da0f9dccc85da0951d54c6",
+    "vlmeval/dataset/image_mcq.py": "9f619bec3abc784ca647ae8fb78f2dc6d5ff6209b8d525a0d0be3ead868c5c73"
+  },
+  "dataset": "MMBench_DEV_CN_V11",
+  "dataset_md5": "593f9b5f6bea453d870a798b34ae4f37",
+  "dataset_sha256": "4de91ee6fa5220a06ed4b418f8f53b372886b218c79e5035207d1fa233ac5dd5",
+  "download_url": "https://opencompass.oss-cn-shanghai.aliyuncs.com/utils/benchmarks/MMBench/MMBench_DEV_CN_V11.tsv",
+  "scoring": "Officialcan_infer/prefetch_circular_group exact_matching,unparsedwrong,nocloudjudge. WhitelistedASTfunctionloading avoids unrelatedpackageinitialization/TLSoverrides.",
+  "data_rights": "Publicbenchmark aggregatesimagesfrommultiplesources;retainupstreamattribution,keeppixels/questiontextlocal,onlymetrics/provenance inGit.",
+  "evaluation_python": "/home/nvidia/AI_Stack/environments/evaluation/bin/python",
+  "evaluation_packages": {
+    "pandas": "2.3.3",
+    "numpy": "1.26.4",
+    "Pillow": "10.2.0",
+    "python-dateutil": "2.8.2",
+    "pytz": "2024.1",
+    "tzdata": "2025.2"
+  },
+  "adapter_sha256": "7e21571509d70ab78889083549bb67129905cd225d5c6a3d70cc64513304b404"
+}
