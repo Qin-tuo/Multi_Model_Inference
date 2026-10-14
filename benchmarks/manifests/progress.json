@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T20:28:59.843819+00:00",
+  "updated_at": "2026-10-14T01:52:03.056227+00:00",
   "plan": "v1.1 (mature-framework revision of v1.0 scope)",
   "overall_status": "RUNNING",
   "tasks": [
@@ -496,7 +496,20 @@
         "benchmarks/results/voice-heap-comparison.json"
       ],
       "validation": "Owned-process startupcollect vscollect+freeze,automaticGC enabledandthresholds unchanged. CPython3.12 immortal permanentbaseline375 explicitly recorded;foreignfreeze/concurrentpolicy rejected,newcycles collect,oldcycles releaseonclose.227corePASS. Both20-turn realmodels/livecamera/fileaudio runs completebutFAILshortlatency:recall4.310/4.274s. WorkloadGCmax5.07/10.30ms,gen2count0/0;loopmax167/373ms. Startup541/536ms,close552/641ms reportedseparately;freeze54.6万objects thenrestore375. No provenbenefit or8hqualification,no defaultpolicy change.",
-      "next_action": "Trace cold first-turn stages;do not adoptfreeze fromshortabsenceofgen2. Longerrepresentative memory/resource tests andphysicalaudio lifecycle remainneeded."
+      "next_action": "Cold-stage trace nowidentifies nativeLLM prefill aslargest firstrecallstage;startupGC remainsbenchmark-only. Longerrepresentative memory/resource tests andphysicalaudio lifecycle remainneeded."
+    },
+    {
+      "task_id": "J5.runtime.prefill",
+      "status": "RUNNING",
+      "artifacts": [
+        "tools/llama_prefill_probe.py",
+        "benchmarks/results/voice-cold-stage.json",
+        "benchmarks/results/voice-cold-stage-diagnostic.json",
+        "benchmarks/results/llama-prefill-screening.json",
+        "benchmarks/results/llama-prefill-readiness-recheck.json"
+      ],
+      "validation": "Cold20turn alloutputs/noerrors butFAILshort/image latency4.350/5.202s. Firstrecall1146tokens:nativeprefill1928ms,LLMTTFB2166ms,ASR693ms,context367ms,TTSfirstchunk102ms. Pinnednative llama-bench9configurations x5reps:ubatch256/512/1024 at512/1024/1536input tokens;no gainover512 so no parameterchange. Vision11.86/11.89Hz,ageP95174/189ms. Finalposehealth no_fresh_sample preservesFAIL;laterall7READY,otherbackendPIDsunchanged. Isolatedtoken-prefill,noprojector/fullspeech/memoryload orJTacceptance.",
+      "next_action": "Evaluate upstream prompt-lookup speculative decoding with identical synthetic text/tool/image requests and actual draftacceptance. Qualify candidate in real voice/memory/vision onlyif output andlatency justifyit;keep defaults untilthen."
     }
   ],
   "acceptance": {
@@ -595,10 +608,10 @@
     "External Chinese memory remains incomplete:full82 development lexical F1=26.329% with scalar FP32 and26.685% with int8 windows;no execution errors,unexpected writes or cross-owner evidence. Small changes do not prove broad quality improvement;200 heldout and76 reserve remain untouched. Relative/range/event-time/version reasoning and broad source faithfulness remain incomplete.",
     "Long-record indexing/packing is integrated with locked BGE int8. Public save/recall/correction/old-backup restore,30 reindex SIGKILLs and40 cross-profile restore SIGKILLs pass. Dynamic quantization must remain record-wise.10k complete-adapter/foreground coexistence timing,other fault classes including control-loss/pending writes and independent JT gates remain incomplete.",
     "Managed current-profile10k timing passes47ms query/343ms write P95,but numbered top5 recall9/100(long0/50). Native local BM25/RRF/DBSF isolated candidates each recover100/100,not production-integrated/lifecycle-qualified. Actual20-turn shared10k voice/live-camera load passes memory127/459ms and visual11.64Hz/174-178ms but FAILS file first-PCM3/5s targets(3.098/5.545s);loop max154.90ms needs diagnosis. Physical audio,independent quality,full scenes and JT gates remain unverified.",
-    "Hybrid dev82 remains below semantic acceptance:direct5/512 lexicalF1=26.958%;fixed8/768=29.585%,visible reference65/82. Configuration nowreaches store andpacker;defaultstillWINDOWS5/512. Hybrid5/512 voice image5.202s fails5s;8/768 voice andreal-stage tracing untested.40cross-profile restoreSIGKILLs passed with declared idlemodelservice intervention. AllJT remainNOT_VERIFIED.",
-    "Current8/768 + bounded256/64MiB prompt-cache20turn baseline stillFAILshort3s(firstPCMmax-typeP95=3.271s),image4.895s;no acousticgroundtruth. Nativephase trace shows irrelevant memorycostfor arithmetic butrouting change notyetimplemented. GlobalRSS/memory and8h remainunqualified;prompt-cache cap isnot a totalprocesscap.",
+    "Hybrid dev82 remains below semantic acceptance:8/768 lexicalF1=29.585%,visible reference65/82;defaultstillWINDOWS5/512. Real8/768 voice traces nowcompleted butFAILlatency.40cross-profile restoreSIGKILLs passedwithdeclared modelservice intervention. Independentheldoutquality andallJT remainNOT_VERIFIED.",
+    "Current8/768 + bounded256/64MiB promptcache stillFAILshortlatency. Arithmetic routingimplementedbutopt-in;currentcoldtrace recall4.350s,image5.202s,LLMprefilllargestfirstrecallstage. Nativeubatch256/512/1024 screeningdidnotimproveruntime;default512 retained. Wholeprocessmemory/8h/physicalaudio remainunqualified.",
     "Fixed-arrival selective-memory experiment remainsincomplete foroverall latency:mathimproves in observedruns butfirstcandidatecameraepochfails;GC-observed20turnrepeatstillrecall4.348s/time3.130s. Gen2GC580ms overlapsloop573ms andcameraepochreset. GCpolicyunchanged;startup/heap/cleanup/8hqualification pending. AllformalJT stillNOT_VERIFIED.",
-    "Startupcollect/freeze20-turn pairdidnotproveoverallgain:neitherrunhadworkloadgen2GC andrecallP95stays~4.3s. GCownership/cleanupmechanism testedbutbenchmark-only;longdurationmemory,8h,andcoldstartupstagesremainunqualified."
+    "Startupcollect/freeze20turnpairdidnotproveoverallgain;GCownership/cleanupbenchmark-only. Coldstageevidence nowshowsfirstrecallprefill1928ms/TTFB2166ms. LongdurationGC,memory/resources and8hremainunqualified."
   ],
   "dependency_root": "/home/nvidia/AI_Stack"
 }

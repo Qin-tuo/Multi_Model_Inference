@@ -5,7 +5,7 @@
 | 目录 | 内容 |
 |---|---|
 | `frameworks/` | llama.cpp、Pipecat、OpenVoiceStream、voice-engine、yolo_ros 的 Git 源码入口；Mem0、APScheduler、Qdrant client、Ultralytics、PyTorch 等已安装包的源码入口；ONNX Runtime 源码及 RealSense ROS 安装包入口 |
-| `builds/` | llama.cpp、ONNX Runtime 等编译目录；`llama/bin/llama-server` 是当前推理服务程序 |
+| `builds/` | llama.cpp、ONNX Runtime 等编译目录；`llama/bin/llama-server` 是当前推理服务程序，`llama/bin/llama-bench` 是已编译的同版本原生性能工具 |
 | `models/` | Qwen 图文/语音模型、BGE、YOLO、Matcha/Vocos 及本机构建的 TensorRT 引擎 |
 | `environments/assistant/` | Pipecat、Mem0、APScheduler、BGE、PyAudio 等主应用 Python 环境 |
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |

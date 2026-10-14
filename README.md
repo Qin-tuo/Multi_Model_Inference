@@ -6,6 +6,8 @@
 
 项目处于框架接入与功能闭环验证阶段。框架/插件227项测试、真实GPU文本/图文推理、BGE转换回归、10项语义召回和3项跨应用进程记忆问答已通过。D435i双路640×480采集实测接近30Hz；ROS检测和姿态已在本机TensorRT执行，原生ORT逐节点trace确认完整模型计算位于TensorRT。持续会话已接入实时相机和语音文件输入，并复用记忆、工具和提醒；图文计数与实际推理用量核对通过。完整模型质量、物理语音、响应时延和整机验收仍待完成。逐项进度见 [progress.json](benchmarks/manifests/progress.json)，测试范围见 [测试报告](benchmarks/results/framework-tests.json)。
 
+最新[冷启动阶段分析](benchmarks/results/voice-cold-stage-diagnostic.json)确认首轮记忆问答的主要等待在模型处理提示：1146个输入token，原生提示计算约1.93秒，模型首token约2.17秒；该轮文件首PCM约4.35秒。已用固定版本的`llama-bench`完成[三种微批量、三个输入长度、各五次测量](benchmarks/results/llama-prefill-screening.json)，没有发现值得采用的收益，当前512微批量保持不变。筛选末尾一次姿态就绪探测未取得新样本，原报告保留FAIL；[后续复查](benchmarks/results/llama-prefill-readiness-recheck.json)七个后端全部READY。原生基准不包含图像编码或完整语音链路，也不替代JT验收。
+
 | 功能 | 组件 | 当前状态 |
 |---|---|---|
 | 主框架 | Pipecat 1.12.0 原生 PipelineWorker/WorkerRunner | 持续文本/相机/语音文件会话、记忆与工具通过初测；真实设备、完整打断和质量验证继续推进 |
