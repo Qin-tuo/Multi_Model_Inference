@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T10:58:37.442709+00:00",
-  "plan": "v1.3 (software foundation first; long-term memory and performance targets deferred by user)",
-  "overall_status": "RUNNING",
+  "updated_at": "2026-10-14T11:24:57.466183+00:00",
+  "plan": "v2.0 (edge multi-model deployment, dataflow, resources, profiling and reliable delivery)",
+  "overall_status": "PAUSED",
   "tasks": [
     {
       "task_id": "J0.1",
@@ -883,24 +883,30 @@
   ],
   "dependency_root": "/home/nvidia/AI_Stack",
   "delivery_phases": {
-    "active": "software_foundation",
-    "decision_date": "2026-10-14",
-    "authority": "User requested4B main model and relaxed current acceptance to framework integration/software reliability; performance later.",
-    "current": [
-      "SF-01 real end-to-end framework integration",
-      "SF-02 cancellation and state consistency",
-      "SF-03 durable notes/reminders and idempotency",
-      "SF-04 bounded resource lifecycle",
-      "SF-05 backend failure and recovery",
-      "SF-06 reproducible operation and issue ledger"
+    "active": "A_software_foundation",
+    "execution_status": "PAUSED",
+    "A": [
+      "SF-01 real chain",
+      "SF-02 cancellation/state",
+      "SF-03 durable tools",
+      "SF-04 resource lifecycle",
+      "SF-05 recovery",
+      "SF-06 runnable delivery"
     ],
-    "next": [
-      "long-term memory-specific implementation and qualification",
-      "model quality optimization and independent percentage targets",
-      "latency/throughput/visual-rate optimization, B0-B3 and formal 8h acceptance"
+    "B": [
+      "Deployment/precision evidence",
+      "Dataflow/resource scheduling",
+      "B0-B3 and frozen SLO",
+      "Measured optimization",
+      "8h/fault/offline/redeployment",
+      "C++ contribution and portfolio evidence"
     ],
-    "preservation": "Keep existing Mem0/Qdrant integration, data and all prior evidence. Mixed tasks retain their non-memory work.",
-    "acceptance": "Current phase uses SF-01..06. Original JT requirements retained for later product qualification, not claimed passed."
+    "later": [
+      "Long-term memory product extension",
+      "Independent Edge-LLM comparison"
+    ],
+    "authority": "Latest user goal prioritizes edge deployment as the resume project; framework first, performance evidence required for final portfolio.",
+    "legacy_acceptance": "JT values remain historical/extended-product evidence; no mixed denominator with SF or DP."
   },
   "foundation_acceptance": {
     "SF-01": {
@@ -955,6 +961,56 @@
     ],
     "identity_authentication": false,
     "authority": "User scenario and explicit removal of identity verification in project review",
-    "gesture_action_mapping": "PENDING_USER_REPLY"
+    "gesture_action_mapping": {
+      "wave": "greet_once",
+      "stationary_open_palm": "cancel_current_turn",
+      "motion_conflict": "waving is not a stationary stop",
+      "cancel_effect": "stop generation/playback and block unstarted tools; retain completed notes/reminders"
+    }
+  },
+  "execution_state_note": "User paused implementation. JD-driven plan updated without resuming deployment or testing.",
+  "deployment_roadmap": "benchmarks/manifests/deployment-roadmap-v2.json",
+  "job_requirement_sources": "benchmarks/manifests/target-jd-20261014.json",
+  "final_deployment_acceptance": {
+    "DP-01": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-02": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-03": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-04": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-05": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-06": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-07": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-08": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-09": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    },
+    "DP-10": {
+      "status": "NOT_VERIFIED",
+      "evidence": []
+    }
   }
 }

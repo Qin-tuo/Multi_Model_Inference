@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T10:58:37.441726+00:00",
+  "updated_at": "2026-10-14T11:24:57.472024+00:00",
   "phase": "software_foundation",
   "scope": "Observed issues and verification gaps; not a claim that all possible defects are known.",
   "issues": [
@@ -38,7 +38,7 @@
       "id": "SF-GAP-003",
       "title": "User-requested face detection and explicit gesture behaviors",
       "status": "OPEN",
-      "scope": "Body/face/gesture perception followed by voice instruction, model understanding and speaker output. User explicitly removed identity authentication; face detection/localization only. Gesture/action mapping pending interview reply."
+      "scope": "Body/face/gesture perception to voice/model/speaker. No identity. Wave greets; stationary held open palm cancels the current generation/playback and unstarted tools, preserving completed writes; moving palm does not stop. Mature face/hand models still require integration."
     }
   ]
 }

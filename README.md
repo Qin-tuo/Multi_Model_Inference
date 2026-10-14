@@ -1,10 +1,10 @@
-# Jetson 本地多模态助手
+# Jetson 端侧多模型部署与资源调度
 
-在 Jetson Orin NX 16GB 上构建具有中文语音、持续视觉、图文理解、长期记忆、打断、工具和提醒能力的本地助手。整体基底采用 Pipecat，记忆采用 Mem0，提醒采用 APScheduler；业务代码负责模型接入、策略和性能测量。实施任务与验收见 [项目计划](02-jetson-multimodel-inference.md)。
+以陪伴机器人为真实负载，在Orin NX 16GB上部署视觉、语音和4B主模型，重点验证跨模型数据流、资源预算、并发调度、性能与异常恢复。整体复用Pipecat、ROS2、llama.cpp、ORT/TensorRT及现有语音/感知框架。实施依据为[JD驱动的v2.0计划](02-jetson-multimodel-inference.md)，已有源码和历史证据继续保留。
 
 ## 当前进度
 
-2026-10-14按用户要求调整：**当前目标是打通整体框架、夯实软件基础，发现并修复整机集成问题**。主模型暂用Qwen3.5-4B；围绕真实调用链、取消与状态一致性、工具持久化、资源释放、异常恢复和可运行部署验收。长期记忆专项、性能优化及正确率百分比门槛移到后续阶段。已有模块、数据和历史证据保留，具体SF-01～06标准见[阶段调整](02-jetson-multimodel-inference.md#0-当前交付阶段调整2026-10-14)。
+2026-10-14更新为[端侧部署岗位路线](benchmarks/manifests/deployment-roadmap-v2.json)：**先交付软件基础A，再完成具有资源调度、性能证据和可复现交付的作品集B**。参考[4个官方域岗位JD](benchmarks/manifests/target-jd-20261014.json)。主模型暂用Qwen3.5-4B；人体/人脸/手势→语音→理解→扬声器为核心场景，挥手问候、静止举掌取消整轮。长期记忆延期，身份验证删除。当前实施仍暂停，本轮只更新计划；旧[JT目标](docs/archive/02-plan-v1.3-20261014.md)与新SF/DP验收分别记录。
 
 [当前4B软件基础验证](benchmarks/results/phase-one-qwen35-main-serial.json)已完成四轮文字和四轮文件语音：笔记保存/查询、提醒创建/取消、时间、图像、算术和到期提醒输出通过。首轮[失败记录](benchmarks/results/phase-one-qwen35-main.json)发现同一回复批量重复工具请求，触发额外生成及跨轮token记录；幂等处理保证实际笔记和提醒未重复写入。现使用llama.cpp原生`parallel_tool_calls=false`逐次决策，并同步到输入token计数；[相同模型/输入复测](benchmarks/results/qwen35-serial-tool-comparison.json)通过，[42项相关回归](benchmarks/results/foundation-qwen35-regression.json)通过。文件回执保持fixture标记，公开入口、持续运行和故障恢复继续验证，见[问题台账](benchmarks/manifests/foundation-issues.json)。
 
