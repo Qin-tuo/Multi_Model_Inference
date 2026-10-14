@@ -1,0 +1,643 @@
+{
+  "created_at": "2026-10-14T07:54:53.646490+00:00",
+  "status": "PASS",
+  "scope": "Register every selected model artifact/engine without loading duplicate models.\n\nHashes prove artifact identity and configuration binding, not inference quality.\nLive native properties, process mappings and previous execution evidence are\nreported separately. Inactive engine variants are explicitly identified.\n",
+  "source_sha256": "43daa78a26bcd8df6239c7fca48ba7c1d08d11f2e8e4723fd8931a6c80d0da87",
+  "source_commit": "c7b33d3a2d5338a56610d549681e3e2df973a32a",
+  "runtime_sha256": "99d66c8f6bb0a6af81c2fc520ce7106f7aa4a2b35f9dd554dd970276fbf34110",
+  "model_manifest_sha256": "2969a7b45bf7ce5b107ec69932a0bc39d8d2a4ea9e71edb2144c5f799ab82ba0",
+  "functional_model_count": 7,
+  "model_counting": "VLM, ASR, TTS chain (Matcha+Vocos), detection, pose, embedding, VAD. TTS includes two neural architectures.",
+  "models": {
+    "vlm": {
+      "backend": "llama.cpp CUDA",
+      "device": "GPU",
+      "artifacts": [
+        {
+          "path": "/home/nvidia/AI_Stack/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+          "sha256": "d02fe9b69ad8cadbbd228e387667af66612c44bed29ffc8eb1e7caf9ac486c12",
+          "bytes": 1929901056,
+          "role": "model",
+          "verification": "matches prior lock"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf",
+          "sha256": "b9160fe9d814d1fadf68395677468534778b39ac33c2e7561b7b218626e60d5e",
+          "bytes": 1338428128,
+          "role": "projector",
+          "verification": "matches prior lock"
+        }
+      ],
+      "native_properties": {
+        "model_path": "/home/nvidia/.cache/multi-model-assistant/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf",
+        "model_alias": "assistant-vlm",
+        "modalities": {
+          "vision": true,
+          "video": true,
+          "audio": false
+        },
+        "total_slots": 1,
+        "build_info": "b1-08ffba2"
+      },
+      "execution_evidence": {
+        "path": "benchmarks/results/llama-smoke.json",
+        "sha256": "0318d617fb6c082cbec6dadb954ab3417afc48bafdc07e76bb640fc9e76bac60",
+        "status": "PASS",
+        "scope": "GPU load and text/image functionality only; not quality or latency acceptance"
+      }
+    },
+    "detection": {
+      "backend": "ORT TensorRT",
+      "device": "GPU",
+      "artifacts": [
+        {
+          "component": "detection",
+          "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n.onnx",
+          "sha256": "e2970d69e3d726825547ca6d3b09e9c030c76a351cdc13d657fb1a1418e273f0",
+          "bytes": 12824165
+        },
+        {
+          "component": "detection",
+          "path": "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/detection/yolov8n/TensorrtExecutionProvider_TRTKernel_graph_main_graph_17254864328571302711_0_0_sm87.engine",
+          "sha256": "88b8e9c3e2f09794cc46986cec591f9af38fc920936bc4e2d869050551458a02",
+          "bytes": 14005068
+        }
+      ],
+      "runtime_parameters": {
+        "path": "/home/nvidia/AI_Stack/runtime-data/config/ros-detection.json",
+        "configured_path": "/home/nvidia/.local/share/multi-model-assistant/config/ros-detection.json",
+        "sha256": "c800679a31cf6a38d0570690fbed671c3c05c0512c615f482d7f45351ef9ccaa",
+        "bytes": 2050,
+        "role": null,
+        "verification": "observed registration hash"
+      },
+      "precision": "FP32 ONNX / TensorRT FP32 with TF32 allowed; FP16 retained for later measured comparison",
+      "execution_evidence": {
+        "path": "benchmarks/results/vision-detection-provider.json",
+        "sha256": "42e206865398cb26c0bae1193353b6d3b3643cd1be1138f59f3dab5f4fceeac9",
+        "status": "PASS",
+        "scope": "actual ORT per-node trace with model-shaped TensorRT boundaries; no quality/performance acceptance"
+      }
+    },
+    "pose": {
+      "backend": "ORT TensorRT",
+      "device": "GPU",
+      "artifacts": [
+        {
+          "component": "pose",
+          "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n-pose.onnx",
+          "sha256": "4deecd30760dac3d18371d0c762a3f8b7198c53af8c46362a16fb590c9bb7761",
+          "bytes": 13484674
+        },
+        {
+          "component": "pose",
+          "path": "/home/nvidia/AI_Stack/models/yolo/ort-trt-fp32/pose/yolov8n-pose/TensorrtExecutionProvider_TRTKernel_graph_main_graph_11553024953600363046_0_0_sm87.engine",
+          "sha256": "1188a009dd88ce117611e9730c6a6686ffd1052ba0689fda9eceb95a7ac057d0",
+          "bytes": 14819852
+        }
+      ],
+      "runtime_parameters": {
+        "path": "/home/nvidia/AI_Stack/runtime-data/config/ros-pose.json",
+        "configured_path": "/home/nvidia/.local/share/multi-model-assistant/config/ros-pose.json",
+        "sha256": "5a3216a652d8d412c2b5e0d28983b92fedc807e8c667672c21dc239c783f025e",
+        "bytes": 2046,
+        "role": null,
+        "verification": "observed registration hash"
+      },
+      "precision": "FP32 ONNX / TensorRT FP32 with TF32 allowed; FP16 retained for later measured comparison",
+      "execution_evidence": {
+        "path": "benchmarks/results/vision-pose-provider.json",
+        "sha256": "2a481f41369fd4c85c770b753a3b1e6f9ba3dac77721cc9dcf3afc6ac250daca",
+        "status": "PASS",
+        "scope": "actual ORT per-node trace with model-shaped TensorRT boundaries; no quality/performance acceptance"
+      }
+    },
+    "asr": {
+      "backend": "llama.cpp CUDA",
+      "device": "GPU",
+      "artifacts": [
+        {
+          "path": "/home/nvidia/AI_Stack/models/Qwen3-ASR-0.6B-Q8_0.gguf",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/Qwen3-ASR-0.6B-Q8_0.gguf",
+          "sha256": "bca259818b50ca7c4c05e9bdb35a5dc04fa039653a6d6f3f0f331f96f6aa1971",
+          "bytes": 804749248,
+          "role": "model",
+          "verification": "matches prior lock"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/mmproj-Qwen3-ASR-0.6B-bf16.gguf",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/mmproj-Qwen3-ASR-0.6B-bf16.gguf",
+          "sha256": "dae36c855f9a82a8916bea2238b24bda69a39d8da8b2f46dee7c103775656039",
+          "bytes": 378575520,
+          "role": "projector",
+          "verification": "matches prior lock"
+        }
+      ],
+      "native_properties": {
+        "model_path": "/home/nvidia/.cache/multi-model-assistant/models/Qwen3-ASR-0.6B-Q8_0.gguf",
+        "model_alias": "assistant-asr",
+        "modalities": {
+          "vision": false,
+          "video": false,
+          "audio": true
+        },
+        "total_slots": 1,
+        "build_info": "b1-08ffba2"
+      },
+      "execution_evidence": {
+        "path": "benchmarks/results/asr-probe.json",
+        "sha256": "41bf19e3e174120b4598e9d4a0f4b91b91925aff7a63e5ff20cd7ba447c693db",
+        "status": "PASS",
+        "scope": "raw candidate ASR output on three synthetic TTS files, not final quality acceptance"
+      }
+    },
+    "tts": {
+      "backend": "OVS/voxedge Matcha split TensorRT + Vocos TensorRT",
+      "device": "CPU encoder; GPU three estimator steps and Vocos",
+      "tensorrt": "10.16.2.10",
+      "artifacts": [
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/onnx/matcha_encoder_trt.onnx",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/onnx/matcha_encoder_trt.onnx",
+          "sha256": "597f559bc054bf09fbc85edacad920ee960f5de768bb03039ab9bccf5b8d0355",
+          "bytes": 31101545,
+          "role": "CPU ONNX encoder",
+          "verification": "observed registration hash"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/engines/matcha_estimator_step0_bf16.engine",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/matcha_estimator_step0_bf16.engine",
+          "sha256": "657991c43b7b1435b2334509ad8f00c437bd9e4e65d2f17b7b398a222408cb05",
+          "bytes": 37630316,
+          "role": "TensorRT engine",
+          "verification": "matches prior lock",
+          "build_identity": {
+            "onnx_sha256": "5da91ecbc2f96e2694071431a934c7e0537f8dda8ce2edd2500c16369cd15bec",
+            "tensorrt": "10.16.2.10",
+            "precision": "bf16",
+            "shapes": {
+              "minShapes": "z:1x80x72,mu:1x80x72,mask:1x1x72",
+              "optShapes": "z:1x80x256,mu:1x80x256,mask:1x1x256",
+              "maxShapes": "z:1x80x600,mu:1x80x600,mask:1x1x600"
+            }
+          }
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/engines/matcha_estimator_step1_bf16.engine",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/matcha_estimator_step1_bf16.engine",
+          "sha256": "937931f0293eba0293c48a6016a99dd2140e8777083317018ad1312d075a18d3",
+          "bytes": 36181372,
+          "role": "TensorRT engine",
+          "verification": "matches prior lock",
+          "build_identity": {
+            "onnx_sha256": "d50b33c009eaf887625fc305098a76428aa2e36451f479162c715cbaab7614de",
+            "tensorrt": "10.16.2.10",
+            "precision": "bf16",
+            "shapes": {
+              "minShapes": "z:1x80x72,mu:1x80x72,mask:1x1x72",
+              "optShapes": "z:1x80x256,mu:1x80x256,mask:1x1x256",
+              "maxShapes": "z:1x80x600,mu:1x80x600,mask:1x1x600"
+            }
+          }
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/engines/matcha_estimator_step2_bf16.engine",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/matcha_estimator_step2_bf16.engine",
+          "sha256": "5f7cf0c39c69db38da0ff2e0194e6cd70124eda0c3c9602f6aebf79fe11b6fd1",
+          "bytes": 37718308,
+          "role": "TensorRT engine",
+          "verification": "matches prior lock",
+          "build_identity": {
+            "onnx_sha256": "1b9f49b1b2925343de83d2d49e76bedb34c311c6691bf6be83af14928448fc38",
+            "tensorrt": "10.16.2.10",
+            "precision": "bf16",
+            "shapes": {
+              "minShapes": "z:1x80x72,mu:1x80x72,mask:1x1x72",
+              "optShapes": "z:1x80x256,mu:1x80x256,mask:1x1x256",
+              "maxShapes": "z:1x80x600,mu:1x80x600,mask:1x1x600"
+            }
+          }
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/engines/vocos_fp16.engine",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/engines/vocos_fp16.engine",
+          "sha256": "a9818327244cf2c1b03ebcd5b802c1b3b2c274c4a3e8632c7b26bba0098aefa1",
+          "bytes": 29288092,
+          "role": "TensorRT engine",
+          "verification": "matches prior lock",
+          "build_identity": {
+            "onnx_sha256": "b599142a1fb8ff03de3e84ac35ff537c619e56f4267a6fe894851a42844acf9e",
+            "tensorrt": "10.16.2.10",
+            "precision": "fp16",
+            "shapes": {
+              "minShapes": "mels:1x80x72",
+              "optShapes": "mels:1x80x256",
+              "maxShapes": "mels:1x80x600"
+            }
+          }
+        }
+      ],
+      "support_files": [
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/tokens.txt",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/tokens.txt",
+          "sha256": "77fee8e5e5dd96b3547119e6159292c648e99e065c54c97777722e3ce710b9a4",
+          "bytes": 21146,
+          "role": "TTS text processing",
+          "verification": "observed registration hash"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/lexicon.txt",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/lexicon.txt",
+          "sha256": "599efdcdaff4df2a123ce988c2cb90abcd59b919ef609ce36eb587d68b7ca2c0",
+          "bytes": 1400278,
+          "role": "TTS text processing",
+          "verification": "observed registration hash"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/date-zh.fst",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/date-zh.fst",
+          "sha256": "eb8aa079ae3cb81d8f4404992f39d61a0cb990947512b5b8d1e54d1f6980e718",
+          "bytes": 59154,
+          "role": "TTS text processing",
+          "verification": "observed registration hash"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/phone-zh.fst",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/phone-zh.fst",
+          "sha256": "1ac2b6fa56b1442320c4de7db08353bab8963a2b57f365eebcdd3a2d3562f8d7",
+          "bytes": 88630,
+          "role": "TTS text processing",
+          "verification": "observed registration hash"
+        },
+        {
+          "path": "/home/nvidia/AI_Stack/models/matcha-host/number-zh.fst",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/number-zh.fst",
+          "sha256": "743f402181fcfebf76cc2f0546b71fa26476e626fbe4e460fb7b4c3a7a8bd5bd",
+          "bytes": 64482,
+          "role": "TTS text processing",
+          "verification": "observed registration hash"
+        }
+      ],
+      "host_manifest": {
+        "path": "/home/nvidia/AI_Stack/models/matcha-host/host-manifest.json",
+        "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-host/host-manifest.json",
+        "sha256": "b5eade0548fb9e8685ee7cea5754792339f75c467ea3ced6419ccc10cf632eb3",
+        "bytes": 5205,
+        "role": null,
+        "verification": "observed registration hash"
+      },
+      "execution_evidence": {
+        "path": "benchmarks/results/tts-smoke.json",
+        "sha256": "6e92cc56836801c9a7cd65064e9a341df69ad79dd047fb192caad92556b5fe1a",
+        "status": "PASS",
+        "scope": "three synthetic Chinese TTS files; signal/format checks only, intelligibility and physical playback pending"
+      }
+    },
+    "embedding": {
+      "backend": "Mem0/Sentence Transformers ORT CPU",
+      "device": "CPU",
+      "profile": "bge-int8-windows-v1",
+      "embedding_threads": 4,
+      "binding_fingerprint": "2e273ef07b8e6a6c7b029bf0651ae058b4dc6d9adf6e1a3d2399b1944e7f1136",
+      "artifacts": [
+        {
+          "path": "/home/nvidia/AI_Stack/models/bge-small-zh-v1.5-onnx-arm64-int8/onnx/model_qint8_arm64.onnx",
+          "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/bge-small-zh-v1.5-onnx-arm64-int8/onnx/model.onnx",
+          "sha256": "6a1d3d19aa301d2cc1d070806bd4928dc9c0511047e99442756373970c2052a7",
+          "bytes": 24006982,
+          "role": "dynamic int8 embedding",
+          "verification": "matches prior lock"
+        }
+      ],
+      "execution_evidence": {
+        "path": "benchmarks/results/embedding-threads4-public-voice.json",
+        "sha256": "d05645816d64954edde0687d198aed9d196b9c9f5caebd9c369b4914e6cbf721",
+        "status": "PASS",
+        "scope": "Two existing synthetic WAV utterances through public voice command with real ASR/BGE/llama/TTS, authenticated bound Mem0/Qdrant store and WAV output. No physical audio or full quality/latency acceptance."
+      },
+      "lifecycle": "Loaded by assistant processes on demand, not a standalone resident service"
+    },
+    "vad": {
+      "backend": "Pipecat Silero ORT CPU",
+      "device": "CPU",
+      "artifacts": [
+        {
+          "path": "/home/nvidia/AI_Stack/environments/assistant/lib/python3.12/site-packages/pipecat/audio/vad/data/silero_vad.onnx",
+          "configured_path": "/home/nvidia/Multi_Model_Inference/.venv/lib/python3.12/site-packages/pipecat/audio/vad/data/silero_vad.onnx",
+          "sha256": "597d30b3ec076608d059477bb14cfeffdf951bf5cae370d38f65d33bbfe82004",
+          "bytes": 2327524,
+          "role": "VAD",
+          "verification": "matches prior lock"
+        }
+      ],
+      "execution_evidence": {
+        "path": "benchmarks/results/voice-assistant-smoke.json",
+        "sha256": "2e88b80e466de7834c6689de37f4a8bf7ce99d4199e5f2492cea2f41ce3a766b",
+        "status": "PASS",
+        "scope": "six synthetic file utterances through real Silero/ASR/BGE/Mem0/llama/TTS and native output queue; synthetic RGB visual input; real APScheduler reminder delivered to WAV, not speaker; no physical AEC or acoustic acceptance"
+      },
+      "lifecycle": "Loaded by voice application processes on demand"
+    }
+  },
+  "managed_backends": {
+    "created_at": "2026-10-14T07:54:53.646420+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "19043",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 19043,
+        "cgroup_pids": [
+          19043,
+          19046
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "241634",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 241634,
+        "cgroup_pids": [
+          241634,
+          241642
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 719243,
+        "cgroup_pids": [
+          719243,
+          719251
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 719332,
+        "cgroup_pids": [
+          244060,
+          719332,
+          719334
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "8205",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 8205,
+        "cgroup_pids": [
+          8205,
+          8213,
+          8240
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 56.275452,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "vision": {
+        "MainPID": "242004",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 242004,
+        "cgroup_pids": [
+          242004,
+          242012,
+          242073
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 83.797545,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      },
+      "pose": {
+        "MainPID": "242171",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 242171,
+        "cgroup_pids": [
+          242171,
+          242179,
+          242241
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 85.788507,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification"
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "active_engine_count": 6,
+  "inactive_engine_variants": [
+    {
+      "path": "/home/nvidia/AI_Stack/models/matcha-upstream-jp62/engines/matcha_estimator_step0_bf16.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-upstream-jp62/engines/matcha_estimator_step0_bf16.engine",
+      "sha256": "bbb9cd11c47ce98ac69290144000d93b1dee563e1e9950d09c19db863ab3413c",
+      "bytes": 39841396,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/matcha-upstream-jp62/engines/matcha_estimator_step1_bf16.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-upstream-jp62/engines/matcha_estimator_step1_bf16.engine",
+      "sha256": "3f6765a4a095aee324677a25927d4d03003bd983739e246fd9a8924caf45ddc9",
+      "bytes": 39296164,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/matcha-upstream-jp62/engines/matcha_estimator_step2_bf16.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-upstream-jp62/engines/matcha_estimator_step2_bf16.engine",
+      "sha256": "3998c55c300c5ae06db5ec64195ea6f344b91bc7faabf15a06d2544868cf2326",
+      "bytes": 42565132,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/matcha-upstream-jp62/engines/vocos_fp16.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/matcha-upstream-jp62/engines/vocos_fp16.engine",
+      "sha256": "918b8040c001d9c49d8390be922e6cae4cafb70affede59d23cc040c4e78afe3",
+      "bytes": 29421556,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n-fp16.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/yolo/yolov8n-fp16.engine",
+      "sha256": "92b6fc204e2db37a3a4219bf5201904849c2581d7525b8149c048a1727d39b94",
+      "bytes": 9607156,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n-fp32.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/yolo/yolov8n-fp32.engine",
+      "sha256": "67d53491724c8cf0e5030d137adb093a273e370ece62a06c2078d025ca8ac2d2",
+      "bytes": 20287068,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n-fp32_tf32.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/yolo/yolov8n-fp32_tf32.engine",
+      "sha256": "3d522559f7bbdd4e7ca69bd83d0983d4d1f5437c92fcce1a3b584747a7e51dce",
+      "bytes": 14042716,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/models/yolo/yolov8n-pose-fp32_tf32.engine",
+      "configured_path": "/home/nvidia/.cache/multi-model-assistant/models/yolo/yolov8n-pose-fp32_tf32.engine",
+      "sha256": "0234cdfb4a15fdac77927799da692049386a5036efca3a9ea27acce3cceb3867",
+      "bytes": 14815332,
+      "role": "not selected by runtime",
+      "verification": "observed registration hash"
+    }
+  ],
+  "observed_loaded_libraries": {
+    "qdrant": [],
+    "llama": [
+      "/home/nvidia/AI_Stack/builds/llama/bin/libggml-cuda.so.0.26.0",
+      "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.86"
+    ],
+    "asr": [
+      "/home/nvidia/AI_Stack/builds/llama/bin/libggml-cuda.so.0.26.0",
+      "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.86"
+    ],
+    "speech": [
+      "/home/nvidia/AI_Stack/environments/speech/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer.so.10.16.2",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer_plugin.so.10.16.2"
+    ],
+    "camera": [],
+    "vision": [
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime.so.1.28.0",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime_providers_cuda.so",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime_providers_shared.so",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime_providers_tensorrt.so",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer.so.10.16.2",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer_builder_resource_sm86.so.10.16.2",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer_plugin.so.10.16.2",
+      "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.86"
+    ],
+    "pose": [
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime.so.1.28.0",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime_providers_cuda.so",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime_providers_shared.so",
+      "/home/nvidia/AI_Stack/installed/onnxruntime-1.28.0-cuda13-sm87/lib/libonnxruntime_providers_tensorrt.so",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer.so.10.16.2",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer_builder_resource_sm86.so.10.16.2",
+      "/usr/lib/aarch64-linux-gnu/libnvinfer_plugin.so.10.16.2",
+      "/usr/local/cuda-13.2/targets/sbsa-linux/lib/libcudart.so.13.2.86"
+    ]
+  },
+  "environment": {
+    "l4t": "# R39 (release), REVISION: 2.1, GCID: 46758480, BOARD: generic, EABI: aarch64, DATE: Fri Aug  7 05:54:22 AM UTC 2026\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "architecture": "aarch64",
+    "upstreams_lock": {
+      "path": "/home/nvidia/Multi_Model_Inference/deploy/upstreams.lock.json",
+      "configured_path": "/home/nvidia/Multi_Model_Inference/deploy/upstreams.lock.json",
+      "sha256": "ef1aa2c492991d05138a4a40ab350cbc1c1f27b889e67c68b77e92acb65e35bd",
+      "bytes": 3746,
+      "role": null,
+      "verification": "observed registration hash"
+    },
+    "vision_source_lock": {
+      "path": "/home/nvidia/Multi_Model_Inference/deploy/vision/source-lock.json",
+      "configured_path": "/home/nvidia/Multi_Model_Inference/deploy/vision/source-lock.json",
+      "sha256": "5bd82661303f377f153c62cdf55bd75d98de0503773562ac24faad40d21b01b4",
+      "bytes": 2373,
+      "role": null,
+      "verification": "observed registration hash"
+    }
+  },
+  "checks": {
+    "seven_model_roles": true,
+    "six_selected_tensorrt_engines": true,
+    "all_backends_ready": true,
+    "same_service_pids": true,
+    "runtime_unchanged": true,
+    "model_manifest_unchanged": true
+  },
+  "completed_at": "2026-10-14T07:55:14.617489+00:00"
+}

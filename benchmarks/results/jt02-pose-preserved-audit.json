@@ -1,0 +1,248 @@
+{
+  "created_at": "2026-10-14T07:56:29.249913+00:00",
+  "gate": "JT-02",
+  "status": "PASS",
+  "checks": {
+    "collector_passed_declared_checks": true,
+    "inventory_passed_declared_checks": true,
+    "seven_required_functional_model_roles": true,
+    "all_selected_tensorrt_engines_registered": true,
+    "trace_artifacts_match_inventory": true,
+    "all_device_activities_have_unique_successful_launch": true,
+    "successful_launches_have_execution_or_graph_capture": true,
+    "three_native_gpu_processes_on_one_device": true,
+    "complete_request_labels": true,
+    "nine_application_ranges": true,
+    "request_timestamps_agree": true,
+    "required_visual_and_vlm_work_during_each_request": true,
+    "vlm_and_visual_device_intervals_overlap": true,
+    "no_missing_cuda_warning_for_gpu_workers": true,
+    "model_execution_evidence_passed": true,
+    "runtime_still_matches": true,
+    "models_still_match": true
+  },
+  "requirement": "约4–7个功能模型；视觉/VLM至少两个必需GPU负载重叠请求；trace说明实际执行/争用；登记所有engine。",
+  "source_sha256": "e260bc8c1112d7dbe6a9e787e588320fdea92e10ee6054b9d44e63b694a329cf",
+  "native_queue_definition_source": "/opt/nvidia/nsight-systems/2026.3.1/target-linux-sbsa-armv8/reports/cuda_kern_exec_trace.py",
+  "native_queue_definition_sha256": "cfae1eba37751c6756fe0cf7d1b5d86c978310dd276c9b3ab81970fc59676dc7",
+  "trace_report": "benchmarks/results/gpu-concurrency-pose-preserved.json",
+  "trace_report_sha256": "3ea2160930f4d327f0a39716ce97ab4ab5f692697da80fef02313ec099aa890c",
+  "inventory_report": "benchmarks/results/model-engine-inventory-pose-preserved.json",
+  "inventory_report_sha256": "7afb0ad28430711cd4bd256b9a873ed77e865f07686ef4b96c2b9a1779cc4132",
+  "database_sha256": "7f51b6a0938524d7b6c55c2dcc306b0b6ca90185855804ef6f434ce0455abe63",
+  "whole_capture_correlated_activities": 174877,
+  "measurement_activities": 139843,
+  "reverse_launch_coverage": {
+    "capture_ranges_balanced": true,
+    "capture_ranges": 8,
+    "calls": [
+      {
+        "component": "llama",
+        "api": "cuLaunchKernel",
+        "calls": 196,
+        "matched_device_execution": 98,
+        "captured_into_graph_without_immediate_execution": 98
+      },
+      {
+        "component": "llama",
+        "api": "cudaGraphLaunch_v10000",
+        "calls": 203,
+        "matched_device_execution": 203
+      },
+      {
+        "component": "llama",
+        "api": "cudaLaunchKernel_v7000",
+        "calls": 25734,
+        "matched_device_execution": 19158,
+        "captured_into_graph_without_immediate_execution": 6576
+      },
+      {
+        "component": "pose",
+        "api": "cuLaunchKernel",
+        "calls": 26134,
+        "matched_device_execution": 26134
+      },
+      {
+        "component": "pose",
+        "api": "cuLaunchKernelEx",
+        "calls": 25418,
+        "matched_device_execution": 25418
+      },
+      {
+        "component": "pose",
+        "api": "cudaLaunchKernel_v7000",
+        "calls": 16826,
+        "matched_device_execution": 16826
+      },
+      {
+        "component": "vision",
+        "api": "cuLaunchKernel",
+        "calls": 33280,
+        "matched_device_execution": 33280
+      },
+      {
+        "component": "vision",
+        "api": "cuLaunchKernelEx",
+        "calls": 33280,
+        "matched_device_execution": 33280
+      },
+      {
+        "component": "vision",
+        "api": "cudaLaunchKernel_v7000",
+        "calls": 20480,
+        "matched_device_execution": 20480
+      }
+    ]
+  },
+  "phases": {
+    "visual_only": {
+      "llama": {
+        "activities": 0,
+        "kinds": {},
+        "device_lifetime": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "max_ms": null
+        },
+        "queue_after_api_return": {
+          "count": 0,
+          "p50_ms": null,
+          "p95_ms": null,
+          "max_ms": null
+        },
+        "device_started_before_api_return": 0,
+        "api_functions": {}
+      },
+      "vision": {
+        "activities": 9690,
+        "kinds": {
+          "kernel": 9690
+        },
+        "device_lifetime": {
+          "count": 9690,
+          "p50_ms": 0.030561,
+          "p95_ms": 0.210216,
+          "max_ms": 2.93841
+        },
+        "queue_after_api_return": {
+          "count": 9690,
+          "p50_ms": 6.794932,
+          "p95_ms": 14.262978,
+          "max_ms": 15.675413
+        },
+        "device_started_before_api_return": 0,
+        "api_functions": {
+          "cudaLaunchKernel_v7000": 2280,
+          "cuLaunchKernelEx": 3705,
+          "cuLaunchKernel": 3705
+        }
+      },
+      "pose": {
+        "activities": 10887,
+        "kinds": {
+          "kernel": 10887
+        },
+        "device_lifetime": {
+          "count": 10887,
+          "p50_ms": 0.027681,
+          "p95_ms": 0.20884,
+          "max_ms": 2.895816
+        },
+        "queue_after_api_return": {
+          "count": 10887,
+          "p50_ms": 6.592525,
+          "p95_ms": 13.620779,
+          "max_ms": 15.274247
+        },
+        "device_started_before_api_return": 0,
+        "api_functions": {
+          "cudaLaunchKernel_v7000": 2679,
+          "cuLaunchKernelEx": 4047,
+          "cuLaunchKernel": 4161
+        }
+      }
+    },
+    "vlm_requests": {
+      "llama": {
+        "activities": 18377,
+        "kinds": {
+          "kernel": 18175,
+          "graph": 202
+        },
+        "device_lifetime": {
+          "count": 18377,
+          "p50_ms": 0.015137,
+          "p95_ms": 0.866527,
+          "max_ms": 1205.72865
+        },
+        "queue_after_api_return": {
+          "count": 17976,
+          "p50_ms": 29.096186,
+          "p95_ms": 590.662124,
+          "max_ms": 829.181711
+        },
+        "device_started_before_api_return": 401,
+        "api_functions": {
+          "cudaLaunchKernel_v7000": 18077,
+          "cuLaunchKernel": 98,
+          "cudaGraphLaunch_v10000": 202
+        }
+      },
+      "vision": {
+        "activities": 41310,
+        "kinds": {
+          "kernel": 41310
+        },
+        "device_lifetime": {
+          "count": 41310,
+          "p50_ms": 0.025153,
+          "p95_ms": 0.183974,
+          "max_ms": 5.2079
+        },
+        "queue_after_api_return": {
+          "count": 41310,
+          "p50_ms": 9.630075,
+          "p95_ms": 20.806894,
+          "max_ms": 26.513916
+        },
+        "device_started_before_api_return": 0,
+        "api_functions": {
+          "cudaLaunchKernel_v7000": 9720,
+          "cuLaunchKernelEx": 15795,
+          "cuLaunchKernel": 15795
+        }
+      },
+      "pose": {
+        "activities": 46399,
+        "kinds": {
+          "kernel": 46399
+        },
+        "device_lifetime": {
+          "count": 46399,
+          "p50_ms": 0.024545,
+          "p95_ms": 0.185415,
+          "max_ms": 5.194716
+        },
+        "queue_after_api_return": {
+          "count": 46399,
+          "p50_ms": 9.186731,
+          "p95_ms": 19.89547,
+          "max_ms": 24.74294
+        },
+        "device_started_before_api_return": 0,
+        "api_functions": {
+          "cudaLaunchKernel_v7000": 11417,
+          "cuLaunchKernelEx": 17251,
+          "cuLaunchKernel": 17731
+        }
+      }
+    }
+  },
+  "scope": "JT-02 model/engine identity and native device execution/queue evidence only. Six real text/live-camera requests. CUDA graphs are whole-device-graph lifetime records, not individual inner kernels; internal gaps and preemption are possible. All launches are correlated by process plus native correlationId. Within-trace phase differences are diagnostic, not causal speedup or uninstrumented performance. No SM occupancy, physical audio, task accuracy, JT-03/04/06/07/08 or complete assistant acceptance.",
+  "remaining_limitations": [
+    "Node-granularity graph attribution errors remain in both installed Nsight versions; original failed evidence preserved.",
+    "Orin hardware tracing and Unified Memory fault tracing unavailable; no such metrics claimed.",
+    "NVTX shutdown completeness warnings retained; all nine application ranges collected and six request durations independently cross-checked."
+  ]
+}

@@ -14,9 +14,11 @@
 
 [合成ROS传输测试](benchmarks/results/vision-bag-fixture.json)确认录制和回放字段一致，[中断测试](benchmarks/results/vision-bag-cancellation.json)确认SIGTERM后原生录制/播放进程均退出。早期[延时启动丢帧](benchmarks/results/vision-bag-replay-baseline.json)与[仅图发现判定不足](benchmarks/results/vision-bag-graph-admission-baseline.json)均保留。测试只有8×6合成消息，不证明640×480录制带宽或真实场景质量；实际房间画面尚未录制。历史时间戳保持原样，消费者需要ROS模拟时钟；完整助手的模拟时钟接入及真实录制/回放时效仍待验证。
 
-**JT-02多模型竞争专项验收已通过**，见[逐条审计](benchmarks/results/jt02-multimodel-audit.json)。[当前模型/engine清单](benchmarks/results/model-engine-inventory.json)登记7类功能模型（TTS包含Matcha与Vocos）、6个在用TensorRT engine及8个未启用版本；逐项记录路径、SHA256、配置绑定、运行证据及已加载原生库。[同一次原生追踪](benchmarks/results/gpu-concurrency-graph-trace.json)覆盖D435i检测、姿态和6次文本/实时图文请求：188,944条独立kernel记录、177条CUDA Graph整体记录，189,121条设备活动全部关联到成功的启动调用。反向检查中，177次图启动全部有执行记录，6,674次仅捕获调用均位于8个成对捕获区间，没有无法解释的遗漏。
+**JT-02多模型竞争专项验收已通过**，见[修复后逐条审计](benchmarks/results/jt02-pose-preserved-audit.json)。[当前模型/engine清单](benchmarks/results/model-engine-inventory-pose-preserved.json)登记7类功能模型（TTS包含Matcha与Vocos）、6个在用TensorRT engine及8个未启用版本；逐项记录路径、SHA256、配置绑定、运行证据及已加载原生库。[首轮原生追踪](benchmarks/results/gpu-concurrency-graph-trace.json)覆盖D435i检测、姿态和6次文本/实时图文请求：188,944条独立kernel记录、177条CUDA Graph整体记录，189,121条设备活动全部关联到成功的启动调用。反向检查中，177次图启动全部有执行记录，6,674次仅捕获调用均位于8个成对捕获区间，没有无法解释的遗漏。
 
-在该次插桩诊断中，检测/姿态启动API返回后的排队P95由视觉阶段的14.34/13.32ms，变为VLM请求阶段的20.69/19.85ms；这是同次追踪的阶段观察，不作为因果收益或性能达标结论。26.74秒采样的检测/姿态约11.67/11.78Hz，最新结果年龄P95为179.87/184.83ms。三模型进程正常退出，七个原服务恢复READY。图整体区间包含内部空隙，不等于kernel活跃时间或SM指令同时执行；物理语音、问答质量、JT-03/04/06/07/08及整机验收仍未完成。
+保留姿态坐标的补丁之后，[新一轮追踪](benchmarks/results/gpu-concurrency-pose-preserved.json)再次通过，174,877条设备活动完整关联，检测/姿态为11.82/11.78Hz，年龄P95为177.96/179.86ms。
+
+在首轮插桩诊断中，检测/姿态启动API返回后的排队P95由视觉阶段的14.34/13.32ms，变为VLM请求阶段的20.69/19.85ms；这是同次追踪的阶段观察，不作为因果收益或性能达标结论。26.74秒采样的检测/姿态约11.67/11.78Hz，最新结果年龄P95为179.87/184.83ms。三模型进程正常退出，七个原服务恢复READY。图整体区间包含内部空隙，不等于kernel活跃时间或SM指令同时执行；物理语音、问答质量、JT-03/04/06/07/08及整机验收仍未完成。
 
 节点级追踪的GraphId/GraphNodeId错误在[2026版本](benchmarks/results/gpu-concurrency-trace.json)和[2025版本](benchmarks/results/gpu-concurrency-nsys2025.json)中均保留为FAIL；[最小CUDA更新实验](benchmarks/results/nsys-graph-update.json)未复现该错误，不能声称已修复底层原因。已验证的整体图采集避开该关联路径，同时保留图外kernel。默认采集使用`--graph-trace graph`，`--graph-trace node`保留用于诊断。原始文件位于`/home/nvidia/AI_Stack/runtime-data/benchmarks/gpu-concurrency-graph-v1/`，Git报告登记SHA256；不保存摄像头图像或公开场景回答。最初的[子进程回收失败](benchmarks/results/gpu-concurrency-cleanup-baseline.json)也保留，回收修复、区间统计及缺失事件识别的[3项专项测试](benchmarks/results/gpu-trace-tests.json)通过。
 
