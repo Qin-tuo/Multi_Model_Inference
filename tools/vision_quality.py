@@ -204,7 +204,7 @@ def run(args):
             if task=='pose':comparisons[task]['reference_publication_filtered_AP_percent']=result['torch']['metrics']['keypoints_publication_filter']['AP_percent']
         checks={'no_errors':not report['errors'],'both_models_complete':len(comparisons)==2,
             'source_unchanged':hashes()==report['source_hashes'],
-            'engines_unchanged':{str(p.resolve()):sha256(p) for p in engine_paths}==engines,
+            'engines_unchanged':{str(p.resolve()):sha256(p) for p in sorted((CACHE/'models/yolo/ort-trt-fp32').rglob('*.engine'))}==engines,
             'backends_ready':report['backends_after']['backend_status']=='READY',
             'quality_drop_within_one_point':len(comparisons)==2 and all(r['within_one_percentage_point'] for r in comparisons.values())}
         report.update(checks=checks,comparisons=comparisons,status='PASS' if all(checks.values()) else 'FAIL',completed_at=stamp())
