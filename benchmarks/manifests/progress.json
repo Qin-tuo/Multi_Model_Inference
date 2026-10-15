@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-15T05:29:43.390712+00:00",
+  "updated_at": "2026-10-15T05:42:29.750464+00:00",
   "plan": "v3.0 Reachy-derived no-body application; assistant framework and baseline, guided user optimization",
   "overall_status": "ACTIVE",
   "tasks": [
@@ -948,7 +948,7 @@
       "cancel_effect": "stop generation/playback and block unstarted tools; retain completed notes/reminders"
     }
   },
-  "execution_state_note": "New goal activated; R0 snapshot complete, isolated migration preparation underway. Legacy services and data remain unchanged.",
+  "execution_state_note": "Active goal. Isolated migration/reachy-headless branch has imported upstream source and verified CLI text/file-image requests. Legacy main checkout services remain operational; full headless application and B0 are unfinished.",
   "deployment_roadmap": "benchmarks/manifests/reachy-headless-roadmap-v3.json",
   "job_requirement_sources": "benchmarks/manifests/target-jd-20261014.json",
   "final_deployment_acceptance": {
@@ -1030,8 +1030,15 @@
     "upstream": "NVIDIA-AI-IOT/reachy-mini-jetson-assistant",
     "commit": "2673202a360a41935b45ac79141ef0bb529492ba",
     "variant": "no-robot-body",
-    "migration_status": "R0_IN_PROGRESS",
-    "gap_ledger": "benchmarks/manifests/reachy-gap-ledger-v3.json"
+    "migration_status": "R1_CORE_ADAPTATION_IN_PROGRESS",
+    "gap_ledger": "benchmarks/manifests/reachy-gap-ledger-v3.json",
+    "branch": "migration/reachy-headless",
+    "worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
+    "evidence": [
+      "benchmarks/results/reachy-r1-cli.json",
+      "benchmarks/results/reachy-r1-core-environment.json"
+    ],
+    "last_pushed_implementation_commit": "fdbac53"
   },
   "legacy_evidence_scope": "Existing tasks, JT/SF/DP and reports qualify only their historical implementation/configuration; none automatically passes new F/E/K."
 }
