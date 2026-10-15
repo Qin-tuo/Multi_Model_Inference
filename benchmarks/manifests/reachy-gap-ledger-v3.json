@@ -11,8 +11,11 @@
       "source_file": "run_web_vision_chat.py",
       "planned_resolution": "Independent face detection/temporal state with no SDK/daemon",
       "phase": "R1",
-      "status": "OPEN",
-      "evidence": []
+      "status": "RESOLVED_FOR_R1",
+      "evidence": [
+        "benchmarks/results/reachy-r1-live-face.json",
+        "benchmarks/results/reachy-r1-camera-web.json"
+      ]
     },
     {
       "id": "RG-02",
@@ -41,8 +44,12 @@
       "source_file": "app/reachy.py",
       "planned_resolution": "Own-resource cleanup only; report external occupancy",
       "phase": "R1",
-      "status": "OPEN",
-      "evidence": []
+      "status": "REMOVED_FROM_ACTIVE_WEB_CAMERA_PATH",
+      "evidence": [
+        "run_web_vision_chat.py",
+        "app/camera.py"
+      ],
+      "remaining": "Legacy audio fallback still contains kill_pulseaudio; remove during R2 before audio enablement."
     },
     {
       "id": "RG-05",
@@ -61,8 +68,11 @@
       "source_file": "packaging/jetson-wheels.json",
       "planned_resolution": "Isolated compatibility verification or documented host build",
       "phase": "R0",
-      "status": "OPEN",
-      "evidence": []
+      "status": "CORE_COMPATIBILITY_VERIFIED_R2_PROVIDER_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r1-core-environment.json",
+        "benchmarks/results/reachy-r1-camera-web.json"
+      ]
     },
     {
       "id": "RG-07",
@@ -103,6 +113,18 @@
       "phase": "R3",
       "status": "OPEN",
       "evidence": []
+    },
+    {
+      "id": "RG-11",
+      "classification": "OBSERVED_MIGRATION_HANDOVER_FAULT",
+      "finding": "Old RealSense depth startup warning appeared after switching from V4L2 RGB back to ROS; active service was not enough to prove restoration.",
+      "planned_resolution": "Require fresh color and aligned depth after each migration handover; record recovery, never infer readiness from PID only.",
+      "phase": "R3",
+      "status": "RECOVERED_RECURRENCE_TEST_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r1-legacy-restore.json",
+        "benchmarks/results/reachy-r1-camera-web.json"
+      ]
     }
   ],
   "hardware_gap": {

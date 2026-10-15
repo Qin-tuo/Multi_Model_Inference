@@ -3,7 +3,7 @@
   "version": "3.0",
   "created_at": "2026-10-15T03:33:30.511226+00:00",
   "execution_status": "ACTIVE",
-  "migration_status": "R1_CORE_ADAPTATION_IN_PROGRESS",
+  "migration_status": "R1_WEB_CAMERA_FACE_INTEGRATED_R2_PENDING",
   "goal": "基于固定版本的NVIDIA Reachy Mini Jetson Assistant实际源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。",
   "current_runtime": "legacy Pipecat/ROS2 application remains unchanged",
   "planned_runtime": "derived Reachy Mini Jetson Assistant without robot body",
@@ -30,13 +30,14 @@
         {
           "id": "R0.compatibility",
           "title": "核验NX16GB和上游wheel/BSP差异",
-          "status": "CORE_RUNTIME_VERIFIED_PERCEPTION_ABI_PENDING",
+          "status": "CORE_ENVIRONMENT_AND_SELECTED_INTERFACES_VERIFIED",
           "deliverable": "兼容性检查记录；不得将研究锁视为部署通过",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r0-snapshot.json",
-            "benchmarks/results/reachy-r1-core-environment.json"
-          ]
+            "benchmarks/results/reachy-r1-core-environment.json",
+            "benchmarks/results/reachy-r1-camera-web.json"
+          ],
+          "boundary": "This is compatibility preparation and core verification; new body/hand inference providers are checked in R2, not certified here."
         },
         {
           "id": "R0.workspace",
@@ -73,9 +74,9 @@
         {
           "id": "R1.reference",
           "title": "复现上游可运行参考并记录阻塞",
-          "status": "CLIENT_TEXT_REFERENCE_VERIFIED_FULL_REFERENCE_PENDING",
+          "status": "COMPLETE_WITH_DECLARED_R1_SCOPE",
           "deliverable": "固定上游客户端配已选4B的最小参考证据；明确配置差异，不额外下载Gemma或开展选型",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
             "benchmarks/results/reachy-r1-reference-text.json"
           ]
@@ -83,25 +84,34 @@
         {
           "id": "R1.trim",
           "title": "裁掉运动/SDK/默认RAG和无关界面",
-          "status": "NOT_STARTED",
+          "status": "COMPLETE_WITH_DECLARED_R1_SCOPE",
           "deliverable": "可追踪源码差异、精简运行依赖",
-          "execution": "NOT_STARTED"
+          "execution": "COMPLETE",
+          "evidence": [
+            "deploy/reachy-import.json",
+            "run_web_vision_chat.py",
+            "app/config.py"
+          ]
         },
         {
           "id": "R1.face",
           "title": "人脸感知/选帧与运动逻辑解耦",
-          "status": "NOT_STARTED",
+          "status": "COMPLETE_WITH_DECLARED_R1_SCOPE",
           "deliverable": "纯感知输出、无机身持续运行和关闭回归",
-          "execution": "NOT_STARTED"
+          "execution": "COMPLETE",
+          "evidence": [
+            "benchmarks/results/reachy-r1-live-face.json"
+          ]
         },
         {
           "id": "R1.pipeline",
           "title": "接通相机、文字/VLM、Web及明确的软件模式",
-          "status": "CLI_TEXT_AND_FILE_IMAGE_VERIFIED_WEB_CAMERA_PENDING",
+          "status": "COMPLETE_WITH_DECLARED_R1_SCOPE",
           "deliverable": "公开入口文字/图像功能与模式说明；不伪造物理录播",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r1-cli.json"
+            "benchmarks/results/reachy-r1-web-text.json",
+            "benchmarks/results/reachy-r1-camera-web.json"
           ]
         }
       ]
@@ -461,7 +471,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
-  "updated_at": "2026-10-15T05:41:05.730655+00:00",
+  "updated_at": "2026-10-15T06:22:24.265230+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"

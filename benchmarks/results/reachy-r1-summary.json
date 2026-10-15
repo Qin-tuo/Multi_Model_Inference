@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-15T06:26:22.967766+00:00",
+  "scope": "R1 no-body Web/V4L2/YuNet/native-4B integration, not complete application or B0",
+  "status": "R1_FUNCTIONAL_INTEGRATION_VERIFIED",
+  "source_sha256": {
+    "app/llm.py": "2bd70a200398d5a5cda0c9851dea2a8804a4f4edefd3fd65b0aee748f78dbf4f",
+    "app/pipeline.py": "58543fcc8d6c1bc6c884e692d17506d254207a61217a1d2b2fcf606ec233392c",
+    "app/monitor.py": "71505e3fcd414224e2efcff0be4ff4d1683f09db7523f3506c5af6eb5fc1bddc",
+    "app/tts.py": "92e7190a88cfafd520b7645ce2b5caca2ff36b429f2d3c309d2501c51226bc35",
+    "app/face_detector.py": "377cae164b0bdd0b8f8303f1ba639b4eaac655233adf53cb4112fa5ec1ea931b",
+    "app/tts_worker.py": "8ae812acd6e8f44ec50101606656a578ee91d955c34387385f6e9aaaa19a7e2c",
+    "app/web.py": "427de1fa66ef2dca519e78e976fbe22d346d62fd393707d32a5beaa7c0f7c846",
+    "app/cli.py": "d4300e8c916d10440d44912af0fef70e0d3d863ee28de09482c27ce8db55e5d6",
+    "app/face_tracker.py": "8e78180ac6cddc0cd314fb045f15f231f20b5540a14690238ec56e6533be1090",
+    "app/audio.py": "15eeb5d50212419dbe7a7e584e91711ec2409dfb6d5f5dab15bde6efbf5594c6",
+    "app/__init__.py": "b6b7b3007ae0171e1905556bec3d2e2cc33a462f9684c183d14d95ac668138e8",
+    "app/stt.py": "5367ac247e6685c1ff934e85778de339c0f91b7567ff628609eaaade0a636345",
+    "app/turn_control.py": "2cc38ba2b240b1953bb1f7dfa67c76147de19a048d87b9cff91646a31c741c47",
+    "app/vision_capture.py": "57f260076a7982e6639014a221f3e49d8727e33b5df4eef907ce414acfa8f0ef",
+    "app/config.py": "0517992c0cdeb179c27c41b4e607dea2aceee171d4ec61a2b0c504270dd938d4",
+    "app/camera.py": "ebae3b8b495e0c0d9be90caafae7397de725e3561564b87b9845fff8788cd541",
+    "run_web_vision_chat.py": "3868d7d6cc298dc19b885eafce57a285fae4a3e5705c838dc1d004946e847d4b",
+    "run_vision_chat.py": "60bff5d88b8454e474fcbde0a987a87f4863c4813b015729451d012f21e73a0b",
+    "config/settings.yaml": "690edbf73d6736b20645e9fbe30ff16636684d846305ece7347071478e1c59ab",
+    "config/settings.orin-nx-headless.yaml": "0b4e1b076a3efdfaf821c8a54144c6621facf3a72d52c12d516beddcf5ed6081",
+    "models/perception.json": "920d10b7d272944373a8cbffe5131b416bae642cedc0dc638b24c6401bd183cb",
+    "static/index.html": "3be85a4b116e698c3b41550a5229a57cb280d0bdfb97b33b2da7a7f4ad25e8ab"
+  },
+  "tests": {
+    "command": "python -m pytest -q --ignore=tests/test_silero_vad.py --junitxml=/home/nvidia/AI_Stack/runtime-data/reachy-r1-tests.xml",
+    "passed": 43,
+    "failures": 0,
+    "errors": 0,
+    "excluded": "tests/test_silero_vad.py: two R2 model-dependent cases; VAD not yet enabled",
+    "xml": "/home/nvidia/AI_Stack/runtime-data/reachy-r1-tests.xml",
+    "xml_sha256": "9e0fb3b3cda42a6b9ff982d14c14586f93ea65bc1a1ad423b81cb9867c6d65a6",
+    "warning": "Starlette TestClient httpx deprecation; no runtime failure observed"
+  },
+  "real_evidence": [
+    "benchmarks/results/reachy-r1-web-text.json",
+    "benchmarks/results/reachy-r1-camera-web.json",
+    "benchmarks/results/reachy-r1-live-face.json",
+    "benchmarks/results/reachy-r1-legacy-restore.json"
+  ],
+  "live_face_positive_distinct_frames": 10,
+  "camera_preview_rule": "Preview pixels and face metadata come from the same sampled frame; covered by test_preview_pairs_pixels_and_box_from_same_frame",
+  "browser": {
+    "tool": "Firefox 155.0 --headless --screenshot",
+    "scope": "Actual rendering of text-only UI; not a full browser interaction test or face-overlay precision test",
+    "screenshot": "/home/nvidia/AI_Stack/runtime-data/reachy-r1-web.png",
+    "screenshot_sha256": "6f233944a632abda6ef146146c086b5a110744717ea1228826396cd3baf272b4"
+  },
+  "model_slot_idle_after_checks": true,
+  "known_limits": [
+    "Only single text/image turns; history/tools not integrated",
+    "ASR/TTS/VAD and physical audio pending",
+    "Body/hand/wave/static-palm pending",
+    "Full cancellation/provider-release qualification pending",
+    "RealSense switch can show a transient depth startup failure; readiness requires fresh RGB and aligned depth, not only active service",
+    "Long-duration, complete fault matrix and B0 pending"
+  ],
+  "upstream_reuse": "Shared Camera buffer, YuNet implementation and framing rules, LLM messages/streaming, FastAPI Broadcaster, static frontend and monitoring retained; robot/RAG removed; single upstream turn sequence extracted into turn_control."
+}
