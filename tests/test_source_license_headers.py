@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import subprocess
+import json
 from pathlib import Path
 
 
@@ -30,20 +30,10 @@ SOURCE_SUFFIXES = {
 
 
 def repository_files():
-    result = subprocess.run(
-        [
-            "git",
-            "ls-files",
-            "--cached",
-            "--others",
-            "--exclude-standard",
-        ],
-        cwd=ROOT,
-        check=True,
-        stdout=subprocess.PIPE,
-        text=True,
-    )
-    return [ROOT / name for name in result.stdout.splitlines()]
+    # Preserve attribution on retained imported source; local additions must
+    # not falsely claim NVIDIA authorship.
+    manifest = json.loads((ROOT / "deploy/reachy-import.json").read_text())
+    return [ROOT / name for name in manifest["source_sha256"] if (ROOT / name).is_file()]
 
 
 def test_nvidia_source_files_have_spdx_headers():

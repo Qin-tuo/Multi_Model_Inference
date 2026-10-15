@@ -19,8 +19,8 @@ def test_default_profile_is_local_4b_without_robot_or_rag(monkeypatch):
     assert config.llm.max_tokens == 128
     assert config.llm.chat_template_kwargs == {"enable_thinking": False}
     assert config.vision.frames == 1
-    assert not config.reachy.enabled and not config.reachy.spawn_daemon
-    assert not config.rag.enabled
+    assert not hasattr(config, "reachy") and not hasattr(config, "rag")
+    assert config.face.enabled
 
 
 @pytest.mark.parametrize("content", [

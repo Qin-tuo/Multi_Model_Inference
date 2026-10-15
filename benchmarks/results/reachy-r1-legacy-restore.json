@@ -1,0 +1,17 @@
+{
+  "fresh_topics": {
+    "depth": {
+      "age_ms": 52.234198,
+      "width": 640,
+      "height": 480,
+      "encoding": "16UC1"
+    },
+    "color": {
+      "age_ms": 58.284787,
+      "width": 640,
+      "height": 480,
+      "encoding": "rgb8"
+    }
+  },
+  "both_restored": true
+}

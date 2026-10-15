@@ -180,12 +180,18 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   .splitter{display:none}
 }
   .cam-panel{min-height:260px}
+.text-form{display:flex;gap:8px;flex-wrap:wrap;padding:12px;border-top:1px solid var(--border)}
+.text-form input[type=text]{flex:1;min-width:180px;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:10px;border-radius:6px}
+.text-form button{padding:8px 18px;border-radius:6px;cursor:pointer}
+.text-form label{align-self:center;font-size:.85rem}
+.input-error{color:var(--danger);min-height:1.4em;padding:0 12px}
+.audio-route,.volume-route,#pttBtn{display:none}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">&#129302; Reachy Mini <span>Vision Chat</span> <span style="color:var(--dim);font-weight:400;font-size:.95rem">&mdash; on <span id="headerPlatform">Jetson</span></span></div>
+  <div class="logo">Orin NX <span>Companion</span> <span style="color:var(--dim);font-weight:400;font-size:.95rem">&mdash; on <span id="headerPlatform">Jetson</span></span></div>
   <div class="header-right">
     <span class="client-count" id="clientCount"></span>
     <span class="badge" id="platformBadge">Jetson</span>
@@ -194,11 +200,11 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 </header>
 
 <div class="main">
-  <!-- Left: robot camera, face tracking, and resource metrics -->
+  <!-- Left: camera, face tracking, and resource metrics -->
   <div class="left">
     <div class="panel cam-panel">
       <div class="panel-hdr">
-        <span>Robot View</span>
+        <span>Camera</span>
         <span class="live-badge off" id="liveBadge">LIVE</span>
       </div>
       <div class="cam-wrap">
@@ -277,7 +283,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     <div class="panel pipe-panel">
       <div class="pipe-row">
         <div class="pipe-stages" id="pipeStages">
-          <div class="stage active" data-stage="listening">&#127908; Listen</div>
+          <div class="stage" data-stage="idle">输入</div>
           <div class="flow-step">
             <span class="flow-arrow" aria-hidden="true">&#8594;</span>
             <div class="stage" data-stage="transcribing">&#128221; STT</div>
@@ -317,13 +323,13 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       <div class="panel-hdr"><span>System</span></div>
       <div class="sys-grid">
         <span class="label">STT</span><span class="val" id="modelSTT">--</span>
-        <span class="label">Status</span><span class="val" id="robotConn">--</span>
+        <span class="label">Camera</span><span class="val" id="cameraState">--</span>
         <span class="label">VLM</span><span class="val" id="modelVLM">--</span>
-        <span class="label">Motors</span><span class="val" id="robotMotors">--</span>
+
         <span class="label">TTS</span><span class="val" id="modelTTS">--</span>
-        <span class="label">Head</span><span class="val" id="robotHead">--</span>
+
         <span class="label">VAD</span><span class="val" id="modelVAD">--</span>
-        <span class="label">Tracking</span><span class="val" id="robotTracking">--</span>
+        <span class="label">Input</span><span class="val" id="inputMode">文字</span>
       </div>
     </div>
 
@@ -332,10 +338,16 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         <span>Conversation</span>
         <span style="font-size:.8rem;color:var(--dim)" id="msgCount"></span>
       </div>
+      <form class="text-form" id="textForm">
+        <input id="textInput" type="text" maxlength="4000" placeholder="输入中文问题" required aria-label="问题">
+        <label><input id="useCamera" type="checkbox"> 使用当前画面</label>
+        <button id="sendText" type="submit">发送</button>
+      </form>
+      <div class="input-error" id="inputError" role="alert"></div>
       <div class="messages" id="messages">
         <div class="empty-state" id="emptyState">
-          <div>Speak to Reachy Mini to start a conversation.</div>
-          <div style="font-size:.8rem;margin-top:6px;color:var(--dim)">The robot listens, sees via camera, and responds via VLM + TTS.</div>
+          <div>输入中文问题，或选择使用当前画面。</div>
+          <div style="font-size:.8rem;margin-top:6px;color:var(--dim)">语音未启用时可以使用文字输入。</div>
         </div>
       </div>
     </div>
@@ -351,7 +363,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   const camNatural = {w:640, h:480};
   let lastFaceBox = null, lastCentered = false, trackingEnabled = false;
   let faceHoldTimer = null;
-  const FACE_HOLD_MS = 2500;
+  const FACE_HOLD_MS = 0;
 
   /* ── WebSocket ──────────────────── */
   function connect(){
@@ -391,7 +403,10 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'token':        onToken(msg); break;
         case 'done':         onDone(msg); break;
         case 'stats':        onStats(msg); break;
-        case 'robot':        onRobot(msg); break;
+        case 'perception':   onPerception(msg); break;
+        case 'capabilities':onCapabilities(msg); break;
+        case 'camera_state':cameraUnavailable(msg); break;
+        case 'error': case 'overflow': $('inputError').textContent=msg.error || '请求失败'; break;
         case 'info':         onInfo(msg); break;
         case 'ptt_state':    onPttState(msg); break;
         case 'speaker_state':onSpeakerState(msg); break;
@@ -404,6 +419,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 
   function onFrame(msg){
     const img = $('camImg');
+    $('cameraState').textContent='就绪';
 
     const hasFace = msg.face_detected && msg.face_box;
     pendingFaceBox = hasFace ? msg.face_box : null;
@@ -462,7 +478,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     dot.className = 'track-dot' + (trackingEnabled ? ' searching' : '');
     lbl.textContent = trackingEnabled ? 'Searching\u2026' : 'No face';
     lbl.style.color = 'var(--dim)';
-    $('trackStats').textContent = trackingEnabled ? 'Head holding position' : 'Tracking disabled';
+    $('trackStats').textContent = trackingEnabled ? '等待新的有效人脸结果' : '人脸检测未启用';
     setAxis('axisX', 0, true); setAxis('axisY', 0, true);
   }
 
@@ -533,7 +549,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     }
 
     const labels = {
-      connecting:'Connecting...', muted:'Mic muted', listening:'Listening...',
+      idle:'等待输入', connecting:'Connecting...', muted:'Mic muted', listening:'Listening...',
       recording:'Recording...', transcribing:'Transcribing...',
       thinking:'Thinking...', speaking:'Speaking...'
     };
@@ -549,6 +565,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const stages = $('pipeStages').querySelectorAll('.stage');
     for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
     pipelineStage = msg.stage;
+    $('sendText').disabled = msg.stage === 'thinking';
     renderPipelineStatus();
   }
 
@@ -578,13 +595,16 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   }
 
   function onDone(msg){
+    if(!currentAssistant && msg.text) onToken({text:msg.text});
     if(currentAssistant){
+      if(typeof msg.text === 'string') currentAssistant.querySelector('.content').textContent=msg.text;
       currentAssistant.querySelector('.content').classList.remove('cursor-blink');
       const meta = currentAssistant.querySelector('.meta');
       const parts = [];
       if(msg.ttft != null) parts.push('TTFT '+msg.ttft.toFixed(1)+'s');
       if(msg.vlm_time != null) parts.push('VLM '+msg.vlm_time.toFixed(1)+'s');
       if(msg.tokens != null) parts.push(msg.tokens+' tok');
+      if(msg.status === 'failed') parts.push('未完成');
       meta.textContent = parts.join(' \u00b7 ');
       currentAssistant = null;
       msgIdx++;
@@ -613,28 +633,51 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     if(msg.clients != null) $('clientCount').textContent = msg.clients+' viewer'+(msg.clients!==1?'s':'');
   }
 
-  function onRobot(msg){
-    $('robotConn').textContent = msg.connected ? '\u2713 Connected' : '\u2717 Disconnected';
-    $('robotConn').style.color = msg.connected ? 'var(--accent)' : 'var(--danger)';
-    if(msg.motors != null) $('robotMotors').textContent = msg.motors ? 'Enabled' : 'Disabled';
-    if(msg.head != null) $('robotHead').textContent = msg.head;
+  function cameraUnavailable(msg){
+    $('cameraState').textContent='不可用';
+    $('camImg').style.display='none';
+    $('camPlaceholder').style.display='';
+    $('camPlaceholder').textContent=msg.error || '摄像头未启用';
+    $('liveBadge').className='live-badge off';
+    pendingFaceBox=null; lastFaceBox=null;
+    clearTimeout(faceHoldTimer); faceHoldTimer=null;
+    setTrackIdle();
+    const c=$('faceOverlay'); c.getContext('2d').clearRect(0,0,c.width,c.height);
+  }
 
-    const trackingOn = msg.tracking != null;
-    trackingEnabled = trackingOn;
-    const badge = $('trackBadge');
-    badge.className = 'track-badge ' + (trackingOn ? 'on' : 'off');
-    badge.textContent = trackingOn ? 'ON' : 'OFF';
+  function onPerception(msg){
+    trackingEnabled=!!msg.enabled;
+    $('trackBadge').className='track-badge ' + (trackingEnabled ? 'on' : 'off');
+    $('trackBadge').textContent=trackingEnabled ? 'ON' : 'OFF';
+    if(!msg.face_detected) setTrackIdle();
+  }
 
-    const t = $('robotTracking');
-    if(trackingOn){ t.textContent = msg.tracking ? 'Active' : 'Idle'; t.style.color = msg.tracking ? 'var(--accent)' : 'var(--dim)'; }
-    else { t.textContent = 'Off'; t.style.color = 'var(--dim)'; }
-
-    // When the tracker reports no face, reflect it in the panel (unless a
-    // recent frame is still holding the crop visible).
-    if(msg.face_detected === false && !faceHoldTimer && $('faceCropCanvas').style.display === 'none'){
-      setTrackIdle();
+  function onCapabilities(msg){
+    updateModels(msg.models || {});
+    $('useCamera').disabled=!msg.camera_enabled;
+    if(!msg.camera_enabled) $('useCamera').checked=false;
+    $('cameraState').textContent=msg.camera_ready ? '就绪' : '未启用/不可用';
+    if(!msg.camera_ready) cameraUnavailable({error:msg.camera_error});
+    $('inputMode').textContent=msg.audio_enabled ? '语音与文字' : '文字';
+    onStatus({stage:msg.active_turn ? 'thinking' : 'idle'});
+    if(msg.last_result){
+      onDone({text:msg.last_result.text, status:msg.last_result.status});
     }
   }
+
+  $('textForm').addEventListener('submit', async function(event){
+    event.preventDefault();
+    $('inputError').textContent=''; $('sendText').disabled=true;
+    try{
+      const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({text:$('textInput').value,use_image:$('useCamera').checked})});
+      const data=await response.json();
+      if(!response.ok) throw new Error(typeof data.detail==='string' ? data.detail : '输入无效');
+      $('textInput').value='';
+    }catch(error){
+      $('inputError').textContent=error.message; $('sendText').disabled=false;
+    }
+  });
 
   function onInfo(msg){
     if(msg.models) updateModels(msg.models);

@@ -35,6 +35,7 @@ class CameraBufferTests(unittest.TestCase):
         camera._ring.append((timestamp, jpg))
         camera._latest = (timestamp, frame)
         camera._latest_jpeg = jpg
+        camera._alive = True
 
         encoded = camera.get_speech_frames(timestamp - 0.1, timestamp + 0.1, max_frames=1)
 
@@ -50,3 +51,38 @@ class CameraBufferTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_stale_frame_is_not_served_or_substituted():
+    camera = Camera(stale_after=0.1)
+    image = np.zeros((32, 32, 3), dtype=np.uint8)
+    camera._latest = (time.monotonic() - 1, image)
+    camera._latest_jpeg = camera._encode_frame_bytes(image)
+    camera._ring.append((time.monotonic() - 1, camera._latest_jpeg))
+    camera._alive = True
+    assert camera.snapshot() is None
+    assert camera.capture_single() is None
+    assert not camera.health_check()
+    assert camera.get_speech_frames(time.monotonic() - 0.1, time.monotonic()) == []
+
+
+def test_frame_outside_requested_window_is_not_substituted():
+    camera = Camera()
+    image = np.zeros((32, 32, 3), dtype=np.uint8)
+    now = time.monotonic()
+    camera._latest = (now, image)
+    camera._latest_jpeg = camera._encode_frame_bytes(image)
+    camera._ring.append((now, camera._latest_jpeg))
+    camera._alive = True
+    assert camera.get_speech_frames(now - 2, now - 1) == []
+
+
+def test_close_invalidates_frame_and_buffer():
+    camera = Camera()
+    image = np.zeros((32, 32, 3), dtype=np.uint8)
+    camera._latest = (time.monotonic(), image)
+    camera._latest_jpeg = camera._encode_frame_bytes(image)
+    camera._ring.append((time.monotonic(), camera._latest_jpeg))
+    camera._alive = True
+    camera.close()
+    assert camera.snapshot() is None and camera.buffer_count == camera.buffer_bytes == 0

@@ -1,4 +1,4 @@
-# Local deployment overlay. No robot, memory, or cloud service is initialized.
+# Orin NX 16GB local platform overlay
 llm:
   model: assistant-vlm
   base_url: http://127.0.0.1:8088
@@ -8,27 +8,24 @@ llm:
   temperature: 0.0
   chat_template_kwargs:
     enable_thinking: false
-  system_prompt: "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。"
-  system_prompt_no_rag: "你是本机的中文陪伴助手。请简短、准确地回答。"
+  system_prompt: 你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。
+  system_prompt_no_rag: 你是本机的中文陪伴助手。请简短、准确地回答。
 vision:
   width: 640
   height: 480
   frames: 1
-  system_prompt: "根据本次提供的画面，用中文简短回答；看不清时明确说明。"
+  system_prompt: 根据本次提供的画面，用中文简短回答；看不清时明确说明。
   few_shot: []
+  camera_device: /dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0
+  stale_after: 1.0
+  buffer_bytes_limit: 16777216
 audio:
   input_device: ReSpeaker Lite
   output_device: null
-reachy:
-  enabled: false
-  spawn_daemon: false
-  face_tracking: false
-  tracking_motion_enabled: false
-  tracking_body_enabled: false
-  tracking_scan_enabled: false
-  speaking_movements_enabled: false
-rag:
-  enabled: false
 web:
   host: 127.0.0.1
   port: 8090
+face:
+  enabled: true
+  fps: 5.0
+  stable_frames: 2

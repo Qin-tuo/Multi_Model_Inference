@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "face": {
+    "repository": "opencv/face_detection_yunet",
+    "revision": "3cc26e7f1014a5ee5d74a42acee58bafc9d0a310",
+    "directory": "/home/nvidia/AI_Stack/models/face/yunet-2023mar",
+    "filename": "face_detection_yunet_2023mar.onnx",
+    "provider": "OpenCV CPU",
+    "precision": "original FP32 ONNX",
+    "license": "MIT",
+    "files": {
+      "face_detection_yunet_2023mar.onnx": {
+        "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+        "bytes": 232589,
+        "url": "https://huggingface.co/opencv/face_detection_yunet/resolve/3cc26e7f1014a5ee5d74a42acee58bafc9d0a310/face_detection_yunet_2023mar.onnx"
+      },
+      "LICENSE": {
+        "sha256": "c83b8120c50ccbd4c4f96edf53141bdd566ebb8f8e9227e415326aa1b1aba958",
+        "bytes": 1085,
+        "url": "https://huggingface.co/opencv/face_detection_yunet/resolve/3cc26e7f1014a5ee5d74a42acee58bafc9d0a310/LICENSE"
+      },
+      "README.md": {
+        "sha256": "a45578c40b04f9aaa1e154bca1d0179ffad6dab840458ac8f7cb0a9362413b72",
+        "bytes": 2745,
+        "url": "https://huggingface.co/opencv/face_detection_yunet/resolve/3cc26e7f1014a5ee5d74a42acee58bafc9d0a310/README.md"
+      }
+    }
+  }
+}

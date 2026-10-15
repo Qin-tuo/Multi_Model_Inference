@@ -25,8 +25,11 @@ import json
 import threading
 from pathlib import Path
 from typing import Callable, Optional
+from contextlib import asynccontextmanager
+from urllib.parse import urlparse
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from pydantic import BaseModel, Field, StrictBool
 from fastapi.responses import FileResponse, HTMLResponse
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
@@ -48,7 +51,7 @@ class Broadcaster:
         self._lock = threading.Lock()
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._ptt = threading.Event()
-        self._ptt.set()
+        self._ptt.clear()
         self._speaker_getter: Optional[Callable[[], dict]] = None
         self._speaker_setter: Optional[Callable[[str], dict]] = None
         self._speaker_volume_setter: Optional[Callable[[int], dict]] = None
@@ -143,6 +146,11 @@ class Broadcaster:
         except asyncio.QueueFull:
             pass
 
+        if msg.get("type") in {"frame", "stats", "perception"}:
+            return
+        # Reliable output cannot be silently discarded. Notify and disconnect
+        # a slow client; the last complete result is available at /api/state.
+        msg = {"type": "overflow", "error": "Viewer fell behind; reconnect to refresh state"}
         # Camera frames are large and quickly become stale. Drop one queued
         # message and retry instead of letting QueueFull escape from the event
         # loop callback, where asyncio would log the complete base64 payload.
@@ -169,12 +177,38 @@ class Broadcaster:
                     pass
 
 
-def create_app(broadcaster: Broadcaster) -> FastAPI:
-    app = FastAPI(title="Reachy Mini Vision Chat")
+class ChatRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=4000)
+    use_image: StrictBool = False
 
-    @app.on_event("startup")
-    async def _startup():
-        broadcaster.set_loop(asyncio.get_event_loop())
+
+def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=None) -> FastAPI:
+    @asynccontextmanager
+    async def application_lifespan(app):
+        broadcaster.set_loop(asyncio.get_running_loop())
+        try:
+            if lifespan:
+                async with lifespan(app): yield
+            else:
+                yield
+        finally:
+            broadcaster.set_loop(None)
+
+    app = FastAPI(title="Orin NX Companion", lifespan=application_lifespan)
+
+    @app.get("/api/state")
+    async def _state():
+        return state() if state else {"ready": False}
+
+    @app.post("/api/chat", status_code=202)
+    async def _chat(request: ChatRequest):
+        if submit is None: raise HTTPException(503, "Conversation input unavailable")
+        try:
+            return submit(request.text, request.use_image)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(409, str(exc)) from exc
 
     @app.get("/")
     async def _index():
@@ -188,18 +222,32 @@ def create_app(broadcaster: Broadcaster) -> FastAPI:
 
     @app.websocket("/ws")
     async def _ws(ws: WebSocket):
+        origin = ws.headers.get("origin")
+        if origin:
+            parsed = urlparse(origin)
+            if parsed.scheme not in {"http", "https"} or parsed.netloc != ws.headers.get("host"):
+                await ws.close(code=1008)
+                return
+        if broadcaster.client_count >= 4:
+            await ws.close(code=1013)
+            return
         await ws.accept()
-        q: asyncio.Queue = asyncio.Queue(maxsize=128)
+        q: asyncio.Queue = asyncio.Queue(maxsize=16)
         broadcaster.register(q)
 
         q.put_nowait({"type": "ptt_state", "active": broadcaster.ptt_active})
         q.put_nowait(broadcaster.get_speaker_state())
+        if state:
+            q.put_nowait({"type": "capabilities", **state()})
 
         async def _sender():
             try:
                 while True:
                     msg = await q.get()
                     await ws.send_text(json.dumps(msg))
+                    if msg.get("type") == "overflow":
+                        await ws.close(code=1013)
+                        return
             except (WebSocketDisconnect, Exception):
                 pass
 
@@ -210,7 +258,10 @@ def create_app(broadcaster: Broadcaster) -> FastAPI:
                     try:
                         msg = json.loads(data)
                         if msg.get("type") == "ptt":
-                            broadcaster.set_ptt(bool(msg.get("active", False)))
+                            if broadcaster._speaker_getter is None:
+                                q.put_nowait({"type": "error", "error": "Audio input is not enabled"})
+                            else:
+                                broadcaster.set_ptt(bool(msg.get("active", False)))
                         elif msg.get("type") == "set_speaker":
                             sink_id = msg.get("sink")
                             if isinstance(sink_id, str) and sink_id:
@@ -244,24 +295,9 @@ def create_app(broadcaster: Broadcaster) -> FastAPI:
             send_task.cancel()
             recv_task.cancel()
         finally:
+            send_task.cancel()
+            recv_task.cancel()
+            await asyncio.gather(send_task, recv_task, return_exceptions=True)
             broadcaster.unregister(q)
 
     return app
-
-
-def start_web_server(
-    broadcaster: Broadcaster,
-    host: str = "0.0.0.0",
-    port: int = 8090,
-) -> threading.Thread:
-    """Start uvicorn in a daemon thread.  Returns immediately."""
-    import uvicorn
-
-    app = create_app(broadcaster)
-
-    def _run():
-        uvicorn.run(app, host=host, port=port, log_level="warning")
-
-    t = threading.Thread(target=_run, daemon=True, name="web-server")
-    t.start()
-    return t

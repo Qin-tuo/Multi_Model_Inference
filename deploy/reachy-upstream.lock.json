@@ -4,7 +4,7 @@
   "repository": "https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant",
   "commit": "2673202a360a41935b45ac79141ef0bb529492ba",
   "purpose": "Read-only source audit and planned upstream for a no-body derivative",
-  "status": "IMPORTED_TO_ISOLATED_BRANCH_ADAPTATION_IN_PROGRESS",
+  "status": "R1_NO_BODY_WEB_CAMERA_FACE_ADAPTED_NOT_FULL_DEPLOYMENT",
   "local_review_checkout": "/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202",
   "license": "Apache-2.0 project; retain NOTICE and third-party license inventory",
   "source_sha256": {
@@ -46,7 +46,7 @@
     "l4t": "39.2.1",
     "cuda": "13.2",
     "python": "3.12",
-    "compatibility_status": "CORE_HTTP_CLIENT_VERIFIED_GPU_PYTHON_AND_HARDWARE_PENDING"
+    "compatibility_status": "WEB_NATIVE_LLM_V4L2_OPENCV_CPU_VERIFIED_OTHER_PROVIDERS_PENDING"
   },
   "prohibited_inferences": [
     "Pinned source is not a local deployment pass",

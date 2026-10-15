@@ -16,11 +16,12 @@
 """Face detection — YuNet (MIT, OpenCV Zoo) via cv2.FaceDetectorYN.
 
 A single-purpose detector used to locate the most prominent face in a
-camera frame. The face box drives head tracking so the robot keeps the
-person centered in view. No emotion or expression classification.
+camera frame. Detection is independent of a robot body.
+No identity, emotion, or expression classification.
 """
 
-import sys
+import hashlib
+import json
 import threading
 from pathlib import Path
 from typing import Optional
@@ -28,15 +29,7 @@ from typing import Optional
 import cv2
 import numpy as np
 
-_MODELS_ROOT = Path(__file__).resolve().parent.parent / "models"
-_FACE_DIR = _MODELS_ROOT / "face"
-_LEGACY_DIR = _MODELS_ROOT / "emotion"  # original location of the YuNet weights
-
-_FACE_MODEL_FILE = "yunet_2023mar.onnx"
-_FACE_MODEL_URL = (
-    "https://huggingface.co/opencv/face_detection_yunet"
-    "/resolve/main/face_detection_yunet_2023mar.onnx"
-)
+_MANIFEST = Path(__file__).resolve().parent.parent / "models" / "perception.json"
 
 _SCORE_THRESH = 0.5
 _NMS_THRESH = 0.3
@@ -50,44 +43,14 @@ _DETECT_MAX_W = 640
 FaceBox = tuple[int, int, int, int]
 
 
-def _resolve_model_path() -> Optional[Path]:
-    """Return an existing YuNet weights path, downloading it if needed."""
-    for candidate in (_FACE_DIR / _FACE_MODEL_FILE, _LEGACY_DIR / _FACE_MODEL_FILE):
-        if candidate.exists():
-            return candidate
-    dest = _FACE_DIR / _FACE_MODEL_FILE
-    if _download(_FACE_MODEL_URL, dest, "YuNet face (~233 KB)"):
-        return dest
-    return None
-
-
-def _download(url: str, path: Path, label: str) -> bool:
-    try:
-        import httpx
-    except ImportError:
-        print("FaceDetector: install httpx to auto-download model (pip install httpx)")
-        return False
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with httpx.stream("GET", url, follow_redirects=True, timeout=120.0) as r:
-            r.raise_for_status()
-            total = int(r.headers.get("content-length", 0)) or None
-            done = 0
-            with open(path, "wb") as f:
-                for chunk in r.iter_bytes(chunk_size=262144):
-                    f.write(chunk)
-                    done += len(chunk)
-                    if total:
-                        sys.stdout.write(f"\r  {label}: {100 * done / total:.0f}%")
-                        sys.stdout.flush()
-        if total:
-            print()
-        return True
-    except Exception as e:
-        print(f"  Download failed: {e}")
-        if path.exists():
-            path.unlink()
-        return False
+def _resolve_model_path() -> Path:
+    """Use a prepared, pinned local artifact; runtime never downloads weights."""
+    entry = json.loads(_MANIFEST.read_text())["face"]
+    path = Path(entry["directory"]).expanduser() / entry["filename"]
+    expected = entry["files"][entry["filename"]]["sha256"]
+    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+        raise ValueError("YuNet artifact hash mismatch")
+    return path
 
 
 def _pick_best_face(faces: Optional[np.ndarray]) -> Optional[FaceBox]:
@@ -111,12 +74,13 @@ class FaceDetector:
     def __init__(self):
         self._detector: Optional[cv2.FaceDetectorYN] = None
         self._lock = threading.Lock()
+        self.last_error = None
 
     def load(self) -> bool:
-        model_path = _resolve_model_path()
-        if model_path is None:
-            return False
+        self.last_error = None
+        self.unload()
         try:
+            model_path = _resolve_model_path()
             self._detector = cv2.FaceDetectorYN.create(
                 str(model_path), "",
                 (320, 320),
@@ -126,6 +90,7 @@ class FaceDetector:
             )
             return True
         except Exception as e:
+            self.last_error = str(e)
             print(f"FaceDetector: load error — {e}")
             return False
 
@@ -139,7 +104,7 @@ class FaceDetector:
         Returns (x1, y1, x2, y2) in the original frame's pixel coordinates,
         or None. Detection runs on a downscaled copy for speed. Thread-safe.
         """
-        if self._detector is None or frame is None:
+        if frame is None:
             return None
         h, w = frame.shape[:2]
 
@@ -151,6 +116,8 @@ class FaceDetector:
         sh, sw = small.shape[:2]
 
         with self._lock:
+            if self._detector is None:
+                return None
             self._detector.setInputSize((sw, sh))
             _, faces = self._detector.detect(small)
 
@@ -164,4 +131,5 @@ class FaceDetector:
         return self._detector is not None
 
     def unload(self) -> None:
-        self._detector = None
+        with self._lock:
+            self._detector = None
