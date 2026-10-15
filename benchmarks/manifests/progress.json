@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-14T11:24:57.466183+00:00",
-  "plan": "v2.0 (edge multi-model deployment, dataflow, resources, profiling and reliable delivery)",
+  "updated_at": "2026-10-15T03:33:30.511226+00:00",
+  "plan": "v3.0 Reachy-derived no-body application; assistant framework and baseline, guided user optimization",
   "overall_status": "PAUSED",
   "tasks": [
     {
@@ -883,30 +883,10 @@
   ],
   "dependency_root": "/home/nvidia/AI_Stack",
   "delivery_phases": {
-    "active": "A_software_foundation",
-    "execution_status": "PAUSED",
-    "A": [
-      "SF-01 real chain",
-      "SF-02 cancellation/state",
-      "SF-03 durable tools",
-      "SF-04 resource lifecycle",
-      "SF-05 recovery",
-      "SF-06 runnable delivery"
-    ],
-    "B": [
-      "Deployment/precision evidence",
-      "Dataflow/resource scheduling",
-      "B0-B3 and frozen SLO",
-      "Measured optimization",
-      "8h/fault/offline/redeployment",
-      "C++ contribution and portfolio evidence"
-    ],
-    "later": [
-      "Long-term memory product extension",
-      "Independent Edge-LLM comparison"
-    ],
-    "authority": "Latest user goal prioritizes edge deployment as the resume project; framework first, performance evidence required for final portfolio.",
-    "legacy_acceptance": "JT values remain historical/extended-product evidence; no mixed denominator with SF or DP."
+    "A": "assistant builds complete maintainable no-body derivative",
+    "B": "assistant delivers current complete-function baseline",
+    "C": "user executes module-wise diagnosis and optimization with guidance",
+    "execution_status": "PAUSED"
   },
   "foundation_acceptance": {
     "SF-01": {
@@ -968,8 +948,8 @@
       "cancel_effect": "stop generation/playback and block unstarted tools; retain completed notes/reminders"
     }
   },
-  "execution_state_note": "User paused implementation. JD-driven plan updated without resuming deployment or testing.",
-  "deployment_roadmap": "benchmarks/manifests/deployment-roadmap-v2.json",
+  "execution_state_note": "Plan only. Current runtime/code remain legacy; migration and new application benchmarks not started.",
+  "deployment_roadmap": "benchmarks/manifests/reachy-headless-roadmap-v3.json",
   "job_requirement_sources": "benchmarks/manifests/target-jd-20261014.json",
   "final_deployment_acceptance": {
     "DP-01": {
@@ -1012,5 +992,46 @@
       "status": "NOT_VERIFIED",
       "evidence": []
     }
-  }
+  },
+  "learning_acceptance": {
+    "LR-01": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-02": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-03": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-04": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-05": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-06": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    }
+  },
+  "collaboration_policy": {
+    "framework_owner": "assistant",
+    "initial_baseline_owner": "assistant",
+    "optimization_owner": "user_with_guidance",
+    "autonomous_performance_tuning": false,
+    "on_missing_user_feedback": "Wait for user results or explicit delegated execution; do not advance optimization automatically."
+  },
+  "planned_application": {
+    "upstream": "NVIDIA-AI-IOT/reachy-mini-jetson-assistant",
+    "commit": "2673202a360a41935b45ac79141ef0bb529492ba",
+    "variant": "no-robot-body",
+    "migration_status": "NOT_STARTED",
+    "gap_ledger": "benchmarks/manifests/reachy-gap-ledger-v3.json"
+  },
+  "legacy_evidence_scope": "Existing tasks, JT/SF/DP and reports qualify only their historical implementation/configuration; none automatically passes new F/E/K."
 }

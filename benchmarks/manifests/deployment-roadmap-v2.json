@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "created_at": "2026-10-14T11:24:57.464101+00:00",
-  "version": "2.0",
+  "version": "2.1",
   "execution_status": "PAUSED",
   "authority": "User requested redesign around researched edge-deployment JDs; this records a revised plan, not a resumed or completed execution goal.",
-  "goal": "在Orin NX 16GB上，以陪伴机器人为真实负载，基于Pipecat、ROS2、llama.cpp、TensorRT/ORT及成熟感知/语音模型，交付端侧多模型部署服务。主模型暂用Qwen3.5-4B；实现人体、人脸和手部感知、语音指令理解与扬声器回应，挥手问候、静止举掌整轮取消，保持工具幂等和状态一致。先完成SF-01～06软件基础与已知缺陷修复，再建立资源预算、B0–B3和预先冻结SLO，完成有依据的优化、精度对照、8h与故障恢复、离线及重部署，并以DP-01～10证据形成端侧部署岗位作品集。长期记忆另阶段，身份验证不包含，Edge-LLM仅作后续对照；所有成果区分真实/回放/合成范围，不把阶段交付等同最终完成。",
+  "goal": "在Orin NX 16GB上，以陪伴机器人为真实场景，先选定并复用Pipecat、ROS2、llama.cpp、ORT/TensorRT等成熟框架，明确各模块输入输出、职责和简洁合理的代码结构。助手负责搭建并验证功能完整、可配置部署、数据流正确、资源有界、可观测及异常可恢复的工程基础；固定Qwen3.5-4B，打通人体/人脸/手部感知、语音、理解、扬声器与有限工具，实现挥手问候和静止举掌整轮取消。整体功能跑通后由助手交付当前各模块和整机性能基线。随后由用户在逐步指导下使用专业工具，按模块定位问题、分析瓶颈、提出并实施优化、回归并与冻结基准比较；助手负责讲解、脚手架、证据审查和按需协助，不自动代替用户完成多轮优化。最终同时通过SF/DP工程验证与LR-01至LR-06掌握验证，形成可复现且能由用户独立解释的端侧部署项目。长期记忆后置，身份验证删除，Edge-LLM仅作后续对照；物理音频和工业落地条件必须以真实验证为依据。",
   "job_source_manifest": "benchmarks/manifests/target-jd-20261014.json",
   "milestones": [
     {
@@ -13,6 +13,20 @@
       "depends_on": [],
       "status": "PLANNED_WITH_EXISTING_EVIDENCE",
       "tasks": [
+        {
+          "id": "M0.framework_boundaries",
+          "title": "Confirm mature frameworks and each module input/output/ownership",
+          "status": "PLANNED",
+          "existing_evidence": [],
+          "work_execution": "PAUSED"
+        },
+        {
+          "id": "M0.code_structure",
+          "title": "Map existing files, simplify layout, migrate incrementally with regression",
+          "status": "NOT_STARTED",
+          "existing_evidence": [],
+          "work_execution": "PAUSED"
+        },
         {
           "id": "M0.default_entry",
           "title": "核对4B默认入口、原生工具策略、工件及回退清单",
@@ -46,7 +60,8 @@
           ],
           "work_execution": "PAUSED"
         }
-      ]
+      ],
+      "owner": "assistant_framework_with_user_handoff"
     },
     {
       "id": "M1",
@@ -102,7 +117,8 @@
           "existing_evidence": [],
           "work_execution": "PAUSED"
         }
-      ]
+      ],
+      "owner": "assistant_framework_with_user_handoff"
     },
     {
       "id": "M2",
@@ -148,7 +164,8 @@
           "work_execution": "PAUSED"
         }
       ],
-      "conditional_entry": "A-software completion permits non-acoustic resource/replay baselines while audio hardware is absent; physical SLO remains unmeasured and final DP-03/05 cannot pass."
+      "conditional_entry": "A-software completion permits non-acoustic resource/replay baselines while audio hardware is absent; physical SLO remains unmeasured and final DP-03/05 cannot pass.",
+      "owner": "assistant_initial_baseline_then_guided_user_reproduction"
     },
     {
       "id": "M3",
@@ -186,7 +203,8 @@
           "existing_evidence": [],
           "work_execution": "PAUSED"
         }
-      ]
+      ],
+      "owner": "guided_user_led"
     },
     {
       "id": "M4",
@@ -224,7 +242,8 @@
           "existing_evidence": [],
           "work_execution": "PAUSED"
         }
-      ]
+      ],
+      "owner": "guided_user_led"
     },
     {
       "id": "M5",
@@ -255,7 +274,8 @@
           "existing_evidence": [],
           "work_execution": "PAUSED"
         }
-      ]
+      ],
+      "owner": "guided_user_led"
     }
   ],
   "completion_nodes": {
@@ -335,5 +355,51 @@
       "evidence": []
     }
   },
-  "legacy_plan": "docs/archive/02-plan-v1.3-20261014.md"
+  "legacy_plan": "docs/archive/02-plan-v1.3-20261014.md",
+  "updated_at": "2026-10-14T11:41:22.737490+00:00",
+  "collaboration": {
+    "framework": "assistant builds and validates; user reviews architecture and demonstrates operation",
+    "initial_baseline": "assistant measures and delivers current metrics after complete functional integration",
+    "optimization": "user executes and interprets experiments step by step; assistant teaches, reviews evidence and assists specific requested changes",
+    "boundary": "Do not autonomously optimize or advance experiments while awaiting user results. Explicit delegated runs are labeled and do not prove mastery.",
+    "sequence": [
+      "framework selection",
+      "module contracts",
+      "simple structure and full integration",
+      "current performance baseline",
+      "module-wise guided diagnosis",
+      "hypothesis and optimization",
+      "regression and baseline comparison"
+    ]
+  },
+  "learning_acceptance": {
+    "LR-01": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-02": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-03": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-04": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-05": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    },
+    "LR-06": {
+      "status": "NOT_VERIFIED",
+      "user_evidence": []
+    }
+  },
+  "completion_rule": "Engineering DP criteria and user LR criteria both required; assistant-generated outcomes alone are insufficient.",
+  "superseded_by": "benchmarks/manifests/reachy-headless-roadmap-v3.json",
+  "plan_status": "SUPERSEDED",
+  "superseded_at": "2026-10-15T03:33:30.511226+00:00"
 }

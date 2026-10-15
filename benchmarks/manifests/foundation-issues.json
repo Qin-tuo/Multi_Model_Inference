@@ -40,5 +40,7 @@
       "status": "OPEN",
       "scope": "Body/face/gesture perception to voice/model/speaker. No identity. Wave greets; stationary held open palm cancels the current generation/playback and unstarted tools, preserving completed writes; moving palm does not stop. Mature face/hand models still require integration."
     }
-  ]
+  ],
+  "applicability": "Legacy implementation issue ledger; Reachy source/migration gaps tracked separately.",
+  "reachy_gap_ledger": "benchmarks/manifests/reachy-gap-ledger-v3.json"
 }

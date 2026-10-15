@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-15T03:31:24.246403+00:00",
+  "repository": "https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant",
+  "commit": "2673202a360a41935b45ac79141ef0bb529492ba",
+  "purpose": "Read-only source audit and planned upstream for a no-body derivative",
+  "status": "RESEARCH_PIN_ONLY_NOT_DEPLOYED",
+  "local_review_checkout": "/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202",
+  "license": "Apache-2.0 project; retain NOTICE and third-party license inventory",
+  "source_sha256": {
+    "README.md": "838f945086341608bacc24de446511a30375764d8bc9a04f23358a4a73f9f1d1",
+    "LICENSE": "ae94afb0cb14cdcddb7b0e478f519792f6c8f3cc23828aa021c3e4548a4b0661",
+    "NOTICE": "7e29c920fedffc774b2014463ce5272c52a342b9ff9429a8d4a4dd5de47eaa5b",
+    "THIRD-PARTY-NOTICES.md": "3444b3fb8787ef05ed1dcbb4401b8cb04f4ddcdfd906fe493b75021b31790191",
+    "requirements.txt": "8d1805773d4277e23ece464e948d2c2cd3dadc931bdb3c9fdf585b4141889df7",
+    "run_web_vision_chat.py": "9b6a4b6c694a814a9e425fc3438c9d1c592f97f18718cebd83697bc13357c7fe",
+    "run_vision_chat.py": "31ff317768eb722ce01036cdb84f36184fe34ae391fe14c822bbefcfd423659f",
+    "app/config.py": "f42ccc0dacc11e579a310afbb31b44022c83f2da360dfeeee2402a86496b7d2a",
+    "app/camera.py": "21186306bd8aec10b07e5f6caea7065e5b9c4ac8577372400fb063b66c12d928",
+    "app/face_detector.py": "3312d03d6ede793accc8aca15a4f402848448701658d95f68b872911621cafc7",
+    "app/face_tracker.py": "396249d89111e6fc227bbbf4766d03e296928c00d6706762d4fee8ac6183aff2",
+    "app/vision_capture.py": "b4a034d68cfe3b89d34516c8ccd1de30f9692970e1b08cee80215a20cee41a45",
+    "app/pipeline.py": "58543fcc8d6c1bc6c884e692d17506d254207a61217a1d2b2fcf606ec233392c",
+    "app/audio.py": "15eeb5d50212419dbe7a7e584e91711ec2409dfb6d5f5dab15bde6efbf5594c6",
+    "app/llm.py": "7b34da56665793007321bb5b7312ac235190cbd7a00f08e0eb54318b4a1e7633",
+    "app/stt.py": "5367ac247e6685c1ff934e85778de339c0f91b7567ff628609eaaade0a636345",
+    "app/tts.py": "92e7190a88cfafd520b7645ce2b5caca2ff36b429f2d3c309d2501c51226bc35",
+    "app/reachy.py": "2945164203fedd31828a571c1b39d17f99f020636af9fafd1f6267e5641a7d80",
+    "app/movement_manager.py": "f30517f8a878d7c3fe72b7ed3c86fc8f5ad3814630423adb0ae0566d8d38d792",
+    "app/speaking_movements.py": "9708e18fab50485679c6059d84b92701377705e8b24541e9f9f87bcc48853bdf",
+    "app/web.py": "32e5ef3bdd3fa3e330a152e18e46236276ac00ffb359c8fb40efabdadbb432fe",
+    "app/monitor.py": "71505e3fcd414224e2efcff0be4ff4d1683f09db7523f3506c5af6eb5fc1bddc",
+    "config/settings.yaml": "111d50656b8d5ec4094487c2e2c9809f67beffcf0074317b75491451b319355c",
+    "config/settings.jp72-no-reachy.yaml": "b24977f3449875273721fbbc07ac6e17dfd8546173ae1f05a8df7f27a423717c",
+    "packaging/jetson-wheels.json": "36d9f8fc42000494ce79c8a77cd1ca8dc68675d526a522368e5a4fbb56d6fbd5"
+  },
+  "upstream_target": {
+    "board": "Orin Nano8GB",
+    "manifest_l4t": "39.2.0",
+    "cuda": "13.2",
+    "python": "3.12",
+    "sm": "8.7"
+  },
+  "local_recorded_target": {
+    "board": "Orin NX16GB",
+    "l4t": "39.2.1",
+    "cuda": "13.2",
+    "python": "3.12",
+    "compatibility_status": "NOT_VERIFIED_FOR_UPSTREAM_DEPLOYMENT"
+  },
+  "prohibited_inferences": [
+    "Pinned source is not a local deployment pass",
+    "Upstream performance is not this project baseline",
+    "Project organization does not prove production qualification"
+  ]
+}

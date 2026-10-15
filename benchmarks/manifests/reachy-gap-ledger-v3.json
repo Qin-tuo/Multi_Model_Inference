@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-15T03:31:24.246403+00:00",
+  "upstream_commit": "2673202a360a41935b45ac79141ef0bb529492ba",
+  "scope": "Source findings and required changes; risks without reproduction are not asserted incidents; no implementation or fixes claimed.",
+  "issues": [
+    {
+      "id": "RG-01",
+      "classification": "CONFIRMED_SOURCE_COUPLING",
+      "finding": "Face initialization/tracking depends on Reachy connection and movement manager",
+      "source_file": "run_web_vision_chat.py",
+      "planned_resolution": "Independent face detection/temporal state with no SDK/daemon",
+      "phase": "R1",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-02",
+      "classification": "CONFIRMED_SOURCE_BEHAVIOR",
+      "finding": "Mic pauses during STT/LLM/TTS sequence",
+      "source_file": "app/pipeline.py",
+      "planned_resolution": "Separate listening and turn processing; one cancellation authority and release checks",
+      "phase": "R3",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-03",
+      "classification": "OBSERVED_RISK_PENDING_RUNTIME_REPRO",
+      "finding": "Audio/TTS queues have unbounded declarations",
+      "source_file": "app/pipeline.py",
+      "planned_resolution": "Bound time/bytes, define overflow, verify slow-consumer and cancellation",
+      "phase": "R3",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-04",
+      "classification": "OBSERVED_RISK_PENDING_RUNTIME_REPRO",
+      "finding": "Startup helpers may terminate unrelated device/audio holders",
+      "source_file": "app/reachy.py",
+      "planned_resolution": "Own-resource cleanup only; report external occupancy",
+      "phase": "R1",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-05",
+      "classification": "CONFIRMED_CONFIGURATION_GAP",
+      "finding": "English defaults and word-based filtering/chunking",
+      "source_file": "config/settings.yaml",
+      "planned_resolution": "Chinese ASR/TTS adapters and short-utterance/segmentation checks",
+      "phase": "R2",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-06",
+      "classification": "CONFIRMED_PLATFORM_DIFFERENCE",
+      "finding": "Exact wheel manifest L4T39.2.0 differs from local39.2.1",
+      "source_file": "packaging/jetson-wheels.json",
+      "planned_resolution": "Isolated compatibility verification or documented host build",
+      "phase": "R0",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-07",
+      "classification": "MISSING_REQUIRED_CAPABILITY",
+      "finding": "Body/hand small-model pipeline and human wave/static palm events not present in reviewed source",
+      "source_file": "README.md",
+      "planned_resolution": "Add bounded perception and deterministic two-gesture rules",
+      "phase": "R2",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-08",
+      "classification": "OBSERVED_RISK_PENDING_RUNTIME_REPRO",
+      "finding": "Broad exception handling and forced process exit in main entry",
+      "source_file": "run_web_vision_chat.py",
+      "planned_resolution": "Observable errors, scoped orderly cleanup and repeat lifecycle checks",
+      "phase": "R3",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-09",
+      "classification": "CONFIGURATION_ADAPTATION_REQUIRED",
+      "finding": "Upstream default model and multi-frame input differ from selected4B/2K profile",
+      "source_file": "app/llm.py",
+      "planned_resolution": "Verify model identity, native token budget and declared image policy",
+      "phase": "R2",
+      "status": "OPEN",
+      "evidence": []
+    },
+    {
+      "id": "RG-10",
+      "classification": "MISSING_REQUIRED_EXTENSION",
+      "finding": "Current-session semantics and optional durable tools need explicit integration",
+      "source_file": "app/llm.py",
+      "planned_resolution": "One context owner, minimal optional actions and cancellation-safe receipts",
+      "phase": "R3",
+      "status": "OPEN",
+      "evidence": []
+    }
+  ],
+  "hardware_gap": {
+    "microphone": "ReSpeaker Lite dual-mic, not connected per user",
+    "speaker": "not connected per user",
+    "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
+  }
+}
