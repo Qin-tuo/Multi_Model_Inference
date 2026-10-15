@@ -29,3 +29,5 @@ face:
   enabled: true
   fps: 5.0
   stable_frames: 2
+vad:
+  chunk_ms: 32

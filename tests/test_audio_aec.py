@@ -26,8 +26,8 @@ def test_aec_loads_webrtc_for_selected_physical_sink(monkeypatch):
     assert "aec_method=webrtc" in load_call
     assert "source_master=reachy-physical-mic" in load_call
     assert "sink_master=selected-physical-speaker" in load_call
-    assert f"source_name={pipeline.AEC_SOURCE_NAME}" in load_call
-    assert f"sink_name={pipeline.AEC_SINK_NAME}" in load_call
+    assert f"source_name={aec.source_name}" in load_call
+    assert f"sink_name={aec.sink_name}" in load_call
 
     aec.stop()
     assert ["pactl", "unload-module", "42"] in calls

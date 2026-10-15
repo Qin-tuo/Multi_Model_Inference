@@ -1,0 +1,59 @@
+{
+  "scope": "Real streamed 4B text split into multiple Chinese TTS chunks, concatenated into one complete WAV; no physical playback",
+  "passed": true,
+  "result": {
+    "turn_id": "f07f4599ce1c4d7da81c2e3cfa69d717",
+    "text": "你好。我们已经接通中文语音服务。",
+    "metadata": {
+      "input_tokens_preflight": 52,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 52,
+        "total_tokens": 61,
+        "prompt_tokens_details": {
+          "cached_tokens": 26
+        }
+      },
+      "eval_count": 9,
+      "done": true
+    },
+    "mode": "text",
+    "prompt": "请只输出以下原文：你好。我们已经接通中文语音服务。",
+    "speech": {
+      "receipt": {
+        "kind": "file_written",
+        "path": "/home/nvidia/AI_Stack/runtime-data/reachy-audio/reply-f07f4599ce1c4d7da81c2e3cfa69d717.wav",
+        "bytes": 128512
+      },
+      "chunks": [
+        {
+          "text": "你好。",
+          "bytes": 36864,
+          "elapsed_seconds": 0.11481966899009421,
+          "first_pcm_seconds": 0.10960546898422763,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 36864
+          }
+        },
+        {
+          "text": "我们已经接通中文语音服务。",
+          "bytes": 91648,
+          "elapsed_seconds": 0.0954062879900448,
+          "first_pcm_seconds": 0.09132717500324361,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 91648
+          }
+        }
+      ],
+      "duration": 4.016
+    },
+    "audio_url": "/api/audio/f07f4599ce1c4d7da81c2e3cfa69d717",
+    "status": "complete",
+    "elapsed_seconds": 1.1241990249836817,
+    "first_content_seconds": 0.3404982999782078
+  },
+  "wav_frames": 64256
+}

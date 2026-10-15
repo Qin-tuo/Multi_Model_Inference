@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Voice adapter is integrated into the shared application in R2."""
-if __name__ == "__main__":
-    raise SystemExit("Voice input is not integrated yet. Use run_web_vision_chat.py --no-camera for text input.")
+"""Voice/file input reuses the same application with camera disabled by default."""
+from run_web_vision_chat import main
+
+if __name__ == "__main__": main(default_no_camera=True)

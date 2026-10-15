@@ -47,9 +47,7 @@ def test_speaker_selector_switches_without_restart(monkeypatch):
     state = selector.select(SPEAKERS[0]["id"])
 
     assert state["selected"] == SPEAKERS[0]["id"]
-    assert [
-        "pactl", "set-default-sink", SPEAKERS[0]["id"],
-    ] in pactl_calls
+    assert not any("set-default-sink" in call for call in pactl_calls)
 
 
 def test_speaker_selector_reports_and_sets_volume(monkeypatch):
@@ -84,3 +82,10 @@ def test_speaker_selector_reports_and_sets_volume(monkeypatch):
     assert [
         "pactl", "set-sink-volume", SPEAKERS[0]["id"], "55%",
     ] in pactl_calls
+
+
+def test_configured_missing_output_does_not_select_unrelated_speaker(monkeypatch):
+    monkeypatch.setattr(pipeline,"list_pa_sinks",lambda:SPEAKERS)
+    monkeypatch.setattr(pipeline,"get_default_pa_sink",lambda:SPEAKERS[0]["id"])
+    selector=pipeline.SpeakerSelector("missing-speaker",None)
+    assert selector.get_sink() is None

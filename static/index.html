@@ -343,6 +343,11 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         <label><input id="useCamera" type="checkbox"> 使用当前画面</label>
         <button id="sendText" type="submit">发送</button>
       </form>
+      <form class="text-form" id="audioForm">
+        <input id="audioFile" type="file" accept=".wav,audio/wav" aria-label="16kHz单声道WAV" disabled>
+        <button id="sendAudio" type="submit" disabled>上传语音 WAV</button>
+        <span id="audioMode" style="font-size:.8rem;color:var(--dim)">语音未启用</span>
+      </form>
       <div class="input-error" id="inputError" role="alert"></div>
       <div class="messages" id="messages">
         <div class="empty-state" id="emptyState">
@@ -358,6 +363,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 (function(){
   const $ = id => document.getElementById(id);
 
+  let speechReady = false;
   let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
   let reconnectTimer = null, pttActive = null, pipelineStage = 'connecting', faceBoxTimer = null;
   const camNatural = {w:640, h:480};
@@ -551,7 +557,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const labels = {
       idle:'等待输入', connecting:'Connecting...', muted:'Mic muted', listening:'Listening...',
       recording:'Recording...', transcribing:'Transcribing...',
-      thinking:'Thinking...', speaking:'Speaking...'
+      thinking:'Thinking...', synthesizing:'生成语音文件...', speaking:'Speaking...'
     };
     const status = $('pipeStatus');
     status.textContent = labels[stage] || stage;
@@ -565,7 +571,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const stages = $('pipeStages').querySelectorAll('.stage');
     for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
     pipelineStage = msg.stage;
-    $('sendText').disabled = msg.stage === 'thinking';
+    const busy=['thinking','transcribing','synthesizing','speaking'].includes(msg.stage);
+    $('sendText').disabled=busy; $('sendAudio').disabled=busy || !speechReady;
     renderPipelineStatus();
   }
 
@@ -603,9 +610,16 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       const parts = [];
       if(msg.ttft != null) parts.push('TTFT '+msg.ttft.toFixed(1)+'s');
       if(msg.vlm_time != null) parts.push('VLM '+msg.vlm_time.toFixed(1)+'s');
+      if(msg.total_time != null) parts.push('总计 '+msg.total_time.toFixed(1)+'s');
       if(msg.tokens != null) parts.push(msg.tokens+' tok');
       if(msg.status === 'failed') parts.push('未完成');
       meta.textContent = parts.join(' \u00b7 ');
+      if(msg.audio_url){
+        const link=document.createElement('a'); link.href=msg.audio_url; link.textContent=' 下载语音文件';
+        link.setAttribute('download','reply.wav'); meta.appendChild(link);
+      } else if(msg.output_kind === 'device_completed'){
+        meta.appendChild(document.createTextNode(' 设备输出完成'));
+      }
       currentAssistant = null;
       msgIdx++;
       updateMsgCount();
@@ -658,12 +672,32 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     if(!msg.camera_enabled) $('useCamera').checked=false;
     $('cameraState').textContent=msg.camera_ready ? '就绪' : '未启用/不可用';
     if(!msg.camera_ready) cameraUnavailable({error:msg.camera_error});
-    $('inputMode').textContent=msg.audio_enabled ? '语音与文字' : '文字';
+    speechReady=!!msg.speech_ready;
+    $('pttBtn').style.display=msg.audio_enabled ? '' : 'none';
+    if(msg.audio_enabled) $('pttBtn').style.display='flex';
+    $('audioFile').disabled=!speechReady;
+    $('audioMode').textContent=speechReady ? '16kHz 单声道 PCM WAV；输出：'+(msg.audio_output_mode==='file' ? '文件' : '设备') : '语音未启用';
+    $('inputMode').textContent=msg.audio_enabled ? '麦克风与文字' : speechReady ? '语音文件与文字' : '文字';
     onStatus({stage:msg.active_turn ? 'thinking' : 'idle'});
     if(msg.last_result){
-      onDone({text:msg.last_result.text, status:msg.last_result.status});
+      onDone({text:msg.last_result.text, status:msg.last_result.status, audio_url:msg.last_result.audio_url});
     }
   }
+
+  $('audioForm').addEventListener('submit',async function(event){
+    event.preventDefault(); $('inputError').textContent='';
+    const file=$('audioFile').files[0];
+    if(!file){ $('inputError').textContent='请选择 WAV 文件'; return; }
+    $('sendAudio').disabled=true; $('sendText').disabled=true;
+    try{
+      const response=await fetch('/api/audio?use_image='+$('useCamera').checked,
+        {method:'POST',headers:{'Content-Type':'audio/wav'},body:file});
+      const data=await response.json();
+      if(!response.ok) throw new Error(typeof data.detail==='string' ? data.detail : '语音输入无效');
+    }catch(error){
+      $('inputError').textContent=error.message; $('sendAudio').disabled=!speechReady; $('sendText').disabled=false;
+    }
+  });
 
   $('textForm').addEventListener('submit', async function(event){
     event.preventDefault();

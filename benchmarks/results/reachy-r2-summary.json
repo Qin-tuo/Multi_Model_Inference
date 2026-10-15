@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-15T07:35:38.365792+00:00",
+  "scope": "R2 Chinese ASR/VAD/TTS software integration; physical microphone/speaker/AEC/duplex and full R2 perception are not qualified",
+  "status": "SPEECH_FILE_PIPELINE_VERIFIED",
+  "source_sha256": {
+    "app/llm.py": "2bd70a200398d5a5cda0c9851dea2a8804a4f4edefd3fd65b0aee748f78dbf4f",
+    "app/pipeline.py": "f636e7d5d37f4ff4358dedcdd6c7c29a4800bc786909d5bb431d96f1ec59ce45",
+    "app/monitor.py": "71505e3fcd414224e2efcff0be4ff4d1683f09db7523f3506c5af6eb5fc1bddc",
+    "app/tts.py": "59e8b1d61b40301bbd8e0c47c9f55698cb592e5c453d04ee97d72a9f184d8ae9",
+    "app/face_detector.py": "377cae164b0bdd0b8f8303f1ba639b4eaac655233adf53cb4112fa5ec1ea931b",
+    "app/web.py": "30960140509a358fa7d54dd941c575af1a1009956bcb54e02bb85c33166e9880",
+    "app/cli.py": "d4300e8c916d10440d44912af0fef70e0d3d863ee28de09482c27ce8db55e5d6",
+    "app/face_tracker.py": "8e78180ac6cddc0cd314fb045f15f231f20b5540a14690238ec56e6533be1090",
+    "app/audio.py": "72f298bf6bc378a0441076af60940479a04b8114cd5f00f92529a7dfd1eabd0e",
+    "app/__init__.py": "b6b7b3007ae0171e1905556bec3d2e2cc33a462f9684c183d14d95ac668138e8",
+    "app/stt.py": "0314cbcb790336def945a0eb7148600cb4ce8b83e12c4bcd58edb7aabf4bfba2",
+    "app/turn_control.py": "5446ef2de6f52203cb0880000164e9ca40d876e8b7b945feffa764f4a107526b",
+    "app/vision_capture.py": "57f260076a7982e6639014a221f3e49d8727e33b5df4eef907ce414acfa8f0ef",
+    "app/config.py": "0c11815803b36f1cabed2c23ad8e964bfbb24e07610ff12c99b537c8c781cc64",
+    "app/camera.py": "ebae3b8b495e0c0d9be90caafae7397de725e3561564b87b9845fff8788cd541",
+    "run_web_vision_chat.py": "b97f35ecc65ffe45cd2f039b4d9dc362201b2c4379acd651317a1739c3e013ef",
+    "run_voice_chat.py": "c4706ccee88e2f2b25f8cd642d56ff2a25d5268049fe7b0ae8f5864bcca0139c",
+    "models/speech.json": "6c7834d913261a68cea294d4474abccb9c34b39f797a6ac683385c6cd0c85844",
+    "requirements.lock": "e0d9ab90052bd999625c9ba652aba4296ba93a8f099602650e9ee5c67c9ac1eb",
+    "config/settings.yaml": "431b2c315611d582716db5427a91b1dce911cb8fe66535005be2ef5a3c73a1d6",
+    "config/settings.orin-nx-headless.yaml": "6ecb384ecd844878830b985e6a47a5ff5fe9541d81094c9a3268d8073ec5f8f5",
+    "static/index.html": "94c81c7ac393b488183f92f6f16747991f7231d9768aa3bf82108590439a0dbc"
+  },
+  "tests": {
+    "command": "python -m pytest -q --junitxml=/home/nvidia/AI_Stack/runtime-data/reachy-r2-tests.xml",
+    "passed": 56,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_sha256": "e3a4f52d89ecfa8fc8aa14c264715ede1091a9083cad70413a8848a74fc31e06"
+  },
+  "real_evidence": [
+    "benchmarks/results/reachy-r2-speech-file.json",
+    "benchmarks/results/reachy-r2-speech-final.json",
+    "benchmarks/results/reachy-r2-chinese-chunks.json",
+    "benchmarks/results/reachy-r2-missing-device.json"
+  ],
+  "inference_release": {
+    "llama_slots_idle": {
+      "8088": true,
+      "8089": true
+    },
+    "speech_active": {
+      "asr": 0,
+      "tts": 0
+    }
+  },
+  "existing_service_pids": [
+    {
+      "unit": "mmassistant-llama.service",
+      "same_pid_as_R0": true
+    },
+    {
+      "unit": "mmassistant-asr.service",
+      "same_pid_as_R0": true
+    },
+    {
+      "unit": "mmassistant-speech.service",
+      "same_pid_as_R0": true
+    },
+    {
+      "unit": "mmassistant-vision.service",
+      "same_pid_as_R0": true
+    },
+    {
+      "unit": "mmassistant-pose.service",
+      "same_pid_as_R0": true
+    },
+    {
+      "unit": "mmassistant-qdrant.service",
+      "same_pid_as_R0": true
+    }
+  ],
+  "bounds": {
+    "mic_frames": 64,
+    "mic_frame_ms": 32,
+    "speech_text_queue": 2,
+    "file_input_seconds": 15,
+    "tts_chunk_audio_seconds": 30,
+    "turn_audio_seconds": 120,
+    "retained_wav_files": 10
+  },
+  "fixed_problems": [
+    "Chinese text no longer depends on English word counts",
+    "Invalid/truncated WAV, wrong format, silence and oversized input fail visibly",
+    "TTS/PCM failures do not publish completed files or playback receipts",
+    "Reply retention always preserves the newly completed file even on mtime ties",
+    "File segment timestamps now cover the exact represented PCM interval",
+    "Recorder cleanup owns only its processes; no global pkill/PulseAudio config changes",
+    "AEC instances have unique names and unload only their own module",
+    "Speaker selection is app-local; unavailable preferred device is not replaced by unrelated output",
+    "Microphone mute/resume invalidates queued capture epochs"
+  ],
+  "known_limits": [
+    "Hardware voice, audibility/AEC/duplex and actual stop remain unverified",
+    "Speech cancellation during inference and exact backend release are R3 work",
+    "No natural-human speech accuracy benchmark; current input fixture is synthesized Chinese",
+    "Body/hand and gesture integration remains pending",
+    "B0 performance baseline and user-guided optimization not started"
+  ],
+  "browser": {
+    "tool": "Firefox headless render",
+    "screenshot": "/home/nvidia/AI_Stack/runtime-data/reachy-r2-web.png",
+    "sha256": "43e30ef3487969b7e9f42885e9d6c38aacc48aa0eea14fb12364a1d0cb9901ed",
+    "scope": "Rendered file-upload and reply-download UI; transport verified separately"
+  },
+  "runtime_warning": "CPU ORT printed a DRM GPU-discovery warning; Silero was explicitly executed with CPUExecutionProvider and actual tests passed."
+}

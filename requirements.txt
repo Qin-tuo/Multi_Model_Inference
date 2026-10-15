@@ -1,4 +1,4 @@
-# R1 application core; ASR/TTS/VAD backends are added in R2.
+# Headless core and CPU Silero VAD; GPU inference runs in existing local services.
 PyYAML==6.0.3
 httpx==0.28.1
 fastapi==0.143.0
@@ -10,3 +10,4 @@ psutil==5.9.8
 numpy==1.26.4
 opencv-python-headless==4.11.0.86
 websockets==17.2
+onnxruntime==1.24.4

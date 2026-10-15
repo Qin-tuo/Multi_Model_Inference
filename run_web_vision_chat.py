@@ -30,6 +30,11 @@ from app.camera import Camera
 from app.face_detector import FaceDetector
 from app.face_tracker import FaceTracker
 from app.llm import LLM
+from app.stt import STT
+from app.tts import create_tts
+from app.pipeline import SileroVAD, MicRecorder, vad_loop, find_pa_sink
+from app.audio import find_alsa_device
+from rich.console import Console
 from app.monitor import get_system_stats, get_jetson_model
 from app.turn_control import TurnController
 from app.web import Broadcaster, create_app
@@ -78,7 +83,7 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
         stop.wait(interval)
 
 
-def build_app(config, *, no_camera=False):
+def build_app(config, *, no_camera=False, no_audio=False):
     broadcaster = Broadcaster()
     stop = threading.Event()
     llm = LLM(model=config.llm.model, base_url=config.llm.base_url,
@@ -94,19 +99,43 @@ def build_app(config, *, no_camera=False):
     tracker = FaceTracker(cam, detector, fps=config.face.fps, dead_zone=config.face.dead_zone,
               good_frame_zone=config.face.good_frame_zone, min_face_size=config.face.min_face_size,
               stable_frames=config.face.stable_frames) if detector else None
-    control = TurnController(config, llm, broadcaster, cam)
+    speech_enabled = config.audio.enabled and not no_audio
+    stt = STT(**vars(config.stt)) if speech_enabled else None
+    tts = create_tts(**{k:v for k,v in vars(config.tts).items() if k not in {"first_chunk_chars", "max_chunk_chars"}}) if speech_enabled else None
+    mic = None
+    live_vad = None
+    control = TurnController(config, llm, broadcaster, cam, stt=stt, tts=tts)
     threads = []
 
     def state():
-        return {**control.state(), "audio_enabled": False, "camera_enabled": cam is not None,
+        return {**control.state(), "audio_enabled": bool(mic and mic.alive),
+                "speech_ready": bool(speech_enabled and control.vad is not None),
+                "audio_input_mode": config.audio.input_mode if speech_enabled else "disabled",
+                "audio_output_mode": config.audio.output_mode if speech_enabled else "disabled",
+                "microphone_error": mic.last_error if mic else None,
+                "aec_active": bool(mic and mic.aec and mic.aec.active), "camera_enabled": cam is not None,
                 "camera_ready": bool(cam and cam.health_check()),
                 "camera_error": cam.last_error if cam else None,
                 "face": {"enabled": bool(tracker), **(tracker.snapshot() if tracker else {"face_detected": False})},
-                "models": {"vlm": llm.model, "stt": "未启用", "tts": "未启用", "vad": "未启用"},
+                "models": {"vlm": llm.model, "stt": config.stt.model if speech_enabled else "未启用",
+                           "tts": config.tts.model if speech_enabled else "未启用", "vad": "Silero v6" if speech_enabled else "未启用"},
                 "effective_config": config.effective()}
+
+    def listen():
+        try:
+            for segment in vad_loop(mic, Console(), config.vad, live_vad):
+                if stop.is_set(): break
+                if segment.input_epoch != mic.input_epoch: continue
+                try: control.submit_segment(segment)
+                except (RuntimeError, ValueError) as exc:
+                    broadcaster.send({"type":"error", "error":str(exc)})
+        except Exception as exc:
+            broadcaster.send({"type":"error", "error":str(exc)})
+            log.exception("Audio input failed")
 
     @asynccontextmanager
     async def lifespan(app):
+        nonlocal mic, live_vad
         try:
             if not await asyncio.to_thread(llm.load):
                 raise RuntimeError(llm.last_error or "Local VLM is not ready")
@@ -114,8 +143,30 @@ def build_app(config, *, no_camera=False):
                 raise RuntimeError(cam.last_error or "Camera is not ready")
             if detector and not await asyncio.to_thread(detector.load):
                 raise RuntimeError(detector.last_error or "Face detector is not ready")
+            if speech_enabled:
+                for model in (stt, tts):
+                    if not await asyncio.to_thread(model.load): raise RuntimeError(model.last_error or "Speech model not ready")
+                control.vad = await asyncio.to_thread(SileroVAD)
+                if config.audio.input_mode == "device":
+                    device = await asyncio.to_thread(find_alsa_device, config.audio.input_device)
+                    if not device: raise RuntimeError("Configured microphone is not connected")
+                    card, number, _ = device
+                    if config.audio.output_mode == "device" and not config.audio.output_device.startswith(("hw:", "plughw:")):
+                        if not await asyncio.to_thread(find_pa_sink, config.audio.output_device):
+                            raise RuntimeError("Configured speaker is not connected")
+                    mic = MicRecorder(Console(), config.vad.chunk_ms)
+                    if not await asyncio.to_thread(mic.start, f"hw:{card},{number}", config.audio.input_device,
+                                                  config.audio.output_device, config.audio.echo_cancellation and config.audio.output_mode == "device" and not config.audio.output_device.startswith(("hw:", "plughw:"))):
+                        raise RuntimeError(mic.last_error or "Microphone not ready")
+                    live_vad = await asyncio.to_thread(SileroVAD)
+                    if config.audio.output_mode == "device" and not config.audio.output_device.startswith(("hw:", "plughw:")):
+                        control.output_sink = mic.get_pa_sink
+                    broadcaster.configure_speakers(mic.speaker_state, mic.select_speaker, mic.set_speaker_volume)
+                    broadcaster._input_setter = lambda active: mic.resume() if active else mic.pause()
+                    broadcaster.set_ptt(True)
             if tracker: tracker.start()
             control.start()
+            if mic: threads.append(threading.Thread(target=listen, name="audio-vad", daemon=True))
             if cam:
                 threads.append(threading.Thread(target=_frame_broadcast_thread,
                     args=(cam, broadcaster, stop, config.web.ui_fps, tracker), name="frame-broadcast", daemon=True))
@@ -126,6 +177,9 @@ def build_app(config, *, no_camera=False):
         finally:
             stop.set()
             errors = []
+            if mic:
+                try: await asyncio.to_thread(mic.stop)
+                except Exception as exc: errors.append(exc)
             for thread in threads:
                 await asyncio.to_thread(thread.join, 5)
                 if thread.is_alive(): errors.append(RuntimeError(f"{thread.name} still running"))
@@ -136,24 +190,29 @@ def build_app(config, *, no_camera=False):
                     except Exception as exc: errors.append(exc)
             if detector: detector.unload()
             llm.unload()
+            for model in (stt, tts):
+                if model: model.unload()
             if errors: raise ExceptionGroup("Shutdown resources not fully released", errors)
 
-    return create_app(broadcaster, submit=control.submit, state=state, lifespan=lifespan)
+    return create_app(broadcaster, submit=control.submit, state=state, lifespan=lifespan,
+                      submit_audio=control.submit_audio, audio_file=control.audio_file,
+                      max_upload_bytes=int(config.stt.max_seconds*32000)+4096)
 
 
-def main():
+def main(default_no_camera=False):
     parser = argparse.ArgumentParser(description="Orin NX headless Web Vision Chat")
     parser.add_argument("--config")
     parser.add_argument("--host")
     parser.add_argument("--port", type=int)
-    parser.add_argument("--no-camera", action="store_true", help="Explicit text-only software mode")
+    parser.add_argument("--no-audio", action="store_true", help="Disable speech backends and audio I/O")
+    parser.add_argument("--no-camera", action="store_true", default=default_no_camera, help="Explicit text-only software mode")
     args = parser.parse_args()
     config = Config.load(args.config)
     if args.host: config.web.host = args.host
     if args.port is not None: config.web.port = args.port
     config.validate()
     import uvicorn
-    uvicorn.run(build_app(config, no_camera=args.no_camera), host=config.web.host,
+    uvicorn.run(build_app(config, no_camera=args.no_camera, no_audio=args.no_audio), host=config.web.host,
                 port=config.web.port, log_level="info", ws_max_size=65536,
                 limit_concurrency=16, timeout_graceful_shutdown=10)
 

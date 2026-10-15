@@ -13,72 +13,78 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""STT — faster-whisper, GPU-accelerated Whisper on Jetson."""
-
-from typing import Dict, Any, Union
+"""Upstream STT contract adapted to the existing local Qwen3-ASR service."""
+from pathlib import Path
+import time
+import wave
+import httpx
 import numpy as np
+from app.audio import local_speech_url, speech_capability, pcm_wav, wav_pcm
 
 
 class STT:
-    def __init__(
-        self,
-        model: str = "base.en",
-        device: str = "cuda",
-        compute_type: str = "int8",
-        language: str = "en",
-        beam_size: int = 1,
-    ):
-        self.model_name = model
-        self.device = device
-        self.compute_type = compute_type
-        self.language = language
-        self.beam_size = beam_size
-        self._model = None
+    def __init__(self, model="qwen3-asr", base_url="http://127.0.0.1:8621/v1",
+                 backend="llama_qwen3_asr", language="zh", timeout=60.0, max_seconds=15):
+        self.model_name, self.backend, self.language = model, backend, language
+        self.base_url = local_speech_url(base_url)
+        self.timeout, self.max_seconds = timeout, max_seconds
+        self._client = None
+        self.last_error = None
+        self.capability = None
 
-    def load(self) -> bool:
+    def load(self):
+        self.unload()
+        self._client = httpx.Client(timeout=self.timeout, trust_env=False,
+            limits=httpx.Limits(max_connections=1, max_keepalive_connections=1))
         try:
-            from faster_whisper import WhisperModel
-            self._model = WhisperModel(self.model_name, device=self.device, compute_type=self.compute_type)
+            self.capability = speech_capability(self._client, self.base_url, "asr", self.model_name, self.backend)
+            self.last_error = None
             return True
-        except Exception as e:
-            print(f"faster-whisper load error: {e}")
-            try:
-                from faster_whisper import WhisperModel
-                print("Falling back to CPU...")
-                self._model = WhisperModel(self.model_name, device="cpu", compute_type="int8")
-                self.device = "cpu"
-                return True
-            except Exception as e2:
-                print(f"CPU fallback failed: {e2}")
-                return False
+        except (httpx.HTTPError, ValueError, KeyError) as exc:
+            self.last_error = str(exc); self.unload(); return False
 
-    def transcribe(self, audio: Union[np.ndarray, str], sample_rate: int = 16000) -> Dict[str, Any]:
-        if self._model is None:
-            return {"text": "", "error": "Model not loaded"}
+    def transcribe(self, audio, sample_rate=16000):
+        if self._client is None: return {"text": "", "error": "ASR is not loaded"}
+        start = time.monotonic()
         try:
-            if isinstance(audio, np.ndarray):
-                if audio.ndim > 1:
-                    audio = audio.mean(axis=1)
-                audio = audio.flatten().astype(np.float32)
-                if np.abs(audio).max() > 1.5:
-                    audio = audio / 32768.0
+            if sample_rate != 16000: raise ValueError("ASR expects 16kHz mono input")
+            if isinstance(audio, (str, Path)):
+                path = Path(audio)
+                if path.stat().st_size > self.max_seconds * 32000 + 4096: raise ValueError("WAV exceeds input limit")
+                pcm = wav_pcm(path.read_bytes(), self.max_seconds)
+            else:
+                array = np.asarray(audio)
+                if array.ndim != 1 or not 0 < array.size <= self.max_seconds * 16000:
+                    raise ValueError("ASR requires a bounded nonempty mono array")
+                if array.dtype == np.int16: pcm = array.astype('<i2', copy=False).tobytes()
+                elif np.issubdtype(array.dtype, np.floating) and np.all(np.isfinite(array)) and np.max(np.abs(array)) <= 1:
+                    pcm = np.rint(array * 32767).astype('<i2').tobytes()
+                else: raise ValueError("ASR expects normalized floats or int16 PCM")
+            response = self._client.post(self.base_url + "/audio/transcriptions",
+                files={"file": ("utterance.wav", pcm_wav(pcm), "audio/wav")},
+                data={"model": self.model_name, "language": self.language, "response_format": "json"})
+            response.raise_for_status()
+            text = response.json()["text"]
+            if not isinstance(text, str) or not text.strip() or len(text) > 4000:
+                raise ValueError("ASR returned an empty or oversized transcript")
+            return {"text": text.strip(), "language": self.language, "duration": len(pcm) / 32000,
+                    "elapsed_seconds": time.monotonic() - start, "backend": self.backend}
+        except (httpx.HTTPError, ValueError, OSError, KeyError, wave.Error, EOFError) as exc:
+            self.last_error = str(exc)
+            return {"text": "", "error": str(exc)}
 
-            segments, info = self._model.transcribe(
-                audio, language=self.language, beam_size=self.beam_size,
-                no_speech_threshold=0.1, log_prob_threshold=-1.0,
-            )
-            text = " ".join(s.text for s in segments).strip()
-            return {"text": text, "language": info.language, "duration": info.duration}
-        except Exception as e:
-            return {"text": "", "error": str(e)}
+    def get_info(self):
+        return {"backend": self.backend, "model": self.model_name, "mode": "utterance_file",
+                "sample_rate": 16000, "channels": 1}
 
-    def get_info(self) -> Dict[str, Any]:
-        return {"backend": "faster-whisper", "model": self.model_name, "device": self.device}
-
-    def health_check(self) -> bool:
-        return self._model is not None
+    def health_check(self):
+        if self._client is None: return False
+        try:
+            speech_capability(self._client, self.base_url, "asr", self.model_name, self.backend)
+            return True
+        except (httpx.HTTPError, ValueError, KeyError): return False
 
     def unload(self):
-        if self._model:
-            del self._model
-            self._model = None
+        if self._client: self._client.close()
+        self._client = None
+        self.capability = None

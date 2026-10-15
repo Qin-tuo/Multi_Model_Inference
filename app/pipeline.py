@@ -25,6 +25,10 @@ import wave
 import subprocess
 import threading
 import queue
+import json
+import hashlib
+import re
+import uuid
 from collections import deque
 from dataclasses import dataclass
 from typing import Callable, Optional, Iterator, Union
@@ -33,7 +37,7 @@ import numpy as np
 from pathlib import Path
 from rich.console import Console
 
-from app.audio import kill_pulseaudio
+from app.audio import wav_pcm
 from app.config import VADConfig
 
 # Suppress noisy ALSA error messages (underrun warnings etc.)
@@ -204,9 +208,9 @@ class SpeakerSelector:
         with self._lock:
             selected = self._sink if self._sink in available else None
             selected = selected or self._matching_sink(speakers, self._preferred_hint)
-            selected = selected or self._matching_sink(speakers, self._fallback_hint)
-            selected = selected or (default_sink if default_sink in available else None)
-            selected = selected or (speakers[0]["id"] if speakers else None)
+            if not self._preferred_hint:
+                selected = selected or self._matching_sink(speakers, self._fallback_hint)
+                selected = selected or (default_sink if default_sink in available else None)
             self._speakers = speakers
             self._sink = selected
             return self._state_unlocked()
@@ -237,23 +241,10 @@ class SpeakerSelector:
             state["error"] = "Selected speaker is no longer available"
             return state
 
-        try:
-            result = subprocess.run(
-                ["pactl", "set-default-sink", sink_id],
-                capture_output=True, text=True, timeout=5,
-            )
-            if result.returncode != 0:
-                state = self.refresh()
-                state["error"] = result.stderr.strip() or "Could not switch speaker"
-                return state
-        except Exception as exc:
-            state = self.refresh()
-            state["error"] = str(exc)
-            return state
-
         with self._lock:
             self._speakers = speakers
             self._sink = sink_id
+            self._preferred_hint = sink_id
             return self._state_unlocked()
 
     def set_volume(self, volume: int) -> dict:
@@ -288,12 +279,13 @@ class PulseAudioAEC:
     def __init__(
         self,
         source_master: str,
-        source_name: str = AEC_SOURCE_NAME,
-        sink_name: str = AEC_SINK_NAME,
+        source_name: Optional[str] = None,
+        sink_name: Optional[str] = None,
     ):
         self.source_master = source_master
-        self.source_name = source_name
-        self.sink_name = sink_name
+        suffix = uuid.uuid4().hex[:8]
+        self.source_name = source_name or f"{AEC_SOURCE_NAME}_{suffix}"
+        self.sink_name = sink_name or f"{AEC_SINK_NAME}_{suffix}"
         self.sink_master: Optional[str] = None
         self.module_id: Optional[int] = None
         self.last_error: Optional[str] = None
@@ -302,41 +294,8 @@ class PulseAudioAEC:
     def active(self) -> bool:
         return self.module_id is not None
 
-    def _managed_module_ids(self) -> list[int]:
-        try:
-            result = subprocess.run(
-                ["pactl", "list", "short", "modules"],
-                capture_output=True, text=True, timeout=5,
-            )
-        except Exception:
-            return []
-
-        module_ids = []
-        for line in result.stdout.splitlines():
-            parts = line.split("\t", 2)
-            if len(parts) < 3 or parts[1] != "module-echo-cancel":
-                continue
-            args = parts[2]
-            if f"source_name={self.source_name}" in args or f"sink_name={self.sink_name}" in args:
-                try:
-                    module_ids.append(int(parts[0]))
-                except ValueError:
-                    pass
-        return module_ids
-
-    def cleanup_stale(self):
-        for module_id in self._managed_module_ids():
-            try:
-                subprocess.run(
-                    ["pactl", "unload-module", str(module_id)],
-                    capture_output=True, text=True, timeout=5,
-                )
-            except Exception:
-                pass
-
     def start(self, sink_master: str) -> bool:
         self.stop()
-        self.cleanup_stale()
         self.last_error = None
         args = [
             "pactl", "load-module", "module-echo-cancel",
@@ -365,78 +324,36 @@ class PulseAudioAEC:
             return False
 
     def stop(self):
-        module_id = self.module_id
+        if self.module_id is None: return
+        result = subprocess.run(["pactl", "unload-module", str(self.module_id)],
+                                capture_output=True, text=True, timeout=5)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "AEC module did not unload")
         self.module_id = None
         self.sink_master = None
-        if module_id is None:
-            return
-        try:
-            subprocess.run(
-                ["pactl", "unload-module", str(module_id)],
-                capture_output=True, text=True, timeout=5,
-            )
-        except Exception:
-            pass
 
 
 def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None):
-    """Play int16 audio and do not return before its real-time duration."""
-    raw = audio.astype(np.int16).tobytes()
-    expected_duration = audio.size / sample_rate if sample_rate > 0 else 0.0
-    started_at = time.monotonic()
-    submitted = False
+    """Return a device-process receipt; physical audibility is a separate check."""
+    if not sink: raise ValueError("Explicit speaker device is required")
+    if audio.ndim != 1 or audio.dtype != np.int16 or sample_rate != 16000:
+        raise ValueError("Playback requires mono PCM16 at 16kHz")
+    if sink.startswith(("hw:", "plughw:")):
+        cmd = ["aplay", "-D", sink, "-f", "S16_LE", "-r", str(sample_rate), "-c", "1", "-t", "raw", "-q"]
+    else:
+        cmd = ["paplay", f"--device={sink}", "--format=s16le", f"--rate={sample_rate}", "--channels=1", "--raw"]
+    process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    started = time.monotonic()
     try:
-        if sink:
-            cmd = ["paplay", f"--device={sink}", "--format=s16le",
-                   f"--rate={sample_rate}", "--channels=1", "--raw"]
-        else:
-            cmd = ["aplay", "-f", "S16_LE", "-r", str(sample_rate),
-                   "-c", "1", "-t", "raw", "-q"]
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        p.stdin.write(raw)
-        p.stdin.close()
-        submitted = True
-        p.wait(timeout=30)
-    except Exception:
-        pass
+        _, error = process.communicate(audio.tobytes(), timeout=audio.size/sample_rate + 5)
+        if process.returncode != 0: raise RuntimeError(f"Playback failed: {error.decode(errors='replace')[:300]}")
+        return {"kind": "device_completed", "submitted_monotonic": started,
+                "completed_monotonic": time.monotonic(), "frames": audio.size}
     finally:
-        if submitted:
-            remaining = expected_duration - (time.monotonic() - started_at)
-            if remaining > 0:
-                time.sleep(remaining)
-
-
-def tts_player(
-    tts_obj,
-    tts_q: queue.Queue,
-    sink: Optional[Union[str, Callable[[], Optional[str]]]] = None,
-    on_audio_start: Optional[Callable[[], None]] = None,
-    on_audio_end: Optional[Callable[[], None]] = None,
-):
-    """Synthesize queued text and expose the true first/last audio events."""
-    audio_started = False
-    try:
-        while True:
-            text = tts_q.get()
-            if text is None:
-                return
-            r = tts_obj.synthesize(text)
-            if r.get("audio") is not None:
-                if not audio_started:
-                    audio_started = True
-                    if on_audio_start:
-                        try:
-                            on_audio_start()
-                        except Exception as exc:
-                            print(f"TTS start callback failed: {exc}")
-                current_sink = sink() if callable(sink) else sink
-                play_audio(r["audio"], r["sample_rate"], sink=current_sink)
-    finally:
-        if audio_started and on_audio_end:
-            try:
-                on_audio_end()
-            except Exception as exc:
-                print(f"TTS end callback failed: {exc}")
+        if process.poll() is None:
+            process.terminate()
+            try: process.wait(timeout=2)
+            except subprocess.TimeoutExpired: process.kill(); process.wait()
 
 
 # ── Silero VAD ────────────────────────────────────────────────────
@@ -446,14 +363,10 @@ class SileroVAD:
 
     def __init__(self):
         import onnxruntime as ort
-        from faster_whisper.utils import get_assets_path
-
-        model_path = Path(get_assets_path()) / "silero_vad_v6.onnx"
-        if not model_path.is_file():
-            raise RuntimeError(
-                f"faster-whisper does not contain {model_path.name}; "
-                "install faster-whisper==1.2.1"
-            )
+        entry = json.loads((Path(__file__).resolve().parents[1] / "models/speech.json").read_text())["vad"]
+        model_path = Path(entry["directory"]) / entry["filename"]
+        if hashlib.sha256(model_path.read_bytes()).hexdigest() != entry["files"][entry["filename"]]["sha256"]:
+            raise RuntimeError("Silero VAD model differs from lock")
 
         session_options = ort.SessionOptions()
         session_options.inter_op_num_threads = 1
@@ -491,7 +404,7 @@ class SileroVAD:
 
 
 def load_silero(console: Optional[Console] = None) -> SileroVAD:
-    """Load the Silero ONNX model bundled with faster-whisper."""
+    """Load the pinned Silero asset extracted from the upstream distribution."""
     t0 = time.perf_counter()
     vad = SileroVAD()
     dt = time.perf_counter() - t0
@@ -511,19 +424,31 @@ class SpeechSegment:
     rms: float
     start_time: float
     end_time: float
+    input_epoch: int = 0
 
 
 # ── Mic recorder ──────────────────────────────────────────────────
 
+@dataclass(frozen=True)
+class AudioChunk:
+    data: bytes
+    input_epoch: int
+    received_monotonic: float
+
+
 class MicRecorder:
     """Manages mic recording via parecord/arecord with a background reader thread."""
 
-    def __init__(self, console: Console, chunk_ms: int = 30):
+    def __init__(self, console: Console, chunk_ms: int = 32):
         self.console = console
         self.chunk_ms = chunk_ms
         self.chunk_samples = int(SAMPLE_RATE * chunk_ms / 1000)
         self.chunk_bytes = self.chunk_samples * CHANNELS * 2
-        self.audio_q: queue.Queue[bytes] = queue.Queue()
+        self.audio_q: queue.Queue[AudioChunk] = queue.Queue(maxsize=64)
+        self.last_error = None
+        self._reader_thread = None
+        self._input_lock = threading.Lock()
+        self.input_epoch = 0
         self.listening = threading.Event()
         self.listening.set()
         self.alive = True
@@ -543,9 +468,11 @@ class MicRecorder:
         echo_cancellation: bool = True,
     ) -> bool:
         """Start recording. Returns True on success."""
-        subprocess.run(["pkill", "-9", "parecord"], capture_output=True)
-        subprocess.run(["pkill", "-9", "arecord"], capture_output=True)
-        time.sleep(0.3)
+        self.stop()
+        self.alive = True
+        self.last_error = None
+        self.flush()
+        self.listening.set()
 
         self._hw = hw
         self.pa_source = find_pa_source(mic_hint)
@@ -572,8 +499,7 @@ class MicRecorder:
             self.console.print(f"  PA source: {self.pa_source.split('.')[-2]}")
         else:
             self.console.print("  [yellow]PA source not found, using ALSA direct[/yellow]")
-            kill_pulseaudio()
-            time.sleep(0.5)
+            # A busy ALSA device fails explicitly; never stop the desktop audio service.
 
         if not self._start_capture():
             if self.aec and self.aec.active:
@@ -585,7 +511,10 @@ class MicRecorder:
             else:
                 return False
 
-        self._check_capture()
+        if not self._check_capture():
+            self.last_error = "Microphone produced no startup audio"
+            self.stop()
+            return False
         return True
 
     def _record_command(self) -> list[str]:
@@ -608,7 +537,8 @@ class MicRecorder:
             time.sleep(0.5)
             if proc.poll() is None:
                 self._proc = proc
-                threading.Thread(target=self._reader, args=(proc,), daemon=True).start()
+                self._reader_thread = threading.Thread(target=self._reader, args=(proc,), name="microphone-reader", daemon=True)
+                self._reader_thread.start()
                 return True
             err = proc.stderr.read().decode(errors="replace").strip()
             self.console.print(f"  [red]Mic attempt {attempt+1} failed: {err}[/red]")
@@ -625,7 +555,7 @@ class MicRecorder:
             except queue.Empty:
                 break
         if test_chunks:
-            rms = chunk_rms(b"".join(test_chunks))
+            rms = chunk_rms(b"".join(chunk.data for chunk in test_chunks))
             if rms > 0.003:
                 self.console.print("  Mic: [green]✓ live[/green]")
             else:
@@ -633,20 +563,22 @@ class MicRecorder:
         else:
             running = self._proc is not None and self._proc.poll() is None
             self.console.print(f"  [yellow]Mic: no startup audio; capture running: {running}[/yellow]")
+        return bool(test_chunks)
 
     def _stop_capture(self):
         proc = self._proc
         self._proc = None
-        if not proc or proc.poll() is not None:
-            return
-        try:
-            proc.terminate()
-            proc.wait(timeout=2)
-        except Exception:
-            try:
-                proc.kill()
-            except Exception:
-                pass
+        if proc is not None:
+            if proc.poll() is None:
+                proc.terminate()
+                try: proc.wait(timeout=2)
+                except subprocess.TimeoutExpired: proc.kill(); proc.wait()
+            if self._reader_thread:
+                self._reader_thread.join(timeout=2)
+                if self._reader_thread.is_alive(): raise RuntimeError("Microphone reader has not released")
+                self._reader_thread = None
+            if proc.stdout: proc.stdout.close()
+            if proc.stderr: proc.stderr.close()
 
     def _rebuild_aec_route(self) -> bool:
         with self._route_lock:
@@ -726,6 +658,7 @@ class MicRecorder:
 
     def _reader(self, proc: subprocess.Popen):
         while self.alive and proc.poll() is None:
+            epoch = self.input_epoch
             raw = proc.stdout.read(self.chunk_bytes)
             if not raw:
                 if proc.poll() is not None and proc is self._proc:
@@ -733,8 +666,21 @@ class MicRecorder:
                     if err:
                         self.console.print(f"\n  [red]audio capture died: {err}[/red]")
                 break
-            if proc is self._proc and self.listening.is_set():
-                self.audio_q.put(raw)
+            with self._input_lock:
+                if proc is self._proc and self.listening.is_set() and epoch == self.input_epoch:
+                    if len(raw) != self.chunk_bytes:
+                        self.last_error = "Microphone returned partial PCM frame"
+                        self.alive = False
+                        break
+                    try: self.audio_q.put_nowait(AudioChunk(raw, epoch, time.monotonic()))
+                    except queue.Full:
+                        self.last_error = "Microphone input overflow; utterance invalidated"
+                        self.alive = False
+                        self.flush()
+                        break
+        if proc is self._proc and self.alive:
+            self.last_error = self.last_error or "Microphone capture ended"
+            self.alive = False
 
     def flush(self):
         while not self.audio_q.empty():
@@ -744,185 +690,198 @@ class MicRecorder:
                 break
 
     def pause(self):
-        """Stop queuing audio and drain the buffer."""
-        self.listening.clear()
-        self.flush()
+        """Discard this capture epoch; old partial input cannot resume later."""
+        with self._input_lock:
+            self.listening.clear()
+            self.input_epoch += 1
+            self.flush()
 
     def resume(self):
-        """Drain any stale audio and resume queuing."""
-        self.flush()
-        self.listening.set()
+        with self._input_lock:
+            self.flush()
+            self.input_epoch += 1
+            self.listening.set()
 
     def stop(self):
         self.alive = False
         with self._route_lock:
-            self._stop_capture()
-            if self.aec:
-                self.aec.stop()
+            try: self._stop_capture()
+            finally:
+                if self.aec: self.aec.stop()
+                self.flush()
 
 
 # ── VAD loop ──────────────────────────────────────────────────────
 
-def vad_loop(
-    mic: MicRecorder,
-    console: Console,
-    vad_cfg: Optional[VADConfig] = None,
-    silero: Optional[SileroVAD] = None,
-) -> Iterator[SpeechSegment]:
-    """Yields SpeechSegment each time a complete utterance is detected.
-
-    Uses Silero VAD for speech detection with RMS as a cheap pre-filter
-    to skip dead silence without invoking the model.
-
-    The caller is responsible for calling mic.resume() after processing
-    each segment (so audio stays paused during STT/LLM/TTS).
-    """
-    if silero is None:
-        raise RuntimeError("Silero VAD is required (installed with faster-whisper)")
-
-    cfg = vad_cfg or VADConfig()
-    chunk_ms = cfg.chunk_ms
-    silence_chunks = int(cfg.silence_duration_ms / chunk_ms)
-    lookback_chunks = int(cfg.lookback_ms / chunk_ms)
-    max_chunks = int(cfg.max_speech_secs * 1000 / chunk_ms)
-
-    silero_thresh = cfg.silero_threshold
-    rms_silence_floor = min(0.002, cfg.min_utterance_rms)
-
-    lookback: deque[bytes] = deque(maxlen=lookback_chunks)
-    speech_raw: list[bytes] = []
-    is_speaking = False
-    silence_count = 0
-    speech_start_t: float = 0.0
-
-    while mic.alive:
-        try:
-            raw = mic.audio_q.get(timeout=0.1)
-        except queue.Empty:
-            continue
-
-        rms = chunk_rms(raw)
-
-        if rms < rms_silence_floor:
-            is_speech = False
-        else:
-            is_speech = silero(raw) > silero_thresh
-
-        if is_speech:
-            silence_count = 0
-            if not is_speaking:
-                is_speaking = True
-                speech_start_t = time.monotonic()
-                speech_raw = list(lookback)
-                sys.stdout.write("  🎤 Listening...\r")
-                sys.stdout.flush()
-            speech_raw.append(raw)
-            if len(speech_raw) < max_chunks:
-                continue
-        else:
-            if is_speaking:
-                speech_raw.append(raw)
-                silence_count += 1
-                if silence_count < silence_chunks:
-                    continue
-            else:
-                lookback.append(raw)
-                continue
-
-        is_speaking = False
-        captured = speech_raw
-        speech_raw = []
-        silence_count = 0
-        lookback.clear()
-        speech_end_t = time.monotonic()
-
+class SpeechSegmenter:
+    """Upstream Silero/RMS/lookback/end-silence rules, independent of the source."""
+    def __init__(self, config, silero):
+        self.config, self.silero = config, silero
+        self.lookback = deque(maxlen=int(config.lookback_ms/config.chunk_ms))
+        self.speech_raw = []
+        self.speaking = False
+        self.silence = 0
+        self.started = 0.0
         silero.reset()
 
-        dur_s = len(captured) * chunk_ms / 1000
-        cap_rms = chunk_rms(b"".join(captured))
+    def feed(self, raw, received_time):
+        cfg = self.config
+        if len(raw) != SILERO_CHUNK_SAMPLES * 2:
+            raise ValueError("VAD input must be one complete 512-sample PCM16 frame")
+        rms = chunk_rms(raw)
+        is_speech = rms >= min(0.002, cfg.min_utterance_rms) and self.silero(raw) > cfg.silero_threshold
+        if is_speech:
+            self.silence = 0
+            if not self.speaking:
+                self.speaking = True
+                self.started = received_time - (len(self.lookback) + 1) * cfg.chunk_ms/1000
+                self.speech_raw = list(self.lookback)
+            self.speech_raw.append(raw)
+            if len(self.speech_raw) < int(cfg.max_speech_secs*1000/cfg.chunk_ms): return None
+        elif self.speaking:
+            self.speech_raw.append(raw)
+            self.silence += 1
+            if self.silence < max(1, int(cfg.silence_duration_ms/cfg.chunk_ms)): return None
+        else:
+            self.lookback.append(raw)
+            return None
+        captured = self.speech_raw
+        self.speech_raw = []; self.lookback.clear(); self.speaking = False; self.silence = 0
+        self.silero.reset()
+        pcm = b"".join(captured)
+        duration, rms = len(pcm)/32000, chunk_rms(pcm)
+        if duration < cfg.min_utterance_secs or rms < cfg.min_utterance_rms: return None
+        return SpeechSegment(np.frombuffer(pcm, dtype=np.int16).astype(np.float32)/32768,
+                             captured, duration, rms, self.started, received_time)
 
-        sys.stdout.write("                              \r")
-        sys.stdout.flush()
-        mic.pause()
 
-        if dur_s < cfg.min_utterance_secs or cap_rms < cfg.min_utterance_rms:
-            console.print(f"[dim]  (noise: {dur_s:.1f}s, rms={cap_rms:.4f})[/dim]")
-            mic.resume()
-            continue
-
-        raw_audio = b"".join(captured)
-        audio_np = np.frombuffer(raw_audio, dtype=np.int16).astype(np.float32) / 32768.0
-
-        yield SpeechSegment(
-            audio=audio_np,
-            raw_chunks=captured,
-            duration=dur_s,
-            rms=cap_rms,
-            start_time=speech_start_t,
-            end_time=speech_end_t,
-        )
+def segment_pcm(pcm: bytes, vad_cfg, silero):
+    """File replay using the same segmenter; timestamps are file offsets, not device time."""
+    segmenter = SpeechSegmenter(vad_cfg, silero)
+    frame_bytes = SILERO_CHUNK_SAMPLES * 2
+    # Pad only for the finite file boundary; this is never a measured acoustic endpoint.
+    padded = pcm + b"\0" * ((-len(pcm)) % frame_bytes)
+    padded += b"\0" * (frame_bytes * (int(vad_cfg.silence_duration_ms/vad_cfg.chunk_ms) + 1))
+    for offset in range(0, len(padded), frame_bytes):
+        result = segmenter.feed(padded[offset:offset+frame_bytes], (offset+frame_bytes)/32000)
+        if result is not None: yield result
 
 
-# ── LLM streaming with TTS ───────────────────────────────────────
+def vad_loop(mic, console, vad_cfg=None, silero=None):
+    """Continuous bounded input; slow inference runs in the conversation worker."""
+    if silero is None: raise RuntimeError("Prepared Silero VAD is required")
+    segmenter = SpeechSegmenter(vad_cfg or VADConfig(), silero)
+    epoch = mic.input_epoch
+    while mic.alive:
+        try: chunk = mic.audio_q.get(timeout=0.1)
+        except queue.Empty: continue
+        if chunk.input_epoch != mic.input_epoch or not mic.listening.is_set(): continue
+        if epoch != chunk.input_epoch:
+            epoch = chunk.input_epoch
+            segmenter = SpeechSegmenter(vad_cfg or VADConfig(), silero)
+        result = segmenter.feed(chunk.data, chunk.received_monotonic)
+        if result is not None and epoch == mic.input_epoch and mic.listening.is_set():
+            result.input_epoch = epoch
+            yield result
+    if mic.last_error: raise RuntimeError(mic.last_error)
 
-def stream_and_speak(
-    llm,
-    tts_obj,
-    prompt: str,
-    system_prompt: str,
-    pa_sink: Optional[str] = None,
-    images_b64: Optional[list[str]] = None,
-    few_shot: Optional[list[dict]] = None,
-    first_chunk_words: int = 3,
-    max_chunk_words: int = 8,
-) -> tuple[str, float, Optional[float]]:
-    """Stream LLM response while chunking text to TTS for real-time playback.
 
-    Returns (full_response, elapsed_seconds, time_to_first_token).
-    """
-    tts_q = None
-    tts_thread = None
-    if tts_obj:
-        tts_q = queue.Queue()
-        tts_thread = threading.Thread(
-            target=tts_player, args=(tts_obj, tts_q, pa_sink), daemon=True,
-        )
-        tts_thread.start()
+class TextChunker:
+    """Chinese punctuation and bounded characters; no English word-count gate."""
+    def __init__(self, first_chars=8, max_chars=40):
+        self.first_chars, self.max_chars = first_chars, max_chars
+        self.buffer = ""
+        self.started = False
 
-    full_resp = ""
-    tts_buf = ""
-    first_tts_sent = False
-    t_llm = time.perf_counter()
-    ttft = None
+    def feed(self, text):
+        chunks = []
+        for char in text:
+            self.buffer += char
+            limit = self.max_chars if self.started else self.first_chars
+            if char in "。！？!?；;\n" or len(self.buffer) >= limit:
+                chunk = self.buffer.strip(); self.buffer = ""
+                if chunk and any(c.isalnum() for c in chunk):
+                    chunks.append(chunk); self.started = True
+        return chunks
 
-    for chunk_data in llm.generate_stream(
-        prompt=prompt, system_prompt=system_prompt,
-        images_b64=images_b64, few_shot=few_shot,
-    ):
-        content, meta = chunk_data if isinstance(chunk_data, tuple) else (chunk_data, {})
-        if content:
-            if ttft is None:
-                ttft = time.perf_counter() - t_llm
-            sys.stdout.write(content)
-            sys.stdout.flush()
-            full_resp += content
+    def finish(self):
+        text, self.buffer = self.buffer.strip(), ""
+        return [text] if text and any(c.isalnum() for c in text) else []
 
-            if tts_q is not None:
-                tts_buf += content
-                words = len(tts_buf.split())
-                limit = first_chunk_words if not first_tts_sent else max_chunk_words
-                hit_break = any(c in content for c in TTS_BREAKS) and words >= 2
-                if hit_break or words >= limit:
-                    tts_q.put(tts_buf.strip())
-                    tts_buf = ""
-                    first_tts_sent = True
 
-    dt_llm = time.perf_counter() - t_llm
+class SpeechOutput:
+    """One bounded synthesis worker; file and device receipts are distinct."""
+    def __init__(self, tts, audio_config, turn_id, output_sink=None):
+        self.tts, self.config, self.turn_id = tts, audio_config, turn_id
+        self.output_sink = output_sink or (lambda: audio_config.output_device)
+        self.queue = queue.Queue(maxsize=2)
+        self.error = None
+        self.bytes_written = 0
+        self.chunks = []
+        self.receipt = None
+        self._abort = threading.Event()
+        self._thread = threading.Thread(target=self._run, name="speech-output", daemon=True)
+        self._thread.start()
 
-    if tts_q is not None:
-        if tts_buf.strip():
-            tts_q.put(tts_buf.strip())
-        tts_q.put(None)
-        tts_thread.join()
+    def submit(self, text):
+        while self._thread.is_alive():
+            if self.error: raise RuntimeError(self.error)
+            try: self.queue.put(text, timeout=0.1); return
+            except queue.Full: continue
+        raise RuntimeError(self.error or "Speech worker stopped")
 
-    return full_resp, dt_llm, ttft
+    def _run(self):
+        writer = None; temporary = None; path = None
+        try:
+            if self.config.output_mode == "file":
+                folder = Path(self.config.output_directory).expanduser()
+                folder.mkdir(parents=True, exist_ok=True, mode=0o700)
+                path = folder / f"reply-{self.turn_id}.wav"
+                temporary = path.with_suffix(".partial")
+                writer = wave.open(str(temporary), "wb")
+                writer.setnchannels(1); writer.setsampwidth(2); writer.setframerate(SAMPLE_RATE)
+            while not self._abort.is_set():
+                try: text = self.queue.get(timeout=0.1)
+                except queue.Empty: continue
+                if text is None: break
+                result = self.tts.synthesize(text)
+                if self._abort.is_set(): raise InterruptedError("Speech output aborted")
+                audio = result.get("audio")
+                if audio is None: raise RuntimeError(result.get("error", "TTS returned no audio"))
+                if audio.dtype != np.int16 or audio.ndim != 1 or result["sample_rate"] != SAMPLE_RATE:
+                    raise ValueError("Unexpected synthesized PCM format")
+                raw = audio.tobytes()
+                if self.bytes_written + len(raw) > self.config.max_output_seconds * 32000:
+                    raise ValueError("Turn audio exceeds duration budget")
+                if writer:
+                    writer.writeframesraw(raw)
+                    receipt = {"kind": "file_chunk_written", "bytes": len(raw)}
+                else:
+                    receipt = play_audio(audio, SAMPLE_RATE, self.output_sink())
+                self.bytes_written += len(raw)
+                self.chunks.append({"text": text, "bytes": len(raw), "elapsed_seconds": result.get("elapsed_seconds"),
+                                    "first_pcm_seconds": result.get("first_pcm_seconds"), "receipt": receipt})
+            if self._abort.is_set(): raise InterruptedError("Speech output aborted")
+            if not self.bytes_written: raise RuntimeError("No speech output produced")
+            if writer:
+                writer.close(); writer = None
+                temporary.replace(path)
+                retained = sorted((p for p in path.parent.glob("reply-*.wav") if p != path and re.fullmatch(r"reply-[0-9a-f]{32}\.wav", p.name)), key=lambda p:(p.stat().st_mtime_ns, p.name), reverse=True)
+                # Always keep the file just completed, even when mtime ties.
+                for old in retained[self.config.retained_files - 1:]: old.unlink()
+                self.receipt = {"kind": "file_written", "path": str(path), "bytes": self.bytes_written}
+            else:
+                self.receipt = {"kind": "device_completed", "bytes": self.bytes_written}
+        except Exception as exc:
+            self.error = str(exc)
+        finally:
+            if writer: writer.close()
+            if temporary and temporary.exists(): temporary.unlink()
+
+    def close(self, success=True):
+        if not success: self._abort.set()
+        elif self._thread.is_alive(): self.submit(None)
+        self._thread.join(timeout=self.tts.timeout * 3 + 5)
+        if self._thread.is_alive(): raise RuntimeError("Speech worker has not released")
+        if self.error and success: raise RuntimeError(self.error)
+        return self.receipt

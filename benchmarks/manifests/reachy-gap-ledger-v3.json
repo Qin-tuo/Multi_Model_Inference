@@ -24,8 +24,10 @@
       "source_file": "app/pipeline.py",
       "planned_resolution": "Separate listening and turn processing; one cancellation authority and release checks",
       "phase": "R3",
-      "status": "OPEN",
-      "evidence": []
+      "status": "CONTINUOUS_CAPTURE_PATH_PREPARED_PHYSICAL_CANCEL_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r2-summary.json"
+      ]
     },
     {
       "id": "RG-03",
@@ -34,8 +36,10 @@
       "source_file": "app/pipeline.py",
       "planned_resolution": "Bound time/bytes, define overflow, verify slow-consumer and cancellation",
       "phase": "R3",
-      "status": "OPEN",
-      "evidence": []
+      "status": "BOUNDED_AUDIO_QUEUES_IMPLEMENTED_R3_STRESS_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r2-summary.json"
+      ]
     },
     {
       "id": "RG-04",
@@ -44,12 +48,11 @@
       "source_file": "app/reachy.py",
       "planned_resolution": "Own-resource cleanup only; report external occupancy",
       "phase": "R1",
-      "status": "REMOVED_FROM_ACTIVE_WEB_CAMERA_PATH",
+      "status": "GLOBAL_CAMERA_AND_AUDIO_CLEANUP_REMOVED",
       "evidence": [
-        "run_web_vision_chat.py",
-        "app/camera.py"
+        "benchmarks/results/reachy-r2-summary.json"
       ],
-      "remaining": "Legacy audio fallback still contains kill_pulseaudio; remove during R2 before audio enablement."
+      "remaining": "Physical process/device failure matrix still requires R3/R4 evidence."
     },
     {
       "id": "RG-05",
@@ -58,8 +61,11 @@
       "source_file": "config/settings.yaml",
       "planned_resolution": "Chinese ASR/TTS adapters and short-utterance/segmentation checks",
       "phase": "R2",
-      "status": "OPEN",
-      "evidence": []
+      "status": "CHINESE_FILE_PIPELINE_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r2-speech-file.json",
+        "benchmarks/results/reachy-r2-chinese-chunks.json"
+      ]
     },
     {
       "id": "RG-06",

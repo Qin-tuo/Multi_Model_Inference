@@ -25,22 +25,22 @@ llm:
   system_prompt: 你是本机的中文陪伴助手。请简短、准确地回答。
   system_prompt_no_rag: 你是本机的中文陪伴助手。请简短、准确地回答。
 stt:
-  model: small.en
-  device: cuda
-  compute_type: float16
-  language: en
-  beam_size: 1
+  model: qwen3-asr
+  language: zh
 tts:
-  voice: af_sarah
-  speed: 1.0
-  lang: en-us
-  first_chunk_words: 3
-  max_chunk_words: 8
+  model: matcha-icefall-zh-en
+  voice: '0'
+  lang: zh
+  first_chunk_chars: 8
+  max_chunk_chars: 40
 audio:
+  enabled: true
+  input_mode: file
+  output_mode: file
   sample_rate: 16000
-  channels: 2
-  input_device: Reachy Mini Audio
-  output_device: Reachy Mini Audio
+  channels: 1
+  input_device: ReSpeaker Lite
+  output_device: null
   echo_cancellation: true
 vad:
   silero_threshold: 0.75
@@ -49,7 +49,7 @@ vad:
   lookback_ms: 250
   max_speech_secs: 15
   chunk_ms: 32
-  min_utterance_secs: 0.8
+  min_utterance_secs: 0.12
   min_utterance_rms: 0.001
 vision:
   camera_device: 1

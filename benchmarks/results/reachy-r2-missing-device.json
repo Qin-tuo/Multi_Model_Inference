@@ -1,0 +1,7 @@
+{
+  "scope": "Absent configured ReSpeaker Lite must fail startup; not a physical audio pass",
+  "exit_code": 3,
+  "missing_microphone_rejected": true,
+  "startup_failed": true,
+  "passed": true
+}

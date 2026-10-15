@@ -19,7 +19,7 @@ class FakeLLM:
 
 def test_headless_web_turn_and_shutdown(monkeypatch):
     monkeypatch.setattr(entry, "LLM", FakeLLM)
-    app = entry.build_app(Config.load(), no_camera=True)
+    app = entry.build_app(Config.load(), no_camera=True, no_audio=True)
     with TestClient(app) as client:
         assert client.get("/").status_code == 200
         state = client.get("/api/state").json()
@@ -45,7 +45,7 @@ def test_one_active_request_rejects_extra_work(monkeypatch):
             started.set(); release.wait(2)
             yield from super().generate_stream(*args, **kwargs)
     monkeypatch.setattr(entry, "LLM", SlowLLM)
-    with TestClient(entry.build_app(Config.load(), no_camera=True)) as client:
+    with TestClient(entry.build_app(Config.load(), no_camera=True, no_audio=True)) as client:
         try:
             assert client.post("/api/chat", json={"text":"first"}).status_code == 202
             assert started.wait(1)

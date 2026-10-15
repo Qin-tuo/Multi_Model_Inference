@@ -38,29 +38,41 @@ class LLMConfig:
 
 @dataclass
 class STTConfig:
-    model: str = "base.en"
-    device: str = "cuda"
-    compute_type: str = "float16"
-    language: str = "en"
-    beam_size: int = 1
+    model: str = "qwen3-asr"
+    base_url: str = "http://127.0.0.1:8621/v1"
+    backend: str = "llama_qwen3_asr"
+    language: str = "zh"
+    timeout: float = 60.0
+    max_seconds: float = 15.0
 
 
 @dataclass
 class TTSConfig:
-    voice: str = "af_sarah"
+    model: str = "matcha-icefall-zh-en"
+    base_url: str = "http://127.0.0.1:8621/v1"
+    backend: str = "matcha_trt"
+    voice: str = "0"
     speed: float = 1.0
-    lang: str = "en-us"
-    first_chunk_words: int = 3
-    max_chunk_words: int = 8
+    lang: str = "zh"
+    timeout: float = 60.0
+    max_audio_seconds: float = 30.0
+    first_chunk_chars: int = 8
+    max_chunk_chars: int = 40
 
 
 @dataclass
 class AudioConfig:
+    enabled: bool = True
+    input_mode: str = "file"
+    output_mode: str = "file"
     sample_rate: int = 16000
-    channels: int = 2
-    input_device: Optional[str] = "Reachy Mini Audio"
+    channels: int = 1
+    input_device: Optional[str] = "ReSpeaker Lite"
     output_device: Optional[str] = None
     echo_cancellation: bool = True
+    output_directory: str = str(Path.home() / "AI_Stack/runtime-data/reachy-audio")
+    max_output_seconds: float = 120.0
+    retained_files: int = 10
 
 
 @dataclass
@@ -69,7 +81,7 @@ class VADConfig:
     silence_duration_ms: int = 500
     lookback_ms: int = 250
     max_speech_secs: int = 15
-    chunk_ms: int = 30
+    chunk_ms: int = 32
     min_utterance_secs: float = 0.3
     min_utterance_rms: float = 0.001
     silero_threshold: float = 0.5
@@ -180,6 +192,32 @@ class Config:
             raise ValueError("Camera geometry and rates must be positive")
         if self.vision.frames != 1:
             raise ValueError("The initial 4B profile supports one image per request")
+        from app.audio import local_speech_url
+        for audio_config in (self.stt, self.tts):
+            local_speech_url(audio_config.base_url)
+            if audio_config.timeout <= 0: raise ValueError("Speech timeout must be positive")
+        if (self.audio.sample_rate, self.audio.channels) != (16000, 1):
+            raise ValueError("Speech requires 16kHz mono")
+        if self.audio.input_mode not in {"file", "device"} or self.audio.output_mode not in {"file", "device"}:
+            raise ValueError("Unknown audio mode")
+        if self.audio.output_mode == "device" and not self.audio.output_device:
+            raise ValueError("Explicit output device required")
+        if self.audio.input_mode == "device" and not self.audio.input_device:
+            raise ValueError("Explicit input device required")
+        if not (1 <= self.stt.max_seconds <= 30 and 0.25 <= self.tts.speed <= 4):
+            raise ValueError("Invalid ASR duration or TTS speed")
+        if not 1 <= self.tts.first_chunk_chars <= self.tts.max_chunk_chars <= 200:
+            raise ValueError("Invalid TTS text chunk bounds")
+        if not 0 < self.tts.max_audio_seconds <= self.audio.max_output_seconds <= 120:
+            raise ValueError("Invalid generated audio duration limits")
+        if not 1 <= self.audio.retained_files <= 100:
+            raise ValueError("Invalid audio file retention")
+        if not (0 < self.vad.silero_threshold < 1 and 0 <= self.vad.min_utterance_secs < self.vad.max_speech_secs <= self.stt.max_seconds):
+            raise ValueError("Invalid VAD thresholds or segment duration")
+        if self.vad.silence_duration_ms < 32 or not 0 <= self.vad.lookback_ms <= 1000:
+            raise ValueError("Invalid VAD endpoint/lookback settings")
+        if self.vad.chunk_ms != 32:
+            raise ValueError("Silero v6 requires 32ms/512-sample frames")
         if not 1 <= self.web.port <= 65535:
             raise ValueError("Invalid web port")
         if min(self.vision.stale_after, self.vision.buffer_bytes_limit, self.face.fps, self.face.stable_frames) <= 0:

@@ -28,7 +28,7 @@ from typing import Callable, Optional
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
 from pydantic import BaseModel, Field, StrictBool
 from fastapi.responses import FileResponse, HTMLResponse
 
@@ -52,6 +52,7 @@ class Broadcaster:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._ptt = threading.Event()
         self._ptt.clear()
+        self._input_setter = None
         self._speaker_getter: Optional[Callable[[], dict]] = None
         self._speaker_setter: Optional[Callable[[str], dict]] = None
         self._speaker_volume_setter: Optional[Callable[[int], dict]] = None
@@ -77,6 +78,7 @@ class Broadcaster:
         return self._ptt.is_set()
 
     def set_ptt(self, active: bool):
+        if self._input_setter: self._input_setter(active)
         if active:
             self._ptt.set()
         else:
@@ -182,7 +184,8 @@ class ChatRequest(BaseModel):
     use_image: StrictBool = False
 
 
-def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=None) -> FastAPI:
+def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=None,
+               submit_audio=None, audio_file=None, max_upload_bytes=484096) -> FastAPI:
     @asynccontextmanager
     async def application_lifespan(app):
         broadcaster.set_loop(asyncio.get_running_loop())
@@ -209,6 +212,24 @@ def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=No
             raise HTTPException(400, str(exc)) from exc
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
+
+    @app.post("/api/audio", status_code=202)
+    async def _audio(request: Request, use_image: bool = False):
+        if submit_audio is None: raise HTTPException(503, "Speech input unavailable")
+        data = bytearray()
+        async for chunk in request.stream():
+            data.extend(chunk)
+            if len(data) > max_upload_bytes: raise HTTPException(413, "Audio input exceeds size limit")
+        try: return submit_audio(bytes(data), use_image)
+        except ValueError as exc: raise HTTPException(400, str(exc)) from exc
+        except RuntimeError as exc: raise HTTPException(409, str(exc)) from exc
+
+    @app.get("/api/audio/{turn_id}")
+    async def _download_audio(turn_id: str):
+        path = audio_file(turn_id) if audio_file else None
+        if path is None: raise HTTPException(404, "Audio output is unavailable")
+        return FileResponse(path, media_type="audio/wav", filename="reply.wav",
+                            headers={"Cache-Control":"no-store"})
 
     @app.get("/")
     async def _index():
