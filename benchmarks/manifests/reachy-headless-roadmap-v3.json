@@ -2,8 +2,8 @@
   "schema_version": 1,
   "version": "3.0",
   "created_at": "2026-10-15T03:33:30.511226+00:00",
-  "execution_status": "PAUSED",
-  "migration_status": "NOT_STARTED",
+  "execution_status": "ACTIVE",
+  "migration_status": "R0_IN_PROGRESS",
   "goal": "基于固定版本的NVIDIA Reachy Mini Jetson Assistant实际源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。",
   "current_runtime": "legacy Pipecat/ROS2 application remains unchanged",
   "planned_runtime": "derived Reachy Mini Jetson Assistant without robot body",
@@ -20,30 +20,36 @@
         {
           "id": "R0.pin",
           "title": "固定上游审查与旧项目快照",
-          "status": "RESEARCH_PINNED_IMPLEMENTATION_SNAPSHOT_PENDING",
+          "status": "COMPLETE",
           "deliverable": "上游锁、历史文档和迁移前来源记录",
-          "execution": "PAUSED"
+          "execution": "COMPLETE",
+          "evidence": [
+            "benchmarks/results/reachy-r0-snapshot.json"
+          ]
         },
         {
           "id": "R0.compatibility",
           "title": "核验NX16GB和上游wheel/BSP差异",
-          "status": "NOT_STARTED",
+          "status": "INITIAL_PLATFORM_DIFFERENCE_VERIFIED",
           "deliverable": "兼容性检查记录；不得将研究锁视为部署通过",
-          "execution": "PAUSED"
+          "execution": "IN_PROGRESS",
+          "evidence": [
+            "benchmarks/results/reachy-r0-snapshot.json"
+          ]
         },
         {
           "id": "R0.workspace",
           "title": "创建隔离迁移分支/环境并保留旧运行与用户数据",
           "status": "NOT_STARTED",
           "deliverable": "独立worktree/环境、差异记录和回退步骤",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R0.ownership",
           "title": "确定入口、配置、设备/端口/进程所有权",
           "status": "NOT_STARTED",
           "deliverable": "模块契约与有效配置定义",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     },
@@ -61,28 +67,28 @@
           "title": "复现上游可运行参考并记录阻塞",
           "status": "NOT_STARTED",
           "deliverable": "固定上游客户端配已选4B的最小参考证据；明确配置差异，不额外下载Gemma或开展选型",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R1.trim",
           "title": "裁掉运动/SDK/默认RAG和无关界面",
           "status": "NOT_STARTED",
           "deliverable": "可追踪源码差异、精简运行依赖",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R1.face",
           "title": "人脸感知/选帧与运动逻辑解耦",
           "status": "NOT_STARTED",
           "deliverable": "纯感知输出、无机身持续运行和关闭回归",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R1.pipeline",
           "title": "接通相机、文字/VLM、Web及明确的软件模式",
           "status": "NOT_STARTED",
           "deliverable": "公开入口文字/图像功能与模式说明；不伪造物理录播",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     },
@@ -100,42 +106,42 @@
           "title": "适配4B身份、原生请求与图像/token预算",
           "status": "NOT_STARTED",
           "deliverable": "本机LLM/VLM实际调用与预算检查",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R2.asr",
           "title": "中文ASR适配及短指令边界",
           "status": "NOT_STARTED",
           "deliverable": "STT接口、中文分段/识别和错误回归",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R2.tts",
           "title": "中文TTS适配、分句与PCM契约",
           "status": "NOT_STARTED",
           "deliverable": "合成/播放职责与中文输出检查",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R2.body",
           "title": "迁入人体/姿态工件的实际调用路径",
           "status": "NOT_STARTED",
           "deliverable": "预后处理、坐标和参考输出对照",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R2.hand",
           "title": "接入掌部与21点小模型",
           "status": "NOT_STARTED",
           "deliverable": "上游锁、参考与本机结果、失败限制",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R2.contract",
           "title": "统一帧/轮次/模型与时间元数据",
           "status": "NOT_STARTED",
           "deliverable": "共享缓存、结果归属和观测记录",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     },
@@ -153,35 +159,35 @@
           "title": "实现单一轮次、监听/处理分离和统一取消",
           "status": "NOT_STARTED",
           "deliverable": "正常/迟到/取消阶段回归及后端释放证据",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R3.gestures",
           "title": "挥手问候与静止举掌停止",
           "status": "NOT_STARTED",
           "deliverable": "真实正反例、互斥/冷却/过期/多人记录",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R3.resources",
           "title": "有界队列、作用域内清理和可观测错误",
           "status": "NOT_STARTED",
           "deliverable": "慢消费者/队列满/重复生命周期记录",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R3.actions",
           "title": "当前会话与可关闭有限工具扩展",
           "status": "NOT_STARTED",
           "deliverable": "持久回执、幂等、重启和取消边界",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R3.recovery",
           "title": "验证并修复设备/模型服务异常恢复",
           "status": "NOT_STARTED",
           "deliverable": "故障台账、最小复现和下一轮验证",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     },
@@ -199,28 +205,28 @@
           "title": "接入实物麦克风/扬声器与AEC",
           "status": "NOT_STARTED",
           "deliverable": "真实录播/双讲/停播证据；缺硬件时不能PASS",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R4.function",
           "title": "完成F01-F12及重复/持续运行",
           "status": "NOT_STARTED",
           "deliverable": "功能结果、已知问题与基础版本标签",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R4.baseline",
           "title": "采集未预先调优的模块与共存B0",
           "status": "NOT_STARTED",
           "deliverable": "配置/输入/事件/资源/统计及复现命令",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R4.handoff",
           "title": "交付架构和代码导读",
           "status": "NOT_STARTED",
           "deliverable": "用户能启动、使用并跟踪一条请求",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     },
@@ -238,28 +244,28 @@
           "title": "用户亲自复现基线并解释口径",
           "status": "NOT_STARTED",
           "deliverable": "用户命令/原始结果与解释",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R5.profile",
           "title": "逐模块使用专业工具定位问题",
           "status": "NOT_STARTED",
           "deliverable": "L0-L8覆盖、用户标注trace/资源/假设",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R5.change",
           "title": "用户提出方案并做单因素修改",
           "status": "NOT_STARTED",
           "deliverable": "至少两个模块的实操过程，记录执行者和协助范围",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R5.compare",
           "title": "回归并与B0对比，决定保留或回退",
           "status": "NOT_STARTED",
           "deliverable": "至少一个可重复有效改善；无收益/退化案例保留",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     },
@@ -277,28 +283,28 @@
           "title": "合并有效变化后重新对比B0",
           "status": "NOT_STARTED",
           "deliverable": "配置指纹、质量/服务/资源与性能对照",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R6.endurance",
           "title": "8h共存及适用故障每类10次",
           "status": "NOT_STARTED",
           "deliverable": "原始曲线、失败/恢复和残余局限",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R6.deploy",
           "title": "离线、重部署、回退和公开说明验证",
           "status": "NOT_STARTED",
           "deliverable": "干净部署记录、环境/工件与操作手册",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         },
         {
           "id": "R6.explain",
           "title": "用户独立复现、讲解与求职证据整理",
           "status": "NOT_STARTED",
           "deliverable": "两个以上根因/优化案例、明确来源和个人掌握证据",
-          "execution": "PAUSED"
+          "execution": "NOT_STARTED"
         }
       ]
     }
@@ -440,5 +446,7 @@
     "Cloud/RK online offload",
     "Second parallel orchestration framework"
   ],
-  "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation."
+  "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
+  "updated_at": "2026-10-15T05:29:43.390712+00:00",
+  "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work."
 }

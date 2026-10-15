@@ -2,7 +2,7 @@
 
 基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的计划中派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前状态：计划v3.0已整理，尚未迁移上游代码或切换运行系统；实施Goal仍暂停。** 当前仓库app仍为旧Pipecat/ROS2实现。上游只读审查副本位于/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202。
+**当前状态：新版Goal已启动，R0旧系统快照完成，正在准备隔离迁移；默认运行系统尚未切换。** 当前仓库app仍为旧Pipecat/ROS2实现。上游只读审查副本位于/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202。
 
 ## 当前确定的流程
 
@@ -29,4 +29,4 @@
 - [外部依赖目录](deploy/dependencies-layout.md)
 - [4B默认模型清单](models/manifest.json)
 
-旧系统的模型、数据、代码历史及references/均保留。性能和正确性证据只适用于各自配置，新派生工程必须重新验证。本次未执行新安装、模型下载、基底迁移或性能优化。
+旧系统的模型、数据、代码历史及references/均保留。性能和正确性证据只适用于各自配置，新派生工程必须重新验证。迁移阶段的独立环境、功能证据和进度见任务清单；后续性能优化由用户在指导下完成。
