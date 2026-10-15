@@ -61,7 +61,6 @@ audio:
   echo_cancellation: true                 # WebRTC AEC: Reachy mic + currently selected speaker
 
 vad:
-  use_silero: true                    # true = Silero neural VAD (much better), false = energy-only
   silero_threshold: 0.75              # speech probability threshold for Silero (raise to reject more noise)
   speech_threshold: 0.025             # RMS threshold (pre-filter when Silero is on, sole gate when off)
   silence_duration_ms: 600            # ms of silence to end an utterance

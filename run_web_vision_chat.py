@@ -25,6 +25,10 @@ Usage:
   python3 run_web_vision_chat.py --host 127.0.0.1
 """
 
+# Temporary migration guard; removed when this entry passes its R1/R2 checks.
+if __name__ == "__main__":
+    raise SystemExit("This hardware entry is still being adapted. Use main.py ask; see docs/reachy-migration.md.")
+
 import argparse
 import os
 import queue

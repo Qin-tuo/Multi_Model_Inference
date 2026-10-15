@@ -16,8 +16,8 @@
 """Configuration — loads settings.yaml into typed dataclasses."""
 
 import os
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import asdict, dataclass, field
+from typing import Dict, List, Optional, get_args, get_origin, get_type_hints, Union
 from pathlib import Path
 import yaml
 
@@ -30,6 +30,8 @@ class LLMConfig:
     max_tokens: int = 512
     temperature: float = 0.7
     timeout: float = 120.0
+    context_tokens: int = 2048
+    chat_template_kwargs: Dict[str, bool] = field(default_factory=lambda: {"enable_thinking": False})
     system_prompt: str = "You are a helpful AI assistant."
     system_prompt_no_rag: str = "You are a helpful AI assistant. Answer from your own knowledge."
 
@@ -189,18 +191,66 @@ class Config:
         if profile_path and Path(profile_path).resolve() != default_path.resolve():
             config_paths.append(Path(profile_path))
 
+        # A named profile must exist; invalid config must never silently boot
+        # an English/robot default. Preserve upstream dataclasses and overlays.
+        if not profile_path:
+            config_paths.append(default_path.with_name("settings.orin-nx-headless.yaml"))
         config = cls()
-        try:
-            for path in config_paths:
-                if not path.exists():
-                    continue
-                with path.open() as f:
-                    data = yaml.safe_load(f) or {}
-                for yaml_key, attr_name, _ in _SECTIONS:
-                    section_obj = getattr(config, attr_name)
-                    for k, v in data.get(yaml_key, {}).items():
-                        if hasattr(section_obj, k):
-                            setattr(section_obj, k, v)
-        except Exception as e:
-            print(f"Error loading config: {e}")
+        sections = {key: (attr, kind) for key, attr, kind in _SECTIONS}
+        for path in config_paths:
+            with path.open(encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            if not isinstance(data, dict) or set(data) - sections.keys():
+                raise ValueError(f"Unknown or invalid configuration section in {path}")
+            for section, values in data.items():
+                attr, kind = sections[section]
+                if not isinstance(values, dict):
+                    raise ValueError(f"{section} must be a mapping")
+                obj = getattr(config, attr)
+                hints = get_type_hints(kind)
+                for key, value in values.items():
+                    if key not in hints or not _matches_type(value, hints[key]):
+                        raise ValueError(f"Invalid configuration value: {section}.{key}")
+                    setattr(obj, key, value)
+        config.validate()
         return config
+
+    def validate(self):
+        from urllib.parse import urlparse
+        url = urlparse(self.llm.base_url)
+        if (url.scheme != "http" or url.hostname not in {"127.0.0.1", "localhost", "::1"}
+                or url.username or url.password or url.query or url.fragment or url.path not in {"", "/"}):
+            raise ValueError("llm.base_url must be a local HTTP server root")
+        if self.llm.backend != "openai" or not self.llm.model.strip():
+            raise ValueError("This profile requires an explicit local OpenAI-compatible model")
+        if not 0 < self.llm.max_tokens + 16 < self.llm.context_tokens:
+            raise ValueError("Output reservation exceeds context capacity")
+        if not 0 <= self.llm.temperature <= 2 or self.llm.timeout <= 0:
+            raise ValueError("Invalid LLM sampling or timeout setting")
+        if min(self.vision.width, self.vision.height, self.vision.capture_fps, self.web.ui_fps) <= 0:
+            raise ValueError("Camera geometry and rates must be positive")
+        if self.vision.frames != 1:
+            raise ValueError("The initial 4B profile supports one image per request")
+        if not 1 <= self.web.port <= 65535:
+            raise ValueError("Invalid web port")
+        if self.reachy.enabled or self.reachy.spawn_daemon or self.rag.enabled:
+            raise ValueError("Robot and RAG are excluded from the headless runtime")
+
+    def effective(self) -> dict:
+        return asdict(self)
+
+
+def _matches_type(value, expected) -> bool:
+    origin, args = get_origin(expected), get_args(expected)
+    if origin is Union:
+        return any(_matches_type(value, arg) for arg in args)
+    if expected is type(None):
+        return value is None
+    if origin is list:
+        return isinstance(value, list) and all(_matches_type(v, args[0]) for v in value)
+    if origin is dict:
+        return isinstance(value, dict) and all(
+            _matches_type(k, args[0]) and _matches_type(v, args[1]) for k, v in value.items())
+    if expected is float:
+        return type(value) in (int, float)
+    return type(value) is expected

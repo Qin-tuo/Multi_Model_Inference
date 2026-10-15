@@ -23,6 +23,10 @@ Usage:
   python3 run_voice_chat.py --no-rag   # without RAG
 """
 
+# Temporary migration guard; removed when this entry passes its R1/R2 checks.
+if __name__ == "__main__":
+    raise SystemExit("This hardware entry is still being adapted. Use main.py ask; see docs/reachy-migration.md.")
+
 import sys
 import time
 from pathlib import Path

@@ -2,7 +2,9 @@
 
 基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的计划中派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前状态：新版Goal已启动，R0旧系统快照完成，正在准备隔离迁移；默认运行系统尚未切换。** 当前仓库app仍为旧Pipecat/ROS2实现。上游只读审查副本位于/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202。
+**当前分支：`migration/reachy-headless`，已导入固定上游源码；文字/文件图像入口验证通过。完整网页、摄像头及音频路径仍在适配。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
+
+当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。
 
 ## 当前确定的流程
 

@@ -22,6 +22,10 @@ Usage:
   python3 run_vision_chat.py
 """
 
+# Temporary migration guard; removed when this entry passes its R1/R2 checks.
+if __name__ == "__main__":
+    raise SystemExit("This hardware entry is still being adapted. Use main.py ask; see docs/reachy-migration.md.")
+
 import os
 import signal
 import sys
