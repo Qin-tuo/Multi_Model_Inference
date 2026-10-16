@@ -1,0 +1,589 @@
+{
+  "created_at": "2026-10-16T07:05:12.780361+00:00",
+  "scope": "Detach/rebind only configured D435i RGB UVC interface; verify the real app.\n\nRequires explicit opt-in and passwordless sudo for the two sysfs writes. Stops\nonly this project's legacy camera service, owns an isolated application, then\nrestores its driver/service and verifies fresh legacy RGB plus aligned depth.\nSaves frame metadata and aggregates, never camera images or facial landmarks.\n",
+  "status": "PASSED_WITH_DECLARED_SCOPE",
+  "device": {
+    "by_id": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+    "interface": "2-1.3:1.3",
+    "serial": "253843064464",
+    "speed_mbps": "5000"
+  },
+  "initial": {
+    "camera": {
+      "ready": true,
+      "state": "streaming",
+      "error": null,
+      "source_epoch": "1481361580d34845b7aaa8e7c1cce90c",
+      "frame_age_seconds": 0.027021798014175147,
+      "open_attempts": 1,
+      "failures": 0,
+      "reconnects": 0,
+      "buffer_count": 8,
+      "buffer_bytes": 255052,
+      "capture_worker_alive": true
+    },
+    "frame": {
+      "frame_id": 8,
+      "source_epoch": "1481361580d34845b7aaa8e7c1cce90c",
+      "received_monotonic": 277855.302540456,
+      "time_kind": "host_receive_monotonic",
+      "width": 640,
+      "height": 480,
+      "stride": 1920,
+      "encoding": "bgr8"
+    },
+    "providers": {
+      "body": "TensorRT 10.16.2.10",
+      "face": "YuNet OpenCV CPU",
+      "hands": "OpenCV CPU"
+    },
+    "resources": {
+      "fds": 53,
+      "threads": 25,
+      "pss_bytes": 468652032
+    }
+  },
+  "disconnected": {
+    "camera": {
+      "ready": false,
+      "state": "retrying",
+      "error": "V4L2 camera read failed",
+      "source_epoch": "76887c534f8d42b693f1a1f50147c50c",
+      "frame_age_seconds": null,
+      "open_attempts": 1,
+      "failures": 1,
+      "reconnects": 0,
+      "buffer_count": 0,
+      "buffer_bytes": 0,
+      "capture_worker_alive": true
+    },
+    "perception_ready": false,
+    "face_detected": false,
+    "old_frame_invalidated": true,
+    "preview_events": [
+      {
+        "type": "camera_state",
+        "ready": false,
+        "error": "V4L2 camera read failed"
+      }
+    ]
+  },
+  "offline_image_request_code": 400,
+  "offline_text_turn": {
+    "status": "complete",
+    "resources_released": true
+  },
+  "restored": {
+    "camera": {
+      "ready": true,
+      "state": "streaming",
+      "error": null,
+      "source_epoch": "11aeddb37a294018b350cdd9ad7cd0ad",
+      "frame_age_seconds": 0.043564573978073895,
+      "open_attempts": 3,
+      "failures": 2,
+      "reconnects": 1,
+      "buffer_count": 5,
+      "buffer_bytes": 160480,
+      "capture_worker_alive": true
+    },
+    "frame": {
+      "frame_id": 5,
+      "source_epoch": "11aeddb37a294018b350cdd9ad7cd0ad",
+      "received_monotonic": 277858.621924541,
+      "time_kind": "host_receive_monotonic",
+      "width": 640,
+      "height": 480,
+      "stride": 1920,
+      "encoding": "bgr8"
+    },
+    "providers": {
+      "body": "TensorRT 10.16.2.10",
+      "face": "YuNet OpenCV CPU",
+      "hands": "OpenCV CPU"
+    },
+    "same_capture_thread": true,
+    "resources": {
+      "fds": 55,
+      "threads": 25,
+      "pss_bytes": 472910848
+    }
+  },
+  "restored_visual_turn": {
+    "status": "complete",
+    "frame": {
+      "frame_id": 3,
+      "source_epoch": "11aeddb37a294018b350cdd9ad7cd0ad",
+      "received_monotonic": 277858.420964345,
+      "time_kind": "host_receive_monotonic",
+      "width": 640,
+      "height": 480,
+      "stride": 1920,
+      "encoding": "bgr8"
+    },
+    "metadata": {
+      "input_tokens_preflight": 432,
+      "history_pairs_kept": 1,
+      "history_pairs_dropped": 0,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 5,
+        "prompt_tokens": 432,
+        "total_tokens": 437,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "eval_count": 5,
+      "done": true
+    },
+    "resources_released": true
+  },
+  "web_frames": {
+    "received": 17,
+    "new_epoch_seen": true,
+    "old_epoch_after_new": false
+  },
+  "app_shutdown": {
+    "camera": {
+      "ready": false,
+      "state": "stopped",
+      "error": null,
+      "source_epoch": "ae7e6466222245ec8074ffa4d2131f61",
+      "frame_age_seconds": null,
+      "open_attempts": 3,
+      "failures": 2,
+      "reconnects": 1,
+      "buffer_count": 0,
+      "buffer_bytes": 0,
+      "capture_worker_alive": false
+    },
+    "resources": {
+      "fds": 49,
+      "threads": 19,
+      "pss_bytes": 472458240
+    }
+  },
+  "camera_lifecycle": {
+    "scope": "One warmup plus 20 real camera start/read/close cycles",
+    "cycles": [
+      {
+        "index": 1,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "a71df37529ed43eca0c7f909e1b1c3a9",
+          "received_monotonic": 277862.39214907,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 2,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "1ae12cc1a2a3488fb93d3e34fbbe0666",
+          "received_monotonic": 277863.012827385,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 3,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "55a0aa7ded5e4b7eadc9022a82268866",
+          "received_monotonic": 277863.63369847,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 4,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "9fe43b1ad5754428a21a27e0e8cab9c6",
+          "received_monotonic": 277864.254843905,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473064448
+        }
+      },
+      {
+        "index": 5,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "e8eda3c516354d4b9b5b5d5f2d6a743b",
+          "received_monotonic": 277864.875560021,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473064448
+        }
+      },
+      {
+        "index": 6,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "a1b493407f664336a8e093a65825eaf4",
+          "received_monotonic": 277865.496446821,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473062400
+        }
+      },
+      {
+        "index": 7,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "8a1c3434c4b7400190eef28410e43d2d",
+          "received_monotonic": 277866.117370275,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 8,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "0ec3b7a0f562474d802b61eaaa41c755",
+          "received_monotonic": 277866.738280032,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 9,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "47044317a0d243f893af060f99106c57",
+          "received_monotonic": 277867.359202193,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 10,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "46635aa19aa3444f8708e92a81f7217f",
+          "received_monotonic": 277867.98018581,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473068544
+        }
+      },
+      {
+        "index": 11,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "e04ff0371435478593a2c907bea5aa73",
+          "received_monotonic": 277868.601056182,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473013248
+        }
+      },
+      {
+        "index": 12,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "c12b9efde17242ec924bcc1616b6e31c",
+          "received_monotonic": 277869.222690597,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473013248
+        }
+      },
+      {
+        "index": 13,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "e4f9d27b25ef4af58339b66820047346",
+          "received_monotonic": 277869.842939859,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473013248
+        }
+      },
+      {
+        "index": 14,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "55b336e1f0dc4513a98ffc343f9635da",
+          "received_monotonic": 277870.46526856,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473013248
+        }
+      },
+      {
+        "index": 15,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "5508fc23c99a468e8877e866804c721b",
+          "received_monotonic": 277871.084734572,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473009152
+        }
+      },
+      {
+        "index": 16,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "7d8651dd3bb64ce0b4148ab8e85bbd11",
+          "received_monotonic": 277871.705720991,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473009152
+        }
+      },
+      {
+        "index": 17,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "9cb3995a47c44413b5c17224e137b604",
+          "received_monotonic": 277872.326803589,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473007104
+        }
+      },
+      {
+        "index": 18,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "6315620fd28840369b3428280d361772",
+          "received_monotonic": 277872.947548413,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473007104
+        }
+      },
+      {
+        "index": 19,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "96485f2d24e546e2bfc0ed81d62ebe78",
+          "received_monotonic": 277873.568489206,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 473013248
+        }
+      },
+      {
+        "index": 20,
+        "frame": {
+          "frame_id": 1,
+          "source_epoch": "8c48a8db906c4c25b6fed51814b34845",
+          "received_monotonic": 277874.189865947,
+          "time_kind": "host_receive_monotonic",
+          "width": 640,
+          "height": 480,
+          "stride": 1920,
+          "encoding": "bgr8"
+        },
+        "after_close": {
+          "fds": 49,
+          "threads": 19,
+          "pss_bytes": 472517632
+        }
+      }
+    ],
+    "baseline_after_warmup": {
+      "fds": 49,
+      "threads": 19,
+      "pss_bytes": 472462336
+    },
+    "status": "PASSED"
+  },
+  "legacy_restore": {
+    "fresh": true,
+    "samples": {
+      "rgb": [
+        {
+          "stamp": 1792134340.7918808,
+          "age_ms": 58.17008018493652,
+          "width": 640,
+          "height": 480,
+          "encoding": "rgb8"
+        },
+        {
+          "stamp": 1792134341.092083,
+          "age_ms": 58.16006660461426,
+          "width": 640,
+          "height": 480,
+          "encoding": "rgb8"
+        },
+        {
+          "stamp": 1792134341.1921499,
+          "age_ms": 58.05087089538574,
+          "width": 640,
+          "height": 480,
+          "encoding": "rgb8"
+        }
+      ],
+      "depth": [
+        {
+          "stamp": 1792134340.0913157,
+          "age_ms": 54.2910099029541,
+          "width": 640,
+          "height": 480,
+          "encoding": "16UC1"
+        },
+        {
+          "stamp": 1792134340.1246753,
+          "age_ms": 52.23250389099121,
+          "width": 640,
+          "height": 480,
+          "encoding": "16UC1"
+        },
+        {
+          "stamp": 1792134340.1580348,
+          "age_ms": 52.19006538391113,
+          "width": 640,
+          "height": 480,
+          "encoding": "16UC1"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "checked_at": "2026-10-16T07:10:27.429036+00:00",
+  "services": {
+    "llama": "active",
+    "asr": "active",
+    "speech": "active",
+    "camera": "active",
+    "vision": "active",
+    "pose": "active",
+    "qdrant": "active"
+  },
+  "native": {
+    "llm": {
+      "slots": 1,
+      "processing": 0
+    },
+    "asr": {
+      "slots": 1,
+      "processing": 0
+    },
+    "speech": {
+      "asr": {
+        "backend_max_concurrent": 1,
+        "admission_limit": 1,
+        "active": 0,
+        "available": 1
+      },
+      "tts": {
+        "backend_max_concurrent": 1,
+        "admission_limit": 1,
+        "active": 0,
+        "available": 1
+      }
+    }
+  }
+}
