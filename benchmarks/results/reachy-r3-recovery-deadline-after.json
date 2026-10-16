@@ -1,0 +1,13 @@
+{
+  "scope": "Real local HTTP socket trickles bytes below per-read timeout; synthetic service, no models or B0",
+  "per_read_timeout_seconds": 0.08,
+  "total_budget_seconds": 0.16,
+  "elapsed_seconds": 0.1611714119790122,
+  "error": {
+    "type": "TimeoutException",
+    "message": "Model operation exceeded its total time budget"
+  },
+  "request_adapter_idle": true,
+  "deadline_threads": 0,
+  "source_sha256": "5c7e0538f8661a1b3196b05a1cd20a3dfa7f3c90ae5fe163c1f0e8d09d1c2ff3"
+}

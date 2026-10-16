@@ -1,0 +1,128 @@
+{
+  "created_at": "2026-10-16T06:44:09.671153+00:00",
+  "status": "NATIVE_BACKEND_CRASH_RECOVERY_AND_MODEL_DEADLINES_VERIFIED",
+  "scope": "Actual owned native service crashes and auto-restarts with independent file-audio/actions data; actual socket timeout tests; no physical camera/audio faults, B0 or final endurance",
+  "tests": {
+    "tests": 132,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "75d6f58efacbcdd8a846b14df1742239766941ac13d81ef2a6e73c98ef583a94",
+  "source_sha256": {
+    "app/request_io.py": "a9ca9fd181323bdf1b74ac166c5886fae7896b8a7570e83960bfd8bc51522e7d",
+    "app/llm.py": "a460c646b430dedc310757265dd599a581e0334a3c46634024fb65e19c12cf81",
+    "app/stt.py": "ccb98fbfafde3de09b26e199bf2fb4087adc728122ac28d57f9db495b85071ef",
+    "app/tts.py": "bdaea7705d06b0cbed3eab076deda9ed59d0845c8c314b845f7bf8205a6bc680",
+    "app/turn_control.py": "dfc25591dbbeea23b72509f24e5697a5be526577dfa5dbfe409965f200a4c5ac",
+    "scripts/probe_service_recovery.py": "b882b619e021ec988b06b2adbfae0e0ce28de1698dca16c8f58dd0692c370f5b",
+    "tests/test_model_timeouts.py": "555960e303094d56bec706d4e6099e54abc2334253d6ccc291a34c87d5edba1a"
+  },
+  "evidence": [
+    "benchmarks/results/reachy-r3-recovery-injection-failure.json",
+    "benchmarks/results/reachy-r3-recovery-native-before-deadline.json",
+    "benchmarks/results/reachy-r3-recovery-native.json",
+    "benchmarks/results/reachy-r3-recovery-deadline-before.json",
+    "benchmarks/results/reachy-r3-recovery-deadline-after.json",
+    "benchmarks/results/reachy-r3-recovery-cleanup.json"
+  ],
+  "native_cases": [
+    {
+      "scenario": "llm_inference",
+      "fault_target": {
+        "pid": 34155,
+        "unit_main_pid": 34154,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "port": 8088,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "status": "PASSED",
+      "failed_result_status": "failed",
+      "admission_while_unreleased": 409,
+      "fault_to_released_seconds": 16.405506255978253,
+      "next_turn_status": "complete",
+      "next_output_kind": "file_written"
+    },
+    {
+      "scenario": "asr_inference",
+      "fault_target": {
+        "pid": 32874,
+        "unit_main_pid": 32851,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "port": 8089,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "status": "PASSED",
+      "failed_result_status": "failed",
+      "admission_while_unreleased": 409,
+      "fault_to_released_seconds": 10.639787982974667,
+      "next_turn_status": "complete",
+      "next_output_kind": "file_written"
+    },
+    {
+      "scenario": "tts_synthesis",
+      "fault_target": {
+        "pid": 33534,
+        "unit_main_pid": 33533,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "port": 8621,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "status": "PASSED",
+      "failed_result_status": "failed",
+      "admission_while_unreleased": 409,
+      "fault_to_released_seconds": 11.251717826991808,
+      "next_turn_status": "complete",
+      "next_output_kind": "file_written"
+    },
+    {
+      "scenario": "llm_after_note_commit",
+      "fault_target": {
+        "pid": 40202,
+        "unit_main_pid": 40201,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "port": 8088,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "status": "PASSED",
+      "failed_result_status": "failed",
+      "admission_while_unreleased": 409,
+      "fault_to_released_seconds": 17.687034219969064,
+      "next_turn_status": "complete",
+      "next_output_kind": "file_written"
+    }
+  ],
+  "verified": [
+    "Actual LLM streaming, ASR native processing and TTS synthesis each interrupted by SIGKILL of the verified listener process; systemd automatically starts a new process",
+    "All four final scenarios emit failed result, enter release_unconfirmed while native recovery is pending, reject extra requests with 409, then return idle after native slot/concurrency checks",
+    "Failed turns publish no final WAV, leave no partial file and do not append session history; next native model turn produces downloadable PCM WAV",
+    "After note transaction commits, crashing LLM preserves the committed note/receipt; same request ID replays exactly that receipt without a second note or model tool round",
+    "Real slow-trickle socket reproduces the missing total call bound; new deadline aborts the owned connection and releases its local operation/timer",
+    "Six real socket adapter cases cover LLM/ASR/TTS with stalled headers and slow-trickle bodies, followed by a successful call on the same adapter",
+    "Previous deadline cannot interrupt a later real connection; cancellation remains cancellation when deadline and stop coincide",
+    "ASR/TTS clear prior error after a successful new operation",
+    "Test app exits cleanly, 8093 closes, seven existing services remain active, LLM/ASR native slots and OVS counters return idle"
+  ],
+  "initial_failures": [
+    "systemctl kill --kill-whom=all reported Invalid argument for auxiliary processes, although the main/native service exited and restarted. Preserve the failed harness run; later injection uses pidfd with listener/child/cgroup identity checks.",
+    "A first test app invocation used a nonexistent placeholder profile and failed before startup; the correct explicit profile was then used.",
+    "A final probe attempt connected before application startup completed; no fault was injected. The probe now waits for an explicitly ready state and records startup timeout as a preflight failure."
+  ],
+  "known_limits": [
+    "Four scenarios passed twice: once before the deadline change, once with it; this is not the final ten-repetitions-per-fault acceptance",
+    "Timeout is one inference operation: LLM token counting/history trimming plus one generation, one ASR utterance, or one TTS chunk; not a whole multi-tool conversation or all speech chunks combined",
+    "Deadline interrupts the owned connected socket, joins its timer and reports failure; it cannot preempt GPU kernels, arbitrary Python work or a blocked native resolver",
+    "Startup/health-observation calls still use their HTTPX per-I/O timeouts; remaining liveness audit must cover these separately",
+    "Native backend capacity stays fenced until actually idle/recovered; expiration does not free GPU resources or count as successful release",
+    "Real hardware disappearance, camera epoch recovery, AEC/voice interruption, full application lifecycle repeats and 8h coexistence remain pending",
+    "Measured recovery durations are diagnostic samples and not performance B0 or a latency commitment",
+    "The inherited systemd launchers still depend on the legacy checkout; default runtime handover remains R4 work"
+  ],
+  "verification_note": "Final native run uses the deadline implementation and error-reset changes. Only documentation/unused-variable cleanup followed it; final source hashes identify the committed state. Test script formatting/readiness guard do not alter injected native workloads.",
+  "autonomous_performance_tuning": false,
+  "baseline": "NOT_COLLECTED"
+}

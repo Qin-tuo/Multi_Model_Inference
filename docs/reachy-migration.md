@@ -307,3 +307,30 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 该故障脚本将读取/发送超时缩短为0.2秒、请求体超时0.5秒，以可重复触发边界，不将结果当成生产性能。真实Firefox另行验证了本机模型的WebSocket取消、延迟清空回执和处理中重连。测试用文件语音、关闭摄像头和工具；正式完整配置仍需R4重验。
 
 字节预算约束应用保留的缓冲，不等于整机内存上限。Uvicorn还设有16连接/任务并发限制，任意连接洪泛仍可能拒绝新HTTP请求。原生线程无法强制终止，关闭时若未释放会报错；实物扬声器路由与关闭并发、音频慢消费者、完整模型/设备故障及长时运行仍需后续验证。R3.resources保持进行中，B0尚未采集。
+
+## R3模型退出恢复与调用总时限
+
+[恢复汇总](../benchmarks/results/reachy-r3-recovery-summary.json)和[最终真实模型记录](../benchmarks/results/reachy-r3-recovery-native.json)覆盖四个场景：LLM推理中退出、ASR原生进程退出、TTS合成服务退出，以及笔记已提交后LLM退出。验证使用独立数据库和文件语音，未接触相机或实物声卡。
+
+测试先确认模型正在执行，再核验监听进程属于指定systemd服务的子进程及cgroup，使用pidfd向该进程发送SIGKILL。现有systemd的`Restart=on-failure`启动新进程；应用本轮明确失败，未确认释放时返回409，观察到恢复后的原生槽/语音占用空闲才放行下一轮。四个场景的下一轮均成功生成语音文件，失败轮没有发布WAV、遗留partial或写入会话历史。
+
+已提交笔记在模型退出后保持存在，同一request_id重试返回原回执，没有再次调用工具或新增笔记。恢复时长约11～18秒，仅为本次故障诊断记录，不是B0或性能承诺。四个场景在总时限修改前后各验证一次，未代替最终每类故障十次的要求。
+
+首次组信号注入曾发生管理命令兼容问题：[原始失败记录](../benchmarks/results/reachy-r3-recovery-injection-failure.json)。命令报告辅助进程错误，但服务实际退出并重启，因此该次按测试未完整完成记录，不冒充四场景通过。后续改用核验归属的单进程句柄。
+
+同时复现并修复了调用时限漏洞：HTTPX的读取超时约束单次等待，持续返回小块数据会延长整次请求。[旧实测](../benchmarks/results/reachy-r3-recovery-deadline-before.json)在80ms读取超时下仍持续约413ms；[修复后](../benchmarks/results/reachy-r3-recovery-deadline-after.json)在160ms总预算处中断该连接并回收计时线程。
+
+现有`llm.timeout`、`stt.timeout`、`tts.timeout`同时作为各自一次推理调用的总预算：LLM包括该次原生token计数、历史裁剪及生成；ASR为一个语音片段；TTS为一个文本分句。它不是整轮多次工具调用或全部语音分句的总时长。`RequestIO`每次操作最多持有一个计时线程，退出时取消并join，之后才允许新操作。取消优先保留取消语义；超时不会被解释成后端已空闲，也不意味着GPU内核被即时抢占。ASR/TTS下一次成功后清除旧错误。
+
+当前132项自动化测试通过，包括六个真实本地socket场景：三个adapter分别在响应头阻塞和持续小块返回时超时，随后同一adapter恢复正常请求。启动/健康探测的读取时限、设备故障、语音打断与长时运行仍需继续核验。
+
+复现真实故障时，先以独立配置启动`--no-camera`应用，使用文件音频、空测试数据库和独立输出目录。脚本只允许已核验的固定本机端点和三个服务；测试会使这些共享后端短暂不可用，不应与其他任务同时运行：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_service_recovery.py \
+  --inject-managed-service-crashes \
+  --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
+  --output /home/nvidia/AI_Stack/runtime-data/recovery-native.json
+```
+
+测试配置的数据库目录须含`reachy-r3-recovery-`，防止误用日常数据。脚本等待应用就绪，记录全部故障和恢复，在退出前确保受影响服务重新就绪；最后还需关闭自己启动的测试应用。当前[退出核验](../benchmarks/results/reachy-r3-recovery-cleanup.json)确认8093关闭、七个原服务active、主模型/ASR槽和语音计数为空闲。默认服务入口仍在旧工程，迁移切换尚未完成。

@@ -1,0 +1,62 @@
+{
+  "checked_at": "2026-10-16T06:42:13.135806+00:00",
+  "application_log_tail": [
+    "INFO:     Shutting down",
+    "INFO:     Waiting for application shutdown.",
+    "INFO:     Application shutdown complete.",
+    "INFO:     Finished server process [39272]"
+  ],
+  "test_port": {
+    "port": 8093,
+    "closed": true
+  },
+  "services": {
+    "llama": "active",
+    "asr": "active",
+    "speech": "active",
+    "camera": "active",
+    "vision": "active",
+    "pose": "active",
+    "qdrant": "active"
+  },
+  "native": {
+    "llm": {
+      "models": [
+        "assistant-vlm"
+      ],
+      "slots": 1,
+      "processing": 0
+    },
+    "asr": {
+      "models": [
+        "assistant-asr"
+      ],
+      "slots": 1,
+      "processing": 0
+    },
+    "speech": {
+      "asr": {
+        "ready": true,
+        "model": "qwen3-asr",
+        "backend": "llama_qwen3_asr",
+        "concurrency": {
+          "backend_max_concurrent": 1,
+          "admission_limit": 1,
+          "active": 0,
+          "available": 1
+        }
+      },
+      "tts": {
+        "ready": true,
+        "model": "matcha-icefall-zh-en",
+        "backend": "matcha_trt",
+        "concurrency": {
+          "backend_max_concurrent": 1,
+          "admission_limit": 1,
+          "active": 0,
+          "available": 1
+        }
+      }
+    }
+  }
+}

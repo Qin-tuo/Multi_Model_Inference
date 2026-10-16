@@ -1,0 +1,178 @@
+{
+  "created_at": "2026-10-16T06:31:22.577310+00:00",
+  "scope": "Inject owned systemd backend crashes during real model work and verify recovery.\n\nRequires an isolated running no-camera/file-audio application with its own DB.\nOnly the three named mmassistant backend units may be interrupted. Explicit CLI\nopt-in is required because this affects their shared local model endpoints.\n",
+  "fault": "SIGKILL of named owned unit control group; systemd Restart=on-failure",
+  "input_sha256": "3eb9d0384c31fde3258dea87c06e643cb0e1e3e81ed14effdb133c2e8766a000",
+  "status": "FAILED",
+  "cases": [
+    {
+      "scenario": "llm_inference",
+      "unit": "mmassistant-llama.service",
+      "before": {
+        "MainPID": "468106",
+        "Result": "success",
+        "NRestarts": "0",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "status": "RUNNING",
+      "turn_id": "c9959364d02b40efad801c36b7b72b5d",
+      "busy_observed": true,
+      "fault_monotonic": 275821.901225929
+    }
+  ],
+  "cleanup": {
+    "llm": {
+      "restored": true,
+      "unit": {
+        "MainPID": "29414",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    }
+  },
+  "effective_config": {
+    "llm": {
+      "model": "assistant-vlm",
+      "base_url": "http://127.0.0.1:8088",
+      "backend": "openai",
+      "max_tokens": 128,
+      "temperature": 0.0,
+      "timeout": 120.0,
+      "context_tokens": 2048,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+      "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+    },
+    "stt": {
+      "model": "qwen3-asr",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "llama_qwen3_asr",
+      "native_base_url": "http://127.0.0.1:8089",
+      "language": "zh",
+      "timeout": 60.0,
+      "max_seconds": 15.0
+    },
+    "tts": {
+      "model": "matcha-icefall-zh-en",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "matcha_trt",
+      "voice": "0",
+      "speed": 1.0,
+      "lang": "zh",
+      "timeout": 60.0,
+      "max_audio_seconds": 30.0,
+      "first_chunk_chars": 8,
+      "max_chunk_chars": 40
+    },
+    "audio": {
+      "enabled": true,
+      "input_mode": "file",
+      "output_mode": "file",
+      "sample_rate": 16000,
+      "channels": 1,
+      "input_device": "ReSpeaker Lite",
+      "output_device": null,
+      "echo_cancellation": true,
+      "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio",
+      "max_output_seconds": 120.0,
+      "retained_files": 10
+    },
+    "vad": {
+      "speech_threshold": 0.025,
+      "silence_duration_ms": 600,
+      "lookback_ms": 250,
+      "max_speech_secs": 15,
+      "chunk_ms": 32,
+      "min_utterance_secs": 0.12,
+      "min_utterance_rms": 0.001,
+      "silero_threshold": 0.75
+    },
+    "vision": {
+      "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+      "width": 640,
+      "height": 480,
+      "jpeg_quality": 80,
+      "frames": 1,
+      "capture_fps": 10.0,
+      "stale_after": 1.0,
+      "buffer_bytes_limit": 16777216,
+      "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+      "few_shot": []
+    },
+    "face": {
+      "enabled": true,
+      "fps": 5.0,
+      "dead_zone": 0.12,
+      "good_frame_zone": 0.18,
+      "min_face_size": 0.06,
+      "stable_frames": 2
+    },
+    "web": {
+      "ui_fps": 10.0,
+      "host": "127.0.0.1",
+      "port": 8093,
+      "max_clients": 4,
+      "queue_events": 16,
+      "queue_bytes": 4194304,
+      "bridge_events": 64,
+      "bridge_bytes": 4194304,
+      "message_bytes": 2097152,
+      "json_body_bytes": 32768,
+      "ws_message_bytes": 4096,
+      "body_readers": 4,
+      "body_timeout": 10.0,
+      "send_timeout": 2.0,
+      "read_workers": 2,
+      "read_timeout": 2.0
+    },
+    "perception": {
+      "enabled": true,
+      "body_enabled": true,
+      "hands_enabled": true,
+      "fps": 5.0,
+      "body_threshold": 0.5,
+      "body_iou": 0.45,
+      "max_people": 10,
+      "palm_threshold": 0.5,
+      "hand_threshold": 0.8,
+      "max_hands": 2
+    },
+    "gestures": {
+      "enabled": true,
+      "greetings_enabled": true,
+      "stop_hold_seconds": 1.0,
+      "min_observations": 5,
+      "max_gap_seconds": 0.6,
+      "event_ttl_seconds": 0.75,
+      "stationary_palm_widths": 0.2,
+      "wave_swing_palm_widths": 0.6,
+      "wave_window_seconds": 2.0,
+      "wave_reversals": 2,
+      "rearm_seconds": 0.4,
+      "greeting_cooldown_seconds": 5.0,
+      "min_palm_pixels": 20.0,
+      "association_palm_widths": 2.0,
+      "max_tracks": 4
+    },
+    "session": {
+      "enabled": true,
+      "max_turns": 4
+    },
+    "actions": {
+      "enabled": true,
+      "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/actions.sqlite",
+      "max_calls_per_turn": 2,
+      "max_pending_reminders": 100,
+      "max_records": 1000,
+      "max_requests": 10000,
+      "notification_ttl_seconds": 3600,
+      "timezone": "Asia/Shanghai"
+    }
+  },
+  "error": "RuntimeError('Failed to kill unit mmassistant-llama.service: Failed to send signal SIGKILL to auxiliary processes: Invalid argument')"
+}
