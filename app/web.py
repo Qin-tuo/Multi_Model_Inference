@@ -149,7 +149,7 @@ class Broadcaster:
         except asyncio.QueueFull:
             pass
 
-        if msg.get("type") in {"frame", "stats", "perception"}:
+        if msg.get("type") in {"frame", "stats", "perception", "scene", "gesture_state"}:
             return
         # Reliable output cannot be silently discarded. Notify and disconnect
         # a slow client; the last complete result is available at /api/state.

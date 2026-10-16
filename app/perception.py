@@ -59,7 +59,7 @@ class HandDetector:
 
 class Perception:
     """One worker, no queued images; every result owns one original frame."""
-    def __init__(self, camera, config, tracker=None):
+    def __init__(self, camera, config, tracker=None, on_result=None):
         self.camera, self.config, self.tracker = camera, config, tracker
         self.body = self.hands = None
         self._stop = threading.Event()
@@ -68,6 +68,8 @@ class Perception:
         self._preview = None
         self._state = self._empty()
         self.processed = self.skipped = self.failures = 0
+        self.on_result = on_result
+        self.callback_error = None
 
     @staticmethod
     def _empty(error=None):
@@ -130,6 +132,11 @@ class Perception:
                     except Exception as exc:
                         self.failures+=1
                         with self._lock:self._state=self._empty(str(exc));self._preview=None
+            if self.on_result:
+                try:
+                    self.on_result(self.snapshot())
+                    self.callback_error = None
+                except Exception as exc:self.callback_error = str(exc)
             self._stop.wait(max(0,1/self.config.fps-(time.monotonic()-start)))
 
     def snapshot(self):
@@ -137,7 +144,8 @@ class Perception:
         frame=result['frame']
         if frame and (frame['source_epoch']!=self.camera.source_epoch or time.monotonic()-frame['received_monotonic']>self.camera.stale_after):
             result=self._empty('Perception result expired')
-        return {**result,'processed':self.processed,'skipped_capture_frames':self.skipped,'failures':self.failures}
+        return {**result,'processed':self.processed,'skipped_capture_frames':self.skipped,'failures':self.failures,
+                'callback_error':self.callback_error}
 
     def preview(self):
         with self._lock:frame=self._preview;result=dict(self._state)

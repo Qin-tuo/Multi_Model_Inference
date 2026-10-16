@@ -1,0 +1,68 @@
+{
+  "created_at": "2026-10-16T03:37:44.513931+00:00",
+  "status": "INTEGRATED_LIVE_POSITIVES_VERIFIED_FULL_GESTURE_ACCEPTANCE_PENDING",
+  "tests": {
+    "tests": 88,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "bfb83b666666936f2c1cff6e4a881310f753e86b66fde0884cf6a2fdfbf6ca50",
+  "source_sha256": {
+    "app/config.py": "767d40511301920ea52a62aab2650afeb6780352ba01fc8dd2c455bcf174cc81",
+    "app/gestures.py": "47663a1fca0ca4db48fd07974388e9accba38ffa562476e56c5392c1b9bc7dfa",
+    "app/perception.py": "17d011aaf2b03fa5f193e169de268c3138a4a9717bf6aa5655af3efe701a6ff2",
+    "app/turn_control.py": "ef42c4306535660c302df50de492e3913df6550d5b91a5f67d128e3d538d8c01",
+    "app/web.py": "57de8129bcdcfcd86b026f18876cd57e43a2db259f101e3ee60416fab5dafa9d",
+    "run_web_vision_chat.py": "204c1c03d99b258f2b33509d4e05ac74c8e31340f6c675f0f64d7973a0fd5077",
+    "static/index.html": "03f072e71ea88eb4685183709a57e2e0ff5c6c215c7fe1182feeb9103de15e8f",
+    "models/perception.json": "0c1f84091499a3f4ca53cbb74bdb7b197c7571c0b92e807b3db16a8807dc3d1b",
+    "scripts/probe_gestures.py": "32070f2f1406306dbc4d4219a04a981def31296879729ef074f02b5261855087",
+    "scripts/probe_gesture_replay.py": "256ebeed28c20ac150e4cad7425d5050fda434cb2df448bb8f843405e4a46b36"
+  },
+  "effective_gesture_config": {
+    "enabled": true,
+    "greetings_enabled": true,
+    "stop_hold_seconds": 1.0,
+    "min_observations": 5,
+    "max_gap_seconds": 0.6,
+    "event_ttl_seconds": 0.75,
+    "stationary_palm_widths": 0.2,
+    "wave_swing_palm_widths": 0.6,
+    "wave_window_seconds": 2.0,
+    "wave_reversals": 2,
+    "rearm_seconds": 0.4,
+    "greeting_cooldown_seconds": 5.0,
+    "min_palm_pixels": 20.0,
+    "association_palm_widths": 2.0,
+    "max_tracks": 4
+  },
+  "posture_source": {
+    "path": "/home/nvidia/AI_Stack/frameworks/opencv-zoo/handpose_estimation_mediapipe-4b2a0b44/demo.py",
+    "sha256": "0ee864b0203d2277394e05b13a23445a923a1ecde5808b3a767696b6970254f6",
+    "url": "https://huggingface.co/opencv/handpose_estimation_mediapipe/resolve/4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7/demo.py"
+  },
+  "scope": "Pinned OpenCV Zoo Five predicate with local temporal rules and shared controller; tests and live evidence have distinct scope",
+  "evidence": [
+    "benchmarks/results/reachy-r3-live-gestures.json",
+    "benchmarks/results/reachy-r3-gesture-replay.json",
+    "benchmarks/results/reachy-r3-gesture-camera-restore.json"
+  ],
+  "verified_software": [
+    "Distinct fresh frames and monotonic source ownership",
+    "Anonymous bounded hand tracks and ambiguous-match resets",
+    "Lateral reversals vs stationary hold and latch/rearm",
+    "Wave ignored while busy, muted, cooling down, duplicate or expired",
+    "Stop bound to current turn with frame-newer-than-admission guard",
+    "Live clip landmarks replay to identical event frame windows",
+    "Actual model greeting/cancel/recovery from rebased replay events"
+  ],
+  "known_limits": [
+    "Initial thresholds are development parameters, not a quality guarantee",
+    "Live positive sample set is small; multi-person/crossings/occlusions/negative gestures need real labelled verification",
+    "Physical microphone/speaker still not connected",
+    "Session history and durable tools remain to implement",
+    "No performance B0 or autonomous optimization performed"
+  ],
+  "runtime_note": "Legacy services restored; migration application stopped after test. Raw camera pixels were not saved or committed."
+}

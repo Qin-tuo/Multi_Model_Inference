@@ -130,6 +130,25 @@ class PerceptionConfig:
 
 
 @dataclass
+class GestureConfig:
+    enabled: bool = True
+    greetings_enabled: bool = True
+    stop_hold_seconds: float = 1.0
+    min_observations: int = 5
+    max_gap_seconds: float = 0.6
+    event_ttl_seconds: float = 0.75
+    stationary_palm_widths: float = 0.2
+    wave_swing_palm_widths: float = 0.6
+    wave_window_seconds: float = 2.0
+    wave_reversals: int = 2
+    rearm_seconds: float = 0.4
+    greeting_cooldown_seconds: float = 5.0
+    min_palm_pixels: float = 20.0
+    association_palm_widths: float = 2.0
+    max_tracks: int = 4
+
+
+@dataclass
 class WebConfig:
     ui_fps: float = 10.0
     host: str = "0.0.0.0"
@@ -146,6 +165,7 @@ _SECTIONS = [
     ("face", "face", FaceConfig),
     ("web", "web", WebConfig),
     ("perception", "perception", PerceptionConfig),
+    ("gestures", "gestures", GestureConfig),
 ]
 
 
@@ -160,6 +180,7 @@ class Config:
     face: FaceConfig = field(default_factory=FaceConfig)
     web: WebConfig = field(default_factory=WebConfig)
     perception: PerceptionConfig = field(default_factory=PerceptionConfig)
+    gestures: GestureConfig = field(default_factory=GestureConfig)
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
@@ -249,6 +270,20 @@ class Config:
             raise ValueError("Invalid perception rate/capacity")
         if not all(0 < value < 1 for value in (self.perception.body_threshold,self.perception.body_iou,self.perception.palm_threshold,self.perception.hand_threshold)):
             raise ValueError("Invalid perception threshold")
+        g = self.gestures
+        import math
+        if not all(math.isfinite(v) for v in vars(g).values() if type(v) in (int,float)):
+            raise ValueError('Gesture parameters must be finite')
+        if not (0 < g.stationary_palm_widths < g.wave_swing_palm_widths < g.association_palm_widths <= 4):
+            raise ValueError('Invalid gesture motion thresholds')
+        if not (0 < g.rearm_seconds <= g.stop_hold_seconds <= g.wave_window_seconds <= 5):
+            raise ValueError('Invalid gesture evidence windows')
+        if not (0 < g.max_gap_seconds < g.stop_hold_seconds and 0 < g.event_ttl_seconds <= self.vision.stale_after):
+            raise ValueError('Invalid gesture freshness bounds')
+        if not (3 <= g.min_observations <= 32 and 1 <= g.wave_reversals <= 4 and 1 <= g.max_tracks <= 8):
+            raise ValueError('Invalid gesture capacities')
+        if g.min_palm_pixels < 5 or g.greeting_cooldown_seconds < g.wave_window_seconds:
+            raise ValueError('Invalid gesture size/cooldown')
 
     def effective(self) -> dict:
         return asdict(self)

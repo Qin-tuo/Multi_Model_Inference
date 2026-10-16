@@ -116,3 +116,11 @@ NVIDIA's `common_runtime.py` at commit `16ed0636df41e4a27d46f82d9028fc50fadc7200
 (Apache-2.0), loaded from the checked external source. OpenCV Zoo palm and
 hand-pose source/model identities and Apache-2.0 notices are recorded in
 `models/perception.json`. These components retain their own notices.
+
+`app/gestures.py` adapts the five-finger angle and wrist-distance predicate
+from OpenCV Zoo's `GestureClassification` in the handpose demo at the same
+pinned Hugging Face revision `4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7`
+(Apache-2.0). The original demo, digest and download URL are retained in
+`models/perception.json`; the demo is not imported because it parses CLI
+arguments and downloads a model at module import. Local adaptations add
+finite-vector guards and temporal interaction rules.

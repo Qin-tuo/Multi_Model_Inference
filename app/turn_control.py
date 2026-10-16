@@ -9,6 +9,7 @@ import time
 import uuid
 import re
 import json
+from collections import deque
 from pathlib import Path
 from app.audio import wav_pcm
 from app.pipeline import segment_pcm, SpeechOutput, TextChunker
@@ -22,11 +23,14 @@ class TurnController:
         self.output_sink = None
         self.perception = perception
         self._queue = queue.Queue(maxsize=1)
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._stop = threading.Event()
         self._thread = None
         self._active = None
         self._last = None
+        self._gesture_seen = deque(maxlen=128)
+        self._last_greeting = float('-inf')
+        self._last_gesture = None
 
     def start(self):
         if self._thread and self._thread.is_alive(): return
@@ -57,7 +61,8 @@ class TurnController:
             if use_image and (self.camera is None or not self.camera.health_check()):
                 raise ValueError("No fresh camera image is available")
             request = {"turn_id": uuid.uuid4().hex, "use_image": use_image, **data,
-                       "cancel_event": threading.Event(), "phase": "running", "output": None}
+                       "cancel_event": threading.Event(), "phase": "running", "output": None,
+                       "admitted_monotonic":time.monotonic()}
             self._active = request
             self.broadcaster.send({"type":"status", "stage":"running", "turn_id":request["turn_id"]})
             self._queue.put_nowait(request)
@@ -81,6 +86,54 @@ class TurnController:
         if output: output.cancel()
         return {"accepted":True, "turn_id":request["turn_id"], "resources_released":False}
 
+    def handle_gesture(self, event):
+        """Route fresh perception events through the same admission/cancel owner."""
+        now = time.monotonic()
+        with self._lock:
+            decision = {'type':'gesture', 'event':event, 'accepted':False}
+            if event['event_id'] in self._gesture_seen:
+                decision['reason'] = 'duplicate'
+            else:
+                self._gesture_seen.append(event['event_id'])
+                if not self.config.gestures.enabled:
+                    decision['reason'] = 'disabled'
+                elif (self.camera is None or event['source_epoch']!=self.camera.source_epoch or
+                      not event['evidence_end_monotonic'] <= event['confirmed_monotonic'] <= now <= event['expires_monotonic']):
+                    decision['reason'] = 'expired_or_wrong_source'
+                elif event['kind']=='stop':
+                    active = self._active
+                    if active is None:
+                        decision['reason'] = 'idle'
+                    elif event['evidence_end_monotonic'] < active['admitted_monotonic']:
+                        decision['reason'] = 'frame_precedes_turn'
+                    else:
+                        decision['target_turn_id'] = active['turn_id']
+                elif event['kind']=='wave':
+                    muted = self.config.audio.input_mode=='device' and not self.broadcaster.ptt_active
+                    if not self.config.gestures.greetings_enabled or muted:
+                        decision['reason'] = 'greeting_muted'
+                    elif self._active is not None:
+                        decision['reason'] = 'busy'
+                    elif now-self._last_greeting < self.config.gestures.greeting_cooldown_seconds:
+                        decision['reason'] = 'cooldown'
+                    else:
+                        try:
+                            admitted = self._admit({'input_kind':'text', 'text':'请用一句简短的中文问候向你挥手的人，不猜测对方身份。',
+                                                    'gesture':event}, False)
+                            self._last_greeting = now
+                            decision.update(admitted,reason='greeting_started')
+                        except RuntimeError as exc:decision.update(reason='not_ready',error=str(exc))
+                else:
+                    decision['reason'] = 'unknown_gesture'
+        if 'target_turn_id' in decision:
+            # Bind to the observed turn, so a later request cannot receive this stop.
+            cancelled = self.cancel(decision['target_turn_id'], reason='stationary_palm')
+            decision.update(cancelled)
+            decision['reason'] = 'turn_cancelled' if cancelled['accepted'] else cancelled['reason']
+        with self._lock:self._last_gesture = decision
+        self.broadcaster.send(decision)
+        return decision
+
     def audio_file(self, turn_id):
         if not re.fullmatch(r"[0-9a-f]{32}", turn_id): return None
         folder = Path(self.config.audio.output_directory).expanduser().resolve()
@@ -94,6 +147,7 @@ class TurnController:
                     "active_turn": self._active["turn_id"] if self._active else None,
                     "phase": self._active["phase"] if self._active else "idle",
                     "release": self._active.get("release") if self._active else None,
+                    "last_gesture": self._last_gesture,
                     "last_result": self._last, "pending": self._queue.qsize()}
 
     def _run(self):
@@ -101,6 +155,7 @@ class TurnController:
             try: request = self._queue.get(timeout=0.1)
             except queue.Empty: continue
             result = {"turn_id": request["turn_id"], "text": "", "metadata": {}, "mode": "camera_text" if request["use_image"] else "text"}
+            if request.get('gesture'):result['gesture'] = request['gesture']
             def send(kind, **values):
                 discard = kind in {"token", "transcript"} or (kind == "status" and values.get("stage") not in {"idle", "releasing", "release_unconfirmed"})
                 self.broadcaster.send({"type":kind, "turn_id":request["turn_id"], **values},

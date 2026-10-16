@@ -30,6 +30,7 @@ from app.camera import Camera
 from app.face_detector import FaceDetector
 from app.face_tracker import FaceTracker
 from app.perception import Perception
+from app.gestures import GestureRecognizer
 from app.llm import LLM
 from app.stt import STT
 from app.tts import create_tts
@@ -90,6 +91,7 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
                 "platform": get_jetson_model(), "clients": broadcaster.client_count})
             broadcaster.send({"type": "perception", **current["face"]})
             broadcaster.send({"type": "scene", **current["perception"]})
+            broadcaster.send({"type":"gesture_state", **current['gestures'], 'last_action':current['last_gesture']})
         except Exception:
             log.exception("Resource/vision status update failed")
         stop.wait(interval)
@@ -118,6 +120,11 @@ def build_app(config, *, no_camera=False, no_audio=False):
     mic = None
     live_vad = None
     control = TurnController(config, llm, broadcaster, cam, stt=stt, tts=tts, perception=perception)
+    gestures = GestureRecognizer(config.gestures, config.perception.hand_threshold) if perception and config.perception.hands_enabled else None
+    if gestures:
+        def consume_scene(scene):
+            for event in gestures.update(scene):control.handle_gesture(event)
+        perception.on_result = consume_scene
     threads = []
 
     def state():
@@ -131,6 +138,7 @@ def build_app(config, *, no_camera=False, no_audio=False):
                 "camera_error": cam.last_error if cam else None,
                 "face": {"enabled": bool(tracker), **(tracker.snapshot() if tracker else {"face_detected": False})},
                 "perception": perception.snapshot() if perception else {"ready":False,"error":"Perception disabled","persons":[],"hands":[]},
+                "gestures": {**gestures.snapshot(), 'error':perception.callback_error} if gestures else {"ready":False,"reason":"disabled","tracks":[]},
                 "models": {"vlm": llm.model, "stt": config.stt.model if speech_enabled else "未启用",
                            "tts": config.tts.model if speech_enabled else "未启用", "vad": "Silero v6" if speech_enabled else "未启用"},
                 "effective_config": config.effective()}

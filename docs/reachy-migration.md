@@ -85,7 +85,7 @@ YuNet固定版本和哈希见`models/perception.json`，权重与许可证存放
 
 真人脸验证连续取得10个不同帧的正例；这证明当前环境的检测连通，不是识别精度统计或身份验证。浏览器静态页面用本机Firefox实际渲染，HTTP/WebSocket验证使用真实模型；原始相机图片与截图保存在AI_Stack，没有提交Git。
 
-当前尚待完成：真人手部正例及挥手/静止举掌、当前会话与有限工具、完整故障矩阵、物理音频及B0基线。R2感知和R3软件取消的新增证据见下文。
+当前尚待完成：手势真实负例/遮挡/多人矩阵、当前会话与有限工具、完整故障矩阵、物理音频及B0基线。真人手部、挥手与静止举掌已取得正例；新增证据见下文。
 
 回退时退出新应用即可继续旧系统。默认服务未切换；如将来测试暂停旧相机，必须记录并恢复原服务状态。不要在运行目录执行`git reset --hard`来替代受控回退，不覆盖原用户数据。本次快照保存代码/配置，不宣称已备份在线数据库。
 
@@ -171,4 +171,40 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 
 可选浏览器回归使用已安装Firefox与geckodriver，启动`geckodriver --host 127.0.0.1 --port 4445`后运行`python scripts/probe_browser_cancel.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-browser-cancel.json`；完成后退出自己启动的驱动进程。
 
-这些单次时长属于功能诊断，不是B0或性能承诺。ASR当前已提交的识别和Matcha当前合成步骤仍可能运行至安全结束；不宣称CUDA kernel可被即时抢占。实物播放缓冲何时真正静音、AEC/双讲、手势触发、工具取消边界、模型崩溃/重启矩阵及长期持续运行尚未通过验收。
+这些单次时长属于功能诊断，不是B0或性能承诺。ASR当前已提交的识别和Matcha当前合成步骤仍可能运行至安全结束；不宣称CUDA kernel可被即时抢占。实物播放缓冲何时真正静音、AEC/双讲、手势完整质量、工具取消边界、模型崩溃/重启矩阵及长期持续运行尚未通过验收。
+
+
+## R3挥手与静止举掌
+
+[手势汇总](../benchmarks/results/reachy-r3-gesture-summary.json)、[真人测试](../benchmarks/results/reachy-r3-live-gestures.json)、[轨迹回放](../benchmarks/results/reachy-r3-gesture-replay.json)和[RGB/深度恢复](../benchmarks/results/reachy-r3-gesture-camera-restore.json)分别说明验证范围。当前88项适用测试通过；F06/F07仍为部分正例通过，未标记完整验收完成。
+
+张掌判定复用[OpenCV Zoo固定版本demo](https://huggingface.co/opencv/handpose_estimation_mediapipe/blob/4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7/demo.py)的五指角度/距腕规则；原文、哈希和Apache-2.0许可证已锁定。这里只提取姿态规则，避免导入demo时解析命令行和联网下载。角度计算补充有限值、零向量及反余弦数值范围保护。
+
+`app/gestures.py`接收感知线程发布的同帧手部结果，不再采集图像，也不创建模型线程。匿名短轨迹根据位置、手掌尺度和可靠手性作相互最近匹配；交叉歧义、遮挡和来源变化重建证据，不承诺跨人的身份保持。轨迹最多4条，每条历史最多32个样本。重复帧不增长证据，时间倒退、过期结果和相机epoch变化不能延续动作。
+
+`GestureConfig`保留所有有效参数。当前开发起点为：静止保持1秒且至少5个不同帧；挥手在2秒窗口出现至少2次明确反向；移动幅度按手掌宽度归一化；手部完整入框且掌宽至少20像素。阈值尚未经过完整质量评估。一次举手触发后锁存，收手/连续非张掌后重新积累，避免挥手结束后仍举着手而立刻取消自己的问候。
+
+事件带匿名来源、首末帧、证据时间和有效期。`TurnController`仍是唯一接纳/取消入口：挥手空闲时走现有LLM→TTS路径，忙碌时忽略且不排队；全局问候间隔5秒，重复/过期事件无效。设备模式下话筒静音同时抑制自动问候，配置`gestures.greetings_enabled: false`也可关闭问候；有效举掌停止仍可使用。停止绑定当时的turn_id，早于新轮次入场的画面不能取消它。
+
+现场测试由用户在D435i前实际操作，150秒采样取得738个不同感知帧，其中人体正例732帧、人脸498帧、手部586帧；这是模型观察计数，不是标注准确率。记录到两次挥手问候、两次空闲状态下的举掌（无任务可取消），以及一次取消正在生成的计数回答。已确认一轮真实问候生成“你好！”的WAV，举掌取消后本轮占用释放。最初手腕/手指出界的帧不参与动作判断；界面现已提示完整入框。原服务恢复后再次收到新鲜RGB和对齐深度。
+
+第一次手动协调的长回答在用户举掌前已完成，保留这一限制；成功的停止测试由检测到新张掌时发起计数请求，让用户持续举掌触发取消。观察窗口结束后应用按计划退出，因此现场未继续取得下一轮回复；独立回放用同一批实际手部关键点复现了全部5个事件及相同起止帧，再将标记为回放的事件送入实际4B/TTS，验证问候、取消、下一轮回复与既有音频保留。
+
+在正常相机应用运行时，可从另一个终端记录（原始关键点默认只留本地，不提交Git）：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_gestures.py \
+  --seconds 60 --output /home/nvidia/AI_Stack/runtime-data/gesture-observation.json
+```
+
+`--prime-stop-test`会在新的静止张掌候选出现时显式提交计数请求，用于协调真人停止测试；这不是生产入口的自动行为。仅观察时不加该参数。测试脚本不保存相机像素。
+
+本机已记录的关键点可复现规则和实际后端控制：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_gesture_replay.py \
+  --input /home/nvidia/AI_Stack/runtime-data/reachy-r3-live-gestures/observation.json \
+  --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-gesture-replay.json --exercise-models
+```
+
+回放绕过相机和视觉推理，不能增加真人样本数量或证明检测准确率。真实负例、遮挡、多人、不同距离/光照，以及实际扬声器何时静音仍未验收；当前未进行性能调参或采集B0。

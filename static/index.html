@@ -214,6 +214,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       </div>
       <div class="cam-info" id="camInfo">No frames yet</div>
       <div class="cam-info" id="sceneInfo">感知未就绪</div>
+      <div class="cam-info" id="gestureInfo">手势未就绪</div>
+      <div class="cam-info" id="gestureAction">左右挥手问候；静止举掌停止。触发后收手可再次使用。</div>
     </div>
     <div class="panel face-panel">
       <div class="panel-hdr">
@@ -416,6 +418,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'stats':        onStats(msg); break;
         case 'perception':   onPerception(msg); break;
         case 'scene':        onScene(msg); break;
+        case 'gesture':      onGesture(msg); break;
+        case 'gesture_state':onGestureState(msg); break;
         case 'capabilities':onCapabilities(msg); break;
         case 'camera_state':cameraUnavailable(msg); break;
         case 'error': case 'overflow': $('inputError').textContent=msg.error || '请求失败'; break;
@@ -702,9 +706,34 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     if(!msg.face_detected) setTrackIdle();
   }
 
+  function onGesture(msg){
+    const name=msg.event?.kind==='wave' ? '挥手' : '举掌';
+    const reasons={greeting_started:'已开始问候',turn_cancelled:'已停止本轮',busy:'当前忙碌，本次问候已忽略',
+      cooldown:'问候间隔中',greeting_muted:'自动问候已静音',idle:'当前没有需要停止的任务',
+      expired_or_wrong_source:'画面已失效',frame_precedes_turn:'画面早于本轮',duplicate:'已处理',not_ready:'服务未就绪'};
+    $('gestureAction').textContent=name+'：'+(reasons[msg.reason] || msg.reason || '已处理');
+  }
+
+  function onGestureState(msg){
+    const reasons={disabled:'手势未启用',awaiting_frames:'手势等待画面',stale_frame:'手势画面已过期',
+      perception_unavailable:'手势感知暂不可用',out_of_order_frame:'手势等待连续画面',too_many_hands:'手部数量超出处理范围'};
+    if(msg.error) $('gestureInfo').textContent='手势处理异常：'+msg.error;
+    else if(!msg.ready) $('gestureInfo').textContent=reasons[msg.reason] || '手势未就绪';
+    else{
+      const hands=msg.tracks || [];
+      const holding=hands.filter(h=>h.open_palm && !h.latched);
+      $('gestureInfo').textContent=holding.length ? '正在观察张掌，静止保持片刻可停止' :
+        hands.some(h=>h.latched) ? '本次举手已处理，收手后可再次触发' :
+        msg.rejected_hands?.clipped_hand ? '请将手腕和五指完整放入画面' :
+        msg.rejected_hands?.small_hand ? '手部太小，请适当靠近摄像头' : '手势已就绪';
+    }
+    if(msg.last_action) onGesture(msg.last_action);
+  }
+
   function onCapabilities(msg){
     updateModels(msg.models || {});
     if(msg.perception) onScene(msg.perception);
+    if(msg.gestures) onGestureState({...msg.gestures,last_action:msg.last_gesture});
     $('useCamera').disabled=!msg.camera_enabled;
     if(!msg.camera_enabled) $('useCamera').checked=false;
     $('cameraState').textContent=msg.camera_ready ? '就绪' : '未启用/不可用';
