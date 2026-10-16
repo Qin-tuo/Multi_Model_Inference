@@ -102,6 +102,11 @@
         "url": "https://huggingface.co/opencv/handpose_estimation_mediapipe/resolve/4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7/README.md",
         "sha256": "1677da308d16a155ddbff720ad612abb38117e298a532f8b63b2935b31106e6a",
         "bytes": 1949
+      },
+      "demo.py": {
+        "path": "/home/nvidia/AI_Stack/frameworks/opencv-zoo/handpose_estimation_mediapipe-4b2a0b44/demo.py",
+        "sha256": "0ee864b0203d2277394e05b13a23445a923a1ecde5808b3a767696b6970254f6",
+        "url": "https://huggingface.co/opencv/handpose_estimation_mediapipe/resolve/4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7/demo.py"
       }
     }
   },

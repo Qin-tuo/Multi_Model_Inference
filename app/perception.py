@@ -1,205 +1,164 @@
-"""Bounded temporal rules over yolo_ros's tracked, 1-based COCO keypoints.
-
-Detection/tracking/inference remain in yolo_ros. These rules describe anonymous
-presence and hand gestures; they do not identify people or infer intent.
-"""
-from collections import Counter, deque
-from dataclasses import dataclass, field
-import hashlib
-import math
+# SPDX-License-Identifier: Apache-2.0
+"""Bounded shared-frame body/face/hand inference using pinned existing backends."""
+import json
 import threading
 import time
-import uuid
+from pathlib import Path
+import numpy as np
+from app.body_detector import BodyDetector, checked_file, load_source
 
 
-@dataclass(frozen=True)
-class Person:
-    track_id: str
-    score: float
-    cx: float
-    cy: float
-    width: float
-    height: float
-    keypoints: dict  # yolo_ros IDs 6/7 shoulders, 8/9 elbows, 10/11 wrists.
-    distance_m: float | None = None
+_MANIFEST = Path(__file__).resolve().parents[1] / 'models/perception.json'
 
 
-@dataclass
-class Track:
-    person: Person
-    first_seen_ns: int
-    last_seen_ns: int
-    observations: int = 1
-    high_since_ns: int | None = None
-    low_since_ns: int | None = None
-    released_at_ns: int | None = None
-    emitted: bool = False
-    samples: deque = field(default_factory=lambda: deque(maxlen=32))
+class HandDetector:
+    def __init__(self, manifest, palm_threshold=0.5, hand_threshold=0.8, max_hands=2):
+        self.max_hands = max_hands
+        self.palm = self.hand = None
+        for role, class_name in [('palm','MPPalmDet'),('hand','MPHandPose')]:
+            entry = manifest[role]
+            filename = entry.get('runtime_source_file', entry['source_file'])
+            source = entry['files'][filename]
+            module = load_source(source['path'], source['sha256'], 'reachy_'+role)
+            weight_name = Path(entry['model_path']).name
+            model = checked_file(entry['model_path'], entry['files'][weight_name]['sha256'])
+            kwargs = {'scoreThreshold':palm_threshold} if role=='palm' else {'confThreshold':hand_threshold}
+            setattr(self, role, getattr(module,class_name)(str(model), **kwargs))
+        self.provider = 'OpenCV CPU'
+
+    def infer(self, image):
+        if self.palm is None or self.hand is None: raise RuntimeError('Hand models are closed')
+        palms = self.palm.infer(image)
+        if palms.ndim != 2 or palms.shape[1] != 19 or not np.isfinite(palms).all():
+            raise ValueError('Invalid palm model output')
+        selected = sorted(palms, key=lambda p:float(p[-1]), reverse=True)[:self.max_hands]
+        hands = []; invalid_rois = 0
+        height, width = image.shape[:2]
+        for palm in selected:
+            x1,y1,x2,y2 = palm[:4]
+            if min(x2,width)<=max(x1,0) or min(y2,height)<=max(y1,0):
+                invalid_rois += 1; continue
+            output = self.hand.infer(image, palm)
+            if output is None: continue
+            if output.shape != (132,) or not np.isfinite(output).all():
+                raise ValueError('Invalid hand landmark output')
+            if not 0<=output[-1]<=1 or not 0<=output[-2]<=1:
+                raise ValueError('Invalid hand confidence or handedness')
+            # Upstream screen z is a model estimate relative to the wrist, not
+            # a RealSense depth measurement. No per-keypoint confidence exists.
+            hands.append({'type':'hand', 'box_xyxy':output[:4].tolist(),
+                          'landmarks':output[4:67].reshape(21,3).tolist(),
+                          'score':float(output[131]), 'handedness_score':float(output[130]),
+                          'palm_score':float(palm[18]), 'landmark_order':'MediaPipe Hands 21',
+                          'z_kind':'model_relative_wrist_pixels', 'landmark_confidence':None})
+        return {'hands':hands,'palms_detected':len(palms),'palms_selected':len(selected),'invalid_rois':invalid_rois}
+
+    def close(self):
+        self.palm = self.hand = None
 
 
-class GestureRules:
-    def __init__(self, *, clock=time.monotonic_ns, max_tracks=16, max_event_queue=32,
-                 max_age_ms=200, stale_seconds=.5, confirmation_seconds=.3,
-                 raised_seconds=1.2, neutral_seconds=.5, wave_window_seconds=1.2,
-                 keypoint_score=.6, wave_excursion=.18, event_ttl_seconds=2):
-        if (not 1 <= max_tracks <= 64 or not 1 <= max_event_queue <= 100
-                or not all(math.isfinite(x) and x > 0 for x in
-                    (max_age_ms, stale_seconds, confirmation_seconds, raised_seconds,
-                     neutral_seconds, wave_window_seconds, wave_excursion, event_ttl_seconds))
-                or not 0 < keypoint_score <= 1):
-            raise ValueError("Invalid gesture bounds")
-        self.clock, self.lock = clock, threading.RLock()
-        self.max_tracks, self.max_event_queue = max_tracks, max_event_queue
-        self.max_age_ns, self.stale_ns = int(max_age_ms*1e6), int(stale_seconds*1e9)
-        self.confirm_ns, self.raise_ns, self.neutral_ns = [int(x*1e9) for x in (confirmation_seconds,raised_seconds,neutral_seconds)]
-        self.wave_window_ns, self.event_ttl_ns = int(wave_window_seconds*1e9), int(event_ttl_seconds*1e9)
-        self.keypoint_score, self.wave_excursion = keypoint_score, wave_excursion
-        self.epoch = uuid.uuid4().hex
-        self.source_key = None
-        self.last_arrival_ns = self.last_capture_ns = self.last_source_ns = None
-        self.tracks, self.events = {}, deque()
-        self.counts = Counter()
+class Perception:
+    """One worker, no queued images; every result owns one original frame."""
+    def __init__(self, camera, config, tracker=None, on_result=None):
+        self.camera, self.config, self.tracker = camera, config, tracker
+        self.body = self.hands = None
+        self._stop = threading.Event()
+        self._lock = threading.Lock()
+        self._thread = None
+        self._preview = None
+        self._state = self._empty()
+        self.processed = self.skipped = self.failures = 0
+        self.on_result = on_result
+        self.callback_error = None
 
-    def _reset(self, reason):
-        self.epoch = uuid.uuid4().hex
-        self.tracks.clear(); self.events.clear()
-        self.last_arrival_ns = self.last_capture_ns = self.last_source_ns = None
-        self.counts["reset:"+reason] += 1
+    @staticmethod
+    def _empty(error=None):
+        return {'ready':False,'error':error,'frame':None,'persons':[], 'hands':[],
+                'face':{'face_detected':False,'face_box':None},'completed_monotonic':None}
 
-    def invalidate(self, reason="input_closed"):
-        with self.lock: self._reset(reason)
+    def load(self):
+        manifest = json.loads(_MANIFEST.read_text())
+        try:
+            if self.config.body_enabled:
+                self.body = BodyDetector(manifest['body'], threshold=self.config.body_threshold,
+                    iou=self.config.body_iou, max_detections=self.config.max_people)
+            if self.config.hands_enabled:
+                self.hands = HandDetector(manifest,self.config.palm_threshold,
+                    self.config.hand_threshold,self.config.max_hands)
+        except Exception:
+            self.close(); raise
 
-    def _hands(self, person):
-        raised, valid_sides = [], 0
-        for side, shoulder, elbow, wrist in (("left",6,8,10),("right",7,9,11)):
-            points = [person.keypoints.get(index) for index in (shoulder,elbow,wrist)]
-            if any(p is None or p[2] < self.keypoint_score for p in points): continue
-            s,e,w = points
-            valid_sides += 1
-            if w[1] < s[1] - .12*person.height and e[1] < s[1] + .25*person.height:
-                raised.append((side,(w[0]-s[0])/person.width))
-        return raised, valid_sides == 2 and not raised
+    def start(self):
+        if self._thread and self._thread.is_alive(): return
+        if self.config.body_enabled and self.body is None: raise RuntimeError('Body model is not loaded')
+        if self.config.hands_enabled and self.hands is None: raise RuntimeError('Hand models are not loaded')
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._loop,name='perception',daemon=True)
+        self._thread.start()
 
-    def _wave(self, samples, side):
-        points = [(t,x) for t,s,x in samples if s == side]
-        if len(points) < 5 or points[-1][0]-points[0][0] < self.confirm_ns: return False
-        pivot = points[0][1]
-        direction = reversals = 0
-        for _,value in points[1:]:
-            if not direction:
-                if abs(value-pivot) >= self.wave_excursion:
-                    direction = 1 if value > pivot else -1
-                    pivot = value
-            elif direction*(value-pivot) >= 0:
-                pivot = value
-            elif abs(value-pivot) >= self.wave_excursion:
-                direction *= -1
-                reversals += 1
-                pivot = value
-        return reversals >= 2
+    def process_frame(self, frame):
+        started = time.monotonic(); stages = {}
+        persons, hands, face = [], [], {'face_detected':False,'face_box':None,'frame':frame.metadata()}
+        if self.body:
+            tick=time.monotonic(); persons=self.body.infer(frame.bgr);stages['body_ms']=(time.monotonic()-tick)*1000
+        if self.tracker:
+            tick=time.monotonic();self.tracker.process_frame(frame);face=self.tracker.snapshot();stages['face_ms']=(time.monotonic()-tick)*1000
+        hand_stats = {}
+        if self.hands:
+            tick=time.monotonic();hand_stats=self.hands.infer(frame.bgr);hands=hand_stats.pop('hands');stages['hands_ms']=(time.monotonic()-tick)*1000
+        finished = time.monotonic()
+        if frame.source_epoch!=self.camera.source_epoch or finished-frame.received_monotonic>self.camera.stale_after:
+            raise RuntimeError('Perception result expired before publication')
+        return {'ready':True,'error':None,'frame':frame.metadata(),'persons':persons,'hands':hands,'face':face,
+                'hand_stats':hand_stats,'completed_monotonic':finished,'elapsed_ms':(finished-started)*1000,
+                'stages':stages,'providers':{'body':self.body.provider if self.body else None,
+                    'face':'YuNet OpenCV CPU' if self.tracker else None,'hands':self.hands.provider if self.hands else None}}
 
-    def update(self, people, *, source_key, source_stamp_ns, capture_ns, arrival_ns=None):
-        now = self.clock() if arrival_ns is None else arrival_ns
-        with self.lock:
-            if not source_key or len(source_key)>128 or source_stamp_ns <= 0 or not 0 <= now-capture_ns <= self.max_age_ns:
-                self.counts["stale_or_invalid_clock"] += 1; return
-            if self.source_key != source_key:
-                self._reset("publisher_changed"); self.source_key = source_key
-            elif self.last_arrival_ns is not None and now-self.last_arrival_ns > self.stale_ns:
-                self._reset("stream_gap")
-            elif self.last_source_ns is not None and source_stamp_ns < self.last_source_ns-self.stale_ns:
-                self._reset("source_clock_changed")
-            if self.last_source_ns is not None and source_stamp_ns <= self.last_source_ns:
-                self.counts["duplicate_or_out_of_order"] += 1; return
-            self.last_arrival_ns, self.last_capture_ns, self.last_source_ns = now,capture_ns,source_stamp_ns
-            for key in list(self.tracks):
-                if now-self.tracks[key].last_seen_ns > 2_000_000_000: self.tracks.pop(key)
-            selected = sorted(people,key=lambda p:p.score,reverse=True)
-            if len(selected) > self.max_tracks: self.counts["person_limit"] += len(selected)-self.max_tracks
-            seen = set()
-            for person in selected[:self.max_tracks]:
-                valid = (person.track_id and len(person.track_id)<=64 and person.track_id not in seen
-                    and all(math.isfinite(x) for x in (person.score,person.cx,person.cy,person.width,person.height))
-                    and .5 <= person.score <= 1 and 15 <= person.width <= 1280 and 30 <= person.height <= 960
-                    and 0 <= person.cx <= 640 and 0 <= person.cy <= 480
-                    and len(person.keypoints) <= 17
-                    and all(len(p)==3 and all(math.isfinite(x) for x in p) and 0<=p[2]<=1
-                            and -64<=p[0]<=704 and -48<=p[1]<=528 for p in person.keypoints.values())
-                    and (person.distance_m is None or math.isfinite(person.distance_m) and 0<person.distance_m<=20))
-                if not valid: self.counts["invalid_person"] += 1; continue
-                seen.add(person.track_id)
-                track = self.tracks.get(person.track_id)
-                if track is not None and capture_ns-track.last_seen_ns > self.stale_ns:
-                    # An occlusion cannot count as a sustained gesture. Keep
-                    # the emitted latch until an observed neutral pose releases it.
-                    track.first_seen_ns=capture_ns; track.observations=0
-                    track.high_since_ns=track.low_since_ns=None; track.samples.clear()
-                if track is None:
-                    if len(self.tracks)>=self.max_tracks:
-                        oldest=min(self.tracks,key=lambda k:self.tracks[k].last_seen_ns)
-                        self.tracks.pop(oldest); self.counts["track_eviction"] += 1
-                    track = self.tracks[person.track_id] = Track(person,capture_ns,capture_ns)
-                else:
-                    track.person = person
-                    track.observations += 1
-                    track.last_seen_ns = capture_ns
-                raised, neutral = self._hands(person)
-                if neutral:
-                    track.high_since_ns=None; track.samples.clear()
-                    if track.low_since_ns is None: track.low_since_ns=capture_ns
-                    if (capture_ns-track.low_since_ns >= self.neutral_ns
-                            and (track.released_at_ns is None or track.released_at_ns < track.low_since_ns)):
-                        track.released_at_ns=capture_ns
-                        track.high_since_ns=None; track.emitted=False; track.samples.clear()
-                    continue
-                track.low_since_ns=None
-                if not raised:
-                    track.high_since_ns=None; track.samples.clear()
-                    continue
-                if track.high_since_ns is None: track.high_since_ns=capture_ns
-                for side,x in raised: track.samples.append((capture_ns,side,x))
-                while track.samples and capture_ns-track.samples[0][0] > self.wave_window_ns: track.samples.popleft()
-                if track.emitted or track.observations<3 or capture_ns-track.first_seen_ns<self.confirm_ns: continue
-                kind = "wave" if any(self._wave(track.samples,side) for side,_ in raised) else None
-                if kind is None and capture_ns-track.high_since_ns>=self.raise_ns: kind="hand_raise"
-                if kind is None: continue
-                track.emitted=True
-                key=f"{source_key}:{person.track_id}:{track.high_since_ns}:{kind}"
-                event={"event_id":hashlib.sha256(key.encode()).hexdigest(),"kind":kind,"track_id":person.track_id,
-                    "source_key":source_key,"epoch":self.epoch,"capture_ns":capture_ns,
-                    "source_stamp_ns":source_stamp_ns,"deadline_ns":capture_ns+self.event_ttl_ns,
-                    "text":"你好，有什么可以帮你？"}
-                if len(self.events)>=self.max_event_queue:
-                    self.events.popleft(); self.counts["event_queue_eviction"] += 1
-                self.events.append(event); self.counts["event:"+kind] += 1
-            self.counts["frames"] += 1
-
-    def valid(self, event, *, started=False):
-        now=self.clock()
-        with self.lock:
-            track=self.tracks.get(event["track_id"])
-            return bool(event["epoch"]==self.epoch and event["source_key"]==self.source_key
-                and self.last_arrival_ns is not None and now-self.last_arrival_ns<=self.stale_ns
-                and track is not None and now-track.last_seen_ns<=self.stale_ns
-                and (started or now<=event["deadline_ns"]))
-
-    def drain_events(self):
-        with self.lock:
-            events=list(self.events); self.events.clear(); return events
+    def _loop(self):
+        previous = None
+        while not self._stop.is_set():
+            start=time.monotonic();frame=self.camera.snapshot()
+            if frame is None:
+                with self._lock:self._state=self._empty('No fresh camera frame');self._preview=None
+            else:
+                key=(frame.source_epoch,frame.frame_id)
+                if key!=previous:
+                    if previous and previous[0]==key[0]: self.skipped+=max(0,key[1]-previous[1]-1)
+                    previous=key
+                    try:
+                        result=self.process_frame(frame)
+                        with self._lock:self._state=result;self._preview=frame
+                        self.processed+=1
+                    except Exception as exc:
+                        self.failures+=1
+                        with self._lock:self._state=self._empty(str(exc));self._preview=None
+            if self.on_result:
+                try:
+                    self.on_result(self.snapshot())
+                    self.callback_error = None
+                except Exception as exc:self.callback_error = str(exc)
+            self._stop.wait(max(0,1/self.config.fps-(time.monotonic()-start)))
 
     def snapshot(self):
-        now=self.clock()
-        with self.lock:
-            fresh=self.last_arrival_ns is not None and now-self.last_arrival_ns<=self.stale_ns
-            rows=[]
-            if fresh:
-                for key,track in self.tracks.items():
-                    if now-track.last_seen_ns>self.stale_ns or track.observations<3: continue
-                    p=track.person
-                    rows.append({"track_id":key,"score":p.score,"distance_m":p.distance_m,
-                        "direction":"left" if p.cx<640*.35 else "right" if p.cx>640*.65 else "center",
-                        "released_at_ns":track.released_at_ns,"last_seen_ns":track.last_seen_ns})
-            return {"state":"READY" if fresh else "STALE","epoch":self.epoch,"source_key":self.source_key,
-                "people":rows,"person_count":len(rows),"tracked_state_count":len(self.tracks),
-                "latest_result_age_ms":(now-self.last_capture_ns)/1e6 if self.last_capture_ns else None,
-                "counts":dict(self.counts),"scope":"anonymous tracked detections; no identity or ground-truth accuracy claim"}
+        with self._lock:result=dict(self._state)
+        frame=result['frame']
+        if frame and (frame['source_epoch']!=self.camera.source_epoch or time.monotonic()-frame['received_monotonic']>self.camera.stale_after):
+            result=self._empty('Perception result expired')
+        return {**result,'processed':self.processed,'skipped_capture_frames':self.skipped,'failures':self.failures,
+                'callback_error':self.callback_error}
+
+    def preview(self):
+        with self._lock:frame=self._preview;result=dict(self._state)
+        if frame is None or frame.source_epoch!=self.camera.source_epoch or time.monotonic()-frame.received_monotonic>self.camera.stale_after:
+            return None,self._empty('Perception preview expired')
+        return frame,result
+
+    def close(self):
+        self._stop.set()
+        if self._thread:
+            self._thread.join(timeout=5)
+            if self._thread.is_alive(): raise RuntimeError('Perception worker has not released')
+            self._thread=None
+        if self.body:self.body.close();self.body=None
+        if self.hands:self.hands.close();self.hands=None
+        with self._lock:self._state=self._empty();self._preview=None

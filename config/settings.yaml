@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Reachy Mini Jetson Assistant — Configuration
+
+llm:
+  model: ''
+  base_url: http://localhost:8080
+  backend: openai
+  max_tokens: 128
+  temperature: 0.7
+  timeout: 120.0
+  system_prompt: 你是本机的中文陪伴助手。请简短、准确地回答。
+  system_prompt_no_rag: 你是本机的中文陪伴助手。请简短、准确地回答。
+stt:
+  model: qwen3-asr
+  language: zh
+tts:
+  model: matcha-icefall-zh-en
+  voice: '0'
+  lang: zh
+  first_chunk_chars: 8
+  max_chunk_chars: 40
+audio:
+  enabled: true
+  input_mode: file
+  output_mode: file
+  sample_rate: 16000
+  channels: 1
+  input_device: ReSpeaker Lite
+  output_device: null
+  echo_cancellation: true
+vad:
+  silero_threshold: 0.75
+  speech_threshold: 0.025
+  silence_duration_ms: 600
+  lookback_ms: 250
+  max_speech_secs: 15
+  chunk_ms: 32
+  min_utterance_secs: 0.12
+  min_utterance_rms: 0.001
+vision:
+  camera_device: 1
+  width: 640
+  height: 480
+  jpeg_quality: 80
+  frames: 1
+  capture_fps: 10.0
+  system_prompt: 根据本次画面用中文简短回答。
+  few_shot: []
+web:
+  ui_fps: 10.0
+  host: 0.0.0.0
+  port: 8090

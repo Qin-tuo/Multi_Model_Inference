@@ -1,0 +1,16 @@
+# Headless core and CPU Silero VAD; GPU inference runs in existing local services.
+PyYAML==6.0.3
+httpx==0.28.1
+fastapi==0.143.0
+uvicorn==0.54.0
+rich==13.7.1
+typer==0.12.5
+click==8.1.8
+psutil==5.9.8
+numpy==1.26.4
+opencv-python-headless==4.11.0.86
+websockets==17.2
+onnxruntime==1.24.4
+cuda-bindings==13.2.0
+SQLAlchemy==2.1.4
+APScheduler==3.11.3

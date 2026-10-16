@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "vad": {
+    "model": "Silero VAD v6 (faster-whisper asset)",
+    "directory": "/home/nvidia/AI_Stack/models/vad/faster-whisper-1.2.1",
+    "filename": "silero_vad_v6.onnx",
+    "provider": "CPUExecutionProvider",
+    "source": {
+      "distribution": "faster-whisper",
+      "version": "1.2.1",
+      "wheel_url": "https://files.pythonhosted.org/packages/05/99/49ee85903dee060d9f08297b4a342e5e0bcfca2f027a07b4ee0a38ab13f9/faster_whisper-1.2.1-py3-none-any.whl",
+      "wheel_sha256": "79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7"
+    },
+    "files": {
+      "silero_vad_v6.onnx": {
+        "wheel_member": "faster_whisper/assets/silero_vad_v6.onnx",
+        "sha256": "4cbf549b8326f60f80f2536d9eefeb450a9abe83365a098031c89719f1be17d2",
+        "bytes": 1245151
+      },
+      "LICENSE": {
+        "wheel_member": "faster_whisper-1.2.1.dist-info/LICENSE",
+        "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5",
+        "bytes": 1064
+      }
+    }
+  },
+  "asr": {
+    "model_id": "qwen3-asr",
+    "backend": "llama_qwen3_asr",
+    "artifact_reference": "models/manifest.json#/models/asr"
+  },
+  "tts": {
+    "model_id": "matcha-icefall-zh-en",
+    "backend": "matcha_trt",
+    "artifact_reference": "models/manifest.json#/models/tts"
+  }
+}

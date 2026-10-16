@@ -1,8 +1,10 @@
 # Orin NX 无机身多模态陪伴服务
 
-基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的计划中派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
+基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前状态：隔离分支已接通D435i、人体/脸/手、4B问答、中文文件语音、当前会话和本地工具；软件语音打断、模型退出恢复及相机断流重连已有独立验证。接下来完成手势质量、软件压力/生命周期、部署切换和B0-SW。麦克风/扬声器实物环节按用户要求后置，用户接手后先优化视觉。默认运行系统尚未切换。** 当前主目录app仍为旧Pipecat/ROS2实现，实际派生代码在隔离开发分支。
+**当前分支：`migration/reachy-headless`，多模型感知、中文文件语音、当前会话与整轮取消已贯通，真人手势取得正例。SQLAlchemy笔记和APScheduler提醒已通过真实模型、取消及重启验证；手势完整质量、整机故障矩阵、实体录播及物理停播仍待完成。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
+
+当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。最新[软件语音打断证据](benchmarks/results/reachy-r3-voice-summary.json)包含真实模型、受控PCM和Firefox验证，155项自动化测试通过。按用户2026-10-16决定，麦克风/扬声器实物环节后置，当前推进软件框架与B0-SW交接，随后由用户先开展视觉优化。
 
 ## 当前确定的流程
 
@@ -13,9 +15,7 @@
 
 挥手触发问候；静止举掌保持片刻取消当前整轮，停止生成和播放，阻止未开始的工具；已完成笔记/提醒保留。身份验证删除，长期记忆后置。主模型暂用Qwen3.5-4B，首版后端采用llama.cpp。
 
-## 实施与审查入口
-
-当前实现位于[migration/reachy-headless分支](https://github.com/Qin-tuo/Multi_Model_Inference/tree/migration/reachy-headless)，最新提交`92c2175`。[软件语音打断证据](benchmarks/results/reachy-r3-voice-summary.json)包含真实模型、受控PCM与Firefox验证，155项自动化测试通过。[计划v3.1](02-jetson-multimodel-inference.md)明确物理音频后置、交付B0-SW后等待用户从视觉开始实操；运行命令和全部阶段证据见[迁移说明](docs/reachy-migration.md)。
+## 审查入口
 
 - [完整新版计划书与最终Goal](02-jetson-multimodel-inference.md)
 - [总览与工作分工](00-project-overview.md)
