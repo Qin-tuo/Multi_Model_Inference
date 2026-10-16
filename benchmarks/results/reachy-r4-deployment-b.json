@@ -1,0 +1,1135 @@
+{
+  "created_at": "2026-10-16T08:50:53.910174+00:00",
+  "scope": "Prepared deployment and rollback; no physical audio, B0 or 8h claim",
+  "source_sha256": {
+    "app/llm.py": "723a50f4ab27b1485eeecf75d45b389320f14093802db39eaa8128de0e698e45",
+    "app/request_io.py": "b38ca082677a0d842dd6fa892d229d81651661d2e7376289298d3adcb195d1c6",
+    "app/pipeline.py": "2ec3fc8d2c328ab7165bf0c3fdcdd69ece5e648851a77872ba1c0b5457ecb4c3",
+    "app/monitor.py": "71505e3fcd414224e2efcff0be4ff4d1683f09db7523f3506c5af6eb5fc1bddc",
+    "app/tts.py": "8640147ae98686c97e2ecdfa5d804dc0749f7629a3712084dd1402064fbf7a1c",
+    "app/face_detector.py": "377cae164b0bdd0b8f8303f1ba639b4eaac655233adf53cb4112fa5ec1ea931b",
+    "app/web_limits.py": "570617b958b4871dfc15367473b8121561d8ae0f8fb639d65487eeb7fd02475f",
+    "app/web.py": "d1cab1fec189ac73ca52c0f6c5f9425e166359841d5c8dfd7dc11188313d133b",
+    "app/cli.py": "2a17da932e40b3a7a498838b3a6785e7168a60e04564418f8ce0c66d2a0f96ed",
+    "app/gestures.py": "47663a1fca0ca4db48fd07974388e9accba38ffa562476e56c5392c1b9bc7dfa",
+    "app/face_tracker.py": "e8d71c2d18c2a6a363e13b6f45e5ce2b324bc06a6a7419517add13426d1c542c",
+    "app/body_detector.py": "24ca0b187f0c1af5c67d05f5d98b5e76c68c189a797121d3ea45ba913acebc80",
+    "app/audio.py": "d248d9fca0956feb00deb305436e61d696f08aa9dbc68f39aa9a1d8233d402f4",
+    "app/perception.py": "17d011aaf2b03fa5f193e169de268c3138a4a9717bf6aa5655af3efe701a6ff2",
+    "app/__init__.py": "b6b7b3007ae0171e1905556bec3d2e2cc33a462f9684c183d14d95ac668138e8",
+    "app/stt.py": "8c11363b7fa588b7b2b4158820d2a3eeafcec1b5ac1d6a22cc4afcce5342b591",
+    "app/turn_control.py": "8f83716acf9f9bfd771ff6900a01ca34803e65ef825a21397f2fcf595701a3a2",
+    "app/vision_capture.py": "57f260076a7982e6639014a221f3e49d8727e33b5df4eef907ce414acfa8f0ef",
+    "app/config.py": "b8bf95ca231b6fd2f64441adf5f05ca5d1c72a0d2ce01596a2b6e3e34fec36ed",
+    "app/camera.py": "6bda34d50739b77804711f8b85de444e60c39282ae35250c3a7a347328aa8f7b",
+    "app/actions/store.py": "eae1b20725e1fbc4478c37077979eb8a7a6b5c7d339c41bc422ac4df06bd8256",
+    "app/actions/__init__.py": "5c8a1c5ef9bf166009162247371f5136995e141a34d1d4c934eebfc9b4978ee0",
+    "app/actions/schema.py": "873f526a4c6e6441ad8c71011deef9f136780a6856b6ca02de7d2c8e8fe63de7",
+    "deploy/services.py": "6fe738c8d55ac32dac45a0e424cc2c018ba9d7d6de6c524a822c3309067cf707",
+    "deploy/logged_service.py": "a89f95f75d2ba7e00664f12a1fbdecb3d8504acc116ee3cf124b299891d67ff1",
+    "deploy/runtime.py": "2bbdf25a01666e18b4345cb0cdc88cfe168c531dfdbaaa0cc91ce3ca2e9663d8",
+    "deploy/resource_guard.py": "58f1054ae16b7664cb6bc06b2215873fe147aadde10b6924018f4c9481df9fef",
+    "deploy/vision/cccl_compat.py": "dfa7525d14844a550efe60aeaf6990064979c7431170b5047277ba11c839517a",
+    "deploy/vision/prepare.py": "d39fbb92c812e289ea3c63f43f36a8daba7fc39b9f1e67102adb9fae328b61de",
+    "deploy/vision/serve.py": "db8c2ea1b95ffe30b9382cff7f74ebb5435eabd27ed9f6ace484cf683ea1bc92",
+    "deploy/vision/export_models.py": "8fedb7674effc96961bab8263bb2d1e8feccc72e2b90a67b0061f19c54a92606",
+    "deploy/speech/build_matcha_host.py": "d307ab5a3053a879f97eeca89c03b1891effbbf66d68ea38ab301229893e7ff4",
+    "deploy/speech/cuda_compat.py": "3afdc9bc7d8057cd4ff2ea406ec51e72b130448ac9f51491282e9c1ab6598c1c",
+    "deploy/speech/prepare.py": "7a31ff85ac385809df1759f75e27b1c50674b4d48e169d262d0153d7a0e135de",
+    "deploy/speech/serve.py": "4253d3f9c352a13f83a6fead5b8da5e148cefd2afb4b75353a84beb813076911",
+    "deploy/speech/piper_compat.py": "77a1e39a909d6069950641d85014206c7d1943d72bf41cb18d842be165475d81",
+    "deploy/speech/llama_asr.py": "876dcfc9afcfe703a46f7940f192bf4ebb40491b28a200acd39e2771945e232e",
+    "deploy/evaluation/test_mmbench_scoring.py": "038487982bd33ff4502e964ece709a3f8a33e6c9c83c055987b5ab8b0dfbdee1",
+    "deploy/data/restore.py": "caf2839f21978abd0f5b34258457653fb3e94a93d47459ff3f1fa109cc97fdd1",
+    "deploy/data/__init__.py": "96295aa2cddcb341033abcf8271d374699159ecd3715063fa4d86eb424fac8ca",
+    "deploy/data/backup.py": "3791b96e601a9852170cdfbf33c8f46b3ba36d782a92957f0b4c9170fc7f9593",
+    "deploy/memory/server.py": "3b5ab649265495fe165f39a8bbb7a5f83726302e63e4521d8a8a8d3d7a4ec441",
+    "deploy/memory/runtime.py": "0bc297aae2438ffeef415381898ffc0d8312a53af2ec7f9f758a1510d340c102",
+    "deploy/memory/migrate.py": "976278b9392895cdbd1adf47f99c3657451b18b9a311f8657b83c95f3ef6cdc9",
+    "deploy/memory/prepare_windows.py": "c665616243a0904f772a03909c2ea92dff504a023c03d7a09ca01b90d5821ecb",
+    "deploy/memory/reindex.py": "e7e6bef691fbef15886b4a39fb99f33cc2f859791822de8b7779ccd273da83a1",
+    "deploy/memory/prepare.py": "a2b608b31acca2f90247e0cca15f61d070c8f3c0ef03153d387f2a1eb17eeeda",
+    "deploy/vision/eval/test_wiring.py": "95adfe20479599048d236c5a1b5f1c9814f7db0c6ac607e993b66397f801faf7",
+    "scripts/probe_voice_interruptions.py": "804570f1faf1df24ee9d939a4ac51523ebeb1f809ee1a73d8d659fce065b1d13",
+    "scripts/probe_gestures.py": "32070f2f1406306dbc4d4219a04a981def31296879729ef074f02b5261855087",
+    "scripts/probe_web_transport.py": "273bac305ea54e007d1904f5e0964ed95c7bcd0fea341483948634fe5fe9050d",
+    "scripts/probe_turn_cancel.py": "e0821fe70a88b780d5fcfd0377c9817b4ae5a625fb243e2e07336ace71d37d25",
+    "scripts/probe_browser_cancel.py": "0809258706a63ddd6b2a22a52390d0b99536a48d5a91fe4e67597b3914907d1e",
+    "scripts/prepare_speech.py": "060ebc2d3e120e39fe64b294689442d0b2d7e37f81c840a443ea1401fe0e565f",
+    "scripts/probe_actions.py": "29e18b4940e45b74767e6a215817b02d5f947c72b37b2a0445271dd1bd93ce14",
+    "scripts/probe_camera_recovery.py": "56319e66e9d13746d50b264510924d6167e883fd89d4726121a0cb23cedc9f01",
+    "scripts/prepare_face.py": "4444984b012310e1e0e63c2936d7db31ea1fe76d01eb6f0aabe56669284d7b76",
+    "scripts/probe_deployment.py": "21fee68e5362360e0e468a5ee2fff79ed034ed6c9e95eb7a7ccbf47d71efc06c",
+    "scripts/probe_action_cancel.py": "953312cc64f562e31d1f21648148e843086152e4aa312f3363bad1f1e6941c5a",
+    "scripts/setup_native_perception.py": "89bbe9c2f8855c0a78ba4ee3c24ecae17c481dead1e83ecee62e308c1d667c8a",
+    "scripts/probe_speech_session.py": "ebf73404d405f259b8bcf4238deefda3c385ff34ef7f7f73b0f694e7fca5fd4c",
+    "scripts/probe_service_recovery.py": "b882b619e021ec988b06b2adbfae0e0ce28de1698dca16c8f58dd0692c370f5b",
+    "scripts/probe_gesture_replay.py": "256ebeed28c20ac150e4cad7425d5050fda434cb2df448bb8f843405e4a46b36",
+    "scripts/probe_legacy_camera.py": "1c8d2bdb60de878e328bbd52e2616a7beac8635aad7fc1da37b239cbb296b099",
+    "scripts/probe_cancellation.py": "e8ee6c1aaff23fdeea414889b05ff45fdfd9666af3c5aefd914444e61c780791",
+    "scripts/probe_web.py": "d9a3664d373d11b594aeee41a14bf29ce78d50a0dc2a83beff929d618baeee9b",
+    "scripts/probe_browser_session.py": "bbb8f7dc569481f177085fc19b78adae0a8e5cda107de169db7a0d003734acdd",
+    "scripts/probe_perception.py": "d4726e28acaa5d39399d790e2118811788066bd7da620493e0ec710641a79cc1",
+    "scripts/prepare_perception.py": "71c5216ed56e5ddb5801b3ed9ab559ca4fc1dd3603e18c83434d5cdc5573a212",
+    "scripts/probe_speech.py": "f2fce38796c4f1492c8eba2d47c8da8f24b02a4c18e8044b684da223590ef4dc",
+    "scripts/probe_session.py": "8fc883f3e92f105392daec9d9f394b6b1c81e220419450143248cd932c7c212c"
+  },
+  "legacy_root": "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50",
+  "steps": [
+    {
+      "label": "legacy-before",
+      "command": [
+        "/usr/bin/python3",
+        "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50/tools/project.py",
+        "status",
+        "--components",
+        "all"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 10.699563619971741
+    },
+    {
+      "label": "legacy-down",
+      "command": [
+        "/usr/bin/python3",
+        "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50/tools/project.py",
+        "down",
+        "--components",
+        "qdrant,llama,asr,speech,camera,vision,pose"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 11.953773403016385
+    },
+    {
+      "label": "text",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/AI_Stack/projects/reachy-headless/scripts/probe_web.py",
+        "--text",
+        "只回答：连接成功",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/text.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 3.776969352038577
+    },
+    {
+      "label": "camera",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/AI_Stack/projects/reachy-headless/scripts/probe_web.py",
+        "--camera",
+        "--text",
+        "用一句话描述当前画面，不执行任何工具。",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/camera.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 7.743583317962475
+    },
+    {
+      "label": "file-speech",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/AI_Stack/projects/reachy-headless/scripts/probe_speech.py",
+        "--input",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/input.wav",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/reply.wav"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 3.0238426930154674
+    },
+    {
+      "label": "after-cycles",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/AI_Stack/projects/reachy-headless/scripts/probe_web.py",
+        "--text",
+        "只回答：恢复成功",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/after-cycles.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 2.2208479460095987
+    },
+    {
+      "label": "after-crash",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/AI_Stack/projects/reachy-headless/scripts/probe_web.py",
+        "--text",
+        "只回答：恢复成功",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/after-crash.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 2.171815675974358
+    },
+    {
+      "label": "legacy-up",
+      "command": [
+        "/usr/bin/python3",
+        "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50/tools/project.py",
+        "up",
+        "--components",
+        "qdrant,llama,asr,speech,camera,vision,pose"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 48.465247722982895
+    },
+    {
+      "label": "legacy-restored",
+      "command": [
+        "/usr/bin/python3",
+        "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50/tools/project.py",
+        "status",
+        "--components",
+        "qdrant,llama,asr,speech,camera,vision,pose"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 8.090568955987692
+    },
+    {
+      "label": "legacy-camera",
+      "command": [
+        "bash",
+        "-c",
+        "source /opt/ros/jazzy/setup.bash && exec /usr/bin/python3 \"$1\" \"$2\"",
+        "probe",
+        "/home/nvidia/AI_Stack/projects/reachy-headless/scripts/probe_legacy_camera.py",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/legacy-camera.json"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 3.929609522980172
+    }
+  ],
+  "cycles": [
+    {
+      "cycle": 1,
+      "stopped": {
+        "created_at": "2026-10-16T08:52:06.019982+00:00",
+        "services": {
+          "app": {
+            "MainPID": "0",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "",
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-app.service",
+            "main_pid": 0,
+            "cgroup_pids": [],
+            "managed_by_project": true,
+            "health": {
+              "ready": false
+            }
+          }
+        },
+        "status": "STOPPED",
+        "profile": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+        "scope": "Managed software readiness; physical audio is deferred, not qualified by this check"
+      },
+      "ready": {
+        "created_at": "2026-10-16T08:52:10.860410+00:00",
+        "services": {
+          "app": {
+            "MainPID": "258036",
+            "Result": "success",
+            "NRestarts": "0",
+            "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-app.service",
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-app.service",
+            "main_pid": 258036,
+            "cgroup_pids": [
+              258036,
+              258046
+            ],
+            "managed_by_project": true,
+            "health": {
+              "ready": true,
+              "camera": {
+                "ready": true,
+                "state": "streaming",
+                "error": null,
+                "source_epoch": "e05bd27879724f8f8ae933752733d393",
+                "frame_age_seconds": 0.019432712986599654,
+                "open_attempts": 1,
+                "failures": 0,
+                "reconnects": 0,
+                "buffer_count": 12,
+                "buffer_bytes": 353233,
+                "capture_worker_alive": true
+              },
+              "phase": "idle",
+              "models": {
+                "vlm": "assistant-vlm",
+                "stt": "qwen3-asr",
+                "tts": "matcha-icefall-zh-en",
+                "vad": "Silero v6"
+              },
+              "config_matches": true
+            },
+            "owned_listening_socket": true
+          }
+        },
+        "status": "READY",
+        "profile": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+        "scope": "Managed software readiness; physical audio is deferred, not qualified by this check",
+        "verified_artifact_count": 8
+      },
+      "elapsed_seconds": 5.957627164956648,
+      "process_status": {
+        "258036": "Name:\tpython\nUmask:\t0077\nState:\tS (sleeping)\nTgid:\t258036\nNgid:\t0\nPid:\t258036\nPPid:\t3872\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t128\nGroups:\t4 27 29 44 122 984 993 1000 \nNStgid:\t258036\nNSpid:\t258036\nNSpgid:\t258036\nNSsid:\t258036\nKthread:\t0\nVmPeak:\t   37428 kB\nVmSize:\t   37356 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   20256 kB\nVmRSS:\t   20256 kB\nRssAnon:\t   11580 kB\nRssFile:\t    8676 kB\nRssShmem:\t       0 kB\nVmData:\t   12984 kB\nVmStk:\t     132 kB\nVmExe:\t    6200 kB\nVmLib:\t    7496 kB\nVmPTE:\t     100 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffff\nThreads:\t1\nSigQ:\t0/61278\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000004002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\tff\nCpus_allowed_list:\t0-7\nMems_allowed:\t0001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t10\nnonvoluntary_ctxt_switches:\t5\n",
+        "258046": "Name:\tpython\nUmask:\t0077\nState:\tS (sleeping)\nTgid:\t258046\nNgid:\t0\nPid:\t258046\nPPid:\t258036\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 27 29 44 122 984 993 1000 \nNStgid:\t258046\nNSpid:\t258046\nNSpgid:\t258036\nNSsid:\t258036\nKthread:\t0\nVmPeak:\t20345492 kB\nVmSize:\t20345492 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t  636424 kB\nVmRSS:\t  636424 kB\nRssAnon:\t  391812 kB\nRssFile:\t  244612 kB\nRssShmem:\t       0 kB\nVmData:\t  842816 kB\nVmStk:\t     132 kB\nVmExe:\t    6200 kB\nVmLib:\t  715892 kB\nVmPTE:\t    2340 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffff\nThreads:\t27\nSigQ:\t0/61278\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000100004002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tunknown\nCpus_allowed:\tff\nCpus_allowed_list:\t0-7\nMems_allowed:\t0001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t1425\nnonvoluntary_ctxt_switches:\t55\n"
+      }
+    }
+  ],
+  "status": "PASS",
+  "legacy_commit": "972de50be4a74d6e93cfac9e241154a0612423e5",
+  "legacy_before": {
+    "created_at": "2026-10-16T08:51:04.630146+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "243231",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 243231,
+        "cgroup_pids": [
+          243231,
+          243257
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "244350",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 244350,
+        "cgroup_pids": [
+          244350,
+          244374
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "245017",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 245017,
+        "cgroup_pids": [
+          245017,
+          245025
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "245772",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 245772,
+        "cgroup_pids": [
+          245772,
+          245783,
+          256162
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "246000",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 246000,
+        "cgroup_pids": [
+          246000,
+          246018,
+          246110
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 57.25368,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+          "matched_publishers": 1,
+          "discovery_wait_ms": 2920.9299630019814,
+          "observation_wait_ms": 342.42711297702044,
+          "freshness_limit_ms": 2000
+        }
+      },
+      "vision": {
+        "MainPID": "246253",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 246253,
+        "cgroup_pids": [
+          246253,
+          246265,
+          246370
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 95.099909,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+          "matched_publishers": 1,
+          "discovery_wait_ms": 299.6907359920442,
+          "observation_wait_ms": 0.016674981452524662,
+          "freshness_limit_ms": 2000
+        }
+      },
+      "pose": {
+        "MainPID": "246442",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 246442,
+        "cgroup_pids": [
+          246442,
+          246456,
+          246562
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 101.875537,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+          "matched_publishers": 1,
+          "discovery_wait_ms": 1850.9583019767888,
+          "observation_wait_ms": 0.023523985873907804,
+          "freshness_limit_ms": 2000
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "legacy_unit_sha256": {
+    "qdrant": "bba4cbedb7ea4f766a007af7a30b3bac8285072f39a01d87536a90c3cee1afd6",
+    "llama": "49bfb92ff76354be8be58fe666e543ebf8f8f29059b46671e01fee0d972d67ec",
+    "asr": "32525c6796324913faa267b7e1a6c241c282600c8df17ef76ced55453d71bf1d",
+    "speech": "354c3e9273bb55df35853c7deec85373acf3c02db60fac98e780ff48e73afdcd",
+    "camera": "b98133d83e19f56a3e39ca376b6618871c99f82db9110a4f5b0e52867298ec8c",
+    "vision": "dfcc002d46462bd427dc1af39f701970146ca5fe3023db42c37f598bd1c1f382",
+    "pose": "053168159e205b30a394d677be16fc5b597220f5439551b798af5b729b2b347a"
+  },
+  "effective_config": {
+    "backends": {
+      "stack_root": "/home/nvidia/AI_Stack",
+      "llm_threads": 4,
+      "llm_gpu_layers": 99,
+      "llm_parallel": 1,
+      "llm_cache_ram_mib": 256,
+      "asr_threads": 2,
+      "asr_gpu_layers": 99,
+      "asr_context_tokens": 2048,
+      "asr_cache_ram_mib": 64,
+      "asr_model_id": "assistant-asr",
+      "asr_context": "Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0"
+    },
+    "llm": {
+      "model": "assistant-vlm",
+      "base_url": "http://127.0.0.1:8088",
+      "backend": "openai",
+      "max_tokens": 128,
+      "temperature": 0.0,
+      "timeout": 120.0,
+      "context_tokens": 2048,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+      "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+    },
+    "stt": {
+      "model": "qwen3-asr",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "llama_qwen3_asr",
+      "native_base_url": "http://127.0.0.1:8089",
+      "language": "zh",
+      "timeout": 60.0,
+      "max_seconds": 15.0
+    },
+    "tts": {
+      "model": "matcha-icefall-zh-en",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "matcha_trt",
+      "voice": "0",
+      "speed": 1.0,
+      "lang": "zh",
+      "timeout": 60.0,
+      "max_audio_seconds": 30.0,
+      "first_chunk_chars": 8,
+      "max_chunk_chars": 40
+    },
+    "audio": {
+      "enabled": true,
+      "input_mode": "file",
+      "output_mode": "file",
+      "sample_rate": 16000,
+      "channels": 1,
+      "input_device": "ReSpeaker Lite",
+      "output_device": null,
+      "echo_cancellation": true,
+      "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-audio",
+      "max_output_seconds": 120.0,
+      "retained_files": 10,
+      "voice_interruptions": true,
+      "pending_voice_seconds": 30.0,
+      "input_stale_seconds": 1.0
+    },
+    "vad": {
+      "speech_threshold": 0.025,
+      "silence_duration_ms": 600,
+      "lookback_ms": 250,
+      "max_speech_secs": 15,
+      "chunk_ms": 32,
+      "min_utterance_secs": 0.12,
+      "min_utterance_rms": 0.001,
+      "silero_threshold": 0.75,
+      "confirm_speech_ms": 160
+    },
+    "vision": {
+      "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+      "width": 640,
+      "height": 480,
+      "jpeg_quality": 80,
+      "frames": 1,
+      "capture_fps": 10.0,
+      "stale_after": 1.0,
+      "buffer_bytes_limit": 16777216,
+      "reconnect_seconds": 1.0,
+      "v4l_select_timeout": 2,
+      "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+      "few_shot": []
+    },
+    "face": {
+      "enabled": true,
+      "fps": 5.0,
+      "dead_zone": 0.12,
+      "good_frame_zone": 0.18,
+      "min_face_size": 0.06,
+      "stable_frames": 2
+    },
+    "web": {
+      "ui_fps": 10.0,
+      "host": "127.0.0.1",
+      "port": 8090,
+      "max_clients": 4,
+      "queue_events": 16,
+      "queue_bytes": 4194304,
+      "bridge_events": 64,
+      "bridge_bytes": 4194304,
+      "message_bytes": 2097152,
+      "json_body_bytes": 32768,
+      "ws_message_bytes": 4096,
+      "body_readers": 4,
+      "body_timeout": 10.0,
+      "send_timeout": 2.0,
+      "read_workers": 2,
+      "read_timeout": 2.0
+    },
+    "perception": {
+      "enabled": true,
+      "body_enabled": true,
+      "hands_enabled": true,
+      "fps": 5.0,
+      "body_threshold": 0.5,
+      "body_iou": 0.45,
+      "max_people": 10,
+      "palm_threshold": 0.5,
+      "hand_threshold": 0.8,
+      "max_hands": 2
+    },
+    "gestures": {
+      "enabled": true,
+      "greetings_enabled": true,
+      "stop_hold_seconds": 1.0,
+      "min_observations": 5,
+      "max_gap_seconds": 0.6,
+      "event_ttl_seconds": 0.75,
+      "stationary_palm_widths": 0.2,
+      "wave_swing_palm_widths": 0.6,
+      "wave_window_seconds": 2.0,
+      "wave_reversals": 2,
+      "rearm_seconds": 0.4,
+      "greeting_cooldown_seconds": 5.0,
+      "min_palm_pixels": 20.0,
+      "association_palm_widths": 2.0,
+      "max_tracks": 4
+    },
+    "session": {
+      "enabled": true,
+      "max_turns": 4
+    },
+    "actions": {
+      "enabled": true,
+      "database": "/home/nvidia/AI_Stack/runtime-data/reachy-actions/actions.sqlite",
+      "max_calls_per_turn": 2,
+      "max_pending_reminders": 100,
+      "max_records": 1000,
+      "max_requests": 10000,
+      "notification_ttl_seconds": 3600,
+      "timezone": "Asia/Shanghai"
+    }
+  },
+  "new_ready": {
+    "created_at": "2026-10-16T08:51:50.233305+00:00",
+    "services": {
+      "llama": {
+        "MainPID": "257289",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-llama.service",
+        "main_pid": 257289,
+        "cgroup_pids": [
+          257289,
+          257291
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "model": "assistant-vlm",
+          "context_tokens": 2048,
+          "slots": 1,
+          "processing": 0
+        },
+        "owned_listening_socket": true
+      },
+      "asr": {
+        "MainPID": "257429",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-asr.service",
+        "main_pid": 257429,
+        "cgroup_pids": [
+          257429,
+          257445
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "model": "assistant-asr",
+          "context_tokens": 2048,
+          "slots": 1,
+          "processing": 0
+        },
+        "owned_listening_socket": true
+      },
+      "speech": {
+        "MainPID": "257548",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-speech.service",
+        "main_pid": 257548,
+        "cgroup_pids": [
+          257548,
+          257550,
+          257791
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "capabilities": {
+            "asr": {
+              "ready": true,
+              "model": "qwen3-asr",
+              "backend": "llama_qwen3_asr",
+              "concurrency": {
+                "backend_max_concurrent": 1,
+                "admission_limit": 1,
+                "active": 0,
+                "available": 1
+              }
+            },
+            "tts": {
+              "ready": true,
+              "model": "matcha-icefall-zh-en",
+              "backend": "matcha_trt",
+              "concurrency": {
+                "backend_max_concurrent": 1,
+                "admission_limit": 1,
+                "active": 0,
+                "available": 1
+              }
+            }
+          }
+        },
+        "owned_listening_socket": true
+      },
+      "app": {
+        "MainPID": "257700",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-app.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-app.service",
+        "main_pid": 257700,
+        "cgroup_pids": [
+          257700,
+          257703
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "camera": {
+            "ready": true,
+            "state": "streaming",
+            "error": null,
+            "source_epoch": "7b43594bb6d348ccaf060d6dbbf04eec",
+            "frame_age_seconds": 0.07518302300013602,
+            "open_attempts": 1,
+            "failures": 0,
+            "reconnects": 0,
+            "buffer_count": 17,
+            "buffer_bytes": 512472,
+            "capture_worker_alive": true
+          },
+          "phase": "idle",
+          "models": {
+            "vlm": "assistant-vlm",
+            "stt": "qwen3-asr",
+            "tts": "matcha-icefall-zh-en",
+            "vad": "Silero v6"
+          },
+          "config_matches": true
+        },
+        "owned_listening_socket": true
+      }
+    },
+    "status": "READY",
+    "profile": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+    "scope": "Managed software readiness; physical audio is deferred, not qualified by this check",
+    "verified_artifact_count": 397
+  },
+  "app_crash_recovery": {
+    "method": "SIGKILL to pidfd of owned real app, no probe restart",
+    "killed_pid": 258046,
+    "before": {
+      "created_at": "2026-10-16T08:52:13.249663+00:00",
+      "services": {
+        "app": {
+          "MainPID": "258036",
+          "Result": "success",
+          "NRestarts": "0",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-app.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-app.service",
+          "main_pid": 258036,
+          "cgroup_pids": [
+            258036,
+            258046
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "camera": {
+              "ready": true,
+              "state": "streaming",
+              "error": null,
+              "source_epoch": "e05bd27879724f8f8ae933752733d393",
+              "frame_age_seconds": 0.09159843996167183,
+              "open_attempts": 1,
+              "failures": 0,
+              "reconnects": 0,
+              "buffer_count": 34,
+              "buffer_bytes": 1010057,
+              "capture_worker_alive": true
+            },
+            "phase": "idle",
+            "models": {
+              "vlm": "assistant-vlm",
+              "stt": "qwen3-asr",
+              "tts": "matcha-icefall-zh-en",
+              "vad": "Silero v6"
+            },
+            "config_matches": true
+          },
+          "owned_listening_socket": true
+        }
+      },
+      "status": "READY",
+      "profile": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+      "scope": "Managed software readiness; physical audio is deferred, not qualified by this check"
+    },
+    "after": {
+      "created_at": "2026-10-16T08:52:22.648918+00:00",
+      "services": {
+        "app": {
+          "MainPID": "258241",
+          "Result": "success",
+          "NRestarts": "1",
+          "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/reachy-headless-app.service",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running",
+          "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-app.service",
+          "main_pid": 258241,
+          "cgroup_pids": [
+            258241,
+            258244
+          ],
+          "managed_by_project": true,
+          "health": {
+            "ready": true,
+            "camera": {
+              "ready": true,
+              "state": "streaming",
+              "error": null,
+              "source_epoch": "3cebf1d0826e443e9c946a7afa5b4c37",
+              "frame_age_seconds": 0.07535402599023655,
+              "open_attempts": 1,
+              "failures": 0,
+              "reconnects": 0,
+              "buffer_count": 11,
+              "buffer_bytes": 324254,
+              "capture_worker_alive": true
+            },
+            "phase": "idle",
+            "models": {
+              "vlm": "assistant-vlm",
+              "stt": "qwen3-asr",
+              "tts": "matcha-icefall-zh-en",
+              "vad": "Silero v6"
+            },
+            "config_matches": true
+          },
+          "owned_listening_socket": true
+        }
+      },
+      "status": "READY",
+      "profile": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+      "scope": "Managed software readiness; physical audio is deferred, not qualified by this check"
+    }
+  },
+  "software_status": "PASS",
+  "new_stopped": {
+    "created_at": "2026-10-16T08:52:28.844443+00:00",
+    "services": {
+      "llama": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-llama.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "asr": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-asr.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "speech": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-speech.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      },
+      "app": {
+        "MainPID": "0",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "",
+        "LoadState": "loaded",
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/reachy-headless-app.service",
+        "main_pid": 0,
+        "cgroup_pids": [],
+        "managed_by_project": true,
+        "health": {
+          "ready": false
+        }
+      }
+    },
+    "status": "STOPPED",
+    "profile": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+    "scope": "Managed software readiness; physical audio is deferred, not qualified by this check"
+  },
+  "legacy_restored": {
+    "created_at": "2026-10-16T08:53:25.339021+00:00",
+    "components": {
+      "qdrant": {
+        "MainPID": "258474",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-qdrant.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-qdrant.service",
+        "main_pid": 258474,
+        "cgroup_pids": [
+          258474,
+          258476
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "authentication_required": true,
+          "instance_id": "729e5f46b25445428eb0b5dfec44106f",
+          "scope": "Authenticated loopback storage readiness; not memory quality acceptance",
+          "owned_listening_socket": true
+        }
+      },
+      "llama": {
+        "MainPID": "258723",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-llama.service",
+        "main_pid": 258723,
+        "cgroup_pids": [
+          258723,
+          258728
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "asr": {
+        "MainPID": "259008",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-asr.service",
+        "main_pid": 259008,
+        "cgroup_pids": [
+          259008,
+          259014
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "speech": {
+        "MainPID": "259177",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-speech.service",
+        "main_pid": 259177,
+        "cgroup_pids": [
+          259177,
+          259181
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "scope": "local backend readiness",
+          "owned_listening_socket": true
+        }
+      },
+      "camera": {
+        "MainPID": "259489",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-camera.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-camera.service",
+        "main_pid": 259489,
+        "cgroup_pids": [
+          259489,
+          259509,
+          259574
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/camera/camera/color/image_raw",
+          "capture_age_ms": 53.74665,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+          "matched_publishers": 1,
+          "discovery_wait_ms": 998.5447499784641,
+          "observation_wait_ms": 0.021670013666152954,
+          "freshness_limit_ms": 2000
+        }
+      },
+      "vision": {
+        "MainPID": "259623",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-vision.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-vision.service",
+        "main_pid": 259623,
+        "cgroup_pids": [
+          259623,
+          259648,
+          259753
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/vision/d435/detections_3d",
+          "capture_age_ms": 82.178588,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+          "matched_publishers": 1,
+          "discovery_wait_ms": 1875.0362750142813,
+          "observation_wait_ms": 0.02237397711724043,
+          "freshness_limit_ms": 2000
+        }
+      },
+      "pose": {
+        "MainPID": "259838",
+        "Result": "success",
+        "NRestarts": "0",
+        "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-pose.service",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running",
+        "FragmentPath": "/home/nvidia/.config/systemd/user/mmassistant-pose.service",
+        "main_pid": 259838,
+        "cgroup_pids": [
+          259838,
+          259861,
+          259934
+        ],
+        "managed_by_project": true,
+        "health": {
+          "ready": true,
+          "topic": "/pose/d435/detections_3d",
+          "capture_age_ms": 80.016684,
+          "scope": "fresh ROS message; not model accuracy or GPU-placement verification",
+          "matched_publishers": 1,
+          "discovery_wait_ms": 0.03527500666677952,
+          "observation_wait_ms": 16.53258898295462,
+          "freshness_limit_ms": 2000
+        }
+      }
+    },
+    "backend_status": "READY",
+    "health_checked": true,
+    "assistant_acceptance": "NOT_VERIFIED",
+    "scope": "backend supervision/readiness only; interactive or device pipelines have separate acceptance"
+  },
+  "rollback_status": "PASS",
+  "finished_at": "2026-10-16T08:53:29.368885+00:00"
+}

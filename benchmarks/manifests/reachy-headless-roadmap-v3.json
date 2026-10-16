@@ -218,12 +218,13 @@
           "execution": "IN_PROGRESS",
           "evidence": [
             "benchmarks/results/reachy-r3-gesture-summary.json"
-          ]
+          ],
+          "user_test_availability": "User replied 稍后再测 on 2026-10-16; real negative/occlusion/multi-hand samples remain pending, independent work continues."
         },
         {
           "id": "R3.resources",
           "title": "有界队列、作用域内清理和可观测错误",
-          "status": "WEB_TRANSPORT_BOUNDS_VERIFIED_FULL_MODEL_DEVICE_STRESS_PENDING",
+          "status": "BOUNDS_AND_COMPLETE_APP_LIFECYCLE_VERIFIED_COEXISTENCE_STRESS_PENDING",
           "deliverable": "慢消费者/队列满/重复生命周期记录",
           "execution": "IN_PROGRESS",
           "evidence": [
@@ -231,7 +232,8 @@
             "benchmarks/results/reachy-r3-web-summary.json",
             "benchmarks/results/reachy-r3-recovery-summary.json",
             "benchmarks/results/reachy-r3-health-camera-summary.json",
-            "benchmarks/results/reachy-r3-voice-summary.json"
+            "benchmarks/results/reachy-r3-voice-summary.json",
+            "benchmarks/results/reachy-r4-deployment-summary.json"
           ]
         },
         {
@@ -247,15 +249,17 @@
         {
           "id": "R3.recovery",
           "title": "验证并修复设备/模型服务异常恢复",
-          "status": "NATIVE_MODEL_AND_CAMERA_DRIVER_RECOVERY_VERIFIED_PHYSICAL_AUDIO_MATRIX_PENDING",
+          "status": "NATIVE_MODEL_CAMERA_APP_AND_PCM_FAULT_RECOVERY_VERIFIED_PHYSICAL_AUDIO_DEFERRED",
           "deliverable": "故障台账、最小复现和下一轮验证",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
             "benchmarks/results/reachy-r3-actions-summary.json",
             "benchmarks/results/reachy-r3-recovery-summary.json",
             "benchmarks/results/reachy-r3-health-camera-summary.json",
-            "benchmarks/results/reachy-r3-voice-summary.json"
-          ]
+            "benchmarks/results/reachy-r3-voice-summary.json",
+            "benchmarks/results/reachy-r4-deployment-summary.json"
+          ],
+          "boundary": "Current software fault scope; R6 repeated fault matrix and 8h tests remain separate. Physical audio is deferred, never counted as PASS."
         }
       ]
     },
@@ -280,9 +284,12 @@
         {
           "id": "R4.function",
           "title": "完成当前软件/视觉范围功能及重复运行",
-          "status": "NOT_STARTED",
+          "status": "MANAGED_DEPLOYMENT_CYCLES_AND_ROLLBACK_VERIFIED_ACCEPTANCE_MATRIX_PENDING",
           "deliverable": "启用软件范围F01-F12证据、20次完整应用循环、已知局限和软件版本标签；声学项列DEFERRED",
-          "execution": "NOT_STARTED"
+          "execution": "IN_PROGRESS",
+          "evidence": [
+            "benchmarks/results/reachy-r4-deployment-summary.json"
+          ]
         },
         {
           "id": "R4.baseline",
@@ -381,8 +388,10 @@
   ],
   "functional_acceptance": {
     "F01": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "PREPARED_SOFTWARE_START_STOP_RESTART_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r4-deployment-summary.json"
+      ]
     },
     "F02": {
       "status": "NOT_VERIFIED",
@@ -443,7 +452,8 @@
       "evidence": [
         "benchmarks/results/reachy-r3-web-summary.json",
         "benchmarks/results/reachy-r3-recovery-summary.json",
-        "benchmarks/results/reachy-r3-health-camera-summary.json"
+        "benchmarks/results/reachy-r3-health-camera-summary.json",
+        "benchmarks/results/reachy-r4-deployment-summary.json"
       ]
     }
   },
@@ -539,7 +549,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
-  "updated_at": "2026-10-16T08:06:29.825763+00:00",
+  "updated_at": "2026-10-16T08:54:43.222068+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",

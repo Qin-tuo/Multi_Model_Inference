@@ -1,5 +1,7 @@
 # 本机 AI 开源框架与依赖总目录
 
+当前 Reachy 应用的主要依赖为 `environments/reachy-headless`、llama.cpp、OpenVoiceStream、OpenCV、TensorRT、Silero、SQLAlchemy 和 APScheduler。当前服务管理见 [Reachy 部署](systemd/README.md)。下表保留整台机器已经整理过的依赖目录；Pipecat、ROS 视觉、Mem0/Qdrant 等属于历史或后置方案，不随新四服务启动。旧工具操作须在 `/home/nvidia/AI_Stack/archives/legacy-runtime-972de50` 执行。
+
 统一入口：`/home/nvidia/AI_Stack/`。业务项目仍在 `/home/nvidia/Multi_Model_Inference/`。框架、模型和运行环境集中放在此处，项目仓库保留业务接入代码、版本锁与验证报告。
 
 | 目录 | 内容 |
@@ -7,6 +9,7 @@
 | `frameworks/` | llama.cpp、Pipecat、OpenVoiceStream、voice-engine、yolo_ros 的 Git 源码入口；Mem0、APScheduler、Qdrant client、Ultralytics、PyTorch 等已安装包的源码入口；ONNX Runtime 源码及 RealSense ROS 安装包入口 |
 | `builds/` | llama.cpp、ONNX Runtime 等编译目录；`llama/bin/llama-server` 是当前推理服务程序，`llama/bin/llama-bench` 是已编译的同版本原生性能工具 |
 | `models/` | Qwen 图文/语音模型、BGE、YOLO、Matcha/Vocos 及本机构建的 TensorRT 引擎 |
+| `environments/reachy-headless/` | 当前 Reachy 派生应用、OpenCV/感知、Silero、SQLAlchemy/APScheduler 和验证工具 |
 | `environments/assistant/` | Pipecat、Mem0、APScheduler、BGE、PyAudio 等主应用 Python 环境 |
 | `environments/speech/` | OpenVoiceStream/VoxEdge/Piper 等语音 Python 环境 |
 | `environments/vision/` | Ultralytics、PyTorch CPU、ONNX 等模型导出/验证环境 |
@@ -62,8 +65,8 @@
 通过 systemd 启动或复用当前 llama.cpp 服务：
 
 ```bash
-cd /home/nvidia/Multi_Model_Inference
-python3 tools/project.py up --components llama
+cd /home/nvidia/AI_Stack/projects/reachy-headless
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services up --components llama
 ```
 
-整理脚本是项目中的 `tools/organize_dependencies.py`，重复运行不会覆盖已有目录。迁移时应先短暂暂停使用这些目录的构建/服务进程，完成迁移和路径检查后恢复；不要直接删除兼容链接，否则现有构建缓存和虚拟环境脚本可能失效。模型、框架源码、编译产物和环境不会上传业务仓库；GitHub 保存可以重建它们的脚本、锁文件和本文档。
+历史整理脚本位于旧源码快照的 `tools/organize_dependencies.py`，重复运行不会覆盖已有目录。迁移时应先短暂暂停使用这些目录的构建/服务进程，完成迁移和路径检查后恢复；不要直接删除兼容链接，否则现有构建缓存和虚拟环境脚本可能失效。模型、框架源码、编译产物和环境不会上传业务仓库；GitHub 保存可以重建它们的脚本、锁文件和本文档。

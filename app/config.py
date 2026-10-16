@@ -192,7 +192,24 @@ class WebConfig:
     read_timeout: float = 2.0
 
 
+@dataclass
+class BackendsConfig:
+    stack_root: str = str(Path.home() / 'AI_Stack')
+    llm_threads: int = 4
+    llm_gpu_layers: int = 99
+    llm_parallel: int = 1
+    llm_cache_ram_mib: int = 256
+    asr_threads: int = 2
+    asr_gpu_layers: int = 99
+    asr_context_tokens: int = 2048
+    asr_cache_ram_mib: int = 64
+    asr_model_id: str = 'assistant-asr'
+    # Preserve the already running ASR hint; changes belong to later experiments.
+    asr_context: str = 'Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0'
+
+
 _SECTIONS = [
+    ('backends','backends',BackendsConfig),
     ("llm", "llm", LLMConfig),
     ("stt", "stt", STTConfig),
     ("tts", "tts", TTSConfig),
@@ -210,6 +227,7 @@ _SECTIONS = [
 
 @dataclass
 class Config:
+    backends: BackendsConfig = field(default_factory=BackendsConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     stt: STTConfig = field(default_factory=STTConfig)
     tts: TTSConfig = field(default_factory=TTSConfig)
@@ -256,6 +274,13 @@ class Config:
         return config
 
     def validate(self):
+        b=self.backends
+        if not (1<=b.llm_threads<=8 and 1<=b.asr_threads<=8 and b.llm_parallel==1
+                and 0<=b.llm_gpu_layers<=999 and 0<=b.asr_gpu_layers<=999
+                and 0<=b.llm_cache_ram_mib<=1024 and 0<=b.asr_cache_ram_mib<=1024
+                and 512<=b.asr_context_tokens<=8192 and b.asr_model_id
+                and len(b.asr_context)<=1024 and Path(b.stack_root).expanduser().is_absolute()):
+            raise ValueError('Invalid native backend capacity or paths')
         if not (self.vad.max_speech_secs+1<=self.audio.pending_voice_seconds<=60
                 and .032<=self.audio.input_stale_seconds<=2
                 and 32<=self.vad.confirm_speech_ms<=1000):
@@ -297,7 +322,8 @@ class Config:
         local_speech_url(self.stt.native_base_url.rstrip('/') + '/v1')
         for audio_config in (self.stt, self.tts):
             local_speech_url(audio_config.base_url)
-            if audio_config.timeout <= 0: raise ValueError("Speech timeout must be positive")
+            if audio_config.timeout <= 0:
+                raise ValueError("Speech timeout must be positive")
         if (self.audio.sample_rate, self.audio.channels) != (16000, 1):
             raise ValueError("Speech requires 16kHz mono")
         if self.audio.input_mode not in {"file", "device"} or self.audio.output_mode not in {"file", "device"}:

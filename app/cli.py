@@ -113,6 +113,13 @@ def ask(
             llm.unload()
 
 
+@app.command(context_settings={'allow_extra_args':True,'ignore_unknown_options':True})
+def services(ctx: typer.Context, action: str = typer.Argument(...,help='check, install, up, down, status or logs')):
+    """Manage native backends and the Web app through user systemd."""
+    from deploy.services import main as service_main
+    raise typer.Exit(service_main([action,*ctx.args]))
+
+
 @app.command()
 def config(config_path: Optional[str] = typer.Option(None, "--config", "-c")):
     """Print the effective typed configuration."""
