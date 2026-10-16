@@ -1,0 +1,75 @@
+{
+  "created_at": "2026-10-16T03:11:57.028258+00:00",
+  "status": "SOFTWARE_CANCELLATION_VERIFIED_PHYSICAL_AND_GESTURE_PENDING",
+  "scope": "Whole-turn text/file-audio cancellation in Reachy application using actual local models; physical audio, gestures, tools and performance B0 excluded",
+  "tests": {
+    "tests": 74,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "c930df2831b47b13dc24a1606573df8999ba6dd105006b896362192f0f68e285",
+  "source_sha256": {
+    "app/llm.py": "81f499e2dd3086abeb85731d898061da1407c3b0f7d79e548901be0c29b6d5b4",
+    "app/request_io.py": "922c76242144c73a5b7cfdbd0bb69a826e700788fa8603199d4e235608146815",
+    "app/pipeline.py": "c1a7d0e52e9993dfaf61102ce16c2efdb0177c4a7a19f8105fd90ebd9e8bef93",
+    "app/monitor.py": "71505e3fcd414224e2efcff0be4ff4d1683f09db7523f3506c5af6eb5fc1bddc",
+    "app/tts.py": "dd95d710fd942dd3f671d8d5601358f1fc0251e178c6f3e04f7b306e1b9089b9",
+    "app/face_detector.py": "377cae164b0bdd0b8f8303f1ba639b4eaac655233adf53cb4112fa5ec1ea931b",
+    "app/web.py": "7e54f725a16f5ba877cb211c0cdb73211a8d40b0f5bc33c718f79fd367b6c92b",
+    "app/cli.py": "d4300e8c916d10440d44912af0fef70e0d3d863ee28de09482c27ce8db55e5d6",
+    "app/face_tracker.py": "e8d71c2d18c2a6a363e13b6f45e5ce2b324bc06a6a7419517add13426d1c542c",
+    "app/body_detector.py": "24ca0b187f0c1af5c67d05f5d98b5e76c68c189a797121d3ea45ba913acebc80",
+    "app/audio.py": "72f298bf6bc378a0441076af60940479a04b8114cd5f00f92529a7dfd1eabd0e",
+    "app/perception.py": "1f69821a793e98b9d9af817ff29bf34cd16ce2ca10ea065d05a6896f9362bf5d",
+    "app/__init__.py": "b6b7b3007ae0171e1905556bec3d2e2cc33a462f9684c183d14d95ac668138e8",
+    "app/stt.py": "6dde27447c39075b194c72161b0b69def704364e5f5da50e26c076bac858d38a",
+    "app/turn_control.py": "f8c164a7ce1d0adf7e36e3c08d79755ac8bc4f08188f5215464c15cc292e605c",
+    "app/vision_capture.py": "57f260076a7982e6639014a221f3e49d8727e33b5df4eef907ce414acfa8f0ef",
+    "app/config.py": "80898bb0e65cb6014a5128c5f133bb1fcbde73a1933af74fda6136f973665ff9",
+    "app/camera.py": "ebae3b8b495e0c0d9be90caafae7397de725e3561564b87b9845fff8788cd541",
+    "run_web_vision_chat.py": "dbb76ae1c1f2793d6acc4cb763b42770e0674b79ea45dc2ce4d284e7099b9382",
+    "static/index.html": "2b52cb6e0bb99026261ef8217b128ed94db0361900b397f3d66e9b66eeae3e73",
+    "scripts/probe_turn_cancel.py": "e0821fe70a88b780d5fcfd0377c9817b4ae5a625fb243e2e07336ace71d37d25",
+    "scripts/probe_browser_cancel.py": "b61d891a70837db9f6e40b086b8b920b37ba37a7d31f140728219b763d55b5b8",
+    "scripts/probe_cancellation.py": "e8ee6c1aaff23fdeea414889b05ff45fdfd9666af3c5aefd914444e61c780791"
+  },
+  "evidence": [
+    "benchmarks/results/reachy-r3-native-cancellation.json",
+    "benchmarks/results/reachy-r3-web-cancellation.json",
+    "benchmarks/results/reachy-r3-browser-cancellation.json",
+    "benchmarks/results/reachy-r3-web-lifecycle.json"
+  ],
+  "verified": [
+    "HTTP cancellation before response headers and during body read",
+    "Single-turn event identity and stale cancellation rejection",
+    "ASR/LLM/TTS cancellation, native drain observations and successful next request",
+    "Late token/transcript filtering after cancellation",
+    "Cancelled WAV unavailable; earlier retained completed WAV survives",
+    "Full TTS queue abort discards pending text",
+    "Only owned playback process terminated, including SIGTERM-ignoring stand-in",
+    "Unconfirmed backend release rejects work and recovers",
+    "Real Firefox stop button, delayed HTTP response cannot rewind state",
+    "Application graceful shutdown after actual model calls"
+  ],
+  "release_contract": {
+    "meaning": "Request execution occupancy ends; model weights remain resident; not total GPU idle or memory zero",
+    "llm": "Local operation closed and /slots all is_processing=false",
+    "asr": "OVS active=0 and native llama ASR /slots idle",
+    "tts": "OVS admission active=0; pinned _run_tts_stream_cleanup retains release callback until executor finished signal",
+    "source_sha256": {
+      "/home/nvidia/AI_Stack/frameworks/openvoicestream/server/main.py": "eac57ce94eaf88756fc5db477f8bf62248e83c4e434a7b3a9eec2b5d689ec59c",
+      "/home/nvidia/AI_Stack/frameworks/openvoicestream/server/core/api_capabilities.py": "16245cbd4948e7c73015b96019e5a844d772280f72e2c08fbc0077425a547c94",
+      "/home/nvidia/AI_Stack/environments/speech/lib/python3.12/site-packages/voxedge/backends/jetson/matcha_trt.py": "57ebbab493825d1d0f346976ce8d182efecf211506937e3267e8b8b2287bc567"
+    }
+  },
+  "known_limits": [
+    "Already submitted ASR decode and Matcha synthesis may drain to safe completion; no CUDA kernel preemption claimed",
+    "No actual speaker buffer stop/AEC/duplex validation",
+    "Wave/static-palm trigger and tools not integrated yet",
+    "Full fault/restart matrix and duration stress pending",
+    "Diagnostic samples are not percentile latency guarantees or B0",
+    "Backend endpoints are shared with legacy services; probes require no competing requests"
+  ],
+  "browser_probe_note": "Initial ad-hoc check selected the previously completed answer; committed probe waits for a newly added assistant element and checks the last one."
+}
