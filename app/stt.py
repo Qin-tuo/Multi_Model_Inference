@@ -64,7 +64,7 @@ class STT:
                 elif np.issubdtype(array.dtype, np.floating) and np.all(np.isfinite(array)) and np.max(np.abs(array)) <= 1:
                     pcm = np.rint(array * 32767).astype('<i2').tobytes()
                 else: raise ValueError("ASR expects normalized floats or int16 PCM")
-            with self.requests.operation(cancel_event) as operation:
+            with self.requests.operation(cancel_event,timeout=self.timeout) as operation:
                 response = self._client.post(self.base_url + "/audio/transcriptions",
                     files={"file": ("utterance.wav", pcm_wav(pcm), "audio/wav")},
                     data={"model": self.model_name, "language": self.language, "response_format": "json"}, extensions=operation.extensions)
@@ -73,6 +73,7 @@ class STT:
                 text = response.json()["text"]
                 if not isinstance(text, str) or not text.strip() or len(text) > 4000:
                     raise ValueError("ASR returned an empty or oversized transcript")
+                self.last_error = None
                 return {"text": text.strip(), "language": self.language, "duration": len(pcm) / 32000,
                         "elapsed_seconds": time.monotonic() - start, "backend": self.backend}
         except (httpx.HTTPError, ValueError, OSError, KeyError, wave.Error, EOFError) as exc:

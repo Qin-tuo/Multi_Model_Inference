@@ -184,6 +184,19 @@
         "benchmarks/results/reachy-r3-web-summary.json",
         "benchmarks/results/reachy-r3-web-bounds-before.json"
       ]
+    },
+    {
+      "id": "RG-16",
+      "classification": "CONFIRMED_REAL_SOCKET_TIMEOUT_GAP",
+      "phase": "R3",
+      "finding": "Per-read HTTP timeouts are refreshed by each small chunk, so configured model timeout did not bound total request duration; real local response completed after 0.413s with 0.08s per-read timeout.",
+      "planned_resolution": "Own one absolute-deadline timer per inference operation, interrupt only its socket, join timer before releasing local admission, retain separate native release checks.",
+      "status": "INFERENCE_DEADLINES_VERIFIED_STARTUP_HEALTH_LIVENESS_AUDIT_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r3-recovery-summary.json",
+        "benchmarks/results/reachy-r3-recovery-deadline-before.json",
+        "benchmarks/results/reachy-r3-recovery-deadline-after.json"
+      ]
     }
   ],
   "hardware_gap": {
@@ -191,5 +204,5 @@
     "speaker": "not connected per user",
     "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
   },
-  "updated_at": "2026-10-16T06:25:36.294098+00:00"
+  "updated_at": "2026-10-16T06:44:09.671153+00:00"
 }

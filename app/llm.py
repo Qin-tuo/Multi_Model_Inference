@@ -175,7 +175,7 @@ class LLM:
             payload.update(tools=tools,tool_choice='auto' if tools else 'none',parallel_tool_calls=False)
         if type(max_tokens) is not int or max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
-        with self.requests.operation(cancel_event) as operation, httpx.Client(timeout=self.timeout, trust_env=False) as client:
+        with self.requests.operation(cancel_event,timeout=self.timeout) as operation, httpx.Client(timeout=self.timeout, trust_env=False) as client:
             dropped = 0
             while True:
                 operation.check()

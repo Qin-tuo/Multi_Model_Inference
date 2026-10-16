@@ -1,0 +1,2203 @@
+{
+  "created_at": "2026-10-16T06:33:20.563808+00:00",
+  "scope": "Inject owned systemd backend crashes during real model work and verify recovery.\n\nRequires an isolated running no-camera/file-audio application with its own DB.\nOnly the three named mmassistant backend units may be interrupted. Explicit CLI\nopt-in is required because this affects their shared local model endpoints.\n",
+  "fault": "SIGKILL of verified native listener via pidfd; systemd Restart=on-failure",
+  "input_sha256": "3eb9d0384c31fde3258dea87c06e643cb0e1e3e81ed14effdb133c2e8766a000",
+  "status": "PASSED_WITH_DECLARED_SCOPE",
+  "cases": [
+    {
+      "scenario": "llm_inference",
+      "unit": "mmassistant-llama.service",
+      "before": {
+        "MainPID": "29414",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "status": "PASSED",
+      "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+      "busy_observed": true,
+      "fault_monotonic": 275939.873045153,
+      "injection": {
+        "pid": 29438,
+        "unit_main_pid": 29414,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "port": 8088,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "after_kill": {
+        "MainPID": "29414",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "during_recovery": {
+        "ready": true,
+        "active_turn": "b6958586bdb1499ba4f5c6fd35b9ed76",
+        "phase": "releasing",
+        "release": null,
+        "last_gesture": null,
+        "session": {
+          "id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+          "enabled": true,
+          "retained_turns": 0,
+          "max_turns": 4,
+          "persistence": "process_memory",
+          "images_retained": false
+        },
+        "action_error": null,
+        "last_result": {
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "text": "",
+          "metadata": {},
+          "mode": "text",
+          "request_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "prompt": "请详细解释十种常见的数据结构，每项说明用途和优缺点。",
+          "model_rounds": [],
+          "status": "failed",
+          "error": "peer closed connection without sending complete message body (incomplete chunked read)",
+          "actions_committed": [],
+          "elapsed_seconds": 0.21618804801255465,
+          "first_content_seconds": null
+        },
+        "pending": 0,
+        "event_cursor": 50,
+        "audio_enabled": false,
+        "actions": {
+          "enabled": true,
+          "scheduler_running": true,
+          "error": null,
+          "notes": 0,
+          "reminders": []
+        },
+        "web": {
+          "clients": 1,
+          "client_limit": 4,
+          "bridge_events": 0,
+          "bridge_bytes": 0,
+          "drain_scheduled": false,
+          "bridge_peak_events": 5,
+          "bridge_peak_bytes": 571,
+          "coalesced": 0,
+          "dropped": 0,
+          "overflows": 0,
+          "rejected_messages": 0
+        },
+        "speech_ready": true,
+        "audio_input_mode": "file",
+        "audio_output_mode": "file",
+        "microphone_error": null,
+        "aec_active": false,
+        "camera_enabled": false,
+        "camera_ready": false,
+        "camera_error": null,
+        "face": {
+          "enabled": false,
+          "face_detected": false
+        },
+        "perception": {
+          "ready": false,
+          "error": "Perception disabled",
+          "persons": [],
+          "hands": []
+        },
+        "gestures": {
+          "ready": false,
+          "reason": "disabled",
+          "tracks": []
+        },
+        "models": {
+          "vlm": "assistant-vlm",
+          "stt": "qwen3-asr",
+          "tts": "matcha-icefall-zh-en",
+          "vad": "Silero v6"
+        },
+        "effective_config": {
+          "llm": {
+            "model": "assistant-vlm",
+            "base_url": "http://127.0.0.1:8088",
+            "backend": "openai",
+            "max_tokens": 128,
+            "temperature": 0.0,
+            "timeout": 120.0,
+            "context_tokens": 2048,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+            "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+          },
+          "stt": {
+            "model": "qwen3-asr",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "llama_qwen3_asr",
+            "native_base_url": "http://127.0.0.1:8089",
+            "language": "zh",
+            "timeout": 60.0,
+            "max_seconds": 15.0
+          },
+          "tts": {
+            "model": "matcha-icefall-zh-en",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "matcha_trt",
+            "voice": "0",
+            "speed": 1.0,
+            "lang": "zh",
+            "timeout": 60.0,
+            "max_audio_seconds": 30.0,
+            "first_chunk_chars": 8,
+            "max_chunk_chars": 40
+          },
+          "audio": {
+            "enabled": true,
+            "input_mode": "file",
+            "output_mode": "file",
+            "sample_rate": 16000,
+            "channels": 1,
+            "input_device": "ReSpeaker Lite",
+            "output_device": null,
+            "echo_cancellation": true,
+            "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio",
+            "max_output_seconds": 120.0,
+            "retained_files": 10
+          },
+          "vad": {
+            "speech_threshold": 0.025,
+            "silence_duration_ms": 600,
+            "lookback_ms": 250,
+            "max_speech_secs": 15,
+            "chunk_ms": 32,
+            "min_utterance_secs": 0.12,
+            "min_utterance_rms": 0.001,
+            "silero_threshold": 0.75
+          },
+          "vision": {
+            "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+            "width": 640,
+            "height": 480,
+            "jpeg_quality": 80,
+            "frames": 1,
+            "capture_fps": 10.0,
+            "stale_after": 1.0,
+            "buffer_bytes_limit": 16777216,
+            "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+            "few_shot": []
+          },
+          "face": {
+            "enabled": true,
+            "fps": 5.0,
+            "dead_zone": 0.12,
+            "good_frame_zone": 0.18,
+            "min_face_size": 0.06,
+            "stable_frames": 2
+          },
+          "web": {
+            "ui_fps": 10.0,
+            "host": "127.0.0.1",
+            "port": 8093,
+            "max_clients": 4,
+            "queue_events": 16,
+            "queue_bytes": 4194304,
+            "bridge_events": 64,
+            "bridge_bytes": 4194304,
+            "message_bytes": 2097152,
+            "json_body_bytes": 32768,
+            "ws_message_bytes": 4096,
+            "body_readers": 4,
+            "body_timeout": 10.0,
+            "send_timeout": 2.0,
+            "read_workers": 2,
+            "read_timeout": 2.0
+          },
+          "perception": {
+            "enabled": true,
+            "body_enabled": true,
+            "hands_enabled": true,
+            "fps": 5.0,
+            "body_threshold": 0.5,
+            "body_iou": 0.45,
+            "max_people": 10,
+            "palm_threshold": 0.5,
+            "hand_threshold": 0.8,
+            "max_hands": 2
+          },
+          "gestures": {
+            "enabled": true,
+            "greetings_enabled": true,
+            "stop_hold_seconds": 1.0,
+            "min_observations": 5,
+            "max_gap_seconds": 0.6,
+            "event_ttl_seconds": 0.75,
+            "stationary_palm_widths": 0.2,
+            "wave_swing_palm_widths": 0.6,
+            "wave_window_seconds": 2.0,
+            "wave_reversals": 2,
+            "rearm_seconds": 0.4,
+            "greeting_cooldown_seconds": 5.0,
+            "min_palm_pixels": 20.0,
+            "association_palm_widths": 2.0,
+            "max_tracks": 4
+          },
+          "session": {
+            "enabled": true,
+            "max_turns": 4
+          },
+          "actions": {
+            "enabled": true,
+            "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/actions.sqlite",
+            "max_calls_per_turn": 2,
+            "max_pending_reminders": 100,
+            "max_records": 1000,
+            "max_requests": 10000,
+            "notification_ttl_seconds": 3600,
+            "timezone": "Asia/Shanghai"
+          }
+        },
+        "web_reads": {
+          "in_flight": 0,
+          "limit": 2,
+          "rejected": 0,
+          "completed": 11
+        }
+      },
+      "admission_while_unreleased": 409,
+      "failed_result": {
+        "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+        "prompt": "请详细解释十种常见的数据结构，每项说明用途和优缺点。",
+        "model_rounds": [],
+        "status": "failed",
+        "error": "peer closed connection without sending complete message body (incomplete chunked read)",
+        "actions_committed": [],
+        "elapsed_seconds": 0.21618804801255465,
+        "first_content_seconds": null,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 17.265871884999797,
+          "confirmed": true
+        }
+      },
+      "after": {
+        "MainPID": "32390",
+        "Result": "success",
+        "NRestarts": "2",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "fault_to_released_seconds": 17.449440899014007,
+      "next_turn": {
+        "turn_id": "23f6675eab174634b9cf15e900ea0a60",
+        "text": "故障恢复成功。",
+        "metadata": {
+          "input_tokens_preflight": 966,
+          "history_pairs_kept": 0,
+          "history_pairs_dropped": 0,
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 5,
+            "prompt_tokens": 966,
+            "total_tokens": 971,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "eval_count": 5,
+          "done": true
+        },
+        "mode": "text",
+        "request_id": "23f6675eab174634b9cf15e900ea0a60",
+        "prompt": "请只回复：故障恢复成功。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 966,
+            "history_pairs_kept": 0,
+            "history_pairs_dropped": 0,
+            "finish_reason": "stop",
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 966,
+              "total_tokens": 971,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "eval_count": 5,
+            "done": true
+          }
+        ],
+        "tool_messages": [],
+        "speech": {
+          "receipt": {
+            "kind": "file_written",
+            "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio/reply-23f6675eab174634b9cf15e900ea0a60.wav",
+            "bytes": 62976
+          },
+          "chunks": [
+            {
+              "text": "故障恢复成功。",
+              "bytes": 62976,
+              "elapsed_seconds": 0.08535019098781049,
+              "first_pcm_seconds": 0.07445023400941864,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 62976
+              }
+            }
+          ],
+          "duration": 1.968
+        },
+        "audio_url": "/api/audio/23f6675eab174634b9cf15e900ea0a60",
+        "status": "complete",
+        "session_id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+        "actions_committed": [],
+        "elapsed_seconds": 3.459667761984747,
+        "first_content_seconds": 3.3626120410044678,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 0.1416802010498941,
+          "confirmed": true
+        }
+      },
+      "events": [
+        {
+          "type": "status",
+          "stage": "running",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76"
+        },
+        {
+          "type": "transcript",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "text": "请详细解释十种常见的数据结构，每项说明用途和优缺点。"
+        },
+        {
+          "type": "status",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "stage": "thinking"
+        },
+        {
+          "type": "status",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "stage": "thinking"
+        },
+        {
+          "type": "error",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "error": "peer closed connection without sending complete message body (incomplete chunked read)"
+        },
+        {
+          "type": "status",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "stage": "releasing"
+        },
+        {
+          "type": "done",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "text": "",
+          "status": "failed",
+          "tokens": null,
+          "ttft": null,
+          "total_time": 0.21618804801255465,
+          "actions_committed": [],
+          "audio_url": null,
+          "output_kind": null
+        },
+        {
+          "type": "status",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "stage": "release_unconfirmed"
+        },
+        {
+          "type": "status",
+          "turn_id": "b6958586bdb1499ba4f5c6fd35b9ed76",
+          "stage": "idle"
+        }
+      ]
+    },
+    {
+      "scenario": "asr_inference",
+      "unit": "mmassistant-asr.service",
+      "before": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "status": "PASSED",
+      "turn_id": "970aae7981124beeb4d92083b1e498b0",
+      "busy_observed": true,
+      "fault_monotonic": 275961.194718225,
+      "injection": {
+        "pid": 719251,
+        "unit_main_pid": 719243,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-asr.service",
+        "port": 8089,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "after_kill": {
+        "MainPID": "719243",
+        "Result": "success",
+        "NRestarts": "0",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "during_recovery": {
+        "ready": true,
+        "active_turn": "970aae7981124beeb4d92083b1e498b0",
+        "phase": "releasing",
+        "release": null,
+        "last_gesture": null,
+        "session": {
+          "id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+          "enabled": true,
+          "retained_turns": 1,
+          "max_turns": 4,
+          "persistence": "process_memory",
+          "images_retained": false
+        },
+        "action_error": null,
+        "last_result": {
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "text": "",
+          "metadata": {},
+          "mode": "text",
+          "request_id": "970aae7981124beeb4d92083b1e498b0",
+          "asr": [],
+          "status": "failed",
+          "error": "Server error '503 Service Unavailable' for url 'http://127.0.0.1:8621/v1/audio/transcriptions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503",
+          "actions_committed": [],
+          "elapsed_seconds": 0.2300972809898667,
+          "first_content_seconds": null
+        },
+        "pending": 0,
+        "event_cursor": 117,
+        "audio_enabled": false,
+        "actions": {
+          "enabled": true,
+          "scheduler_running": true,
+          "error": null,
+          "notes": 0,
+          "reminders": []
+        },
+        "web": {
+          "clients": 1,
+          "client_limit": 4,
+          "bridge_events": 0,
+          "bridge_bytes": 0,
+          "drain_scheduled": false,
+          "bridge_peak_events": 5,
+          "bridge_peak_bytes": 571,
+          "coalesced": 0,
+          "dropped": 0,
+          "overflows": 0,
+          "rejected_messages": 0
+        },
+        "speech_ready": true,
+        "audio_input_mode": "file",
+        "audio_output_mode": "file",
+        "microphone_error": null,
+        "aec_active": false,
+        "camera_enabled": false,
+        "camera_ready": false,
+        "camera_error": null,
+        "face": {
+          "enabled": false,
+          "face_detected": false
+        },
+        "perception": {
+          "ready": false,
+          "error": "Perception disabled",
+          "persons": [],
+          "hands": []
+        },
+        "gestures": {
+          "ready": false,
+          "reason": "disabled",
+          "tracks": []
+        },
+        "models": {
+          "vlm": "assistant-vlm",
+          "stt": "qwen3-asr",
+          "tts": "matcha-icefall-zh-en",
+          "vad": "Silero v6"
+        },
+        "effective_config": {
+          "llm": {
+            "model": "assistant-vlm",
+            "base_url": "http://127.0.0.1:8088",
+            "backend": "openai",
+            "max_tokens": 128,
+            "temperature": 0.0,
+            "timeout": 120.0,
+            "context_tokens": 2048,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+            "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+          },
+          "stt": {
+            "model": "qwen3-asr",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "llama_qwen3_asr",
+            "native_base_url": "http://127.0.0.1:8089",
+            "language": "zh",
+            "timeout": 60.0,
+            "max_seconds": 15.0
+          },
+          "tts": {
+            "model": "matcha-icefall-zh-en",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "matcha_trt",
+            "voice": "0",
+            "speed": 1.0,
+            "lang": "zh",
+            "timeout": 60.0,
+            "max_audio_seconds": 30.0,
+            "first_chunk_chars": 8,
+            "max_chunk_chars": 40
+          },
+          "audio": {
+            "enabled": true,
+            "input_mode": "file",
+            "output_mode": "file",
+            "sample_rate": 16000,
+            "channels": 1,
+            "input_device": "ReSpeaker Lite",
+            "output_device": null,
+            "echo_cancellation": true,
+            "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio",
+            "max_output_seconds": 120.0,
+            "retained_files": 10
+          },
+          "vad": {
+            "speech_threshold": 0.025,
+            "silence_duration_ms": 600,
+            "lookback_ms": 250,
+            "max_speech_secs": 15,
+            "chunk_ms": 32,
+            "min_utterance_secs": 0.12,
+            "min_utterance_rms": 0.001,
+            "silero_threshold": 0.75
+          },
+          "vision": {
+            "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+            "width": 640,
+            "height": 480,
+            "jpeg_quality": 80,
+            "frames": 1,
+            "capture_fps": 10.0,
+            "stale_after": 1.0,
+            "buffer_bytes_limit": 16777216,
+            "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+            "few_shot": []
+          },
+          "face": {
+            "enabled": true,
+            "fps": 5.0,
+            "dead_zone": 0.12,
+            "good_frame_zone": 0.18,
+            "min_face_size": 0.06,
+            "stable_frames": 2
+          },
+          "web": {
+            "ui_fps": 10.0,
+            "host": "127.0.0.1",
+            "port": 8093,
+            "max_clients": 4,
+            "queue_events": 16,
+            "queue_bytes": 4194304,
+            "bridge_events": 64,
+            "bridge_bytes": 4194304,
+            "message_bytes": 2097152,
+            "json_body_bytes": 32768,
+            "ws_message_bytes": 4096,
+            "body_readers": 4,
+            "body_timeout": 10.0,
+            "send_timeout": 2.0,
+            "read_workers": 2,
+            "read_timeout": 2.0
+          },
+          "perception": {
+            "enabled": true,
+            "body_enabled": true,
+            "hands_enabled": true,
+            "fps": 5.0,
+            "body_threshold": 0.5,
+            "body_iou": 0.45,
+            "max_people": 10,
+            "palm_threshold": 0.5,
+            "hand_threshold": 0.8,
+            "max_hands": 2
+          },
+          "gestures": {
+            "enabled": true,
+            "greetings_enabled": true,
+            "stop_hold_seconds": 1.0,
+            "min_observations": 5,
+            "max_gap_seconds": 0.6,
+            "event_ttl_seconds": 0.75,
+            "stationary_palm_widths": 0.2,
+            "wave_swing_palm_widths": 0.6,
+            "wave_window_seconds": 2.0,
+            "wave_reversals": 2,
+            "rearm_seconds": 0.4,
+            "greeting_cooldown_seconds": 5.0,
+            "min_palm_pixels": 20.0,
+            "association_palm_widths": 2.0,
+            "max_tracks": 4
+          },
+          "session": {
+            "enabled": true,
+            "max_turns": 4
+          },
+          "actions": {
+            "enabled": true,
+            "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/actions.sqlite",
+            "max_calls_per_turn": 2,
+            "max_pending_reminders": 100,
+            "max_records": 1000,
+            "max_requests": 10000,
+            "notification_ttl_seconds": 3600,
+            "timezone": "Asia/Shanghai"
+          }
+        },
+        "web_reads": {
+          "in_flight": 0,
+          "limit": 2,
+          "rejected": 0,
+          "completed": 138
+        }
+      },
+      "admission_while_unreleased": 409,
+      "failed_result": {
+        "turn_id": "970aae7981124beeb4d92083b1e498b0",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "970aae7981124beeb4d92083b1e498b0",
+        "asr": [],
+        "status": "failed",
+        "error": "Server error '503 Service Unavailable' for url 'http://127.0.0.1:8621/v1/audio/transcriptions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503",
+        "actions_committed": [],
+        "elapsed_seconds": 0.2300972809898667,
+        "first_content_seconds": null,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "asr": {
+              "idle": true
+            }
+          },
+          "seconds": 10.497790787019767,
+          "confirmed": true
+        }
+      },
+      "after": {
+        "MainPID": "32851",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "fault_to_released_seconds": 10.678345782042015,
+      "next_turn": {
+        "turn_id": "d8fc16ed037c438a9b4eea7adaa51581",
+        "text": "故障恢复成功。",
+        "metadata": {
+          "input_tokens_preflight": 988,
+          "history_pairs_kept": 1,
+          "history_pairs_dropped": 0,
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 5,
+            "prompt_tokens": 988,
+            "total_tokens": 993,
+            "prompt_tokens_details": {
+              "cached_tokens": 450
+            }
+          },
+          "eval_count": 5,
+          "done": true
+        },
+        "mode": "text",
+        "request_id": "d8fc16ed037c438a9b4eea7adaa51581",
+        "prompt": "请只回复：故障恢复成功。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 988,
+            "history_pairs_kept": 1,
+            "history_pairs_dropped": 0,
+            "finish_reason": "stop",
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 988,
+              "total_tokens": 993,
+              "prompt_tokens_details": {
+                "cached_tokens": 450
+              }
+            },
+            "eval_count": 5,
+            "done": true
+          }
+        ],
+        "tool_messages": [],
+        "speech": {
+          "receipt": {
+            "kind": "file_written",
+            "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio/reply-d8fc16ed037c438a9b4eea7adaa51581.wav",
+            "bytes": 62976
+          },
+          "chunks": [
+            {
+              "text": "故障恢复成功。",
+              "bytes": 62976,
+              "elapsed_seconds": 0.05473002098733559,
+              "first_pcm_seconds": 0.050786672974936664,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 62976
+              }
+            }
+          ],
+          "duration": 1.968
+        },
+        "audio_url": "/api/audio/d8fc16ed037c438a9b4eea7adaa51581",
+        "status": "complete",
+        "session_id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+        "actions_committed": [],
+        "elapsed_seconds": 2.340181000996381,
+        "first_content_seconds": 2.2779524290235713,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 0.11127676395699382,
+          "confirmed": true
+        }
+      },
+      "events": [
+        {
+          "type": "status",
+          "stage": "running",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0"
+        },
+        {
+          "type": "status",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "stage": "transcribing"
+        },
+        {
+          "type": "error",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "error": "Server error '503 Service Unavailable' for url 'http://127.0.0.1:8621/v1/audio/transcriptions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503"
+        },
+        {
+          "type": "status",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "stage": "releasing"
+        },
+        {
+          "type": "done",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "text": "",
+          "status": "failed",
+          "tokens": null,
+          "ttft": null,
+          "total_time": 0.2300972809898667,
+          "actions_committed": [],
+          "audio_url": null,
+          "output_kind": null
+        },
+        {
+          "type": "status",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "stage": "release_unconfirmed"
+        },
+        {
+          "type": "status",
+          "turn_id": "970aae7981124beeb4d92083b1e498b0",
+          "stage": "idle"
+        }
+      ]
+    },
+    {
+      "scenario": "tts_synthesis",
+      "unit": "mmassistant-speech.service",
+      "before": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "status": "PASSED",
+      "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+      "busy_observed": true,
+      "fault_monotonic": 275987.596822114,
+      "injection": {
+        "pid": 719334,
+        "unit_main_pid": 719332,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-speech.service",
+        "port": 8621,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "after_kill": {
+        "MainPID": "719332",
+        "Result": "success",
+        "NRestarts": "0",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "during_recovery": {
+        "ready": true,
+        "active_turn": "1caf03ff60f84af7ba71e6d9381f6aa8",
+        "phase": "releasing",
+        "release": null,
+        "last_gesture": null,
+        "session": {
+          "id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+          "enabled": true,
+          "retained_turns": 2,
+          "max_turns": 4,
+          "persistence": "process_memory",
+          "images_retained": false
+        },
+        "action_error": null,
+        "last_result": {
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "text": "以下是十种常见的数据结构及其用途、优缺点的详细解释：\n\n1.  **数组 (Array)**\n    *   **用途**：用于存储一组连续的元素，常用于需要频繁随机访问数据的场景，如图像像素处理、缓存数据等。\n    *   **优点**：\n        *   **随机访问快**：通过索引直接访问元素的时间复杂度为 O(1)。\n        *   **实现简单**：语法简洁，易于理解。\n    *   **缺点**：\n        *   **插入/删除慢**：在中间位置插入或删除元素需要移动后续所有元素，",
+          "metadata": {
+            "input_tokens_preflight": 1016,
+            "history_pairs_kept": 2,
+            "history_pairs_dropped": 0,
+            "finish_reason": "length",
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 1016,
+              "total_tokens": 1144,
+              "prompt_tokens_details": {
+                "cached_tokens": 472
+              }
+            },
+            "eval_count": 128,
+            "done": true
+          },
+          "mode": "text",
+          "request_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "prompt": "请详细解释十种常见的数据结构，每项说明用途和优缺点。",
+          "model_rounds": [
+            {
+              "input_tokens_preflight": 1016,
+              "history_pairs_kept": 2,
+              "history_pairs_dropped": 0,
+              "finish_reason": "length",
+              "usage": {
+                "completion_tokens": 128,
+                "prompt_tokens": 1016,
+                "total_tokens": 1144,
+                "prompt_tokens_details": {
+                  "cached_tokens": 472
+                }
+              },
+              "eval_count": 128,
+              "done": true
+            }
+          ],
+          "tool_messages": [],
+          "status": "failed",
+          "error": "Server disconnected without sending a response.",
+          "actions_committed": [],
+          "elapsed_seconds": 13.437373142980505,
+          "first_content_seconds": 13.139061043970287
+        },
+        "pending": 0,
+        "event_cursor": 202,
+        "audio_enabled": false,
+        "actions": {
+          "enabled": true,
+          "scheduler_running": true,
+          "error": null,
+          "notes": 0,
+          "reminders": []
+        },
+        "web": {
+          "clients": 1,
+          "client_limit": 4,
+          "bridge_events": 0,
+          "bridge_bytes": 0,
+          "drain_scheduled": false,
+          "bridge_peak_events": 5,
+          "bridge_peak_bytes": 866,
+          "coalesced": 0,
+          "dropped": 0,
+          "overflows": 0,
+          "rejected_messages": 0
+        },
+        "speech_ready": true,
+        "audio_input_mode": "file",
+        "audio_output_mode": "file",
+        "microphone_error": null,
+        "aec_active": false,
+        "camera_enabled": false,
+        "camera_ready": false,
+        "camera_error": null,
+        "face": {
+          "enabled": false,
+          "face_detected": false
+        },
+        "perception": {
+          "ready": false,
+          "error": "Perception disabled",
+          "persons": [],
+          "hands": []
+        },
+        "gestures": {
+          "ready": false,
+          "reason": "disabled",
+          "tracks": []
+        },
+        "models": {
+          "vlm": "assistant-vlm",
+          "stt": "qwen3-asr",
+          "tts": "matcha-icefall-zh-en",
+          "vad": "Silero v6"
+        },
+        "effective_config": {
+          "llm": {
+            "model": "assistant-vlm",
+            "base_url": "http://127.0.0.1:8088",
+            "backend": "openai",
+            "max_tokens": 128,
+            "temperature": 0.0,
+            "timeout": 120.0,
+            "context_tokens": 2048,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+            "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+          },
+          "stt": {
+            "model": "qwen3-asr",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "llama_qwen3_asr",
+            "native_base_url": "http://127.0.0.1:8089",
+            "language": "zh",
+            "timeout": 60.0,
+            "max_seconds": 15.0
+          },
+          "tts": {
+            "model": "matcha-icefall-zh-en",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "matcha_trt",
+            "voice": "0",
+            "speed": 1.0,
+            "lang": "zh",
+            "timeout": 60.0,
+            "max_audio_seconds": 30.0,
+            "first_chunk_chars": 8,
+            "max_chunk_chars": 40
+          },
+          "audio": {
+            "enabled": true,
+            "input_mode": "file",
+            "output_mode": "file",
+            "sample_rate": 16000,
+            "channels": 1,
+            "input_device": "ReSpeaker Lite",
+            "output_device": null,
+            "echo_cancellation": true,
+            "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio",
+            "max_output_seconds": 120.0,
+            "retained_files": 10
+          },
+          "vad": {
+            "speech_threshold": 0.025,
+            "silence_duration_ms": 600,
+            "lookback_ms": 250,
+            "max_speech_secs": 15,
+            "chunk_ms": 32,
+            "min_utterance_secs": 0.12,
+            "min_utterance_rms": 0.001,
+            "silero_threshold": 0.75
+          },
+          "vision": {
+            "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+            "width": 640,
+            "height": 480,
+            "jpeg_quality": 80,
+            "frames": 1,
+            "capture_fps": 10.0,
+            "stale_after": 1.0,
+            "buffer_bytes_limit": 16777216,
+            "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+            "few_shot": []
+          },
+          "face": {
+            "enabled": true,
+            "fps": 5.0,
+            "dead_zone": 0.12,
+            "good_frame_zone": 0.18,
+            "min_face_size": 0.06,
+            "stable_frames": 2
+          },
+          "web": {
+            "ui_fps": 10.0,
+            "host": "127.0.0.1",
+            "port": 8093,
+            "max_clients": 4,
+            "queue_events": 16,
+            "queue_bytes": 4194304,
+            "bridge_events": 64,
+            "bridge_bytes": 4194304,
+            "message_bytes": 2097152,
+            "json_body_bytes": 32768,
+            "ws_message_bytes": 4096,
+            "body_readers": 4,
+            "body_timeout": 10.0,
+            "send_timeout": 2.0,
+            "read_workers": 2,
+            "read_timeout": 2.0
+          },
+          "perception": {
+            "enabled": true,
+            "body_enabled": true,
+            "hands_enabled": true,
+            "fps": 5.0,
+            "body_threshold": 0.5,
+            "body_iou": 0.45,
+            "max_people": 10,
+            "palm_threshold": 0.5,
+            "hand_threshold": 0.8,
+            "max_hands": 2
+          },
+          "gestures": {
+            "enabled": true,
+            "greetings_enabled": true,
+            "stop_hold_seconds": 1.0,
+            "min_observations": 5,
+            "max_gap_seconds": 0.6,
+            "event_ttl_seconds": 0.75,
+            "stationary_palm_widths": 0.2,
+            "wave_swing_palm_widths": 0.6,
+            "wave_window_seconds": 2.0,
+            "wave_reversals": 2,
+            "rearm_seconds": 0.4,
+            "greeting_cooldown_seconds": 5.0,
+            "min_palm_pixels": 20.0,
+            "association_palm_widths": 2.0,
+            "max_tracks": 4
+          },
+          "session": {
+            "enabled": true,
+            "max_turns": 4
+          },
+          "actions": {
+            "enabled": true,
+            "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/actions.sqlite",
+            "max_calls_per_turn": 2,
+            "max_pending_reminders": 100,
+            "max_records": 1000,
+            "max_requests": 10000,
+            "notification_ttl_seconds": 3600,
+            "timezone": "Asia/Shanghai"
+          }
+        },
+        "web_reads": {
+          "in_flight": 0,
+          "limit": 2,
+          "rejected": 0,
+          "completed": 241
+        }
+      },
+      "admission_while_unreleased": 409,
+      "failed_result": {
+        "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+        "text": "以下是十种常见的数据结构及其用途、优缺点的详细解释：\n\n1.  **数组 (Array)**\n    *   **用途**：用于存储一组连续的元素，常用于需要频繁随机访问数据的场景，如图像像素处理、缓存数据等。\n    *   **优点**：\n        *   **随机访问快**：通过索引直接访问元素的时间复杂度为 O(1)。\n        *   **实现简单**：语法简洁，易于理解。\n    *   **缺点**：\n        *   **插入/删除慢**：在中间位置插入或删除元素需要移动后续所有元素，",
+        "metadata": {
+          "input_tokens_preflight": 1016,
+          "history_pairs_kept": 2,
+          "history_pairs_dropped": 0,
+          "finish_reason": "length",
+          "usage": {
+            "completion_tokens": 128,
+            "prompt_tokens": 1016,
+            "total_tokens": 1144,
+            "prompt_tokens_details": {
+              "cached_tokens": 472
+            }
+          },
+          "eval_count": 128,
+          "done": true
+        },
+        "mode": "text",
+        "request_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+        "prompt": "请详细解释十种常见的数据结构，每项说明用途和优缺点。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 1016,
+            "history_pairs_kept": 2,
+            "history_pairs_dropped": 0,
+            "finish_reason": "length",
+            "usage": {
+              "completion_tokens": 128,
+              "prompt_tokens": 1016,
+              "total_tokens": 1144,
+              "prompt_tokens_details": {
+                "cached_tokens": 472
+              }
+            },
+            "eval_count": 128,
+            "done": true
+          }
+        ],
+        "tool_messages": [],
+        "status": "failed",
+        "error": "Server disconnected without sending a response.",
+        "actions_committed": [],
+        "elapsed_seconds": 13.437373142980505,
+        "first_content_seconds": 13.139061043970287,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 11.752537316002417,
+          "confirmed": true
+        }
+      },
+      "after": {
+        "MainPID": "33533",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "fault_to_released_seconds": 12.071112279954832,
+      "next_turn": {
+        "turn_id": "f9f75eb5658f4e3b8a697a02d535a411",
+        "text": "故障恢复成功。",
+        "metadata": {
+          "input_tokens_preflight": 1010,
+          "history_pairs_kept": 2,
+          "history_pairs_dropped": 0,
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 5,
+            "prompt_tokens": 1010,
+            "total_tokens": 1015,
+            "prompt_tokens_details": {
+              "cached_tokens": 500
+            }
+          },
+          "eval_count": 5,
+          "done": true
+        },
+        "mode": "text",
+        "request_id": "f9f75eb5658f4e3b8a697a02d535a411",
+        "prompt": "请只回复：故障恢复成功。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 1010,
+            "history_pairs_kept": 2,
+            "history_pairs_dropped": 0,
+            "finish_reason": "stop",
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 1010,
+              "total_tokens": 1015,
+              "prompt_tokens_details": {
+                "cached_tokens": 500
+              }
+            },
+            "eval_count": 5,
+            "done": true
+          }
+        ],
+        "tool_messages": [],
+        "speech": {
+          "receipt": {
+            "kind": "file_written",
+            "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio/reply-f9f75eb5658f4e3b8a697a02d535a411.wav",
+            "bytes": 62976
+          },
+          "chunks": [
+            {
+              "text": "故障恢复成功。",
+              "bytes": 62976,
+              "elapsed_seconds": 0.07499686896335334,
+              "first_pcm_seconds": 0.06820993695873767,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 62976
+              }
+            }
+          ],
+          "duration": 1.968
+        },
+        "audio_url": "/api/audio/f9f75eb5658f4e3b8a697a02d535a411",
+        "status": "complete",
+        "session_id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+        "actions_committed": [],
+        "elapsed_seconds": 2.2387117400066927,
+        "first_content_seconds": 2.155178997956682,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 0.10976439400110394,
+          "confirmed": true
+        }
+      },
+      "events": [
+        {
+          "type": "status",
+          "stage": "running",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8"
+        },
+        {
+          "type": "transcript",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "text": "请详细解释十种常见的数据结构，每项说明用途和优缺点。"
+        },
+        {
+          "type": "status",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "stage": "thinking"
+        },
+        {
+          "type": "status",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "stage": "thinking"
+        },
+        {
+          "type": "token",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "text": "以下是十种常见的数据结构及其用途、优缺点的详细解释：\n\n1.  **数组 (Array)**\n    *   **用途**：用于存储一组连续的元素，常用于需要频繁随机访问数据的场景，如图像像素处理、缓存数据等。\n    *   **优点**：\n        *   **随机访问快**：通过索引直接访问元素的时间复杂度为 O(1)。\n        *   **实现简单**：语法简洁，易于理解。\n    *   **缺点**：\n        *   **插入/删除慢**：在中间位置插入或删除元素需要移动后续所有元素，"
+        },
+        {
+          "type": "error",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "error": "Server disconnected without sending a response."
+        },
+        {
+          "type": "status",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "stage": "releasing"
+        },
+        {
+          "type": "done",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "text": "以下是十种常见的数据结构及其用途、优缺点的详细解释：\n\n1.  **数组 (Array)**\n    *   **用途**：用于存储一组连续的元素，常用于需要频繁随机访问数据的场景，如图像像素处理、缓存数据等。\n    *   **优点**：\n        *   **随机访问快**：通过索引直接访问元素的时间复杂度为 O(1)。\n        *   **实现简单**：语法简洁，易于理解。\n    *   **缺点**：\n        *   **插入/删除慢**：在中间位置插入或删除元素需要移动后续所有元素，",
+          "status": "failed",
+          "tokens": 128,
+          "ttft": 13.139061043970287,
+          "total_time": 13.437373142980505,
+          "actions_committed": [],
+          "audio_url": null,
+          "output_kind": null
+        },
+        {
+          "type": "status",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "stage": "release_unconfirmed"
+        },
+        {
+          "type": "status",
+          "turn_id": "1caf03ff60f84af7ba71e6d9381f6aa8",
+          "stage": "idle"
+        }
+      ]
+    },
+    {
+      "scenario": "llm_after_note_commit",
+      "unit": "mmassistant-llama.service",
+      "before": {
+        "MainPID": "32390",
+        "Result": "success",
+        "NRestarts": "2",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "status": "PASSED",
+      "committed_before_fault": {
+        "name": "create_note",
+        "position": 0,
+        "committed": true,
+        "result": {
+          "status": "created",
+          "note_id": "5d1e791e69bd438dbb85638423cb314d",
+          "title": "故障恢复验证",
+          "body": "已提交的笔记在模型服务退出后仍需保留。"
+        }
+      },
+      "turn_id": "1051463fd7464f5daba15baffc606c1e",
+      "busy_observed": true,
+      "fault_monotonic": 276008.543978055,
+      "injection": {
+        "pid": 32424,
+        "unit_main_pid": 32390,
+        "cgroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/mmassistant-llama.service",
+        "port": 8088,
+        "signal": "SIGKILL",
+        "target": "verified native listener via pidfd"
+      },
+      "after_kill": {
+        "MainPID": "32390",
+        "Result": "success",
+        "NRestarts": "2",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "during_recovery": {
+        "ready": true,
+        "active_turn": "1051463fd7464f5daba15baffc606c1e",
+        "phase": "releasing",
+        "release": null,
+        "last_gesture": null,
+        "session": {
+          "id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+          "enabled": true,
+          "retained_turns": 3,
+          "max_turns": 4,
+          "persistence": "process_memory",
+          "images_retained": false
+        },
+        "action_error": null,
+        "last_result": {
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "text": "",
+          "metadata": {},
+          "mode": "text",
+          "request_id": "3746c68d6bcc4ef4ae0d2e5d3c9b4348",
+          "prompt": "请创建笔记，标题为故障恢复验证，内容为已提交的笔记在模型服务退出后仍需保留。保存完成后详细解释这个原则。",
+          "model_rounds": [
+            {
+              "input_tokens_preflight": 1053,
+              "history_pairs_kept": 3,
+              "history_pairs_dropped": 0,
+              "finish_reason": "tool_calls",
+              "usage": {
+                "completion_tokens": 49,
+                "prompt_tokens": 1053,
+                "total_tokens": 1102,
+                "prompt_tokens_details": {
+                  "cached_tokens": 500
+                }
+              },
+              "eval_count": 49,
+              "tool_calls": [
+                {
+                  "id": "KBvOkyJieqigaOjEH3ByIG43IvjZJCmr",
+                  "type": "function",
+                  "function": {
+                    "name": "create_note",
+                    "arguments": "{\"title\":\"故障恢复验证\",\"body\":\"已提交的笔记在模型服务退出后仍需保留。\"}"
+                  }
+                }
+              ],
+              "assistant_content": "",
+              "done": true
+            }
+          ],
+          "actions": [
+            {
+              "name": "create_note",
+              "position": 0,
+              "committed": true,
+              "result": {
+                "status": "created",
+                "note_id": "5d1e791e69bd438dbb85638423cb314d",
+                "title": "故障恢复验证",
+                "body": "已提交的笔记在模型服务退出后仍需保留。"
+              }
+            }
+          ],
+          "status": "failed",
+          "error": "peer closed connection without sending complete message body (incomplete chunked read)",
+          "actions_committed": [
+            {
+              "name": "create_note",
+              "position": 0,
+              "result": {
+                "status": "created",
+                "note_id": "5d1e791e69bd438dbb85638423cb314d",
+                "title": "故障恢复验证",
+                "body": "已提交的笔记在模型服务退出后仍需保留。"
+              }
+            }
+          ],
+          "elapsed_seconds": 6.538134616974276,
+          "first_content_seconds": null
+        },
+        "pending": 0,
+        "event_cursor": 274,
+        "audio_enabled": false,
+        "actions": {
+          "enabled": true,
+          "scheduler_running": true,
+          "error": null,
+          "notes": 1,
+          "reminders": []
+        },
+        "web": {
+          "clients": 1,
+          "client_limit": 4,
+          "bridge_events": 0,
+          "bridge_bytes": 0,
+          "drain_scheduled": false,
+          "bridge_peak_events": 5,
+          "bridge_peak_bytes": 866,
+          "coalesced": 0,
+          "dropped": 0,
+          "overflows": 0,
+          "rejected_messages": 0
+        },
+        "speech_ready": true,
+        "audio_input_mode": "file",
+        "audio_output_mode": "file",
+        "microphone_error": null,
+        "aec_active": false,
+        "camera_enabled": false,
+        "camera_ready": false,
+        "camera_error": null,
+        "face": {
+          "enabled": false,
+          "face_detected": false
+        },
+        "perception": {
+          "ready": false,
+          "error": "Perception disabled",
+          "persons": [],
+          "hands": []
+        },
+        "gestures": {
+          "ready": false,
+          "reason": "disabled",
+          "tracks": []
+        },
+        "models": {
+          "vlm": "assistant-vlm",
+          "stt": "qwen3-asr",
+          "tts": "matcha-icefall-zh-en",
+          "vad": "Silero v6"
+        },
+        "effective_config": {
+          "llm": {
+            "model": "assistant-vlm",
+            "base_url": "http://127.0.0.1:8088",
+            "backend": "openai",
+            "max_tokens": 128,
+            "temperature": 0.0,
+            "timeout": 120.0,
+            "context_tokens": 2048,
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            },
+            "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+            "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+          },
+          "stt": {
+            "model": "qwen3-asr",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "llama_qwen3_asr",
+            "native_base_url": "http://127.0.0.1:8089",
+            "language": "zh",
+            "timeout": 60.0,
+            "max_seconds": 15.0
+          },
+          "tts": {
+            "model": "matcha-icefall-zh-en",
+            "base_url": "http://127.0.0.1:8621/v1",
+            "backend": "matcha_trt",
+            "voice": "0",
+            "speed": 1.0,
+            "lang": "zh",
+            "timeout": 60.0,
+            "max_audio_seconds": 30.0,
+            "first_chunk_chars": 8,
+            "max_chunk_chars": 40
+          },
+          "audio": {
+            "enabled": true,
+            "input_mode": "file",
+            "output_mode": "file",
+            "sample_rate": 16000,
+            "channels": 1,
+            "input_device": "ReSpeaker Lite",
+            "output_device": null,
+            "echo_cancellation": true,
+            "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio",
+            "max_output_seconds": 120.0,
+            "retained_files": 10
+          },
+          "vad": {
+            "speech_threshold": 0.025,
+            "silence_duration_ms": 600,
+            "lookback_ms": 250,
+            "max_speech_secs": 15,
+            "chunk_ms": 32,
+            "min_utterance_secs": 0.12,
+            "min_utterance_rms": 0.001,
+            "silero_threshold": 0.75
+          },
+          "vision": {
+            "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+            "width": 640,
+            "height": 480,
+            "jpeg_quality": 80,
+            "frames": 1,
+            "capture_fps": 10.0,
+            "stale_after": 1.0,
+            "buffer_bytes_limit": 16777216,
+            "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+            "few_shot": []
+          },
+          "face": {
+            "enabled": true,
+            "fps": 5.0,
+            "dead_zone": 0.12,
+            "good_frame_zone": 0.18,
+            "min_face_size": 0.06,
+            "stable_frames": 2
+          },
+          "web": {
+            "ui_fps": 10.0,
+            "host": "127.0.0.1",
+            "port": 8093,
+            "max_clients": 4,
+            "queue_events": 16,
+            "queue_bytes": 4194304,
+            "bridge_events": 64,
+            "bridge_bytes": 4194304,
+            "message_bytes": 2097152,
+            "json_body_bytes": 32768,
+            "ws_message_bytes": 4096,
+            "body_readers": 4,
+            "body_timeout": 10.0,
+            "send_timeout": 2.0,
+            "read_workers": 2,
+            "read_timeout": 2.0
+          },
+          "perception": {
+            "enabled": true,
+            "body_enabled": true,
+            "hands_enabled": true,
+            "fps": 5.0,
+            "body_threshold": 0.5,
+            "body_iou": 0.45,
+            "max_people": 10,
+            "palm_threshold": 0.5,
+            "hand_threshold": 0.8,
+            "max_hands": 2
+          },
+          "gestures": {
+            "enabled": true,
+            "greetings_enabled": true,
+            "stop_hold_seconds": 1.0,
+            "min_observations": 5,
+            "max_gap_seconds": 0.6,
+            "event_ttl_seconds": 0.75,
+            "stationary_palm_widths": 0.2,
+            "wave_swing_palm_widths": 0.6,
+            "wave_window_seconds": 2.0,
+            "wave_reversals": 2,
+            "rearm_seconds": 0.4,
+            "greeting_cooldown_seconds": 5.0,
+            "min_palm_pixels": 20.0,
+            "association_palm_widths": 2.0,
+            "max_tracks": 4
+          },
+          "session": {
+            "enabled": true,
+            "max_turns": 4
+          },
+          "actions": {
+            "enabled": true,
+            "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/actions.sqlite",
+            "max_calls_per_turn": 2,
+            "max_pending_reminders": 100,
+            "max_records": 1000,
+            "max_requests": 10000,
+            "notification_ttl_seconds": 3600,
+            "timezone": "Asia/Shanghai"
+          }
+        },
+        "web_reads": {
+          "in_flight": 0,
+          "limit": 2,
+          "rejected": 0,
+          "completed": 324
+        }
+      },
+      "admission_while_unreleased": 409,
+      "failed_result": {
+        "turn_id": "1051463fd7464f5daba15baffc606c1e",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "3746c68d6bcc4ef4ae0d2e5d3c9b4348",
+        "prompt": "请创建笔记，标题为故障恢复验证，内容为已提交的笔记在模型服务退出后仍需保留。保存完成后详细解释这个原则。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 1053,
+            "history_pairs_kept": 3,
+            "history_pairs_dropped": 0,
+            "finish_reason": "tool_calls",
+            "usage": {
+              "completion_tokens": 49,
+              "prompt_tokens": 1053,
+              "total_tokens": 1102,
+              "prompt_tokens_details": {
+                "cached_tokens": 500
+              }
+            },
+            "eval_count": 49,
+            "tool_calls": [
+              {
+                "id": "KBvOkyJieqigaOjEH3ByIG43IvjZJCmr",
+                "type": "function",
+                "function": {
+                  "name": "create_note",
+                  "arguments": "{\"title\":\"故障恢复验证\",\"body\":\"已提交的笔记在模型服务退出后仍需保留。\"}"
+                }
+              }
+            ],
+            "assistant_content": "",
+            "done": true
+          }
+        ],
+        "actions": [
+          {
+            "name": "create_note",
+            "position": 0,
+            "committed": true,
+            "result": {
+              "status": "created",
+              "note_id": "5d1e791e69bd438dbb85638423cb314d",
+              "title": "故障恢复验证",
+              "body": "已提交的笔记在模型服务退出后仍需保留。"
+            }
+          }
+        ],
+        "status": "failed",
+        "error": "peer closed connection without sending complete message body (incomplete chunked read)",
+        "actions_committed": [
+          {
+            "name": "create_note",
+            "position": 0,
+            "result": {
+              "status": "created",
+              "note_id": "5d1e791e69bd438dbb85638423cb314d",
+              "title": "故障恢复验证",
+              "body": "已提交的笔记在模型服务退出后仍需保留。"
+            }
+          }
+        ],
+        "elapsed_seconds": 6.538134616974276,
+        "first_content_seconds": null,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 17.32387890800601,
+          "confirmed": true
+        }
+      },
+      "after": {
+        "MainPID": "34154",
+        "Result": "success",
+        "NRestarts": "3",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "fault_to_released_seconds": 17.489308610965963,
+      "same_request_replay": {
+        "turn_id": "8c08eedfa2a140bfb0a74c14a3598dbd",
+        "text": "此前请求的已提交回执：笔记已保存：故障恢复验证。",
+        "metadata": {
+          "done": true,
+          "source": "durable_receipts"
+        },
+        "mode": "receipt_replay",
+        "request_id": "3746c68d6bcc4ef4ae0d2e5d3c9b4348",
+        "replayed": true,
+        "actions": [
+          {
+            "name": "create_note",
+            "position": 0,
+            "result": {
+              "status": "created",
+              "note_id": "5d1e791e69bd438dbb85638423cb314d",
+              "title": "故障恢复验证",
+              "body": "已提交的笔记在模型服务退出后仍需保留。"
+            }
+          }
+        ],
+        "original_request_status": "failed",
+        "prompt": "请创建笔记，标题为故障恢复验证，内容为已提交的笔记在模型服务退出后仍需保留。保存完成后详细解释这个原则。",
+        "speech": {
+          "receipt": {
+            "kind": "file_written",
+            "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio/reply-8c08eedfa2a140bfb0a74c14a3598dbd.wav",
+            "bytes": 195584
+          },
+          "chunks": [
+            {
+              "text": "此前请求的已提交",
+              "bytes": 73216,
+              "elapsed_seconds": 0.10661352600436658,
+              "first_pcm_seconds": 0.1043522729887627,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 73216
+              }
+            },
+            {
+              "text": "回执：笔记已保存：故障恢复验证。",
+              "bytes": 122368,
+              "elapsed_seconds": 0.07805656298296526,
+              "first_pcm_seconds": 0.06963493599323556,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 122368
+              }
+            }
+          ],
+          "duration": 6.112
+        },
+        "audio_url": "/api/audio/8c08eedfa2a140bfb0a74c14a3598dbd",
+        "status": "complete",
+        "session_id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+        "elapsed_seconds": 0.19246263097738847,
+        "first_content_seconds": 0.0033789679873734713,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 0.09230069100158289,
+          "confirmed": true
+        }
+      },
+      "next_turn": {
+        "turn_id": "66097e87c90a4f9b9a4f47f295a4589d",
+        "text": "故障恢复成功。",
+        "metadata": {
+          "input_tokens_preflight": 1032,
+          "history_pairs_kept": 3,
+          "history_pairs_dropped": 0,
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 5,
+            "prompt_tokens": 1032,
+            "total_tokens": 1037,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "eval_count": 5,
+          "done": true
+        },
+        "mode": "text",
+        "request_id": "66097e87c90a4f9b9a4f47f295a4589d",
+        "prompt": "请只回复：故障恢复成功。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 1032,
+            "history_pairs_kept": 3,
+            "history_pairs_dropped": 0,
+            "finish_reason": "stop",
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 1032,
+              "total_tokens": 1037,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "eval_count": 5,
+            "done": true
+          }
+        ],
+        "tool_messages": [],
+        "speech": {
+          "receipt": {
+            "kind": "file_written",
+            "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio/reply-66097e87c90a4f9b9a4f47f295a4589d.wav",
+            "bytes": 62976
+          },
+          "chunks": [
+            {
+              "text": "故障恢复成功。",
+              "bytes": 62976,
+              "elapsed_seconds": 0.06390949198976159,
+              "first_pcm_seconds": 0.057763424003496766,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 62976
+              }
+            }
+          ],
+          "duration": 1.968
+        },
+        "audio_url": "/api/audio/66097e87c90a4f9b9a4f47f295a4589d",
+        "status": "complete",
+        "session_id": "d4b80e8fcba141dabc20861bcd2ff3ee",
+        "actions_committed": [],
+        "elapsed_seconds": 3.6427772939787246,
+        "first_content_seconds": 3.573214267962612,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 0.11657534196274355,
+          "confirmed": true
+        }
+      },
+      "events": [
+        {
+          "type": "status",
+          "stage": "running",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e"
+        },
+        {
+          "type": "transcript",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "text": "请创建笔记，标题为故障恢复验证，内容为已提交的笔记在模型服务退出后仍需保留。保存完成后详细解释这个原则。"
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "thinking"
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "thinking"
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "executing_tool"
+        },
+        {
+          "type": "action_receipt",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "receipt": {
+            "name": "create_note",
+            "position": 0,
+            "committed": true,
+            "result": {
+              "status": "created",
+              "note_id": "5d1e791e69bd438dbb85638423cb314d",
+              "title": "故障恢复验证",
+              "body": "已提交的笔记在模型服务退出后仍需保留。"
+            }
+          }
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "thinking"
+        },
+        {
+          "type": "error",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "error": "peer closed connection without sending complete message body (incomplete chunked read)"
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "releasing"
+        },
+        {
+          "type": "done",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "text": "",
+          "status": "failed",
+          "tokens": null,
+          "ttft": null,
+          "total_time": 6.538134616974276,
+          "actions_committed": [
+            {
+              "name": "create_note",
+              "position": 0,
+              "result": {
+                "status": "created",
+                "note_id": "5d1e791e69bd438dbb85638423cb314d",
+                "title": "故障恢复验证",
+                "body": "已提交的笔记在模型服务退出后仍需保留。"
+              }
+            }
+          ],
+          "audio_url": null,
+          "output_kind": null
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "release_unconfirmed"
+        },
+        {
+          "type": "status",
+          "turn_id": "1051463fd7464f5daba15baffc606c1e",
+          "stage": "idle"
+        }
+      ]
+    }
+  ],
+  "cleanup": {
+    "tts": {
+      "restored": true,
+      "unit": {
+        "MainPID": "33533",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "asr": {
+      "restored": true,
+      "unit": {
+        "MainPID": "32851",
+        "Result": "success",
+        "NRestarts": "1",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    },
+    "llm": {
+      "restored": true,
+      "unit": {
+        "MainPID": "34154",
+        "Result": "success",
+        "NRestarts": "3",
+        "ActiveState": "active",
+        "SubState": "running"
+      }
+    }
+  },
+  "effective_config": {
+    "llm": {
+      "model": "assistant-vlm",
+      "base_url": "http://127.0.0.1:8088",
+      "backend": "openai",
+      "max_tokens": 128,
+      "temperature": 0.0,
+      "timeout": 120.0,
+      "context_tokens": 2048,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+      "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+    },
+    "stt": {
+      "model": "qwen3-asr",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "llama_qwen3_asr",
+      "native_base_url": "http://127.0.0.1:8089",
+      "language": "zh",
+      "timeout": 60.0,
+      "max_seconds": 15.0
+    },
+    "tts": {
+      "model": "matcha-icefall-zh-en",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "matcha_trt",
+      "voice": "0",
+      "speed": 1.0,
+      "lang": "zh",
+      "timeout": 60.0,
+      "max_audio_seconds": 30.0,
+      "first_chunk_chars": 8,
+      "max_chunk_chars": 40
+    },
+    "audio": {
+      "enabled": true,
+      "input_mode": "file",
+      "output_mode": "file",
+      "sample_rate": 16000,
+      "channels": 1,
+      "input_device": "ReSpeaker Lite",
+      "output_device": null,
+      "echo_cancellation": true,
+      "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/audio",
+      "max_output_seconds": 120.0,
+      "retained_files": 10
+    },
+    "vad": {
+      "speech_threshold": 0.025,
+      "silence_duration_ms": 600,
+      "lookback_ms": 250,
+      "max_speech_secs": 15,
+      "chunk_ms": 32,
+      "min_utterance_secs": 0.12,
+      "min_utterance_rms": 0.001,
+      "silero_threshold": 0.75
+    },
+    "vision": {
+      "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+      "width": 640,
+      "height": 480,
+      "jpeg_quality": 80,
+      "frames": 1,
+      "capture_fps": 10.0,
+      "stale_after": 1.0,
+      "buffer_bytes_limit": 16777216,
+      "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+      "few_shot": []
+    },
+    "face": {
+      "enabled": true,
+      "fps": 5.0,
+      "dead_zone": 0.12,
+      "good_frame_zone": 0.18,
+      "min_face_size": 0.06,
+      "stable_frames": 2
+    },
+    "web": {
+      "ui_fps": 10.0,
+      "host": "127.0.0.1",
+      "port": 8093,
+      "max_clients": 4,
+      "queue_events": 16,
+      "queue_bytes": 4194304,
+      "bridge_events": 64,
+      "bridge_bytes": 4194304,
+      "message_bytes": 2097152,
+      "json_body_bytes": 32768,
+      "ws_message_bytes": 4096,
+      "body_readers": 4,
+      "body_timeout": 10.0,
+      "send_timeout": 2.0,
+      "read_workers": 2,
+      "read_timeout": 2.0
+    },
+    "perception": {
+      "enabled": true,
+      "body_enabled": true,
+      "hands_enabled": true,
+      "fps": 5.0,
+      "body_threshold": 0.5,
+      "body_iou": 0.45,
+      "max_people": 10,
+      "palm_threshold": 0.5,
+      "hand_threshold": 0.8,
+      "max_hands": 2
+    },
+    "gestures": {
+      "enabled": true,
+      "greetings_enabled": true,
+      "stop_hold_seconds": 1.0,
+      "min_observations": 5,
+      "max_gap_seconds": 0.6,
+      "event_ttl_seconds": 0.75,
+      "stationary_palm_widths": 0.2,
+      "wave_swing_palm_widths": 0.6,
+      "wave_window_seconds": 2.0,
+      "wave_reversals": 2,
+      "rearm_seconds": 0.4,
+      "greeting_cooldown_seconds": 5.0,
+      "min_palm_pixels": 20.0,
+      "association_palm_widths": 2.0,
+      "max_tracks": 4
+    },
+    "session": {
+      "enabled": true,
+      "max_turns": 4
+    },
+    "actions": {
+      "enabled": true,
+      "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-recovery-vhil0_k7/actions.sqlite",
+      "max_calls_per_turn": 2,
+      "max_pending_reminders": 100,
+      "max_records": 1000,
+      "max_requests": 10000,
+      "notification_ttl_seconds": 3600,
+      "timezone": "Asia/Shanghai"
+    }
+  }
+}

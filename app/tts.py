@@ -56,7 +56,7 @@ class LocalTTS:
         try:
             if not isinstance(text, str) or not text.strip() or len(text) > 500:
                 raise ValueError("TTS input must contain 1–500 characters")
-            with self.requests.operation(cancel_event) as operation:
+            with self.requests.operation(cancel_event,timeout=self.timeout) as operation:
                 data = bytearray()
                 with self._client.stream("POST", self.base_url + "/audio/speech", json={
                     "model": self.model, "voice": self.voice, "input": text.strip(),
@@ -71,6 +71,7 @@ class LocalTTS:
                             if len(data) > self.max_audio_seconds * 32000:
                                 raise ValueError("TTS PCM exceeds response budget")
                 if not data or len(data) % 2: raise ValueError("TTS returned empty or truncated PCM16")
+                self.last_error = None
                 return {"audio": np.frombuffer(bytes(data), dtype='<i2'), "sample_rate": 16000,
                         "duration": len(data)/32000, "elapsed_seconds": time.monotonic()-start,
                         "first_pcm_seconds": first-start if first else None}

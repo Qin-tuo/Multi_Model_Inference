@@ -226,7 +226,8 @@
           "execution": "IN_PROGRESS",
           "evidence": [
             "benchmarks/results/reachy-r3-actions-summary.json",
-            "benchmarks/results/reachy-r3-web-summary.json"
+            "benchmarks/results/reachy-r3-web-summary.json",
+            "benchmarks/results/reachy-r3-recovery-summary.json"
           ]
         },
         {
@@ -242,11 +243,12 @@
         {
           "id": "R3.recovery",
           "title": "验证并修复设备/模型服务异常恢复",
-          "status": "ACTION_STORAGE_SCHEDULER_RECOVERY_VERIFIED_DEVICE_MODEL_MATRIX_PENDING",
+          "status": "NATIVE_MODEL_CRASH_AND_ACTION_RECOVERY_VERIFIED_DEVICE_MATRIX_PENDING",
           "deliverable": "故障台账、最小复现和下一轮验证",
           "execution": "IN_PROGRESS",
           "evidence": [
-            "benchmarks/results/reachy-r3-actions-summary.json"
+            "benchmarks/results/reachy-r3-actions-summary.json",
+            "benchmarks/results/reachy-r3-recovery-summary.json"
           ]
         }
       ]
@@ -427,8 +429,11 @@
       "evidence": []
     },
     "F12": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "PARTIAL_NATIVE_BACKEND_AND_WEB_OVERLOAD_VERIFIED_DEVICE_MATRIX_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r3-web-summary.json",
+        "benchmarks/results/reachy-r3-recovery-summary.json"
+      ]
     }
   },
   "engineering_acceptance": {
@@ -519,7 +524,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
-  "updated_at": "2026-10-16T06:25:36.294098+00:00",
+  "updated_at": "2026-10-16T06:44:09.671153+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"
