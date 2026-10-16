@@ -99,7 +99,7 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
 
 
 def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
-    broadcaster = Broadcaster()
+    broadcaster = Broadcaster(config.web,frame_ttl=config.vision.stale_after)
     stop = threading.Event()
     llm = LLM(model=config.llm.model, base_url=config.llm.base_url,
               backend=config.llm.backend, max_tokens=config.llm.max_tokens,
@@ -135,7 +135,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
 
     def state():
         return {**control.state(), "audio_enabled": bool(mic and mic.alive),
-                'actions':action_state(),
+                'actions':action_state(), 'web':broadcaster.snapshot(),
                 "speech_ready": bool(speech_enabled and control.vad is not None),
                 "audio_input_mode": config.audio.input_mode if speech_enabled else "disabled",
                 "audio_output_mode": config.audio.output_mode if speech_enabled else "disabled",
@@ -195,6 +195,9 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                     if config.audio.output_mode == "device" and not config.audio.output_device.startswith(("hw:", "plughw:")):
                         control.output_sink = mic.get_pa_sink
                     broadcaster.configure_speakers(mic.speaker_state, mic.select_speaker, mic.set_speaker_volume)
+                    # The upstream getter may rebuild an AEC route; do this
+                    # once during startup, never concurrently in Web readers.
+                    await asyncio.to_thread(broadcaster.get_speaker_state)
                     broadcaster._input_setter = lambda active: mic.resume() if active else mic.pause()
                     broadcaster.set_ptt(True)
             if perception:
@@ -255,7 +258,7 @@ def main(default_no_camera=False):
     config.validate()
     import uvicorn
     uvicorn.run(build_app(config, no_camera=args.no_camera, no_audio=args.no_audio, no_actions=args.no_tools), host=config.web.host,
-                port=config.web.port, log_level="info", ws_max_size=65536,
+                port=config.web.port, log_level="info", ws_max_size=config.web.ws_message_bytes, ws_max_queue=4,
                 limit_concurrency=16, timeout_graceful_shutdown=10)
 
 

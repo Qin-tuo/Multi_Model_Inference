@@ -1,0 +1,57 @@
+{
+  "created_at": "2026-10-16T06:25:36.294098+00:00",
+  "status": "WEB_TRANSPORT_BOUNDS_VERIFIED_FULL_R3_PENDING",
+  "scope": "Actual asyncio/ASGI regressions, actual loopback Uvicorn transport harness and Firefox with native 4B/file TTS; no physical devices, full endurance, B0 or autonomous performance optimization",
+  "tests": {
+    "tests": 124,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "f5a0544d67e0db294dcba49438bfbe785790927968f4005bcd8c63c4b1253992",
+  "source_sha256": {
+    "app/web.py": "aca8d908f581c53bdf26d2dec30daf7f7a5fdf8284e4e8143a7c3b328631d758",
+    "app/web_limits.py": "6d7d65c06ff44bc2f716211fbe893847c4cc4dd68323dd71e93ef129ac88753f",
+    "app/config.py": "3f2f094a1ba6a092aa0d323e6147ffb9a0d60241e1db667ecb6a321d3498c708",
+    "app/turn_control.py": "dfc25591dbbeea23b72509f24e5697a5be526577dfa5dbfe409965f200a4c5ac",
+    "app/actions/store.py": "eae1b20725e1fbc4478c37077979eb8a7a6b5c7d339c41bc422ac4df06bd8256",
+    "run_web_vision_chat.py": "638f13111560e1e013863459d51a5393f12d883158c5057900c6f01cfd8f3a07",
+    "static/index.html": "262bf799febfcf39981e1d0d6b08d56771b4578802860736d39004b9c9b91007",
+    "scripts/probe_web_transport.py": "273bac305ea54e007d1904f5e0964ed95c7bcd0fea341483948634fe5fe9050d",
+    "scripts/probe_browser_cancel.py": "0809258706a63ddd6b2a22a52390d0b99536a48d5a91fe4e67597b3914907d1e",
+    "tests/test_web_limits.py": "66d26bcdc64baa775090e122c71764d86aea97352424ea5a0c00c07845bcfce8"
+  },
+  "evidence": [
+    "benchmarks/results/reachy-r3-web-bounds-before.json",
+    "benchmarks/results/reachy-r3-web-bounds-after.json",
+    "benchmarks/results/reachy-r3-web-transport.json",
+    "benchmarks/results/reachy-r3-web-browser-session.json",
+    "benchmarks/results/reachy-r3-web-browser-cancel.json",
+    "benchmarks/results/reachy-r3-web-browser-reconnect.json",
+    "benchmarks/results/reachy-r3-web-cleanup.json"
+  ],
+  "verified": [
+    "Paused actual loop: 10000 frame submissions retain one scheduled callback, one latest frame and 1059 wire bytes; old code retained 10000 callbacks",
+    "Six simultaneous delayed ASGI handshakes reserve four slots; handshake task cancellation releases all reservations",
+    "Reliable overflow explicitly terminates and requests authoritative snapshot; stale/cancelled messages and old loop epochs do not deliver",
+    "State snapshot cursor handles callbacks delivered after the snapshot; unfinished answer events retain their turn identity",
+    "Actual TCP: 20 connect/disconnect cycles return to 12 FDs and 2 process threads; PSS rises by 737280 bytes, not evidence of long-term leak freedom",
+    "Actual TCP: two timed-out native reads retain both worker slots; 20 extra reads rejected; existing WS receives cancellation and reads recover after native unblock",
+    "Actual TCP: four stalled bodies expire with 408, excess data request gets 503, separate HTTP cancellation gets 202, declared/chunked oversized JSON gets 413",
+    "Actual TCP: non-reading viewer is released on send timeout, bridge is empty afterward; harness shutdown leaves one process thread",
+    "Actual Firefox/native 4B: existing WS cancellation clears partial answer, returns idle and enables next request",
+    "Actual Firefox: delayed session-clear HTTP reply does not erase new turn; connecting during active model turn keeps old and new answers separate"
+  ],
+  "known_limits": [
+    "TCP fault harness uses synthetic producers and 0.2s read/send plus 0.5s body timeout; production defaults are 2s read/send and 10s body timeout",
+    "Native Firefox uses no-camera and no-tools with file TTS; hardware microphone/speaker and actual AEC routing are unqualified",
+    "Native threads cannot be forcibly cancelled; timeout retains capacity, shutdown reports failure if reads have not actually released",
+    "Mutating speaker controls are single-flight; initial route getter runs during startup, connections read cached state; actual physical route/teardown faults remain pending",
+    "Application byte limits cover retained message/body buffers, not OS socket buffers or total process/JSON transient allocation",
+    "Uvicorn global concurrency includes sockets; existing WS cancellation avoids a new connection, but arbitrary connection floods can still deny new HTTP requests",
+    "Only latest completed turn is available in reconnect snapshot; partial text missing during disconnect is restored by final result, not a persistent chat event log",
+    "Browser retains at most 100 DOM messages and turn-keyed bounded maps; long GUI endurance still pending",
+    "Full microphone/TTS slow-consumer, device/model fault matrix, repeat app lifecycle, native hang recovery and 8h tests remain pending"
+  ],
+  "verification_note": "Final source includes a narrow invalid outbound type guard covered by the final 124-test suite. TCP/native browser runs precede this additive guard; final formatting only changes whitespace. Earlier action evidence is not claimed as a fresh native tool run for these transport changes."
+}

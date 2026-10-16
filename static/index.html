@@ -374,7 +374,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   let speechReady = false;
   let activeTurn = null, cancelledTurn = null;
   let sessionId = null;
-  let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
+  let ws = null, frameCount = 0, msgIdx = 0;
+  const answers=new Map(), transcripts=new Map(), receipts=new Map(), finishedTurns=new Set();
   let reconnectTimer = null, pttActive = null, pipelineStage = 'connecting', faceBoxTimer = null;
   const camNatural = {w:640, h:480};
   let lastFaceBox = null, lastCentered = false, trackingEnabled = false;
@@ -407,13 +408,14 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       $('volumeValue').textContent = '--%';
       $('speakerStatus').textContent = 'Offline';
       $('clearSession').disabled=true;
+      $('sendText').disabled=true; $('sendAudio').disabled=true; $('cancelTurn').disabled=true;
       reconnectTimer = setTimeout(connect, 3000);
     };
     ws.onerror = () => ws.close();
     ws.onmessage = (ev) => {
       let msg;
       try{ msg = JSON.parse(ev.data); } catch(e){ return; }
-      if(msg.turn_id === cancelledTurn && ['token','transcript'].includes(msg.type)) return;
+      if((msg.turn_id === cancelledTurn || finishedTurns.has(msg.turn_id)) && ['token','transcript'].includes(msg.type)) return;
       switch(msg.type){
         case 'frame':        onFrame(msg); break;
         case 'status':       onStatus(msg); break;
@@ -422,9 +424,10 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'done':         onDone(msg); break;
         case 'session_cleared':onSessionCleared(msg); break;
         case 'session_state':onSession(msg.session); break;
-        case 'action_receipt':onActionReceipt(msg.receipt); break;
+        case 'action_receipt':onActionReceipt(msg.receipt,msg.turn_id); break;
         case 'actions_state':onActionsState(msg); break;
         case 'cancelled':    cancelledTurn=msg.turn_id; onStatus({...msg,stage:'cancelling'}); break;
+        case 'cancel_ack':   if(!msg.accepted && cancelledTurn===msg.turn_id) cancelledTurn=null; break;
         case 'stats':        onStats(msg); break;
         case 'perception':   onPerception(msg); break;
         case 'scene':        onScene(msg); break;
@@ -590,6 +593,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   }
 
   function onStatus(msg){
+    if(msg.turn_id && finishedTurns.has(msg.turn_id) && msg.turn_id!==activeTurn) return;
+    if(msg.stage==='idle' && msg.turn_id && activeTurn && msg.turn_id!==activeTurn) return;
     if(msg.turn_id && msg.stage !== 'idle') activeTurn=msg.turn_id;
     if(msg.stage === 'idle') activeTurn=null;
     const stages = $('pipeStages').querySelectorAll('.stage');
@@ -603,6 +608,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   }
 
   function onTranscript(msg){
+    if(!msg.turn_id || transcripts.has(msg.turn_id) || finishedTurns.has(msg.turn_id)) return;
     hideEmpty();
     const div = document.createElement('div');
     div.className = 'msg user';
@@ -610,25 +616,32 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       + `<div class="meta">${msg.stt_time ? 'STT '+msg.stt_time.toFixed(1)+'s' : ''}`
       + `${msg.duration ? ' \u00b7 '+msg.duration.toFixed(1)+'s' : ''}</div>`;
     $('messages').appendChild(div);
+    transcripts.set(msg.turn_id,div);
     scrollChat();
     msgIdx++;
     updateMsgCount();
   }
 
   function onToken(msg){
+    if(!msg.turn_id || finishedTurns.has(msg.turn_id)) return;
+    let currentAssistant=answers.get(msg.turn_id);
     if(!currentAssistant){
       hideEmpty();
       currentAssistant = document.createElement('div');
       currentAssistant.className = 'msg assistant';
       currentAssistant.innerHTML = '<div class="content cursor-blink"></div><div class="meta"></div>';
       $('messages').appendChild(currentAssistant);
+      answers.set(msg.turn_id,currentAssistant);
     }
     currentAssistant.querySelector('.content').textContent += msg.text;
     scrollChat();
   }
 
   function onDone(msg){
-    if(!currentAssistant && msg.text) onToken({text:msg.text});
+    if(!msg.turn_id) return;
+    for(const receipt of msg.actions_committed || []) onActionReceipt({...receipt,committed:true},msg.turn_id);
+    if(!answers.has(msg.turn_id) && !finishedTurns.has(msg.turn_id)) onToken({...msg,text:msg.text || ''});
+    const currentAssistant=answers.get(msg.turn_id);
     if(currentAssistant){
       if(typeof msg.text === 'string') currentAssistant.querySelector('.content').textContent=msg.text;
       currentAssistant.querySelector('.content').classList.remove('cursor-blink');
@@ -647,10 +660,12 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       } else if(msg.output_kind === 'device_completed'){
         meta.appendChild(document.createTextNode(' 设备输出完成'));
       }
-      currentAssistant = null;
-      msgIdx++;
+      if(!finishedTurns.has(msg.turn_id)) msgIdx++;
       updateMsgCount();
     }
+    finishedTurns.add(msg.turn_id);
+    while(finishedTurns.size>100) finishedTurns.delete(finishedTurns.values().next().value);
+    scrollChat();
   }
 
   /* ── Stats / Robot / Info ────── */
@@ -760,7 +775,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     activeTurn=msg.active_turn;
     onStatus({stage:msg.phase || (msg.active_turn ? 'thinking' : 'idle'),turn_id:msg.active_turn});
     if(msg.last_result){
-      onDone({text:msg.last_result.text, status:msg.last_result.status, audio_url:msg.last_result.audio_url});
+      onDone({...msg.last_result,ttft:msg.last_result.first_content_seconds,
+        total_time:msg.last_result.elapsed_seconds,output_kind:msg.last_result.speech?.receipt?.kind});
     }
   }
 
@@ -785,6 +801,10 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     cancelledTurn=turn;
     $('cancelTurn').disabled=true;
     try{
+      if(ws?.readyState===WebSocket.OPEN){
+        ws.send(JSON.stringify({type:'cancel',turn_id:turn}));
+        return;
+      }
       const response=await fetch('/api/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({turn_id:turn})});
       const result=await response.json();
       if(!response.ok) throw new Error(result.detail || '停止请求失败');
@@ -802,14 +822,16 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       '已保存 '+msg.notes+' 条笔记；最近提醒：'+(msg.reminders || []).map(r=>r.text+'（'+({scheduled:'待到时',due:'等待输出',claimed:'等待输出',delivering:'输出中',delivered:'已输出',stopped:'已停止本轮输出',cancelled:'已取消',expired:'已过期',uncertain:'输出结果待确认',failed:'失败'}[r.status] || r.status)+'）').join('、');
   }
 
-  function onActionReceipt(receipt){
+  function onActionReceipt(receipt,turn){
+    const key=turn+':'+receipt.position;
+    if(receipts.has(key)) return;
     hideEmpty();const div=document.createElement('div');div.className='msg assistant';
     const body=document.createElement('div');body.className='content';
     const value=receipt.result || {};
     const labels={create_note:'笔记',list_notes:'查询笔记',create_reminder:'提醒',list_reminders:'查询提醒',cancel_reminder:'取消提醒'};
     body.textContent=receipt.committed ? (labels[receipt.name] || '本地操作')+'已执行：'+
       (value.title || value.text || ({cancelled:'已取消',not_found:'未找到',already_delivered:'已经完成输出，原回执保留',already_expired:'已经过期，记录保留'}[value.status]) || '查询完成') : '本地操作未执行：'+(value.error || '参数无效');
-    div.appendChild(body);$('messages').appendChild(div);scrollChat();
+    div.appendChild(body);$('messages').appendChild(div);receipts.set(key,div);scrollChat();
   }
 
   function onSession(session){
@@ -819,7 +841,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 
   function onSessionCleared(msg){
     onSession(msg.session);
-    $('messages').replaceChildren();currentAssistant=null;msgIdx=0;updateMsgCount();
+    $('messages').replaceChildren();answers.clear();transcripts.clear();receipts.clear();finishedTurns.clear();msgIdx=0;updateMsgCount();
     $('inputError').textContent='';cancelledTurn=null;
     onStatus({stage:'idle'});
   }
@@ -1045,7 +1067,12 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     if(faceBoxTimer){ clearTimeout(faceBoxTimer); faceBoxTimer=null; }
   }
 
-  function scrollChat(){ const m=$('messages'); m.scrollTop=m.scrollHeight; }
+  function scrollChat(){
+    const m=$('messages');
+    while(m.children.length>100) m.firstElementChild.remove();
+    for(const map of [answers,transcripts,receipts]) for(const [key,node] of map) if(!node.isConnected) map.delete(key);
+    m.scrollTop=m.scrollHeight;
+  }
   function hideEmpty(){ const e=$('emptyState'); if(e) e.remove(); }
   function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
   function setBar(prefix, percent){

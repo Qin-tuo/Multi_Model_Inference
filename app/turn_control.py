@@ -11,6 +11,7 @@ import uuid
 import re
 import json
 import hashlib
+from copy import deepcopy
 from collections import deque
 from pathlib import Path
 from app.audio import wav_pcm
@@ -196,11 +197,12 @@ class TurnController:
                                   and not self._action_error and not (self._active and self._active["phase"] == "release_unconfirmed")),
                     "active_turn": self._active["turn_id"] if self._active else None,
                     "phase": self._active["phase"] if self._active else "idle",
-                    "release": self._active.get("release") if self._active else None,
-                    "last_gesture": self._last_gesture,
+                    "release": deepcopy(self._active.get("release")) if self._active else None,
+                    "last_gesture": deepcopy(self._last_gesture),
                     "session": self.session_state(),
                     "action_error": self._action_error,
-                    "last_result": self._last, "pending": self._queue.qsize()}
+                    "last_result": deepcopy(self._last), "pending": self._queue.qsize(),
+                    "event_cursor": getattr(self.broadcaster,'cursor',0)}
 
     def _run(self):
         while not self._stop.is_set() or not self._queue.empty():
@@ -379,11 +381,12 @@ class TurnController:
                 send("done", text=result["text"], status=result["status"],
                      tokens=result["metadata"].get("eval_count"),
                      ttft=result["first_content_seconds"], total_time=result["elapsed_seconds"],
+                     actions_committed=result.get('actions_committed',[]),
                      audio_url=result.get("audio_url"), output_kind=result.get("speech", {}).get("receipt", {}).get("kind"))
                 released = self._wait_for_release(request, used)
-                result["resources_released"] = released
-                result["release"] = request["release"]
                 with self._lock:
+                    result["resources_released"] = released
+                    result["release"] = request["release"]
                     self._last = result
                     if released: self._active = None
                     send("status", stage="idle" if released else "release_unconfirmed")

@@ -1,0 +1,22 @@
+{
+  "scope": "Actual paused asyncio loop, synthetic frames; transport regression, not B0",
+  "source_sha256": "460fe5f86065efcdb75563962794365b70b032d597e5105ff1125215d3cd0f3f",
+  "produced": 10000,
+  "scheduled_callbacks": 1,
+  "traced_growth_bytes": 166188,
+  "bridge": {
+    "clients": 1,
+    "client_limit": 4,
+    "bridge_events": 1,
+    "bridge_bytes": 1059,
+    "drain_scheduled": true,
+    "bridge_peak_events": 1,
+    "bridge_peak_bytes": 1059,
+    "coalesced": 9999,
+    "dropped": 0,
+    "overflows": 0,
+    "rejected_messages": 0
+  },
+  "delivered_frames": 1,
+  "latest_frame": 9999
+}

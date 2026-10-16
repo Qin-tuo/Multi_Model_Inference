@@ -171,6 +171,19 @@ class WebConfig:
     ui_fps: float = 10.0
     host: str = "0.0.0.0"
     port: int = 8090
+    max_clients: int = 4
+    queue_events: int = 16
+    queue_bytes: int = 4 * 1024 * 1024
+    bridge_events: int = 64
+    bridge_bytes: int = 4 * 1024 * 1024
+    message_bytes: int = 2 * 1024 * 1024
+    json_body_bytes: int = 32768
+    ws_message_bytes: int = 4096
+    body_readers: int = 4
+    body_timeout: float = 10.0
+    send_timeout: float = 2.0
+    read_workers: int = 2
+    read_timeout: float = 2.0
 
 
 _SECTIONS = [
@@ -237,6 +250,14 @@ class Config:
         return config
 
     def validate(self):
+        w=self.web
+        if not (1<=w.max_clients<=4 and 4<=w.queue_events<=64 and 4<=w.bridge_events<=256
+                and 65536<=w.message_bytes<=4*1024*1024 and w.message_bytes<=w.queue_bytes<=16*1024*1024
+                and w.message_bytes<=w.bridge_bytes<=16*1024*1024 and 24576<=w.json_body_bytes<=65536
+                and 512<=w.ws_message_bytes<=65536 and 1<=w.body_readers<=4 and 1<=w.read_workers<=2):
+            raise ValueError('Invalid Web resource bounds')
+        if not (0<w.body_timeout<=30 and 0<w.send_timeout<=10 and 0<w.read_timeout<=10):
+            raise ValueError('Invalid Web timeouts')
         from zoneinfo import ZoneInfo
         ZoneInfo(self.actions.timezone)
         if not (1 <= self.actions.max_calls_per_turn <= 2 and 1 <= self.actions.max_pending_reminders <= 100

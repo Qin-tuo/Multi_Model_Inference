@@ -179,13 +179,16 @@ def test_cancel_terminates_only_owned_playback_even_if_it_ignores_term(monkeypat
 
 
 def test_cancelled_events_are_filtered_even_if_already_queued():
-    event=threading.Event();q=asyncio.Queue(maxsize=2)
-    Broadcaster._enqueue_latest(q,{'type':'token','text':'stale','_cancel_event':event})
-    event.set()
-    assert Broadcaster.visible(q.get_nowait()) is None
-    Broadcaster._enqueue_latest(q,{'type':'token','_cancel_event':event})
-    assert q.empty()
-    assert Broadcaster.visible({'type':'done','status':'cancelled'})['status']=='cancelled'
+    from app.web_limits import ClientBuffer,encode
+    async def check():
+        event=threading.Event();q=ClientBuffer(2,1024);q.initialized.set()
+        q.put(encode({'type':'token','text':'stale'},1024,event))
+        event.set()
+        q.put(encode({'type':'token'},1024,event))
+        q.put(encode({'type':'done','status':'cancelled'},1024))
+        assert (await q.get()).kind=='done'
+        assert not q.items and q.bytes==0
+    asyncio.run(check())
 
 
 def test_web_cancel_requires_specific_turn_and_returns_before_release():

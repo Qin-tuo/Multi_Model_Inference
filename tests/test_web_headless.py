@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 import queue
+import json
 import threading
 import time
 from fastapi.testclient import TestClient
 from app.config import Config
 from app.web import Broadcaster
+from app.web_limits import ClientBuffer, encode
 import run_web_vision_chat as entry
 
 
@@ -57,16 +59,12 @@ def test_one_active_request_rejects_extra_work(monkeypatch):
 
 
 def test_frame_pressure_does_not_silently_discard_response():
-    q = queue.Queue(maxsize=1)
-    # asyncio.Queue has the same nonblocking methods but distinct exceptions.
-    import asyncio
-    q = asyncio.Queue(maxsize=1)
-    q.put_nowait({"type":"token", "text":"important"})
-    Broadcaster._enqueue_latest(q, {"type":"frame", "data":"large"})
-    assert q.get_nowait()["text"] == "important"
-    q.put_nowait({"type":"token"})
-    Broadcaster._enqueue_latest(q, {"type":"done"})
-    assert q.get_nowait()["type"] == "overflow"
+    q = ClientBuffer(1,1024)
+    q.put(encode({"type":"token", "text":"important"},1024))
+    q.put(encode({"type":"frame", "data":"large"},1024))
+    assert json.loads(q.items[0].wire)["text"] == "important"
+    q.put(encode({"type":"done"},1024))
+    assert q.failed and q.items[0].kind == "overflow"
 
 
 def test_browser_from_another_origin_cannot_read_camera_stream():

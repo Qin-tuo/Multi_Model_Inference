@@ -33,9 +33,9 @@ def main():
             wait("return document.querySelector('#connStatus').textContent.includes('Connected') && !document.querySelector('#sendText').disabled")
             js("""
                 window.priorAnswers=document.querySelectorAll('.msg.assistant').length;
-                window.originalFetch=window.fetch;
-                window.fetch=async (...args)=>{const r=await window.originalFetch(...args);
-                  if(args[0]==='/api/cancel') await new Promise(resolve=>setTimeout(resolve,1000));return r;};
+                window.cancelControls=0;
+                const originalSend=WebSocket.prototype.send;
+                WebSocket.prototype.send=function(data){if(JSON.parse(data).type==='cancel') window.cancelControls++;return originalSend.call(this,data);};
                 document.querySelector('#textInput').value='请详细介绍十种学习编程的方法，每条解释具体步骤。';
                 document.querySelector('#sendText').click();
             """)
@@ -52,8 +52,9 @@ def main():
                 error:document.querySelector('#inputError').textContent};""")
             assert report['phase']=='等待输入' and report['send_enabled'] and report['cancel_disabled']
             assert report['assistant_text']=='' and '已取消' in report['meta'] and not report['error']
-            report.update(status='PASSED',browser='Firefox via WebDriver',delayed_cancel_http_response_seconds=1,
-                          scope='Real browser cancellation and delayed HTTP lifecycle; no physical audio')
+            assert js('return window.cancelControls')==1
+            report.update(status='PASSED',browser='Firefox via WebDriver',cancel_transport='existing WebSocket',
+                          scope='Real browser cancellation via existing WebSocket; no physical audio')
             screenshot=call('GET',f'/session/{session}/screenshot')
             args.output.with_suffix('.png').write_bytes(base64.b64decode(screenshot))
         except Exception as exc:

@@ -221,11 +221,12 @@
         {
           "id": "R3.resources",
           "title": "有界队列、作用域内清理和可观测错误",
-          "status": "CORE_CAPACITIES_BOUNDED_WEBCALLBACK_AND_STRESS_PENDING",
+          "status": "WEB_TRANSPORT_BOUNDS_VERIFIED_FULL_MODEL_DEVICE_STRESS_PENDING",
           "deliverable": "慢消费者/队列满/重复生命周期记录",
           "execution": "IN_PROGRESS",
           "evidence": [
-            "benchmarks/results/reachy-r3-actions-summary.json"
+            "benchmarks/results/reachy-r3-actions-summary.json",
+            "benchmarks/results/reachy-r3-web-summary.json"
           ]
         },
         {
@@ -404,8 +405,10 @@
       ]
     },
     "F08": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "PARTIAL_WEB_CANCEL_VERIFIED_PHYSICAL_VOICE_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r3-web-summary.json"
+      ]
     },
     "F09": {
       "status": "SOFTWARE_MODEL_DATABASE_SCHEDULER_VERIFIED",
@@ -414,8 +417,10 @@
       ]
     },
     "F10": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "PARTIAL_WEB_STATE_AND_TRANSPORT_VERIFIED_FULL_COEXISTENCE_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r3-web-summary.json"
+      ]
     },
     "F11": {
       "status": "NOT_VERIFIED",
@@ -514,7 +519,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
-  "updated_at": "2026-10-16T05:05:25.437156+00:00",
+  "updated_at": "2026-10-16T06:25:36.294098+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"

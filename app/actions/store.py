@@ -233,8 +233,12 @@ class ActionStore:
                 receipt=json.dumps(receipt or {'kind':status,'error':error},ensure_ascii=False)))
 
     def snapshot(self):
-        with self._lock,self.db.connect() as c:
+        # Monitoring reads must not hold the writer/notification mutex. The
+        # application joins monitoring and Web readers before closing this DB.
+        with self._lock:
             self._open()
-            return {'enabled':True,'scheduler_running':bool(self.scheduler.running),'error':self.last_error,
+            status={'enabled':True,'scheduler_running':bool(self.scheduler.running),'error':self.last_error}
+        with self.db.connect() as c:
+            return {**status,
                 'notes':c.scalar(select(func.count()).select_from(NOTES)),
                 'reminders':[dict(r) for r in c.execute(select(REMINDERS).order_by(REMINDERS.c.created_at.desc()).limit(10)).mappings()]}
