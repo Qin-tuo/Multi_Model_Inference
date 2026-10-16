@@ -257,6 +257,10 @@ def environment(out):
         "power": command(["sudo", "-n", "nvpmodel", "-q"]),
         "git_commit": command(["git", "-C", str(ROOT), "rev-parse", "HEAD"]),
         "l4t": Path("/etc/nv_tegra_release").read_text(),
+        "python": os.sys.version,
+        "cuda_version_manifest": json.loads(
+            Path("/usr/local/cuda/version.json").read_text()
+        ),
         "opencv": command(
             [
                 os.sys.executable,
@@ -291,6 +295,11 @@ class Resources:
         self.stats_log = None
 
     def start(self):
+        self.clock_anchor = {
+            "monotonic": time.monotonic(),
+            "wall_time_unix": time.time(),
+            "utc": runtime.stamp(),
+        }
         self.stats_log = (self.out / "tegrastats.log").open("w")
         self.stats = subprocess.Popen(
             ["tegrastats", "--interval", "1000"],
@@ -374,6 +383,11 @@ class Resources:
             self.out / "monitor.json",
             {
                 "errors": self.errors,
+                "clock_anchor": self.clock_anchor,
+                "clock_end": {
+                    "monotonic": time.monotonic(),
+                    "wall_time_unix": time.time(),
+                },
                 "process_groups": self.groups,
                 "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory.",
             },

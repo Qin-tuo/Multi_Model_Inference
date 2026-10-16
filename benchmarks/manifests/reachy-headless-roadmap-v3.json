@@ -298,21 +298,26 @@
         {
           "id": "R4.baseline",
           "title": "采集视觉优先的软件B0-SW",
-          "status": "VISION_V1_V2_COLLECTED_SPEECH_LLM_END_TO_END_PENDING",
+          "status": "V1_V2_S1_L1_T1_COLLECTED_FULL_APPLICATION_E1_PENDING",
           "deliverable": "视觉实机与固定输入单体/共存指标、文件或PCM语音软件指标；标明时间起点，声学指标不填估值",
           "execution": "IN_PROGRESS",
           "evidence": [
             "benchmarks/manifests/reachy-b0-sw-v1.json",
             "benchmarks/manifests/reachy-b0-inputs-v1.json",
-            "benchmarks/results/reachy-b0-vision-summary.json"
+            "benchmarks/results/reachy-b0-vision-summary.json",
+            "benchmarks/results/reachy-b0-models-summary.json"
           ]
         },
         {
           "id": "R4.handoff",
           "title": "交付架构和代码导读",
-          "status": "NOT_STARTED",
+          "status": "ARCHITECTURE_CODE_GUIDE_DRAFTED_FINAL_BASELINE_HANDOFF_PENDING",
           "deliverable": "用户能启动、使用并跟踪一条请求",
-          "execution": "NOT_STARTED"
+          "execution": "IN_PROGRESS",
+          "evidence": [
+            "README.md",
+            "docs/reachy-migration.md"
+          ]
         }
       ]
     },
@@ -535,21 +540,22 @@
     "upstream_reference": "U0; source-reported results separate from local measurements",
     "functional_baseline": "B0-SW; current enabled software and real D435i vision scope, assistant measured without prior tuning",
     "user_experiments": "E-series; user-led single-factor changes compared with frozen B0",
-    "status": "PARTIAL_VISION_COLLECTED_FULL_B0_PENDING",
+    "status": "COMPONENTS_COLLECTED_FULL_APPLICATION_E1_PENDING",
     "physical_audio_status": "DEFERRED_BY_USER",
     "collection_started": true,
     "completed_components": [
       "V1: fixed-input body/face/palm+hands",
-      "V2: fixed replay isolated/resident/4B and live camera"
+      "V2: fixed replay isolated/resident/4B and live camera",
+      "S1: frozen file VAD/ASR",
+      "T1: local TTS PCM interface",
+      "L1: text/image 4B with native cache/decode metadata"
     ],
     "pending_components": [
-      "S1: file VAD/ASR",
-      "L1: LLM and VLM",
-      "T1: TTS",
       "E1: complete software application",
-      "Consolidated baseline and architecture handoff"
+      "Consolidated baseline and user reproduction handoff"
     ],
-    "vision_evidence": "benchmarks/results/reachy-b0-vision-summary.json"
+    "vision_evidence": "benchmarks/results/reachy-b0-vision-summary.json",
+    "model_interface_evidence": "benchmarks/results/reachy-b0-models-summary.json"
   },
   "collaboration": {
     "framework_owner": "assistant",
@@ -576,7 +582,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
-  "updated_at": "2026-10-16T10:04:16.772351+00:00",
+  "updated_at": "2026-10-16T10:46:48.792755+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
