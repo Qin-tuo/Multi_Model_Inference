@@ -12,7 +12,7 @@
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services down
 ```
 
-操作细节见 [部署与回退](deploy/systemd/README.md)，数据流和阶段记录见 [迁移说明](docs/reachy-migration.md)。当前验证包括 167 项自动化测试、20 次连续完整应用启停、实际进程崩溃恢复、两次旧系统回退、20 轮真实模型共存压力及隔离网络离线启动。证据见 [部署报告](benchmarks/results/reachy-r4-deployment-summary.json)。这些是软件功能与可靠性检查，尚未交付性能基线。基线的 3 份图像、20 份合成中文语音及[测量协议](benchmarks/manifests/reachy-b0-sw-v1.json)已冻结，正式测量待进行。
+操作细节见 [部署与回退](deploy/systemd/README.md)，数据流和阶段记录见 [迁移说明](docs/reachy-migration.md)。当前验证包括 171 项自动化测试、20 次连续完整应用启停、实际进程崩溃恢复、两次旧系统回退、20 轮真实模型共存压力及隔离网络离线启动。证据见 [部署报告](benchmarks/results/reachy-r4-deployment-summary.json)。这些是软件功能与可靠性检查，视觉 V1/V2 基线已采集，见[数据与边界](benchmarks/results/reachy-b0-vision-summary.json)及[图表](benchmarks/results/reachy-b0-vision.png)。3 份图像、20 份合成中文语音及[冻结协议](benchmarks/manifests/reachy-b0-sw-v1.json)保持固定；ASR、主模型、TTS、完整软件端到端及最终交接仍待完成。
 
 按用户 2026-10-16 决定，麦克风/扬声器实物环节后置；真实手势补测稍后进行。当前继续软件框架与 B0-SW 交接，交接后由用户先开展视觉优化。旧系统固定在 `~/AI_Stack/archives/legacy-runtime-972de50`，默认旧七服务已停止。
 

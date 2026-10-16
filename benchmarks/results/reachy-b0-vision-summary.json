@@ -1,0 +1,1756 @@
+{
+  "created_at": "2026-10-16T10:02:58.135687+00:00",
+  "status": "VISION_COMPONENTS_COLLECTED_FULL_B0_PENDING",
+  "summarizer_sha256": "2992bde93aa7900925d4828a6517aa6117aaecefe350ce6472e47356aca323da",
+  "modules": {
+    "body": {
+      "status": "MEASURED",
+      "load_seconds": 0.3598281120066531,
+      "opencv_threads": 8,
+      "fixtures": [
+        {
+          "input": "public-original.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 51.70188803458586,
+            "p95": 54.19247399549931,
+            "max": 54.91298803826794,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 53.16291900817305,
+            "p95": 54.98831998556852,
+            "max": 57.4129149899818,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "body.preprocess": {
+              "count": 20,
+              "p50": 4.407732980325818,
+              "p95": 4.488345002755523,
+              "max": 4.499257018323988,
+              "method": "nearest-rank"
+            },
+            "body.native_sync": {
+              "count": 20,
+              "p50": 11.216445011086762,
+              "p95": 11.384646000806242,
+              "max": 11.412455001845956,
+              "method": "nearest-rank"
+            },
+            "body.postprocess": {
+              "count": 20,
+              "p50": 37.782783969305456,
+              "p95": 39.38100702362135,
+              "max": 41.630394000094384,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": 0.5271450208965689,
+          "first_after_fixture_change_ms": 74.84837900847197
+        },
+        {
+          "input": "public-camera-shape.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 55.324757006019354,
+            "p95": 59.149133041501045,
+            "max": 62.43361404631287,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 54.992037010379136,
+            "p95": 60.317799041513354,
+            "max": 63.29410203034058,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "body.preprocess": {
+              "count": 20,
+              "p50": 1.657007960602641,
+              "p95": 1.7864860128611326,
+              "max": 4.740005999337882,
+              "method": "nearest-rank"
+            },
+            "body.native_sync": {
+              "count": 20,
+              "p50": 11.137017980217934,
+              "p95": 11.80706697050482,
+              "max": 12.509246007539332,
+              "method": "nearest-rank"
+            },
+            "body.postprocess": {
+              "count": 20,
+              "p50": 41.974958032369614,
+              "p95": 43.983087001834065,
+              "max": 50.3693160135299,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": 0.08797246846370399,
+          "first_after_fixture_change_ms": 54.82908204430714
+        },
+        {
+          "input": "blank-camera-shape.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 64.68550197314471,
+            "p95": 66.70646503334865,
+            "max": 86.98696497594938,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 64.96807601070032,
+            "p95": 84.31304502300918,
+            "max": 85.01753001473844,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "body.preprocess": {
+              "count": 20,
+              "p50": 1.642158953472972,
+              "p95": 1.6838579904288054,
+              "max": 1.7551890341565013,
+              "method": "nearest-rank"
+            },
+            "body.native_sync": {
+              "count": 20,
+              "p50": 11.157436994835734,
+              "p95": 11.375463043805212,
+              "max": 11.389031948056072,
+              "method": "nearest-rank"
+            },
+            "body.postprocess": {
+              "count": 20,
+              "p50": 52.180736034642905,
+              "p95": 71.47751201409847,
+              "max": 71.93891197675839,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": -0.043057516450062394,
+          "first_after_fixture_change_ms": 62.76249303482473
+        }
+      ],
+      "errors": [],
+      "resources": {
+        "sample_count": 7,
+        "minimum_mem_available_gib": 11.127002716064453,
+        "maximum_swap_used_gib": 0.9903526306152344,
+        "host_cpu_percent": {
+          "count": 7,
+          "p50": 14.4,
+          "p95": 19.3,
+          "max": 19.3,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 7,
+          "p50": 0.0,
+          "p95": 29.2,
+          "max": 29.2,
+          "method": "nearest-rank"
+        },
+        "body_pss": {
+          "first": 378330112.0,
+          "last": 381291520.0,
+          "sampled_max": 381291520.0
+        },
+        "body_rss": {
+          "first": 520523776.0,
+          "last": 523472896.0,
+          "sampled_max": 523472896.0
+        },
+        "body_fds": {
+          "first": 50.0,
+          "last": 50.0,
+          "sampled_max": 50.0
+        },
+        "body_threads": {
+          "first": 19.0,
+          "last": 19.0,
+          "sampled_max": 19.0
+        },
+        "body_cpu_percent_one_core": 98.97841017852738
+      },
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "body": [
+            274561
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    },
+    "face": {
+      "status": "MEASURED",
+      "load_seconds": 0.007247775967698544,
+      "opencv_threads": 8,
+      "fixtures": [
+        {
+          "input": "public-original.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 21.871910023037344,
+            "p95": 27.070723997894675,
+            "max": 27.651679003611207,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 21.405647043138742,
+            "p95": 23.16899795550853,
+            "max": 25.95815696986392,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "face.native_config": {
+              "count": 20,
+              "p50": 0.008416012860834599,
+              "p95": 0.008992035873234272,
+              "max": 0.009312003385275602,
+              "method": "nearest-rank"
+            },
+            "face.native_detect": {
+              "count": 20,
+              "p50": 21.304075024090707,
+              "p95": 23.051744035910815,
+              "max": 25.85940097924322,
+              "method": "nearest-rank"
+            },
+            "face.python_pre_and_lock": {
+              "count": 20,
+              "p50": 0.014783989172428846,
+              "p95": 0.01846498344093561,
+              "max": 0.018912949599325657,
+              "method": "nearest-rank"
+            },
+            "face.python_post": {
+              "count": 20,
+              "p50": 0.07369898958131671,
+              "p95": 0.08086796151474118,
+              "max": 0.2087139873765409,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": -0.5613070097751915,
+          "first_after_fixture_change_ms": 43.45948703121394
+        },
+        {
+          "input": "public-camera-shape.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 10.618659958709031,
+            "p95": 11.878401041030884,
+            "max": 12.966645997948945,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 10.686983994673938,
+            "p95": 12.969623028766364,
+            "max": 14.243603975046426,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "face.native_config": {
+              "count": 20,
+              "p50": 0.007232010830193758,
+              "p95": 0.008288014214485884,
+              "max": 0.008767994586378336,
+              "method": "nearest-rank"
+            },
+            "face.native_detect": {
+              "count": 20,
+              "p50": 10.600482986774296,
+              "p95": 12.858065019827336,
+              "max": 14.150704024359584,
+              "method": "nearest-rank"
+            },
+            "face.python_pre_and_lock": {
+              "count": 20,
+              "p50": 0.011424999684095383,
+              "p95": 0.015616999007761478,
+              "max": 0.038146041333675385,
+              "method": "nearest-rank"
+            },
+            "face.python_post": {
+              "count": 20,
+              "p50": 0.06589101394638419,
+              "p95": 0.07101200753822923,
+              "max": 0.09117298759520054,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": 0.1413830032106489,
+          "first_after_fixture_change_ms": 18.419166968669742
+        },
+        {
+          "input": "blank-camera-shape.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 11.46734197391197,
+            "p95": 13.978918956127018,
+            "max": 14.243924990296364,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 11.042745027225465,
+            "p95": 13.262884982395917,
+            "max": 14.20075399801135,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "face.native_config": {
+              "count": 20,
+              "p50": 0.008704024367034435,
+              "p95": 0.010721036233007908,
+              "max": 0.01094501931220293,
+              "method": "nearest-rank"
+            },
+            "face.native_detect": {
+              "count": 20,
+              "p50": 10.988951020408422,
+              "p95": 13.215203012805432,
+              "max": 14.140080020297319,
+              "method": "nearest-rank"
+            },
+            "face.python_pre_and_lock": {
+              "count": 20,
+              "p50": 0.014625024050474167,
+              "p95": 0.018784950952976942,
+              "max": 0.019392988178879023,
+              "method": "nearest-rank"
+            },
+            "face.python_post": {
+              "count": 20,
+              "p50": 0.025920977350324392,
+              "p95": 0.02780900103971362,
+              "max": 0.028737005777657032,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": -0.10373350232839584,
+          "first_after_fixture_change_ms": 14.509761007502675
+        }
+      ],
+      "errors": [],
+      "resources": {
+        "sample_count": 2,
+        "minimum_mem_available_gib": 11.220355987548828,
+        "maximum_swap_used_gib": 0.9903526306152344,
+        "host_cpu_percent": {
+          "count": 2,
+          "p50": 86.5,
+          "p95": 91.5,
+          "max": 91.5,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 2,
+          "p50": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "method": "nearest-rank"
+        },
+        "face_pss": {
+          "first": 97748992.0,
+          "last": 75049984.0,
+          "sampled_max": 97748992.0
+        },
+        "face_rss": {
+          "first": 104869888.0,
+          "last": 82182144.0,
+          "sampled_max": 104869888.0
+        },
+        "face_fds": {
+          "first": 8.0,
+          "last": 8.0,
+          "sampled_max": 8.0
+        },
+        "face_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "face_cpu_percent_one_core": 710.5708585468853
+      },
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "face": [
+            274589
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    },
+    "hands": {
+      "status": "MEASURED",
+      "load_seconds": 0.03814073698595166,
+      "opencv_threads": 8,
+      "fixtures": [
+        {
+          "input": "public-original.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 43.280829035211354,
+            "p95": 47.881758015137166,
+            "max": 50.98549200920388,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 40.97876499872655,
+            "p95": 49.18230202747509,
+            "max": 58.443457004614174,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "palm.preprocess": {
+              "count": 20,
+              "p50": 0.7569970330223441,
+              "p95": 0.7926460239104927,
+              "max": 0.8060240070335567,
+              "method": "nearest-rank"
+            },
+            "palm.set_input": {
+              "count": 20,
+              "p50": 0.047779001761227846,
+              "p95": 0.04864297807216644,
+              "max": 0.048802001401782036,
+              "method": "nearest-rank"
+            },
+            "palm.native_forward": {
+              "count": 20,
+              "p50": 14.126352034509182,
+              "p95": 20.595084002707154,
+              "max": 21.668767964001745,
+              "method": "nearest-rank"
+            },
+            "palm.postprocess": {
+              "count": 20,
+              "p50": 1.8779790261760354,
+              "p95": 1.9111649598926306,
+              "max": 1.9115490140393376,
+              "method": "nearest-rank"
+            },
+            "hand.preprocess": {
+              "count": 40,
+              "p50": 4.421656019985676,
+              "p95": 7.201215019449592,
+              "max": 7.361894997302443,
+              "method": "nearest-rank"
+            },
+            "hand.set_input": {
+              "count": 40,
+              "p50": 0.06646697875112295,
+              "p95": 0.06845203461125493,
+              "max": 0.06995495641604066,
+              "method": "nearest-rank"
+            },
+            "hand.native_forward": {
+              "count": 40,
+              "p50": 6.014053011313081,
+              "p95": 9.193217032589018,
+              "max": 12.762479018419981,
+              "method": "nearest-rank"
+            },
+            "hand.postprocess": {
+              "count": 40,
+              "p50": 0.6216619512997568,
+              "p95": 0.652928021736443,
+              "max": 0.6561279878951609,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": -0.4032835131511092,
+          "first_after_fixture_change_ms": 64.45366702973843
+        },
+        {
+          "input": "public-camera-shape.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 37.81589400023222,
+            "p95": 46.97976500028744,
+            "max": 48.91521896934137,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 37.475939956493676,
+            "p95": 47.5046870415099,
+            "max": 49.22617896227166,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "palm.preprocess": {
+              "count": 20,
+              "p50": 0.7571249734610319,
+              "p95": 0.7830460090190172,
+              "max": 0.7898950134404004,
+              "method": "nearest-rank"
+            },
+            "palm.set_input": {
+              "count": 20,
+              "p50": 0.04592305049300194,
+              "p95": 0.047106994315981865,
+              "max": 0.04723400343209505,
+              "method": "nearest-rank"
+            },
+            "palm.native_forward": {
+              "count": 20,
+              "p50": 14.338139037135988,
+              "p95": 20.625774981454015,
+              "max": 20.69432201096788,
+              "method": "nearest-rank"
+            },
+            "palm.postprocess": {
+              "count": 20,
+              "p50": 1.8604110227897763,
+              "p95": 1.919166010338813,
+              "max": 1.9208939629606903,
+              "method": "nearest-rank"
+            },
+            "hand.preprocess": {
+              "count": 40,
+              "p50": 2.978961041662842,
+              "p95": 3.848315973300487,
+              "max": 3.8656279793940485,
+              "method": "nearest-rank"
+            },
+            "hand.set_input": {
+              "count": 40,
+              "p50": 0.062370963860303164,
+              "p95": 0.06467604544013739,
+              "max": 0.08845300180837512,
+              "method": "nearest-rank"
+            },
+            "hand.native_forward": {
+              "count": 40,
+              "p50": 5.875614995602518,
+              "p95": 8.686824003234506,
+              "max": 9.36621701112017,
+              "method": "nearest-rank"
+            },
+            "hand.postprocess": {
+              "count": 40,
+              "p50": 0.6119019817560911,
+              "p95": 0.6270390003919601,
+              "max": 0.6479350267909467,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": -0.5962055292911828,
+          "first_after_fixture_change_ms": 37.37529501086101
+        },
+        {
+          "input": "blank-camera-shape.png",
+          "plain_ms": {
+            "count": 20,
+            "p50": 16.377535997889936,
+            "p95": 21.597630984615535,
+            "max": 22.499018989037722,
+            "method": "nearest-rank"
+          },
+          "instrumented_ms": {
+            "count": 20,
+            "p50": 16.493700968567282,
+            "p95": 20.125782990362495,
+            "max": 22.37459598109126,
+            "method": "nearest-rank"
+          },
+          "stage_ms": {
+            "palm.preprocess": {
+              "count": 20,
+              "p50": 0.7246760069392622,
+              "p95": 0.7553969626314938,
+              "max": 0.7724209572188556,
+              "method": "nearest-rank"
+            },
+            "palm.set_input": {
+              "count": 20,
+              "p50": 0.04339398583397269,
+              "p95": 0.047043024096637964,
+              "max": 0.061635044403374195,
+              "method": "nearest-rank"
+            },
+            "palm.native_forward": {
+              "count": 20,
+              "p50": 13.875910022761673,
+              "p95": 17.453971959184855,
+              "max": 19.708066014572978,
+              "method": "nearest-rank"
+            },
+            "palm.postprocess": {
+              "count": 20,
+              "p50": 1.7496859654784203,
+              "p95": 1.7789669800549746,
+              "max": 1.7790939891710877,
+              "method": "nearest-rank"
+            }
+          },
+          "pair_count": 20,
+          "parity_matches": 20,
+          "signed_paired_difference_median_ms": -0.06533201667480171,
+          "first_after_fixture_change_ms": 23.33726698998362
+        }
+      ],
+      "errors": [],
+      "resources": {
+        "sample_count": 3,
+        "minimum_mem_available_gib": 11.243778228759766,
+        "maximum_swap_used_gib": 0.9903526306152344,
+        "host_cpu_percent": {
+          "count": 3,
+          "p50": 77.7,
+          "p95": 78.7,
+          "max": 78.7,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 3,
+          "p50": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "method": "nearest-rank"
+        },
+        "hands_pss": {
+          "first": 84859904.0,
+          "last": 84930560.0,
+          "sampled_max": 84930560.0
+        },
+        "hands_rss": {
+          "first": 91987968.0,
+          "last": 92069888.0,
+          "sampled_max": 92069888.0
+        },
+        "hands_fds": {
+          "first": 8.0,
+          "last": 8.0,
+          "sampled_max": 8.0
+        },
+        "hands_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "hands_cpu_percent_one_core": 599.8696000482627
+      },
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "hands": [
+            274610
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    }
+  },
+  "streams": {
+    "replay-only": {
+      "status": "MEASURED",
+      "window_seconds": 60.00007911003195,
+      "samples": 600,
+      "captured_rate_hz": 9.966424282849305,
+      "perception_completions": 300,
+      "perception_rate_hz": 4.99999340750603,
+      "latest_age_ms": {
+        "count": 600,
+        "p50": 261.473816994112,
+        "p95": 380.54387900047004,
+        "max": 440.66982803633437,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_missing_ms": 380.54387900047004,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "perception_errors_cumulative": 0,
+      "camera_after": {
+        "ready": true,
+        "state": "streaming",
+        "error": null,
+        "source_epoch": "171f2b7e07084a2096190fabd04d3658",
+        "frame_age_seconds": 0.04447935498319566,
+        "open_attempts": 1,
+        "failures": 0,
+        "reconnects": 0,
+        "buffer_count": 165,
+        "buffer_bytes": 2025392,
+        "capture_worker_alive": true
+      },
+      "frame_processing_ms": {
+        "count": 300,
+        "p50": 124.41397702787071,
+        "p95": 140.15560498228297,
+        "max": 148.5546669573523,
+        "method": "nearest-rank"
+      },
+      "perception_stage_ms": {
+        "body_ms": {
+          "count": 300,
+          "p50": 68.71685397345573,
+          "p95": 83.96038698265329,
+          "max": 94.58526701200753,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 300,
+          "p50": 15.465311997104436,
+          "p95": 16.939540044404566,
+          "max": 18.219742050860077,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 300,
+          "p50": 31.27655596472323,
+          "p95": 60.966585006099194,
+          "max": 65.42536901542917,
+          "method": "nearest-rank"
+        }
+      },
+      "source_read_ms": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "method": "nearest-rank"
+      },
+      "jpeg_encode_ms": {
+        "count": 598,
+        "p50": 3.108242992311716,
+        "p95": 5.398073990363628,
+        "max": 36.655504954978824,
+        "method": "nearest-rank"
+      },
+      "frame_fetch_ms": {
+        "count": 300,
+        "p50": 0.0333779607899487,
+        "p95": 0.04867499228566885,
+        "max": 0.08083699503913522,
+        "method": "nearest-rank"
+      },
+      "replay_missed_arrivals_with_warmup": 2,
+      "replay_delivery_lag_ms": {
+        "count": 598,
+        "p50": 44.636334001552314,
+        "p95": 80.52816102281213,
+        "max": 88.96594302495942,
+        "method": "nearest-rank"
+      },
+      "background_requests_overlapping_window": 0,
+      "background_requests_completed": 0,
+      "background_end_of_window_cancelled": 0,
+      "resources": {
+        "sample_count": 60,
+        "minimum_mem_available_gib": 11.056438446044922,
+        "maximum_swap_used_gib": 0.9866905212402344,
+        "host_cpu_percent": {
+          "count": 60,
+          "p50": 30.9,
+          "p95": 36.0,
+          "max": 38.3,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 60,
+          "p50": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "method": "nearest-rank"
+        },
+        "vision_pss": {
+          "first": 445724672.0,
+          "last": 446493696.0,
+          "sampled_max": 446493696.0
+        },
+        "vision_rss": {
+          "first": 588189696.0,
+          "last": 588959744.0,
+          "sampled_max": 588959744.0
+        },
+        "vision_fds": {
+          "first": 50.0,
+          "last": 50.0,
+          "sampled_max": 50.0
+        },
+        "vision_threads": {
+          "first": 21.0,
+          "last": 21.0,
+          "sampled_max": 21.0
+        },
+        "vision_cpu_percent_one_core": 228.1649987877101
+      },
+      "errors": [],
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "vision": [
+            275699
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    },
+    "replay-resident": {
+      "status": "MEASURED",
+      "window_seconds": 60.00010129902512,
+      "samples": 600,
+      "captured_rate_hz": 9.966614450105274,
+      "perception_completions": 300,
+      "perception_rate_hz": 4.9999915584288255,
+      "latest_age_ms": {
+        "count": 600,
+        "p50": 262.8855390357785,
+        "p95": 363.7215819908306,
+        "max": 429.33909804560244,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_missing_ms": 363.7215819908306,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "perception_errors_cumulative": 0,
+      "camera_after": {
+        "ready": true,
+        "state": "streaming",
+        "error": null,
+        "source_epoch": "e8e459dfe3ac42609f6397e8a8ec6982",
+        "frame_age_seconds": 0.09376219403930008,
+        "open_attempts": 1,
+        "failures": 0,
+        "reconnects": 0,
+        "buffer_count": 165,
+        "buffer_bytes": 2039695,
+        "capture_worker_alive": true
+      },
+      "frame_processing_ms": {
+        "count": 300,
+        "p50": 124.3045490118675,
+        "p95": 139.0135269612074,
+        "max": 147.6356780040078,
+        "method": "nearest-rank"
+      },
+      "perception_stage_ms": {
+        "body_ms": {
+          "count": 300,
+          "p50": 67.640035005752,
+          "p95": 85.8411900117062,
+          "max": 99.66324100969359,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 300,
+          "p50": 15.34599403385073,
+          "p95": 17.28268200531602,
+          "max": 19.115752016659826,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 300,
+          "p50": 31.35967400157824,
+          "p95": 60.27354404795915,
+          "max": 63.57951101381332,
+          "method": "nearest-rank"
+        }
+      },
+      "source_read_ms": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "method": "nearest-rank"
+      },
+      "jpeg_encode_ms": {
+        "count": 598,
+        "p50": 3.6947450134903193,
+        "p95": 5.692305043339729,
+        "max": 56.25648197019473,
+        "method": "nearest-rank"
+      },
+      "frame_fetch_ms": {
+        "count": 300,
+        "p50": 0.033025979064404964,
+        "p95": 0.04726700717583299,
+        "max": 0.053475028835237026,
+        "method": "nearest-rank"
+      },
+      "replay_missed_arrivals_with_warmup": 3,
+      "replay_delivery_lag_ms": {
+        "count": 598,
+        "p50": 38.511343009304255,
+        "p95": 93.31095399102196,
+        "max": 99.97656097402796,
+        "method": "nearest-rank"
+      },
+      "background_requests_overlapping_window": 0,
+      "background_requests_completed": 0,
+      "background_end_of_window_cancelled": 0,
+      "resources": {
+        "sample_count": 60,
+        "minimum_mem_available_gib": 5.399894714355469,
+        "maximum_swap_used_gib": 0.9859123229980469,
+        "host_cpu_percent": {
+          "count": 60,
+          "p50": 30.8,
+          "p95": 37.4,
+          "max": 38.9,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 60,
+          "p50": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "method": "nearest-rank"
+        },
+        "vision_pss": {
+          "first": 349834240.0,
+          "last": 350657536.0,
+          "sampled_max": 350657536.0
+        },
+        "vision_rss": {
+          "first": 582553600.0,
+          "last": 583335936.0,
+          "sampled_max": 583335936.0
+        },
+        "vision_fds": {
+          "first": 50.0,
+          "last": 50.0,
+          "sampled_max": 50.0
+        },
+        "vision_threads": {
+          "first": 21.0,
+          "last": 21.0,
+          "sampled_max": 21.0
+        },
+        "vision_cpu_percent_one_core": 227.19424382143578,
+        "llama_pss": {
+          "first": 696932352.0,
+          "last": 696969216.0,
+          "sampled_max": 696969216.0
+        },
+        "llama_rss": {
+          "first": 4957667328.0,
+          "last": 4957732864.0,
+          "sampled_max": 4957732864.0
+        },
+        "llama_fds": {
+          "first": 52.0,
+          "last": 52.0,
+          "sampled_max": 52.0
+        },
+        "llama_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "llama_cpu_percent_one_core": 0.033886828819666065,
+        "asr_pss": {
+          "first": 386766848.0,
+          "last": 386738176.0,
+          "sampled_max": 386770944.0
+        },
+        "asr_rss": {
+          "first": 2475585536.0,
+          "last": 2475585536.0,
+          "sampled_max": 2475585536.0
+        },
+        "asr_fds": {
+          "first": 52.0,
+          "last": 52.0,
+          "sampled_max": 52.0
+        },
+        "asr_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "asr_cpu_percent_one_core": 0.050830243229496086,
+        "speech_pss": {
+          "first": 574146560.0,
+          "last": 574173184.0,
+          "sampled_max": 574173184.0
+        },
+        "speech_rss": {
+          "first": 943030272.0,
+          "last": 943050752.0,
+          "sampled_max": 943050752.0
+        },
+        "speech_fds": {
+          "first": 64.0,
+          "last": 62.0,
+          "sampled_max": 64.0
+        },
+        "speech_threads": {
+          "first": 20.0,
+          "last": 20.0,
+          "sampled_max": 20.0
+        },
+        "speech_cpu_percent_one_core": 0.2710946305573089
+      },
+      "errors": [],
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "vision": [
+            276099
+          ],
+          "llama": [
+            275881,
+            275885
+          ],
+          "asr": [
+            275966,
+            275969
+          ],
+          "speech": [
+            276023,
+            276025
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    },
+    "replay-4b": {
+      "status": "MEASURED",
+      "window_seconds": 60.00010356598068,
+      "samples": 600,
+      "captured_rate_hz": 9.950120681104355,
+      "perception_completions": 300,
+      "perception_rate_hz": 4.999991369516507,
+      "latest_age_ms": {
+        "count": 600,
+        "p50": 265.2332099969499,
+        "p95": 375.0173519947566,
+        "max": 449.6104369754903,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_missing_ms": 375.0173519947566,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "perception_errors_cumulative": 0,
+      "camera_after": {
+        "ready": true,
+        "state": "streaming",
+        "error": null,
+        "source_epoch": "e642a76030d44c8ca0833862fcf09099",
+        "frame_age_seconds": 0.01785899297101423,
+        "open_attempts": 1,
+        "failures": 0,
+        "reconnects": 0,
+        "buffer_count": 165,
+        "buffer_bytes": 2039695,
+        "capture_worker_alive": true
+      },
+      "frame_processing_ms": {
+        "count": 300,
+        "p50": 131.93737500114366,
+        "p95": 148.78747699549422,
+        "max": 176.25490500358865,
+        "method": "nearest-rank"
+      },
+      "perception_stage_ms": {
+        "body_ms": {
+          "count": 300,
+          "p50": 78.14394298475236,
+          "p95": 98.08771399548277,
+          "max": 129.7407919773832,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 300,
+          "p50": 14.219186967238784,
+          "p95": 16.30820898571983,
+          "max": 18.936080974526703,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 300,
+          "p50": 29.70017702318728,
+          "p95": 56.92071601515636,
+          "max": 60.833798022940755,
+          "method": "nearest-rank"
+        }
+      },
+      "source_read_ms": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "method": "nearest-rank"
+      },
+      "jpeg_encode_ms": {
+        "count": 598,
+        "p50": 3.7404799950309098,
+        "p95": 5.711446050554514,
+        "max": 27.523251017555594,
+        "method": "nearest-rank"
+      },
+      "frame_fetch_ms": {
+        "count": 300,
+        "p50": 0.02848199801519513,
+        "p95": 0.041251012589782476,
+        "max": 0.05001900717616081,
+        "method": "nearest-rank"
+      },
+      "replay_missed_arrivals_with_warmup": 4,
+      "replay_delivery_lag_ms": {
+        "count": 597,
+        "p50": 49.44306495599449,
+        "p95": 94.54469598131254,
+        "max": 99.73215096397325,
+        "method": "nearest-rank"
+      },
+      "background_requests_overlapping_window": 7,
+      "background_requests_completed": 6,
+      "background_end_of_window_cancelled": 1,
+      "resources": {
+        "sample_count": 60,
+        "minimum_mem_available_gib": 5.042640686035156,
+        "maximum_swap_used_gib": 0.9859123229980469,
+        "host_cpu_percent": {
+          "count": 60,
+          "p50": 30.4,
+          "p95": 35.4,
+          "max": 35.9,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 60,
+          "p50": 99.9,
+          "p95": 99.9,
+          "max": 99.9,
+          "method": "nearest-rank"
+        },
+        "vision_pss": {
+          "first": 366910464.0,
+          "last": 368704512.0,
+          "sampled_max": 368704512.0
+        },
+        "vision_rss": {
+          "first": 597770240.0,
+          "last": 599531520.0,
+          "sampled_max": 599531520.0
+        },
+        "vision_fds": {
+          "first": 51.0,
+          "last": 51.0,
+          "sampled_max": 51.0
+        },
+        "vision_threads": {
+          "first": 23.0,
+          "last": 23.0,
+          "sampled_max": 23.0
+        },
+        "vision_cpu_percent_one_core": 217.61854762643242,
+        "llama_pss": {
+          "first": 971752448.0,
+          "last": 972108800.0,
+          "sampled_max": 972110848.0
+        },
+        "llama_rss": {
+          "first": 5239050240.0,
+          "last": 5239312384.0,
+          "sampled_max": 5239312384.0
+        },
+        "llama_fds": {
+          "first": 53.0,
+          "last": 53.0,
+          "sampled_max": 53.0
+        },
+        "llama_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "llama_cpu_percent_one_core": 4.9632003156024505,
+        "asr_pss": {
+          "first": 386458624.0,
+          "last": 386454528.0,
+          "sampled_max": 386458624.0
+        },
+        "asr_rss": {
+          "first": 2475139072.0,
+          "last": 2475139072.0,
+          "sampled_max": 2475139072.0
+        },
+        "asr_fds": {
+          "first": 52.0,
+          "last": 52.0,
+          "sampled_max": 52.0
+        },
+        "asr_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "asr_cpu_percent_one_core": 0.01693925022389954,
+        "speech_pss": {
+          "first": 571051008.0,
+          "last": 571048960.0,
+          "sampled_max": 571055104.0
+        },
+        "speech_rss": {
+          "first": 937701376.0,
+          "last": 937705472.0,
+          "sampled_max": 937705472.0
+        },
+        "speech_fds": {
+          "first": 62.0,
+          "last": 64.0,
+          "sampled_max": 64.0
+        },
+        "speech_threads": {
+          "first": 20.0,
+          "last": 20.0,
+          "sampled_max": 20.0
+        },
+        "speech_cpu_percent_one_core": 0.23714950313458907
+      },
+      "errors": [],
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "vision": [
+            276223
+          ],
+          "llama": [
+            275881,
+            275885
+          ],
+          "asr": [
+            275966,
+            275969
+          ],
+          "speech": [
+            276023,
+            276025
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    },
+    "live-resident": {
+      "status": "MEASURED",
+      "window_seconds": 60.00010605499847,
+      "samples": 600,
+      "captured_rate_hz": 9.983327272504827,
+      "perception_completions": 300,
+      "perception_rate_hz": 4.999991162099083,
+      "latest_age_ms": {
+        "count": 600,
+        "p50": 249.186308006756,
+        "p95": 342.42731204722077,
+        "max": 421.17136699380353,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_missing_ms": 342.42731204722077,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "perception_errors_cumulative": 0,
+      "camera_after": {
+        "ready": true,
+        "state": "streaming",
+        "error": null,
+        "source_epoch": "e384c9d74a0b491fa3e5617bd39459b3",
+        "frame_age_seconds": 0.1021900349878706,
+        "open_attempts": 1,
+        "failures": 0,
+        "reconnects": 0,
+        "buffer_count": 165,
+        "buffer_bytes": 4881622,
+        "capture_worker_alive": true
+      },
+      "frame_processing_ms": {
+        "count": 300,
+        "p50": 115.09894399205223,
+        "p95": 131.5244780271314,
+        "max": 140.8657169668004,
+        "method": "nearest-rank"
+      },
+      "perception_stage_ms": {
+        "body_ms": {
+          "count": 300,
+          "p50": 57.96756700146943,
+          "p95": 73.21233599213883,
+          "max": 78.33172095706686,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 300,
+          "p50": 16.795222007203847,
+          "p95": 18.920824979431927,
+          "max": 21.535161999054253,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 300,
+          "p50": 40.27673101518303,
+          "p95": 46.60147498361766,
+          "max": 56.3264440279454,
+          "method": "nearest-rank"
+        }
+      },
+      "source_read_ms": {
+        "count": 599,
+        "p50": 0.698057992849499,
+        "p95": 1.9560539512895048,
+        "max": 5.224922962952405,
+        "method": "nearest-rank"
+      },
+      "jpeg_encode_ms": {
+        "count": 598,
+        "p50": 3.2013130257837474,
+        "p95": 5.729978962335736,
+        "max": 24.394943029619753,
+        "method": "nearest-rank"
+      },
+      "frame_fetch_ms": {
+        "count": 300,
+        "p50": 0.03593799192458391,
+        "p95": 0.048866961151361465,
+        "max": 0.06931601092219353,
+        "method": "nearest-rank"
+      },
+      "replay_missed_arrivals_with_warmup": null,
+      "replay_delivery_lag_ms": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "max": null,
+        "method": "nearest-rank"
+      },
+      "background_requests_overlapping_window": 0,
+      "background_requests_completed": 0,
+      "background_end_of_window_cancelled": 0,
+      "resources": {
+        "sample_count": 60,
+        "minimum_mem_available_gib": 5.038673400878906,
+        "maximum_swap_used_gib": 0.9861564636230469,
+        "host_cpu_percent": {
+          "count": 60,
+          "p50": 30.9,
+          "p95": 33.3,
+          "max": 34.1,
+          "method": "nearest-rank"
+        },
+        "gpu_load_snapshot_percent": {
+          "count": 60,
+          "p50": 0.0,
+          "p95": 0.0,
+          "max": 0.0,
+          "method": "nearest-rank"
+        },
+        "vision_pss": {
+          "first": 376576000.0,
+          "last": 377315328.0,
+          "sampled_max": 377315328.0
+        },
+        "vision_rss": {
+          "first": 607014912.0,
+          "last": 607719424.0,
+          "sampled_max": 607719424.0
+        },
+        "vision_fds": {
+          "first": 51.0,
+          "last": 51.0,
+          "sampled_max": 51.0
+        },
+        "vision_threads": {
+          "first": 21.0,
+          "last": 21.0,
+          "sampled_max": 21.0
+        },
+        "vision_cpu_percent_one_core": 224.0634335322556,
+        "llama_pss": {
+          "first": 972116992.0,
+          "last": 972116992.0,
+          "sampled_max": 972116992.0
+        },
+        "llama_rss": {
+          "first": 5239316480.0,
+          "last": 5239316480.0,
+          "sampled_max": 5239316480.0
+        },
+        "llama_fds": {
+          "first": 52.0,
+          "last": 52.0,
+          "sampled_max": 52.0
+        },
+        "llama_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "llama_cpu_percent_one_core": 0.050815716706736666,
+        "asr_pss": {
+          "first": 386458624.0,
+          "last": 386458624.0,
+          "sampled_max": 386458624.0
+        },
+        "asr_rss": {
+          "first": 2475139072.0,
+          "last": 2475139072.0,
+          "sampled_max": 2475139072.0
+        },
+        "asr_fds": {
+          "first": 52.0,
+          "last": 52.0,
+          "sampled_max": 52.0
+        },
+        "asr_threads": {
+          "first": 16.0,
+          "last": 16.0,
+          "sampled_max": 16.0
+        },
+        "asr_cpu_percent_one_core": 0.050815716706741176,
+        "speech_pss": {
+          "first": 571022336.0,
+          "last": 571026432.0,
+          "sampled_max": 571026432.0
+        },
+        "speech_rss": {
+          "first": 937627648.0,
+          "last": 937631744.0,
+          "sampled_max": 937631744.0
+        },
+        "speech_fds": {
+          "first": 62.0,
+          "last": 62.0,
+          "sampled_max": 64.0
+        },
+        "speech_threads": {
+          "first": 20.0,
+          "last": 20.0,
+          "sampled_max": 20.0
+        },
+        "speech_cpu_percent_one_core": 0.2879557280048657
+      },
+      "errors": [],
+      "monitor": {
+        "errors": [],
+        "process_groups": {
+          "vision": [
+            276443
+          ],
+          "llama": [
+            275881,
+            275885
+          ],
+          "asr": [
+            275966,
+            275969
+          ],
+          "speech": [
+            276023,
+            276025
+          ]
+        },
+        "scope": "Host unified memory and stable process PSS/RSS are separate. GPU/temperature/clocks in raw tegrastats; no summing RSS with GPU memory."
+      }
+    }
+  },
+  "raw_runs": [
+    {
+      "directory": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-v1-20261016-a",
+      "report_status": "MEASURED",
+      "restored": "READY",
+      "files": [
+        {
+          "file": "body/events.jsonl",
+          "bytes": 59013,
+          "sha256": "bddd2ddd572321b71d40967bceda4d2054ad224ad649aa464533537329962d9a"
+        },
+        {
+          "file": "body/monitor.json",
+          "bytes": 228,
+          "sha256": "8936f4182e5b7707bc6d44c308719deadac514ae898cef47502b78cf2bc0f048"
+        },
+        {
+          "file": "body/process.log",
+          "bytes": 180,
+          "sha256": "0be3f36849d82a26a08a073b5e14258dbcf43f0e01e5294ad7fe010238e9da55"
+        },
+        {
+          "file": "body/resources.csv",
+          "bytes": 1336,
+          "sha256": "7d5ab5e3f25ed6e1903f35d877db9f5335688c90b11736995031b4f5c2f62b4f"
+        },
+        {
+          "file": "body/result.json",
+          "bytes": 21010,
+          "sha256": "bd19d2c1031613484cf1b2e65f3cb6ecf0ca0c849be802544a537a2bd998f845"
+        },
+        {
+          "file": "body/tegrastats.log",
+          "bytes": 4347,
+          "sha256": "5ce331a742ee57027da1fa9998f6177a6922229e31aa9c3c6266d7c439a3a0ce"
+        },
+        {
+          "file": "effective-config.json",
+          "bytes": 4326,
+          "sha256": "f6b429a3b801d29fcd731ff8f6679b0bffa05fb57c7011a470e701000d054a0b"
+        },
+        {
+          "file": "environment.json",
+          "bytes": 42012,
+          "sha256": "d601af33888670b1bc4362f4edc010c0fc2f65b073f0d3cd63f0731c37025c51"
+        },
+        {
+          "file": "face/events.jsonl",
+          "bytes": 49683,
+          "sha256": "48dff70bcf15b7c76457ec003fe59ce901ac28fb200baa765602f06d696ef40a"
+        },
+        {
+          "file": "face/monitor.json",
+          "bytes": 228,
+          "sha256": "4e0a815671f4fda5ef714fed5b6dac02b0f776ea8cb48bcd48650b6f4198e0e8"
+        },
+        {
+          "file": "face/process.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "face/resources.csv",
+          "bytes": 663,
+          "sha256": "e58a1e04ee472fadf4c50b99f20584a3bc7fd4f4005e83ccfda2e582cffae0b3"
+        },
+        {
+          "file": "face/result.json",
+          "bytes": 24119,
+          "sha256": "9ff3e74e0bdde8980133a5057675232badd30ef5153e7569c77043df737078b7"
+        },
+        {
+          "file": "face/tegrastats.log",
+          "bytes": 1727,
+          "sha256": "6d40e3297e26a860c7e182f5df3566b0cffffb393ef7d06cecf43c470deabe9f"
+        },
+        {
+          "file": "hands/events.jsonl",
+          "bytes": 391980,
+          "sha256": "aab4d109b8b519696eb196a0df81b0acd913a8d68bfd42685a5a8fc12b8241b5"
+        },
+        {
+          "file": "hands/monitor.json",
+          "bytes": 229,
+          "sha256": "7f9f8b7d8acf0a1752334357cadd67914453b01270a30829a05d5f1e1d1e8eb5"
+        },
+        {
+          "file": "hands/process.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "hands/resources.csv",
+          "bytes": 887,
+          "sha256": "9f036a00457fba946ad70fc41f5c35b2bb10865d4e1d0dddf64b8915a49eace8"
+        },
+        {
+          "file": "hands/result.json",
+          "bytes": 35268,
+          "sha256": "326ed54b16f8e7cdc26ab10f7e195a9c34ccc55975958cd51697958ee9e3373f"
+        },
+        {
+          "file": "hands/tegrastats.log",
+          "bytes": 2660,
+          "sha256": "6d39584105988de3ffc3f053b5ec8f66075f3a3751357e8e20c01798d4b965de"
+        },
+        {
+          "file": "report.json",
+          "bytes": 11837,
+          "sha256": "723713f94d022a713470e26c49287eb4697cdd1e15f295cedac29e9ad8f7e2a5"
+        }
+      ]
+    },
+    {
+      "directory": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-v2-20261016-a",
+      "report_status": "MEASURED",
+      "restored": "READY",
+      "files": [
+        {
+          "file": "effective-config.json",
+          "bytes": 4326,
+          "sha256": "f6b429a3b801d29fcd731ff8f6679b0bffa05fb57c7011a470e701000d054a0b"
+        },
+        {
+          "file": "environment.json",
+          "bytes": 42270,
+          "sha256": "54531213b07eeecdf5715b988b6d2e29ff79babcade155e99621f721218d7374"
+        },
+        {
+          "file": "live-resident/events.jsonl",
+          "bytes": 945393,
+          "sha256": "d40fae9bd3219c08376cd7d18e6c6521660f34f521b4fdda0d49c4006a61fed8"
+        },
+        {
+          "file": "live-resident/monitor.json",
+          "bytes": 376,
+          "sha256": "524077c48112ab3819aaf249b5844f56a752b71aea8e19304eab61d28fbf3ab7"
+        },
+        {
+          "file": "live-resident/process.log",
+          "bytes": 180,
+          "sha256": "6cab674bd8301317f5d493145b8f22bd8ff0c87f4ce739c4d183d3b80e0ad82a"
+        },
+        {
+          "file": "live-resident/resources.csv",
+          "bytes": 17323,
+          "sha256": "aa70fa909453e98fd74040f45299c89ac2f022ba364b9f44a611aad2543e0cc2"
+        },
+        {
+          "file": "live-resident/result.json",
+          "bytes": 505632,
+          "sha256": "f8fd9f08dbff07bc8acf825176daba4d9b66ebb8922ebb0b5b850e463149f391"
+        },
+        {
+          "file": "live-resident/tegrastats.log",
+          "bytes": 35383,
+          "sha256": "9ab86517b823a7aaa78bc62e98e6a14c3a6143926935364bf24e28d568e12de2"
+        },
+        {
+          "file": "replay-4b/events.jsonl",
+          "bytes": 1287719,
+          "sha256": "47b60315ffcaf859a857ea4c86a3e388b5fd9400be79c4d88201865377a54df0"
+        },
+        {
+          "file": "replay-4b/monitor.json",
+          "bytes": 376,
+          "sha256": "20f41458362d445857dc41e35292fb433478a1d2729e8e04dba477ed0af5354e"
+        },
+        {
+          "file": "replay-4b/process.log",
+          "bytes": 180,
+          "sha256": "c8c9bfae9a7b46afc2f8663f613c9135f93fe4360b8a94d8063f21551edc8931"
+        },
+        {
+          "file": "replay-4b/resources.csv",
+          "bytes": 21881,
+          "sha256": "7ad9c26f63055b1e023cb9799db214e26ab851f0e473ee1c1a96cd0bc598501f"
+        },
+        {
+          "file": "replay-4b/result.json",
+          "bytes": 505495,
+          "sha256": "32815408c96cd984eeb55ebdda1cbcb048253ad5a8cb6b8d2e0c47fee0a21b0f"
+        },
+        {
+          "file": "replay-4b/tegrastats.log",
+          "bytes": 47657,
+          "sha256": "8de89f8f1c943ef6346e75b3997b807e1dbee4ef0d020d8ba6057fb01ba0ba24"
+        },
+        {
+          "file": "replay-only/events.jsonl",
+          "bytes": 1094222,
+          "sha256": "b0b4526c452cc24b06ba9046ecbc30a0136232d455b62f2b2b2456d16d6aa5f8"
+        },
+        {
+          "file": "replay-only/monitor.json",
+          "bytes": 230,
+          "sha256": "748eef46a0830c55ff9ab5f6d676a608601c32e2439111413b4bc6125340edc5"
+        },
+        {
+          "file": "replay-only/process.log",
+          "bytes": 180,
+          "sha256": "d0d3d4da9cc6942d29d6bd6c693c765c741979e8ce3e81f8a591e778a3cb9f7a"
+        },
+        {
+          "file": "replay-only/resources.csv",
+          "bytes": 8113,
+          "sha256": "a0cdf3bc9613bc681731c9f0997984fa1c4db6f68ab4113dba44a8498efb1fee"
+        },
+        {
+          "file": "replay-only/result.json",
+          "bytes": 503967,
+          "sha256": "8e50a98ba323d27e1f0cdc9a86b7003c075443f27ab89b993b7a9dd44a2f6191"
+        },
+        {
+          "file": "replay-only/tegrastats.log",
+          "bytes": 36660,
+          "sha256": "1f7ecb283ce5e762ca190ee3a519340f110247b6953ea1c763605b6b85ed4903"
+        },
+        {
+          "file": "replay-resident/events.jsonl",
+          "bytes": 1095111,
+          "sha256": "02b10522518692cbc6bf008599537aef952859ed72a7abe6e2ee391b15d04ad8"
+        },
+        {
+          "file": "replay-resident/monitor.json",
+          "bytes": 376,
+          "sha256": "d357c0471fb1d538a5d444bb7bbedbcb1d8857b38b853e8042833f612f1470be"
+        },
+        {
+          "file": "replay-resident/process.log",
+          "bytes": 180,
+          "sha256": "56a17ddf5dc68bbff30d430c7459d6697e9f7822c86121feab253467a24f11b1"
+        },
+        {
+          "file": "replay-resident/resources.csv",
+          "bytes": 16797,
+          "sha256": "068c8b13c84733c830d7265ed75d41872b2fa88d63710721bfe5adfae9bfb1d0"
+        },
+        {
+          "file": "replay-resident/result.json",
+          "bytes": 505756,
+          "sha256": "84fec9db65fdf4b29c4313e66e1a16796741efb9b2545aea27a0c53c1cea9369"
+        },
+        {
+          "file": "replay-resident/tegrastats.log",
+          "bytes": 36934,
+          "sha256": "899844b9db31c7321543ca05a83ed2316bd2818287f8e46f833a7a419cb4ca85"
+        },
+        {
+          "file": "report.json",
+          "bytes": 9905,
+          "sha256": "ba8b4c3279cf777e930ab3f8b3f7c5d2c3a27e935a066e096fd5dec3da3f371c"
+        },
+        {
+          "file": "workload.json",
+          "bytes": 730,
+          "sha256": "3cb2a3fb337a091212d4bc0bea4476586003c98a2c9081ee14c28d5a60b113e1"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    "20 plain/instrumented pairs per module and fixture; three fixed inputs, not a representative accuracy dataset. Empty valid detection outputs are distinct from unavailable results.",
+    "V1 total call timing excludes input PNG decoding and output JSON serialization. Face native detect includes OpenCV internal preprocessing/inference/NMS. TensorRT native call includes transfers, execution and synchronization.",
+    "Hand pipeline timings include palm and up to two landmark ROIs; landmark stage distributions are per actual ROI call. Blank input has no landmark calls, not zero-cost landmark inference.",
+    "Paired overhead differences can be negative due to runtime noise and dynamic clocks; values are retained without subtraction. V2 event/resource observation overhead is included and consistent across conditions, not independently removed.",
+    "V2 age is host receipt to independent sample, not sensor exposure or display latency. Missing samples rank after finite ages. Only replay conditions share fixed input workload; live camera is a separate observational window.",
+    "One ordered 60-second run per condition with current MAXN/dynamic clocks. Differences include thermal/scheduling history; no repeated-run statistical significance or causal bottleneck attribution claimed.",
+    "1Hz GPU-load snapshots can miss brief TensorRT work; zero sampled load is not proof of zero GPU execution. Raw tegrastats clocks/temperature cover the whole worker including warmup; no precise per-phase alignment claimed for those raw logs.",
+    "PSS, RSS and system MemAvailable have different meanings on shared-memory Orin; do not add them as GPU allocation. Resource peaks are sampled, not exact allocation maxima.",
+    "Background 4B is a single backlogged adapter client with unchanged context/cache/output limits; GUI/voice/actions/gesture timing belongs to E1. The final in-flight request is intentionally cancelled at the window boundary.",
+    "ASR, LLM/VLM, TTS and complete-application B0 measurements and handoff guide remain pending. Physical audio and user-deferred real gesture samples remain unqualified."
+  ],
+  "automatic_tests": {
+    "tests": 171,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xml_path": "/home/nvidia/AI_Stack/runtime-data/reachy-b0-vision-tests.xml",
+    "xml_sha256": "7a59e2f0791143b0aeb12c898cd2c0a2e2f7fcff39a06a955a24839a015f5556"
+  }
+}
