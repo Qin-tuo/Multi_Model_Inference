@@ -3,7 +3,7 @@
   "version": "3.0",
   "created_at": "2026-10-15T03:33:30.511226+00:00",
   "execution_status": "ACTIVE",
-  "migration_status": "R3_GESTURES_AND_CANCEL_INTEGRATED_LIVE_POSITIVES_VERIFIED",
+  "migration_status": "R3_SESSION_GESTURES_CANCEL_VERIFIED_DURABLE_TOOLS_PENDING",
   "goal": "基于固定版本的NVIDIA Reachy Mini Jetson Assistant实际源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。",
   "current_runtime": "legacy Pipecat/ROS2 application remains unchanged",
   "planned_runtime": "derived Reachy Mini Jetson Assistant without robot body",
@@ -228,9 +228,12 @@
         {
           "id": "R3.actions",
           "title": "当前会话与可关闭有限工具扩展",
-          "status": "NOT_STARTED",
+          "status": "CURRENT_CONTEXT_VERIFIED_DURABLE_TOOLS_PENDING",
           "deliverable": "持久回执、幂等、重启和取消边界",
-          "execution": "NOT_STARTED"
+          "execution": "IN_PROGRESS",
+          "evidence": [
+            "benchmarks/results/reachy-r3-session-summary.json"
+          ]
         },
         {
           "id": "R3.recovery",
@@ -377,8 +380,10 @@
       "evidence": []
     },
     "F05": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "SOFTWARE_TEXT_AND_FILE_SPEECH_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r3-session-summary.json"
+      ]
     },
     "F06": {
       "status": "PARTIAL_LIVE_POSITIVE_VERIFIED",
@@ -501,7 +506,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
-  "updated_at": "2026-10-16T03:37:44.513931+00:00",
+  "updated_at": "2026-10-16T04:04:27.258554+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"
