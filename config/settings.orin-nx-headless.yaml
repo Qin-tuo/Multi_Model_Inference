@@ -31,3 +31,5 @@ face:
   stable_frames: 2
 vad:
   chunk_ms: 32
+actions:
+  enabled: true

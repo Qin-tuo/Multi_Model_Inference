@@ -184,6 +184,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 .text-form input[type=text]{flex:1;min-width:180px;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:10px;border-radius:6px}
 .text-form button{padding:8px 18px;border-radius:6px;cursor:pointer}
 .text-form label{align-self:center;font-size:.85rem}
+#actionsInfo{max-height:80px;overflow:auto;text-align:left;padding:6px 12px}
 .input-error{color:var(--danger);min-height:1.4em;padding:0 12px}
 .audio-route,.volume-route,#pttBtn{display:none}
 </style>
@@ -355,6 +356,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         <span id="audioMode" style="font-size:.8rem;color:var(--dim)">语音未启用</span>
       </form>
       <div class="input-error" id="inputError" role="alert"></div>
+      <div class="cam-info" id="actionsInfo">本地笔记与提醒未启用</div>
       <div class="messages" id="messages">
         <div class="empty-state" id="emptyState">
           <div>输入中文问题，或选择使用当前画面。</div>
@@ -420,6 +422,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'done':         onDone(msg); break;
         case 'session_cleared':onSessionCleared(msg); break;
         case 'session_state':onSession(msg.session); break;
+        case 'action_receipt':onActionReceipt(msg.receipt); break;
+        case 'actions_state':onActionsState(msg); break;
         case 'cancelled':    cancelledTurn=msg.turn_id; onStatus({...msg,stage:'cancelling'}); break;
         case 'stats':        onStats(msg); break;
         case 'perception':   onPerception(msg); break;
@@ -575,7 +579,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       idle:'等待输入', connecting:'Connecting...', muted:'Mic muted', listening:'Listening...',
       recording:'Recording...', transcribing:'Transcribing...',
       thinking:'Thinking...', synthesizing:'生成语音文件...', speaking:'Speaking...',
-      running:'处理中', cancelling:'正在停止', releasing:'等待资源释放', release_unconfirmed:'资源释放待确认'
+      running:'处理中', cancelling:'正在停止', releasing:'等待资源释放', release_unconfirmed:'资源释放待确认',executing_tool:'执行本地操作'
     };
     const status = $('pipeStatus');
     status.textContent = labels[stage] || stage;
@@ -591,7 +595,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const stages = $('pipeStages').querySelectorAll('.stage');
     for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
     pipelineStage = msg.stage;
-    const busy=['running','thinking','transcribing','synthesizing','speaking','cancelling','releasing','release_unconfirmed'].includes(msg.stage);
+    const busy=['running','thinking','transcribing','synthesizing','speaking','executing_tool','cancelling','releasing','release_unconfirmed'].includes(msg.stage);
     $('sendText').disabled=busy; $('sendAudio').disabled=busy || !speechReady;
     $('cancelTurn').disabled=!activeTurn || ['cancelling','releasing','release_unconfirmed'].includes(msg.stage);
     $('clearSession').disabled=busy || !sessionId || ws?.readyState!==WebSocket.OPEN;
@@ -739,6 +743,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 
   function onCapabilities(msg){
     if(msg.session) onSession(msg.session);
+    if(msg.actions) onActionsState(msg.actions);
     updateModels(msg.models || {});
     if(msg.perception) onScene(msg.perception);
     if(msg.gestures) onGestureState({...msg.gestures,last_action:msg.last_gesture});
@@ -765,7 +770,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     if(!file){ $('inputError').textContent='请选择 WAV 文件'; return; }
     $('sendAudio').disabled=true; $('sendText').disabled=true;
     try{
-      const response=await fetch('/api/audio?use_image='+$('useCamera').checked,
+      const response=await fetch('/api/audio?use_image='+$('useCamera').checked+'&request_id='+crypto.randomUUID().replaceAll('-',''),
         {method:'POST',headers:{'Content-Type':'audio/wav'},body:file});
       const data=await response.json();
       if(!response.ok) throw new Error(typeof data.detail==='string' ? data.detail : '语音输入无效');
@@ -791,6 +796,21 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       $('inputError').textContent=error.message; $('cancelTurn').disabled=false;
     }
   });
+
+  function onActionsState(msg){
+    $('actionsInfo').textContent=!msg.enabled ? '本地笔记与提醒未启用' : msg.error ? '本地操作异常：'+msg.error :
+      '已保存 '+msg.notes+' 条笔记；最近提醒：'+(msg.reminders || []).map(r=>r.text+'（'+({scheduled:'待到时',due:'等待输出',claimed:'等待输出',delivering:'输出中',delivered:'已输出',stopped:'已停止本轮输出',cancelled:'已取消',expired:'已过期',uncertain:'输出结果待确认',failed:'失败'}[r.status] || r.status)+'）').join('、');
+  }
+
+  function onActionReceipt(receipt){
+    hideEmpty();const div=document.createElement('div');div.className='msg assistant';
+    const body=document.createElement('div');body.className='content';
+    const value=receipt.result || {};
+    const labels={create_note:'笔记',list_notes:'查询笔记',create_reminder:'提醒',list_reminders:'查询提醒',cancel_reminder:'取消提醒'};
+    body.textContent=receipt.committed ? (labels[receipt.name] || '本地操作')+'已执行：'+
+      (value.title || value.text || ({cancelled:'已取消',not_found:'未找到',already_delivered:'已经完成输出，原回执保留',already_expired:'已经过期，记录保留'}[value.status]) || '查询完成') : '本地操作未执行：'+(value.error || '参数无效');
+    div.appendChild(body);$('messages').appendChild(div);scrollChat();
+  }
 
   function onSession(session){
     sessionId=session.id;
@@ -821,7 +841,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     $('inputError').textContent=''; $('sendText').disabled=true;
     try{
       const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({text:$('textInput').value,use_image:$('useCamera').checked})});
+        body:JSON.stringify({text:$('textInput').value,use_image:$('useCamera').checked,request_id:crypto.randomUUID().replaceAll('-','')})});
       const data=await response.json();
       if(!response.ok) throw new Error(typeof data.detail==='string' ? data.detail : '输入无效');
       $('textInput').value='';

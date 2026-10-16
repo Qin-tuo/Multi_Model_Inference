@@ -1,8 +1,8 @@
 # Orin NX 无机身多模态陪伴服务
 
-基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的计划中派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
+基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前分支：`migration/reachy-headless`，文字、文件图像、摄像头问答及中文文件语音已贯通。人体/脸/手共享帧感知、整轮取消及真人手势已取得实测证据；当前会话可接续、清空，并按原生token预算保留有界历史。持久笔记/提醒、手势完整质量、实体录播及物理停播仍待验证。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
+**当前分支：`migration/reachy-headless`，多模型感知、中文文件语音、当前会话与整轮取消已贯通，真人手势取得正例。SQLAlchemy笔记和APScheduler提醒已通过真实模型、取消及重启验证；手势完整质量、整机故障矩阵、实体录播及物理停播仍待完成。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
 
 当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。
 

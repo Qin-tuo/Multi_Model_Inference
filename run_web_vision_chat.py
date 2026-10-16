@@ -16,8 +16,8 @@
 
 """Derived upstream Web Vision Chat: shared camera, VLM streaming, WebSocket UI.
 
-R1 exposes text and optional live camera input. Audio adapters join this same
-application in R2. No robot SDK, daemon, motor or RAG initialization.
+Owns camera/perception, speech, gestures, current session and optional local
+actions. No robot SDK, daemon, motor or RAG initialization.
 """
 import argparse
 import asyncio
@@ -92,12 +92,13 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
             broadcaster.send({"type": "perception", **current["face"]})
             broadcaster.send({"type": "scene", **current["perception"]})
             broadcaster.send({"type":"gesture_state", **current['gestures'], 'last_action':current['last_gesture']})
+            broadcaster.send({'type':'actions_state',**current['actions']})
         except Exception:
             log.exception("Resource/vision status update failed")
         stop.wait(interval)
 
 
-def build_app(config, *, no_camera=False, no_audio=False):
+def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
     broadcaster = Broadcaster()
     stop = threading.Event()
     llm = LLM(model=config.llm.model, base_url=config.llm.base_url,
@@ -127,8 +128,14 @@ def build_app(config, *, no_camera=False, no_audio=False):
         perception.on_result = consume_scene
     threads = []
 
+    def action_state():
+        if control.actions is None:return {'enabled':False}
+        try:return control.actions.snapshot()
+        except Exception as exc:return {'enabled':True,'error':str(exc)}
+
     def state():
         return {**control.state(), "audio_enabled": bool(mic and mic.alive),
+                'actions':action_state(),
                 "speech_ready": bool(speech_enabled and control.vad is not None),
                 "audio_input_mode": config.audio.input_mode if speech_enabled else "disabled",
                 "audio_output_mode": config.audio.output_mode if speech_enabled else "disabled",
@@ -161,6 +168,10 @@ def build_app(config, *, no_camera=False, no_audio=False):
         try:
             if not await asyncio.to_thread(llm.load):
                 raise RuntimeError(llm.last_error or "Local VLM is not ready")
+            if config.actions.enabled and not no_actions:
+                from app.actions.store import ActionStore
+                await asyncio.to_thread(llm.require_tools)
+                control.actions = await asyncio.to_thread(ActionStore,config.actions)
             if cam and not await asyncio.to_thread(cam.start):
                 raise RuntimeError(cam.last_error or "Camera is not ready")
             if detector and not await asyncio.to_thread(detector.load):
@@ -213,6 +224,9 @@ def build_app(config, *, no_camera=False, no_audio=False):
                     try:
                         await asyncio.to_thread(resource.stop if resource is tracker else resource.close)
                     except Exception as exc: errors.append(exc)
+            if control.actions:
+                try:await asyncio.to_thread(control.actions.close)
+                except Exception as exc:errors.append(exc)
             if detector: detector.unload()
             llm.unload()
             for model in (stt, tts):
@@ -232,6 +246,7 @@ def main(default_no_camera=False):
     parser.add_argument("--host")
     parser.add_argument("--port", type=int)
     parser.add_argument("--no-audio", action="store_true", help="Disable speech backends and audio I/O")
+    parser.add_argument('--no-tools',action='store_true',help='Disable local notes/reminders and scheduler')
     parser.add_argument("--no-camera", action="store_true", default=default_no_camera, help="Explicit text-only software mode")
     args = parser.parse_args()
     config = Config.load(args.config)
@@ -239,7 +254,7 @@ def main(default_no_camera=False):
     if args.port is not None: config.web.port = args.port
     config.validate()
     import uvicorn
-    uvicorn.run(build_app(config, no_camera=args.no_camera, no_audio=args.no_audio), host=config.web.host,
+    uvicorn.run(build_app(config, no_camera=args.no_camera, no_audio=args.no_audio, no_actions=args.no_tools), host=config.web.host,
                 port=config.web.port, log_level="info", ws_max_size=65536,
                 limit_concurrency=16, timeout_graceful_shutdown=10)
 

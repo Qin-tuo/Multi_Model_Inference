@@ -122,9 +122,10 @@
       "source_file": "app/llm.py",
       "planned_resolution": "One context owner, minimal optional actions and cancellation-safe receipts",
       "phase": "R3",
-      "status": "CURRENT_SESSION_VERIFIED_DURABLE_TOOLS_PENDING",
+      "status": "CURRENT_SESSION_AND_LOCAL_ACTIONS_SOFTWARE_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-session-summary.json"
+        "benchmarks/results/reachy-r3-session-summary.json",
+        "benchmarks/results/reachy-r3-actions-summary.json"
       ]
     },
     {
@@ -159,6 +160,18 @@
         "benchmarks/results/reachy-r2-engine-warning.json"
       ],
       "phase": "R3"
+    },
+    {
+      "id": "RG-14",
+      "classification": "CONFIRMED_TOOL_GROUNDING_FAILURE_DURING_INTEGRATION",
+      "phase": "R3",
+      "finding": "Initial tool integration flattened function calls/results out of history; actual reminder query then fabricated an ID and task without a database call.",
+      "planned_resolution": "Retain whole native tool groups, require fresh queries and preserve actual transaction receipts.",
+      "status": "REPRO_CASE_FIXED_BROADER_MODEL_QUALITY_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r3-actions-initial-failure.json",
+        "benchmarks/results/reachy-r3-actions-integration.json"
+      ]
     }
   ],
   "hardware_gap": {
@@ -166,5 +179,5 @@
     "speaker": "not connected per user",
     "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
   },
-  "updated_at": "2026-10-16T04:04:27.258554+00:00"
+  "updated_at": "2026-10-16T05:05:25.437156+00:00"
 }

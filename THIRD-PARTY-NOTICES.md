@@ -124,3 +124,13 @@ pinned Hugging Face revision `4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7`
 `models/perception.json`; the demo is not imported because it parses CLI
 arguments and downloads a model at module import. Local adaptations add
 finite-vector guards and temporal interaction rules.
+
+## Local actions
+
+The optional notes/reminders module uses SQLAlchemy 2.1.4 and APScheduler
+3.11.3, both MIT licensed. Exact installed versions and license digests are
+recorded in `deploy/actions-dependencies.lock.json`; license copies are in
+`licenses/SQLAlchemy-MIT.txt` and `licenses/APScheduler-MIT.txt`.
+Application transaction, idempotency and output-receipt rules adapt the
+previous project's SQLAlchemy/ReminderService contracts, without importing
+its Pipecat, memory or identity layers.

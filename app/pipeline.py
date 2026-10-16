@@ -359,7 +359,7 @@ class Playback:
             if self._process is process: self._process = None
 
 
-def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None, playback=None):
+def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None, playback=None, on_start=None):
     """Return a device-process receipt; physical audibility is a separate check."""
     if not sink: raise ValueError("Explicit speaker device is required")
     if audio.ndim != 1 or audio.dtype != np.int16 or sample_rate != 16000:
@@ -373,6 +373,7 @@ def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None, 
     process = playback.start(cmd)
     started = time.monotonic()
     try:
+        if on_start:on_start()
         data = audio.tobytes()
         deadline = started + audio.size/sample_rate + 5
         while True:
@@ -850,7 +851,7 @@ class TextChunker:
 
 class SpeechOutput:
     """One bounded synthesis worker; file and device receipts are distinct."""
-    def __init__(self, tts, audio_config, turn_id, output_sink=None, *, cancel_event=None, defer_commit=False):
+    def __init__(self, tts, audio_config, turn_id, output_sink=None, *, cancel_event=None, defer_commit=False, on_output_start=None):
         self.tts, self.config, self.turn_id = tts, audio_config, turn_id
         self.output_sink = output_sink or (lambda: audio_config.output_device)
         self.queue = queue.Queue(maxsize=2)
@@ -860,6 +861,8 @@ class SpeechOutput:
         self.receipt = None
         self.cancel_event = cancel_event if cancel_event is not None else threading.Event()
         self.defer_commit = defer_commit
+        self.on_output_start = on_output_start
+        self._output_started = False
         self._temporary = None
         self._path = None
         self._abort = threading.Event()
@@ -896,10 +899,17 @@ class SpeechOutput:
             path = self._path
             retained = sorted((p for p in path.parent.glob('reply-*.wav') if p != path and re.fullmatch(r'reply-[0-9a-f]{32}\.wav', p.name)), key=lambda p:(p.stat().st_mtime_ns,p.name), reverse=True)
             for old in retained[self.config.retained_files - 1:]: old.unlink()
+            self._begin_output()
             self._temporary.replace(path)
             self._temporary = None
             self.receipt = {'kind':'file_written', 'path':str(path), 'bytes':self.bytes_written}
         return self.receipt
+
+    def _begin_output(self):
+        self._check()
+        if not self._output_started:
+            if self.on_output_start:self.on_output_start()
+            self._output_started=True
 
     def _run(self):
         writer = None; temporary = None; path = None
@@ -930,7 +940,7 @@ class SpeechOutput:
                     writer.writeframesraw(raw)
                     receipt = {"kind": "file_chunk_written", "bytes": len(raw)}
                 else:
-                    receipt = play_audio(audio, SAMPLE_RATE, self.output_sink(), self._playback)
+                    receipt = play_audio(audio, SAMPLE_RATE, self.output_sink(), self._playback, on_start=self._begin_output)
                 self.bytes_written += len(raw)
                 self.chunks.append({"text": text, "bytes": len(raw), "elapsed_seconds": result.get("elapsed_seconds"),
                                     "first_pcm_seconds": result.get("first_pcm_seconds"), "receipt": receipt})

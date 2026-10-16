@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """One bounded request worker around the upstream VLM streaming sequence.
 
-Owns text, file/live audio, VLM, bounded TTS output and whole-turn cancellation.
+Owns text, file/live audio, VLM, session context, local actions, bounded TTS
+output and whole-turn cancellation.
 """
 import queue
 import threading
@@ -9,6 +10,7 @@ import time
 import uuid
 import re
 import json
+import hashlib
 from collections import deque
 from pathlib import Path
 from app.audio import wav_pcm
@@ -17,7 +19,7 @@ from app.request_io import TurnCancelled
 
 
 class TurnController:
-    def __init__(self, config, llm, broadcaster, camera=None, stt=None, tts=None, vad=None, perception=None):
+    def __init__(self, config, llm, broadcaster, camera=None, stt=None, tts=None, vad=None, perception=None, actions=None):
         self.config, self.llm, self.broadcaster, self.camera = config, llm, broadcaster, camera
         self.stt, self.tts, self.vad = stt, tts, vad
         self.output_sink = None
@@ -33,6 +35,9 @@ class TurnController:
         self._last_gesture = None
         self._history = deque(maxlen=config.session.max_turns)
         self._session_id = uuid.uuid4().hex
+        self.actions = actions
+        self._action_error = None
+        self._next_notice_check = 0
 
     def start(self):
         if self._thread and self._thread.is_alive(): return
@@ -45,35 +50,48 @@ class TurnController:
         self._thread = threading.Thread(target=self._run, name="conversation", daemon=True)
         self._thread.start()
 
-    def submit(self, text, use_image=False):
+    def submit(self, text, use_image=False, request_id=None):
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("Text must contain 1–4000 characters")
-        return self._admit({"input_kind": "text", "text": text.strip()}, use_image)
+        return self._admit({"input_kind": "text", "text": text.strip()}, use_image, request_id)
 
-    def submit_audio(self, data, use_image=False):
+    def submit_audio(self, data, use_image=False, request_id=None):
         if self.stt is None or self.vad is None: raise ValueError("Speech input is not enabled")
         pcm = wav_pcm(data, self.config.stt.max_seconds)
-        return self._admit({"input_kind": "audio_file", "pcm": pcm}, use_image)
+        return self._admit({"input_kind": "audio_file", "pcm": pcm}, use_image, request_id)
 
     def submit_segment(self, segment):
         if self.stt is None: raise ValueError("Speech input is not enabled")
         return self._admit({"input_kind": "microphone", "segment": segment}, self.camera is not None)
 
-    def _admit(self, data, use_image):
+    def _admit(self, data, use_image, request_id=None):
         if type(use_image) is not bool: raise ValueError("use_image must be boolean")
+        if request_id is not None and (not isinstance(request_id,str) or not re.fullmatch(r'[0-9a-f]{32}',request_id)):
+            raise ValueError('request_id must contain 32 hexadecimal characters')
+        identity={'kind':data['input_kind'],'text':data.get('text'),'use_image':use_image}
+        raw=data.get('pcm') or (data['segment'].audio.tobytes() if data.get('segment') is not None else None)
+        if raw:identity['audio_sha256']=hashlib.sha256(raw).hexdigest()
+        digest=hashlib.sha256(json.dumps(identity,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         with self._lock:
             if self._stop.is_set() or not self._thread or not self._thread.is_alive():
                 raise RuntimeError("Conversation worker is not ready")
-            if self._active is not None: raise RuntimeError("The current request is still running")
+            if self._action_error:raise RuntimeError('Action ledger requires recovery: '+self._action_error)
+            if self._active is not None:
+                if request_id and self._active['request_id']==request_id:
+                    if self._active['fingerprint']!=digest:raise ValueError('Request ID was reused for different input')
+                    return {'accepted':True,'turn_id':self._active['turn_id'],'request_id':request_id,'replayed':True}
+                raise RuntimeError("The current request is still running")
             if use_image and (self.camera is None or not self.camera.health_check()):
-                raise ValueError("No fresh camera image is available")
+                if not (request_id and self.actions is not None and self.actions.knows_request(request_id,digest)):
+                    raise ValueError("No fresh camera image is available")
             request = {"turn_id": uuid.uuid4().hex, "use_image": use_image, **data,
                        "cancel_event": threading.Event(), "phase": "running", "output": None,
                        "admitted_monotonic":time.monotonic()}
+            request.update(request_id=request_id or request['turn_id'],fingerprint=digest)
             self._active = request
             self.broadcaster.send({"type":"status", "stage":"running", "turn_id":request["turn_id"]})
             self._queue.put_nowait(request)
-            return {"accepted": True, "turn_id": request["turn_id"]}
+            return {"accepted": True, "turn_id": request["turn_id"], 'request_id':request['request_id']}
 
     def cancel(self, turn_id=None, reason="user"):
         with self._lock:
@@ -167,25 +185,32 @@ class TurnController:
         for item in self._history:
             text = item['user']
             if item['visual']:text = '[该轮附有图片；历史仅保留文字，原图已丢弃。] '+text
-            messages.extend([{'role':'user','content':text},{'role':'assistant','content':item['assistant']}])
+            messages.append({'role':'user','content':text})
+            messages.extend(item.get('tool_messages',[]))
+            messages.append({'role':'assistant','content':item['assistant']})
         return messages
 
     def state(self):
         with self._lock:
             return {"ready": bool(self._thread and self._thread.is_alive() and not self._stop.is_set()
-                                  and not (self._active and self._active["phase"] == "release_unconfirmed")),
+                                  and not self._action_error and not (self._active and self._active["phase"] == "release_unconfirmed")),
                     "active_turn": self._active["turn_id"] if self._active else None,
                     "phase": self._active["phase"] if self._active else "idle",
                     "release": self._active.get("release") if self._active else None,
                     "last_gesture": self._last_gesture,
                     "session": self.session_state(),
+                    "action_error": self._action_error,
                     "last_result": self._last, "pending": self._queue.qsize()}
 
     def _run(self):
         while not self._stop.is_set() or not self._queue.empty():
             try: request = self._queue.get(timeout=0.1)
-            except queue.Empty: continue
+            except queue.Empty:
+                self._dispatch_notice()
+                continue
             result = {"turn_id": request["turn_id"], "text": "", "metadata": {}, "mode": "camera_text" if request["use_image"] else "text"}
+            result['request_id'] = request['request_id']
+            if request.get('notice'):result['notification_id'] = request['notice']['id']
             if request.get('gesture'):result['gesture'] = request['gesture']
             def send(kind, **values):
                 discard = kind in {"token", "transcript"} or (kind == "status" and values.get("stage") not in {"idle", "releasing", "release_unconfirmed"})
@@ -196,12 +221,32 @@ class TurnController:
             output = None
             used = {}
             event = request["cancel_event"]
+            registered = False
+            notice = request.get('notice')
+            delivery_started = False
+            def begin_notice_output():
+                nonlocal delivery_started
+                with self._lock:
+                    check()
+                    if not delivery_started:
+                        self.actions.begin_delivery(notice,self.config.audio.output_mode if self.tts else 'text')
+                        delivery_started = True
             def check():
                 if event.is_set() or self._stop.is_set(): raise TurnCancelled("Turn cancelled")
             try:
                 check()
                 prompt = request.get("text")
-                if request["input_kind"] != "text":
+                fixed = prompt if notice else None
+                if self.actions is not None and not request.get('gesture') and not notice:
+                    from app.actions.schema import receipts_text
+                    registration = self.actions.begin_request(request['request_id'],request['fingerprint'])
+                    if registration['replay']:
+                        result.update(replayed=True,actions=registration['receipts'],original_request_status=registration['status'])
+                        result['mode'] = 'receipt_replay'
+                        fixed = '此前请求的已提交回执：'+receipts_text(registration['receipts'])
+                        prompt = prompt or '[重复语音请求，沿用已有回执]'
+                    else:registered = True
+                if request["input_kind"] != "text" and fixed is None:
                     send("status", stage="transcribing")
                     segments = ([request["segment"]] if request["input_kind"] == "microphone" else
                                 list(segment_pcm(request["pcm"], self.config.vad, self.vad)))
@@ -223,7 +268,7 @@ class TurnController:
                 result["prompt"] = prompt
                 images = None
                 vision_prompt = self.config.vision.system_prompt
-                if request["use_image"]:
+                if request["use_image"] and fixed is None:
                     frame = None
                     if self.perception:
                         observed, scene = self.perception.preview()
@@ -239,28 +284,33 @@ class TurnController:
                     if frame is None: raise ValueError("Camera image expired before processing")
                     result["frame"] = frame.metadata()
                     images = [self.camera._base64_jpeg(frame.jpeg)]
-                send("transcript", text=prompt)
+                if not notice:send("transcript", text=prompt)
                 send("status", stage="thinking")
                 if self.tts is not None:
                     with self._lock:
                         check()
                         output = SpeechOutput(self.tts, self.config.audio, request["turn_id"], self.output_sink,
-                                              cancel_event=event, defer_commit=True)
+                                              cancel_event=event, defer_commit=True,
+                                              on_output_start=begin_notice_output if notice else None)
                         request["output"] = output
                     used["tts"] = self.tts
                 chunker = TextChunker(self.config.tts.first_chunk_chars, self.config.tts.max_chunk_chars)
                 check()
-                used["llm"] = self.llm
-                remember = self.config.session.enabled and not request.get('gesture')
-                with self._lock:history = self._context_messages() if remember else []
-                stream = self.llm.generate_stream(prompt, images_b64=images,
-                    system_prompt=vision_prompt if images else None, cancel_event=event,
-                    few_shot=history, trim_history=True)
+                remember = self.config.session.enabled and not request.get('gesture') and not notice and not result.get('replayed')
+                with self._lock:
+                    history = self._context_messages() if remember else []
+                    history_sizes = [2+len(item.get('tool_messages',[])) for item in self._history] if remember else []
+                if fixed is not None:
+                    stream = iter([(fixed,{'done':True,'source':'notification' if notice else 'durable_receipts'})])
+                else:
+                    used['llm'] = self.llm
+                    stream = self._model_stream(request,result,prompt,images,vision_prompt if images else None,history,history_sizes,send,registered)
                 try:
                     for text, metadata in stream:
                         check()
                         result["metadata"].update(metadata)
                         if text:
+                            if notice and output is None:begin_notice_output()
                             if len(result['text'])+len(text)>16384:raise ValueError('Model text exceeds turn response budget')
                             first = first or time.monotonic()
                             result["text"] += text
@@ -268,7 +318,7 @@ class TurnController:
                             if output:
                                 for chunk in chunker.feed(text): output.submit(chunk)
                 finally:
-                    stream.close()
+                    if hasattr(stream,'close'):stream.close()
                 if not result["metadata"].get("done") or not result["text"].strip():
                     raise RuntimeError("Model did not produce a complete text answer")
                 if output:
@@ -283,6 +333,8 @@ class TurnController:
                         receipt = output.publish()
                         result["speech"] = {"receipt":receipt, "chunks":output.chunks, "duration":output.bytes_written/32000}
                         if receipt["kind"] == "file_written": result["audio_url"] = f"/api/audio/{request['turn_id']}"
+                    if notice:
+                        self.actions.finish_delivery(notice,result.get('speech',{}).get('receipt') or {'kind':'text_available','turn_id':request['turn_id']})
                     request["phase"] = "releasing"
                     result["status"] = "complete"
                     if remember:
@@ -290,7 +342,7 @@ class TurnController:
                             if self._history:self._history.popleft()
                         delivered = result['text']
                         if result['metadata'].get('finish_reason')=='length':delivered += '\n[本次回答达到输出上限，文字被截断。]'
-                        self._history.append({'user':prompt,'assistant':delivered,'visual':bool(images)})
+                        self._history.append({'user':prompt,'assistant':delivered,'visual':bool(images),'tool_messages':result.get('tool_messages',[])})
                         self.broadcaster.send({'type':'session_state','session':self.session_state()})
                     result['session_id'] = self._session_id
                 output = None
@@ -305,6 +357,15 @@ class TurnController:
                     try: output.close(success=False)
                     except Exception as exc:
                         result["cleanup_error"] = str(exc)
+                if registered:
+                    try:
+                        self.actions.finish_request(request['request_id'],'cancelled' if event.is_set() else result['status'])
+                        result['actions_committed'] = self.actions.receipts(request['request_id'])
+                    except Exception as exc:
+                        self._action_error = str(exc);result['action_finalize_error'] = str(exc)
+                if notice and result.get('status')!='complete':
+                    try:self.actions.finish_delivery(notice,cancelled=event.is_set(),error=result.get('error','turn cancelled'))
+                    except Exception as exc:self._action_error=str(exc);result['notification_error']=str(exc)
                 result.update(elapsed_seconds=time.monotonic() - start,
                               first_content_seconds=first - start if first else None)
                 with self._lock:
@@ -327,6 +388,75 @@ class TurnController:
                     if released: self._active = None
                     send("status", stage="idle" if released else "release_unconfirmed")
                 self._queue.task_done()
+
+    def _model_stream(self,request,result,prompt,images,system_prompt,history,history_sizes,send,registered):
+        """At most two serial tool executions, still owned by the same turn."""
+        if not registered:
+            if self.actions is None and not request.get('gesture'):
+                system_prompt=(system_prompt or self.config.llm.system_prompt)+'\n当前未启用持久笔记或提醒工具，不能声称已保存笔记或已设置提醒。'
+            yield from self.llm.generate_stream(prompt,images_b64=images,system_prompt=system_prompt,
+                cancel_event=request['cancel_event'],few_shot=history,trim_history=True,history_group_sizes=history_sizes)
+            return
+        from app.actions.schema import tools,instruction,parse
+        system_prompt=(system_prompt or self.config.llm.system_prompt)+instruction(self.config.actions.timezone)
+        chain=[];count=0;dropped=0;result['model_rounds']=[]
+        def check():
+            if request['cancel_event'].is_set() or self._stop.is_set():raise TurnCancelled('Turn cancelled before next tool/model operation')
+        while True:
+            check();parts=[];meta={}
+            send('status',stage='thinking')
+            stream=self.llm.generate_stream(prompt,images_b64=images,system_prompt=system_prompt,
+                cancel_event=request['cancel_event'],few_shot=history,trim_history=True,
+                history_group_sizes=history_sizes,
+                tools=tools() if count<self.config.actions.max_calls_per_turn else [],tool_messages=chain)
+            try:
+                for content,entry in stream:
+                    check();meta.update(entry)
+                    if content:parts.append(content)
+            finally:stream.close()
+            if not meta.get('done'):raise RuntimeError('Incomplete model tool round')
+            removed=meta.get('history_pairs_dropped',0);dropped+=removed
+            history=history[sum(history_sizes[:removed]):];history_sizes=history_sizes[removed:]
+            result['model_rounds'].append(meta)
+            calls=meta.get('tool_calls',[])
+            if not calls:
+                result['tool_messages'] = chain
+                yield(''.join(parts),{**meta,'history_pairs_dropped':dropped})
+                return
+            if count+len(calls)>self.config.actions.max_calls_per_turn:raise RuntimeError('Tool budget exceeded; remaining calls not executed')
+            chain.append({'role':'assistant','content':meta.get('assistant_content',''),'tool_calls':calls})
+            for call in calls:
+                name=call['function']['name'];position=count;count+=1
+                try:
+                    arguments=parse(name,call['function']['arguments'])
+                    with self._lock:
+                        check()
+                        request['tool_started']={'name':name,'position':position,'started_monotonic':time.monotonic()}
+                    send('status',stage='executing_tool')
+                    value=self.actions.execute(request['request_id'],position,name,arguments)
+                    receipt={'name':name,'position':position,'committed':True,'result':value}
+                except ValueError as exc:
+                    value={'status':'not_executed','error':str(exc)[:500]}
+                    receipt={'name':name,'position':position,'committed':False,'result':value}
+                result.setdefault('actions',[]).append(receipt)
+                send('action_receipt',receipt=receipt)
+                check()
+                chain.append({'role':'tool','tool_call_id':call['id'],'content':json.dumps(value,ensure_ascii=False)})
+
+    def _dispatch_notice(self):
+        if self.actions is None or self._stop.is_set() or self._action_error or time.monotonic()<self._next_notice_check:return
+        self._next_notice_check=time.monotonic()+.5
+        with self._lock:
+            if self._active is not None:return
+        if self.config.audio.input_mode=='device' and not self.broadcaster.ptt_active:return
+        try:
+            notice=self.actions.claim_due()
+            if not notice:return
+            try:self._admit({'input_kind':'text','text':'提醒：'+notice['text'],'notice':notice},False)
+            except RuntimeError:self.actions.finish_delivery(notice,release=True)
+        except Exception as exc:
+            self._action_error=str(exc)
+            self.broadcaster.send({'type':'error','error':'Reminder dispatch requires recovery: '+str(exc)})
 
     def _wait_for_release(self, request, adapters):
         """Keep admission closed until local output and native workers are idle."""

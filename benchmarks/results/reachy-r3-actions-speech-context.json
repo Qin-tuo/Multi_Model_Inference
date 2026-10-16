@@ -1,0 +1,301 @@
+{
+  "scope": "Generated Chinese WAV and actual local ASR/LLM/TTS; not microphone or physical speaker",
+  "input_sha256": "cf966248ad3bd7d93faee6671d68f0bbb9fcd24476d1cd89ddc08f2961df3a40",
+  "first": {
+    "turn_id": "7d3d82e041184f18abe39a88527bdf6c",
+    "text": "好的，我会记住您最喜欢的颜色是蓝色。如果您需要我创建笔记或提醒，请告诉我。",
+    "metadata": {
+      "input_tokens_preflight": 967,
+      "history_pairs_kept": 0,
+      "history_pairs_dropped": 0,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 22,
+        "prompt_tokens": 967,
+        "total_tokens": 989,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "eval_count": 22,
+      "done": true
+    },
+    "mode": "text",
+    "request_id": "7d3d82e041184f18abe39a88527bdf6c",
+    "asr": [
+      {
+        "text": "我最喜欢的颜色是蓝色。请你记住。",
+        "language": "zh",
+        "duration": 3.488,
+        "elapsed_seconds": 0.47821231599664316,
+        "backend": "llama_qwen3_asr"
+      }
+    ],
+    "input_kind": "audio_file",
+    "vad_segments": [
+      {
+        "duration": 3.488,
+        "start": 0.064,
+        "end": 3.552
+      }
+    ],
+    "vad_time_kind": "file_offset_with_end_padding",
+    "prompt": "我最喜欢的颜色是蓝色。请你记住。",
+    "model_rounds": [
+      {
+        "input_tokens_preflight": 967,
+        "history_pairs_kept": 0,
+        "history_pairs_dropped": 0,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 22,
+          "prompt_tokens": 967,
+          "total_tokens": 989,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "eval_count": 22,
+        "done": true
+      }
+    ],
+    "tool_messages": [],
+    "speech": {
+      "receipt": {
+        "kind": "file_written",
+        "path": "/home/nvidia/AI_Stack/runtime-data/reachy-actions-voice-k8mdlelu/audio/reply-7d3d82e041184f18abe39a88527bdf6c.wav",
+        "bytes": 283136
+      },
+      "chunks": [
+        {
+          "text": "好的，我会记住您",
+          "bytes": 73216,
+          "elapsed_seconds": 0.09520396101288497,
+          "first_pcm_seconds": 0.0867101630428806,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 73216
+          }
+        },
+        {
+          "text": "最喜欢的颜色是蓝色。",
+          "bytes": 79872,
+          "elapsed_seconds": 0.06896942801540717,
+          "first_pcm_seconds": 0.06096017500385642,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 79872
+          }
+        },
+        {
+          "text": "如果您需要我创建笔记或提醒，请告诉我。",
+          "bytes": 130048,
+          "elapsed_seconds": 0.11582358001032844,
+          "first_pcm_seconds": 0.10601238103117794,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 130048
+          }
+        }
+      ],
+      "duration": 8.848
+    },
+    "audio_url": "/api/audio/7d3d82e041184f18abe39a88527bdf6c",
+    "status": "complete",
+    "session_id": "5e2e1eee9f7e41d09b9ef3d40cf68551",
+    "actions_committed": [],
+    "elapsed_seconds": 5.790157400013413,
+    "first_content_seconds": 5.502857465995476,
+    "resources_released": true,
+    "release": {
+      "observations": {
+        "asr": {
+          "idle": true
+        },
+        "tts": {
+          "idle": true
+        },
+        "llm": {
+          "idle": true
+        },
+        "output": {
+          "idle": true
+        }
+      },
+      "seconds": 0.20110276498598978,
+      "confirmed": true
+    },
+    "download_sha256": "e7dd452824faf0741af824a68e03edb9b81707f9ba67f8cbb64074155e161d0d"
+  },
+  "recall": {
+    "turn_id": "bb6629c2543747b0b2b8bcdf0059fcc0",
+    "text": "蓝色",
+    "metadata": {
+      "input_tokens_preflight": 1013,
+      "history_pairs_kept": 1,
+      "history_pairs_dropped": 0,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 1013,
+        "total_tokens": 1015,
+        "prompt_tokens_details": {
+          "cached_tokens": 451
+        }
+      },
+      "eval_count": 2,
+      "done": true
+    },
+    "mode": "text",
+    "request_id": "bb6629c2543747b0b2b8bcdf0059fcc0",
+    "prompt": "我最喜欢的颜色是什么？只回答颜色，没有提供就回答不知道。",
+    "model_rounds": [
+      {
+        "input_tokens_preflight": 1013,
+        "history_pairs_kept": 1,
+        "history_pairs_dropped": 0,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 2,
+          "prompt_tokens": 1013,
+          "total_tokens": 1015,
+          "prompt_tokens_details": {
+            "cached_tokens": 451
+          }
+        },
+        "eval_count": 2,
+        "done": true
+      }
+    ],
+    "tool_messages": [],
+    "speech": {
+      "receipt": {
+        "kind": "file_written",
+        "path": "/home/nvidia/AI_Stack/runtime-data/reachy-actions-voice-k8mdlelu/audio/reply-bb6629c2543747b0b2b8bcdf0059fcc0.wav",
+        "bytes": 42496
+      },
+      "chunks": [
+        {
+          "text": "蓝色",
+          "bytes": 42496,
+          "elapsed_seconds": 0.07000977400457487,
+          "first_pcm_seconds": 0.06594220001716167,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 42496
+          }
+        }
+      ],
+      "duration": 1.328
+    },
+    "audio_url": "/api/audio/bb6629c2543747b0b2b8bcdf0059fcc0",
+    "status": "complete",
+    "session_id": "5e2e1eee9f7e41d09b9ef3d40cf68551",
+    "actions_committed": [],
+    "elapsed_seconds": 1.9885991780320182,
+    "first_content_seconds": 1.906766485015396,
+    "resources_released": true,
+    "release": {
+      "observations": {
+        "tts": {
+          "idle": true
+        },
+        "llm": {
+          "idle": true
+        },
+        "output": {
+          "idle": true
+        }
+      },
+      "seconds": 0.12625098996795714,
+      "confirmed": true
+    },
+    "download_sha256": "b6938a46a8f3235b1139fc6d769eb528acf54331d324e331b7f5a1b08ee30e4e"
+  },
+  "after_clear": {
+    "turn_id": "9531c1df632f45f1a91c38acd7f1fa28",
+    "text": "不知道",
+    "metadata": {
+      "input_tokens_preflight": 973,
+      "history_pairs_kept": 0,
+      "history_pairs_dropped": 0,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 2,
+        "prompt_tokens": 973,
+        "total_tokens": 975,
+        "prompt_tokens_details": {
+          "cached_tokens": 497
+        }
+      },
+      "eval_count": 2,
+      "done": true
+    },
+    "mode": "text",
+    "request_id": "9531c1df632f45f1a91c38acd7f1fa28",
+    "prompt": "我最喜欢的颜色是什么？只回答颜色，没有提供就回答不知道。",
+    "model_rounds": [
+      {
+        "input_tokens_preflight": 973,
+        "history_pairs_kept": 0,
+        "history_pairs_dropped": 0,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 2,
+          "prompt_tokens": 973,
+          "total_tokens": 975,
+          "prompt_tokens_details": {
+            "cached_tokens": 497
+          }
+        },
+        "eval_count": 2,
+        "done": true
+      }
+    ],
+    "tool_messages": [],
+    "speech": {
+      "receipt": {
+        "kind": "file_written",
+        "path": "/home/nvidia/AI_Stack/runtime-data/reachy-actions-voice-k8mdlelu/audio/reply-9531c1df632f45f1a91c38acd7f1fa28.wav",
+        "bytes": 45568
+      },
+      "chunks": [
+        {
+          "text": "不知道",
+          "bytes": 45568,
+          "elapsed_seconds": 0.08784588699927554,
+          "first_pcm_seconds": 0.08150542405201122,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 45568
+          }
+        }
+      ],
+      "duration": 1.424
+    },
+    "audio_url": "/api/audio/9531c1df632f45f1a91c38acd7f1fa28",
+    "status": "complete",
+    "session_id": "beb9d6c7acb34b2c84935eb1c43f1171",
+    "actions_committed": [],
+    "elapsed_seconds": 1.8564399359747767,
+    "first_content_seconds": 1.7604255569749512,
+    "resources_released": true,
+    "release": {
+      "observations": {
+        "tts": {
+          "idle": true
+        },
+        "llm": {
+          "idle": true
+        },
+        "output": {
+          "idle": true
+        }
+      },
+      "seconds": 0.13705179799580947,
+      "confirmed": true
+    },
+    "download_sha256": "ed7f4e4922f3934d9ce67870f9d623529536552ab68621b2ec3ee5ebd96f58c4"
+  },
+  "status": "PASSED_WITH_DECLARED_SCOPE"
+}

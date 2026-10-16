@@ -155,6 +155,18 @@ class SessionConfig:
 
 
 @dataclass
+class ActionsConfig:
+    enabled: bool = False
+    database: str = str(Path.home() / 'AI_Stack/runtime-data/reachy-actions/actions.sqlite')
+    max_calls_per_turn: int = 2
+    max_pending_reminders: int = 100
+    max_records: int = 1000
+    max_requests: int = 10000
+    notification_ttl_seconds: int = 3600
+    timezone: str = 'Asia/Shanghai'
+
+
+@dataclass
 class WebConfig:
     ui_fps: float = 10.0
     host: str = "0.0.0.0"
@@ -173,6 +185,7 @@ _SECTIONS = [
     ("perception", "perception", PerceptionConfig),
     ("gestures", "gestures", GestureConfig),
     ("session", "session", SessionConfig),
+    ("actions", "actions", ActionsConfig),
 ]
 
 
@@ -189,6 +202,7 @@ class Config:
     perception: PerceptionConfig = field(default_factory=PerceptionConfig)
     gestures: GestureConfig = field(default_factory=GestureConfig)
     session: SessionConfig = field(default_factory=SessionConfig)
+    actions: ActionsConfig = field(default_factory=ActionsConfig)
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
@@ -223,6 +237,12 @@ class Config:
         return config
 
     def validate(self):
+        from zoneinfo import ZoneInfo
+        ZoneInfo(self.actions.timezone)
+        if not (1 <= self.actions.max_calls_per_turn <= 2 and 1 <= self.actions.max_pending_reminders <= 100
+                and self.actions.max_pending_reminders <= self.actions.max_records <= 10000
+                and 1 <= self.actions.max_requests <= 100000 and 1 <= self.actions.notification_ttl_seconds <= 86400):
+            raise ValueError('Invalid action capacity')
         if not 1 <= self.session.max_turns <= 16:
             raise ValueError('Session history must contain at most 1–16 turns')
         from urllib.parse import urlparse

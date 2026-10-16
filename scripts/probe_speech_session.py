@@ -43,6 +43,7 @@ def main():
             wav=pcm_wav(spoken['audio'].tobytes());report['input_sha256']=hashlib.sha256(wav).hexdigest()
             report['first']=result(client.post('/api/audio',content=wav,headers={'Content-Type':'audio/wav'}))
             assert '蓝色' in report['first']['prompt']
+            assert not report['first'].get('actions_committed'), 'Ordinary session recall must not create a durable note'
             report['recall']=result(client.post('/api/chat',json={'text':'我最喜欢的颜色是什么？只回答颜色，没有提供就回答不知道。'}))
             assert '蓝色' in report['recall']['text']
             client.post('/api/session/clear',json={'session_id':state()['session']['id']}).raise_for_status()

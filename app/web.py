@@ -149,7 +149,7 @@ class Broadcaster:
         except asyncio.QueueFull:
             pass
 
-        if msg.get("type") in {"frame", "stats", "perception", "scene", "gesture_state"}:
+        if msg.get("type") in {"frame", "stats", "perception", "scene", "gesture_state", "actions_state"}:
             return
         # Reliable output cannot be silently discarded. Notify and disconnect
         # a slow client; the last complete result is available at /api/state.
@@ -190,6 +190,7 @@ class Broadcaster:
 class ChatRequest(BaseModel):
     text: str = Field(min_length=1, max_length=4000)
     use_image: StrictBool = False
+    request_id: str | None = Field(default=None,pattern=r'^[0-9a-f]{32}$')
 
 
 class CancelRequest(BaseModel):
@@ -223,20 +224,20 @@ def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=No
     async def _chat(request: ChatRequest):
         if submit is None: raise HTTPException(503, "Conversation input unavailable")
         try:
-            return submit(request.text, request.use_image)
+            return submit(request.text, request.use_image, request_id=request.request_id) if request.request_id else submit(request.text, request.use_image)
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from exc
         except RuntimeError as exc:
             raise HTTPException(409, str(exc)) from exc
 
     @app.post("/api/audio", status_code=202)
-    async def _audio(request: Request, use_image: bool = False):
+    async def _audio(request: Request, use_image: bool = False, request_id: str | None = None):
         if submit_audio is None: raise HTTPException(503, "Speech input unavailable")
         data = bytearray()
         async for chunk in request.stream():
             data.extend(chunk)
             if len(data) > max_upload_bytes: raise HTTPException(413, "Audio input exceeds size limit")
-        try: return submit_audio(bytes(data), use_image)
+        try: return submit_audio(bytes(data), use_image, request_id=request_id) if request_id else submit_audio(bytes(data), use_image)
         except ValueError as exc: raise HTTPException(400, str(exc)) from exc
         except RuntimeError as exc: raise HTTPException(409, str(exc)) from exc
 

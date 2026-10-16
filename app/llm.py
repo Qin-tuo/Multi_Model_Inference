@@ -122,6 +122,9 @@ class LLM:
         few_shot: Optional[list[dict]] = None,
         cancel_event=None,
         trim_history: bool = False,
+        tools=None,
+        tool_messages=None,
+        history_group_sizes=None,
     ) -> Iterator[tuple]:
         """Yields (content, metadata) tuples. Pass images_b64 for multimodal VLM requests."""
         if not self._loaded:
@@ -132,19 +135,35 @@ class LLM:
             msgs = self._messages_multimodal(prompt, images_b64, system_prompt, few_shot)
         else:
             msgs = self._messages(prompt, system_prompt, few_shot)
+        if tool_messages: msgs.extend(tool_messages)
 
         if self.backend == "openai":
             history_pairs = 0
+            group_sizes = []
             if trim_history:
                 prior = few_shot or []
-                if len(prior)%2 or any(m.get('role') != ('user' if i%2==0 else 'assistant') or not isinstance(m.get('content'),str) for i,m in enumerate(prior)):
-                    raise ValueError('Trimmable history must contain complete text turn pairs')
-                history_pairs = len(prior)//2
-            yield from self._stream_openai(msgs, mt, t, cancel_event, history_pairs)
+                group_sizes = history_group_sizes if history_group_sizes is not None else [2]*(len(prior)//2)
+                if sum(group_sizes)!=len(prior) or any(type(n) is not int or not 2<=n<=8 for n in group_sizes):
+                    raise ValueError('Trimmable history must contain complete text turn pairs and closed tool groups')
+                offset=0
+                for size in group_sizes:
+                    group=prior[offset:offset+size];offset+=size;pending=set()
+                    if group[0].get('role')!='user' or group[-1].get('role')!='assistant' or not all(isinstance(m.get('content'),str) for m in group):
+                        raise ValueError('Trimmable history must contain complete text turn pairs')
+                    for message in group[1:-1]:
+                        if message.get('role')=='assistant' and message.get('tool_calls') and not pending:
+                            ids=[c['id'] for c in message['tool_calls']]
+                            if len(set(ids))!=len(ids):raise ValueError('Duplicate tool call ID in history')
+                            pending=set(ids)
+                        elif message.get('role')=='tool' and message.get('tool_call_id') in pending:pending.remove(message['tool_call_id'])
+                        else:raise ValueError('Unpaired tool history')
+                    if pending:raise ValueError('Incomplete tool results in history')
+                history_pairs = len(group_sizes)
+            yield from self._stream_openai(msgs, mt, t, cancel_event, history_pairs, tools, group_sizes)
         else:
             yield from self._stream_ollama(msgs, mt, t)
 
-    def _stream_openai(self, messages, max_tokens, temperature, cancel_event=None, history_pairs=0) -> Iterator[tuple]:
+    def _stream_openai(self, messages, max_tokens, temperature, cancel_event=None, history_pairs=0, tools=None, history_group_sizes=None) -> Iterator[tuple]:
         # Use one payload for native multimodal token counting and inference.
         payload = {
             "model": self.model, "messages": messages,
@@ -152,6 +171,8 @@ class LLM:
             "max_tokens": max_tokens, "temperature": temperature,
             "stream": True, "stream_options": {"include_usage": True},
         }
+        if tools is not None:
+            payload.update(tools=tools,tool_choice='auto' if tools else 'none',parallel_tool_calls=False)
         if type(max_tokens) is not int or max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
         with self.requests.operation(cancel_event) as operation, httpx.Client(timeout=self.timeout, trust_env=False) as client:
@@ -167,13 +188,15 @@ class LLM:
                 if input_tokens + max_tokens + 16 <= self.context_tokens: break
                 if dropped >= history_pairs: raise ValueError("CONTEXT_BUDGET_EXCEEDED")
                 first = 1 if messages[0]['role']=='system' else 0
-                del messages[first:first+2]
+                size = history_group_sizes[dropped] if history_group_sizes is not None else 2
+                del messages[first:first+size]
                 dropped += 1
             yield ("", {"input_tokens_preflight": input_tokens, "history_pairs_kept":history_pairs-dropped,
                         "history_pairs_dropped":dropped})
             operation.check()
             final = {}
             finished = False
+            calls = {}; buffered = ''
             with client.stream("POST", f"{self.base_url}/v1/chat/completions", json=payload, extensions=operation.extensions) as r:
                 operation.check()
                 r.raise_for_status()
@@ -185,15 +208,41 @@ class LLM:
                     if raw == "[DONE]":
                         if not finished:
                             raise RuntimeError("Model stream ended without finish_reason")
+                        if calls:
+                            if final.get('finish_reason')!='tool_calls':raise RuntimeError('Incomplete tool call; nothing executed')
+                            ordered=[calls[k] for k in sorted(calls)]
+                            if any(not c['id'] or not c['function']['name'] for c in ordered):raise ValueError('Incomplete tool identity')
+                            final.update(tool_calls=ordered,assistant_content=buffered)
+                        elif tools is not None and buffered:yield(buffered,{})
                         yield ("", {**final, "done": True})
                         return
                     data = json.loads(raw)
                     if data.get("error"):
                         raise RuntimeError(f"Model stream error: {data['error']}")
                     for choice in data.get("choices", []):
-                        content = (choice.get("delta") or {}).get("content")
+                        delta = choice.get('delta') or {}
+                        for part in delta.get('tool_calls',[]):
+                            if not tools:raise ValueError('Model requested a disabled tool')
+                            index=part.get('index')
+                            if type(index) is not int or not 0<=index<2:raise ValueError('Too many model tool calls')
+                            call=calls.setdefault(index,{'id':'','type':'function','function':{'name':'','arguments':''}})
+                            if part.get('type','function')!='function':raise ValueError('Unsupported tool type')
+                            if part.get('id'):
+                                if call['id'] and call['id']!=part['id']:raise ValueError('Tool identity changed mid-stream')
+                                call['id']=part['id']
+                            function=part.get('function',{})
+                            for field,limit in [('name',64),('arguments',4096)]:
+                                value=function.get(field,'')
+                                if not isinstance(value,str):raise ValueError('Invalid streamed tool argument')
+                                call['function'][field]+=value
+                                if len(call['function'][field])>limit:raise ValueError('Tool response budget exceeded')
+                            if not isinstance(call['id'],str) or len(call['id'])>128:raise ValueError('Invalid tool ID')
+                        content = delta.get("content")
                         if content:
-                            yield (content, {})
+                            if tools is None:yield (content,{})
+                            else:
+                                buffered+=content
+                                if len(buffered)>16384:raise ValueError('Model text response budget exceeded')
                         if choice.get("finish_reason") is not None:
                             finished = True
                             final["finish_reason"] = choice["finish_reason"]
@@ -245,6 +294,13 @@ class LLM:
 
     def cancel(self, event):
         self.requests.cancel(event)
+
+    def require_tools(self):
+        with httpx.Client(timeout=5,trust_env=False) as client:
+            props=client.get(self.base_url+'/props').raise_for_status().json()
+        caps=props.get('chat_template_caps',{})
+        if not caps.get('supports_tools') or not caps.get('supports_tool_calls'):
+            raise RuntimeError('Configured model template does not support local tools')
 
     def idle(self):
         return self.requests.idle() and llama_slots_idle(self.base_url)

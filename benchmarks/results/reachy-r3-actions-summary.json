@@ -1,0 +1,84 @@
+{
+  "created_at": "2026-10-16T05:05:25.437156+00:00",
+  "status": "SOFTWARE_ACTIONS_AND_FILE_NOTIFICATIONS_VERIFIED",
+  "scope": "Actual local model tool calls, SQLAlchemy transactions, APScheduler persistence and file output; no physical playback, 8h qualification or performance B0",
+  "tests": {
+    "tests": 114,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "3424d72d24e344cf2e95e6f5d68d4fbfb7d1c9e1b909bd90e539e62daa8608ff",
+  "source_sha256": {
+    "app/actions/__init__.py": "5c8a1c5ef9bf166009162247371f5136995e141a34d1d4c934eebfc9b4978ee0",
+    "app/actions/schema.py": "873f526a4c6e6441ad8c71011deef9f136780a6856b6ca02de7d2c8e8fe63de7",
+    "app/actions/store.py": "06d93d242b3ee0db3b7ac7e198507c064cd625c8afec41eeb9cd44d828625b49",
+    "app/config.py": "f919ac5e57e5ec2726a9a13f2a381f9b9f74fe44d06b6e990c1c0181e3909384",
+    "app/llm.py": "993e1f9f569d6c5e4c7ae9c5cf44865f4b6a412350b507bee9453ced0e752669",
+    "app/pipeline.py": "07f5f8714ddae86831ac28ae880a44eebf152ae88c003c77eac2026d22cde413",
+    "app/turn_control.py": "ba280c83a8436af3add429ac05a5d2008c3237c578dddf1057c42532bfc789a9",
+    "app/web.py": "fe5142a64d93c8a5848f8fa09520b16c4031f25bc49428459b9002d1d9cce9e0",
+    "run_web_vision_chat.py": "13329f02ad025f4c384f4b06076871dc5c7ff82302b1067e143b699f7e267a0c",
+    "static/index.html": "42bab11a8b6a3d14e69bfec4bb4f7ce19895ea8c8015dff4fba3a37616baac2d",
+    "config/settings.orin-nx-headless.yaml": "fdce914d9b6fa6e62b7b69a632b4488857de1bb1024a6819b0ea52e4432c8e7a",
+    "requirements.lock": "e33cf6e031b51e35d61183ac8f8f9c00176253a3601c0d77b93d82d8d3634030",
+    "scripts/probe_actions.py": "29e18b4940e45b74767e6a215817b02d5f947c72b37b2a0445271dd1bd93ce14",
+    "scripts/probe_action_cancel.py": "953312cc64f562e31d1f21648148e843086152e4aa312f3363bad1f1e6941c5a",
+    "scripts/probe_speech_session.py": "ebf73404d405f259b8bcf4238deefda3c385ff34ef7f7f73b0f694e7fca5fd4c"
+  },
+  "actions_config": {
+    "enabled": true,
+    "database": "/home/nvidia/AI_Stack/runtime-data/reachy-actions/actions.sqlite",
+    "max_calls_per_turn": 2,
+    "max_pending_reminders": 100,
+    "max_records": 1000,
+    "max_requests": 10000,
+    "notification_ttl_seconds": 3600,
+    "timezone": "Asia/Shanghai"
+  },
+  "evidence": [
+    "benchmarks/results/reachy-r3-actions-initial-failure.json",
+    "benchmarks/results/reachy-r3-actions-integration.json",
+    "benchmarks/results/reachy-r3-actions-cancel.json",
+    "benchmarks/results/reachy-r3-actions-browser.json",
+    "benchmarks/results/reachy-r3-actions-speech-context.json",
+    "benchmarks/results/reachy-r3-actions-completed-reminder.json"
+  ],
+  "frameworks": {
+    "SQLAlchemy": "2.1.4",
+    "APScheduler": "3.11.3",
+    "storage": "SQLite WAL / synchronous FULL",
+    "scheduler_workers": 1
+  },
+  "verified": [
+    "Actual create/query notes, create/query/cancel reminders with local model and file speech",
+    "Same request ID returns committed receipts without repeating model execution or mutations",
+    "Different input under reused request ID is rejected without altering prior data",
+    "Actual cancellation after note/reminder commit preserves data and returns original receipt on retry",
+    "Deterministic DB/controller regression blocks a second unstarted tool after first commit and cancellation",
+    "SQL operation and receipt roll back together on injected receipt failure",
+    "Due time passes while app is stopped; restart produces one file notification and second restart does not repeat it",
+    "Restart during unconfirmed delivery stays uncertain instead of replaying",
+    "Scheduler setup failure after commit is visible and reconciled without losing reminder",
+    "Stopping notification preserves saved records and does not auto-repeat the stopped attempt",
+    "Explicit tools-off mode reports unavailable and performs no persistent operation",
+    "Ordinary speech preference remains session-local with tools enabled",
+    "Real Firefox shows committed operation receipt, database state and audio link",
+    "Cancelling an already delivered reminder preserves its delivery status and receipt",
+    "Missing player executable does not mark the notification output as started",
+    "A saved image request can replay its durable receipt during a simulated camera outage without requesting a new image"
+  ],
+  "known_limits": [
+    "Small deterministic functional samples, not a statistical function-calling quality benchmark",
+    "An actual fabricated reminder response occurred in the initial integration and is preserved as failure evidence",
+    "Model-generated prose is not the authoritative operation receipt; execution records are separate",
+    "Recent-query tools currently return three note previews and five reminders; broader retrieval/pagination behavior is not validated",
+    "Date scheduling uses UTC wall time; clock-jump resilience is not qualified",
+    "Relative reminders count from request registration and reject deadlines already passed by execution",
+    "Physical speaker/AEC, full device/model fault matrix and long endurance remain unverified",
+    "Browser network retries must reuse request_id; a new request_id denotes a new operation intent",
+    "New Reachy database is separate from legacy business databases; no old-data migration claimed"
+  ],
+  "optimization": "No autonomous performance tuning; B0 remains uncollected",
+  "verification_note": "Native model/database/scheduler cases and final regression evidence have separate scopes; later additive output-start and camera-outage retry guards are covered by DB/controller regressions."
+}

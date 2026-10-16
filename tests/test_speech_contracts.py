@@ -77,6 +77,14 @@ def test_playback_failure_is_not_a_completion(monkeypatch):
     with pytest.raises(ValueError):play_audio(np.ones(16,dtype=np.int16),16000)
 
 
+def test_missing_player_does_not_mark_output_started(monkeypatch):
+    def missing(*args,**kwargs):raise FileNotFoundError('player is unavailable')
+    monkeypatch.setattr('app.pipeline.subprocess.Popen',missing);started=[]
+    with pytest.raises(FileNotFoundError):
+        play_audio(np.ones(16,dtype=np.int16),16000,'chosen-sink',on_start=lambda:started.append(True))
+    assert not started
+
+
 def test_asr_rejects_bad_array_without_submitting():
     asr=STT()
     calls=[]
