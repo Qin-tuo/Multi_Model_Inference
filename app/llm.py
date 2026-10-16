@@ -17,6 +17,7 @@
 
 import httpx
 import json
+from app.request_io import RequestIO, llama_slots_idle
 from typing import Optional, Iterator, Dict, Any
 
 
@@ -44,6 +45,7 @@ class LLM:
         self.chat_template_kwargs = dict(chat_template_kwargs or {})
         self.last_error = None
         self._loaded = False
+        self.requests = RequestIO()
 
     def load(self) -> bool:
         self._loaded = False
@@ -118,6 +120,7 @@ class LLM:
         temperature: Optional[float] = None,
         images_b64: Optional[list[str]] = None,
         few_shot: Optional[list[dict]] = None,
+        cancel_event=None,
     ) -> Iterator[tuple]:
         """Yields (content, metadata) tuples. Pass images_b64 for multimodal VLM requests."""
         if not self._loaded:
@@ -130,11 +133,11 @@ class LLM:
             msgs = self._messages(prompt, system_prompt, few_shot)
 
         if self.backend == "openai":
-            yield from self._stream_openai(msgs, mt, t)
+            yield from self._stream_openai(msgs, mt, t, cancel_event)
         else:
             yield from self._stream_ollama(msgs, mt, t)
 
-    def _stream_openai(self, messages, max_tokens, temperature) -> Iterator[tuple]:
+    def _stream_openai(self, messages, max_tokens, temperature, cancel_event=None) -> Iterator[tuple]:
         # Use one payload for native multimodal token counting and inference.
         payload = {
             "model": self.model, "messages": messages,
@@ -144,8 +147,9 @@ class LLM:
         }
         if type(max_tokens) is not int or max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
-        with httpx.Client(timeout=self.timeout, trust_env=False) as client:
-            count = client.post(f"{self.base_url}/v1/chat/completions/input_tokens", json=payload)
+        with self.requests.operation(cancel_event) as operation, httpx.Client(timeout=self.timeout, trust_env=False) as client:
+            count = client.post(f"{self.base_url}/v1/chat/completions/input_tokens", json=payload, extensions=operation.extensions)
+            operation.check()
             count.raise_for_status()
             input_tokens = count.json()["input_tokens"]
             if type(input_tokens) is not int or input_tokens < 0:
@@ -153,11 +157,14 @@ class LLM:
             if input_tokens + max_tokens + 16 > self.context_tokens:
                 raise ValueError("CONTEXT_BUDGET_EXCEEDED")
             yield ("", {"input_tokens_preflight": input_tokens})
+            operation.check()
             final = {}
             finished = False
-            with client.stream("POST", f"{self.base_url}/v1/chat/completions", json=payload) as r:
+            with client.stream("POST", f"{self.base_url}/v1/chat/completions", json=payload, extensions=operation.extensions) as r:
+                operation.check()
                 r.raise_for_status()
                 for line in r.iter_lines():
+                    operation.check()
                     if not line or not line.startswith("data:"):
                         continue
                     raw = line[5:].strip()
@@ -221,6 +228,12 @@ class LLM:
                 return client.get(url).status_code == 200
         except Exception:
             return False
+
+    def cancel(self, event):
+        self.requests.cancel(event)
+
+    def idle(self):
+        return self.requests.idle() and llama_slots_idle(self.base_url)
 
     def unload(self):
         self._loaded = False

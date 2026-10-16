@@ -41,6 +41,7 @@ class STTConfig:
     model: str = "qwen3-asr"
     base_url: str = "http://127.0.0.1:8621/v1"
     backend: str = "llama_qwen3_asr"
+    native_base_url: str = "http://127.0.0.1:8089"
     language: str = "zh"
     timeout: float = 60.0
     max_seconds: float = 15.0
@@ -209,6 +210,7 @@ class Config:
         if self.vision.frames != 1:
             raise ValueError("The initial 4B profile supports one image per request")
         from app.audio import local_speech_url
+        local_speech_url(self.stt.native_base_url.rstrip('/') + '/v1')
         for audio_config in (self.stt, self.tts):
             local_speech_url(audio_config.base_url)
             if audio_config.timeout <= 0: raise ValueError("Speech timeout must be positive")

@@ -39,7 +39,8 @@ def test_chinese_single_character_and_punctuation_are_not_dropped():
 
 class FakeTTS:
     timeout=0.1
-    def synthesize(self,text):
+    def cancel(self,event): pass
+    def synthesize(self,text,**kwargs):
         return {'audio':np.full(160,100,dtype=np.int16),'sample_rate':16000}
 
 
@@ -57,7 +58,7 @@ def test_file_output_receipt_and_retention_are_real(tmp_path):
 
 def test_synthesis_failure_does_not_publish_a_file(tmp_path):
     class Failed(FakeTTS):
-        def synthesize(self,text):return {'audio':None,'error':'provider failed'}
+        def synthesize(self,text,**kwargs):return {'audio':None,'error':'provider failed'}
     cfg=replace(Config.load().audio,output_directory=str(tmp_path))
     output=SpeechOutput(Failed(),cfg,'c'*32)
     output.submit('你好')

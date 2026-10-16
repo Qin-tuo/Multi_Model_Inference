@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """One bounded request worker around the upstream VLM streaming sequence.
 
-Owns text, file/live audio, VLM and bounded TTS output. History, tools and
-full cancellation are integrated in R3 into this same owner.
+Owns text, file/live audio, VLM, bounded TTS output and whole-turn cancellation.
 """
 import queue
 import threading
@@ -13,6 +12,7 @@ import json
 from pathlib import Path
 from app.audio import wav_pcm
 from app.pipeline import segment_pcm, SpeechOutput, TextChunker
+from app.request_io import TurnCancelled
 
 
 class TurnController:
@@ -56,10 +56,30 @@ class TurnController:
             if self._active is not None: raise RuntimeError("The current request is still running")
             if use_image and (self.camera is None or not self.camera.health_check()):
                 raise ValueError("No fresh camera image is available")
-            request = {"turn_id": uuid.uuid4().hex, "use_image": use_image, **data}
+            request = {"turn_id": uuid.uuid4().hex, "use_image": use_image, **data,
+                       "cancel_event": threading.Event(), "phase": "running", "output": None}
             self._active = request
+            self.broadcaster.send({"type":"status", "stage":"running", "turn_id":request["turn_id"]})
             self._queue.put_nowait(request)
             return {"accepted": True, "turn_id": request["turn_id"]}
+
+    def cancel(self, turn_id=None, reason="user"):
+        with self._lock:
+            request = self._active
+            if request is None or (turn_id is not None and turn_id != request["turn_id"]):
+                return {"accepted": False, "reason": "turn_not_active"}
+            if request["phase"] in {"releasing", "release_unconfirmed"}:
+                return {"accepted": False, "reason": "turn_finalized", "turn_id": request["turn_id"]}
+            event = request["cancel_event"]
+            event.set()
+            request.update(phase="cancelling", cancel_reason=reason)
+            output = request["output"]
+            self.broadcaster.send({"type":"cancelled", "turn_id":request["turn_id"], "reason":reason})
+        # Adapter event identity prevents a delayed abort from affecting a new turn.
+        for adapter in (self.llm, self.stt):
+            if adapter is not None: adapter.cancel(event)
+        if output: output.cancel()
+        return {"accepted":True, "turn_id":request["turn_id"], "resources_released":False}
 
     def audio_file(self, turn_id):
         if not re.fullmatch(r"[0-9a-f]{32}", turn_id): return None
@@ -69,22 +89,31 @@ class TurnController:
 
     def state(self):
         with self._lock:
-            return {"ready": bool(self._thread and self._thread.is_alive() and not self._stop.is_set()),
+            return {"ready": bool(self._thread and self._thread.is_alive() and not self._stop.is_set()
+                                  and not (self._active and self._active["phase"] == "release_unconfirmed")),
                     "active_turn": self._active["turn_id"] if self._active else None,
+                    "phase": self._active["phase"] if self._active else "idle",
+                    "release": self._active.get("release") if self._active else None,
                     "last_result": self._last, "pending": self._queue.qsize()}
 
     def _run(self):
-        while not self._stop.is_set():
+        while not self._stop.is_set() or not self._queue.empty():
             try: request = self._queue.get(timeout=0.1)
             except queue.Empty: continue
             result = {"turn_id": request["turn_id"], "text": "", "metadata": {}, "mode": "camera_text" if request["use_image"] else "text"}
             def send(kind, **values):
-                self.broadcaster.send({"type": kind, "turn_id": request["turn_id"], **values})
+                discard = kind in {"token", "transcript"} or (kind == "status" and values.get("stage") not in {"idle", "releasing", "release_unconfirmed"})
+                self.broadcaster.send({"type":kind, "turn_id":request["turn_id"], **values},
+                                      cancel_event=request["cancel_event"] if discard else None)
             start = time.monotonic()
             first = None
             output = None
+            used = {}
+            event = request["cancel_event"]
+            def check():
+                if event.is_set() or self._stop.is_set(): raise TurnCancelled("Turn cancelled")
             try:
-                if self._stop.is_set(): raise InterruptedError("Application stopping")
+                check()
                 prompt = request.get("text")
                 if request["input_kind"] != "text":
                     send("status", stage="transcribing")
@@ -93,8 +122,10 @@ class TurnController:
                     if not segments: raise ValueError("No speech detected in audio input")
                     result["asr"] = []
                     for segment in segments:
-                        if self._stop.is_set(): raise InterruptedError("Application stopping")
-                        transcript = self.stt.transcribe(segment.audio)
+                        check()
+                        used["asr"] = self.stt
+                        transcript = self.stt.transcribe(segment.audio, cancel_event=event)
+                        check()
                         if transcript.get("error"): raise RuntimeError(transcript["error"])
                         result["asr"].append(transcript)
                     prompt = "".join(item["text"] for item in result["asr"])
@@ -102,7 +133,7 @@ class TurnController:
                     result["input_kind"] = request["input_kind"]
                     result["vad_segments"] = [{"duration": x.duration, "start": x.start_time, "end": x.end_time} for x in segments]
                     result["vad_time_kind"] = "file_offset_with_end_padding" if request["input_kind"] == "audio_file" else "host_receive_monotonic"
-                if self._stop.is_set(): raise InterruptedError("Application stopping")
+                check()
                 result["prompt"] = prompt
                 images = None
                 vision_prompt = self.config.vision.system_prompt
@@ -125,13 +156,20 @@ class TurnController:
                 send("transcript", text=prompt)
                 send("status", stage="thinking")
                 if self.tts is not None:
-                    output = SpeechOutput(self.tts, self.config.audio, request["turn_id"], self.output_sink)
+                    with self._lock:
+                        check()
+                        output = SpeechOutput(self.tts, self.config.audio, request["turn_id"], self.output_sink,
+                                              cancel_event=event, defer_commit=True)
+                        request["output"] = output
+                    used["tts"] = self.tts
                 chunker = TextChunker(self.config.tts.first_chunk_chars, self.config.tts.max_chunk_chars)
+                check()
+                used["llm"] = self.llm
                 stream = self.llm.generate_stream(prompt, images_b64=images,
-                    system_prompt=vision_prompt if images else None)
+                    system_prompt=vision_prompt if images else None, cancel_event=event)
                 try:
                     for text, metadata in stream:
-                        if self._stop.is_set(): raise InterruptedError("Application stopping")
+                        check()
                         result["metadata"].update(metadata)
                         if text:
                             first = first or time.monotonic()
@@ -146,37 +184,81 @@ class TurnController:
                 if output:
                     send("status", stage="synthesizing" if self.config.audio.output_mode == "file" else "speaking")
                     for chunk in chunker.finish(): output.submit(chunk)
-                    receipt = output.close(success=True)
-                    result["speech"] = {"receipt": receipt, "chunks": output.chunks, "duration": output.bytes_written/32000}
-                    if receipt["kind"] == "file_written": result["audio_url"] = f"/api/audio/{request['turn_id']}"
-                    output = None
-                result["status"] = "complete"
+                    output.close(success=True)
+                # Commit and cancellation are serialized. A cancelled staged WAV
+                # is never published; a completed earlier turn stays intact.
+                with self._lock:
+                    check()
+                    if output:
+                        receipt = output.publish()
+                        result["speech"] = {"receipt":receipt, "chunks":output.chunks, "duration":output.bytes_written/32000}
+                        if receipt["kind"] == "file_written": result["audio_url"] = f"/api/audio/{request['turn_id']}"
+                    request["phase"] = "releasing"
+                    result["status"] = "complete"
+                output = None
             except Exception as exc:
-                result.update(status="failed", error=str(exc))
-                send("error", error=str(exc))
+                if event.is_set() or isinstance(exc, TurnCancelled):
+                    result.update(status="cancelled", cancel_reason=request.get("cancel_reason", "shutdown"))
+                else:
+                    result.update(status="failed", error=str(exc))
+                    send("error", error=str(exc))
             finally:
                 if output:
                     try: output.close(success=False)
                     except Exception as exc:
-                        result.update(status="failed", cleanup_error=str(exc))
+                        result["cleanup_error"] = str(exc)
                 result.update(elapsed_seconds=time.monotonic() - start,
                               first_content_seconds=first - start if first else None)
-                # The HTTP stream has closed before the next request is admitted.
-                # Provider-release and cross-modality cancellation are R3 checks.
                 with self._lock:
+                    if event.is_set() and result["status"] != "complete":
+                        result["status"] = "cancelled"
+                        result["discarded_text_chars"] = len(result["text"])
+                        result["text"] = ""
                     self._last = result
-                    self._active = None
-                self._queue.task_done()
+                    request["phase"] = "releasing"
+                send("status", stage="releasing")
                 send("done", text=result["text"], status=result["status"],
                      tokens=result["metadata"].get("eval_count"),
                      ttft=result["first_content_seconds"], total_time=result["elapsed_seconds"],
                      audio_url=result.get("audio_url"), output_kind=result.get("speech", {}).get("receipt", {}).get("kind"))
-                send("status", stage="idle")
+                released = self._wait_for_release(request, used)
+                result["resources_released"] = released
+                result["release"] = request["release"]
+                with self._lock:
+                    self._last = result
+                    if released: self._active = None
+                    send("status", stage="idle" if released else "release_unconfirmed")
+                self._queue.task_done()
+
+    def _wait_for_release(self, request, adapters):
+        """Keep admission closed until local output and native workers are idle."""
+        started = time.monotonic()
+        warned = False
+        while True:
+            observed = {}
+            for name, adapter in adapters.items():
+                try: observed[name] = {"idle": bool(adapter.idle())}
+                except Exception as exc: observed[name] = {"idle":False, "error":str(exc)}
+            output = request["output"]
+            if output: observed["output"] = {"idle":output.idle()}
+            released = all(value["idle"] for value in observed.values())
+            with self._lock:
+                request["release"] = {"observations":observed, "seconds":time.monotonic()-started, "confirmed":released}
+                if not released and time.monotonic()-started >= 5:
+                    request["phase"] = "release_unconfirmed"
+            if released: return True
+            if not warned and time.monotonic()-started >= 5:
+                warned = True
+                self.broadcaster.send({"type":"status", "turn_id":request["turn_id"], "stage":"release_unconfirmed"})
+            if self._stop.wait(0.25): return False
 
     def close(self):
         self._stop.set()
+        self.cancel(reason="shutdown")
         if self._thread:
             self._thread.join(timeout=self.config.llm.timeout + 5)
             if self._thread.is_alive():
                 raise RuntimeError("Conversation worker has not released")
             self._thread = None
+        if self._active is not None:
+            raise RuntimeError("Backend release is unconfirmed; inspect conversation state")

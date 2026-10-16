@@ -18,24 +18,28 @@ from pathlib import Path
 import time
 import wave
 import httpx
+from app.request_io import RequestIO, llama_slots_idle
 import numpy as np
 from app.audio import local_speech_url, speech_capability, pcm_wav, wav_pcm
 
 
 class STT:
     def __init__(self, model="qwen3-asr", base_url="http://127.0.0.1:8621/v1",
-                 backend="llama_qwen3_asr", language="zh", timeout=60.0, max_seconds=15):
+                 backend="llama_qwen3_asr", language="zh", timeout=60.0, max_seconds=15,
+                 native_base_url="http://127.0.0.1:8089"):
         self.model_name, self.backend, self.language = model, backend, language
         self.base_url = local_speech_url(base_url)
+        self.native_base_url = local_speech_url(native_base_url.rstrip("/")+"/v1").removesuffix("/v1")
         self.timeout, self.max_seconds = timeout, max_seconds
         self._client = None
         self.last_error = None
         self.capability = None
+        self.requests = RequestIO()
 
     def load(self):
         self.unload()
         self._client = httpx.Client(timeout=self.timeout, trust_env=False,
-            limits=httpx.Limits(max_connections=1, max_keepalive_connections=1))
+            limits=httpx.Limits(max_connections=1, max_keepalive_connections=0))
         try:
             self.capability = speech_capability(self._client, self.base_url, "asr", self.model_name, self.backend)
             self.last_error = None
@@ -43,7 +47,7 @@ class STT:
         except (httpx.HTTPError, ValueError, KeyError) as exc:
             self.last_error = str(exc); self.unload(); return False
 
-    def transcribe(self, audio, sample_rate=16000):
+    def transcribe(self, audio, sample_rate=16000, cancel_event=None):
         if self._client is None: return {"text": "", "error": "ASR is not loaded"}
         start = time.monotonic()
         try:
@@ -60,15 +64,17 @@ class STT:
                 elif np.issubdtype(array.dtype, np.floating) and np.all(np.isfinite(array)) and np.max(np.abs(array)) <= 1:
                     pcm = np.rint(array * 32767).astype('<i2').tobytes()
                 else: raise ValueError("ASR expects normalized floats or int16 PCM")
-            response = self._client.post(self.base_url + "/audio/transcriptions",
-                files={"file": ("utterance.wav", pcm_wav(pcm), "audio/wav")},
-                data={"model": self.model_name, "language": self.language, "response_format": "json"})
-            response.raise_for_status()
-            text = response.json()["text"]
-            if not isinstance(text, str) or not text.strip() or len(text) > 4000:
-                raise ValueError("ASR returned an empty or oversized transcript")
-            return {"text": text.strip(), "language": self.language, "duration": len(pcm) / 32000,
-                    "elapsed_seconds": time.monotonic() - start, "backend": self.backend}
+            with self.requests.operation(cancel_event) as operation:
+                response = self._client.post(self.base_url + "/audio/transcriptions",
+                    files={"file": ("utterance.wav", pcm_wav(pcm), "audio/wav")},
+                    data={"model": self.model_name, "language": self.language, "response_format": "json"}, extensions=operation.extensions)
+                operation.check()
+                response.raise_for_status()
+                text = response.json()["text"]
+                if not isinstance(text, str) or not text.strip() or len(text) > 4000:
+                    raise ValueError("ASR returned an empty or oversized transcript")
+                return {"text": text.strip(), "language": self.language, "duration": len(pcm) / 32000,
+                        "elapsed_seconds": time.monotonic() - start, "backend": self.backend}
         except (httpx.HTTPError, ValueError, OSError, KeyError, wave.Error, EOFError) as exc:
             self.last_error = str(exc)
             return {"text": "", "error": str(exc)}
@@ -83,6 +89,17 @@ class STT:
             speech_capability(self._client, self.base_url, "asr", self.model_name, self.backend)
             return True
         except (httpx.HTTPError, ValueError, KeyError): return False
+
+    def cancel(self, event):
+        self.requests.cancel(event)
+
+    def idle(self):
+        if not self.requests.idle(): return False
+        with httpx.Client(timeout=.5,trust_env=False) as client:
+            capability=speech_capability(client,self.base_url,"asr",self.model_name,self.backend)
+        active=capability.get('concurrency',{}).get('active')
+        if type(active) is not int: raise ValueError('Invalid speech concurrency observation')
+        return active==0 and llama_slots_idle(self.native_base_url)
 
     def unload(self):
         if self._client: self._client.close()

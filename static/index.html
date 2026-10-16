@@ -343,6 +343,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         <input id="textInput" type="text" maxlength="4000" placeholder="输入中文问题" required aria-label="问题">
         <label><input id="useCamera" type="checkbox"> 使用当前画面</label>
         <button id="sendText" type="submit">发送</button>
+        <button id="cancelTurn" type="button" disabled>停止本轮</button>
       </form>
       <form class="text-form" id="audioForm">
         <input id="audioFile" type="file" accept=".wav,audio/wav" aria-label="16kHz单声道WAV" disabled>
@@ -365,6 +366,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   const $ = id => document.getElementById(id);
 
   let speechReady = false;
+  let activeTurn = null, cancelledTurn = null;
   let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
   let reconnectTimer = null, pttActive = null, pipelineStage = 'connecting', faceBoxTimer = null;
   const camNatural = {w:640, h:480};
@@ -403,12 +405,14 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     ws.onmessage = (ev) => {
       let msg;
       try{ msg = JSON.parse(ev.data); } catch(e){ return; }
+      if(msg.turn_id === cancelledTurn && ['token','transcript'].includes(msg.type)) return;
       switch(msg.type){
         case 'frame':        onFrame(msg); break;
         case 'status':       onStatus(msg); break;
         case 'transcript':   onTranscript(msg); break;
         case 'token':        onToken(msg); break;
         case 'done':         onDone(msg); break;
+        case 'cancelled':    cancelledTurn=msg.turn_id; onStatus({...msg,stage:'cancelling'}); break;
         case 'stats':        onStats(msg); break;
         case 'perception':   onPerception(msg); break;
         case 'scene':        onScene(msg); break;
@@ -560,7 +564,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const labels = {
       idle:'等待输入', connecting:'Connecting...', muted:'Mic muted', listening:'Listening...',
       recording:'Recording...', transcribing:'Transcribing...',
-      thinking:'Thinking...', synthesizing:'生成语音文件...', speaking:'Speaking...'
+      thinking:'Thinking...', synthesizing:'生成语音文件...', speaking:'Speaking...',
+      running:'处理中', cancelling:'正在停止', releasing:'等待资源释放', release_unconfirmed:'资源释放待确认'
     };
     const status = $('pipeStatus');
     status.textContent = labels[stage] || stage;
@@ -571,11 +576,14 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   }
 
   function onStatus(msg){
+    if(msg.turn_id && msg.stage !== 'idle') activeTurn=msg.turn_id;
+    if(msg.stage === 'idle') activeTurn=null;
     const stages = $('pipeStages').querySelectorAll('.stage');
     for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
     pipelineStage = msg.stage;
-    const busy=['thinking','transcribing','synthesizing','speaking'].includes(msg.stage);
+    const busy=['running','thinking','transcribing','synthesizing','speaking','cancelling','releasing','release_unconfirmed'].includes(msg.stage);
     $('sendText').disabled=busy; $('sendAudio').disabled=busy || !speechReady;
+    $('cancelTurn').disabled=!activeTurn || ['cancelling','releasing','release_unconfirmed'].includes(msg.stage);
     renderPipelineStatus();
   }
 
@@ -616,6 +624,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       if(msg.total_time != null) parts.push('总计 '+msg.total_time.toFixed(1)+'s');
       if(msg.tokens != null) parts.push(msg.tokens+' tok');
       if(msg.status === 'failed') parts.push('未完成');
+      if(msg.status === 'cancelled') parts.push('已取消');
       meta.textContent = parts.join(' \u00b7 ');
       if(msg.audio_url){
         const link=document.createElement('a'); link.href=msg.audio_url; link.textContent=' 下载语音文件';
@@ -706,7 +715,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     $('audioFile').disabled=!speechReady;
     $('audioMode').textContent=speechReady ? '16kHz 单声道 PCM WAV；输出：'+(msg.audio_output_mode==='file' ? '文件' : '设备') : '语音未启用';
     $('inputMode').textContent=msg.audio_enabled ? '麦克风与文字' : speechReady ? '语音文件与文字' : '文字';
-    onStatus({stage:msg.active_turn ? 'thinking' : 'idle'});
+    activeTurn=msg.active_turn;
+    onStatus({stage:msg.phase || (msg.active_turn ? 'thinking' : 'idle'),turn_id:msg.active_turn});
     if(msg.last_result){
       onDone({text:msg.last_result.text, status:msg.last_result.status, audio_url:msg.last_result.audio_url});
     }
@@ -724,6 +734,24 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       if(!response.ok) throw new Error(typeof data.detail==='string' ? data.detail : '语音输入无效');
     }catch(error){
       $('inputError').textContent=error.message; $('sendAudio').disabled=!speechReady; $('sendText').disabled=false;
+    }
+  });
+
+  $('cancelTurn').addEventListener('click',async function(){
+    if(!activeTurn) return;
+    const turn=activeTurn;
+    cancelledTurn=turn;
+    $('cancelTurn').disabled=true;
+    try{
+      const response=await fetch('/api/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({turn_id:turn})});
+      const result=await response.json();
+      if(!response.ok) throw new Error(result.detail || '停止请求失败');
+      // WebSocket carries the ordered lifecycle. A delayed HTTP response must
+      // not rewind an already-idle/new turn back to cancelling.
+      if(!result.accepted && cancelledTurn===turn) cancelledTurn=null;
+    }catch(error){
+      if(cancelledTurn===turn) cancelledTurn=null;
+      $('inputError').textContent=error.message; $('cancelTurn').disabled=false;
     }
   });
 

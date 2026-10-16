@@ -49,13 +49,13 @@ systemctl --user start mmassistant-camera.service
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_web.py --camera --text '用一句话描述当前画面'
 ```
 
-`run_vision_chat.py`复用同一入口与生命周期，不复制主控；`run_voice_chat.py`复用同一网页/会话生命周期，默认关闭相机。一次只接纳一个请求，多余请求返回409；当前尚不承诺语音、手势及生成中的即时取消。
+`run_vision_chat.py`复用同一入口与生命周期，不复制主控；`run_voice_chat.py`复用同一网页/会话生命周期，默认关闭相机。一次只接纳一个请求，多余请求返回409；网页停止本轮及原生后端释放确认已接入，具体边界见下方R3记录。
 
 ## 配置与模型
 
 沿用上游typed dataclass和overlay组织。默认加载`config/settings.yaml`及`config/settings.orin-nx-headless.yaml`；显式`--config`或`REACHY_ASSISTANT_CONFIG`可选择另一个完整平台overlay。未知字段、错误类型、缺失文件、机器人/RAG字段和远端模型地址均明确失败。输出的effective config是当前参数依据。
 
-上游YAML中的`vad.use_silero`未被原dataclass消费，已删除这个无效配置项；真正的VAD接入与验证在后续阶段进行。
+上游YAML中的`vad.use_silero`未被原dataclass消费，已删除这个无效配置项；Silero v6已在R2实际接入并验证。
 
 模型使用已有`assistant-vlm`本机服务。主模型由既有模型锁固定为Qwen3.5-4B Q4_K_M。客户端每次生成前使用同一请求参数调用原生多模态token计数端点，保留128输出和16 token余量；不按字符估算。显式模型名称不匹配时不自动替换；HTTP失败、异常结束和空输出不能伪装成功。
 
@@ -85,7 +85,7 @@ YuNet固定版本和哈希见`models/perception.json`，权重与许可证存放
 
 真人脸验证连续取得10个不同帧的正例；这证明当前环境的检测连通，不是识别精度统计或身份验证。浏览器静态页面用本机Firefox实际渲染，HTTP/WebSocket验证使用真实模型；原始相机图片与截图保存在AI_Stack，没有提交Git。
 
-尚待完成：人体/手部感知、挥手/静止举掌、当前会话与有限工具、统一取消和后端释放、完整故障矩阵、物理音频及B0基线。
+当前尚待完成：真人手部正例及挥手/静止举掌、当前会话与有限工具、完整故障矩阵、物理音频及B0基线。R2感知和R3软件取消的新增证据见下文。
 
 回退时退出新应用即可继续旧系统。默认服务未切换；如将来测试暂停旧相机，必须记录并恢复原服务状态。不要在运行目录执行`git reset --hard`来替代受控回退，不覆盖原用户数据。本次快照保存代码/配置，不宣称已备份在线数据库。
 
@@ -110,7 +110,7 @@ YuNet固定版本和哈希见`models/perception.json`，权重与许可证存放
 
 文件回执`file_written`与设备回执`device_completed`分开。设备回执表示播放器正常退出，不代表已经完成声学验收。当前默认input_mode/output_mode均为file。要进入设备模式需显式配置ReSpeaker Lite及输出设备；实际录播、AEC和双讲仍待硬件接入。
 
-移除了结束所有录音进程、关闭桌面PulseAudio及改写其配置的逻辑。只管理自身录音/播放进程和AEC模块，AEC名称按实例隔离，选择输出不修改系统默认扬声器。音频错误会结束本轮并返回失败；整轮即时取消和GPU释放仍是R3任务。
+移除了结束所有录音进程、关闭桌面PulseAudio及改写其配置的逻辑。只管理自身录音/播放进程和AEC模块，AEC名称按实例隔离，选择输出不修改系统默认扬声器。音频错误会结束本轮并返回失败；R3已补充软件取消及后端释放观察，物理停播仍未验收。
 
 
 ## R2人体、手掌与21点手部
@@ -143,3 +143,32 @@ setup只在本应用环境链接系统匹配版本的TensorRT Python包，避免
 TensorRT加载旧engine提示设备兼容性警告。[审查记录](../benchmarks/results/reachy-r2-engine-warning.json)显示构建记录与当前Orin的计算能力、SM数一致，engine早于本次启动；NVIDIA记录过同版本重启后的同类问题。本机根因未被完全证明，警告保持可见，系统版本保持固定，长期稳定性仍待验证。参考[官方问题记录](https://forums.developer.nvidia.com/t/trt-engine-plan-file-across-devices-warning-after-reboot-on-jetson-orin-nano/376848)。
 
 人体预后处理适配来自Ultralytics公开示例，保留AGPL-3.0声明；TensorRT运行辅助代码来自NVIDIA样例，保留Apache-2.0声明。对应原文、固定提交及许可证见`deploy/perception-sources.lock.json`、`licenses/`和`THIRD-PARTY-NOTICES.md`。
+
+
+## R3整轮取消的软件验证
+
+[阶段汇总](../benchmarks/results/reachy-r3-cancellation-summary.json)、[原生后端观察](../benchmarks/results/reachy-r3-native-cancellation.json)、[真实Web链路](../benchmarks/results/reachy-r3-web-cancellation.json)和[浏览器按钮](../benchmarks/results/reachy-r3-browser-cancellation.json)记录本次范围。74项适用测试通过，包含真实本地阻塞HTTP连接和自有播放器替身进程，不使用扬声器假回执。
+
+`TurnController`仍是唯一轮次所有者。网页停止使用`POST /api/cancel`并携带当前`turn_id`；迟到的旧轮次取消不能中断下一轮。取消标记先阻断新输出和后续模型调用，再中断自身HTTP连接、停止自身播放器。HTTPX的连接trace让应用在响应头到达之前也能中断阻塞读取；只shutdown该操作持有的socket，连接最终关闭由HTTPX负责。
+
+WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁内发布；取消不能发布半轮音频。之前已完成且仍在保留范围内的文件继续可用。WebSocket排队和实际发送时都检查该轮取消标记，迟到token/转写不会重新出现。文件回执与设备进程回执仍分开。
+
+本地调用返回与后端释放是两个状态。这里的释放指本轮执行占用结束，模型权重继续常驻，不表示整机GPU空闲或内存归零。LLM检查原生`/slots`；ASR同时检查OVS占用与8089原生槽；TTS检查OVS持有到执行线程退出的占用。源码依据及哈希见汇总。释放未确认时保持409拒绝新轮，5秒后显示`release_unconfirmed`并继续探测恢复，不将超时当作成功。关闭应用时仍无法确认释放会明确报错，不会替外部systemd服务杀模型进程。
+
+本次三个原生模型都观察到“本地已取消、后端仍忙”，随后空闲，下一请求成功。完整Web测试分别在ASR、LLM、TTS忙时取消：无迟到输出、取消音频404、下一轮正常生成WAV。Firefox实测还人为延迟取消HTTP回执1秒，验证旧回执不会覆盖较新的空闲状态。
+
+复现时保持这些共享后端没有其他请求；先启动无相机文件模式，再运行：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_cancellation.py \
+  --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
+  --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-native-cancellation.json
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_turn_cancel.py \
+  --base-url http://127.0.0.1:8090 \
+  --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
+  --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-web-cancellation.json
+```
+
+可选浏览器回归使用已安装Firefox与geckodriver，启动`geckodriver --host 127.0.0.1 --port 4445`后运行`python scripts/probe_browser_cancel.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-browser-cancel.json`；完成后退出自己启动的驱动进程。
+
+这些单次时长属于功能诊断，不是B0或性能承诺。ASR当前已提交的识别和Matcha当前合成步骤仍可能运行至安全结束；不宣称CUDA kernel可被即时抢占。实物播放缓冲何时真正静音、AEC/双讲、手势触发、工具取消边界、模型崩溃/重启矩阵及长期持续运行尚未通过验收。

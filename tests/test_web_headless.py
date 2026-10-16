@@ -12,6 +12,8 @@ class FakeLLM:
     def __init__(self, **kwargs): self.model = kwargs["model"]; self.last_error = None
     def load(self): return True
     def unload(self): pass
+    def idle(self): return True
+    def cancel(self, event): pass
     def generate_stream(self, prompt, **kwargs):
         yield "测试回答", {}
         yield "", {"done": True, "eval_count": 2}

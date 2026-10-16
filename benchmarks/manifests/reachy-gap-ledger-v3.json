@@ -24,9 +24,10 @@
       "source_file": "app/pipeline.py",
       "planned_resolution": "Separate listening and turn processing; one cancellation authority and release checks",
       "phase": "R3",
-      "status": "CONTINUOUS_CAPTURE_PATH_PREPARED_PHYSICAL_CANCEL_PENDING",
+      "status": "SOFTWARE_CANCEL_RELEASE_VERIFIED_PHYSICAL_DUPLEX_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r2-summary.json"
+        "benchmarks/results/reachy-r2-summary.json",
+        "benchmarks/results/reachy-r3-cancellation-summary.json"
       ]
     },
     {
@@ -38,7 +39,8 @@
       "phase": "R3",
       "status": "BOUNDED_AUDIO_QUEUES_IMPLEMENTED_R3_STRESS_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r2-summary.json"
+        "benchmarks/results/reachy-r2-summary.json",
+        "benchmarks/results/reachy-r3-cancellation-summary.json"
       ]
     },
     {
@@ -159,5 +161,6 @@
     "microphone": "ReSpeaker Lite dual-mic, not connected per user",
     "speaker": "not connected per user",
     "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
-  }
+  },
+  "updated_at": "2026-10-16T03:11:57.028258+00:00"
 }

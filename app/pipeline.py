@@ -333,7 +333,33 @@ class PulseAudioAEC:
         self.sink_master = None
 
 
-def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None):
+class Playback:
+    """Own only this turn's player; cancellation and process launch share a lock."""
+    def __init__(self, event):
+        self.event = event
+        self._lock = threading.Lock()
+        self._process = None
+
+    def start(self, cmd):
+        from app.request_io import TurnCancelled
+        with self._lock:
+            if self.event.is_set(): raise TurnCancelled('Playback cancelled')
+            self._process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+            return self._process
+
+    def cancel(self):
+        with self._lock:
+            process = self._process
+            if process is not None and process.poll() is None:
+                try: process.terminate()
+                except ProcessLookupError: pass
+
+    def clear(self, process):
+        with self._lock:
+            if self._process is process: self._process = None
+
+
+def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None, playback=None):
     """Return a device-process receipt; physical audibility is a separate check."""
     if not sink: raise ValueError("Explicit speaker device is required")
     if audio.ndim != 1 or audio.dtype != np.int16 or sample_rate != 16000:
@@ -342,18 +368,31 @@ def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None):
         cmd = ["aplay", "-D", sink, "-f", "S16_LE", "-r", str(sample_rate), "-c", "1", "-t", "raw", "-q"]
     else:
         cmd = ["paplay", f"--device={sink}", "--format=s16le", f"--rate={sample_rate}", "--channels=1", "--raw"]
-    process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    from app.request_io import TurnCancelled
+    playback = playback or Playback(threading.Event())
+    process = playback.start(cmd)
     started = time.monotonic()
     try:
-        _, error = process.communicate(audio.tobytes(), timeout=audio.size/sample_rate + 5)
+        data = audio.tobytes()
+        deadline = started + audio.size/sample_rate + 5
+        while True:
+            if playback.event.is_set(): raise TurnCancelled('Playback cancelled')
+            try:
+                _, error = process.communicate(data, timeout=0.1)
+                break
+            except subprocess.TimeoutExpired:
+                data = None
+                if time.monotonic() >= deadline: raise RuntimeError('Playback timed out')
+        if playback.event.is_set(): raise TurnCancelled('Playback cancelled')
         if process.returncode != 0: raise RuntimeError(f"Playback failed: {error.decode(errors='replace')[:300]}")
         return {"kind": "device_completed", "submitted_monotonic": started,
                 "completed_monotonic": time.monotonic(), "frames": audio.size}
     finally:
         if process.poll() is None:
             process.terminate()
-            try: process.wait(timeout=2)
+            try: process.wait(timeout=0.5)
             except subprocess.TimeoutExpired: process.kill(); process.wait()
+        playback.clear(process)
 
 
 # ── Silero VAD ────────────────────────────────────────────────────
@@ -811,7 +850,7 @@ class TextChunker:
 
 class SpeechOutput:
     """One bounded synthesis worker; file and device receipts are distinct."""
-    def __init__(self, tts, audio_config, turn_id, output_sink=None):
+    def __init__(self, tts, audio_config, turn_id, output_sink=None, *, cancel_event=None, defer_commit=False):
         self.tts, self.config, self.turn_id = tts, audio_config, turn_id
         self.output_sink = output_sink or (lambda: audio_config.output_device)
         self.queue = queue.Queue(maxsize=2)
@@ -819,16 +858,48 @@ class SpeechOutput:
         self.bytes_written = 0
         self.chunks = []
         self.receipt = None
+        self.cancel_event = cancel_event if cancel_event is not None else threading.Event()
+        self.defer_commit = defer_commit
+        self._temporary = None
+        self._path = None
         self._abort = threading.Event()
+        self._playback = Playback(self._abort)
         self._thread = threading.Thread(target=self._run, name="speech-output", daemon=True)
         self._thread.start()
 
     def submit(self, text):
         while self._thread.is_alive():
+            self._check()
             if self.error: raise RuntimeError(self.error)
             try: self.queue.put(text, timeout=0.1); return
             except queue.Full: continue
         raise RuntimeError(self.error or "Speech worker stopped")
+
+    def _check(self):
+        from app.request_io import TurnCancelled
+        if self._abort.is_set() or self.cancel_event.is_set(): raise TurnCancelled('Speech output cancelled')
+
+    def cancel(self):
+        self._abort.set()
+        self.tts.cancel(self._abort)
+        self._playback.cancel()
+
+    def idle(self):
+        return not self._thread.is_alive()
+
+    def publish(self):
+        """Caller serializes this commit with turn cancellation."""
+        self._check()
+        if self._thread.is_alive(): raise RuntimeError('Speech output is still running')
+        if self.error: raise RuntimeError(self.error)
+        if self._temporary:
+            path = self._path
+            retained = sorted((p for p in path.parent.glob('reply-*.wav') if p != path and re.fullmatch(r'reply-[0-9a-f]{32}\.wav', p.name)), key=lambda p:(p.stat().st_mtime_ns,p.name), reverse=True)
+            for old in retained[self.config.retained_files - 1:]: old.unlink()
+            self._temporary.replace(path)
+            self._temporary = None
+            self.receipt = {'kind':'file_written', 'path':str(path), 'bytes':self.bytes_written}
+        return self.receipt
 
     def _run(self):
         writer = None; temporary = None; path = None
@@ -840,12 +911,14 @@ class SpeechOutput:
                 temporary = path.with_suffix(".partial")
                 writer = wave.open(str(temporary), "wb")
                 writer.setnchannels(1); writer.setsampwidth(2); writer.setframerate(SAMPLE_RATE)
-            while not self._abort.is_set():
+            while True:
+                self._check()
                 try: text = self.queue.get(timeout=0.1)
                 except queue.Empty: continue
                 if text is None: break
-                result = self.tts.synthesize(text)
-                if self._abort.is_set(): raise InterruptedError("Speech output aborted")
+                self._check()
+                result = self.tts.synthesize(text, cancel_event=self._abort)
+                self._check()
                 audio = result.get("audio")
                 if audio is None: raise RuntimeError(result.get("error", "TTS returned no audio"))
                 if audio.dtype != np.int16 or audio.ndim != 1 or result["sample_rate"] != SAMPLE_RATE:
@@ -857,19 +930,16 @@ class SpeechOutput:
                     writer.writeframesraw(raw)
                     receipt = {"kind": "file_chunk_written", "bytes": len(raw)}
                 else:
-                    receipt = play_audio(audio, SAMPLE_RATE, self.output_sink())
+                    receipt = play_audio(audio, SAMPLE_RATE, self.output_sink(), self._playback)
                 self.bytes_written += len(raw)
                 self.chunks.append({"text": text, "bytes": len(raw), "elapsed_seconds": result.get("elapsed_seconds"),
                                     "first_pcm_seconds": result.get("first_pcm_seconds"), "receipt": receipt})
-            if self._abort.is_set(): raise InterruptedError("Speech output aborted")
+            self._check()
             if not self.bytes_written: raise RuntimeError("No speech output produced")
             if writer:
                 writer.close(); writer = None
-                temporary.replace(path)
-                retained = sorted((p for p in path.parent.glob("reply-*.wav") if p != path and re.fullmatch(r"reply-[0-9a-f]{32}\.wav", p.name)), key=lambda p:(p.stat().st_mtime_ns, p.name), reverse=True)
-                # Always keep the file just completed, even when mtime ties.
-                for old in retained[self.config.retained_files - 1:]: old.unlink()
-                self.receipt = {"kind": "file_written", "path": str(path), "bytes": self.bytes_written}
+                self._temporary, self._path = temporary, path
+                temporary = None  # Publication belongs to the turn's commit.
             else:
                 self.receipt = {"kind": "device_completed", "bytes": self.bytes_written}
         except Exception as exc:
@@ -879,9 +949,13 @@ class SpeechOutput:
             if temporary and temporary.exists(): temporary.unlink()
 
     def close(self, success=True):
-        if not success: self._abort.set()
+        if not success: self.cancel()
         elif self._thread.is_alive(): self.submit(None)
-        self._thread.join(timeout=self.tts.timeout * 3 + 5)
+        self._thread.join(timeout=self.tts.timeout + 5)
         if self._thread.is_alive(): raise RuntimeError("Speech worker has not released")
+        if not success and self._temporary:
+            self._temporary.unlink(missing_ok=True)
+            self._temporary = None
         if self.error and success: raise RuntimeError(self.error)
+        if success and not self.defer_commit: return self.publish()
         return self.receipt

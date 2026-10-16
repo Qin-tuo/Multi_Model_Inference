@@ -2,7 +2,7 @@
 
 基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的计划中派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前分支：`migration/reachy-headless`，已导入固定上游源码；文字、文件图像及真实摄像头网页问答已验证；无机身人脸检测取得真实正例。中文文件语音也已贯通；人体/手部已接入共享帧链路，真人手部、手势和完整取消待验证；实体录播待外设接入。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
+**当前分支：`migration/reachy-headless`，已导入固定上游源码；文字、文件图像及真实摄像头网页问答已验证；无机身人脸检测取得真实正例。中文文件语音已贯通，人体/手部已接入共享帧链路。网页整轮取消、后端释放确认及下一轮恢复已实测；真人手部、手势、实体录播及物理停播仍待验证。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
 
 当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。
 

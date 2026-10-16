@@ -17,6 +17,7 @@
 import time
 from pathlib import Path
 import httpx
+from app.request_io import RequestIO
 import numpy as np
 from app.audio import local_speech_url, speech_capability, pcm_wav
 
@@ -32,11 +33,12 @@ class LocalTTS:
         self._client = None
         self.last_error = None
         self.capability = None
+        self.requests = RequestIO()
 
     def load(self):
         self.unload()
         self._client = httpx.Client(timeout=self.timeout, trust_env=False,
-            limits=httpx.Limits(max_connections=1, max_keepalive_connections=1))
+            limits=httpx.Limits(max_connections=1, max_keepalive_connections=0))
         try:
             self.capability = speech_capability(self._client, self.base_url, "tts", self.model, self.backend_name)
             if "pcm" not in self.capability["audio"]["response_formats"]:
@@ -48,28 +50,30 @@ class LocalTTS:
         except (httpx.HTTPError, ValueError, KeyError) as exc:
             self.last_error = str(exc); self.unload(); return False
 
-    def synthesize(self, text):
+    def synthesize(self, text, cancel_event=None):
         if self._client is None: return {"audio": None, "error": "TTS is not loaded"}
         start = time.monotonic(); first = None
         try:
             if not isinstance(text, str) or not text.strip() or len(text) > 500:
                 raise ValueError("TTS input must contain 1–500 characters")
-            data = bytearray()
-            with self._client.stream("POST", self.base_url + "/audio/speech", json={
-                "model": self.model, "voice": self.voice, "input": text.strip(),
-                "speed": self.speed, "response_format": "pcm",
-            }) as response:
-                response.raise_for_status()
-                for chunk in response.iter_bytes(4096):
-                    if chunk:
-                        first = first or time.monotonic()
-                        data.extend(chunk)
-                        if len(data) > self.max_audio_seconds * 32000:
-                            raise ValueError("TTS PCM exceeds response budget")
-            if not data or len(data) % 2: raise ValueError("TTS returned empty or truncated PCM16")
-            return {"audio": np.frombuffer(bytes(data), dtype='<i2'), "sample_rate": 16000,
-                    "duration": len(data)/32000, "elapsed_seconds": time.monotonic()-start,
-                    "first_pcm_seconds": first-start if first else None}
+            with self.requests.operation(cancel_event) as operation:
+                data = bytearray()
+                with self._client.stream("POST", self.base_url + "/audio/speech", json={
+                    "model": self.model, "voice": self.voice, "input": text.strip(),
+                    "speed": self.speed, "response_format": "pcm",
+                }, extensions=operation.extensions) as response:
+                    response.raise_for_status()
+                    for chunk in response.iter_bytes(4096):
+                        operation.check()
+                        if chunk:
+                            first = first or time.monotonic()
+                            data.extend(chunk)
+                            if len(data) > self.max_audio_seconds * 32000:
+                                raise ValueError("TTS PCM exceeds response budget")
+                if not data or len(data) % 2: raise ValueError("TTS returned empty or truncated PCM16")
+                return {"audio": np.frombuffer(bytes(data), dtype='<i2'), "sample_rate": 16000,
+                        "duration": len(data)/32000, "elapsed_seconds": time.monotonic()-start,
+                        "first_pcm_seconds": first-start if first else None}
         except (httpx.HTTPError, ValueError, KeyError) as exc:
             self.last_error = str(exc)
             return {"audio": None, "error": str(exc)}
@@ -86,6 +90,17 @@ class LocalTTS:
             speech_capability(self._client, self.base_url, "tts", self.model, self.backend_name)
             return True
         except (httpx.HTTPError, ValueError, KeyError): return False
+
+    def cancel(self, event):
+        self.requests.cancel(event)
+
+    def idle(self):
+        if not self.requests.idle(): return False
+        with httpx.Client(timeout=.5,trust_env=False) as client:
+            capability=speech_capability(client,self.base_url,"tts",self.model,self.backend_name)
+        active=capability.get('concurrency',{}).get('active')
+        if type(active) is not int: raise ValueError('Invalid speech concurrency observation')
+        return active==0
 
     def unload(self):
         if self._client: self._client.close()

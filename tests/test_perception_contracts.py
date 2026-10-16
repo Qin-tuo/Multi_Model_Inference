@@ -101,12 +101,13 @@ def test_vlm_image_and_auxiliary_observation_use_same_frame(body_provider):
     camera._alive=True;camera._latest=(time.monotonic(),chosen.bgr);camera._latest_jpeg=b'newer';camera._frame_id=8
     scene={'ready':True,'frame':chosen.metadata(),'persons':[{}],'hands':[{},{}],'face':{'face_detected':True},'providers':{'body':body_provider,'face':'fake','hands':'fake'}}
     class Model:
+        def idle(self): return True
         def generate_stream(self,prompt,**kwargs):
             assert kwargs['images_b64']==[camera._base64_jpeg(chosen.jpeg)]
             assert 'person_candidates' in kwargs['system_prompt']
             yield '回答',{}
             yield '',{'done':True}
-    sink=SimpleNamespace(send=lambda event:None)
+    sink=SimpleNamespace(send=lambda event,**kwargs:None)
     control=TurnController(cfg,Model(),sink,camera,perception=SimpleNamespace(preview=lambda:(chosen,scene)))
     try:
         control.start();control.submit('画面是什么',True)

@@ -142,6 +142,7 @@ class Broadcaster:
     @staticmethod
     def _enqueue_latest(q: asyncio.Queue, msg: dict):
         """Keep a slow client's queue current without leaking payloads to logs."""
+        if msg.get('_cancel_event') is not None and msg['_cancel_event'].is_set(): return
         try:
             q.put_nowait(msg)
             return
@@ -166,11 +167,18 @@ class Broadcaster:
         except asyncio.QueueFull:
             pass
 
-    def send(self, msg: dict):
+    @staticmethod
+    def visible(msg):
+        event = msg.get('_cancel_event')
+        if event is not None and event.is_set(): return None
+        return {key:value for key,value in msg.items() if key != '_cancel_event'}
+
+    def send(self, msg: dict, *, cancel_event=None):
         """Enqueue *msg* for every connected client (thread-safe)."""
         loop = self._loop
         if not loop:
             return
+        if cancel_event is not None: msg = {**msg, '_cancel_event':cancel_event}
         with self._lock:
             for q in self._clients:
                 try:
@@ -184,8 +192,12 @@ class ChatRequest(BaseModel):
     use_image: StrictBool = False
 
 
+class CancelRequest(BaseModel):
+    turn_id: str = Field(pattern=r'^[0-9a-f]{32}$')
+
+
 def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=None,
-               submit_audio=None, audio_file=None, max_upload_bytes=484096) -> FastAPI:
+               submit_audio=None, audio_file=None, cancel=None, max_upload_bytes=484096) -> FastAPI:
     @asynccontextmanager
     async def application_lifespan(app):
         broadcaster.set_loop(asyncio.get_running_loop())
@@ -223,6 +235,11 @@ def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=No
         try: return submit_audio(bytes(data), use_image)
         except ValueError as exc: raise HTTPException(400, str(exc)) from exc
         except RuntimeError as exc: raise HTTPException(409, str(exc)) from exc
+
+    @app.post('/api/cancel', status_code=202)
+    async def _cancel(request: CancelRequest):
+        if cancel is None: raise HTTPException(503, 'Cancellation unavailable')
+        return cancel(turn_id=request.turn_id)
 
     @app.get("/api/audio/{turn_id}")
     async def _download_audio(turn_id: str):
@@ -265,6 +282,8 @@ def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=No
             try:
                 while True:
                     msg = await q.get()
+                    msg = broadcaster.visible(msg)
+                    if msg is None: continue
                     await ws.send_text(json.dumps(msg))
                     if msg.get("type") == "overflow":
                         await ws.close(code=1013)

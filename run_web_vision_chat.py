@@ -213,6 +213,7 @@ def build_app(config, *, no_camera=False, no_audio=False):
 
     return create_app(broadcaster, submit=control.submit, state=state, lifespan=lifespan,
                       submit_audio=control.submit_audio, audio_file=control.audio_file,
+                      cancel=control.cancel,
                       max_upload_bytes=int(config.stt.max_seconds*32000)+4096)
 
 
