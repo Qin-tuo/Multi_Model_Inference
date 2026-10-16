@@ -2,19 +2,32 @@
 
 基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前主目录和 `main` 已采用 Reachy 派生实现。** 默认运行四个服务：4B 图文模型、ASR、OpenVoiceStream 语音服务和 Reachy 应用。人体/脸/手、图文问答、中文文件语音、当前会话、笔记/提醒及整轮取消已贯通；真实手势负例/遮挡/多手质量和 B0-SW 尚待完成。
+**软件框架与初始 B0-SW 已交付，现等待用户从视觉开始复现与分析。** 冻结标签：`b0-sw-20261016`。 默认运行四个服务：4B 图文模型、ASR、OpenVoiceStream 和 Reachy 应用。主目录为 `/home/nvidia/Multi_Model_Inference`，本机网页为 `http://127.0.0.1:8090`。
 
-主目录：`/home/nvidia/Multi_Model_Inference`。网页：`http://127.0.0.1:8090`。使用独立环境管理服务：
+入口：[B0 总清单](benchmarks/results/reachy-b0-sw.json) · [原始数据包索引](benchmarks/results/reachy-b0-archive.json) · [完整应用图表](benchmarks/results/reachy-b0-e1.png) · [实际请求时间线](benchmarks/results/reachy-b0-e1-trace.png) · [部署与回退](deploy/systemd/README.md)。详细口径与复现命令见 [阶段记录](docs/reachy-migration.md)。
+
+当前软件路径已通过真实模型问答、文件语音、工具回执/持久性、取消、过载、重复启停、故障恢复和准备工件的离线启动检查；173 项自动化测试通过。**这不是全部工程验收完成。** 真人手势负例/遮挡/多手仍待补测；麦克风/扬声器声学项按用户决定后置；8 小时长稳、干净机器重部署和用户掌握验收仍未完成。原旧七服务已停止，旧源码与数据保留用于回退。
+
+| 完整应用场景：提交→回复 WAV 发布 | P50 | P95 |
+|---|---:|---:|
+| 文字问答 | 2.81 s | 4.84 s |
+| 语音文件问答 | 4.78 s | 11.74 s |
+| 语音文件＋画面 | 11.46 s | 17.43 s |
+| 创建笔记并回复 | 10.69 s | 10.89 s |
+
+每类 20 个事件，图像采用固定公开街景回放；这是文件交付时间，不是可听回应。场景的输出长度、工具回合和数据状态不同，不能把场景间时延比例直接当作某个模块的开销。已知问题包括模型多余的只读工具调用、少量合成语音转写差异和长输出；原始结果均保留，尚未自动调优。
+
+### 你接手的第一步
+
+先执行下面三行，暂不改配置：
 
 ```bash
+cd /home/nvidia/Multi_Model_Inference
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services status
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services up
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services down
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py config
 ```
 
-操作细节见 [部署与回退](deploy/systemd/README.md)，数据流和阶段记录见 [迁移说明](docs/reachy-migration.md)。当前验证包括 173 项自动化测试、20 次连续完整应用启停、实际进程崩溃恢复、两次旧系统回退、20 轮真实模型共存压力及隔离网络离线启动。证据见 [部署报告](benchmarks/results/reachy-r4-deployment-summary.json)。这些是软件功能与可靠性检查，视觉 V1/V2 基线已采集，见[数据与边界](benchmarks/results/reachy-b0-vision-summary.json)及[图表](benchmarks/results/reachy-b0-vision.png)。3 份图像、20 份合成中文语音及[冻结协议](benchmarks/manifests/reachy-b0-sw-v1.json)保持固定；ASR、4B 文字/图像及 TTS 的组件基线现已采集，见[接口数据与局限](benchmarks/results/reachy-b0-models-summary.json)和[图表](benchmarks/results/reachy-b0-models.png)；完整应用 E1 与最终交接仍待完成。
-
-按用户 2026-10-16 决定，麦克风/扬声器实物环节后置；真实手势补测稍后进行。当前继续软件框架与 B0-SW 交接，交接后由用户先开展视觉优化。旧系统固定在 `~/AI_Stack/archives/legacy-runtime-972de50`，默认旧七服务已停止。
+把四个服务的状态，以及 `vision.capture_fps`、`perception.fps`、`llm.context_tokens` 的值发给助手。随后先解释输入帧率、感知频率和模型上下文各控制什么，再按你实际运行的结果进入视觉基线复现。下一阶段由用户执行和判断，助手负责指导与审查。
 
 ## 当前确定的流程
 
@@ -72,7 +85,7 @@ flowchart LR
 
 当前会话最多保留 4 轮已交付上下文，进程重启后清空；笔记和提醒使用独立 SQLite 数据持久保存。手部的 z 值是模型相对手腕的估计，不是 D435i 深度测距；人脸模块只检测位置，不做身份验证。
 
-当前仍在补齐完整 B0。完成后先带用户核对模型/输入输出契约、复现视觉基线，再按用户实际结果进入专业工具分析和单因素优化。
+当前 B0 数据已齐。接下来先由用户核对模型/输入输出契约并复现视觉基线，再按实际结果进入专业工具分析和单因素优化。
 
 ## 审查入口
 

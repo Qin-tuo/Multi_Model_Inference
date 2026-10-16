@@ -253,6 +253,18 @@
       "evidence": [
         "benchmarks/results/reachy-r4-coexistence-summary.json"
       ]
+    },
+    {
+      "id": "RG-22",
+      "classification": "OBSERVED_MODEL_TOOL_ROUTING_LIMITATION",
+      "phase": "R4",
+      "finding": "Two measured image questions and two warmups invoked unrequested read-only note/reminder tools; responses still answered the image question. No unrequested mutations observed.",
+      "status": "RETAINED_IN_B0_FOR_USER_GUIDED_ANALYSIS",
+      "evidence": [
+        "benchmarks/results/reachy-b0-e1-summary.json",
+        "benchmarks/results/reachy-b0-e1-trace.png"
+      ],
+      "boundary": "Not claimed resolved; do not interpret the passing pipeline checks as perfect semantic/tool selection."
     }
   ],
   "hardware_gap": {
@@ -260,5 +272,5 @@
     "speaker": "not connected per user",
     "rule": "Physical audio explicitly deferred by user on 2026-10-16; does not block B0-SW and vision-first handoff. File/PCM substitutes do not qualify acoustics."
   },
-  "updated_at": "2026-10-16T08:06:29.825763+00:00"
+  "updated_at": "2026-10-16T12:17:56.315953+00:00"
 }

@@ -1,0 +1,45 @@
+{
+  "created_at": "2026-10-16T12:19:39.705648+00:00",
+  "archive": "/home/nvidia/AI_Stack/archives/reachy-b0-sw-20261016.tar.gz",
+  "sha256": "66366231afb9035fb21847b59065f8222b609a6b4c217f778dca51f24b611660",
+  "bytes": 38448177,
+  "member_count": 904,
+  "contents": [
+    {
+      "source": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-sw-20261016",
+      "archive_root": "baseline"
+    },
+    {
+      "source": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-v1-20261016-a",
+      "archive_root": "raw/V1"
+    },
+    {
+      "source": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-v2-20261016-a",
+      "archive_root": "raw/V2"
+    },
+    {
+      "source": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-models-20261016-a",
+      "archive_root": "raw/S1-T1-L1"
+    },
+    {
+      "source": "/home/nvidia/AI_Stack/runtime-data/benchmarks/reachy-b0-e1-20261016-a",
+      "archive_root": "raw/E1"
+    },
+    {
+      "source": "/home/nvidia/AI_Stack/datasets/reachy-b0-sw-v1",
+      "archive_root": "inputs/reachy-b0-sw-v1"
+    },
+    {
+      "source": "/home/nvidia/AI_Stack/datasets/reachy-b0-e1-v1",
+      "archive_root": "inputs/reachy-b0-e1-v1"
+    }
+  ],
+  "scope": "Frozen inputs, raw measurements, source snapshots used by the runs and software B0 summary. Models/installed environments/OS are not bundled; clean-machine deployment is not qualified by this archive.",
+  "baseline_json_sha256": "903119c069054d2092428489404f8040f2a20dfb903e7298d99fda61d2704417",
+  "verification": {
+    "verified_at": "2026-10-16T12:26:22.286141+00:00",
+    "input_and_baseline_members_sha256_checked": 25,
+    "all_match": true
+  },
+  "delivery_source_tag": "b0-sw-20261016"
+}

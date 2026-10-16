@@ -286,37 +286,42 @@
         {
           "id": "R4.function",
           "title": "完成当前软件/视觉范围功能及重复运行",
-          "status": "SOFTWARE_DEPLOYMENT_PRESSURE_OFFLINE_VERIFIED_FINAL_FUNCTION_MATRIX_PENDING",
+          "status": "SOFTWARE_PATHS_VERIFIED_REAL_GESTURE_QUALITY_AND_PHYSICAL_ACCEPTANCE_OPEN",
           "deliverable": "启用软件范围F01-F12证据、20次完整应用循环、已知局限和软件版本标签；声学项列DEFERRED",
           "execution": "IN_PROGRESS",
           "evidence": [
             "benchmarks/results/reachy-r4-deployment-summary.json",
             "benchmarks/results/reachy-r4-coexistence-summary.json",
-            "benchmarks/results/reachy-r4-offline-summary.json"
-          ]
+            "benchmarks/results/reachy-r4-offline-summary.json",
+            "benchmarks/results/reachy-b0-e1-summary.json"
+          ],
+          "boundary": "No blanket complete-function claim: F06/F07 still need user-deferred real negative/occlusion/multi-hand samples; physical audio remains deferred."
         },
         {
           "id": "R4.baseline",
           "title": "采集视觉优先的软件B0-SW",
-          "status": "V1_V2_S1_L1_T1_COLLECTED_FULL_APPLICATION_E1_PENDING",
+          "status": "SOFTWARE_B0_MEASURED_AND_INDEXED_WITH_DECLARED_LIMITATIONS",
           "deliverable": "视觉实机与固定输入单体/共存指标、文件或PCM语音软件指标；标明时间起点，声学指标不填估值",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
             "benchmarks/manifests/reachy-b0-sw-v1.json",
             "benchmarks/manifests/reachy-b0-inputs-v1.json",
             "benchmarks/results/reachy-b0-vision-summary.json",
-            "benchmarks/results/reachy-b0-models-summary.json"
+            "benchmarks/results/reachy-b0-models-summary.json",
+            "benchmarks/results/reachy-b0-sw.json",
+            "benchmarks/results/reachy-b0-e1-summary.json"
           ]
         },
         {
           "id": "R4.handoff",
           "title": "交付架构和代码导读",
-          "status": "ARCHITECTURE_CODE_GUIDE_DRAFTED_FINAL_BASELINE_HANDOFF_PENDING",
+          "status": "GUIDE_AND_REPRODUCTION_DELIVERED_USER_REPRODUCTION_PENDING",
           "deliverable": "用户能启动、使用并跟踪一条请求",
           "execution": "IN_PROGRESS",
           "evidence": [
             "README.md",
-            "docs/reachy-migration.md"
+            "docs/reachy-migration.md",
+            "benchmarks/results/reachy-b0-sw.json"
           ]
         }
       ]
@@ -333,7 +338,7 @@
         {
           "id": "R5.reproduce",
           "title": "用户亲自复现基线并解释口径",
-          "status": "NOT_STARTED",
+          "status": "AWAITING_USER_FIRST_VISION_REPRODUCTION",
           "deliverable": "用户命令/原始结果与解释",
           "execution": "NOT_STARTED"
         },
@@ -408,16 +413,31 @@
       ]
     },
     "F02": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "REAL_AND_FIXED_INPUT_VISION_DATAFLOW_VERIFIED_QUALITY_SCOPE_LIMITED",
+      "evidence": [
+        "benchmarks/results/reachy-r1-live-face.json",
+        "benchmarks/results/reachy-r2-perception-summary.json",
+        "benchmarks/results/reachy-r3-gesture-summary.json",
+        "benchmarks/results/reachy-b0-vision-summary.json"
+      ],
+      "boundary": "Typed outputs, same-frame ownership and live positive samples; not full gesture or general perception accuracy acceptance."
     },
     "F03": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "TEXT_AND_FILE_SPEECH_PIPELINE_VERIFIED_WITH_MODEL_LIMITATIONS",
+      "evidence": [
+        "benchmarks/results/reachy-b0-models-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
+      ],
+      "boundary": "Actual ASR/4B/TTS and WAV replies; synthetic CER and extra read-tool calls retained; physical acoustics deferred."
     },
     "F04": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "CURRENT_FRAME_AND_STALE_SOURCE_REJECTION_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r1-camera-web.json",
+        "benchmarks/results/reachy-r3-health-camera-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
+      ],
+      "boundary": "Host-receipt freshness/epoch contract; not sensor-exposure latency or perfect VLM semantics."
     },
     "F05": {
       "status": "SOFTWARE_TEXT_AND_FILE_SPEECH_VERIFIED",
@@ -441,13 +461,15 @@
       "status": "SOFTWARE_VOICE_AND_UI_CANCEL_VERIFIED_PHYSICAL_ACOUSTICS_DEFERRED",
       "evidence": [
         "benchmarks/results/reachy-r3-cancellation-summary.json",
-        "benchmarks/results/reachy-r3-voice-summary.json"
+        "benchmarks/results/reachy-r3-voice-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
       ]
     },
     "F09": {
       "status": "SOFTWARE_MODEL_DATABASE_SCHEDULER_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-actions-summary.json"
+        "benchmarks/results/reachy-r3-actions-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
       ]
     },
     "F10": {
@@ -455,13 +477,15 @@
       "evidence": [
         "benchmarks/results/reachy-r3-web-summary.json",
         "benchmarks/results/reachy-r3-health-camera-summary.json",
-        "benchmarks/results/reachy-r4-coexistence-summary.json"
+        "benchmarks/results/reachy-r4-coexistence-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
       ]
     },
     "F11": {
       "status": "PREPARED_ARTIFACTS_OFFLINE_RUNTIME_START_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r4-offline-summary.json"
+        "benchmarks/results/reachy-r4-offline-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
       ],
       "boundary": "Four native entrypoints, loopback-only namespace, unprivileged inference, normal cleanup and host-service restoration; clean-machine rebuild and OS reboot remain separate."
     },
@@ -472,7 +496,8 @@
         "benchmarks/results/reachy-r3-recovery-summary.json",
         "benchmarks/results/reachy-r3-health-camera-summary.json",
         "benchmarks/results/reachy-r4-deployment-summary.json",
-        "benchmarks/results/reachy-r4-coexistence-summary.json"
+        "benchmarks/results/reachy-r4-coexistence-summary.json",
+        "benchmarks/results/reachy-b0-e1-summary.json"
       ]
     }
   },
@@ -482,8 +507,12 @@
       "evidence": []
     },
     "E02": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "SINGLE_APPLICATION_FRAMEWORK_AND_MODULE_OWNERSHIP_VERIFIED",
+      "evidence": [
+        "README.md",
+        "deploy/reachy-import.json",
+        "benchmarks/results/reachy-r4-cutover.json"
+      ]
     },
     "E03": {
       "status": "NOT_VERIFIED",
@@ -498,8 +527,10 @@
       "evidence": []
     },
     "E06": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "ASSISTANT_BASELINE_AND_REPRODUCTION_ARTIFACTS_DELIVERED_USER_REPRO_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-b0-sw.json"
+      ]
     },
     "E07": {
       "status": "NOT_VERIFIED",
@@ -540,22 +571,22 @@
     "upstream_reference": "U0; source-reported results separate from local measurements",
     "functional_baseline": "B0-SW; current enabled software and real D435i vision scope, assistant measured without prior tuning",
     "user_experiments": "E-series; user-led single-factor changes compared with frozen B0",
-    "status": "COMPONENTS_COLLECTED_FULL_APPLICATION_E1_PENDING",
+    "status": "SOFTWARE_B0_MEASURED_AND_DELIVERED",
     "physical_audio_status": "DEFERRED_BY_USER",
     "collection_started": true,
     "completed_components": [
-      "V1: fixed-input body/face/palm+hands",
-      "V2: fixed replay isolated/resident/4B and live camera",
-      "S1: frozen file VAD/ASR",
-      "T1: local TTS PCM interface",
-      "L1: text/image 4B with native cache/decode metadata"
+      "V1",
+      "V2",
+      "S1",
+      "T1",
+      "L1",
+      "E1"
     ],
-    "pending_components": [
-      "E1: complete software application",
-      "Consolidated baseline and user reproduction handoff"
-    ],
+    "pending_components": [],
     "vision_evidence": "benchmarks/results/reachy-b0-vision-summary.json",
-    "model_interface_evidence": "benchmarks/results/reachy-b0-models-summary.json"
+    "model_interface_evidence": "benchmarks/results/reachy-b0-models-summary.json",
+    "summary": "benchmarks/results/reachy-b0-sw.json",
+    "user_reproduction": "NOT_VERIFIED"
   },
   "collaboration": {
     "framework_owner": "assistant",
@@ -582,7 +613,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
-  "updated_at": "2026-10-16T10:46:48.792755+00:00",
+  "updated_at": "2026-10-16T12:17:56.313377+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
@@ -616,5 +647,12 @@
     "legacy_runtime": "STOPPED",
     "rollback_checkout": "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50",
     "evidence": "benchmarks/results/reachy-r4-cutover.json"
+  },
+  "handoff_state": {
+    "status": "WAITING_FOR_USER_VISION_STEP",
+    "delivered_at": "2026-10-16T12:17:56.313300+00:00",
+    "first_area": "vision",
+    "instruction": "User runs the first inspection/reproduction commands and provides output/interpretation. Assistant explains and reviews, does not automatically optimize.",
+    "goal_complete": false
   }
 }
