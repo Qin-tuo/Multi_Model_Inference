@@ -1,0 +1,7 @@
+{
+  "scope": "Synthetic coordinate-contract regression, not model accuracy",
+  "expected": 2,
+  "upstream_retained": 1,
+  "fixed_retained": 2,
+  "patch": "patches/perception/palm-nms-xywh.patch"
+}

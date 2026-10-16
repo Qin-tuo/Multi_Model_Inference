@@ -3,7 +3,7 @@
   "version": "3.0",
   "created_at": "2026-10-15T03:33:30.511226+00:00",
   "execution_status": "ACTIVE",
-  "migration_status": "R2_SPEECH_SOFTWARE_VERIFIED_PERCEPTION_PENDING",
+  "migration_status": "R2_MODELS_INTEGRATED_R3_INTERACTION_PENDING",
   "goal": "基于固定版本的NVIDIA Reachy Mini Jetson Assistant实际源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。",
   "current_runtime": "legacy Pipecat/ROS2 application remains unchanged",
   "planned_runtime": "derived Reachy Mini Jetson Assistant without robot body",
@@ -128,9 +128,12 @@
         {
           "id": "R2.vlm",
           "title": "适配4B身份、原生请求与图像/token预算",
-          "status": "NOT_STARTED",
+          "status": "SOFTWARE_INTEGRATION_VERIFIED_WITH_DECLARED_LIMITS",
           "deliverable": "本机LLM/VLM实际调用与预算检查",
-          "execution": "NOT_STARTED"
+          "execution": "COMPLETE",
+          "evidence": [
+            "benchmarks/results/reachy-r2-perception-summary.json"
+          ]
         },
         {
           "id": "R2.asr",
@@ -157,25 +160,31 @@
         {
           "id": "R2.body",
           "title": "迁入人体/姿态工件的实际调用路径",
-          "status": "NOT_STARTED",
+          "status": "SOFTWARE_INTEGRATION_VERIFIED_WITH_DECLARED_LIMITS",
           "deliverable": "预后处理、坐标和参考输出对照",
-          "execution": "NOT_STARTED"
+          "execution": "COMPLETE",
+          "evidence": [
+            "benchmarks/results/reachy-r2-perception-summary.json"
+          ]
         },
         {
           "id": "R2.hand",
           "title": "接入掌部与21点小模型",
-          "status": "NOT_STARTED",
+          "status": "SOFTWARE_INTEGRATION_VERIFIED_WITH_DECLARED_LIMITS",
           "deliverable": "上游锁、参考与本机结果、失败限制",
-          "execution": "NOT_STARTED"
+          "execution": "COMPLETE",
+          "evidence": [
+            "benchmarks/results/reachy-r2-perception-summary.json"
+          ]
         },
         {
           "id": "R2.contract",
           "title": "统一帧/轮次/模型与时间元数据",
-          "status": "AUDIO_FORMAT_EPOCH_AND_FILE_RECEIPTS_VERIFIED_PERCEPTION_PENDING",
+          "status": "SOFTWARE_INTEGRATION_VERIFIED_WITH_DECLARED_LIMITS",
           "deliverable": "共享缓存、结果归属和观测记录",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-summary.json"
+            "benchmarks/results/reachy-r2-perception-summary.json"
           ]
         }
       ]
@@ -192,9 +201,9 @@
         {
           "id": "R3.turn",
           "title": "实现单一轮次、监听/处理分离和统一取消",
-          "status": "NOT_STARTED",
+          "status": "IN_PROGRESS",
           "deliverable": "正常/迟到/取消阶段回归及后端释放证据",
-          "execution": "NOT_STARTED"
+          "execution": "IN_PROGRESS"
         },
         {
           "id": "R3.gestures",
@@ -482,7 +491,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
-  "updated_at": "2026-10-15T07:35:38.365792+00:00",
+  "updated_at": "2026-10-16T02:38:22.113052+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"
