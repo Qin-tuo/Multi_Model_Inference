@@ -357,6 +357,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       </form>
       <div class="input-error" id="inputError" role="alert"></div>
       <div class="cam-info" id="actionsInfo">本地笔记与提醒未启用</div>
+      <div class="cam-info" id="voiceInfo"></div>
+      <div class="cam-info" id="liveAudioInfo"></div>
       <div class="messages" id="messages">
         <div class="empty-state" id="emptyState">
           <div>输入中文问题，或选择使用当前画面。</div>
@@ -372,7 +374,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   const $ = id => document.getElementById(id);
 
   let speechReady = false;
-  let activeTurn = null, cancelledTurn = null;
+  let activeTurn = null, cancelledTurn = null, pendingVoice = null;
   let sessionId = null;
   let ws = null, frameCount = 0, msgIdx = 0;
   const answers=new Map(), transcripts=new Map(), receipts=new Map(), finishedTurns=new Set();
@@ -426,6 +428,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'session_state':onSession(msg.session); break;
         case 'action_receipt':onActionReceipt(msg.receipt,msg.turn_id); break;
         case 'actions_state':onActionsState(msg); break;
+        case 'voice_state':onVoiceState(msg); break;
+        case 'audio_state':onLiveAudio(msg); break;
         case 'cancelled':    cancelledTurn=msg.turn_id; onStatus({...msg,stage:'cancelling'}); break;
         case 'cancel_ack':   if(!msg.accepted && cancelledTurn===msg.turn_id) cancelledTurn=null; break;
         case 'stats':        onStats(msg); break;
@@ -601,9 +605,9 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     for(let s of stages) s.classList.toggle('active', s.dataset.stage === msg.stage);
     pipelineStage = msg.stage;
     const busy=['running','thinking','transcribing','synthesizing','speaking','executing_tool','cancelling','releasing','release_unconfirmed'].includes(msg.stage);
-    $('sendText').disabled=busy; $('sendAudio').disabled=busy || !speechReady;
-    $('cancelTurn').disabled=!activeTurn || ['cancelling','releasing','release_unconfirmed'].includes(msg.stage);
-    $('clearSession').disabled=busy || !sessionId || ws?.readyState!==WebSocket.OPEN;
+    $('sendText').disabled=busy || !!pendingVoice; $('sendAudio').disabled=busy || !!pendingVoice || !speechReady;
+    $('cancelTurn').disabled=!pendingVoice && (!activeTurn || ['cancelling','releasing','release_unconfirmed'].includes(msg.stage));
+    $('clearSession').disabled=busy || !!pendingVoice || !sessionId || ws?.readyState!==WebSocket.OPEN;
     renderPipelineStatus();
   }
 
@@ -760,6 +764,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   }
 
   function onCapabilities(msg){
+    if(msg.voice) onVoiceState(msg.voice);
+    if(msg.live_audio) onLiveAudio(msg.live_audio);
     if(msg.session) onSession(msg.session);
     if(msg.actions) onActionsState(msg.actions);
     updateModels(msg.models || {});
@@ -799,8 +805,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   });
 
   $('cancelTurn').addEventListener('click',async function(){
-    if(!activeTurn) return;
-    const turn=activeTurn;
+    const turn=pendingVoice || activeTurn;
+    if(!turn) return;
     cancelledTurn=turn;
     $('cancelTurn').disabled=true;
     try{
@@ -823,6 +829,24 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   function onActionsState(msg){
     $('actionsInfo').textContent=!msg.enabled ? '本地笔记与提醒未启用' : msg.error ? '本地操作异常：'+msg.error :
       '已保存 '+msg.notes+' 条笔记；最近提醒：'+(msg.reminders || []).map(r=>r.text+'（'+({scheduled:'待到时',due:'等待输出',claimed:'等待输出',delivering:'输出中',delivered:'已输出',stopped:'已停止本轮输出',cancelled:'已取消',expired:'已过期',uncertain:'输出结果待确认',failed:'失败'}[r.status] || r.status)+'）').join('、');
+  }
+
+  function onVoiceState(msg){
+    pendingVoice=msg.pending?.turn_id || null;
+    const reasons={input_epoch_changed:'输入已切换或静音，请重新讲话',pending_voice_expired:'等待超时，请重新讲话',
+      utterance_too_long:'语音过长，请分句重说',utterance_rejected:'未取得有效语音',input_stopped:'语音输入已停止',
+      user:'已停止待处理语音',stationary_palm:'举掌已停止待处理语音',superseded_by_new_voice:'已改为听取新语音'};
+    $('voiceInfo').textContent=msg.pending ? (msg.pending.phase==='capturing' ? '正在听取新指令' : '语音已收到，等待上一轮资源释放') :
+      msg.last?.outcome==='discarded' ? (reasons[msg.last.reason] || '语音未提交：'+msg.last.reason) : '';
+    onStatus({stage:pipelineStage,turn_id:activeTurn});
+  }
+
+  function onLiveAudio(msg){
+    const input=msg.input;
+    $('liveAudioInfo').textContent=!msg.enabled ? '' : !input?.alive ? '麦克风输入已停止：'+(input?.error || '请检查设备并重启应用') :
+      input.suppressed_reason ? '半双工：本轮结束后恢复听取' :
+      msg.interruptions_available ? '可以讲话打断当前轮次' : '半双工：语音打断未启用，或回声消除尚未就绪';
+    if(msg.enabled && !input?.alive) $('pttBtn').style.display='none';
   }
 
   function onActionReceipt(receipt,turn){

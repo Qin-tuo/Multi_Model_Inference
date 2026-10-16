@@ -21,6 +21,8 @@ VOLATILE = frozenset(
         "gesture_state",
         "actions_state",
         "camera_state",
+        "voice_state",
+        "audio_state",
     }
 )
 

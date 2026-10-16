@@ -1,0 +1,50 @@
+{
+  "checked_at": "2026-10-16T08:02:50.404347+00:00",
+  "services": {
+    "llama": "active",
+    "asr": "active",
+    "speech": "active",
+    "camera": "active",
+    "vision": "active",
+    "pose": "active",
+    "qdrant": "active"
+  },
+  "native": {
+    "llm": {
+      "processing": 0
+    },
+    "asr": {
+      "processing": 0
+    },
+    "speech": {
+      "asr": {
+        "backend_max_concurrent": 1,
+        "admission_limit": 1,
+        "active": 0,
+        "available": 1
+      },
+      "tts": {
+        "backend_max_concurrent": 1,
+        "admission_limit": 1,
+        "active": 0,
+        "available": 1
+      }
+    }
+  },
+  "browser": {
+    "phase": "等待输入",
+    "voice": "语音输入已停止",
+    "audio": "麦克风输入已停止：Microphone capture stalled; current input discarded",
+    "send_enabled": true
+  },
+  "probe_shutdowns": [
+    {
+      "source_released": true,
+      "owned_threads": []
+    },
+    {
+      "source_released": true,
+      "owned_threads": []
+    }
+  ]
+}

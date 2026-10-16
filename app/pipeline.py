@@ -465,6 +465,18 @@ class SpeechSegment:
     start_time: float
     end_time: float
     input_epoch: int = 0
+    utterance_id: str | None = None
+    input_invalidated: threading.Event | None = None
+    end_reason: str = 'silence'
+
+
+@dataclass(frozen=True)
+class SpeechOnset:
+    utterance_id: str
+    started_monotonic: float
+    confirmed_monotonic: float
+    input_epoch: int = 0
+    input_invalidated: threading.Event | None = None
 
 
 # ── Mic recorder ──────────────────────────────────────────────────
@@ -474,6 +486,8 @@ class AudioChunk:
     data: bytes
     input_epoch: int
     received_monotonic: float
+    sequence: int = 0
+    input_invalidated: threading.Event | None = None
 
 
 class MicRecorder:
@@ -489,6 +503,10 @@ class MicRecorder:
         self._reader_thread = None
         self._input_lock = threading.Lock()
         self.input_epoch = 0
+        self.input_invalidated = threading.Event()
+        self._sequence = 0
+        self.suppressed_reason = None
+        self.last_chunk_monotonic = None
         self.listening = threading.Event()
         self.listening.set()
         self.alive = True
@@ -511,6 +529,7 @@ class MicRecorder:
         self.stop()
         self.alive = True
         self.last_error = None
+        self.suppressed_reason=None
         self.flush()
         self.listening.set()
 
@@ -581,6 +600,9 @@ class MicRecorder:
                 self._reader_thread.start()
                 return True
             err = proc.stderr.read().decode(errors="replace").strip()
+            if proc.stdout:proc.stdout.close()
+            if proc.stderr:proc.stderr.close()
+            self.last_error=err or f'Microphone process exited with status {proc.returncode}'
             self.console.print(f"  [red]Mic attempt {attempt+1} failed: {err}[/red]")
             time.sleep(1)
         self._proc = None
@@ -663,15 +685,17 @@ class MicRecorder:
         state = self.speaker_selector.state()
         selected_sink = self.speaker_selector.get_sink()
         if (
-            selected_sink
+            self.alive and selected_sink
             and previous_sink != selected_sink
             and self.aec
             and self.aec.sink_master != selected_sink
         ):
             self._rebuild_aec_route()
+        if not self.alive:state['error']=self.last_error or 'Microphone input stopped; restart the application'
         return self._add_aec_state(state)
 
     def select_speaker(self, sink_id: str) -> dict:
+        if not self.alive:raise RuntimeError('Microphone input stopped; restart the application after checking the device')
         if not self.speaker_selector:
             return {
                 "speakers": [],
@@ -700,6 +724,7 @@ class MicRecorder:
         while self.alive and proc.poll() is None:
             epoch = self.input_epoch
             raw = proc.stdout.read(self.chunk_bytes)
+            if raw:self.last_chunk_monotonic=time.monotonic()
             if not raw:
                 if proc.poll() is not None and proc is self._proc:
                     err = proc.stderr.read().decode(errors="replace").strip()
@@ -711,16 +736,43 @@ class MicRecorder:
                     if len(raw) != self.chunk_bytes:
                         self.last_error = "Microphone returned partial PCM frame"
                         self.alive = False
+                        self._invalidate_input_locked()
                         break
-                    try: self.audio_q.put_nowait(AudioChunk(raw, epoch, time.monotonic()))
+                    self._sequence+=1
+                    try: self.audio_q.put_nowait(AudioChunk(raw, epoch, time.monotonic(),self._sequence,self.input_invalidated))
                     except queue.Full:
                         self.last_error = "Microphone input overflow; utterance invalidated"
                         self.alive = False
-                        self.flush()
+                        self._invalidate_input_locked()
                         break
         if proc is self._proc and self.alive:
             self.last_error = self.last_error or "Microphone capture ended"
             self.alive = False
+            with self._input_lock:self._invalidate_input_locked()
+
+    def _invalidate_input_locked(self):
+        self.input_invalidated.set()
+        self.input_invalidated=threading.Event()
+        self.input_epoch+=1
+        self._sequence=0
+        self.flush()
+
+    def suppress(self,reason):
+        """Processing gate leaves the user's listening/mute preference intact."""
+        with self._input_lock:
+            if reason!=self.suppressed_reason:
+                self.suppressed_reason=reason
+                self._invalidate_input_locked()
+
+    def fail_input(self,reason):
+        with self._input_lock:
+            self.last_error=reason;self.alive=False
+            self._invalidate_input_locked()
+
+    def input_state(self):
+        return {'alive':self.alive,'listening':self.listening.is_set(),
+                'input_epoch':self.input_epoch,'suppressed_reason':self.suppressed_reason,
+                'error':self.last_error,'queued_chunks':self.audio_q.qsize(),'queue_capacity':self.audio_q.maxsize}
 
     def flush(self):
         while not self.audio_q.empty():
@@ -733,66 +785,133 @@ class MicRecorder:
         """Discard this capture epoch; old partial input cannot resume later."""
         with self._input_lock:
             self.listening.clear()
-            self.input_epoch += 1
-            self.flush()
+            self._invalidate_input_locked()
 
     def resume(self):
         with self._input_lock:
-            self.flush()
-            self.input_epoch += 1
+            if not self.alive:
+                raise ValueError(
+                    "Microphone capture stopped; restart the application after checking the device"
+                )
+            self._invalidate_input_locked()
             self.listening.set()
 
     def stop(self):
         self.alive = False
+        with self._input_lock:
+            self._invalidate_input_locked()
         with self._route_lock:
-            try: self._stop_capture()
+            try:
+                self._stop_capture()
             finally:
-                if self.aec: self.aec.stop()
+                if self.aec:
+                    self.aec.stop()
                 self.flush()
 
 
 # ── VAD loop ──────────────────────────────────────────────────────
 
+
 class SpeechSegmenter:
     """Upstream Silero/RMS/lookback/end-silence rules, independent of the source."""
+
     def __init__(self, config, silero):
         self.config, self.silero = config, silero
-        self.lookback = deque(maxlen=int(config.lookback_ms/config.chunk_ms))
+        self.lookback = deque(maxlen=int(config.lookback_ms / config.chunk_ms))
         self.speech_raw = []
         self.speaking = False
         self.silence = 0
         self.started = 0.0
+        self.utterance_id = None
+        self.first_speech = 0.0
+        self.voiced_frames = 0
+        self.confirmed = False
+        self.onset = None
+        self.discarded = None
+        self.draining = False
         silero.reset()
 
     def feed(self, raw, received_time):
+        self.onset = self.discarded = None
         cfg = self.config
         if len(raw) != SILERO_CHUNK_SAMPLES * 2:
             raise ValueError("VAD input must be one complete 512-sample PCM16 frame")
         rms = chunk_rms(raw)
-        is_speech = rms >= min(0.002, cfg.min_utterance_rms) and self.silero(raw) > cfg.silero_threshold
+        is_speech = (
+            rms >= min(0.002, cfg.min_utterance_rms)
+            and self.silero(raw) > cfg.silero_threshold
+        )
+        if self.draining:
+            self.silence = 0 if is_speech else self.silence + 1
+            if self.silence >= max(1, int(cfg.silence_duration_ms / cfg.chunk_ms)):
+                self.draining = False
+                self.silence = 0
+                self.silero.reset()
+            return None
         if is_speech:
             self.silence = 0
             if not self.speaking:
                 self.speaking = True
-                self.started = received_time - (len(self.lookback) + 1) * cfg.chunk_ms/1000
+                self.utterance_id = uuid.uuid4().hex
+                self.first_speech = received_time - cfg.chunk_ms / 1000
+                self.voiced_frames = 0
+                self.confirmed = False
+                self.started = (
+                    received_time - (len(self.lookback) + 1) * cfg.chunk_ms / 1000
+                )
                 self.speech_raw = list(self.lookback)
             self.speech_raw.append(raw)
-            if len(self.speech_raw) < int(cfg.max_speech_secs*1000/cfg.chunk_ms): return None
+            self.voiced_frames += 1
+            if (
+                not self.confirmed
+                and self.voiced_frames * cfg.chunk_ms >= cfg.confirm_speech_ms
+            ):
+                self.confirmed = True
+                self.onset = SpeechOnset(
+                    self.utterance_id, self.first_speech, received_time
+                )
         elif self.speaking:
             self.speech_raw.append(raw)
             self.silence += 1
-            if self.silence < max(1, int(cfg.silence_duration_ms/cfg.chunk_ms)): return None
         else:
             self.lookback.append(raw)
             return None
+        limited = len(self.speech_raw) >= int(cfg.max_speech_secs * 1000 / cfg.chunk_ms)
+        ended = self.silence >= max(1, int(cfg.silence_duration_ms / cfg.chunk_ms))
+        if not limited and not ended:
+            return None
+        identity = self.utterance_id
+        first_speech = self.first_speech
+        confirmed = self.confirmed
         captured = self.speech_raw
-        self.speech_raw = []; self.lookback.clear(); self.speaking = False; self.silence = 0
+        self.speech_raw = []
+        self.lookback.clear()
+        self.speaking = False
+        self.silence = 0
+        self.utterance_id = None
+        self.voiced_frames = 0
+        self.confirmed = False
         self.silero.reset()
         pcm = b"".join(captured)
-        duration, rms = len(pcm)/32000, chunk_rms(pcm)
-        if duration < cfg.min_utterance_secs or rms < cfg.min_utterance_rms: return None
-        return SpeechSegment(np.frombuffer(pcm, dtype=np.int16).astype(np.float32)/32768,
-                             captured, duration, rms, self.started, received_time)
+        duration, rms = len(pcm) / 32000, chunk_rms(pcm)
+        if limited and not ended:
+            self.draining = True
+            self.discarded = (identity, "utterance_too_long")
+        if duration < cfg.min_utterance_secs or rms < cfg.min_utterance_rms:
+            self.discarded = (identity, "utterance_rejected")
+            return None
+        if not confirmed and not limited:
+            self.onset = SpeechOnset(identity, first_speech, received_time)
+        return SpeechSegment(
+            np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768,
+            captured,
+            duration,
+            rms,
+            self.started,
+            received_time,
+            utterance_id=identity,
+            end_reason="max_duration" if limited and not ended else "silence",
+        )
 
 
 def segment_pcm(pcm: bytes, vad_cfg, silero):
@@ -801,29 +920,130 @@ def segment_pcm(pcm: bytes, vad_cfg, silero):
     frame_bytes = SILERO_CHUNK_SAMPLES * 2
     # Pad only for the finite file boundary; this is never a measured acoustic endpoint.
     padded = pcm + b"\0" * ((-len(pcm)) % frame_bytes)
-    padded += b"\0" * (frame_bytes * (int(vad_cfg.silence_duration_ms/vad_cfg.chunk_ms) + 1))
+    padded += b"\0" * (
+        frame_bytes * (int(vad_cfg.silence_duration_ms / vad_cfg.chunk_ms) + 1)
+    )
     for offset in range(0, len(padded), frame_bytes):
-        result = segmenter.feed(padded[offset:offset+frame_bytes], (offset+frame_bytes)/32000)
-        if result is not None: yield result
+        result = segmenter.feed(
+            padded[offset : offset + frame_bytes], (offset + frame_bytes) / 32000
+        )
+        if result is not None:
+            if result.end_reason == "max_duration":
+                raise ValueError(
+                    "Speech utterance exceeds VAD duration budget; use shorter utterances"
+                )
+            yield result
 
 
-def vad_loop(mic, console, vad_cfg=None, silero=None):
+def vad_loop(
+    mic,
+    console,
+    vad_cfg=None,
+    silero=None,
+    *,
+    on_start=None,
+    on_discard=None,
+    capture_gate=None,
+    max_age_seconds=1.0,
+):
     """Continuous bounded input; slow inference runs in the conversation worker."""
-    if silero is None: raise RuntimeError("Prepared Silero VAD is required")
+    if silero is None:
+        raise RuntimeError("Prepared Silero VAD is required")
     segmenter = SpeechSegmenter(vad_cfg or VADConfig(), silero)
     epoch = mic.input_epoch
-    while mic.alive:
-        try: chunk = mic.audio_q.get(timeout=0.1)
-        except queue.Empty: continue
-        if chunk.input_epoch != mic.input_epoch or not mic.listening.is_set(): continue
-        if epoch != chunk.input_epoch:
-            epoch = chunk.input_epoch
-            segmenter = SpeechSegmenter(vad_cfg or VADConfig(), silero)
-        result = segmenter.feed(chunk.data, chunk.received_monotonic)
-        if result is not None and epoch == mic.input_epoch and mic.listening.is_set():
-            result.input_epoch = epoch
-            yield result
-    if mic.last_error: raise RuntimeError(mic.last_error)
+    notified = None
+    previous_sequence = 0
+    last_received = time.monotonic()
+    needs_quiet = False
+    quiet_frames = 0
+
+    def discard(reason):
+        nonlocal notified
+        if notified and on_discard:
+            on_discard(notified, reason)
+        notified = None
+
+    try:
+        while mic.alive:
+            gate_reason = capture_gate() if capture_gate else None
+            if gate_reason:
+                needs_quiet = True
+            if capture_gate:
+                mic.suppress(
+                    gate_reason or ("awaiting_silence" if needs_quiet else None)
+                )
+            if epoch != mic.input_epoch:
+                discard("input_epoch_changed")
+                epoch = mic.input_epoch
+                previous_sequence = 0
+                segmenter = SpeechSegmenter(vad_cfg or VADConfig(), silero)
+            try:
+                chunk = mic.audio_q.get(timeout=0.1)
+            except queue.Empty:
+                if (
+                    time.monotonic() - max(last_received, mic.last_chunk_monotonic or 0)
+                    > max_age_seconds
+                ):
+                    mic.fail_input(
+                        "Microphone capture stalled; current input discarded"
+                    )
+                continue
+            if chunk.input_epoch != mic.input_epoch or not mic.listening.is_set():
+                continue
+            if time.monotonic() - chunk.received_monotonic > max_age_seconds or (
+                previous_sequence and chunk.sequence != previous_sequence + 1
+            ):
+                mic.fail_input(
+                    "Microphone frames stale or discontinuous; current input discarded"
+                )
+                break
+            previous_sequence = chunk.sequence
+            last_received = chunk.received_monotonic
+            if needs_quiet:
+                cfg = vad_cfg or VADConfig()
+                speech = (
+                    chunk_rms(chunk.data) >= min(0.002, cfg.min_utterance_rms)
+                    and silero(chunk.data) > cfg.silero_threshold
+                )
+                quiet_frames = 0 if speech else quiet_frames + 1
+                if not gate_reason and quiet_frames >= max(
+                    1, int(cfg.silence_duration_ms / cfg.chunk_ms)
+                ):
+                    needs_quiet = False
+                    quiet_frames = 0
+                    mic.suppress(None)
+                continue
+            result = segmenter.feed(chunk.data, chunk.received_monotonic)
+            if segmenter.onset and on_start:
+                onset = segmenter.onset
+                decision = on_start(
+                    SpeechOnset(
+                        onset.utterance_id,
+                        onset.started_monotonic,
+                        onset.confirmed_monotonic,
+                        epoch,
+                        chunk.input_invalidated,
+                    )
+                )
+                if decision.get("accepted"):
+                    notified = onset.utterance_id
+            if segmenter.discarded:
+                discard(segmenter.discarded[1])
+            if (
+                result is not None
+                and result.end_reason != "max_duration"
+                and epoch == mic.input_epoch
+                and mic.listening.is_set()
+            ):
+                result.input_epoch = epoch
+                result.input_invalidated = chunk.input_invalidated
+                if on_start is None or notified == result.utterance_id:
+                    yield result
+                notified = None
+    finally:
+        discard("input_stopped")
+    if mic.last_error:
+        raise RuntimeError(mic.last_error)
 
 
 class TextChunker:

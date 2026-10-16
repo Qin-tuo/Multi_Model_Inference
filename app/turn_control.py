@@ -15,7 +15,7 @@ from copy import deepcopy
 from collections import deque
 from pathlib import Path
 from app.audio import wav_pcm
-from app.pipeline import segment_pcm, SpeechOutput, TextChunker
+from app.pipeline import segment_pcm, SpeechOutput, TextChunker, SpeechOnset
 from app.request_io import TurnCancelled
 
 
@@ -39,6 +39,8 @@ class TurnController:
         self.actions = actions
         self._action_error = None
         self._next_notice_check = 0
+        self._voice = None
+        self._last_voice = None
 
     def start(self):
         if self._thread and self._thread.is_alive(): return
@@ -47,6 +49,7 @@ class TurnController:
             self._history.clear()
             self._last = None
             self._session_id = uuid.uuid4().hex
+            self._voice = self._last_voice = None
         self._stop.clear()
         self._thread = threading.Thread(target=self._run, name="conversation", daemon=True)
         self._thread.start()
@@ -54,18 +57,178 @@ class TurnController:
     def submit(self, text, use_image=False, request_id=None):
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("Text must contain 1–4000 characters")
-        return self._admit({"input_kind": "text", "text": text.strip()}, use_image, request_id)
+        return self._admit(
+            {"input_kind": "text", "text": text.strip()}, use_image, request_id
+        )
 
     def submit_audio(self, data, use_image=False, request_id=None):
-        if self.stt is None or self.vad is None: raise ValueError("Speech input is not enabled")
+        if self.stt is None or self.vad is None:
+            raise ValueError("Speech input is not enabled")
         pcm = wav_pcm(data, self.config.stt.max_seconds)
-        return self._admit({"input_kind": "audio_file", "pcm": pcm}, use_image, request_id)
+        return self._admit(
+            {"input_kind": "audio_file", "pcm": pcm}, use_image, request_id
+        )
 
     def submit_segment(self, segment):
-        if self.stt is None: raise ValueError("Speech input is not enabled")
-        return self._admit({"input_kind": "microphone", "segment": segment}, self.camera is not None)
+        if self.stt is None:
+            raise ValueError("Speech input is not enabled")
+        with self._lock:
+            self._expire_voice_locked()
+            voice = self._voice
+            if voice is None or segment.utterance_id != voice["turn_id"]:
+                return {"accepted": False, "reason": "utterance_not_reserved"}
+            if (
+                segment.input_epoch != voice["input_epoch"]
+                or segment.input_invalidated is not voice["invalidated"]
+                or segment.end_reason != "silence"
+                or not 0 < len(segment.audio) <= self.config.stt.max_seconds * 16000
+                or not 0
+                <= time.monotonic() - segment.end_time
+                <= self.config.audio.input_stale_seconds
+            ):
+                self._discard_voice_locked("invalid_or_expired_segment")
+                return {"accepted": False, "reason": "invalid_or_expired_segment"}
+            if voice["segment"] is not None:
+                return {"accepted": False, "reason": "segment_already_received"}
+            voice["segment"] = segment
+            self._notify_voice_locked()
+            return {
+                "accepted": True,
+                "turn_id": voice["turn_id"],
+                "waiting_for_release": self._active is not None,
+            }
 
-    def _admit(self, data, use_image, request_id=None):
+    def _voice_state_locked(self):
+        voice = self._voice
+        return {
+            "pending": None
+            if voice is None
+            else {
+                "turn_id": voice["turn_id"],
+                "input_epoch": voice["input_epoch"],
+                "phase": "capturing"
+                if voice["segment"] is None
+                else "waiting_for_release",
+                "expires_monotonic": voice["expires_monotonic"],
+                "pcm_samples": len(voice["segment"].audio)
+                if voice["segment"] is not None
+                else 0,
+            },
+            "last": deepcopy(self._last_voice),
+        }
+
+    def _notify_voice_locked(self):
+        self.broadcaster.send({"type": "voice_state", **self._voice_state_locked()})
+
+    def _discard_voice_locked(self, reason):
+        if self._voice is None:
+            return False
+        self._last_voice = {
+            "turn_id": self._voice["turn_id"],
+            "outcome": "discarded",
+            "reason": reason,
+        }
+        self._voice = None
+        self._notify_voice_locked()
+        return True
+
+    def _expire_voice_locked(self):
+        if self._voice is not None:
+            if self._voice["invalidated"].is_set():
+                self._discard_voice_locked("input_epoch_changed")
+            elif time.monotonic() >= self._voice["expires_monotonic"]:
+                self._discard_voice_locked("pending_voice_expired")
+
+    def discard_voice(self, utterance_id, reason="input_discarded"):
+        with self._lock:
+            if self._voice is not None and self._voice["turn_id"] == utterance_id:
+                return self._discard_voice_locked(reason)
+            return False
+
+    def begin_voice(self, onset: SpeechOnset):
+        """Reserve one utterance; cancel only the turn observed at confirmation."""
+        target = None
+        with self._lock:
+            self._expire_voice_locked()
+            now = time.monotonic()
+            if (
+                not isinstance(onset, SpeechOnset)
+                or not re.fullmatch(r"[0-9a-f]{32}", onset.utterance_id)
+                or onset.input_invalidated is None
+                or onset.input_invalidated.is_set()
+                or not onset.started_monotonic <= onset.confirmed_monotonic <= now
+                or now - onset.confirmed_monotonic
+                > self.config.audio.input_stale_seconds
+            ):
+                return {"accepted": False, "reason": "stale_voice_source"}
+            if (
+                self.stt is None
+                or self._stop.is_set()
+                or not self._thread
+                or not self._thread.is_alive()
+                or self._action_error
+            ):
+                return {"accepted": False, "reason": "not_ready"}
+            active = self._active
+            if active is not None:
+                if not self.config.audio.voice_interruptions:
+                    return {"accepted": False, "reason": "voice_interruption_disabled"}
+                if onset.started_monotonic < active["admitted_monotonic"]:
+                    return {"accepted": False, "reason": "voice_precedes_active_turn"}
+                target = active["turn_id"]
+            if self._voice is not None:
+                if self._voice["turn_id"] == onset.utterance_id:
+                    return {"accepted": True, "turn_id": onset.utterance_id}
+                if onset.started_monotonic <= self._voice["started_monotonic"]:
+                    return {"accepted": False, "reason": "older_utterance"}
+                self._discard_voice_locked("superseded_by_new_voice")
+            self._voice = {
+                "turn_id": onset.utterance_id,
+                "input_epoch": onset.input_epoch,
+                "invalidated": onset.input_invalidated,
+                "started_monotonic": onset.started_monotonic,
+                "confirmed_monotonic": onset.confirmed_monotonic,
+                "expires_monotonic": now + self.config.audio.pending_voice_seconds,
+                "segment": None,
+            }
+            self._last_voice = {
+                "turn_id": onset.utterance_id,
+                "outcome": "capturing",
+                "interrupted_turn": target,
+            }
+            self._notify_voice_locked()
+        cancelled = self.cancel(target, reason="speech") if target else None
+        return {
+            "accepted": True,
+            "turn_id": onset.utterance_id,
+            "interrupted_turn": target,
+            "cancellation": cancelled,
+        }
+
+    def _dispatch_voice(self):
+        with self._lock:
+            self._expire_voice_locked()
+            voice = self._voice
+            if (
+                voice is None
+                or voice["segment"] is None
+                or self._active is not None
+                or self._stop.is_set()
+            ):
+                return
+            try:
+                self._admit(
+                    {"input_kind": "microphone", "segment": voice["segment"]},
+                    self.camera is not None,
+                    _voice_id=voice["turn_id"],
+                )
+            except (ValueError, RuntimeError) as exc:
+                self._discard_voice_locked(str(exc))
+
+    def conversation_busy(self):
+        with self._lock:return self._active is not None
+
+    def _admit(self, data, use_image, request_id=None, *, _voice_id=None):
         if type(use_image) is not bool: raise ValueError("use_image must be boolean")
         if request_id is not None and (not isinstance(request_id,str) or not re.fullmatch(r'[0-9a-f]{32}',request_id)):
             raise ValueError('request_id must contain 32 hexadecimal characters')
@@ -74,9 +237,16 @@ class TurnController:
         if raw:identity['audio_sha256']=hashlib.sha256(raw).hexdigest()
         digest=hashlib.sha256(json.dumps(identity,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         with self._lock:
+            self._expire_voice_locked()
             if self._stop.is_set() or not self._thread or not self._thread.is_alive():
                 raise RuntimeError("Conversation worker is not ready")
             if self._action_error:raise RuntimeError('Action ledger requires recovery: '+self._action_error)
+            if self._voice is not None and self._voice['turn_id']!=_voice_id:
+                raise RuntimeError('A voice utterance is being captured or waiting for release')
+            if _voice_id and (self._voice is None or self._voice['turn_id']!=_voice_id):
+                raise RuntimeError('Voice reservation is no longer valid')
+            if _voice_id and data['segment'].input_invalidated.is_set():
+                raise RuntimeError('Voice input changed before admission')
             if self._active is not None:
                 if request_id and self._active['request_id']==request_id:
                     if self._active['fingerprint']!=digest:raise ValueError('Request ID was reused for different input')
@@ -85,19 +255,27 @@ class TurnController:
             if use_image and (self.camera is None or not self.camera.health_check()):
                 if not (request_id and self.actions is not None and self.actions.knows_request(request_id,digest)):
                     raise ValueError("No fresh camera image is available")
-            request = {"turn_id": uuid.uuid4().hex, "use_image": use_image, **data,
+            request = {"turn_id": _voice_id or uuid.uuid4().hex, "use_image": use_image, **data,
                        "cancel_event": threading.Event(), "phase": "running", "output": None,
                        "admitted_monotonic":time.monotonic()}
             request.update(request_id=request_id or request['turn_id'],fingerprint=digest)
             self._active = request
+            if _voice_id:
+                self._voice=None
+                self._last_voice={'turn_id':_voice_id,'outcome':'admitted'}
+                self._notify_voice_locked()
             self.broadcaster.send({"type":"status", "stage":"running", "turn_id":request["turn_id"]})
             self._queue.put_nowait(request)
             return {"accepted": True, "turn_id": request["turn_id"], 'request_id':request['request_id']}
 
     def cancel(self, turn_id=None, reason="user"):
         with self._lock:
+            discarded=False
+            if self._voice is not None and (turn_id is None or turn_id==self._voice['turn_id']):
+                discarded=self._discard_voice_locked(reason)
             request = self._active
             if request is None or (turn_id is not None and turn_id != request["turn_id"]):
+                if discarded:return {'accepted':True,'turn_id':turn_id,'pending_voice_discarded':True}
                 return {"accepted": False, "reason": "turn_not_active"}
             if request["phase"] in {"releasing", "release_unconfirmed"}:
                 return {"accepted": False, "reason": "turn_finalized", "turn_id": request["turn_id"]}
@@ -127,10 +305,10 @@ class TurnController:
                       not event['evidence_end_monotonic'] <= event['confirmed_monotonic'] <= now <= event['expires_monotonic']):
                     decision['reason'] = 'expired_or_wrong_source'
                 elif event['kind']=='stop':
-                    active = self._active
+                    active = self._voice or self._active
                     if active is None:
                         decision['reason'] = 'idle'
-                    elif event['evidence_end_monotonic'] < active['admitted_monotonic']:
+                    elif event['evidence_end_monotonic'] < active.get('admitted_monotonic',active.get('confirmed_monotonic')):
                         decision['reason'] = 'frame_precedes_turn'
                     else:
                         decision['target_turn_id'] = active['turn_id']
@@ -138,7 +316,7 @@ class TurnController:
                     muted = self.config.audio.input_mode=='device' and not self.broadcaster.ptt_active
                     if not self.config.gestures.greetings_enabled or muted:
                         decision['reason'] = 'greeting_muted'
-                    elif self._active is not None:
+                    elif self._active is not None or self._voice is not None:
                         decision['reason'] = 'busy'
                     elif now-self._last_greeting < self.config.gestures.greeting_cooldown_seconds:
                         decision['reason'] = 'cooldown'
@@ -175,7 +353,7 @@ class TurnController:
     def clear_history(self, session_id):
         with self._lock:
             if session_id != self._session_id: raise RuntimeError('Session changed; refresh before clearing')
-            if self._active is not None: raise RuntimeError('Wait for the current turn and resource release before clearing')
+            if self._active is not None or self._voice is not None: raise RuntimeError('Wait for the current turn, voice input and resource release before clearing')
             self._history.clear(); self._last = None; self._session_id = uuid.uuid4().hex
             state = self.session_state()
             self.broadcaster.send({'type':'session_cleared', 'session':state})
@@ -193,6 +371,7 @@ class TurnController:
 
     def state(self):
         with self._lock:
+            self._expire_voice_locked()
             return {"ready": bool(self._thread and self._thread.is_alive() and not self._stop.is_set()
                                   and not self._action_error and not (self._active and self._active["phase"] == "release_unconfirmed")),
                     "active_turn": self._active["turn_id"] if self._active else None,
@@ -201,11 +380,13 @@ class TurnController:
                     "last_gesture": deepcopy(self._last_gesture),
                     "session": self.session_state(),
                     "action_error": self._action_error,
+                    'voice':self._voice_state_locked(),
                     "last_result": deepcopy(self._last), "pending": self._queue.qsize(),
                     "event_cursor": getattr(self.broadcaster,'cursor',0)}
 
     def _run(self):
         while not self._stop.is_set() or not self._queue.empty():
+            self._dispatch_voice()
             try: request = self._queue.get(timeout=0.1)
             except queue.Empty:
                 self._dispatch_notice()
@@ -237,6 +418,11 @@ class TurnController:
                 if event.is_set() or self._stop.is_set(): raise TurnCancelled("Turn cancelled")
             try:
                 check()
+                if request['input_kind']=='microphone':
+                    segment=request['segment']
+                    result['voice_input']={'utterance_id':segment.utterance_id,'input_epoch':segment.input_epoch,
+                        'end_reason':segment.end_reason,'samples':len(segment.audio),
+                        'wait_before_admission_seconds':max(0,request['admitted_monotonic']-segment.end_time)}
                 prompt = request.get("text")
                 fixed = prompt if notice else None
                 if self.actions is not None and not request.get('gesture') and not notice:
@@ -450,7 +636,7 @@ class TurnController:
         if self.actions is None or self._stop.is_set() or self._action_error or time.monotonic()<self._next_notice_check:return
         self._next_notice_check=time.monotonic()+.5
         with self._lock:
-            if self._active is not None:return
+            if self._active is not None or self._voice is not None:return
         if self.config.audio.input_mode=='device' and not self.broadcaster.ptt_active:return
         try:
             notice=self.actions.claim_due()
@@ -474,6 +660,7 @@ class TurnController:
             if output: observed["output"] = {"idle":output.idle()}
             released = all(value["idle"] for value in observed.values())
             with self._lock:
+                self._expire_voice_locked()
                 request["release"] = {"observations":observed, "seconds":time.monotonic()-started, "confirmed":released}
                 if not released and time.monotonic()-started >= 5:
                     request["phase"] = "release_unconfirmed"

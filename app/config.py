@@ -74,6 +74,9 @@ class AudioConfig:
     output_directory: str = str(Path.home() / "AI_Stack/runtime-data/reachy-audio")
     max_output_seconds: float = 120.0
     retained_files: int = 10
+    voice_interruptions: bool = True
+    pending_voice_seconds: float = 30.0
+    input_stale_seconds: float = 1.0
 
 
 @dataclass
@@ -86,6 +89,7 @@ class VADConfig:
     min_utterance_secs: float = 0.3
     min_utterance_rms: float = 0.001
     silero_threshold: float = 0.5
+    confirm_speech_ms: int = 160
 
 
 @dataclass
@@ -252,6 +256,10 @@ class Config:
         return config
 
     def validate(self):
+        if not (self.vad.max_speech_secs+1<=self.audio.pending_voice_seconds<=60
+                and .032<=self.audio.input_stale_seconds<=2
+                and 32<=self.vad.confirm_speech_ms<=1000):
+            raise ValueError('Invalid live voice timing bounds')
         if not (.1<=self.vision.reconnect_seconds<=10 and 1<=self.vision.v4l_select_timeout<=3):
             raise ValueError('Invalid camera recovery timing')
         w=self.web

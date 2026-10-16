@@ -145,7 +145,11 @@ class Broadcaster:
 
     def set_ptt(self, active: bool):
         if self._input_setter:
-            self._input_setter(active)
+            try:self._input_setter(active)
+            except ValueError:
+                self._ptt.clear()
+                self.send({'type':'ptt_state','active':False})
+                raise
         if active:
             self._ptt.set()
         else:

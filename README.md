@@ -4,7 +4,7 @@
 
 **当前分支：`migration/reachy-headless`，多模型感知、中文文件语音、当前会话与整轮取消已贯通，真人手势取得正例。SQLAlchemy笔记和APScheduler提醒已通过真实模型、取消及重启验证；手势完整质量、整机故障矩阵、实体录播及物理停播仍待完成。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
 
-当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。最新[健康探测与相机恢复证据](benchmarks/results/reachy-r3-health-camera-summary.json)覆盖模型身份检查、状态读取边界、D435i断流重连及20次摄像头启停；144项自动化测试通过。完整R3、实物音频和B0仍待完成。
+当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。最新[软件语音打断证据](benchmarks/results/reachy-r3-voice-summary.json)包含真实模型、受控PCM和Firefox验证，155项自动化测试通过。按用户2026-10-16决定，麦克风/扬声器实物环节后置，当前推进软件框架与B0-SW交接，随后由用户先开展视觉优化。
 
 ## 当前确定的流程
 

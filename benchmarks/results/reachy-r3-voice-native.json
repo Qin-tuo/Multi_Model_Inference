@@ -1,0 +1,985 @@
+{
+  "scope": "Exercise real VAD/ASR/LLM/TTS voice interruption with a paced PCM subprocess.\n\nThe capture/discovery source is explicitly substituted. Production MicRecorder,\nVAD loop, turn controller, native models, SQL actions and Web routes are used.\nNo microphone, loudspeaker, AEC or acoustic latency qualification is claimed.\n",
+  "status": "PASSED_WITH_DECLARED_SCOPE",
+  "cases": [
+    {
+      "name": "complete_new_voice",
+      "old_turn": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "voice_turn": "1f6ca0895419428fada44baa39950226",
+      "confirmed_before_endpoint": true,
+      "old_result": {
+        "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+        "prompt": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。",
+        "model_rounds": [],
+        "status": "cancelled",
+        "cancel_reason": "speech",
+        "actions_committed": [],
+        "elapsed_seconds": 0.7381021199980751,
+        "first_content_seconds": null,
+        "discarded_text_chars": 0,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 2.2678812709636986,
+          "confirmed": true
+        }
+      },
+      "new_result": {
+        "turn_id": "1f6ca0895419428fada44baa39950226",
+        "text": "语音连接成功。",
+        "metadata": {
+          "input_tokens_preflight": 965,
+          "history_pairs_kept": 0,
+          "history_pairs_dropped": 0,
+          "finish_reason": "stop",
+          "usage": {
+            "completion_tokens": 5,
+            "prompt_tokens": 965,
+            "total_tokens": 970,
+            "prompt_tokens_details": {
+              "cached_tokens": 457
+            }
+          },
+          "eval_count": 5,
+          "done": true
+        },
+        "mode": "text",
+        "request_id": "1f6ca0895419428fada44baa39950226",
+        "voice_input": {
+          "utterance_id": "1f6ca0895419428fada44baa39950226",
+          "input_epoch": 2,
+          "end_reason": "silence",
+          "samples": 48640,
+          "wait_before_admission_seconds": 0.10073274397291243
+        },
+        "asr": [
+          {
+            "text": "请只回答语音连接成功。",
+            "language": "zh",
+            "duration": 3.04,
+            "elapsed_seconds": 0.42025980399921536,
+            "backend": "llama_qwen3_asr"
+          }
+        ],
+        "input_kind": "microphone",
+        "vad_segments": [
+          {
+            "duration": 3.04,
+            "start": 280370.976426847,
+            "end": 280374.016562536
+          }
+        ],
+        "vad_time_kind": "host_receive_monotonic",
+        "prompt": "请只回答语音连接成功。",
+        "model_rounds": [
+          {
+            "input_tokens_preflight": 965,
+            "history_pairs_kept": 0,
+            "history_pairs_dropped": 0,
+            "finish_reason": "stop",
+            "usage": {
+              "completion_tokens": 5,
+              "prompt_tokens": 965,
+              "total_tokens": 970,
+              "prompt_tokens_details": {
+                "cached_tokens": 457
+              }
+            },
+            "eval_count": 5,
+            "done": true
+          }
+        ],
+        "tool_messages": [],
+        "speech": {
+          "receipt": {
+            "kind": "file_written",
+            "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-voice-eei531ky/audio/reply-1f6ca0895419428fada44baa39950226.wav",
+            "bytes": 61440
+          },
+          "chunks": [
+            {
+              "text": "语音连接成功。",
+              "bytes": 61440,
+              "elapsed_seconds": 0.06991827901219949,
+              "first_pcm_seconds": 0.06538588303374127,
+              "receipt": {
+                "kind": "file_chunk_written",
+                "bytes": 61440
+              }
+            }
+          ],
+          "duration": 1.92
+        },
+        "audio_url": "/api/audio/1f6ca0895419428fada44baa39950226",
+        "status": "complete",
+        "session_id": "047206dc9a654b498b8c593cc96042b3",
+        "actions_committed": [],
+        "elapsed_seconds": 2.564516108017415,
+        "first_content_seconds": 2.486401153029874,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "asr": {
+              "idle": true
+            },
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 0.18033611797727644,
+          "confirmed": true
+        }
+      },
+      "status": "PASSED"
+    },
+    {
+      "name": "cancel_pending_voice",
+      "old_turn": "858408c39f0b471d87c00ad551bb6492",
+      "voice_turn": "5af0aa1b08ca4c7c845bbfd771db8411",
+      "confirmed_before_endpoint": true,
+      "old_result": {
+        "turn_id": "858408c39f0b471d87c00ad551bb6492",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "858408c39f0b471d87c00ad551bb6492",
+        "prompt": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。",
+        "model_rounds": [],
+        "status": "cancelled",
+        "cancel_reason": "speech",
+        "actions_committed": [],
+        "elapsed_seconds": 0.5218360560247675,
+        "first_content_seconds": null,
+        "discarded_text_chars": 0,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 1.4387894929968752,
+          "confirmed": true
+        }
+      },
+      "voice_state": {
+        "pending": null,
+        "last": {
+          "turn_id": "5af0aa1b08ca4c7c845bbfd771db8411",
+          "outcome": "discarded",
+          "reason": "user"
+        }
+      },
+      "live_audio": {
+        "enabled": true,
+        "input": {
+          "alive": true,
+          "listening": true,
+          "input_epoch": 2,
+          "suppressed_reason": null,
+          "error": null,
+          "queued_chunks": 0,
+          "queue_capacity": 64
+        },
+        "interruptions_available": true,
+        "aec_active": false
+      },
+      "status": "PASSED"
+    },
+    {
+      "name": "mute_pending_voice",
+      "old_turn": "c87d62d435334e87a156374a4133fc06",
+      "voice_turn": "106a162676134f42861a5645ca067784",
+      "confirmed_before_endpoint": true,
+      "old_result": {
+        "turn_id": "c87d62d435334e87a156374a4133fc06",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "c87d62d435334e87a156374a4133fc06",
+        "prompt": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。",
+        "model_rounds": [],
+        "status": "cancelled",
+        "cancel_reason": "speech",
+        "actions_committed": [],
+        "elapsed_seconds": 0.6379000160377473,
+        "first_content_seconds": null,
+        "discarded_text_chars": 0,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 1.4195655499934219,
+          "confirmed": true
+        }
+      },
+      "voice_state": {
+        "pending": null,
+        "last": {
+          "turn_id": "106a162676134f42861a5645ca067784",
+          "outcome": "discarded",
+          "reason": "input_epoch_changed"
+        }
+      },
+      "live_audio": {
+        "enabled": true,
+        "input": {
+          "alive": true,
+          "listening": false,
+          "input_epoch": 3,
+          "suppressed_reason": null,
+          "error": null,
+          "queued_chunks": 0,
+          "queue_capacity": 64
+        },
+        "interruptions_available": true,
+        "aec_active": false
+      },
+      "status": "PASSED"
+    },
+    {
+      "name": "stalled_capture",
+      "old_turn": "5563f5fe15184fe69b7b6762939f621a",
+      "voice_turn": "5327d61b7f8a4e058986c44f5815fb85",
+      "confirmed_before_endpoint": true,
+      "old_result": {
+        "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+        "text": "",
+        "metadata": {},
+        "mode": "text",
+        "request_id": "5563f5fe15184fe69b7b6762939f621a",
+        "prompt": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。",
+        "model_rounds": [],
+        "status": "cancelled",
+        "cancel_reason": "speech",
+        "actions_committed": [],
+        "elapsed_seconds": 0.6284505759831518,
+        "first_content_seconds": null,
+        "discarded_text_chars": 0,
+        "resources_released": true,
+        "release": {
+          "observations": {
+            "tts": {
+              "idle": true
+            },
+            "llm": {
+              "idle": true
+            },
+            "output": {
+              "idle": true
+            }
+          },
+          "seconds": 1.3542298480169848,
+          "confirmed": true
+        }
+      },
+      "voice_state": {
+        "pending": null,
+        "last": {
+          "turn_id": "5327d61b7f8a4e058986c44f5815fb85",
+          "outcome": "discarded",
+          "reason": "input_stopped"
+        }
+      },
+      "live_audio": {
+        "enabled": true,
+        "input": {
+          "alive": false,
+          "listening": true,
+          "input_epoch": 6,
+          "suppressed_reason": null,
+          "error": "Microphone capture stalled; current input discarded",
+          "queued_chunks": 0,
+          "queue_capacity": 64
+        },
+        "interruptions_available": false,
+        "aec_active": false
+      },
+      "status": "PASSED"
+    }
+  ],
+  "effective_config": {
+    "llm": {
+      "model": "assistant-vlm",
+      "base_url": "http://127.0.0.1:8088",
+      "backend": "openai",
+      "max_tokens": 128,
+      "temperature": 0.0,
+      "timeout": 120.0,
+      "context_tokens": 2048,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "system_prompt": "你是本机的中文陪伴助手。请简短、准确地回答，不编造未观察到的事实。",
+      "system_prompt_no_rag": "你是本机的中文陪伴助手。请简短、准确地回答。"
+    },
+    "stt": {
+      "model": "qwen3-asr",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "llama_qwen3_asr",
+      "native_base_url": "http://127.0.0.1:8089",
+      "language": "zh",
+      "timeout": 60.0,
+      "max_seconds": 15.0
+    },
+    "tts": {
+      "model": "matcha-icefall-zh-en",
+      "base_url": "http://127.0.0.1:8621/v1",
+      "backend": "matcha_trt",
+      "voice": "0",
+      "speed": 1.0,
+      "lang": "zh",
+      "timeout": 60.0,
+      "max_audio_seconds": 30.0,
+      "first_chunk_chars": 8,
+      "max_chunk_chars": 40
+    },
+    "audio": {
+      "enabled": true,
+      "input_mode": "device",
+      "output_mode": "file",
+      "sample_rate": 16000,
+      "channels": 1,
+      "input_device": "__pcm_replay__",
+      "output_device": null,
+      "echo_cancellation": true,
+      "output_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-voice-eei531ky/audio",
+      "max_output_seconds": 120.0,
+      "retained_files": 10,
+      "voice_interruptions": true,
+      "pending_voice_seconds": 30.0,
+      "input_stale_seconds": 1.0
+    },
+    "vad": {
+      "speech_threshold": 0.025,
+      "silence_duration_ms": 600,
+      "lookback_ms": 250,
+      "max_speech_secs": 15,
+      "chunk_ms": 32,
+      "min_utterance_secs": 0.12,
+      "min_utterance_rms": 0.001,
+      "silero_threshold": 0.75,
+      "confirm_speech_ms": 160
+    },
+    "vision": {
+      "camera_device": "/dev/v4l/by-id/usb-Intel_R__RealSense_TM__Depth_Camera_435i_Intel_R__RealSense_TM__Depth_Camera_435i_253843064464-video-index0",
+      "width": 640,
+      "height": 480,
+      "jpeg_quality": 80,
+      "frames": 1,
+      "capture_fps": 10.0,
+      "stale_after": 1.0,
+      "buffer_bytes_limit": 16777216,
+      "reconnect_seconds": 1.0,
+      "v4l_select_timeout": 2,
+      "system_prompt": "根据本次提供的画面，用中文简短回答；看不清时明确说明。",
+      "few_shot": []
+    },
+    "face": {
+      "enabled": true,
+      "fps": 5.0,
+      "dead_zone": 0.12,
+      "good_frame_zone": 0.18,
+      "min_face_size": 0.06,
+      "stable_frames": 2
+    },
+    "web": {
+      "ui_fps": 10.0,
+      "host": "127.0.0.1",
+      "port": 8090,
+      "max_clients": 4,
+      "queue_events": 16,
+      "queue_bytes": 4194304,
+      "bridge_events": 64,
+      "bridge_bytes": 4194304,
+      "message_bytes": 2097152,
+      "json_body_bytes": 32768,
+      "ws_message_bytes": 4096,
+      "body_readers": 4,
+      "body_timeout": 10.0,
+      "send_timeout": 2.0,
+      "read_workers": 2,
+      "read_timeout": 2.0
+    },
+    "perception": {
+      "enabled": true,
+      "body_enabled": true,
+      "hands_enabled": true,
+      "fps": 5.0,
+      "body_threshold": 0.5,
+      "body_iou": 0.45,
+      "max_people": 10,
+      "palm_threshold": 0.5,
+      "hand_threshold": 0.8,
+      "max_hands": 2
+    },
+    "gestures": {
+      "enabled": true,
+      "greetings_enabled": true,
+      "stop_hold_seconds": 1.0,
+      "min_observations": 5,
+      "max_gap_seconds": 0.6,
+      "event_ttl_seconds": 0.75,
+      "stationary_palm_widths": 0.2,
+      "wave_swing_palm_widths": 0.6,
+      "wave_window_seconds": 2.0,
+      "wave_reversals": 2,
+      "rearm_seconds": 0.4,
+      "greeting_cooldown_seconds": 5.0,
+      "min_palm_pixels": 20.0,
+      "association_palm_widths": 2.0,
+      "max_tracks": 4
+    },
+    "session": {
+      "enabled": true,
+      "max_turns": 4
+    },
+    "actions": {
+      "enabled": true,
+      "database": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-voice-eei531ky/actions.sqlite",
+      "max_calls_per_turn": 2,
+      "max_pending_reminders": 100,
+      "max_records": 1000,
+      "max_requests": 10000,
+      "notification_ttl_seconds": 3600,
+      "timezone": "Asia/Shanghai"
+    }
+  },
+  "source_pid": 140521,
+  "after_input_failure": {
+    "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+    "text": "输入故障后文字仍然可用。",
+    "metadata": {
+      "input_tokens_preflight": 990,
+      "history_pairs_kept": 1,
+      "history_pairs_dropped": 0,
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 8,
+        "prompt_tokens": 990,
+        "total_tokens": 998,
+        "prompt_tokens_details": {
+          "cached_tokens": 478
+        }
+      },
+      "eval_count": 8,
+      "done": true
+    },
+    "mode": "text",
+    "request_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+    "prompt": "请只回答：输入故障后文字仍然可用。",
+    "model_rounds": [
+      {
+        "input_tokens_preflight": 990,
+        "history_pairs_kept": 1,
+        "history_pairs_dropped": 0,
+        "finish_reason": "stop",
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 990,
+          "total_tokens": 998,
+          "prompt_tokens_details": {
+            "cached_tokens": 478
+          }
+        },
+        "eval_count": 8,
+        "done": true
+      }
+    ],
+    "tool_messages": [],
+    "speech": {
+      "receipt": {
+        "kind": "file_written",
+        "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r3-voice-eei531ky/audio/reply-e30aff0cf57042ff8d152ef0e199ee7a.wav",
+        "bytes": 121856
+      },
+      "chunks": [
+        {
+          "text": "输入故障后文字仍",
+          "bytes": 76800,
+          "elapsed_seconds": 0.086914365994744,
+          "first_pcm_seconds": 0.07832376001169905,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 76800
+          }
+        },
+        {
+          "text": "然可用。",
+          "bytes": 45056,
+          "elapsed_seconds": 0.05462290602736175,
+          "first_pcm_seconds": 0.04890686500584707,
+          "receipt": {
+            "kind": "file_chunk_written",
+            "bytes": 45056
+          }
+        }
+      ],
+      "duration": 3.808
+    },
+    "audio_url": "/api/audio/e30aff0cf57042ff8d152ef0e199ee7a",
+    "status": "complete",
+    "session_id": "047206dc9a654b498b8c593cc96042b3",
+    "actions_committed": [],
+    "elapsed_seconds": 2.66109392803628,
+    "first_content_seconds": 2.508466183033306,
+    "resources_released": true,
+    "release": {
+      "observations": {
+        "tts": {
+          "idle": true
+        },
+        "llm": {
+          "idle": true
+        },
+        "output": {
+          "idle": true
+        }
+      },
+      "seconds": 0.12223764200462028,
+      "confirmed": true
+    }
+  },
+  "events": [
+    {
+      "type": "status",
+      "stage": "running",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed"
+    },
+    {
+      "type": "transcript",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "text": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。"
+    },
+    {
+      "type": "status",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "stage": "thinking"
+    },
+    {
+      "type": "voice_state",
+      "pending": {
+        "turn_id": "1f6ca0895419428fada44baa39950226",
+        "input_epoch": 2,
+        "phase": "capturing",
+        "expires_monotonic": 280401.362466627,
+        "pcm_samples": 0
+      },
+      "last": {
+        "turn_id": "1f6ca0895419428fada44baa39950226",
+        "outcome": "capturing",
+        "interrupted_turn": "f1b55e5472f24a14a92bf5b93ef2feed"
+      }
+    },
+    {
+      "type": "cancelled",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "reason": "speech"
+    },
+    {
+      "type": "status",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "stage": "releasing"
+    },
+    {
+      "type": "done",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "text": "",
+      "status": "cancelled",
+      "tokens": null,
+      "ttft": null,
+      "total_time": 0.7381021199980751,
+      "actions_committed": [],
+      "audio_url": null,
+      "output_kind": null
+    },
+    {
+      "type": "status",
+      "turn_id": "f1b55e5472f24a14a92bf5b93ef2feed",
+      "stage": "idle"
+    },
+    {
+      "type": "voice_state",
+      "pending": {
+        "turn_id": "1f6ca0895419428fada44baa39950226",
+        "input_epoch": 2,
+        "phase": "waiting_for_release",
+        "expires_monotonic": 280401.362466627,
+        "pcm_samples": 48640
+      },
+      "last": {
+        "turn_id": "1f6ca0895419428fada44baa39950226",
+        "outcome": "capturing",
+        "interrupted_turn": "f1b55e5472f24a14a92bf5b93ef2feed"
+      }
+    },
+    {
+      "type": "voice_state",
+      "pending": null,
+      "last": {
+        "turn_id": "1f6ca0895419428fada44baa39950226",
+        "outcome": "admitted"
+      }
+    },
+    {
+      "type": "status",
+      "stage": "running",
+      "turn_id": "1f6ca0895419428fada44baa39950226"
+    },
+    {
+      "type": "status",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "stage": "transcribing"
+    },
+    {
+      "type": "transcript",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "text": "请只回答语音连接成功。"
+    },
+    {
+      "type": "status",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "stage": "synthesizing"
+    },
+    {
+      "type": "status",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "stage": "releasing"
+    },
+    {
+      "type": "done",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "text": "语音连接成功。",
+      "status": "complete",
+      "tokens": 5,
+      "ttft": 2.486401153029874,
+      "total_time": 2.564516108017415,
+      "actions_committed": [],
+      "audio_url": "/api/audio/1f6ca0895419428fada44baa39950226",
+      "output_kind": "file_written"
+    },
+    {
+      "type": "status",
+      "turn_id": "1f6ca0895419428fada44baa39950226",
+      "stage": "idle"
+    },
+    {
+      "type": "status",
+      "stage": "running",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492"
+    },
+    {
+      "type": "transcript",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "text": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。"
+    },
+    {
+      "type": "status",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "stage": "thinking"
+    },
+    {
+      "type": "voice_state",
+      "pending": {
+        "turn_id": "5af0aa1b08ca4c7c845bbfd771db8411",
+        "input_epoch": 2,
+        "phase": "capturing",
+        "expires_monotonic": 280407.569787811,
+        "pcm_samples": 0
+      },
+      "last": {
+        "turn_id": "5af0aa1b08ca4c7c845bbfd771db8411",
+        "outcome": "capturing",
+        "interrupted_turn": "858408c39f0b471d87c00ad551bb6492"
+      }
+    },
+    {
+      "type": "cancelled",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "reason": "speech"
+    },
+    {
+      "type": "status",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "stage": "releasing"
+    },
+    {
+      "type": "done",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "text": "",
+      "status": "cancelled",
+      "tokens": null,
+      "ttft": null,
+      "total_time": 0.5218360560247675,
+      "actions_committed": [],
+      "audio_url": null,
+      "output_kind": null
+    },
+    {
+      "type": "voice_state",
+      "pending": null,
+      "last": {
+        "turn_id": "5af0aa1b08ca4c7c845bbfd771db8411",
+        "outcome": "discarded",
+        "reason": "user"
+      }
+    },
+    {
+      "type": "status",
+      "turn_id": "858408c39f0b471d87c00ad551bb6492",
+      "stage": "idle"
+    },
+    {
+      "type": "status",
+      "stage": "running",
+      "turn_id": "c87d62d435334e87a156374a4133fc06"
+    },
+    {
+      "type": "transcript",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "text": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。"
+    },
+    {
+      "type": "status",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "stage": "thinking"
+    },
+    {
+      "type": "voice_state",
+      "pending": {
+        "turn_id": "106a162676134f42861a5645ca067784",
+        "input_epoch": 2,
+        "phase": "capturing",
+        "expires_monotonic": 280413.906274723,
+        "pcm_samples": 0
+      },
+      "last": {
+        "turn_id": "106a162676134f42861a5645ca067784",
+        "outcome": "capturing",
+        "interrupted_turn": "c87d62d435334e87a156374a4133fc06"
+      }
+    },
+    {
+      "type": "cancelled",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "reason": "speech"
+    },
+    {
+      "type": "status",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "stage": "releasing"
+    },
+    {
+      "type": "done",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "text": "",
+      "status": "cancelled",
+      "tokens": null,
+      "ttft": null,
+      "total_time": 0.6379000160377473,
+      "actions_committed": [],
+      "audio_url": null,
+      "output_kind": null
+    },
+    {
+      "type": "voice_state",
+      "pending": null,
+      "last": {
+        "turn_id": "106a162676134f42861a5645ca067784",
+        "outcome": "discarded",
+        "reason": "input_epoch_changed"
+      }
+    },
+    {
+      "type": "status",
+      "turn_id": "c87d62d435334e87a156374a4133fc06",
+      "stage": "idle"
+    },
+    {
+      "type": "status",
+      "stage": "running",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a"
+    },
+    {
+      "type": "transcript",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "text": "请详细解释十种常见数据结构，每项说明具体用途和优缺点。"
+    },
+    {
+      "type": "status",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "stage": "thinking"
+    },
+    {
+      "type": "voice_state",
+      "pending": {
+        "turn_id": "5327d61b7f8a4e058986c44f5815fb85",
+        "input_epoch": 4,
+        "phase": "capturing",
+        "expires_monotonic": 280420.145270202,
+        "pcm_samples": 0
+      },
+      "last": {
+        "turn_id": "5327d61b7f8a4e058986c44f5815fb85",
+        "outcome": "capturing",
+        "interrupted_turn": "5563f5fe15184fe69b7b6762939f621a"
+      }
+    },
+    {
+      "type": "cancelled",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "reason": "speech"
+    },
+    {
+      "type": "status",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "stage": "releasing"
+    },
+    {
+      "type": "done",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "text": "",
+      "status": "cancelled",
+      "tokens": null,
+      "ttft": null,
+      "total_time": 0.6284505759831518,
+      "actions_committed": [],
+      "audio_url": null,
+      "output_kind": null
+    },
+    {
+      "type": "voice_state",
+      "pending": null,
+      "last": {
+        "turn_id": "5327d61b7f8a4e058986c44f5815fb85",
+        "outcome": "discarded",
+        "reason": "input_stopped"
+      }
+    },
+    {
+      "type": "error",
+      "error": "Microphone capture stalled; current input discarded"
+    },
+    {
+      "type": "status",
+      "turn_id": "5563f5fe15184fe69b7b6762939f621a",
+      "stage": "idle"
+    },
+    {
+      "type": "status",
+      "stage": "running",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a"
+    },
+    {
+      "type": "transcript",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "text": "请只回答：输入故障后文字仍然可用。"
+    },
+    {
+      "type": "status",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "stage": "thinking"
+    },
+    {
+      "type": "status",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "stage": "synthesizing"
+    },
+    {
+      "type": "status",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "stage": "releasing"
+    },
+    {
+      "type": "done",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "text": "输入故障后文字仍然可用。",
+      "status": "complete",
+      "tokens": 8,
+      "ttft": 2.508466183033306,
+      "total_time": 2.66109392803628,
+      "actions_committed": [],
+      "audio_url": "/api/audio/e30aff0cf57042ff8d152ef0e199ee7a",
+      "output_kind": "file_written"
+    },
+    {
+      "type": "status",
+      "turn_id": "e30aff0cf57042ff8d152ef0e199ee7a",
+      "stage": "idle"
+    }
+  ],
+  "shutdown": {
+    "source_released": true,
+    "owned_threads": []
+  }
+}

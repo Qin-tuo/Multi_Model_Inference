@@ -24,6 +24,7 @@ import asyncio
 from contextlib import asynccontextmanager
 import logging
 import threading
+import time
 
 from app.config import Config
 from app.camera import Camera
@@ -93,6 +94,7 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
             broadcaster.send({"type": "scene", **current["perception"]})
             broadcaster.send({"type":"gesture_state", **current['gestures'], 'last_action':current['last_gesture']})
             broadcaster.send({'type':'actions_state',**current['actions']})
+            broadcaster.send({'type':'audio_state',**current['live_audio']})
         except Exception:
             log.exception("Resource/vision status update failed")
         stop.wait(interval)
@@ -136,7 +138,12 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
 
     def state():
         camera_state=cam.status() if cam else {'ready':False,'state':'disabled'}
+        echo_ready=bool(mic and mic.aec and mic.aec.active)
         return {**control.state(), "audio_enabled": bool(mic and mic.alive),
+                'live_audio':{'enabled':bool(mic),'input':mic.input_state() if mic else None,
+                    'interruptions_available':bool(mic and mic.alive and config.audio.voice_interruptions
+                        and (config.audio.output_mode!='device' or echo_ready)),
+                    'aec_active':echo_ready},
                 'actions':action_state(), 'web':broadcaster.snapshot(),
                 "speech_ready": bool(speech_enabled and control.vad is not None),
                 "audio_input_mode": config.audio.input_mode if speech_enabled else "disabled",
@@ -153,8 +160,17 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                 "effective_config": config.effective()}
 
     def listen():
+        quiet_until=0.0
+        def gate():
+            nonlocal quiet_until
+            duplex=config.audio.voice_interruptions and (config.audio.output_mode!='device' or bool(mic.aec and mic.aec.active))
+            if not duplex and control.conversation_busy():
+                quiet_until=time.monotonic()+config.vad.silence_duration_ms/1000
+            return 'half_duplex' if time.monotonic()<quiet_until else None
         try:
-            for segment in vad_loop(mic, Console(), config.vad, live_vad):
+            for segment in vad_loop(mic, Console(), config.vad, live_vad,
+                    on_start=control.begin_voice,on_discard=control.discard_voice,
+                    capture_gate=gate,max_age_seconds=config.audio.input_stale_seconds):
                 if stop.is_set(): break
                 if segment.input_epoch != mic.input_epoch: continue
                 try: control.submit_segment(segment)
@@ -163,6 +179,12 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         except Exception as exc:
             broadcaster.send({"type":"error", "error":str(exc)})
             log.exception("Audio input failed")
+        finally:
+            # Input failure is visible and closes only the owned capture. It
+            # requires application restart; speaker selection cannot revive an
+            # orphan capture after this VAD worker has exited.
+            try:mic.stop()
+            except Exception:log.exception('Microphone cleanup failed')
 
     @asynccontextmanager
     async def lifespan(app):
