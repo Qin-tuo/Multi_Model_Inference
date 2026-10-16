@@ -224,17 +224,19 @@
         {
           "id": "R3.resources",
           "title": "有界队列、作用域内清理和可观测错误",
-          "status": "BOUNDS_AND_COMPLETE_APP_LIFECYCLE_VERIFIED_COEXISTENCE_STRESS_PENDING",
+          "status": "SOFTWARE_BOUNDS_COEXISTENCE_AND_LIFECYCLE_VERIFIED",
           "deliverable": "慢消费者/队列满/重复生命周期记录",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
             "benchmarks/results/reachy-r3-actions-summary.json",
             "benchmarks/results/reachy-r3-web-summary.json",
             "benchmarks/results/reachy-r3-recovery-summary.json",
             "benchmarks/results/reachy-r3-health-camera-summary.json",
             "benchmarks/results/reachy-r3-voice-summary.json",
-            "benchmarks/results/reachy-r4-deployment-summary.json"
-          ]
+            "benchmarks/results/reachy-r4-deployment-summary.json",
+            "benchmarks/results/reachy-r4-coexistence-summary.json"
+          ],
+          "boundary": "Current enabled software scope; limited native pressure/cleanup evidence does not claim 8h leak freedom or physical device behavior."
         },
         {
           "id": "R3.actions",
@@ -284,19 +286,25 @@
         {
           "id": "R4.function",
           "title": "完成当前软件/视觉范围功能及重复运行",
-          "status": "MANAGED_DEPLOYMENT_CYCLES_AND_ROLLBACK_VERIFIED_ACCEPTANCE_MATRIX_PENDING",
+          "status": "SOFTWARE_DEPLOYMENT_PRESSURE_OFFLINE_VERIFIED_FINAL_FUNCTION_MATRIX_PENDING",
           "deliverable": "启用软件范围F01-F12证据、20次完整应用循环、已知局限和软件版本标签；声学项列DEFERRED",
           "execution": "IN_PROGRESS",
           "evidence": [
-            "benchmarks/results/reachy-r4-deployment-summary.json"
+            "benchmarks/results/reachy-r4-deployment-summary.json",
+            "benchmarks/results/reachy-r4-coexistence-summary.json",
+            "benchmarks/results/reachy-r4-offline-summary.json"
           ]
         },
         {
           "id": "R4.baseline",
           "title": "采集视觉优先的软件B0-SW",
-          "status": "NOT_STARTED",
+          "status": "INPUTS_AND_PROTOCOL_FROZEN_MEASUREMENTS_PENDING",
           "deliverable": "视觉实机与固定输入单体/共存指标、文件或PCM语音软件指标；标明时间起点，声学指标不填估值",
-          "execution": "NOT_STARTED"
+          "execution": "IN_PROGRESS",
+          "evidence": [
+            "benchmarks/manifests/reachy-b0-sw-v1.json",
+            "benchmarks/manifests/reachy-b0-inputs-v1.json"
+          ]
         },
         {
           "id": "R4.handoff",
@@ -437,15 +445,19 @@
       ]
     },
     "F10": {
-      "status": "PARTIAL_WEB_STATE_AND_TRANSPORT_VERIFIED_FULL_COEXISTENCE_PENDING",
+      "status": "SOFTWARE_COEXISTENCE_AND_TRANSPORT_VERIFIED_SHORT_WINDOW",
       "evidence": [
         "benchmarks/results/reachy-r3-web-summary.json",
-        "benchmarks/results/reachy-r3-health-camera-summary.json"
+        "benchmarks/results/reachy-r3-health-camera-summary.json",
+        "benchmarks/results/reachy-r4-coexistence-summary.json"
       ]
     },
     "F11": {
-      "status": "NOT_VERIFIED",
-      "evidence": []
+      "status": "PREPARED_ARTIFACTS_OFFLINE_RUNTIME_START_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r4-offline-summary.json"
+      ],
+      "boundary": "Four native entrypoints, loopback-only namespace, unprivileged inference, normal cleanup and host-service restoration; clean-machine rebuild and OS reboot remain separate."
     },
     "F12": {
       "status": "PARTIAL_BACKEND_WEB_AND_CAMERA_DRIVER_RECOVERY_VERIFIED_PHYSICAL_MATRIX_PENDING",
@@ -453,7 +465,8 @@
         "benchmarks/results/reachy-r3-web-summary.json",
         "benchmarks/results/reachy-r3-recovery-summary.json",
         "benchmarks/results/reachy-r3-health-camera-summary.json",
-        "benchmarks/results/reachy-r4-deployment-summary.json"
+        "benchmarks/results/reachy-r4-deployment-summary.json",
+        "benchmarks/results/reachy-r4-coexistence-summary.json"
       ]
     }
   },
@@ -521,7 +534,7 @@
     "upstream_reference": "U0; source-reported results separate from local measurements",
     "functional_baseline": "B0-SW; current enabled software and real D435i vision scope, assistant measured without prior tuning",
     "user_experiments": "E-series; user-led single-factor changes compared with frozen B0",
-    "status": "NOT_COLLECTED",
+    "status": "INPUTS_AND_PROTOCOL_FROZEN_MEASUREMENTS_PENDING",
     "physical_audio_status": "DEFERRED_BY_USER"
   },
   "collaboration": {
@@ -549,7 +562,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
-  "updated_at": "2026-10-16T08:59:06.833979+00:00",
+  "updated_at": "2026-10-16T09:25:52.959774+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",

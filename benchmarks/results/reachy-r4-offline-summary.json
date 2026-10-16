@@ -1,0 +1,268 @@
+{
+  "created_at": "2026-10-16T09:24:04.304684+00:00",
+  "status": "PREPARED_ARTIFACTS_OFFLINE_START_VERIFIED",
+  "scope": "Cold-start prepared native artifacts in a loopback-only network namespace.\n\nThe outer process stops/restores only our four managed services. Root is used\nonly to create the temporary network namespace; inference runs as the original\nuser. Host interfaces/routes are never modified. This is not a clean rebuild,\nmachine reboot or a test of systemd itself inside the namespace.\n",
+  "raw_directory": "/home/nvidia/AI_Stack/runtime-data/reachy-r4-offline-20261016-a",
+  "source_commit": "c3a540b98c4ae1d0cf2eb1554d80ee0cf882e226",
+  "probe_sha256": "34e63ec65a7b42d71a80e9bf75bed5215157cdecc248129c51e94cee517fa691",
+  "network": {
+    "namespace": "net:[4026533879]",
+    "interfaces": [
+      {
+        "ifindex": 1,
+        "ifname": "lo",
+        "flags": [
+          "LOOPBACK",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 65536,
+        "qdisc": "noqueue",
+        "operstate": "UNKNOWN",
+        "group": "default",
+        "txqlen": 1000,
+        "link_type": "loopback",
+        "address": "00:00:00:00:00:00",
+        "broadcast": "00:00:00:00:00:00",
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "127.0.0.1",
+            "prefixlen": 8,
+            "scope": "host",
+            "label": "lo",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          },
+          {
+            "family": "inet6",
+            "local": "::1",
+            "prefixlen": 128,
+            "scope": "host",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      }
+    ],
+    "ipv4_routes": [],
+    "ipv6_routes": []
+  },
+  "inference_uid": 1000,
+  "external_connect_errno": 101,
+  "components": {
+    "llama": {
+      "pid": 271619,
+      "namespace": "net:[4026533879]",
+      "health": {
+        "ready": true,
+        "model": "assistant-vlm",
+        "context_tokens": 2048,
+        "slots": 1,
+        "processing": 0
+      }
+    },
+    "asr": {
+      "pid": 271823,
+      "namespace": "net:[4026533879]",
+      "health": {
+        "ready": true,
+        "model": "assistant-asr",
+        "context_tokens": 2048,
+        "slots": 1,
+        "processing": 0
+      }
+    },
+    "speech": {
+      "pid": 271856,
+      "namespace": "net:[4026533879]",
+      "health": {
+        "ready": true,
+        "capabilities": {
+          "asr": {
+            "ready": true,
+            "model": "qwen3-asr",
+            "backend": "llama_qwen3_asr",
+            "concurrency": {
+              "backend_max_concurrent": 1,
+              "admission_limit": 1,
+              "active": 0,
+              "available": 1
+            }
+          },
+          "tts": {
+            "ready": true,
+            "model": "matcha-icefall-zh-en",
+            "backend": "matcha_trt",
+            "concurrency": {
+              "backend_max_concurrent": 1,
+              "admission_limit": 1,
+              "active": 0,
+              "available": 1
+            }
+          }
+        }
+      }
+    },
+    "app": {
+      "pid": 271913,
+      "namespace": "net:[4026533879]",
+      "health": {
+        "ready": true,
+        "camera": {
+          "ready": true,
+          "state": "streaming",
+          "error": null,
+          "source_epoch": "7fb09e839c664f9c8d348ea3fd149894",
+          "frame_age_seconds": 0.012675122998189181,
+          "open_attempts": 1,
+          "failures": 0,
+          "reconnects": 0,
+          "buffer_count": 14,
+          "buffer_bytes": 419742,
+          "capture_worker_alive": true
+        },
+        "phase": "idle",
+        "models": {
+          "vlm": "assistant-vlm",
+          "stt": "qwen3-asr",
+          "tts": "matcha-icefall-zh-en",
+          "vad": "Silero v6"
+        },
+        "config_matches": true
+      }
+    }
+  },
+  "checks": [
+    {
+      "label": "text",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/Multi_Model_Inference/scripts/probe_web.py",
+        "--text",
+        "只回答：离线运行成功",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-offline-20261016-a/text.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "camera",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/Multi_Model_Inference/scripts/probe_web.py",
+        "--camera",
+        "--text",
+        "用一句话描述当前画面，不执行任何工具。",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-offline-20261016-a/camera.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "file-speech",
+      "command": [
+        "/home/nvidia/AI_Stack/environments/reachy-headless/bin/python",
+        "/home/nvidia/Multi_Model_Inference/scripts/probe_speech.py",
+        "--input",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-deployment-20261016-b/input.wav",
+        "--output",
+        "/home/nvidia/AI_Stack/runtime-data/reachy-r4-offline-20261016-a/reply.wav"
+      ],
+      "returncode": 0
+    }
+  ],
+  "shutdown": {
+    "app": 0,
+    "speech": 0,
+    "asr": 0,
+    "llama": 0
+  },
+  "remaining_owned_processes": [],
+  "outer_namespace_cleanup": [],
+  "host_topology_unchanged": true,
+  "restored_status": "READY",
+  "files": [
+    {
+      "name": "app.log",
+      "bytes": 1740,
+      "sha256": "da211c5f0eb8985876dd621e9b34a67ab7df94a57386074d83f20746385909d8"
+    },
+    {
+      "name": "asr.log",
+      "bytes": 20821,
+      "sha256": "fb204dde0c0c1f3aa83cde60e92b0004df60632a24dddc3715cf015f588f65ce"
+    },
+    {
+      "name": "camera.json",
+      "bytes": 4805,
+      "sha256": "7371f2442886acf7f52c6adaf449220ccde79bac7242f7ff833e1cb91203afd2"
+    },
+    {
+      "name": "camera.log",
+      "bytes": 4805,
+      "sha256": "7371f2442886acf7f52c6adaf449220ccde79bac7242f7ff833e1cb91203afd2"
+    },
+    {
+      "name": "file-speech.log",
+      "bytes": 2697,
+      "sha256": "10c2af900679a6a2c109d68cca2b59c264102c18ebc682d2513e3f029a64634f"
+    },
+    {
+      "name": "inside.json",
+      "bytes": 4707,
+      "sha256": "71bdc76fde77572a78d87aa9ba27b451fd40285942929443588be8844cb399c9"
+    },
+    {
+      "name": "llama.log",
+      "bytes": 33194,
+      "sha256": "78876dad11a34e8be2decdecb6139cc9996ab68d95f4dce18cfc703e87e65e62"
+    },
+    {
+      "name": "namespace.log",
+      "bytes": 81,
+      "sha256": "c12d0acbed85e35b27a98827312097f5a8810565bc876ce902a7b165576ade9d"
+    },
+    {
+      "name": "outer.json",
+      "bytes": 13961,
+      "sha256": "016c0bb1b57f0fb7d2c89eff2102b72246c95e44e13ca308a37a1a1f8b4a7e4f"
+    },
+    {
+      "name": "reply.json",
+      "bytes": 2697,
+      "sha256": "10c2af900679a6a2c109d68cca2b59c264102c18ebc682d2513e3f029a64634f"
+    },
+    {
+      "name": "report.json",
+      "bytes": 35116,
+      "sha256": "f1477c9c2b6e9f87b447993e7dfa15ea43b6b9df96b316c5bb33924bd5a55f48"
+    },
+    {
+      "name": "settings.json",
+      "bytes": 4362,
+      "sha256": "3381874af7d6990e3ef08b5f2ce8af2bec1bfeda2f392acecebfde8a1e48db42"
+    },
+    {
+      "name": "speech.log",
+      "bytes": 6192,
+      "sha256": "9ea62d0acfeaa16e8428611f4d92383fec5907e5149b4a55a2ba5ed6ff8ee772"
+    },
+    {
+      "name": "text.json",
+      "bytes": 2891,
+      "sha256": "a113c8acbf33e75e6b8c031ad10a640e3d63da1459537fa46e9ea85335de3ba6"
+    },
+    {
+      "name": "text.log",
+      "bytes": 2891,
+      "sha256": "a113c8acbf33e75e6b8c031ad10a640e3d63da1459537fa46e9ea85335de3ba6"
+    }
+  ],
+  "not_qualified": [
+    "Clean-machine rebuild",
+    "Machine reboot/autostart",
+    "Physical audio",
+    "8h endurance"
+  ]
+}

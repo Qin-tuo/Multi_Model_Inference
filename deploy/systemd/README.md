@@ -39,7 +39,7 @@
 - 模型清单、感知/VAD 锁及 `deploy/runtime-artifacts.lock.json` 校验现有权重、原生程序/库、TTS 工件和感知源码。OVS 源码要求固定提交且无未记录改动。全量校验会读取数 GiB 文件，请等待命令完成。
 - 日志位于 `~/AI_Stack/runtime-data/reachy-headless/logs`，每组件按 5 MiB 轮转并保留 4 份备份。实验 trace 和测试输出有各自目录。
 
-`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、B0 性能和长稳分别需要证据。离线环境变量与本地工件校验不等于已经完成断网启动或干净机器重部署验收。
+`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、B0 性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。当前已另行通过 [隔离网络启动验证](../../benchmarks/results/reachy-r4-offline-summary.json)：四个原生入口在只有 lo 的临时网络空间中冷启动并完成交互；整机重启、自启动及干净机器重部署仍分别待验。
 
 ## 切换与回退
 
@@ -58,3 +58,22 @@
 正式回退顺序：当前入口执行 `main.py services down`，再到旧快照执行 `python3 tools/project.py up --components all`。旧管理器会将旧单元入口指向快照，避免回退依赖被更新的主目录。恢复后必须检查旧服务状态和 `scripts/probe_legacy_camera.py` 的新鲜 RGB/深度，不能只看进程。
 
 [旧部署文档](README-legacy.md)只解释历史方案。当前准备工件的可运行性与干净环境重建是两个验收范围；完整重部署仍在 R6。
+
+
+## 当前软件压力与离线复现
+
+两项命令都需要当前四服务就绪、没有正在处理的用户请求。它们使用新的独立数据库/音频目录；结束后恢复原冻结配置与默认服务。输出路径必须是尚不存在的目录。
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_coexistence.py \
+  --output /home/nvidia/AI_Stack/runtime-data/reachy-pressure-new-run \
+  --input /home/nvidia/AI_Stack/datasets/reachy-b0-sw-v1/zh-20.wav
+
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_offline.py \
+  --output /home/nvidia/AI_Stack/runtime-data/reachy-offline-new-run \
+  --input /home/nvidia/AI_Stack/datasets/reachy-b0-sw-v1/zh-20.wav
+```
+
+压力探针暂时替换应用，保留三个原生模型服务。离线探针暂时停止四服务，用 `sudo unshare --net` 创建只有回环接口的临时网络空间，再降回原普通用户执行推理；不改主机网络接口和路由。当前机器需要可用的 `sudo -n`、`unshare`、`ip`。离线探针验证的是准备工件上的原生入口，不声称在该空间内验证了用户级 systemd 或从零安装。
+
+压力检查保存全部请求、拒绝、取消、周期状态与资源曲线。辅助 watchdog 子进程可以正常出现/消失；原生模型身份通过监听者、创建时间、主进程和重启计数核对。短时间 PSS/FD 变化保留在报告，不能据此宣称长期无泄漏。

@@ -233,6 +233,26 @@
         "benchmarks/results/reachy-r3-voice-before.json",
         "benchmarks/results/reachy-r3-voice-summary.json"
       ]
+    },
+    {
+      "id": "RG-20",
+      "classification": "CONFIRMED_OBSERVATION_ERROR_HANDLING",
+      "phase": "R4",
+      "finding": "Absent authoritative systemd LoadState could be treated as STOPPED; observation failure is not proof of process termination.",
+      "status": "FIXED_WITH_EXPLICIT_OBSERVATION_ERROR",
+      "evidence": [
+        "benchmarks/results/reachy-r4-deployment-summary.json"
+      ]
+    },
+    {
+      "id": "RG-21",
+      "classification": "CONFIRMED_PROBE_FALSE_RESTART_INVARIANT",
+      "phase": "R4",
+      "finding": "Exact cgroup PID list equality rejects normal OVS watchdog subprocess churn. First native attempt preserved; follow-up recorded varying helper PID with stable native workers and zero restarts.",
+      "status": "PROBE_FIXED_AND_NATIVE_COEXISTENCE_REVERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r4-coexistence-summary.json"
+      ]
     }
   ],
   "hardware_gap": {

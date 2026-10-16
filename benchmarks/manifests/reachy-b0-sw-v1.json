@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-16T09:25:52.953834+00:00",
+  "status": "INPUTS_AND_PROTOCOL_FROZEN_MEASUREMENTS_PENDING",
+  "purpose": "B0-SW before user-led vision-first optimization; no autonomous tuning.",
+  "runtime_source_commit": "c3a540b98c4ae1d0cf2eb1554d80ee0cf882e226",
+  "effective_config_path": "/home/nvidia/AI_Stack/runtime-data/reachy-headless/systemd/settings.json",
+  "effective_config_sha256": "f6b429a3b801d29fcd731ff8f6679b0bffa05fb57c7011a470e701000d054a0b",
+  "input_directory": "/home/nvidia/AI_Stack/datasets/reachy-b0-sw-v1",
+  "input_manifest": "benchmarks/manifests/reachy-b0-inputs-v1.json",
+  "input_manifest_sha256": "449d9eca007d88fe837642e0c1fc7b52749d98c991864e170c6391627ce5f878",
+  "locks": {
+    "requirements.lock": "e33cf6e031b51e35d61183ac8f8f9c00176253a3601c0d77b93d82d8d3634030",
+    "models/manifest.json": "a0d4928ca4617390136547ad45dc640f915038ef4288810316d4ba8e5391681c",
+    "models/perception.json": "0c1f84091499a3f4ca53cbb74bdb7b197c7571c0b92e807b3db16a8807dc3d1b",
+    "models/speech.json": "6c7834d913261a68cea294d4474abccb9c34b39f797a6ac683385c6cd0c85844",
+    "deploy/runtime-artifacts.lock.json": "023a2f8a749fd7ce54984d1bbeb6f24f17be98336a1b1f4e8dce5352a105069d",
+    "deploy/speech/source-lock.json": "71fd4c6e062cb73b7fd729045b743e5635105ee0f3555865fa2f88fad54fb69d"
+  },
+  "fixed_runtime": {
+    "main_model": "Qwen3.5-4B Q4_K_M + f16 projector",
+    "asr": "Qwen3-ASR-0.6B Q8_0 + bf16 projector",
+    "tts": "Matcha three BF16 estimator steps + FP16 Vocos",
+    "vision": "Existing YOLOv8n FP32/TF32 TensorRT; YuNet and palm/hand FP32 OpenCV CPU",
+    "llm_context": 2048,
+    "llm_max_output_tokens": 128,
+    "llm_threads": 4,
+    "llm_slots": 1,
+    "llm_cache_ram_mib": 256,
+    "asr_threads": 2,
+    "asr_cache_ram_mib": 64,
+    "thinking": false,
+    "camera_fps_target": 10,
+    "perception_fps_target": 5
+  },
+  "measurement_rules": {
+    "minimum_events_per_class": 20,
+    "warmup": "Record cold first call separately; five untimed warmup calls per fixed input/model before warm samples. Record all initial and warmup outcomes; do not select only successful samples.",
+    "order": "Fixed fixture order. Sequential module calls; constant-rate replay arrivals at 10Hz and age sampling at 10Hz. Overload workload has independent scheduled arrivals and records late sends/rejections.",
+    "statistics": "nearest-rank P50/P95/max, raw sample count, errors and missing outcomes; no-result age samples rank after all finite ages. Report unique inputs separately from repeated inference calls.",
+    "resource_sampling_seconds": 1,
+    "power": "Record nvpmodel, clocks, thermal state and background processes at each run; preserve current MAXN and dynamic clocks; do not invoke jetson_clocks or change power mode.",
+    "isolation": "No builds/downloads/other tests during measurement. Isolated action DB and output directory; restore original managed services and configuration in finally.",
+    "cache": "Record native prompt-cache settings and actual cached-token counts; specify cold/reused process and initial session state; no silent cache disabling.",
+    "instrumentation": "Bench-only call-boundary timers; preserve production source and native parameters. Document timer/proxy overhead with paired uninstrumented calls and matching outputs."
+  },
+  "scenarios": [
+    {
+      "id": "V1",
+      "kind": "fixed_image_single_model",
+      "inputs": [
+        "public-original.png",
+        "public-camera-shape.png",
+        "blank-camera-shape.png"
+      ],
+      "calls_per_input": 20,
+      "modules": [
+        "body",
+        "face",
+        "palm",
+        "hand"
+      ],
+      "metrics": [
+        "host preprocessing",
+        "synchronous native call",
+        "postprocessing",
+        "valid/empty/error outputs",
+        "per-call outputs and input shape"
+      ],
+      "boundary": "Hand landmark calls only when a palm ROI exists; report actual ROI/call count. TensorRT native wall time includes copies/synchronization; YuNet native detect includes OpenCV internal pre/post. Do not invent pure-kernel times."
+    },
+    {
+      "id": "V2",
+      "kind": "continuous_vision",
+      "seconds_each": 60,
+      "inputs": [
+        "fixed-rate public fixture replay",
+        "live D435i metadata-only window"
+      ],
+      "conditions": [
+        "vision only",
+        "vision with resident idle LLM/ASR/TTS",
+        "vision with fixed 4B workload"
+      ],
+      "metrics": [
+        "capture/arrival rate",
+        "result throughput",
+        "skipped/rejected/expired frames",
+        "latest-result age sampled independently of completion",
+        "buffer bytes",
+        "FD/threads/PSS/RSS and host GPU/CPU/thermal"
+      ],
+      "boundary": "Only fixed replay conditions support controlled interference comparison; live camera scene is not frozen and is reported separately. No new raw private camera recordings."
+    },
+    {
+      "id": "S1",
+      "kind": "file_vad_asr",
+      "cases": 20,
+      "corpus": "benchmarks/corpora/reachy-b0-speech-v1.json",
+      "metrics": [
+        "file VAD time and segments",
+        "audio seconds",
+        "ASR wall seconds/RTF",
+        "prompt-agreement CER",
+        "errors"
+      ],
+      "boundary": "Synthetic prompts are not independent audio transcriptions; this is a controlled pipeline diagnostic, not real-world ASR accuracy."
+    },
+    {
+      "id": "L1",
+      "kind": "llm_text_and_fixed_image",
+      "events_each": 20,
+      "metrics": [
+        "arrival/admission/queue",
+        "image preparation",
+        "preflight and actual input tokens",
+        "first-content latency",
+        "generation tokens/rate",
+        "total seconds",
+        "finish reason and cache hits"
+      ],
+      "boundary": "Freeze literal prompts and native request parameters in events; current max_tokens/ctx/threads/cache unchanged."
+    },
+    {
+      "id": "T1",
+      "kind": "tts_only",
+      "cases": 20,
+      "corpus": "benchmarks/corpora/reachy-b0-speech-v1.json",
+      "metrics": [
+        "first PCM latency",
+        "synthesis wall seconds",
+        "audio duration/RTF",
+        "byte and format validity",
+        "errors"
+      ],
+      "boundary": "No audible playback timing or AEC claim."
+    },
+    {
+      "id": "E1",
+      "kind": "complete_software_application",
+      "events_each": 20,
+      "classes": [
+        "text + speech file reply",
+        "file speech + speech file reply",
+        "image + file speech reply",
+        "logical cancellation + native release",
+        "overload rejection",
+        "local action + persistent receipt"
+      ],
+      "metrics": [
+        "client admission/rejection",
+        "module timings",
+        "time to first content/PCM",
+        "time to output file publication",
+        "native release",
+        "periodically sampled vision availability/age",
+        "resources"
+      ],
+      "boundary": "Actions use an isolated DB; physical audio and real negative gesture samples remain explicitly unqualified."
+    }
+  ],
+  "deliverables": [
+    "effective-config.json",
+    "environment.json",
+    "inputs manifest",
+    "events.jsonl",
+    "resources.csv",
+    "tegrastats.log",
+    "baseline.json",
+    "readable report",
+    "source/commands/hashes index",
+    "architecture and first user reproduction commands"
+  ],
+  "deferred": [
+    "Physical microphone/speaker/AEC/double-talk/audible response/actual silence",
+    "User-deferred real gesture negative/occlusion/multi-hand quality samples"
+  ],
+  "later": [
+    "8h endurance",
+    "Clean-machine rebuild/redeployment",
+    "User-led performance optimization and five-run comparisons"
+  ],
+  "collection_started": false
+}

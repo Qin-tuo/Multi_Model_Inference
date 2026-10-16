@@ -1,0 +1,435 @@
+{
+  "created_at": "2026-10-16T09:24:04.301880+00:00",
+  "status": "SOFTWARE_COEXISTENCE_PRESSURE_VERIFIED",
+  "scope": "Actual live D435i body/face/hands, native 4B/ASR/TTS, isolated notes/audio paths, production inference/admission config; not B0 or 8h.",
+  "runs": [
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r4-coexistence-20261016-a",
+      "status": "FAIL",
+      "error": "RuntimeError('A native backend restarted during pressure')",
+      "source_commit": "c3a540b98c4ae1d0cf2eb1554d80ee0cf882e226",
+      "probe_sha256": "76c8fe8920a9a766f2d115a58ca8231812f60762fb23222857bc93ec328f60f2",
+      "cycles": 20,
+      "cancelled_count": 20,
+      "completed_count": 20,
+      "file_speech_completed_count": 20,
+      "http_409_count": 80,
+      "fifth_viewer_http_status": 403,
+      "cancel_to_observed_idle_seconds": {
+        "p50": 1.7781137560377829,
+        "p95": 2.8594716290244833,
+        "max": 2.8728972140233964,
+        "definition": "Client WS cancel send to polled application idle after native release; not physical silence or kernel preemption"
+      },
+      "sample_count": 231,
+      "minimum_sampled_mem_available_gib": 4.303859710693359,
+      "maximum_sampled_camera_buffer_bytes": 5085109,
+      "sampled_camera_unready": 0,
+      "sampled_perception_unready": 0,
+      "camera_failures": 0,
+      "perception_failures": 0,
+      "before": {
+        "llama": {
+          "pss": 1100342272,
+          "rss": 5396873216,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 12.57
+        },
+        "asr": {
+          "pss": 603768832,
+          "rss": 2727534592,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 4.32
+        },
+        "speech": {
+          "pss": 578937856,
+          "rss": 945958912,
+          "threads": 21,
+          "fds": 64,
+          "cpu_seconds": 8.44
+        },
+        "app": {
+          "pss": 472023040,
+          "rss": 705245184,
+          "threads": 29,
+          "fds": 56,
+          "cpu_seconds": 46.29
+        }
+      },
+      "after": {
+        "llama": {
+          "pss": 1420257280,
+          "rss": 5719445504,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 46.89
+        },
+        "asr": {
+          "pss": 609812480,
+          "rss": 2733301760,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 5.3100000000000005
+        },
+        "speech": {
+          "pss": 579978240,
+          "rss": 946319360,
+          "threads": 21,
+          "fds": 64,
+          "cpu_seconds": 23.57
+        },
+        "app": {
+          "pss": 480438272,
+          "rss": 713101312,
+          "threads": 29,
+          "fds": 59,
+          "cpu_seconds": 589.52
+        }
+      },
+      "cooldown_app_fds": [
+        59,
+        60
+      ],
+      "cooldown_app_threads": [
+        29
+      ],
+      "final_web": {
+        "clients": 0,
+        "client_limit": 4,
+        "bridge_events": 0,
+        "bridge_bytes": 0,
+        "drain_scheduled": false,
+        "bridge_peak_events": 6,
+        "bridge_peak_bytes": 43914,
+        "coalesced": 0,
+        "dropped": 0,
+        "overflows": 0,
+        "rejected_messages": 0
+      },
+      "retained_wav_count": 10,
+      "partial_count": 0,
+      "backend_identity_before": null,
+      "backend_identity_after": null,
+      "app_exit_code": 0,
+      "restored_status": "READY",
+      "files": [
+        {
+          "name": "app.log",
+          "bytes": 383344,
+          "sha256": "a27988f855dcec5c4e064e2ef928a8420bd72d48e7163ff68840114819dc3949"
+        },
+        {
+          "name": "events.jsonl",
+          "bytes": 93099,
+          "sha256": "ed85b27429d8fca4e8cac64e7996d853dc0ebb7b2d60d2ab925d5c4090441ad0"
+        },
+        {
+          "name": "report.json",
+          "bytes": 218989,
+          "sha256": "00c714dbee2218fba903600513eb33d3c46506a3838af2a90a5b73c9b7e4fca9"
+        },
+        {
+          "name": "resources.csv",
+          "bytes": 46207,
+          "sha256": "abff598fd2cff83f1640075707836b66a0f4c94c916d63528275879d290246f0"
+        },
+        {
+          "name": "settings.json",
+          "bytes": 4370,
+          "sha256": "3a745e49465aa6ca8aebff8fd90ebffa95f36f5906567da175e58fbfb4cd2fb2"
+        },
+        {
+          "name": "state-samples.jsonl",
+          "bytes": 316915,
+          "sha256": "e3864cab014c2abc2ecdf2b4a380c718dba5c30ac3d2942fbc3cab857d6a527f"
+        },
+        {
+          "name": "tegrastats.log",
+          "bytes": 111279,
+          "sha256": "a0a246012ff64355db28ff3e7fefc761ef3a55e55e0efcfb406edf31bd71d49a"
+        }
+      ]
+    },
+    {
+      "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r4-coexistence-20261016-b",
+      "status": "PASS",
+      "error": null,
+      "source_commit": "c3a540b98c4ae1d0cf2eb1554d80ee0cf882e226",
+      "probe_sha256": "50cf623f8bf97d6a5564af5619646e2865f5bce3c3a922220a6750cce95441a7",
+      "cycles": 20,
+      "cancelled_count": 20,
+      "completed_count": 20,
+      "file_speech_completed_count": 20,
+      "http_409_count": 80,
+      "fifth_viewer_http_status": 403,
+      "cancel_to_observed_idle_seconds": {
+        "p50": 1.4546075550024398,
+        "p95": 2.6807144700433128,
+        "max": 2.685482482018415,
+        "definition": "Client WS cancel send to polled application idle after native release; not physical silence or kernel preemption"
+      },
+      "sample_count": 176,
+      "minimum_sampled_mem_available_gib": 4.348613739013672,
+      "maximum_sampled_camera_buffer_bytes": 4953107,
+      "sampled_camera_unready": 0,
+      "sampled_perception_unready": 0,
+      "camera_failures": 0,
+      "perception_failures": 0,
+      "before": {
+        "llama": {
+          "pss": 1421350912,
+          "rss": 5720309760,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 48.4
+        },
+        "asr": {
+          "pss": 609477632,
+          "rss": 2732802048,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 5.449999999999999
+        },
+        "speech": {
+          "pss": 579786752,
+          "rss": 946122752,
+          "threads": 21,
+          "fds": 62,
+          "cpu_seconds": 24.770000000000003
+        },
+        "app": {
+          "pss": 464735232,
+          "rss": 697507840,
+          "threads": 29,
+          "fds": 56,
+          "cpu_seconds": 31.810000000000002
+        }
+      },
+      "after": {
+        "llama": {
+          "pss": 1423357952,
+          "rss": 5722279936,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 77.72
+        },
+        "asr": {
+          "pss": 609682432,
+          "rss": 2732986368,
+          "threads": 16,
+          "fds": 52,
+          "cpu_seconds": 6.32
+        },
+        "speech": {
+          "pss": 579870720,
+          "rss": 946176000,
+          "threads": 21,
+          "fds": 62,
+          "cpu_seconds": 33.93
+        },
+        "app": {
+          "pss": 477142016,
+          "rss": 709844992,
+          "threads": 29,
+          "fds": 57,
+          "cpu_seconds": 424.44000000000005
+        }
+      },
+      "cooldown_app_fds": [
+        57,
+        58
+      ],
+      "cooldown_app_threads": [
+        29
+      ],
+      "final_web": {
+        "clients": 0,
+        "client_limit": 4,
+        "bridge_events": 0,
+        "bridge_bytes": 0,
+        "drain_scheduled": false,
+        "bridge_peak_events": 6,
+        "bridge_peak_bytes": 41905,
+        "coalesced": 0,
+        "dropped": 0,
+        "overflows": 0,
+        "rejected_messages": 0
+      },
+      "retained_wav_count": 10,
+      "partial_count": 0,
+      "backend_identity_before": {
+        "llama": {
+          "identity": {
+            "main_pid": 267619,
+            "restarts": "0",
+            "processes": {
+              "267619": 1792141027.56,
+              "267621": 1792141027.76
+            }
+          },
+          "stable_pids": [
+            267619,
+            267621
+          ],
+          "observed_cgroup_pids": [
+            267619,
+            267621
+          ]
+        },
+        "asr": {
+          "identity": {
+            "main_pid": 267702,
+            "restarts": "0",
+            "processes": {
+              "267702": 1792141036.55,
+              "267705": 1792141036.75
+            }
+          },
+          "stable_pids": [
+            267702,
+            267705
+          ],
+          "observed_cgroup_pids": [
+            267702,
+            267705
+          ]
+        },
+        "speech": {
+          "identity": {
+            "main_pid": 267759,
+            "restarts": "0",
+            "processes": {
+              "267759": 1792141041.25,
+              "267761": 1792141041.44
+            }
+          },
+          "stable_pids": [
+            267759,
+            267761
+          ],
+          "observed_cgroup_pids": [
+            267759,
+            267761
+          ]
+        }
+      },
+      "backend_identity_after": {
+        "llama": {
+          "identity": {
+            "main_pid": 267619,
+            "restarts": "0",
+            "processes": {
+              "267619": 1792141027.56,
+              "267621": 1792141027.76
+            }
+          },
+          "stable_pids": [
+            267619,
+            267621
+          ],
+          "observed_cgroup_pids": [
+            267619,
+            267621
+          ]
+        },
+        "asr": {
+          "identity": {
+            "main_pid": 267702,
+            "restarts": "0",
+            "processes": {
+              "267702": 1792141036.55,
+              "267705": 1792141036.75
+            }
+          },
+          "stable_pids": [
+            267702,
+            267705
+          ],
+          "observed_cgroup_pids": [
+            267702,
+            267705
+          ]
+        },
+        "speech": {
+          "identity": {
+            "main_pid": 267759,
+            "restarts": "0",
+            "processes": {
+              "267759": 1792141041.25,
+              "267761": 1792141041.44
+            }
+          },
+          "stable_pids": [
+            267759,
+            267761
+          ],
+          "observed_cgroup_pids": [
+            267759,
+            267761
+          ]
+        }
+      },
+      "app_exit_code": 0,
+      "restored_status": "READY",
+      "files": [
+        {
+          "name": "app.log",
+          "bytes": 280498,
+          "sha256": "3a7244db4f33b0eb8cf0e27ccaef1acbfa6dd8ac6c3ee6e868caa2d36dd88eb7"
+        },
+        {
+          "name": "events.jsonl",
+          "bytes": 88685,
+          "sha256": "815e1c1d3b2d85bdec04b78679a392676bb73f168e2590ea417f788ce8e89bf4"
+        },
+        {
+          "name": "report.json",
+          "bytes": 202114,
+          "sha256": "6cd41cdcd4305cc61cbec84ea683886c8ec3c80844d3c953009d0310033866ae"
+        },
+        {
+          "name": "resources.csv",
+          "bytes": 35190,
+          "sha256": "606cbd08e38ffdaf300e99fb21a2e3ee41221de0d515a23c3c1e72e25719ea89"
+        },
+        {
+          "name": "settings.json",
+          "bytes": 4370,
+          "sha256": "b0f4dc99b78ff56c4c4ceab0de0bff9db7c0365ff3fb5f5053a822ace87bc732"
+        },
+        {
+          "name": "state-samples.jsonl",
+          "bytes": 241311,
+          "sha256": "83df1eaec415a3675e5cfd8c2b49588c97698fced0ddb2b8e4a28690b591fd41"
+        },
+        {
+          "name": "tegrastats.log",
+          "bytes": 84773,
+          "sha256": "724e77ecb7f93904c1841e4513d9b57bf5309b20dff38a181d37815ccc75319f"
+        }
+      ]
+    }
+  ],
+  "valid_pass_run": "b",
+  "tests": {
+    "passed": 167,
+    "xml_sha256": "1dcfc66ade5e7bf21217aba73b5a499a3c0d4b94d2d28a684f4a6116796dfe4e"
+  },
+  "failed_attempt_retained": {
+    "a": "All 20 interaction cycles succeeded, but final exact-cgroup-PID-list assertion failed. It did not save the offending final PID list. Later direct observation captured OVS tegrastats child churn with stable model PIDs and zero restarts. The incorrect invariant was replaced by owned listening PID + creation time + supervisor PID + restart count.",
+    "followup_observation": {
+      "path": "/home/nvidia/AI_Stack/runtime-data/reachy-r4-coexistence-cgroup-observation.json",
+      "sha256": "1a5539c89aeb9bc6b88042fc690d960359d7fc96f9454c0137ba593c096388ed"
+    },
+    "regression": "Real loopback listener plus real auxiliary child; stable backend identity survives auxiliary churn."
+  },
+  "limits": [
+    "Short pressure test, not proof of leak freedom: app FD 56→57 with cooldown 57–58 and PSS +11.8 MiB in run b; all app processes exited cleanly. Keep full curves for baseline/long-run analysis.",
+    "Native weights and caches remain resident; host unified-memory availability, PSS and RSS are distinct metrics, never summed as GPU memory.",
+    "Per-service process sums in run b cover stable native listener/supervisor, not ephemeral watchdog children; host samples include all processes.",
+    "Live camera scene uncontrolled; no raw camera image recorded. Real gesture negative/occlusion/multi-hand quality remains pending.",
+    "Synthetic file audio does not qualify physical recording, playback or AEC."
+  ]
+}
