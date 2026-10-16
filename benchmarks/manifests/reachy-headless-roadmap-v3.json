@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "3.0",
+  "version": "3.1",
   "created_at": "2026-10-15T03:33:30.511226+00:00",
   "execution_status": "ACTIVE",
   "migration_status": "R3_FUNCTIONAL_MODULES_INTEGRATED_RELIABILITY_MATRIX_PENDING",
@@ -196,17 +196,19 @@
       "depends_on": [
         "R2"
       ],
-      "exit": "功能、取消、幂等、资源和故障边界可复现",
+      "exit": "Enabled software paths, cancellation, idempotence, resource and recoverability boundaries reproduced; physical acoustic checks explicitly deferred by user",
       "tasks": [
         {
           "id": "R3.turn",
           "title": "实现单一轮次、监听/处理分离和统一取消",
-          "status": "SOFTWARE_CANCEL_VERIFIED_PHYSICAL_LISTENING_AND_STOP_PENDING",
+          "status": "SOFTWARE_VOICE_UI_GESTURE_CANCEL_VERIFIED_PHYSICAL_AUDIO_DEFERRED",
           "deliverable": "正常/迟到/取消阶段回归及后端释放证据",
-          "execution": "IN_PROGRESS",
+          "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r3-cancellation-summary.json"
-          ]
+            "benchmarks/results/reachy-r3-cancellation-summary.json",
+            "benchmarks/results/reachy-r3-voice-summary.json"
+          ],
+          "boundary": "Software scope includes real models and controlled PCM; physical listening/AEC/stop remains explicitly DEFERRED_BY_USER, not PASS."
         },
         {
           "id": "R3.gestures",
@@ -228,7 +230,8 @@
             "benchmarks/results/reachy-r3-actions-summary.json",
             "benchmarks/results/reachy-r3-web-summary.json",
             "benchmarks/results/reachy-r3-recovery-summary.json",
-            "benchmarks/results/reachy-r3-health-camera-summary.json"
+            "benchmarks/results/reachy-r3-health-camera-summary.json",
+            "benchmarks/results/reachy-r3-voice-summary.json"
           ]
         },
         {
@@ -250,39 +253,42 @@
           "evidence": [
             "benchmarks/results/reachy-r3-actions-summary.json",
             "benchmarks/results/reachy-r3-recovery-summary.json",
-            "benchmarks/results/reachy-r3-health-camera-summary.json"
+            "benchmarks/results/reachy-r3-health-camera-summary.json",
+            "benchmarks/results/reachy-r3-voice-summary.json"
           ]
         }
       ]
     },
     {
       "id": "R4",
-      "title": "完整功能交付与当前基线",
+      "title": "软件框架交付与B0-SW",
       "owner": "assistant_delivers_user_reproduces",
       "depends_on": [
         "R3"
       ],
-      "exit": "完整实机功能和B0基线可复现，基础版本冻结",
+      "exit": "D435i实机与软件功能验收、B0-SW和导读可复现；物理音频DEFERRED，不阻塞交接",
       "tasks": [
         {
           "id": "R4.hardware",
           "title": "接入实物麦克风/扬声器与AEC",
-          "status": "NOT_STARTED",
+          "status": "DEFERRED_BY_USER_20261016",
           "deliverable": "真实录播/双讲/停播证据；缺硬件时不能PASS",
-          "execution": "NOT_STARTED"
+          "execution": "DEFERRED",
+          "blocks_phase_exit": false,
+          "boundary": "Physical checks remain unqualified and will be scheduled after hardware is connected; not counted as completed."
         },
         {
           "id": "R4.function",
-          "title": "完成F01-F12及重复/持续运行",
+          "title": "完成当前软件/视觉范围功能及重复运行",
           "status": "NOT_STARTED",
-          "deliverable": "功能结果、已知问题与基础版本标签",
+          "deliverable": "启用软件范围F01-F12证据、20次完整应用循环、已知局限和软件版本标签；声学项列DEFERRED",
           "execution": "NOT_STARTED"
         },
         {
           "id": "R4.baseline",
-          "title": "采集未预先调优的模块与共存B0",
+          "title": "采集视觉优先的软件B0-SW",
           "status": "NOT_STARTED",
-          "deliverable": "配置/输入/事件/资源/统计及复现命令",
+          "deliverable": "视觉实机与固定输入单体/共存指标、文件或PCM语音软件指标；标明时间起点，声学指标不填估值",
           "execution": "NOT_STARTED"
         },
         {
@@ -296,7 +302,7 @@
     },
     {
       "id": "R5",
-      "title": "逐模块指导式优化",
+      "title": "先视觉后扩展的指导式优化",
       "owner": "user_with_assistant_guidance",
       "depends_on": [
         "R4"
@@ -314,7 +320,7 @@
           "id": "R5.profile",
           "title": "逐模块使用专业工具定位问题",
           "status": "NOT_STARTED",
-          "deliverable": "L0-L8覆盖、用户标注trace/资源/假设",
+          "deliverable": "先覆盖L0、视觉L1/L2、视觉共存L6，按证据进入L7/L8；语音专题后续安排",
           "execution": "NOT_STARTED"
         },
         {
@@ -409,9 +415,10 @@
       ]
     },
     "F08": {
-      "status": "PARTIAL_WEB_CANCEL_VERIFIED_PHYSICAL_VOICE_PENDING",
+      "status": "SOFTWARE_VOICE_AND_UI_CANCEL_VERIFIED_PHYSICAL_ACOUSTICS_DEFERRED",
       "evidence": [
-        "benchmarks/results/reachy-r3-web-summary.json"
+        "benchmarks/results/reachy-r3-cancellation-summary.json",
+        "benchmarks/results/reachy-r3-voice-summary.json"
       ]
     },
     "F09": {
@@ -502,23 +509,27 @@
   },
   "baseline": {
     "upstream_reference": "U0; source-reported results separate from local measurements",
-    "functional_baseline": "B0; assistant measures after full integration, no prior automatic tuning",
+    "functional_baseline": "B0-SW; current enabled software and real D435i vision scope, assistant measured without prior tuning",
     "user_experiments": "E-series; user-led single-factor changes compared with frozen B0",
-    "status": "NOT_COLLECTED"
+    "status": "NOT_COLLECTED",
+    "physical_audio_status": "DEFERRED_BY_USER"
   },
   "collaboration": {
     "framework_owner": "assistant",
     "initial_baseline_owner": "assistant",
     "optimization_owner": "user_with_guidance",
     "autonomous_performance_tuning": false,
-    "on_missing_user_feedback": "Wait for user results or explicit delegated execution; do not advance optimization automatically."
+    "on_missing_user_feedback": "Wait for user results or explicit delegated execution; do not advance optimization automatically.",
+    "first_optimization_area": "vision",
+    "handoff_gate": "Software/vision framework and frozen B0-SW; physical microphone/speaker are not a current gate"
   },
-  "hardware_boundary": "Without microphone/speaker, software-only integration may progress, but fullR4 physical delivery and physical baseline stayunverified.",
+  "hardware_boundary": "User explicitly deferred physical microphone/speaker on 2026-10-16. Continue software/vision delivery and B0-SW; keep acoustic tests DEFERRED and do not claim their completion.",
   "deferred": [
     "Long-term memory/RAG",
     "Multi-agent expansion",
     "Additional model selection",
-    "Edge-LLM independent comparison"
+    "Edge-LLM independent comparison",
+    "Physical microphone/speaker, acoustic AEC/double-talk and playback timing (user decision 2026-10-16)"
   ],
   "excluded": [
     "Robot body/actuator expression",
@@ -527,9 +538,30 @@
     "Cloud/RK online offload",
     "Second parallel orchestration framework"
   ],
-  "completion_rule": "Engineering E01-E08 AND user-mastery K01-K06; historical passing reports do not transfer to the new implementation.",
-  "updated_at": "2026-10-16T07:10:27.429036+00:00",
+  "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
+  "updated_at": "2026-10-16T08:06:29.825763+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
-  "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"
+  "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
+  "current_scope_decision": {
+    "date": "2026-10-16",
+    "authority": "User explicitly deferred microphone/speaker hardware and selected vision as the first optimization area",
+    "handoff": "Software framework + real D435i vision + native file/controlled-PCM speech + B0-SW + architecture/reproduction guide",
+    "physical_audio_blocks_current_handoff": false,
+    "deferred_checks": [
+      "Physical recording/playback",
+      "Acoustic AEC and double-talk",
+      "Time to audible response",
+      "Actual speaker silence after cancellation"
+    ],
+    "optimization_order": [
+      "Architecture and frozen baseline",
+      "Visual model deployment contracts",
+      "Camera/body/face/hands data flow",
+      "Vision plus 4B coexistence",
+      "Evidence-backed native hotspots",
+      "Regression against B0-SW"
+    ],
+    "assistant_stop_point": "Deliver B0-SW and guide, then wait for user execution/results before guided optimization"
+  }
 }

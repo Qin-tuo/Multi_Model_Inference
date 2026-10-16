@@ -2,7 +2,7 @@
 
 基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的计划中派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前状态：新版Goal已启动，隔离分支已接通无机身网页、D435i、人脸、4B问答及中文文件语音；人体/手部软件接入已验证。网页整轮取消、后端释放确认及下一轮恢复已实测；真人手势已取得正例；当前会话接续、清空及原生token预算裁剪已通过文字/语音文件验证。持久笔记/提醒已通过真实模型、事务、取消及重启的软件验证；整机故障矩阵、手势完整质量、实体录播及物理停播仍待完成。默认运行系统尚未切换。** 当前仓库app仍为旧Pipecat/ROS2实现。上游只读审查副本位于/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202。
+**当前状态：隔离分支已接通D435i、人体/脸/手、4B问答、中文文件语音、当前会话和本地工具；软件语音打断、模型退出恢复及相机断流重连已有独立验证。接下来完成手势质量、软件压力/生命周期、部署切换和B0-SW。麦克风/扬声器实物环节按用户要求后置，用户接手后先优化视觉。默认运行系统尚未切换。** 当前主目录app仍为旧Pipecat/ROS2实现，实际派生代码在隔离开发分支。
 
 ## 当前确定的流程
 
@@ -15,7 +15,7 @@
 
 ## 实施与审查入口
 
-当前实现位于[migration/reachy-headless分支](https://github.com/Qin-tuo/Multi_Model_Inference/tree/migration/reachy-headless)，最新提交`91aeed8`。[健康探测与相机恢复证据](benchmarks/results/reachy-r3-health-camera-summary.json)覆盖模型身份检查、状态读取边界、D435i断流重连及20次摄像头启停；144项自动化测试通过。[隔离迁移说明](docs/reachy-migration.md)包含当前命令、历史阶段证据和未完成边界。默认运行系统仍未切换。
+当前实现位于[migration/reachy-headless分支](https://github.com/Qin-tuo/Multi_Model_Inference/tree/migration/reachy-headless)，最新提交`92c2175`。[软件语音打断证据](benchmarks/results/reachy-r3-voice-summary.json)包含真实模型、受控PCM与Firefox验证，155项自动化测试通过。[计划v3.1](02-jetson-multimodel-inference.md)明确物理音频后置、交付B0-SW后等待用户从视觉开始实操；运行命令和全部阶段证据见[迁移说明](docs/reachy-migration.md)。
 
 - [完整新版计划书与最终Goal](02-jetson-multimodel-inference.md)
 - [总览与工作分工](00-project-overview.md)

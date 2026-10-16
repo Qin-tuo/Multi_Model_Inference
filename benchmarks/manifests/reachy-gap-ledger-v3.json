@@ -24,10 +24,11 @@
       "source_file": "app/pipeline.py",
       "planned_resolution": "Separate listening and turn processing; one cancellation authority and release checks",
       "phase": "R3",
-      "status": "SOFTWARE_CANCEL_RELEASE_VERIFIED_PHYSICAL_DUPLEX_PENDING",
+      "status": "CONTINUOUS_SOFTWARE_VAD_AND_BARGE_IN_VERIFIED_PHYSICAL_AUDIO_DEFERRED",
       "evidence": [
         "benchmarks/results/reachy-r2-summary.json",
-        "benchmarks/results/reachy-r3-cancellation-summary.json"
+        "benchmarks/results/reachy-r3-cancellation-summary.json",
+        "benchmarks/results/reachy-r3-voice-summary.json"
       ]
     },
     {
@@ -221,12 +222,23 @@
         "benchmarks/results/reachy-r3-camera-recovery-before.json",
         "benchmarks/results/reachy-r3-camera-recovery-final.json"
       ]
+    },
+    {
+      "id": "RG-19",
+      "classification": "CONFIRMED_BUSY_VOICE_REJECTION",
+      "phase": "R3",
+      "finding": "New microphone utterances were rejected while the old turn ran, rather than entering the cancellation/release path.",
+      "status": "SINGLE_PENDING_VOICE_AND_CONFIRMED_ONSET_CANCELLATION_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r3-voice-before.json",
+        "benchmarks/results/reachy-r3-voice-summary.json"
+      ]
     }
   ],
   "hardware_gap": {
     "microphone": "ReSpeaker Lite dual-mic, not connected per user",
     "speaker": "not connected per user",
-    "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
+    "rule": "Physical audio explicitly deferred by user on 2026-10-16; does not block B0-SW and vision-first handoff. File/PCM substitutes do not qualify acoustics."
   },
-  "updated_at": "2026-10-16T07:10:27.429036+00:00"
+  "updated_at": "2026-10-16T08:06:29.825763+00:00"
 }

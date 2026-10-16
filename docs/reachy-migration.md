@@ -1,6 +1,6 @@
 # Reachy隔离迁移：当前操作入口与边界
 
-2026-10-15。R1现已接通无机身网页、共享相机、人脸感知和4B问答；R2已接入中文文件语音、VAD与分句合成；人体/手部也已接入共享帧链路；真人手部正例、手势与完整取消继续推进，物理音频仍待接线。
+2026-10-16。R1/R2已接通无机身网页、共享相机、人体/脸/手、4B问答、中文文件语音与VAD；当前补齐软件可靠性、部署与基线交接。用户已明确将实物麦克风/扬声器后置，当前B0-SW和视觉优先的交接不等待外设。
 
 ## 目录与来源
 
@@ -365,4 +365,33 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
   --output /home/nvidia/AI_Stack/runtime-data/camera-recovery.json
 ```
 
-模型/工具和网页压力的前期证据仍保留各自范围；真实语音打断、AEC、实物录播、完整手势质量、完整重复故障与8小时共存尚未完成。R3.resources和R3.recovery继续保持进行中。
+模型/工具和网页压力的前期证据仍保留各自范围；软件语音打断的后续证据见下节。实物AEC/录播按用户要求后置；完整手势质量、软件压力/重复生命周期及8小时共存仍待完成。R3.resources和R3.recovery继续保持进行中。
+
+## R3软件语音打断与当前交接范围
+
+用户于2026-10-16确认：实物音频暂时跳过，接手后先优化视觉。当前目标是软件框架、D435i视觉实机、B0-SW与代码/数据流导读；物理录播、声学AEC/双讲、可听首声和实际停播标记DEFERRED。完成软件交接后，助手等待用户实操结果，不自动展开连续性能优化。具体门槛见[计划v3.1](../02-jetson-multimodel-inference.md)。
+
+[语音打断汇总](../benchmarks/results/reachy-r3-voice-summary.json)、[原行为复现](../benchmarks/results/reachy-r3-voice-before.json)、[真实模型回放](../benchmarks/results/reachy-r3-voice-native.json)及[Firefox验证](../benchmarks/results/reachy-r3-voice-browser.json)记录软件范围。原来忙碌时的新麦克风片段直接被拒绝，没有触发取消；现在同一`TurnController`负责语音预留和轮次切换。
+
+1. 采集读者持续产生带epoch、序号和主机单调时间的32ms PCM帧；静音、切换或故障使旧输入失效。
+2. 原Silero分段器确认新讲话后，控制器预留一条语音并取消当时观察到的旧轮次。默认累计160ms有效语音触发提前确认，短的有效话语可在端点确认；这是开发参数，不是声学质量结论。
+3. 分段器继续收完整句话。完成后仍只保留一条待处理语音，等待旧原生后端释放，再进入ASR、4B和TTS。资源等待中的语音不会提前启动另一个模型请求。
+4. 更晚的新话语可替换尚未执行的语音；静音、源中断、明确停止/举掌或30秒等待到期会丢弃它。旧轮次的迟到取消不影响新话语。
+5. 超长话语不截断执行，丢弃后等待安静再接纳下一句。输入停滞或不连续会终止本次直播输入、回收自身采集进程，并显示检查设备后重启应用；文字/文件请求仍可继续。
+
+`audio.voice_interruptions`控制是否启用打断，`audio.pending_voice_seconds`约束等待，`audio.input_stale_seconds`约束进入VAD前的帧龄；输入队列仍为64块。`vad.confirm_speech_ms`控制提前确认，VAD最长时长按完整32ms帧限制，包含回看和尾部静音。
+
+设备播放没有有效软件AEC时使用半双工降级：处理旧轮期间不解释麦克风内容，恢复前等待安静片段，避免把自身播报尾音或用户讲话后半句当成完整指令。该策略的状态机已经验证，实际声学效果留到后续硬件阶段。文件输出没有设备回声，可用于当前软件验证。
+
+本次四个场景通过真实Silero、Qwen ASR、4B与Matcha/Vocos：新语音打断并完成答复、停止待处理语音、静音丢弃、PCM生产者卡住。录音命令和设备发现被明确替换为按实时节奏输出既有测试WAV的子进程，因此不能声称已使用实体麦克风。Firefox按钮实际发送待处理语音ID，输入故障后仍能发送文字。最后旧轮没有发布WAV，新轮文件可下载，采集/会话/输出/计时线程均释放；155项自动化测试通过。
+
+使用新的独立测试目录复现软件链路；测试会调用当前原生模型，保持它们没有其他请求。可选`--webdriver http://127.0.0.1:4445`连接自己启动的geckodriver：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_voice_interruptions.py \
+  --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
+  --control /home/nvidia/AI_Stack/runtime-data/voice-replay-check/source.json \
+  --output /home/nvidia/AI_Stack/runtime-data/voice-replay-check/result.json
+```
+
+软件R3.turn按新范围完成；完整声学、人的误触发率和双讲仍为后置项。接下来完成剩余手势质量、软件压力/完整生命周期、部署切换和B0-SW，再交给用户从视觉开始分析与优化。

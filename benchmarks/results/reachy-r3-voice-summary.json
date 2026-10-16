@@ -1,0 +1,92 @@
+{
+  "created_at": "2026-10-16T08:06:29.825763+00:00",
+  "status": "SOFTWARE_VOICE_INTERRUPTION_VERIFIED_PHYSICAL_AUDIO_DEFERRED_BY_USER",
+  "scope": "Production capture reader/VAD/controller/Web with explicitly substituted paced PCM source, real Silero/ASR/4B/TTS, file output and Firefox. No physical microphone/speaker/AEC qualification.",
+  "tests": {
+    "tests": 155,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "1e1991f901a1fdeeb4822517c7ce1667e98007469725a22ec17965c8d35f8673",
+  "source_sha256": {
+    "app/config.py": "10c7f3702a412d889f3495df613f967b5753c13dffe9c749a2cf59b940694299",
+    "app/pipeline.py": "2ec3fc8d2c328ab7165bf0c3fdcdd69ece5e648851a77872ba1c0b5457ecb4c3",
+    "app/turn_control.py": "8f83716acf9f9bfd771ff6900a01ca34803e65ef825a21397f2fcf595701a3a2",
+    "app/web.py": "d1cab1fec189ac73ca52c0f6c5f9425e166359841d5c8dfd7dc11188313d133b",
+    "app/web_limits.py": "570617b958b4871dfc15367473b8121561d8ae0f8fb639d65487eeb7fd02475f",
+    "run_web_vision_chat.py": "a00b3c1d0dac55acc13013f11fb27a50fc1775c6f056402b28e84c5a30012367",
+    "static/index.html": "a83d65587804dd2561331e496b4cd43b3903ef63f2b5484b93fed52e1a6c1901",
+    "scripts/probe_voice_interruptions.py": "804570f1faf1df24ee9d939a4ac51523ebeb1f809ee1a73d8d659fce065b1d13",
+    "tests/test_voice_interruptions.py": "230c50c3f4db656fb280940d680933134c72dabc1572621fe124a7b40df960a1"
+  },
+  "evidence": [
+    "benchmarks/results/reachy-r3-voice-before.json",
+    "benchmarks/results/reachy-r3-voice-native.json",
+    "benchmarks/results/reachy-r3-voice-browser.json",
+    "benchmarks/results/reachy-r3-voice-cleanup.json"
+  ],
+  "verified": [
+    "Before change, a new microphone segment while busy was rejected and did not cancel the active turn; deterministic controller reproduction preserved",
+    "VAD confirms ongoing speech before endpoint, reserves one utterance and uses the existing cancellation owner to stop only the observed older turn",
+    "Actual native case: old model turn cancels, publishes no final WAV, then completed incoming speech reaches ASR/4B/TTS and produces the expected downloadable speech file",
+    "Completed new speech waits until native release; deterministic delayed-release test proves ASR is not started early and unrelated text cannot bypass reservation",
+    "Newer pending utterance replaces only unstarted input; old onset/cancel/segment cannot cancel or start a newer turn",
+    "Pending voice is discarded on explicit stop, palm stop, source epoch change, mute or TTL expiry; no model/tool dispatch for discarded input",
+    "Actual Firefox stop button targets the pending voice ID, and state returns to enabled text input after the old cancelled turn releases",
+    "Actual paced source mute discards the partial utterance while capture remains alive; resume starts a fresh input epoch",
+    "Actual PCM producer stalls, input marks failure, pending audio is discarded and only its owned subprocess/reader is closed; subsequent text/model/TTS still works",
+    "Half-duplex gate preserves user mute intent and requires quiet before rearming; confirmed-onset and long-utterance discard covered with deterministic VAD input",
+    "Overlong live speech drains until silence rather than executing a truncated command; short valid utterances may confirm at endpoint",
+    "Failed native capture-start substitutes close all owned stdout/stderr pipe handles; final application/source/model-deadline threads are released"
+  ],
+  "limits": {
+    "pending_utterances": 1,
+    "pending_voice_seconds": 30,
+    "input_stale_seconds": 1,
+    "vad_confirm_speech_ms": 160,
+    "capture_queue_chunks": 64,
+    "chunk_samples": 512,
+    "sample_rate": 16000
+  },
+  "known_limits": [
+    "Audio discovery and recorder command are explicitly replaced in the native probe by a Python PCM producer. Console output from the inherited startup branch is not evidence of ALSA or physical capture.",
+    "The real-model interruption cases target LLM generation. Existing separate cancellation evidence covers native ASR/TTS; delayed native release and palm/pending ownership are deterministic regressions.",
+    "Speech onset confirmation is a development parameter, not measured microphone quality or an acoustic interruption latency promise",
+    "Physical device output permits speech interruption only when the configured software AEC is active; otherwise input processing is half-duplex and waits for quiet before rearming",
+    "Capture stream failure is terminal for live input in this version and asks for application restart after the device is checked; text/file requests remain usable",
+    "The 15s VAD limit is applied in whole 32ms frames including lookback/tail; an overlong utterance is rejected, not partially executed",
+    "Half-duplex/quiet policy, human false triggers, echoes and double-talk require later physical validation, explicitly deferred by the user",
+    "B0-SW is not yet collected; no autonomous performance tuning performed"
+  ],
+  "native_cases": [
+    {
+      "name": "complete_new_voice",
+      "status": "PASSED",
+      "confirmed_before_endpoint": true
+    },
+    {
+      "name": "cancel_pending_voice",
+      "status": "PASSED",
+      "confirmed_before_endpoint": true
+    },
+    {
+      "name": "mute_pending_voice",
+      "status": "PASSED",
+      "confirmed_before_endpoint": true
+    },
+    {
+      "name": "stalled_capture",
+      "status": "PASSED",
+      "confirmed_before_endpoint": true
+    }
+  ],
+  "verification_note": "155-test full suite and native browser run cover final behavior. Subsequent changes only format Python, update documentation/scope and remove an unused test variable.",
+  "user_scope_update": {
+    "date": "2026-10-16",
+    "physical_audio": "DEFERRED_NOT_A_HANDOFF_GATE",
+    "baseline": "B0-SW",
+    "first_user_optimization_area": "vision"
+  },
+  "baseline": "NOT_COLLECTED"
+}
