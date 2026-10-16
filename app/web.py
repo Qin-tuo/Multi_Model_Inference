@@ -196,8 +196,12 @@ class CancelRequest(BaseModel):
     turn_id: str = Field(pattern=r'^[0-9a-f]{32}$')
 
 
+class ClearSessionRequest(BaseModel):
+    session_id: str = Field(pattern=r'^[0-9a-f]{32}$')
+
+
 def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=None,
-               submit_audio=None, audio_file=None, cancel=None, max_upload_bytes=484096) -> FastAPI:
+               submit_audio=None, audio_file=None, cancel=None, clear_history=None, max_upload_bytes=484096) -> FastAPI:
     @asynccontextmanager
     async def application_lifespan(app):
         broadcaster.set_loop(asyncio.get_running_loop())
@@ -240,6 +244,12 @@ def create_app(broadcaster: Broadcaster, *, submit=None, state=None, lifespan=No
     async def _cancel(request: CancelRequest):
         if cancel is None: raise HTTPException(503, 'Cancellation unavailable')
         return cancel(turn_id=request.turn_id)
+
+    @app.post('/api/session/clear')
+    async def _clear_session(request: ClearSessionRequest):
+        if clear_history is None: raise HTTPException(503,'Session control unavailable')
+        try: return clear_history(request.session_id)
+        except RuntimeError as exc: raise HTTPException(409,str(exc)) from exc
 
     @app.get("/api/audio/{turn_id}")
     async def _download_audio(turn_id: str):

@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-10-16T04:04:27.258554+00:00",
+  "status": "CURRENT_SESSION_VERIFIED_DURABLE_TOOLS_PENDING",
+  "scope": "Bounded process-local conversation context with native token budgeting; no long-term memory, durable actions, or physical speech qualification",
+  "tests": {
+    "tests": 96,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "test_xml_sha256": "95017ed01b8bb804df482d5459bed6d9fbd89e3ee6e91e1f9366b239ee7e1232",
+  "source_sha256": {
+    "app/config.py": "8e2dcc30818a0a1d1c2354098a7a08bac5da0d30b22c9f21cf0cc1f0315e2f74",
+    "app/llm.py": "2c825cd2dcdf46fb6048e324599e2ba005d7765da0d32329a1acd9fe5801aad6",
+    "app/turn_control.py": "8766916d3bbc849c8af626e2646dfdf31c8169112e23a1b6006bbca91e432808",
+    "app/web.py": "f715b196bf8c4cd69f3a12f497dc1876f62214b60e63119096d8dd4417213db7",
+    "run_web_vision_chat.py": "951bef162daff89919f6108bc1f03dc24aaa4a832f8c0089d55b2534acc11ebd",
+    "static/index.html": "fe45430d0bab6c794d30671b145b48edce9b319a57d921d21ae204b4566047a8",
+    "scripts/probe_session.py": "8fc883f3e92f105392daec9d9f394b6b1c81e220419450143248cd932c7c212c",
+    "scripts/probe_browser_session.py": "bbb8f7dc569481f177085fc19b78adae0a8e5cda107de169db7a0d003734acdd",
+    "scripts/probe_speech_session.py": "ff14452f55286456646c91e18a40e4e133fb25b6f051cb1e8af4132648aa1a78"
+  },
+  "session_config": {
+    "enabled": true,
+    "max_turns": 4
+  },
+  "evidence": [
+    "benchmarks/results/reachy-r3-session-web.json",
+    "benchmarks/results/reachy-r3-session-browser.json",
+    "benchmarks/results/reachy-r3-speech-session.json",
+    "benchmarks/results/reachy-r3-tool-protocol-readiness.json"
+  ],
+  "verified": [
+    "Actual two-turn model recall and clear-to-unknown behavior",
+    "Chinese generated WAV to actual ASR, next-turn recall, and clear-to-unknown with actual TTS file output",
+    "Native preflight token count equals actual prompt usage in text probe",
+    "Whole old history pairs removed when 2K budget is exceeded; current input/image preserved",
+    "Failed/cancelled/TTS-failed turns do not enter complete history",
+    "Gesture greetings do not pollute user conversation context",
+    "Session reset on controller restart; stale/busy clear requests rejected",
+    "Real Firefox new turn survives delayed old clear HTTP response"
+  ],
+  "boundaries": [
+    "Only successful complete server turns are retained; this does not prove physical audibility",
+    "Prior visual turns retain labelled text, not their image bytes",
+    "History is process-local and resets on restart or explicit clear",
+    "Initial code-recall check treated an inserted space as mismatch; final scoring explicitly ignores whitespace only and preserves raw output",
+    "Native create_note selection observed but no tool function or database write executed",
+    "SQLAlchemy/SQLite durable actions and APScheduler reminders remain to integrate",
+    "No B0 or automatic performance tuning"
+  ],
+  "implementation": "Reachy few_shot/message path reused; controller remains sole history and cancellation owner; no memory agent or second orchestrator added"
+}

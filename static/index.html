@@ -339,6 +339,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     <div class="panel conv-panel">
       <div class="panel-hdr">
         <span>Conversation</span>
+        <span id="sessionInfo" style="font-size:.8rem;color:var(--dim)"></span>
         <span style="font-size:.8rem;color:var(--dim)" id="msgCount"></span>
       </div>
       <form class="text-form" id="textForm">
@@ -346,6 +347,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         <label><input id="useCamera" type="checkbox"> 使用当前画面</label>
         <button id="sendText" type="submit">发送</button>
         <button id="cancelTurn" type="button" disabled>停止本轮</button>
+        <button id="clearSession" type="button" disabled>清空会话</button>
       </form>
       <form class="text-form" id="audioForm">
         <input id="audioFile" type="file" accept=".wav,audio/wav" aria-label="16kHz单声道WAV" disabled>
@@ -369,6 +371,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 
   let speechReady = false;
   let activeTurn = null, cancelledTurn = null;
+  let sessionId = null;
   let ws = null, frameCount = 0, msgIdx = 0, currentAssistant = null;
   let reconnectTimer = null, pttActive = null, pipelineStage = 'connecting', faceBoxTimer = null;
   const camNatural = {w:640, h:480};
@@ -401,6 +404,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       setVolumeControls(false);
       $('volumeValue').textContent = '--%';
       $('speakerStatus').textContent = 'Offline';
+      $('clearSession').disabled=true;
       reconnectTimer = setTimeout(connect, 3000);
     };
     ws.onerror = () => ws.close();
@@ -414,6 +418,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'transcript':   onTranscript(msg); break;
         case 'token':        onToken(msg); break;
         case 'done':         onDone(msg); break;
+        case 'session_cleared':onSessionCleared(msg); break;
+        case 'session_state':onSession(msg.session); break;
         case 'cancelled':    cancelledTurn=msg.turn_id; onStatus({...msg,stage:'cancelling'}); break;
         case 'stats':        onStats(msg); break;
         case 'perception':   onPerception(msg); break;
@@ -588,6 +594,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const busy=['running','thinking','transcribing','synthesizing','speaking','cancelling','releasing','release_unconfirmed'].includes(msg.stage);
     $('sendText').disabled=busy; $('sendAudio').disabled=busy || !speechReady;
     $('cancelTurn').disabled=!activeTurn || ['cancelling','releasing','release_unconfirmed'].includes(msg.stage);
+    $('clearSession').disabled=busy || !sessionId || ws?.readyState!==WebSocket.OPEN;
     renderPipelineStatus();
   }
 
@@ -731,6 +738,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   }
 
   function onCapabilities(msg){
+    if(msg.session) onSession(msg.session);
     updateModels(msg.models || {});
     if(msg.perception) onScene(msg.perception);
     if(msg.gestures) onGestureState({...msg.gestures,last_action:msg.last_gesture});
@@ -782,6 +790,30 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       if(cancelledTurn===turn) cancelledTurn=null;
       $('inputError').textContent=error.message; $('cancelTurn').disabled=false;
     }
+  });
+
+  function onSession(session){
+    sessionId=session.id;
+    $('sessionInfo').textContent=session.enabled ? '本次会话保留 '+session.retained_turns+' 轮文字，关闭应用后清空' : '会话上下文已关闭';
+  }
+
+  function onSessionCleared(msg){
+    onSession(msg.session);
+    $('messages').replaceChildren();currentAssistant=null;msgIdx=0;updateMsgCount();
+    $('inputError').textContent='';cancelledTurn=null;
+    onStatus({stage:'idle'});
+  }
+
+  $('clearSession').addEventListener('click',async function(){
+    if(!sessionId) return;
+    $('clearSession').disabled=true;
+    $('sendText').disabled=true; $('sendAudio').disabled=true;
+    try{
+      const response=await fetch('/api/session/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:sessionId})});
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.detail || '清空失败');
+      // Ordered WebSocket event owns clearing; a late HTTP reply must not erase a new turn.
+    }catch(error){$('inputError').textContent=error.message; onStatus({stage:pipelineStage});}
   });
 
   $('textForm').addEventListener('submit', async function(event){

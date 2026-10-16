@@ -31,9 +31,16 @@ class TurnController:
         self._gesture_seen = deque(maxlen=128)
         self._last_greeting = float('-inf')
         self._last_gesture = None
+        self._history = deque(maxlen=config.session.max_turns)
+        self._session_id = uuid.uuid4().hex
 
     def start(self):
         if self._thread and self._thread.is_alive(): return
+        with self._lock:
+            if self._active is not None: raise RuntimeError('Previous turn release is unconfirmed')
+            self._history.clear()
+            self._last = None
+            self._session_id = uuid.uuid4().hex
         self._stop.clear()
         self._thread = threading.Thread(target=self._run, name="conversation", daemon=True)
         self._thread.start()
@@ -140,6 +147,29 @@ class TurnController:
         path = folder / f"reply-{turn_id}.wav"
         return path if path.is_file() and not path.is_symlink() else None
 
+    def session_state(self):
+        with self._lock:
+            return {'id':self._session_id, 'enabled':self.config.session.enabled,
+                    'retained_turns':len(self._history), 'max_turns':self.config.session.max_turns,
+                    'persistence':'process_memory', 'images_retained':False}
+
+    def clear_history(self, session_id):
+        with self._lock:
+            if session_id != self._session_id: raise RuntimeError('Session changed; refresh before clearing')
+            if self._active is not None: raise RuntimeError('Wait for the current turn and resource release before clearing')
+            self._history.clear(); self._last = None; self._session_id = uuid.uuid4().hex
+            state = self.session_state()
+            self.broadcaster.send({'type':'session_cleared', 'session':state})
+            return {'cleared':True, 'session':state}
+
+    def _context_messages(self):
+        messages = []
+        for item in self._history:
+            text = item['user']
+            if item['visual']:text = '[该轮附有图片；历史仅保留文字，原图已丢弃。] '+text
+            messages.extend([{'role':'user','content':text},{'role':'assistant','content':item['assistant']}])
+        return messages
+
     def state(self):
         with self._lock:
             return {"ready": bool(self._thread and self._thread.is_alive() and not self._stop.is_set()
@@ -148,6 +178,7 @@ class TurnController:
                     "phase": self._active["phase"] if self._active else "idle",
                     "release": self._active.get("release") if self._active else None,
                     "last_gesture": self._last_gesture,
+                    "session": self.session_state(),
                     "last_result": self._last, "pending": self._queue.qsize()}
 
     def _run(self):
@@ -220,13 +251,17 @@ class TurnController:
                 chunker = TextChunker(self.config.tts.first_chunk_chars, self.config.tts.max_chunk_chars)
                 check()
                 used["llm"] = self.llm
+                remember = self.config.session.enabled and not request.get('gesture')
+                with self._lock:history = self._context_messages() if remember else []
                 stream = self.llm.generate_stream(prompt, images_b64=images,
-                    system_prompt=vision_prompt if images else None, cancel_event=event)
+                    system_prompt=vision_prompt if images else None, cancel_event=event,
+                    few_shot=history, trim_history=True)
                 try:
                     for text, metadata in stream:
                         check()
                         result["metadata"].update(metadata)
                         if text:
+                            if len(result['text'])+len(text)>16384:raise ValueError('Model text exceeds turn response budget')
                             first = first or time.monotonic()
                             result["text"] += text
                             send("token", text=text)
@@ -250,6 +285,14 @@ class TurnController:
                         if receipt["kind"] == "file_written": result["audio_url"] = f"/api/audio/{request['turn_id']}"
                     request["phase"] = "releasing"
                     result["status"] = "complete"
+                    if remember:
+                        for _ in range(result['metadata'].get('history_pairs_dropped',0)):
+                            if self._history:self._history.popleft()
+                        delivered = result['text']
+                        if result['metadata'].get('finish_reason')=='length':delivered += '\n[本次回答达到输出上限，文字被截断。]'
+                        self._history.append({'user':prompt,'assistant':delivered,'visual':bool(images)})
+                        self.broadcaster.send({'type':'session_state','session':self.session_state()})
+                    result['session_id'] = self._session_id
                 output = None
             except Exception as exc:
                 if event.is_set() or isinstance(exc, TurnCancelled):

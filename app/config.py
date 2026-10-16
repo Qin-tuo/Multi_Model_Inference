@@ -149,6 +149,12 @@ class GestureConfig:
 
 
 @dataclass
+class SessionConfig:
+    enabled: bool = True
+    max_turns: int = 4
+
+
+@dataclass
 class WebConfig:
     ui_fps: float = 10.0
     host: str = "0.0.0.0"
@@ -166,6 +172,7 @@ _SECTIONS = [
     ("web", "web", WebConfig),
     ("perception", "perception", PerceptionConfig),
     ("gestures", "gestures", GestureConfig),
+    ("session", "session", SessionConfig),
 ]
 
 
@@ -181,6 +188,7 @@ class Config:
     web: WebConfig = field(default_factory=WebConfig)
     perception: PerceptionConfig = field(default_factory=PerceptionConfig)
     gestures: GestureConfig = field(default_factory=GestureConfig)
+    session: SessionConfig = field(default_factory=SessionConfig)
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
@@ -215,6 +223,8 @@ class Config:
         return config
 
     def validate(self):
+        if not 1 <= self.session.max_turns <= 16:
+            raise ValueError('Session history must contain at most 1–16 turns')
         from urllib.parse import urlparse
         url = urlparse(self.llm.base_url)
         if (url.scheme != "http" or url.hostname not in {"127.0.0.1", "localhost", "::1"}

@@ -146,6 +146,7 @@ def test_wave_admission_busy_mute_expiry_dedup_and_global_cooldown():
         assert control.handle_gesture(event())['reason']=='busy'
         model.release.set();wait_done(control)
         assert control.state()['last_result']['gesture']['event_id']==wave['event_id']
+        assert control.session_state()['retained_turns']==0
         assert control.handle_gesture(event())['reason']=='cooldown'
     finally:model.release.set();control.close()
 

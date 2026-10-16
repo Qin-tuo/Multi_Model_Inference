@@ -121,6 +121,7 @@ class LLM:
         images_b64: Optional[list[str]] = None,
         few_shot: Optional[list[dict]] = None,
         cancel_event=None,
+        trim_history: bool = False,
     ) -> Iterator[tuple]:
         """Yields (content, metadata) tuples. Pass images_b64 for multimodal VLM requests."""
         if not self._loaded:
@@ -133,11 +134,17 @@ class LLM:
             msgs = self._messages(prompt, system_prompt, few_shot)
 
         if self.backend == "openai":
-            yield from self._stream_openai(msgs, mt, t, cancel_event)
+            history_pairs = 0
+            if trim_history:
+                prior = few_shot or []
+                if len(prior)%2 or any(m.get('role') != ('user' if i%2==0 else 'assistant') or not isinstance(m.get('content'),str) for i,m in enumerate(prior)):
+                    raise ValueError('Trimmable history must contain complete text turn pairs')
+                history_pairs = len(prior)//2
+            yield from self._stream_openai(msgs, mt, t, cancel_event, history_pairs)
         else:
             yield from self._stream_ollama(msgs, mt, t)
 
-    def _stream_openai(self, messages, max_tokens, temperature, cancel_event=None) -> Iterator[tuple]:
+    def _stream_openai(self, messages, max_tokens, temperature, cancel_event=None, history_pairs=0) -> Iterator[tuple]:
         # Use one payload for native multimodal token counting and inference.
         payload = {
             "model": self.model, "messages": messages,
@@ -148,15 +155,22 @@ class LLM:
         if type(max_tokens) is not int or max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
         with self.requests.operation(cancel_event) as operation, httpx.Client(timeout=self.timeout, trust_env=False) as client:
-            count = client.post(f"{self.base_url}/v1/chat/completions/input_tokens", json=payload, extensions=operation.extensions)
-            operation.check()
-            count.raise_for_status()
-            input_tokens = count.json()["input_tokens"]
-            if type(input_tokens) is not int or input_tokens < 0:
-                raise ValueError("Invalid native input token count")
-            if input_tokens + max_tokens + 16 > self.context_tokens:
-                raise ValueError("CONTEXT_BUDGET_EXCEEDED")
-            yield ("", {"input_tokens_preflight": input_tokens})
+            dropped = 0
+            while True:
+                operation.check()
+                count = client.post(f"{self.base_url}/v1/chat/completions/input_tokens", json=payload, extensions=operation.extensions)
+                operation.check()
+                count.raise_for_status()
+                input_tokens = count.json()["input_tokens"]
+                if type(input_tokens) is not int or input_tokens < 0:
+                    raise ValueError("Invalid native input token count")
+                if input_tokens + max_tokens + 16 <= self.context_tokens: break
+                if dropped >= history_pairs: raise ValueError("CONTEXT_BUDGET_EXCEEDED")
+                first = 1 if messages[0]['role']=='system' else 0
+                del messages[first:first+2]
+                dropped += 1
+            yield ("", {"input_tokens_preflight": input_tokens, "history_pairs_kept":history_pairs-dropped,
+                        "history_pairs_dropped":dropped})
             operation.check()
             final = {}
             finished = False

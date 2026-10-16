@@ -20,7 +20,7 @@ cd /home/nvidia/AI_Stack/projects/reachy-headless
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py ask '图中的主要交通工具是什么？' --image /home/nvidia/AI_Stack/runtime-data/benchmarks/vision-input-diagnostic-v1/decoded.png --json-output
 ```
 
-CLI ask是单次文字/图片接口；网页已支持中文语音文件输入和回复WAV下载。多轮会话、工具及物理语音验收仍待后续阶段。图像例子使用历史固定测试图片，不是实时摄像头。JSON中的单次耗时用于诊断，不是冻结的性能基线。
+CLI ask是单次文字/图片接口；网页支持中文语音文件输入、回复WAV下载及有界当前会话。持久工具及物理语音验收仍待后续阶段。图像例子使用历史固定测试图片，不是实时摄像头。JSON中的单次耗时用于诊断，不是冻结的性能基线。
 
 网页默认启用本机ASR/TTS和Silero，以文件模式处理语音，不占用声卡：
 
@@ -85,7 +85,7 @@ YuNet固定版本和哈希见`models/perception.json`，权重与许可证存放
 
 真人脸验证连续取得10个不同帧的正例；这证明当前环境的检测连通，不是识别精度统计或身份验证。浏览器静态页面用本机Firefox实际渲染，HTTP/WebSocket验证使用真实模型；原始相机图片与截图保存在AI_Stack，没有提交Git。
 
-当前尚待完成：手势真实负例/遮挡/多人矩阵、当前会话与有限工具、完整故障矩阵、物理音频及B0基线。真人手部、挥手与静止举掌已取得正例；新增证据见下文。
+当前尚待完成：手势真实负例/遮挡/多人矩阵、持久有限工具、完整故障矩阵、物理音频及B0基线。当前会话已完成软件验证；真人手部、挥手与静止举掌已取得正例，新增证据见下文。
 
 回退时退出新应用即可继续旧系统。默认服务未切换；如将来测试暂停旧相机，必须记录并恢复原服务状态。不要在运行目录执行`git reset --hard`来替代受控回退，不覆盖原用户数据。本次快照保存代码/配置，不宣称已备份在线数据库。
 
@@ -208,3 +208,33 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 ```
 
 回放绕过相机和视觉推理，不能增加真人样本数量或证明检测准确率。真实负例、遮挡、多人、不同距离/光照，以及实际扬声器何时静音仍未验收；当前未进行性能调参或采集B0。
+
+
+## R3当前会话上下文
+
+[阶段汇总](../benchmarks/results/reachy-r3-session-summary.json)、[真实文字多轮](../benchmarks/results/reachy-r3-session-web.json)、[真实语音文件多轮](../benchmarks/results/reachy-r3-speech-session.json)及[浏览器清空竞态](../benchmarks/results/reachy-r3-session-browser.json)记录本次验证。96项适用测试通过。
+
+沿用Reachy的消息/`few_shot`接口，由已有`TurnController`维护当前会话；没有新增记忆agent。默认`session.enabled: true`、`session.max_turns: 4`，最多保留4轮成功完成的文字。失败、取消、语音合成失败的轮次不记为完整回答；自动挥手问候不占用用户上下文。达到模型输出上限时，历史文字附带截断标记。
+
+每次请求仍调用llama.cpp原生输入token计数。若历史加当前请求、输出预留和16 token余量超过2048，则逐个移除最老的完整用户/助手消息对，并重新计数；不会切断当前输入或删除当前图片来伪装接纳。仅当前请求仍过大时，明确返回`CONTEXT_BUDGET_EXCEEDED`。已采用的原生计数、保留/移除轮数随结果记录，测试中的预检计数与实际prompt usage一致。
+
+视觉历史只保留文字，并注明该轮原图已经丢弃；下一轮不会重发旧图片。成功记录与输出发布、取消使用同一个控制器锁。语音文件经过VAD/ASR后也进入相同上下文路径，本次真实语音测试可接续“最喜欢的颜色是蓝色”，清空后返回“不知道”。
+
+网页提供“清空会话”；接口为`POST /api/session/clear`，请求需带当前`session_id`。活动轮次或后端释放尚未结束时返回409；旧会话的迟到清空请求也返回409。清空只重置当前上下文和最近显示结果，既有输出WAV按原保留策略管理。上下文不写磁盘，应用重启后开始新会话；长期记忆仍另阶段。
+
+会话状态由控制器在提交/清空时有序发布，避免资源统计线程的旧快照覆盖新会话。浏览器验证故意延迟清空HTTP回执2秒，在它返回前开始新一轮；旧回执没有擦除新消息。
+
+在隔离、初始为空的应用实例运行以下脚本；脚本会测试清空，不要用于保留中的实际对话：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_session.py \
+  --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-text.json
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_speech_session.py \
+  --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-speech.json
+```
+
+第二个脚本要求另一个初始为空且启用文件语音的实例，输入由本机TTS生成；不代表真人录音。浏览器回归复用已安装的Firefox/geckodriver，运行`python scripts/probe_browser_session.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-browser.json`。
+
+代码代号测试保留原始输出“青鹭 63B”；评分仅忽略空白，未把格式完全一致当作已通过。当前会话通过不代表长期记忆、工具、物理语音或完整项目验收通过。
+
+[工具协议探测](../benchmarks/results/reachy-r3-tool-protocol-readiness.json)确认当前4B模板实际支持并选择了`create_note`，预检与实际输入token均为323；没有执行函数或写入笔记。下一步使用已有方案中的SQLAlchemy/SQLite与APScheduler接入持久笔记和提醒，不引入另一套会话编排。必须继续验证：明确有限工具白名单和参数、重复操作幂等、取消前未开始的操作不执行、已开始事务收尾并保留回执、已提交内容跨取消/重启保留、到时通知与真实输出回执。
