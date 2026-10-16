@@ -35,11 +35,11 @@
 | [旧项目进度](benchmarks/manifests/progress.json) | 旧实现与已有证据；新应用不自动继承通过 |
 | [岗位资料](benchmarks/manifests/target-jd-20261014.json) | 端侧部署相关JD来源与能力对照 |
 | [历史计划](docs/archive/02-plan-v2.1-before-reachy-20261015.md) | 旧设计和角色约定 |
-| [旧运行说明](docs/archive/README-pre-reachy-20261015.md) | 当前尚未迁移的旧运行系统入口及历史结果 |
+| [旧运行说明](docs/archive/README-pre-reachy-20261015.md) | 固定旧源码快照的使用说明及历史结果 |
 
 ## 4 当前真实状态
 
-上游固定提交为2673202a360a41935b45ac79141ef0bb529492ba，审查副本保存在AI_Stack/research。实际派生工程已位于`/home/nvidia/AI_Stack/projects/reachy-headless`，分支`migration/reachy-headless`；4B、中文语音、人体/脸/手、手势、工具和取消已接通，并在补齐可靠性及部署交接。主仓库app仍是旧实现，默认服务尚未切换。
+上游固定提交为2673202a360a41935b45ac79141ef0bb529492ba，审查副本保存在AI_Stack/research。Reachy 派生实现已汇入 `/home/nvidia/Multi_Model_Inference` 的 `main`，默认采用四个 `reachy-headless-*` 服务。4B、中文语音、人体/脸/手、手势、工具和取消已接通；166 项自动化测试、20 次连续完整应用循环、崩溃恢复与两次回退已验证。旧七服务停止，固定旧源码和数据保留；当前继续共存压力、功能矩阵和 B0-SW。
 
 新数据流的模型、取消、持久回执、服务退出恢复与D435i断流重连已有独立证据，入口见计划和任务清单。ReSpeaker Lite及扬声器按用户要求后置，当前软件基线与视觉交接继续推进，不把文件输出计作物理播放。
 

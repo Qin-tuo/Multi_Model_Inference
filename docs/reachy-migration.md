@@ -1,11 +1,12 @@
-# Reachy隔离迁移：当前操作入口与边界
+# Reachy 当前操作入口与迁移记录
 
 2026-10-16。R1/R2已接通无机身网页、共享相机、人体/脸/手、4B问答、中文文件语音与VAD；当前补齐软件可靠性、部署与基线交接。用户已明确将实物麦克风/扬声器后置，当前B0-SW和视觉优先的交接不等待外设。
 
 ## 目录与来源
 
-- 运行旧系统：`/home/nvidia/Multi_Model_Inference`，仍在`main`。
-- 新派生工程：`/home/nvidia/AI_Stack/projects/reachy-headless`，分支`migration/reachy-headless`。
+- 当前正式源码与运行入口：`/home/nvidia/Multi_Model_Inference`，`main` 已采用 Reachy 派生实现。
+- 旧系统回退源码：`/home/nvidia/AI_Stack/archives/legacy-runtime-972de50`，默认旧七服务已停止。
+- 保留的迁移工作树：`/home/nvidia/AI_Stack/projects/reachy-headless`，分支 `migration/reachy-headless`；后续以主目录为准。
 - 新Python环境：`/home/nvidia/AI_Stack/environments/reachy-headless`，不继承旧环境的site-packages。
 - 只读上游：`/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202`。
 - 旧系统快照：tag `legacy-before-reachy-v3-20261015`；可验证bundle和配置在`/home/nvidia/AI_Stack/archives/reachy-r0-20261015`。
@@ -14,33 +15,24 @@
 ## 已可运行的入口
 
 ```bash
-cd /home/nvidia/AI_Stack/projects/reachy-headless
+cd /home/nvidia/Multi_Model_Inference
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py config
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py ask '只回答：连接成功' --json-output
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py ask '图中的主要交通工具是什么？' --image /home/nvidia/AI_Stack/runtime-data/benchmarks/vision-input-diagnostic-v1/decoded.png --json-output
 ```
 
-CLI ask是单次文字/图片诊断接口，不执行工具；网页支持中文语音文件、当前会话及本地笔记/提醒。物理语音验收仍待外设接入。图像例子使用历史固定测试图片，不是实时摄像头。JSON中的单次耗时用于诊断，不是冻结的性能基线。
+这些 CLI 诊断命令请在网页没有处理请求时使用。CLI ask是单次文字/图片诊断接口，不执行工具；网页支持中文语音文件、当前会话及本地笔记/提醒。物理语音验收仍待外设接入。图像例子使用历史固定测试图片，不是实时摄像头。JSON中的单次耗时用于诊断，不是冻结的性能基线。
 
-网页默认启用本机ASR/TTS和Silero，以文件模式处理语音，不占用声卡：
-
-```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/prepare_face.py --check-only
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/prepare_speech.py --check-only
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python run_web_vision_chat.py --no-camera
-```
-
-浏览器访问`http://127.0.0.1:8090`，输入中文问题。`--no-camera`关闭摄像头。上传16kHz、单声道PCM16 WAV，可下载真实合成回复。`--no-audio`显式关闭语音后端，只测试文字/视觉。默认文件模式不会把生成文件记为扬声器播放。
-
-要验证真实相机，在旧相机服务停用期间运行新入口，退出后恢复原服务；只管理自己项目的相机服务：
+网页默认启用本机 ASR/TTS、Silero 和 D435i，以文件模式处理语音，不占用声卡：
 
 ```bash
-systemctl --user stop mmassistant-camera.service
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python run_web_vision_chat.py
-systemctl --user start mmassistant-camera.service
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services up
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services status
 ```
 
-无论新应用是否正常退出，都要恢复原先启用的相机服务。自动化测试必须使用`try/finally`或shell退出trap，并在恢复后检查新鲜RGB和对齐深度。实测一次恢复时出现过深度启动警告；后续受控重启后两路均恢复，故服务PID存在不能作为恢复完成证据。
+浏览器访问 `http://127.0.0.1:8090`，输入中文问题或上传 16kHz 单声道 PCM16 WAV，可下载真实合成回复。默认文件输出不记作扬声器播放。
+
+需要前台调试时，先执行 `main.py services down --components app`，保留模型服务；再运行 `run_web_vision_chat.py`。调试进程退出后用 `main.py services up --components app` 恢复。自动化调试应使用 `try/finally` 恢复服务并验证新鲜相机状态。`--no-camera` 和 `--no-audio` 仅用于显式缩小前台诊断范围，不代表完整配置就绪。不要同时启动托管与前台两个相机采集者。
 
 另一个终端可以复现实际HTTP/WebSocket链路：
 
@@ -63,17 +55,19 @@ systemctl --user start mmassistant-camera.service
 
 | 资源 | 当前所有者 | 新应用策略 |
 |---|---|---|
-| llama.cpp 8088 | 旧systemd `mmassistant-llama` | 只连接，不重复启动或终止 |
-| ASR 8089 / 语音8621 | 现有systemd后端 | R2已通过接口复用，不另起第二份模型进程 |
-| D435i | 旧systemd `mmassistant-camera` | R1真机测试已受控切换并恢复；同一时刻只允许一个采集者 |
-| 原视觉/姿态/Qdrant | 旧项目服务 | 当前保持原状；新应用不导入ROS/Pipecat/记忆 |
-| 麦克风/扬声器 | 当前未接入指定实物 | 不生成采集或播放成功回执 |
-| 新Python客户端 | 每次CLI请求 | 关闭自身HTTP流，释放后检查模型槽空闲 |
-| Web端口8090 | 新应用可手动启动 | 只管理本项目实例，不自动切换默认服务 |
+| llama.cpp 8088 | `reachy-headless-llama` | 原生模型由 systemd 托管，应用只持有请求 |
+| ASR 8089 / 语音8621 | `reachy-headless-asr/speech` | 使用已有模型和 OVS，不重复启动模型副本 |
+| D435i | `reachy-headless-app` 中的 Camera | 单一采集，共享带 epoch/序号的有界帧缓冲 |
+| 旧 ROS 视觉/姿态/Qdrant | 已停止的旧七服务 | 保留旧源码、模型与数据用于回退，不随新配置启动 |
+| 麦克风/扬声器 | 实物后置 | 不生成采集或播放成功回执 |
+| CLI 客户端 | 每次诊断请求 | 关闭自身 HTTP 流；使用前确保应用无正在处理的请求 |
+| Web端口8090 | `reachy-headless-app` | 控制器拥有当前轮、取消及输出，systemd 拥有进程生命周期 |
 
 所有新安装仅进入独立环境。不更换BSP、CUDA或TRT，不运行上游清理其他相机/音频进程的函数。依赖锁为`requirements.lock`，覆盖当前应用、CPU VAD及开发测试；ASR/TTS/LLM复用本机现有GPU服务，不把它们的Python依赖装入新应用环境。
 
-## 验证与未完成项
+## 阶段证据与未完成项
+
+以下 R1～R3 是各阶段当时的测试记录；其中 `mmassistant-*` 指旧部署。当前启动、停止和回退以 [部署说明](../deploy/systemd/README.md) 为准。涉及旧服务名的历史故障脚本应在相应隔离配置中复现，不能直接套用到当前默认服务。
 
 [阶段汇总](../benchmarks/results/reachy-r1-summary.json)、[真实网页文字](../benchmarks/results/reachy-r1-web-text.json)、[真实D435i/网页/VLM](../benchmarks/results/reachy-r1-camera-web.json)、[真人脸检测](../benchmarks/results/reachy-r1-live-face.json)、[旧RGB/深度恢复](../benchmarks/results/reachy-r1-legacy-restore.json)。
 
@@ -87,7 +81,7 @@ YuNet固定版本和哈希见`models/perception.json`，权重与许可证存放
 
 当前尚待完成：手势真实负例/遮挡/多人矩阵、整机资源压力与完整故障矩阵、物理音频及B0基线。当前会话及本地工具已完成声明范围内的软件验证；真人手势已取得正例，新增证据见下文。
 
-回退时退出新应用即可继续旧系统。默认服务未切换；如将来测试暂停旧相机，必须记录并恢复原服务状态。不要在运行目录执行`git reset --hard`来替代受控回退，不覆盖原用户数据。本次快照保存代码/配置，不宣称已备份在线数据库。
+当前回退须先停止新四服务，再从固定旧源码启动旧七服务，并核验新鲜 RGB/对齐深度。详细步骤见部署说明；不通过 `git reset --hard` 回退在线运行目录，不覆盖用户数据。源码快照不等于在线数据库备份。
 
 
 ## R2中文语音接入

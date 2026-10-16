@@ -2,13 +2,23 @@
 
 基于[NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)的派生工程：保留其语音、视觉、模型接口、网页和监控，裁掉机器人运动表达，在Orin NX16GB上接入中文语音、4B主模型及人体/人脸/手部感知。
 
-**当前分支：`migration/reachy-headless`，多模型感知、中文文件语音、当前会话与整轮取消已贯通，真人手势取得正例。SQLAlchemy笔记和APScheduler提醒已通过真实模型、取消及重启验证；手势完整质量、整机故障矩阵、实体录播及物理停播仍待完成。** 旧运行系统继续位于`/home/nvidia/Multi_Model_Inference`，未切换默认服务。
+**当前主目录和 `main` 已采用 Reachy 派生实现。** 默认运行四个服务：4B 图文模型、ASR、OpenVoiceStream 语音服务和 Reachy 应用。人体/脸/手、图文问答、中文文件语音、当前会话、笔记/提醒及整轮取消已贯通；真实手势负例/遮挡/多手质量、软件共存压力和 B0-SW 尚待完成。
 
-当前操作与验证见[隔离迁移说明](docs/reachy-migration.md)。最新[软件语音打断证据](benchmarks/results/reachy-r3-voice-summary.json)包含真实模型、受控PCM和Firefox验证，155项自动化测试通过。按用户2026-10-16决定，麦克风/扬声器实物环节后置，当前推进软件框架与B0-SW交接，随后由用户先开展视觉优化。
+主目录：`/home/nvidia/Multi_Model_Inference`。网页：`http://127.0.0.1:8090`。使用独立环境管理服务：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services status
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services up
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services down
+```
+
+操作细节见 [部署与回退](deploy/systemd/README.md)，数据流和阶段记录见 [迁移说明](docs/reachy-migration.md)。当前验证包括 166 项自动化测试、20 次连续完整应用启停、实际进程崩溃恢复及两次旧系统回退。证据见 [部署报告](benchmarks/results/reachy-r4-deployment-summary.json)。这些是软件功能与可靠性检查，尚未交付冻结的性能基线。
+
+按用户 2026-10-16 决定，麦克风/扬声器实物环节后置；真实手势补测稍后进行。当前继续软件框架与 B0-SW 交接，交接后由用户先开展视觉优化。旧系统固定在 `~/AI_Stack/archives/legacy-runtime-972de50`，默认旧七服务已停止。
 
 ## 当前确定的流程
 
-1. 固定上游源码与模块职责，在隔离迁移分支做无机身适配。
+1. 固定上游源码与模块职责，完成无机身适配并汇入主项目。
 2. 接通完整中文语音、视觉、手势与输出，修复生命周期和异常问题。
 3. 整体功能跑通后，由助手交付各模块与整机当前性能基线。
 4. 用户在逐步指导下，使用专业工具逐模块定位、分析、优化、回归并对比基准。

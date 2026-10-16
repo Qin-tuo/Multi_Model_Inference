@@ -65,7 +65,7 @@
 通过 systemd 启动或复用当前 llama.cpp 服务：
 
 ```bash
-cd /home/nvidia/AI_Stack/projects/reachy-headless
+cd /home/nvidia/Multi_Model_Inference
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services up --components llama
 ```
 

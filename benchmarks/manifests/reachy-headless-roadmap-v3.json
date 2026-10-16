@@ -549,7 +549,7 @@
     "Second parallel orchestration framework"
   ],
   "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
-  "updated_at": "2026-10-16T08:54:43.222068+00:00",
+  "updated_at": "2026-10-16T08:59:06.833979+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
   "migration_branch": "migration/reachy-headless",
   "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
@@ -573,5 +573,15 @@
       "Regression against B0-SW"
     ],
     "assistant_stop_point": "Deliver B0-SW and guide, then wait for user execution/results before guided optimization"
+  },
+  "active_branch": "main",
+  "active_worktree": "/home/nvidia/Multi_Model_Inference",
+  "migration_merged": true,
+  "deployment": {
+    "source_commit": "a99bc8b37799b7549174d9bfd9d375dee4fc9204",
+    "unit_prefix": "reachy-headless",
+    "legacy_runtime": "STOPPED",
+    "rollback_checkout": "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50",
+    "evidence": "benchmarks/results/reachy-r4-cutover.json"
   }
 }

@@ -13,7 +13,7 @@
 
 ## 操作
 
-在当前 Reachy 源码目录执行；使用独立环境，不使用旧 `.venv`：
+在 `/home/nvidia/Multi_Model_Inference` 主目录执行；使用独立环境，不使用旧 `.venv`：
 
 ```bash
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python main.py services check
@@ -43,6 +43,8 @@
 
 ## 切换与回退
 
+2026-10-16：默认服务已切换到主目录的 Reachy 四服务；旧七服务停止。演练完成后又从主目录完成正式启动和交互验证，最新状态见 [切换报告](../../benchmarks/results/reachy-r4-cutover.json)。
+
 旧源码固定在 `/home/nvidia/AI_Stack/archives/legacy-runtime-972de50`，独立环境、模型和用户数据保留。演练脚本先核对旧七服务归属和就绪，切换到新四服务，测试文字/画面/文件语音及完整应用循环，最后恢复旧七服务并检查新鲜 RGB 与对齐深度：
 
 ```bash
@@ -51,7 +53,7 @@
   --output /home/nvidia/AI_Stack/runtime-data/reachy-deployment-new-run --cycles 20
 ```
 
-输出目录必须是新目录。该脚本会临时中断本项目服务；结束时保留旧系统运行。演练记录不能替代后续正式切换状态。
+输出目录必须是新目录。脚本只接受旧系统运行、新四服务停止的初始状态；当前默认运行新系统，需要先按回退步骤准备旧系统后再演练。该脚本会临时中断本项目服务；结束时保留旧系统运行。演练记录不能替代后续正式切换状态。
 
 正式回退顺序：当前入口执行 `main.py services down`，再到旧快照执行 `python3 tools/project.py up --components all`。旧管理器会将旧单元入口指向快照，避免回退依赖被更新的主目录。恢复后必须检查旧服务状态和 `scripts/probe_legacy_camera.py` 的新鲜 RGB/深度，不能只看进程。
 

@@ -1030,18 +1030,20 @@
     "upstream": "NVIDIA-AI-IOT/reachy-mini-jetson-assistant",
     "commit": "2673202a360a41935b45ac79141ef0bb529492ba",
     "variant": "no-robot-body",
-    "migration_status": "R2_MODELS_INTEGRATED_R3_INTERACTION_PENDING",
+    "migration_status": "MERGED_TO_MAIN_AND_DEFAULT_SERVICES_SWITCHED_B0_SW_PENDING",
     "gap_ledger": "benchmarks/manifests/reachy-gap-ledger-v3.json",
-    "branch": "migration/reachy-headless",
-    "worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
+    "branch": "main",
+    "worktree": "/home/nvidia/Multi_Model_Inference",
     "evidence": [
       "benchmarks/results/reachy-r1-web-text.json",
       "benchmarks/results/reachy-r1-camera-web.json",
       "benchmarks/results/reachy-r1-live-face.json",
       "benchmarks/results/reachy-r2-summary.json",
-      "benchmarks/results/reachy-r2-perception-summary.json"
+      "benchmarks/results/reachy-r2-perception-summary.json",
+      "benchmarks/results/reachy-r4-deployment-summary.json",
+      "benchmarks/results/reachy-r4-cutover.json"
     ],
-    "last_pushed_implementation_commit": "bde67a6"
+    "historical_last_pushed_implementation_commit": "bde67a6"
   },
   "legacy_evidence_scope": "Existing tasks, JT/SF/DP and reports qualify only their historical implementation/configuration; none automatically passes new F/E/K."
 }
