@@ -115,6 +115,20 @@ class FaceConfig:
 
 
 @dataclass
+class PerceptionConfig:
+    enabled: bool = True
+    body_enabled: bool = True
+    hands_enabled: bool = True
+    fps: float = 5.0
+    body_threshold: float = 0.5
+    body_iou: float = 0.45
+    max_people: int = 10
+    palm_threshold: float = 0.5
+    hand_threshold: float = 0.8
+    max_hands: int = 2
+
+
+@dataclass
 class WebConfig:
     ui_fps: float = 10.0
     host: str = "0.0.0.0"
@@ -130,6 +144,7 @@ _SECTIONS = [
     ("vision", "vision", VisionConfig),
     ("face", "face", FaceConfig),
     ("web", "web", WebConfig),
+    ("perception", "perception", PerceptionConfig),
 ]
 
 
@@ -143,6 +158,7 @@ class Config:
     vision: VisionConfig = field(default_factory=VisionConfig)
     face: FaceConfig = field(default_factory=FaceConfig)
     web: WebConfig = field(default_factory=WebConfig)
+    perception: PerceptionConfig = field(default_factory=PerceptionConfig)
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
@@ -226,6 +242,11 @@ class Config:
             raise ValueError("Invalid face framing zones")
         if not 0 < self.face.min_face_size <= 1:
             raise ValueError("Invalid face size threshold")
+
+        if self.perception.fps <= 0 or not 1 <= self.perception.max_hands <= 4 or not 1 <= self.perception.max_people <= 100:
+            raise ValueError("Invalid perception rate/capacity")
+        if not all(0 < value < 1 for value in (self.perception.body_threshold,self.perception.body_iou,self.perception.palm_threshold,self.perception.hand_threshold)):
+            raise ValueError("Invalid perception threshold")
 
     def effective(self) -> dict:
         return asdict(self)

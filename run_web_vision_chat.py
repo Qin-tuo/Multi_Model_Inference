@@ -29,6 +29,7 @@ from app.config import Config
 from app.camera import Camera
 from app.face_detector import FaceDetector
 from app.face_tracker import FaceTracker
+from app.perception import Perception
 from app.llm import LLM
 from app.stt import STT
 from app.tts import create_tts
@@ -42,12 +43,18 @@ from app.web import Broadcaster, create_app
 log = logging.getLogger(__name__)
 
 
-def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None):
+def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None, perception=None):
     last_key = None
     while not stop.wait(1 / fps):
         frame = cam.snapshot()
         face = None
-        if tracker:
+        scene = None
+        if perception:
+            observed, scene = perception.preview()
+            if observed is not None:
+                frame = observed
+                face = scene['face']
+        elif tracker:
             observed, face = tracker.preview()
             if observed is not None:
                 frame = observed
@@ -65,6 +72,10 @@ def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None):
                 message.update(face_detected=bool(matched and face["face_detected"]),
                                centered=bool(matched and face["centered"]), stable=bool(matched and face["stable"]))
                 if matched and face["face_box"]: message["face_box"] = face["face_box"]
+            if scene and scene['ready'] and scene['frame']['frame_id']==frame.frame_id and scene['frame']['source_epoch']==frame.source_epoch:
+                message.update(persons=scene['persons'],hands=scene['hands'],perception_frame=scene['frame'])
+            else:
+                message.update(persons=[],hands=[])
             broadcaster.send(message)
 
 
@@ -78,6 +89,7 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
                 "gpu": stats.gpu_percent, "models": current["models"],
                 "platform": get_jetson_model(), "clients": broadcaster.client_count})
             broadcaster.send({"type": "perception", **current["face"]})
+            broadcaster.send({"type": "scene", **current["perception"]})
         except Exception:
             log.exception("Resource/vision status update failed")
         stop.wait(interval)
@@ -99,12 +111,13 @@ def build_app(config, *, no_camera=False, no_audio=False):
     tracker = FaceTracker(cam, detector, fps=config.face.fps, dead_zone=config.face.dead_zone,
               good_frame_zone=config.face.good_frame_zone, min_face_size=config.face.min_face_size,
               stable_frames=config.face.stable_frames) if detector else None
+    perception = Perception(cam, config.perception, tracker) if cam and config.perception.enabled else None
     speech_enabled = config.audio.enabled and not no_audio
     stt = STT(**vars(config.stt)) if speech_enabled else None
     tts = create_tts(**{k:v for k,v in vars(config.tts).items() if k not in {"first_chunk_chars", "max_chunk_chars"}}) if speech_enabled else None
     mic = None
     live_vad = None
-    control = TurnController(config, llm, broadcaster, cam, stt=stt, tts=tts)
+    control = TurnController(config, llm, broadcaster, cam, stt=stt, tts=tts, perception=perception)
     threads = []
 
     def state():
@@ -117,6 +130,7 @@ def build_app(config, *, no_camera=False, no_audio=False):
                 "camera_ready": bool(cam and cam.health_check()),
                 "camera_error": cam.last_error if cam else None,
                 "face": {"enabled": bool(tracker), **(tracker.snapshot() if tracker else {"face_detected": False})},
+                "perception": perception.snapshot() if perception else {"ready":False,"error":"Perception disabled","persons":[],"hands":[]},
                 "models": {"vlm": llm.model, "stt": config.stt.model if speech_enabled else "未启用",
                            "tts": config.tts.model if speech_enabled else "未启用", "vad": "Silero v6" if speech_enabled else "未启用"},
                 "effective_config": config.effective()}
@@ -164,12 +178,15 @@ def build_app(config, *, no_camera=False, no_audio=False):
                     broadcaster.configure_speakers(mic.speaker_state, mic.select_speaker, mic.set_speaker_volume)
                     broadcaster._input_setter = lambda active: mic.resume() if active else mic.pause()
                     broadcaster.set_ptt(True)
-            if tracker: tracker.start()
+            if perception:
+                await asyncio.to_thread(perception.load)
+                perception.start()
+            elif tracker: tracker.start()
             control.start()
             if mic: threads.append(threading.Thread(target=listen, name="audio-vad", daemon=True))
             if cam:
                 threads.append(threading.Thread(target=_frame_broadcast_thread,
-                    args=(cam, broadcaster, stop, config.web.ui_fps, tracker), name="frame-broadcast", daemon=True))
+                    args=(cam, broadcaster, stop, config.web.ui_fps, tracker, perception), name="frame-broadcast", daemon=True))
             threads.append(threading.Thread(target=_stats_broadcast_thread,
                 args=(broadcaster, stop, state), name="stats-broadcast", daemon=True))
             for thread in threads: thread.start()
@@ -183,7 +200,7 @@ def build_app(config, *, no_camera=False, no_audio=False):
             for thread in threads:
                 await asyncio.to_thread(thread.join, 5)
                 if thread.is_alive(): errors.append(RuntimeError(f"{thread.name} still running"))
-            for resource in [control, tracker, cam]:
+            for resource in [control, perception, tracker, cam]:
                 if resource:
                     try:
                         await asyncio.to_thread(resource.stop if resource is tracker else resource.close)

@@ -1,0 +1,139 @@
+{
+  "scope": "Ten cropped tiles from an annotated upstream example, not clean-image accuracy or real camera qualification",
+  "source_url": "https://huggingface.co/opencv/handpose_estimation_mediapipe/resolve/4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7/example_outputs/gesture_classification.png",
+  "source_sha256": "759c971087aef3068527f46b401af9fdead5a8dda3f68257d445bfb279fa99a9",
+  "provider": "OpenCV CPU",
+  "samples": [
+    {
+      "sample": 0,
+      "crop_xyxy": [
+        0,
+        0,
+        262,
+        196
+      ],
+      "palms": 1,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 1,
+      "crop_xyxy": [
+        262,
+        0,
+        524,
+        196
+      ],
+      "palms": 0,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 2,
+      "crop_xyxy": [
+        524,
+        0,
+        785,
+        196
+      ],
+      "palms": 2,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 3,
+      "crop_xyxy": [
+        785,
+        0,
+        1047,
+        196
+      ],
+      "palms": 1,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 4,
+      "crop_xyxy": [
+        1047,
+        0,
+        1309,
+        196
+      ],
+      "palms": 0,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 5,
+      "crop_xyxy": [
+        0,
+        196,
+        262,
+        392
+      ],
+      "palms": 1,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 6,
+      "crop_xyxy": [
+        262,
+        196,
+        524,
+        392
+      ],
+      "palms": 1,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 7,
+      "crop_xyxy": [
+        524,
+        196,
+        785,
+        392
+      ],
+      "palms": 0,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 8,
+      "crop_xyxy": [
+        785,
+        196,
+        1047,
+        392
+      ],
+      "palms": 0,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    },
+    {
+      "sample": 9,
+      "crop_xyxy": [
+        1047,
+        196,
+        1309,
+        392
+      ],
+      "palms": 1,
+      "hands": 0,
+      "keypoints_per_hand": [],
+      "scores": []
+    }
+  ],
+  "positive_tiles": 0
+}

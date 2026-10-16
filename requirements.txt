@@ -11,3 +11,4 @@ numpy==1.26.4
 opencv-python-headless==4.11.0.86
 websockets==17.2
 onnxruntime==1.24.4
+cuda-bindings==13.2.0

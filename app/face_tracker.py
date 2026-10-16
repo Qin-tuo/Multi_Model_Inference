@@ -118,6 +118,9 @@ class FaceTracker:
         if frame is None:
             self._reset("No fresh camera frame")
             return
+        self.process_frame(frame)
+
+    def process_frame(self, frame):
         key = (frame.source_epoch, frame.frame_id)
         if key == self._last_frame:
             return

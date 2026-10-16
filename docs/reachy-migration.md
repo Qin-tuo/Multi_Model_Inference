@@ -1,6 +1,6 @@
 # Reachy隔离迁移：当前操作入口与边界
 
-2026-10-15。R1现已接通无机身网页、共享相机、人脸感知和4B问答；R2已接入中文文件语音、VAD与分句合成；人体/手部和完整整轮取消继续推进，物理音频仍待接线。
+2026-10-15。R1现已接通无机身网页、共享相机、人脸感知和4B问答；R2已接入中文文件语音、VAD与分句合成；人体/手部也已接入共享帧链路；真人手部正例、手势与完整取消继续推进，物理音频仍待接线。
 
 ## 目录与来源
 
@@ -111,3 +111,35 @@ YuNet固定版本和哈希见`models/perception.json`，权重与许可证存放
 文件回执`file_written`与设备回执`device_completed`分开。设备回执表示播放器正常退出，不代表已经完成声学验收。当前默认input_mode/output_mode均为file。要进入设备模式需显式配置ReSpeaker Lite及输出设备；实际录播、AEC和双讲仍待硬件接入。
 
 移除了结束所有录音进程、关闭桌面PulseAudio及改写其配置的逻辑。只管理自身录音/播放进程和AEC模块，AEC名称按实例隔离，选择输出不修改系统默认扬声器。音频错误会结束本轮并返回失败；整轮即时取消和GPU释放仍是R3任务。
+
+
+## R2人体、手掌与21点手部
+
+[感知验证汇总](../benchmarks/results/reachy-r2-perception-summary.json)记录实际后端和证据范围。人体使用已有YOLOv8n FP32/TF32 TensorRT引擎；脸使用YuNet；手掌和21点手部使用OpenCV Zoo原始ONNX和上游预后处理。手部当前为OpenCV CPU，未进行INT8转换或性能调优。
+
+```bash
+cd /home/nvidia/AI_Stack/projects/reachy-headless
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/setup_native_perception.py
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/prepare_perception.py --check-only
+```
+
+setup只在本应用环境链接系统匹配版本的TensorRT Python包，避免引入整个系统site-packages。prepare校验已保留的人体ONNX和本机engine；可显式下载锁定的手部权重与参考源码、应用已审查的坐标修正。若本机人体工件丢失，需要从保留工件恢复或按独立构建流程重新验证，不会静默换用CPU。
+
+`app/perception.py`以一个工作线程处理最新帧，无待处理图像队列；人体、脸和手使用同一份原始BGR图。结果带frame_id、epoch、收帧/完成时刻和实际provider。网页图片与框线共同来自该帧；VLM选用同一帧并接收对应的简短辅助观测，观测明确允许漏检，不能冒充身份或完备真值。
+
+运行应用后可以记录真实发布结果：
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_perception.py \
+  --seconds 10 --output /home/nvidia/AI_Stack/runtime-data/perception-observation.json
+```
+
+默认最多10个人体候选、2只手。手部每只返回21个点；z是模型估计的相对腕部量，不是D435i测量深度。模型没有逐点置信度，因此逐点confidence明确为空，保留整只手的置信度。
+
+源码审查并复现了Palm后处理的NMS格式问题：上游将xyxy框送入要求xywh的接口，两个不相交的框可能被误合并。[最小补丁](../patches/perception/palm-nms-xywh.patch)和[回归](../benchmarks/results/reachy-r2-palm-nms.json)保留原版1框、修正版2框的证据。
+
+原带标注缩略拼图没有得到可靠手部正例，这一结果仍保留。改用官方MediaPipe教程的干净图片后，得到1个人体、1张脸和2只手的完整21点结果。这些公开图验证模型/坐标接入，不能代替真人手势或质量基准。真机组合测试处理42个不同帧，无推理失败；该次未获得人体/手部正例，仍需补充真人验证。
+
+TensorRT加载旧engine提示设备兼容性警告。[审查记录](../benchmarks/results/reachy-r2-engine-warning.json)显示构建记录与当前Orin的计算能力、SM数一致，engine早于本次启动；NVIDIA记录过同版本重启后的同类问题。本机根因未被完全证明，警告保持可见，系统版本保持固定，长期稳定性仍待验证。参考[官方问题记录](https://forums.developer.nvidia.com/t/trt-engine-plan-file-across-devices-warning-after-reboot-on-jetson-orin-nano/376848)。
+
+人体预后处理适配来自Ultralytics公开示例，保留AGPL-3.0声明；TensorRT运行辅助代码来自NVIDIA样例，保留Apache-2.0声明。对应原文、固定提交及许可证见`deploy/perception-sources.lock.json`、`licenses/`和`THIRD-PARTY-NOTICES.md`。

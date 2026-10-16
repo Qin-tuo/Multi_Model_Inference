@@ -204,7 +204,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   <div class="left">
     <div class="panel cam-panel">
       <div class="panel-hdr">
-        <span>Camera</span>
+        <span>Camera · 人体 / 人脸 / 手部</span>
         <span class="live-badge off" id="liveBadge">LIVE</span>
       </div>
       <div class="cam-wrap">
@@ -213,6 +213,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         <div class="cam-placeholder" id="camPlaceholder">Waiting for camera...</div>
       </div>
       <div class="cam-info" id="camInfo">No frames yet</div>
+      <div class="cam-info" id="sceneInfo">感知未就绪</div>
     </div>
     <div class="panel face-panel">
       <div class="panel-hdr">
@@ -410,6 +411,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         case 'done':         onDone(msg); break;
         case 'stats':        onStats(msg); break;
         case 'perception':   onPerception(msg); break;
+        case 'scene':        onScene(msg); break;
         case 'capabilities':onCapabilities(msg); break;
         case 'camera_state':cameraUnavailable(msg); break;
         case 'error': case 'overflow': $('inputError').textContent=msg.error || '请求失败'; break;
@@ -449,6 +451,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
         clearFaceBox();
         scheduleFaceHide();
       }
+      drawScene(msg.persons || [], msg.hands || []);
     };
 
     img.src = 'data:image/jpeg;base64,' + msg.data;
@@ -659,6 +662,30 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     const c=$('faceOverlay'); c.getContext('2d').clearRect(0,0,c.width,c.height);
   }
 
+  function onScene(msg){
+    $('sceneInfo').textContent=msg.ready ? '人体 '+msg.persons.length+' · 人脸 '+(msg.face && msg.face.face_detected ? 1 : 0)+' · 手 '+msg.hands.length : (msg.error || '感知尚未就绪');
+  }
+
+  function drawScene(persons,hands){
+    const canvas=$('faceOverlay'),ctx=canvas.getContext('2d');
+    const scale=Math.min(canvas.width/camNatural.w,canvas.height/camNatural.h);
+    const ox=(canvas.width-camNatural.w*scale)/2,oy=(canvas.height-camNatural.h*scale)/2;
+    function box(row,color,label){
+      const b=row.box_xyxy;ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.setLineDash([]);
+      ctx.strokeRect(ox+b[0]*scale,oy+b[1]*scale,(b[2]-b[0])*scale,(b[3]-b[1])*scale);
+      ctx.font='13px sans-serif';ctx.fillText(label,ox+b[0]*scale,Math.max(14,oy+b[1]*scale-4));
+    }
+    for(const person of persons) box(person,'#76b900','人体');
+    const edges=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+    for(const hand of hands){
+      box(hand,'#f0a64b','手');const points=hand.landmarks;
+      ctx.strokeStyle='#f0a64b';ctx.lineWidth=2;ctx.beginPath();
+      for(const [a,b] of edges){ctx.moveTo(ox+points[a][0]*scale,oy+points[a][1]*scale);ctx.lineTo(ox+points[b][0]*scale,oy+points[b][1]*scale);}
+      ctx.stroke();ctx.fillStyle='#ffd180';
+      for(const point of points){ctx.beginPath();ctx.arc(ox+point[0]*scale,oy+point[1]*scale,2,0,2*Math.PI);ctx.fill();}
+    }
+  }
+
   function onPerception(msg){
     trackingEnabled=!!msg.enabled;
     $('trackBadge').className='track-badge ' + (trackingEnabled ? 'on' : 'off');
@@ -668,6 +695,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 
   function onCapabilities(msg){
     updateModels(msg.models || {});
+    if(msg.perception) onScene(msg.perception);
     $('useCamera').disabled=!msg.camera_enabled;
     if(!msg.camera_enabled) $('useCamera').checked=false;
     $('cameraState').textContent=msg.camera_ready ? '就绪' : '未启用/不可用';

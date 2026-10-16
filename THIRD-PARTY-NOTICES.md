@@ -103,3 +103,16 @@ See the upstream Kokoro model card for its complete acknowledgements and trainin
 ## Dependency-resolution requirement
 
 The tables above are a human-readable notice index. Keep an exact dependency lock for every supported installation profile and archive the applicable upstream license and notice texts with each release.
+
+
+## Local perception adaptation
+
+`app/body_detector.py` derives the array preprocessing/postprocessing from
+Ultralytics' YOLOv8 OpenCV ONNX example, commit
+`00cd4b8b187b6c7bc34776a6fe25a000f08b5fcc`, under AGPL-3.0.
+The upstream original and license are retained in the directory recorded by
+`deploy/perception-sources.lock.json`. The TensorRT buffer/stream helper is
+NVIDIA's `common_runtime.py` at commit `16ed0636df41e4a27d46f82d9028fc50fadc7200`
+(Apache-2.0), loaded from the checked external source. OpenCV Zoo palm and
+hand-pose source/model identities and Apache-2.0 notices are recorded in
+`models/perception.json`. These components retain their own notices.

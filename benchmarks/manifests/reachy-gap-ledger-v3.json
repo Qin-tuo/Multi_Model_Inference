@@ -87,8 +87,10 @@
       "source_file": "README.md",
       "planned_resolution": "Add bounded perception and deterministic two-gesture rules",
       "phase": "R2",
-      "status": "OPEN",
-      "evidence": []
+      "status": "BODY_HAND_INTEGRATED_GESTURES_PENDING",
+      "evidence": [
+        "benchmarks/results/reachy-r2-perception-summary.json"
+      ]
     },
     {
       "id": "RG-08",
@@ -131,6 +133,26 @@
         "benchmarks/results/reachy-r1-legacy-restore.json",
         "benchmarks/results/reachy-r1-camera-web.json"
       ]
+    },
+    {
+      "id": "RG-12",
+      "classification": "CONFIRMED_DEPENDENCY_COORDINATE_BUG",
+      "finding": "Palm example supplies xyxy boxes to OpenCV xywh NMS; two disjoint boxes can be merged.",
+      "status": "FIXED_WITH_MINIMAL_PATCH",
+      "evidence": [
+        "benchmarks/results/reachy-r2-palm-nms.json"
+      ],
+      "phase": "R2"
+    },
+    {
+      "id": "RG-13",
+      "classification": "OBSERVED_PLATFORM_WARNING",
+      "finding": "TensorRT engine emits device-compatibility warning after reboot; recorded hardware fields match build, similar upstream issue exists.",
+      "status": "TRACKED_STABILITY_UNVERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r2-engine-warning.json"
+      ],
+      "phase": "R3"
     }
   ],
   "hardware_gap": {

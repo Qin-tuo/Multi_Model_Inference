@@ -9,16 +9,18 @@ import threading
 import time
 import uuid
 import re
+import json
 from pathlib import Path
 from app.audio import wav_pcm
 from app.pipeline import segment_pcm, SpeechOutput, TextChunker
 
 
 class TurnController:
-    def __init__(self, config, llm, broadcaster, camera=None, stt=None, tts=None, vad=None):
+    def __init__(self, config, llm, broadcaster, camera=None, stt=None, tts=None, vad=None, perception=None):
         self.config, self.llm, self.broadcaster, self.camera = config, llm, broadcaster, camera
         self.stt, self.tts, self.vad = stt, tts, vad
         self.output_sink = None
+        self.perception = perception
         self._queue = queue.Queue(maxsize=1)
         self._lock = threading.Lock()
         self._stop = threading.Event()
@@ -103,8 +105,20 @@ class TurnController:
                 if self._stop.is_set(): raise InterruptedError("Application stopping")
                 result["prompt"] = prompt
                 images = None
+                vision_prompt = self.config.vision.system_prompt
                 if request["use_image"]:
-                    frame = self.camera.snapshot()
+                    frame = None
+                    if self.perception:
+                        observed, scene = self.perception.preview()
+                        if observed is not None and scene['ready']:
+                            frame = observed
+                            providers = scene.get('providers', {})
+                            observations = {'person_candidates':len(scene['persons']) if providers.get('body') else None,
+                                            'prominent_face_detected':scene['face']['face_detected'] if providers.get('face') else None,
+                                            'hand_candidates':len(scene['hands']) if providers.get('hands') else None}
+                            result['perception_observation'] = {'frame':scene['frame'],'values':observations}
+                            vision_prompt += '\n本帧小模型的辅助观测（可能漏检，请结合图像判断）：'+json.dumps(observations,ensure_ascii=False)
+                    if frame is None: frame = self.camera.snapshot()
                     if frame is None: raise ValueError("Camera image expired before processing")
                     result["frame"] = frame.metadata()
                     images = [self.camera._base64_jpeg(frame.jpeg)]
@@ -114,7 +128,7 @@ class TurnController:
                     output = SpeechOutput(self.tts, self.config.audio, request["turn_id"], self.output_sink)
                 chunker = TextChunker(self.config.tts.first_chunk_chars, self.config.tts.max_chunk_chars)
                 stream = self.llm.generate_stream(prompt, images_b64=images,
-                    system_prompt=self.config.vision.system_prompt if images else None)
+                    system_prompt=vision_prompt if images else None)
                 try:
                     for text, metadata in stream:
                         if self._stop.is_set(): raise InterruptedError("Application stopping")

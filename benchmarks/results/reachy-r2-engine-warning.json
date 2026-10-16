@@ -1,0 +1,21 @@
+{
+  "scope": "Compatibility warning audit; warning not suppressed, long-term stability not yet qualified",
+  "board": "NVIDIA Jetson Orin NX Engineering Reference Developer Kit",
+  "runtime_device": {
+    "name": "Orin",
+    "compute_capability": "8.7",
+    "sm_count": 8,
+    "memory_bytes": 16355508224
+  },
+  "build_log_device": {
+    "name": "Orin",
+    "sm_count": 8,
+    "compute_capability": "8.7"
+  },
+  "engine_built_before_current_boot": true,
+  "same_hardware_fields": true,
+  "upstream_issue": "https://forums.developer.nvidia.com/t/trt-engine-plan-file-across-devices-warning-after-reboot-on-jetson-orin-nano/376848",
+  "upstream_evidence": "NVIDIA reproduced a same-version same-board post-reboot warning and reported an internal fix intended for a later release.",
+  "assessment": "Consistent with the known issue; exact internal cause is not proven. Keep warning visible, preserve BSP/TRT and continue numerical/lifecycle validation.",
+  "system_upgraded": false
+}
