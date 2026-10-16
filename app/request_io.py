@@ -13,6 +13,7 @@ import socket
 import threading
 import math
 import time
+import json
 import httpx
 
 
@@ -119,15 +120,42 @@ class RequestIO:
             return self._active is None
 
 
+def control_json(url, timeout, max_bytes=65536):
+    """Small control-plane GET: independent connection, total time and byte cap."""
+    with (
+        RequestIO().operation(timeout=timeout) as operation,
+        httpx.Client(
+            timeout=timeout,
+            trust_env=False,
+        ) as client,
+    ):
+        data = bytearray()
+        with client.stream(
+            "GET",
+            url,
+            extensions=operation.extensions,
+            headers={"Accept-Encoding": "identity"},
+        ) as response:
+            response.raise_for_status()
+            if int(response.headers.get("content-length", "0")) > max_bytes:
+                raise ValueError("Control response exceeds byte budget")
+            for chunk in response.iter_bytes(8192):
+                operation.check()
+                if len(data) + len(chunk) > max_bytes:
+                    raise ValueError("Control response exceeds byte budget")
+                data.extend(chunk)
+        return json.loads(data)
+
+
 def llama_slots_idle(base_url, timeout=0.5):
-    with httpx.Client(timeout=timeout, trust_env=False) as client:
-        response = client.get(base_url.rstrip("/") + "/slots")
-        response.raise_for_status()
-        slots = response.json()
+    slots = control_json(base_url.rstrip("/") + "/slots", timeout)
     if (
         not isinstance(slots, list)
         or not slots
-        or any(type(x.get("is_processing")) is not bool for x in slots)
+        or any(
+            not isinstance(x, dict) or type(x.get("is_processing")) is not bool
+            for x in slots
+        )
     ):
         raise ValueError("Invalid native slot observation")
     return all(not slot["is_processing"] for slot in slots)

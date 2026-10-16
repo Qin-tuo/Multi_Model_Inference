@@ -1,0 +1,51 @@
+{
+  "fresh": true,
+  "samples": {
+    "rgb": [
+      {
+        "stamp": 1792134340.7918808,
+        "age_ms": 58.17008018493652,
+        "width": 640,
+        "height": 480,
+        "encoding": "rgb8"
+      },
+      {
+        "stamp": 1792134341.092083,
+        "age_ms": 58.16006660461426,
+        "width": 640,
+        "height": 480,
+        "encoding": "rgb8"
+      },
+      {
+        "stamp": 1792134341.1921499,
+        "age_ms": 58.05087089538574,
+        "width": 640,
+        "height": 480,
+        "encoding": "rgb8"
+      }
+    ],
+    "depth": [
+      {
+        "stamp": 1792134340.0913157,
+        "age_ms": 54.2910099029541,
+        "width": 640,
+        "height": 480,
+        "encoding": "16UC1"
+      },
+      {
+        "stamp": 1792134340.1246753,
+        "age_ms": 52.23250389099121,
+        "width": 640,
+        "height": 480,
+        "encoding": "16UC1"
+      },
+      {
+        "stamp": 1792134340.1580348,
+        "age_ms": 52.19006538391113,
+        "width": 640,
+        "height": 480,
+        "encoding": "16UC1"
+      }
+    ]
+  }
+}

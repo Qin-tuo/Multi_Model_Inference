@@ -41,7 +41,7 @@ class STT:
         self._client = httpx.Client(timeout=self.timeout, trust_env=False,
             limits=httpx.Limits(max_connections=1, max_keepalive_connections=0))
         try:
-            self.capability = speech_capability(self._client, self.base_url, "asr", self.model_name, self.backend)
+            self.capability = speech_capability(self.base_url, "asr", self.model_name, self.backend,self.timeout)
             self.last_error = None
             return True
         except (httpx.HTTPError, ValueError, KeyError) as exc:
@@ -87,7 +87,7 @@ class STT:
     def health_check(self):
         if self._client is None: return False
         try:
-            speech_capability(self._client, self.base_url, "asr", self.model_name, self.backend)
+            speech_capability(self.base_url, "asr", self.model_name, self.backend,min(5,self.timeout))
             return True
         except (httpx.HTTPError, ValueError, KeyError): return False
 
@@ -96,10 +96,9 @@ class STT:
 
     def idle(self):
         if not self.requests.idle(): return False
-        with httpx.Client(timeout=.5,trust_env=False) as client:
-            capability=speech_capability(client,self.base_url,"asr",self.model_name,self.backend)
+        capability=speech_capability(self.base_url,"asr",self.model_name,self.backend,.5)
         active=capability.get('concurrency',{}).get('active')
-        if type(active) is not int: raise ValueError('Invalid speech concurrency observation')
+        if type(active) is not int or active<0: raise ValueError('Invalid speech concurrency observation')
         return active==0 and llama_slots_idle(self.native_base_url)
 
     def unload(self):

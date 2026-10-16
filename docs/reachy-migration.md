@@ -322,7 +322,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 现有`llm.timeout`、`stt.timeout`、`tts.timeout`同时作为各自一次推理调用的总预算：LLM包括该次原生token计数、历史裁剪及生成；ASR为一个语音片段；TTS为一个文本分句。它不是整轮多次工具调用或全部语音分句的总时长。`RequestIO`每次操作最多持有一个计时线程，退出时取消并join，之后才允许新操作。取消优先保留取消语义；超时不会被解释成后端已空闲，也不意味着GPU内核被即时抢占。ASR/TTS下一次成功后清除旧错误。
 
-当前132项自动化测试通过，包括六个真实本地socket场景：三个adapter分别在响应头阻塞和持续小块返回时超时，随后同一adapter恢复正常请求。启动/健康探测的读取时限、设备故障、语音打断与长时运行仍需继续核验。
+该次132项自动化测试通过，包括六个真实本地socket场景：三个adapter分别在响应头阻塞和持续小块返回时超时，随后同一adapter恢复正常请求。启动/健康读取时限及相机恢复的后续证据见下节；语音打断、实物音频与长时运行仍需继续核验。
 
 复现真实故障时，先以独立配置启动`--no-camera`应用，使用文件音频、空测试数据库和独立输出目录。脚本只允许已核验的固定本机端点和三个服务；测试会使这些共享后端短暂不可用，不应与其他任务同时运行：
 
@@ -334,3 +334,35 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 ```
 
 测试配置的数据库目录须含`reachy-r3-recovery-`，防止误用日常数据。脚本等待应用就绪，记录全部故障和恢复，在退出前确保受影响服务重新就绪；最后还需关闭自己启动的测试应用。当前[退出核验](../benchmarks/results/reachy-r3-recovery-cleanup.json)确认8093关闭、七个原服务active、主模型/ASR槽和语音计数为空闲。默认服务入口仍在旧工程，迁移切换尚未完成。
+
+## R3健康探测与摄像头恢复
+
+[本次汇总](../benchmarks/results/reachy-r3-health-camera-summary.json)包含144项自动化测试、真实控制接口、D435i驱动断开/重绑定和摄像头重复启停。完整项目仍未验收，B0尚未采集。
+
+健康探测的[修复前](../benchmarks/results/reachy-r3-health-before.json)及[修复后](../benchmarks/results/reachy-r3-health-after.json)记录两个问题：原健康检查仅凭HTTP 200判定主模型正常，即使返回的是另一模型名；原槽查询也会被持续小块返回拖长。现由`request_io.control_json`统一处理启动、模型身份、模板能力、语音能力和槽状态GET：独立连接、总时限、最多64KiB保留JSON，超过边界明确失败。ASR的语音能力和原生槽分别观察，不能只凭代理空闲就放行。
+
+主模型健康检查校验配置中的模型别名；部署工件身份仍由后端清单与启动配置保证。这不是对任意相同别名服务的权重证明。真实LLM/ASR/TTS控制接口以及中文识别/PCM合成已[复核](../benchmarks/results/reachy-r3-health-native.json)，错误探测不会被当作资源释放。
+
+相机的[原始故障](../benchmarks/results/reachy-r3-camera-recovery-before.json)来自实际D435i RGB UVC接口断开：原线程退出，驱动重新绑定后仍没有画面。现在`Camera`保留一个采集线程，由它依次打开、读取、释放和重试；重连没有新增采集者。失败立即清空缓存、更换来源epoch并设置失效标记，感知结果与待发送旧画面均不能继续使用；新帧成功到达才清除错误并恢复ready。Web状态新增`camera`字段，包含阶段、帧龄、重试次数和缓存占用，失效时同时隐藏旧的人脸裁剪。
+
+`vision.reconnect_seconds`默认1秒。`vision.v4l_select_timeout`默认2秒，在首次采集前设置OpenCV的进程级参数；[OpenCV 4.11源码](https://github.com/opencv/opencv/blob/4.11.0/modules/videoio/src/cap_v4l.cpp#L926-L983)表明这个参数会被缓存，因此修改它需要重启应用进程。它限定的是select等待，不能保证所有驱动ioctl都能在两秒内退出。读取未释放时，关闭仍明确报告`close_unconfirmed`，不会并发release正在读取的句柄。
+
+[最终真实应用验证](../benchmarks/results/reachy-r3-camera-recovery-final.json)结果：
+
+- 断流期间图像请求返回400，文字问答正常；旧图像、人体/脸/手结果失效。
+- 重绑定后同一个采集线程恢复，新epoch贯穿小模型、Web画面和实际VLM图像请求。
+- 接收到新epoch后没有再收到旧epoch画面；测试记录仅保存元数据，不保存摄像头图片、脸/手关键点或视觉问答正文。
+- 应用退出后，另做一次摄像头预热及20次真实启停。每次关闭后FD均为49、线程均为19，与预热后的同进程状态一致；PSS从472462336到472517632字节。该进程仍包含已加载库和诊断工具，这不是“整机只剩这些资源”的结论，也不是长时无泄漏证明。
+- 最后恢复原相机服务，核验三张不同时间戳的新鲜RGB和对齐深度，而不只查看服务active。
+
+这两次成功故障注入是RGB驱动接口的解绑/重绑，不能冒充物理拔线、USB集线器掉电或任意驱动卡死验证。20次是摄像头模块启停，完整应用/模型/录播的重复生命周期仍归R4。本次sysfs枚举速度为5000Mb/s，保留为本次环境信息，不作为USB吞吐测量。
+
+独占相机时，可执行以下有明确副作用的诊断。脚本只解绑配置中按序列号核验的D435i RGB接口，需已有免密码sudo；自动停止本项目旧相机服务、运行新应用、恢复驱动与服务，并用独立系统Python/ROS检查原RGB和深度。ROS只用于旧系统交接核验，不进入新应用运行依赖。
+
+```bash
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_camera_recovery.py \
+  --detach-configured-camera \
+  --output /home/nvidia/AI_Stack/runtime-data/camera-recovery.json
+```
+
+模型/工具和网页压力的前期证据仍保留各自范围；真实语音打断、AEC、实物录播、完整手势质量、完整重复故障与8小时共存尚未完成。R3.resources和R3.recovery继续保持进行中。

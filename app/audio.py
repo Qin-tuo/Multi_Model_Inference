@@ -56,14 +56,16 @@ def local_speech_url(url: str) -> str:
     return url.rstrip("/")
 
 
-def speech_capability(client, url, kind, model, backend):
-    response = client.get(url + "/capabilities")
-    response.raise_for_status()
-    capability = response.json()[kind]
+def speech_capability(url, kind, model, backend, timeout):
+    from app.request_io import control_json
+    payload=control_json(url+'/capabilities',timeout)
+    if not isinstance(payload,dict) or not isinstance(payload.get(kind),dict):
+        raise ValueError(f'Invalid {kind} capability response')
+    capability = payload[kind]
     if capability.get("ready") is not True or capability.get("model_id") != model or capability.get("backend") != backend:
         raise ValueError(f"Configured {kind} model/backend is not ready")
-    audio = capability["audio"]
-    if (audio["sample_rate"], audio["channels"], audio["sample_format"]) != (16000, 1, "pcm_s16le"):
+    audio = capability.get('audio')
+    if not isinstance(audio,dict) or (audio.get("sample_rate"), audio.get("channels"), audio.get("sample_format")) != (16000, 1, "pcm_s16le"):
         raise ValueError(f"Unsupported {kind} audio contract")
     return capability
 

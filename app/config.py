@@ -98,6 +98,8 @@ class VisionConfig:
     capture_fps: float = 10.0
     stale_after: float = 1.0
     buffer_bytes_limit: int = 16 * 1024 * 1024
+    reconnect_seconds: float = 1.0
+    v4l_select_timeout: int = 2
     system_prompt: str = (
         "You are a vision assistant on an NVIDIA Jetson device with a live camera. "
         "Answer in one to two sentences. Be direct and concise."
@@ -250,6 +252,8 @@ class Config:
         return config
 
     def validate(self):
+        if not (.1<=self.vision.reconnect_seconds<=10 and 1<=self.vision.v4l_select_timeout<=3):
+            raise ValueError('Invalid camera recovery timing')
         w=self.web
         if not (1<=w.max_clients<=4 and 4<=w.queue_events<=64 and 4<=w.bridge_events<=256
                 and 65536<=w.message_bytes<=4*1024*1024 and w.message_bytes<=w.queue_bytes<=16*1024*1024

@@ -17,7 +17,7 @@
 
 import httpx
 import json
-from app.request_io import RequestIO, llama_slots_idle
+from app.request_io import RequestIO, llama_slots_idle, control_json
 from typing import Optional, Iterator, Dict, Any
 
 
@@ -51,33 +51,25 @@ class LLM:
         self._loaded = False
         self.last_error = None
         try:
-            with httpx.Client(timeout=10.0, trust_env=False) as client:
-                if self.backend == "openai":
-                    r = client.get(f"{self.base_url}/v1/models")
-                    if r.status_code != 200:
-                        return False
-                    models = [m.get("id", "") for m in r.json().get("data", [])]
-                    if not models:
-                        return False
-                    if self.model and self.model not in models:
-                        raise ValueError(f"Expected model {self.model!r}; available: {models}")
-                    if not self.model:
-                        self.model = models[0]
-                else:
-                    r = client.get(f"{self.base_url}/api/tags")
-                    if r.status_code != 200:
-                        return False
-                    names = [m.get("name", "") for m in r.json().get("models", [])]
-                    base = self.model.split(":")[0]
-                    if base not in [n.split(":")[0] for n in names] and self.model not in names:
-                        print(f"Model '{self.model}' not found. Available: {', '.join(names)}")
-                        return False
+            self._verify_identity(min(10,self.timeout),allow_select=True)
             self._loaded = True
             return True
         except Exception as e:
             self.last_error = str(e)
             print(f"LLM connection error: {e}")
             return False
+
+    def _verify_identity(self,timeout,allow_select=False):
+        path='/v1/models' if self.backend=='openai' else '/api/tags'
+        payload=control_json(self.base_url+path,timeout)
+        key,field=('data','id') if self.backend=='openai' else ('models','name')
+        rows=payload.get(key) if isinstance(payload,dict) else None
+        if not isinstance(rows,list) or not rows or any(not isinstance(row,dict) or not isinstance(row.get(field),str) or not row[field] for row in rows):
+            raise ValueError('Invalid model identity response')
+        names=[row[field] for row in rows]
+        if not self.model and allow_select and self.backend=='openai':self.model=names[0]
+        matches=self.model in names or (self.backend!='openai' and self.model.split(':')[0] in [n.split(':')[0] for n in names])
+        if not matches:raise ValueError(f'Expected model {self.model!r}; available: {names}')
 
     def _messages(
         self, prompt: str, system_prompt: Optional[str] = None,
@@ -286,20 +278,20 @@ class LLM:
         if not self._loaded:
             return False
         try:
-            with httpx.Client(timeout=5.0, trust_env=False) as client:
-                url = f"{self.base_url}/v1/models" if self.backend == "openai" else f"{self.base_url}/api/tags"
-                return client.get(url).status_code == 200
-        except Exception:
+            self._verify_identity(min(5,self.timeout))
+            self.last_error=None
+            return True
+        except Exception as exc:
+            self.last_error=str(exc)
             return False
 
     def cancel(self, event):
         self.requests.cancel(event)
 
     def require_tools(self):
-        with httpx.Client(timeout=5,trust_env=False) as client:
-            props=client.get(self.base_url+'/props').raise_for_status().json()
+        props=control_json(self.base_url+'/props',min(5,self.timeout))
         caps=props.get('chat_template_caps',{})
-        if not caps.get('supports_tools') or not caps.get('supports_tool_calls'):
+        if caps.get('supports_tools') is not True or caps.get('supports_tool_calls') is not True:
             raise RuntimeError('Configured model template does not support local tools')
 
     def idle(self):

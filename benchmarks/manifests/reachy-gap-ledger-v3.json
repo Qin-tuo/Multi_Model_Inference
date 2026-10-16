@@ -134,11 +134,12 @@
       "finding": "Old RealSense depth startup warning appeared after switching from V4L2 RGB back to ROS; active service was not enough to prove restoration.",
       "planned_resolution": "Require fresh color and aligned depth after each migration handover; record recovery, never infer readiness from PID only.",
       "phase": "R3",
-      "status": "RECOVERED_RECURRENCE_TEST_PENDING",
+      "status": "REPEATED_DRIVER_HANDOVER_RGB_DEPTH_RESTORED_FINAL_ENDURANCE_PENDING",
       "evidence": [
         "benchmarks/results/reachy-r1-legacy-restore.json",
         "benchmarks/results/reachy-r1-camera-web.json",
-        "benchmarks/results/reachy-r3-gesture-camera-restore.json"
+        "benchmarks/results/reachy-r3-gesture-camera-restore.json",
+        "benchmarks/results/reachy-r3-camera-recovery-legacy-restore.json"
       ]
     },
     {
@@ -191,11 +192,34 @@
       "phase": "R3",
       "finding": "Per-read HTTP timeouts are refreshed by each small chunk, so configured model timeout did not bound total request duration; real local response completed after 0.413s with 0.08s per-read timeout.",
       "planned_resolution": "Own one absolute-deadline timer per inference operation, interrupt only its socket, join timer before releasing local admission, retain separate native release checks.",
-      "status": "INFERENCE_DEADLINES_VERIFIED_STARTUP_HEALTH_LIVENESS_AUDIT_PENDING",
+      "status": "INFERENCE_AND_CONTROL_GET_DEADLINES_VERIFIED_NATIVE_PREEMPTION_NOT_CLAIMED",
       "evidence": [
         "benchmarks/results/reachy-r3-recovery-summary.json",
         "benchmarks/results/reachy-r3-recovery-deadline-before.json",
-        "benchmarks/results/reachy-r3-recovery-deadline-after.json"
+        "benchmarks/results/reachy-r3-recovery-deadline-after.json",
+        "benchmarks/results/reachy-r3-health-camera-summary.json"
+      ]
+    },
+    {
+      "id": "RG-17",
+      "classification": "CONFIRMED_WRONG_MODEL_HEALTH_PASS",
+      "phase": "R3",
+      "finding": "Old LLM health_check accepted HTTP 200 even when the returned model alias differed from the configured alias.",
+      "status": "FIXED_WITH_IDENTITY_VALIDATION",
+      "evidence": [
+        "benchmarks/results/reachy-r3-health-before.json",
+        "benchmarks/results/reachy-r3-health-after.json"
+      ]
+    },
+    {
+      "id": "RG-18",
+      "classification": "CONFIRMED_CAMERA_NO_RECONNECT",
+      "phase": "R3",
+      "finding": "Actual RGB driver detach terminated the capture thread; rebind restored the device node but not capture.",
+      "status": "SAME_OWNER_RECONNECT_AND_EPOCH_INVALIDATION_VERIFIED",
+      "evidence": [
+        "benchmarks/results/reachy-r3-camera-recovery-before.json",
+        "benchmarks/results/reachy-r3-camera-recovery-final.json"
       ]
     }
   ],
@@ -204,5 +228,5 @@
     "speaker": "not connected per user",
     "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
   },
-  "updated_at": "2026-10-16T06:44:09.671153+00:00"
+  "updated_at": "2026-10-16T07:10:27.429036+00:00"
 }

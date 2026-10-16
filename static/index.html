@@ -692,11 +692,14 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   function cameraUnavailable(msg){
     $('cameraState').textContent='不可用';
     $('camImg').style.display='none';
+    $('camImg').onload=null;
+    $('camImg').removeAttribute('src');
     $('camPlaceholder').style.display='';
     $('camPlaceholder').textContent=msg.error || '摄像头未启用';
     $('liveBadge').className='live-badge off';
     pendingFaceBox=null; lastFaceBox=null;
     clearTimeout(faceHoldTimer); faceHoldTimer=null;
+    showFaceCrop(false);
     setTrackIdle();
     const c=$('faceOverlay'); c.getContext('2d').clearRect(0,0,c.width,c.height);
   }

@@ -77,7 +77,7 @@ def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None, perceptio
                 message.update(persons=scene['persons'],hands=scene['hands'],perception_frame=scene['frame'])
             else:
                 message.update(persons=[],hands=[])
-            broadcaster.send(message)
+            broadcaster.send(message,cancel_event=frame.invalidated)
 
 
 def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
@@ -109,7 +109,8 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
     cam = None if no_camera else Camera(device=config.vision.camera_device,
               width=config.vision.width, height=config.vision.height,
               jpeg_quality=config.vision.jpeg_quality, capture_fps=config.vision.capture_fps,
-              stale_after=config.vision.stale_after, buffer_bytes_limit=config.vision.buffer_bytes_limit)
+              stale_after=config.vision.stale_after, buffer_bytes_limit=config.vision.buffer_bytes_limit,
+              reconnect_seconds=config.vision.reconnect_seconds,v4l_select_timeout=config.vision.v4l_select_timeout)
     detector = FaceDetector() if cam and config.face.enabled else None
     tracker = FaceTracker(cam, detector, fps=config.face.fps, dead_zone=config.face.dead_zone,
               good_frame_zone=config.face.good_frame_zone, min_face_size=config.face.min_face_size,
@@ -134,6 +135,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         except Exception as exc:return {'enabled':True,'error':str(exc)}
 
     def state():
+        camera_state=cam.status() if cam else {'ready':False,'state':'disabled'}
         return {**control.state(), "audio_enabled": bool(mic and mic.alive),
                 'actions':action_state(), 'web':broadcaster.snapshot(),
                 "speech_ready": bool(speech_enabled and control.vad is not None),
@@ -141,7 +143,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                 "audio_output_mode": config.audio.output_mode if speech_enabled else "disabled",
                 "microphone_error": mic.last_error if mic else None,
                 "aec_active": bool(mic and mic.aec and mic.aec.active), "camera_enabled": cam is not None,
-                "camera_ready": bool(cam and cam.health_check()),
+                "camera_ready": camera_state['ready'], 'camera':camera_state,
                 "camera_error": cam.last_error if cam else None,
                 "face": {"enabled": bool(tracker), **(tracker.snapshot() if tracker else {"face_detected": False})},
                 "perception": perception.snapshot() if perception else {"ready":False,"error":"Perception disabled","persons":[],"hands":[]},
