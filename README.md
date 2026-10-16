@@ -15,7 +15,7 @@
 
 ## 实施与审查入口
 
-当前实现位于[migration/reachy-headless分支](https://github.com/Qin-tuo/Multi_Model_Inference/tree/migration/reachy-headless)。[隔离迁移说明](docs/reachy-migration.md)包含可运行命令、验证结果和未完成边界。
+当前实现位于[migration/reachy-headless分支](https://github.com/Qin-tuo/Multi_Model_Inference/tree/migration/reachy-headless)。 新增[Web资源边界证据](benchmarks/results/reachy-r3-web-summary.json)，对应实现`ddd19c0`：消息回调积压及握手并发限制已修复，124项自动化测试与TCP/浏览器回归通过；完整R3资源与故障矩阵仍在进行。[隔离迁移说明](docs/reachy-migration.md)包含可运行命令、验证结果和未完成边界。
 
 - [完整新版计划书与最终Goal](02-jetson-multimodel-inference.md)
 - [总览与工作分工](00-project-overview.md)
