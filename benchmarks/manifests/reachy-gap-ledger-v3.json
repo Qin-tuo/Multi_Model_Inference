@@ -89,9 +89,10 @@
       "source_file": "README.md",
       "planned_resolution": "Add bounded perception and deterministic two-gesture rules",
       "phase": "R2",
-      "status": "BODY_HAND_INTEGRATED_GESTURES_PENDING",
+      "status": "GESTURES_INTEGRATED_LIVE_POSITIVES_VERIFIED_FULL_QUALITY_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r2-perception-summary.json"
+        "benchmarks/results/reachy-r2-perception-summary.json",
+        "benchmarks/results/reachy-r3-gesture-summary.json"
       ]
     },
     {
@@ -133,7 +134,8 @@
       "status": "RECOVERED_RECURRENCE_TEST_PENDING",
       "evidence": [
         "benchmarks/results/reachy-r1-legacy-restore.json",
-        "benchmarks/results/reachy-r1-camera-web.json"
+        "benchmarks/results/reachy-r1-camera-web.json",
+        "benchmarks/results/reachy-r3-gesture-camera-restore.json"
       ]
     },
     {
@@ -162,5 +164,5 @@
     "speaker": "not connected per user",
     "rule": "File/synthetic evidence cannot qualify physical playback/AEC/stop"
   },
-  "updated_at": "2026-10-16T03:11:57.028258+00:00"
+  "updated_at": "2026-10-16T03:37:44.513931+00:00"
 }

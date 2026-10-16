@@ -1,0 +1,68 @@
+{
+  "scope": "Recorded-landmark replay, not camera inference",
+  "input_sha256": "628f13c52111498c6d595abc2b1822684d742c81da59b53a1c4e6da503120b29",
+  "expected_events": [
+    [
+      "stop",
+      145,
+      155
+    ],
+    [
+      "wave",
+      311,
+      329
+    ],
+    [
+      "wave",
+      387,
+      401
+    ],
+    [
+      "stop",
+      889,
+      899
+    ],
+    [
+      "stop",
+      1233,
+      1243
+    ]
+  ],
+  "replayed_events": [
+    [
+      "stop",
+      145,
+      155
+    ],
+    [
+      "wave",
+      311,
+      329
+    ],
+    [
+      "wave",
+      387,
+      401
+    ],
+    [
+      "stop",
+      889,
+      899
+    ],
+    [
+      "stop",
+      1233,
+      1243
+    ]
+  ],
+  "exact_frame_match": true,
+  "actual_model_routing": {
+    "scope": "Rebased recorded events through actual local models; not live gestures or physical playback",
+    "greeting_complete": true,
+    "stop_cancelled": true,
+    "backend_release_confirmed": true,
+    "next_turn_complete_with_audio": true,
+    "earlier_greeting_audio_retained": true,
+    "cancelled_turn_audio_unavailable": true
+  }
+}
