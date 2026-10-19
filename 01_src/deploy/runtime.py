@@ -209,11 +209,9 @@ def artifact_files(cfg, components):
             ]
             for role, row in selected["models"].items():
                 add(ROOT / row["engine_path"], row["engine_sha256"])
-            for row in (
-                sources["body_hand_pose"]["decoder_source"],
-                sources["expression"]["prepost_source"]["files"]["facial_fer_model.py"],
-            ):
-                add(ROOT / row["path"], row["sha256"])
+            for role in ("body_hand_pose", "expression"):
+                for row in sources[role]["prepost_source"]["files"].values():
+                    add(ROOT / row["path"], row["sha256"])
             add(
                 perception["body"]["runtime_helper"],
                 perception["body"]["runtime_helper_sha256"],

@@ -7,6 +7,8 @@ separate from the camera's metric depth and is never presented as range.
 """
 
 import cv2
+from functools import lru_cache
+import json
 import numpy as np
 
 from app.body_detector import load_source
@@ -14,23 +16,34 @@ from app.tensorrt_runner import TensorRTModel
 from project_paths import ROOT
 
 
-def prepare_pose(image, box):
+@lru_cache(maxsize=2)
+def geometry_helper(path=None, sha256=None):
+    if path is None:
+        entry = json.loads((ROOT / "03_models/candidates/vision-b1.json").read_text())[
+            "models"
+        ]["body_hand_pose"]
+        source = entry["prepost_source"]["files"]["bbox/transforms.py"]
+        path, sha256 = source["path"], source["sha256"]
+    return load_source(str(ROOT / path), sha256, "assistant_pose_geometry")
+
+
+def prepare_pose(image, box, geometry=None):
     box = np.asarray(box, np.float32)
     if box.shape != (4,) or not np.isfinite(box).all() or min(box[2:] - box[:2]) <= 0:
         raise ValueError("Invalid pose person box")
-    center = (box[:2] + box[2:]) / 2
-    sx, sy = (box[2:] - box[:2]) * 1.25
-    if sx / sy > 288 / 384:
-        sy = sx * 384 / 288
-    else:
-        sx = sy * 288 / 384
-    matrix = np.array(
-        [
-            [288 / sx, 0, 144 - center[0] * 288 / sx],
-            [0, 384 / sy, 192 - center[1] * 384 / sy],
-        ],
-        np.float32,
-    )
+    geometry = geometry or geometry_helper()
+    center, scale = geometry.bbox_xyxy2cs(box, padding=1.25)
+    # Match TopdownAffine._fix_aspect_ratio's array arithmetic and precision.
+    # A mathematically equivalent hand-written matrix changed interpolation
+    # rounding for fractional ROIs, so use the pinned upstream warp function.
+    width, height = np.hsplit(scale[None], [1])
+    aspect = 288 / 384
+    scale = np.where(
+        width > height * aspect,
+        np.hstack([width, width / aspect]),
+        np.hstack([height * aspect, height]),
+    )[0]
+    matrix = geometry.get_warp_matrix(center, scale, 0, output_size=(288, 384))
     crop = cv2.warpAffine(image, matrix, (288, 384), flags=cv2.INTER_LINEAR)
     rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB).astype(np.float32)
     values = (rgb - np.array([123.675, 116.28, 103.53], np.float32)) / np.array(
@@ -41,6 +54,8 @@ def prepare_pose(image, box):
 
 class WholeBodyPose:
     def __init__(self, build, entry):
+        geometry = entry["prepost_source"]["files"]["bbox/transforms.py"]
+        self.geometry = geometry_helper(geometry["path"], geometry["sha256"])
         source = entry["decoder_source"]
         self.decoder = load_source(
             str(ROOT / source["path"]), source["sha256"], "assistant_simcc3d"
@@ -51,7 +66,7 @@ class WholeBodyPose:
         self.provider = self.model.provider
 
     def infer(self, image, box, joint_threshold=0.2):
-        inputs, matrix = prepare_pose(image, box)
+        inputs, matrix = prepare_pose(image, box, self.geometry)
         raw = self.model.infer(inputs)
         bins, scores = self.decoder.get_simcc_maximum(
             raw["output"], raw["1554"], raw["1556"]

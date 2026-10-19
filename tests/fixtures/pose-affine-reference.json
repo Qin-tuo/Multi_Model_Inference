@@ -1,0 +1,39 @@
+{
+  "reference": "Original MMPose GetBBoxCenterScale, TopdownAffine, PoseDataPreprocessor",
+  "revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
+  "opencv": "4.11.0.86",
+  "image_hw": [
+    1080,
+    810
+  ],
+  "bgr_formula": [
+    [
+      5,
+      7
+    ],
+    [
+      11,
+      3
+    ],
+    [
+      19,
+      2
+    ]
+  ],
+  "box": [
+    50.80730438232422,
+    397.3402404785156,
+    244.17869567871094,
+    904.9124755859375
+  ],
+  "image_sha256": "3f4865e7074d22446c5f19553895d5d9ffbb88b7122b6b2cafb7050fcdd0200a",
+  "normalized_tensor_sha256": "b9572c39bf36c900192102963e27dfee1145c9fbdb7d4da419cbdb1cf32f2bb7",
+  "center": [
+    147.4929962158203,
+    651.1263427734375
+  ],
+  "scale": [
+    475.84893798828125,
+    634.4652709960938
+  ]
+}

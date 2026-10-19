@@ -29,7 +29,7 @@
       "source_build": "05_runtime/validation/b1-feasibility-20261019/body_hand_pose/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 482932452,
-      "candidate_contract_sha256": "1968196a016ed3ad7e5858e546feb31836ddae9b41c46bffc58df909633b9d00"
+      "candidate_contract_sha256": "c94fb7e0981ae4f36fbf866e93417652a06fe8c1e5eb2bbff70f1dd4a14763a5"
     },
     "face": {
       "role": "face",

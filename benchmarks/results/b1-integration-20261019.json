@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T14:45:28.774388+00:00",
+  "updated_at": "2026-10-19T15:03:09.158692+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -75,7 +75,6 @@
     }
   ],
   "remaining": [
-    "RTMW3D original checkpoint/export equivalence",
     "Broader live person, wave, occlusion, crossing and distance-gate coverage; previously deferred user-assisted cases remain separate",
     "Stale-source/failure recovery and sustained bounded resource acceptance",
     "Frozen module, pipeline and 4B/audio coexistence B1 measurements with raw samples",
@@ -87,5 +86,10 @@
     "Performance baseline or optimization improvement",
     "Physical audio/AEC",
     "Neural stereo depth"
-  ]
+  ],
+  "pose_source_reference": {
+    "summary": "benchmarks/results/b1-feasibility-20261019.json",
+    "raw_report": "05_runtime/validation/b1-pose-source-20261019-affine-fixed/report.json",
+    "pipeline_recheck": "05_runtime/validation/b1-pipeline-pose-affine-20261019/report.json"
+  }
 }

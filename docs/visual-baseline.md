@@ -2,7 +2,7 @@
 
 ## B1 模型接入验证
 
-2026-10-19：B1 尚未冻结，默认服务仍使用 B0 配置。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐，不再要求神经网络深度推理。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的 TensorRT 核验，统一管线也已执行全部 10 个模型。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。RTMW3D 原始权重／导出链核对、真实场景覆盖、长期恢复、B1 性能和部署交接仍未完成。
+2026-10-19：B1 尚未冻结，默认服务仍使用 B0 配置。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐，不再要求神经网络深度推理。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的 TensorRT 核验，统一管线也已执行全部 10 个模型。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。RTMW3D 原始权重与预后处理核验现已通过；真实场景覆盖、长期恢复、B1 性能和部署交接仍未完成。
 
 ### 集成结构与当前资源边界
 
@@ -35,6 +35,23 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 ```
 
 完整服务探针可加 `--webdriver http://127.0.0.1:4445`，连接已运行的本地 Firefox WebDriver，检查相机页和 `/debug`。浏览器运行在板上会额外占用资源，这些功能测试读数不是 B1 性能结论。正式基线将固定输入、预热、负载和采样条件；现阶段不开展量化/并发调优。
+
+### RTMW3D 原始权重与裁剪核验
+
+原始权重采用 [MMPose 固定版本模型页](https://github.com/open-mmlab/mmpose/blob/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/projects/rtmpose3d/README.md) 所列的 RTMW3D-X，完整 SHA-256 为 `b0a0eab7ca501e2c88028fe1cfd78b50c7130e220d39541da7f669e5de25e6ca`。权重地址、本地路径和大小记录在候选清单的 `body_hand_pose.source_checkpoint`。项目内已准备该文件与固定版本 MMPose 仓库。
+
+参考进程直接加载上游 CSPNeXt、CSPNeXtPAFPN、RTMW3DHead，837 项状态严格加载，无缺失或多余键；原始预处理使用 GetBBoxCenterScale、TopdownAffine、PoseDataPreprocessor，解码使用 SimCC3DLabel。仅绕过会额外导入训练数据集的包聚合入口，不替换网络计算或编造缺失算子；所有实际导入的源文件校验值保存在 `native-provenance.json`。参考进程为 CPU PyTorch，应用仍使用 TensorRT。
+
+四个公开人物/镜像/多人裁剪样本上，ONNX/TensorRT 相对原始权重的最大张量差为 `1.16e-5`，三轴取峰位置无差异；最终原图关键点最大数值误差约 `6.11e-5` 像素，相对 z 一致。这是参考实现一致性，不是人体关键点真实精度。
+
+此次核验发现并修复了一个预处理问题：手写仿射矩阵与上游 float32 数组运算及 `get_warp_matrix` 的舍入不同，一个小数人物框有 129 个输入值变化，造成约 0.826 像素的关键点变化。正式适配器现复用上游纯 NumPy/OpenCV 几何函数，修复后四个输入张量逐值相同，验收阈值未放宽。失败原始记录和修复后的记录都保留，另有独立的合成渐变图张量哈希回归测试。
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_pose_source_b1.py \
+  --output 05_runtime/validation/b1-pose-source-new
+```
+
+该探针临时停止并恢复原有项目服务，原始 CPU 参考和 ONNX 参考分进程执行，随后验证 TensorRT。参考环境锁文件增加了 MMEngine/MMCV-lite，并将 ContourPy、ml-dtypes 固定到支持 NumPy 1.26 的版本；仅供可视化/ONNX 类型支持的这些依赖不进入生产视觉环境。`pip check` 对参考环境仍会报告上游要求的 `opencv-python` 名称未安装，因为这里明确使用同版本 `opencv-python-headless`，不在一个环境中混装两个 OpenCV 发行包。
 
 原生深度复现入口使用应用的 `Camera` 类，检查时间对应、SDK 对齐、米制单位、无效点和关闭后的释放。输出目录每次使用新名称：
 

@@ -39,7 +39,7 @@
     {
       "id": "body_hand_pose",
       "capability": "Public model body/hand keypoints with explicit topology, confidence and coordinate semantics",
-      "status": "TRT_INTEGRATED_PUBLIC_REPLAY_PASS_ORIGINAL_CHECKPOINT_PARITY_PENDING"
+      "status": "ORIGINAL_CHECKPOINT_ONNX_TRT_AND_PREPOST_PARITY_VERIFIED_INTEGRATED_FIXED_REPLAY_PASS"
     },
     {
       "id": "face",
@@ -95,7 +95,7 @@
     {
       "id": "B1.1",
       "name": "Native RGBD capture/alignment and whole-body pose conversion/reference feasibility",
-      "status": "IN_PROGRESS",
+      "status": "PASS_SENSOR_CAPTURE_AND_POSE_REFERENCE_FEASIBILITY",
       "evidence": [
         "03_models/candidates/vision-b1.json",
         "benchmarks/results/b1-feasibility-20261019.json"
@@ -104,7 +104,7 @@
     {
       "id": "B1.2",
       "name": "Per-model TensorRT execution and reference parity",
-      "status": "IN_PROGRESS",
+      "status": "PASS_SELECTED_MODELS_LIMITED_FIXED_INPUTS",
       "evidence": [
         "benchmarks/results/b1-feasibility-20261019.json"
       ]
@@ -170,7 +170,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T14:45:28.774388+00:00",
+  "updated_at": "2026-10-19T15:03:09.159456+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",

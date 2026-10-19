@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T13:14:24.687114+00:00",
+  "updated_at": "2026-10-19T15:03:09.157372+00:00",
   "status": "IN_PROGRESS_NOT_B1_ACCEPTED",
   "scope": "Initial source/interface review and high-risk TensorRT conversion gates; production remains the B0 application",
   "pose": {
@@ -14,10 +14,45 @@
     "overlay_review": "Body/face/hand overlay on the public fixture reviewed; not labeled task-accuracy evidence",
     "raw_report": "05_runtime/validation/b1-feasibility-20261019/parity/body_hand_pose/report.json",
     "remaining": [
-      "Original PyTorch/community export equivalence",
       "Broader quality and scene coverage",
       "Sustained resource/coexistence acceptance and B1 measurements"
-    ]
+    ],
+    "original_reference": {
+      "status": "ORIGINAL_CHECKPOINT_ONNX_TRT_PARITY_PASS_LIMITED_FIXTURES",
+      "raw_report": "05_runtime/validation/b1-pose-source-20261019-affine-fixed/report.json",
+      "raw_report_sha256": "150f953c2b60333d84bebcac368e2b895d6d14d3fea480c55db4d18393cbc701",
+      "provenance": "05_runtime/validation/b1-pose-source-20261019-affine-fixed/native-provenance.json",
+      "provenance_sha256": "7862016ae78ee54f5b01693f70e56759583fd04d382a33e1d359fe5f1ecc8a9f",
+      "official_checkpoint_sha256": "b0a0eab7ca501e2c88028fe1cfd78b50c7130e220d39541da7f669e5de25e6ca",
+      "upstream_revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
+      "strict_loaded_state_keys": 837,
+      "missing_keys": [],
+      "unexpected_keys": [],
+      "fixed_input_cases": 4,
+      "input_max_abs_error": 0.0,
+      "max_raw_abs_error": 1.1608004570007324e-05,
+      "max_argmax_bin_shift": 0,
+      "max_decoded_original_xy_error_px": 6.103515625e-05,
+      "runtime_versions": {
+        "torch": "2.9.1+cpu",
+        "mmengine": "0.10.7",
+        "mmcv-lite": "2.1.0",
+        "numpy": "1.26.4",
+        "opencv-python-headless": "4.11.0.86"
+      },
+      "scope": "Original upstream backbone/neck/head, GetBBoxCenterScale/TopdownAffine/PoseDataPreprocessor and SimCC3D codec on fixed public inputs; no field-accuracy claim",
+      "correction": {
+        "failed_report": "05_runtime/validation/b1-pose-source-20261019-retry/report.json",
+        "cause": "Hand-written affine matrix used different float arithmetic from original TopdownAffine; 129 normalized input values differed on a fractional person ROI, up to 0.035014, causing ~0.826 original-image pixel keypoint change",
+        "fix": "Reuse pinned bbox_xyxy2cs/get_warp_matrix and original float32 array aspect correction; thresholds unchanged",
+        "regression_fixture": "tests/fixtures/pose-affine-reference.json"
+      },
+      "tests": {
+        "passed": 28,
+        "report": "05_runtime/validation/b1-pose-source-20261019-affine-fixed/regressions.xml"
+      },
+      "pipeline_recheck": "05_runtime/validation/b1-pipeline-pose-affine-20261019/report.json"
+    }
   },
   "software_checks": {
     "passed": 232,

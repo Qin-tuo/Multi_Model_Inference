@@ -83,18 +83,18 @@
       "phase": "DEFERRED_EXPERIMENT"
     },
     "body_hand_pose": {
-      "name": "RTMW3D-X 384 community ONNX conversion",
+      "name": "RTMW3D-X 384; official checkpoint and verified community ONNX",
       "repository": "https://huggingface.co/bukuroo/RTMW3D-ONNX",
       "revision": "9c73e0a7068bf11c4c13885d285cb73671e1e8d7",
       "filename": "rtmw3d-x-384.onnx",
       "path": "05_runtime/models/b1/pose/rtmw3d-x-384.onnx",
       "bytes": 369330857,
       "sha256": "4a289c0e99d47eb595e99679d9d4a2d1def1b4241f9adcbafba44b9ff585ebcd",
-      "license": "Model-card declaration: Apache-2.0; original checkpoint/export equivalence still requires verification",
+      "license": "Apache-2.0 declaration in community model card and upstream MMPose repository; official checkpoint linked by pinned model zoo",
       "upstream_repository": "https://github.com/open-mmlab/mmpose",
       "upstream_revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
-      "reference": "Pinned public ONNX for numerical conversion checks; this alone does not certify the community export against original PyTorch weights",
-      "input_contract_status": "ONNX_SCHEMA_PREPROCESSING_AND_LIMITED_TRT_PARITY_VERIFIED",
+      "reference": "Pinned original MMPose CPU network and preprocessing/codec; strict loading of 837 state entries from official b0a0eab7 checkpoint",
+      "input_contract_status": "ORIGINAL_CHECKPOINT_ONNX_TRT_AND_NATIVE_PREPOST_PARITY_VERIFIED_LIMITED_FIXTURES",
       "scope": "133-point whole-body 3D candidate; original proprietary 70/52 topology is not assumed",
       "model_card_sha256": "4bcf87ecfbbb8e07a01b21415a970c8b53a5283bf6872b657040d3f45c9241f7",
       "observed_onnx_contract": {
@@ -159,7 +159,7 @@
           57.12,
           57.375
         ],
-        "source": "Pinned MMPose projects/rtmpose3d/configs/rtmw3d-x_8xb32_cocktail14-384x288.py"
+        "source": "Pinned MMPose GetBBoxCenterScale -> TopdownAffine -> PoseDataPreprocessor; bbox_xyxy2cs/get_warp_matrix reused at runtime, NumPy float32 aspect correction matches TopdownAffine"
       },
       "validation_summary": "benchmarks/results/b1-feasibility-20261019.json",
       "decoder_source": {
@@ -167,7 +167,30 @@
         "sha256": "d7c848e1ae6e25841ec98dcf20675cff17ec28d9055415e0e3c128fa28053fd6",
         "url": "https://raw.githubusercontent.com/open-mmlab/mmpose/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/projects/rtmpose3d/rtmpose3d/utils.py"
       },
-      "output_semantics": "133 COCO-WholeBody joints. xy: original RGB pixels after inverse affine. z: root-relative learned training scale, not camera meters. score: min(x/y SimCC peaks), not bounded probability; left hand91:112, right hand112:133."
+      "output_semantics": "133 COCO-WholeBody joints. xy: original RGB pixels after inverse affine. z: root-relative learned training scale, not camera meters. score: min(x/y SimCC peaks), not bounded probability; left hand91:112, right hand112:133.",
+      "source_checkpoint": {
+        "url": "https://download.openmmlab.com/mmpose/v1/wholebody_3d_keypoint/rtmw3d/rtmw3d-x_8xb64_cocktail14-384x288-b0a0eab7_20240626.pth",
+        "path": "05_runtime/models/b1/pose/rtmw3d-x-b0a0eab7_20240626.pth",
+        "sha256": "b0a0eab7ca501e2c88028fe1cfd78b50c7130e220d39541da7f669e5de25e6ca",
+        "bytes": 370283682,
+        "source": "Pinned official MMPose RTMPose3D model zoo"
+      },
+      "prepost_source": {
+        "repository": "https://github.com/open-mmlab/mmpose",
+        "revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
+        "files": {
+          "bbox/transforms.py": {
+            "path": "05_runtime/frameworks/b1/mmpose/mmpose/structures/bbox/transforms.py",
+            "sha256": "f08047f2672ae58c2428adc8a7c11b1557bed6bad052b834395577c5678692f0",
+            "url": "https://raw.githubusercontent.com/open-mmlab/mmpose/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/mmpose/structures/bbox/transforms.py"
+          },
+          "simcc3d/utils.py": {
+            "path": "05_runtime/frameworks/b1/mmpose/projects/rtmpose3d/rtmpose3d/utils.py",
+            "sha256": "d7c848e1ae6e25841ec98dcf20675cff17ec28d9055415e0e3c128fa28053fd6",
+            "url": "https://raw.githubusercontent.com/open-mmlab/mmpose/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/projects/rtmpose3d/rtmpose3d/utils.py"
+          }
+        }
+      }
     },
     "face": {
       "name": "YuNet 2023mar",
