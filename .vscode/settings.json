@@ -1,5 +1,5 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/05_runtime/environments/reachy-headless/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder}/05_runtime/environments/edge-assistant/bin/python",
   "python.analysis.extraPaths": [
     "${workspaceFolder}/01_src",
     "${workspaceFolder}/scripts"

@@ -22,7 +22,7 @@ def main():
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
     rclpy.init()
-    node = Node("reachy_recovery_restore_probe")
+    node = Node("camera_recovery_restore_probe")
     samples = {"rgb": [], "depth": []}
     started = time.time()
 

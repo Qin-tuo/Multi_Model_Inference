@@ -658,7 +658,7 @@
   $('volumeUp').addEventListener('click', ()=>setVolumeFromUi(Number($('speakerVolume').value)+5, true));
 
   /* ── Resizable camera/control split ── */
-  const splitKey='reachy-layout-split';
+  const splitKey='edge-assistant-layout-split';
   const splitter=$('layoutSplitter'), leftPane=document.querySelector('.left'), main=document.querySelector('.main');
   function setSplit(percent, persist){
     if(window.innerWidth <= 768) return;

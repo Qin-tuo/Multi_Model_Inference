@@ -70,8 +70,8 @@ SILERO_CHUNK_SAMPLES = 512  # Silero VAD requires exactly 512 samples (32ms) at 
 CHANNELS = 1
 
 TTS_BREAKS = frozenset(".,;:!?\n")
-AEC_SOURCE_NAME = "reachy_aec_source"
-AEC_SINK_NAME = "reachy_aec_sink"
+AEC_SOURCE_NAME = "assistant_aec_source"
+AEC_SINK_NAME = "assistant_aec_sink"
 
 
 # ── Audio helpers ─────────────────────────────────────────────────
@@ -144,8 +144,6 @@ def find_pa_sink(name_hint: str) -> Optional[str]:
 def _pa_sink_label(sink_name: str) -> str:
     """Return a concise, user-facing label for a PulseAudio sink."""
     normalized = sink_name.lower()
-    if "pollen_robotics_reachy_mini_audio" in normalized:
-        return "Reachy Mini"
     if "anker_powerconf" in normalized:
         return "Anker PowerConf"
     if "platform-sound" in normalized:
@@ -165,7 +163,7 @@ def list_pa_sinks() -> list[dict[str, str]]:
         sinks = []
         for line in r.stdout.splitlines():
             parts = line.split("\t")
-            if len(parts) >= 2 and not parts[1].startswith("reachy_aec_"):
+            if len(parts) >= 2 and not parts[1].startswith("assistant_aec_"):
                 sinks.append({"id": parts[1], "label": _pa_sink_label(parts[1])})
         return sinks
     except Exception:
@@ -339,8 +337,8 @@ class PulseAudioAEC:
             f"sink_master={sink_master}",
             f"source_name={self.source_name}",
             f"sink_name={self.sink_name}",
-            "source_properties=device.description=Reachy_AEC_Microphone",
-            "sink_properties=device.description=Reachy_AEC_Speaker",
+            "source_properties=device.description=Assistant_AEC_Microphone",
+            "sink_properties=device.description=Assistant_AEC_Speaker",
         ]
         try:
             result = subprocess.run(
@@ -648,7 +646,7 @@ class MicRecorder:
                 if self.aec.start(self.pa_sink):
                     self.console.print(
                         f"  AEC: [green]WebRTC active[/green] "
-                        f"(Reachy mic → {_pa_sink_label(self.pa_sink)})"
+                        f"(Microphone → {_pa_sink_label(self.pa_sink)})"
                     )
                     self.pa_sink = self.aec.sink_name
                 else:

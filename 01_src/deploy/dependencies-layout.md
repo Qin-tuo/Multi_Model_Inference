@@ -10,12 +10,12 @@
 | `frameworks/openvoicestream/` | 固定 OVS 源码及 Jetson voice engine 子模块 |
 | `frameworks/opencv-zoo/`、`frameworks/tensorrt-samples-16ed0636/` | 当前视觉模型实现和原生推理辅助代码 |
 | `builds/llama/bin/` | llama-server、llama-bench、llama-cli 与同版本共享库 |
-| `environments/reachy-headless/`、`environments/speech/` | 已准备的 Python 环境，脚本路径已迁移 |
+| `environments/edge-assistant/`、`environments/speech/` | 已准备的 Python 环境，脚本路径已迁移 |
 | `models/` | 4B/ASR GGUF、视觉 ONNX/TRT、Silero、Matcha/Vocos 工件 |
 | `datasets/` | 当前 B0 固定图像和合成语音输入 |
 | `baselines/b0/effective-config.json` | 原冻结配置的原字节副本 |
-| `runtime-data/reachy-headless/` | 当前冻结运行配置、systemd 文件与服务日志 |
-| `runtime-data/reachy-actions/`、`runtime-data/reachy-audio/` | 工具数据库和回复音频 |
+| `runtime-data/edge-assistant/` | 当前冻结运行配置、systemd 文件与服务日志 |
+| `runtime-data/actions/`、`runtime-data/audio/` | 工具数据库和回复音频 |
 | `validation/` | 本机验证过程及诊断记录 |
 | `bundle.manifest.json` | 工件逐文件 SHA256 和符号链接清单 |
 | `exports/` | 用于复制到其他兼容环境的运行依赖包 |
@@ -24,7 +24,7 @@
 
 ## 启动
 
-在项目根目录执行 `./run.sh services up`。不需要激活旧 `.venv`；开发时可使用 `source ./05_runtime/environments/reachy-headless/bin/activate`。原生程序通过启动器设置本地 `LD_LIBRARY_PATH`，不修改已锁定的 ELF 文件或模型引擎字节。
+在项目根目录执行 `./run.sh services up`。不需要激活旧 `.venv`；开发时可使用 `source ./05_runtime/environments/edge-assistant/bin/activate`。原生程序通过启动器设置本地 `LD_LIBRARY_PATH`，不修改已锁定的 ELF 文件或模型引擎字节。
 
 ## 导入、校验和打包
 
@@ -39,7 +39,7 @@ python3 scripts/import_runtime.py --source /home/nvidia/AI_Stack
 ```bash
 python3 scripts/runtime_bundle.py inventory
 python3 scripts/runtime_bundle.py verify
-python3 scripts/runtime_bundle.py pack --output 05_runtime/exports/runtime-20261019.tar
+python3 scripts/runtime_bundle.py pack --output 05_runtime/exports/runtime-new.tar
 ```
 
 运行包默认排除数据库、音频输出、缓存、日志和验证记录。它补充 Git 仓库中的代码，不包含 Jetson 操作系统。打包命令输出归档 SHA256；本次包的索引见 [项目运行依赖锁](project-runtime.lock.json)。
@@ -49,12 +49,20 @@ python3 scripts/runtime_bundle.py pack --output 05_runtime/exports/runtime-20261
 在相同架构、兼容系统环境的项目副本内，保持目标 `05_runtime` 不存在，使用已核对的 SHA256：
 
 ```bash
-python3 scripts/runtime_bundle.py unpack --archive /path/to/runtime-20261019.tar --sha256 <包的SHA256>
+python3 scripts/runtime_bundle.py unpack --archive /path/to/runtime-edge-assistant-20261019.tar --sha256 <包的SHA256>
 ./run.sh services check
 ./run.sh services up
 ```
 
 恢复器验证包和文件摘要，重建已声明的系统 Python/TensorRT 链接，并调整环境脚本中的项目路径。源码和模型哈希保持可查。服务注册仍执行归属检查；同一台机器更换项目位置前应先停止并卸载旧注册，不覆盖其他实例。
+
+## 项目命名与历史兼容
+
+当前显示名称为“多模型端侧助手”，服务前缀为 `edge-assistant`，配置环境变量为 `EDGE_ASSISTANT_CONFIG`。当前应用环境在 `environments/edge-assistant/`，业务状态在 `runtime-data/actions/`，回复在 `runtime-data/audio/`。VS Code 解释器路径也使用该环境；已手动选过旧解释器时需重新选择。
+
+旧运行包恢复时先核对原始哈希，再转换旧目录及环境入口。冻结 B0、历史实测报告和原始配置保持原字节，通过路径兼容层读取新位置。工具数据库在持有所有者锁时，以单个事务迁移原有表名，保留笔记、提醒与回执；混合命名和包含无关表的数据库会被拒绝。恢复包仍不携带业务数据库。
+
+版权、许可证、上游来源与历史证据中的原始名称继续保留，不作为当前界面标识。命名迁移前的源码标签是 `before-project-naming-20261019`，本机状态和环境入口备份在 `05_runtime/validation/project-naming-20261019/backup/`。变更名称不代表完成新的性能优化。
 
 ## 主机依赖与边界
 

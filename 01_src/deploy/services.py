@@ -24,7 +24,7 @@ from deploy import runtime  # noqa: E402 — direct script entrypoint
 # 这里管理进程生命周期，不参与 GPU 推理或应用轮次调度。
 ORDER = ("llama", "asr", "speech", "app")
 DEPENDENCIES = {"speech": ("asr",), "app": ("llama", "asr", "speech")}
-PREFIX = "reachy-headless"
+PREFIX = "edge-assistant"
 LINK_DIR = Path.home() / ".config/systemd/user"
 
 
@@ -286,7 +286,7 @@ def render(name, cfg):
         ]
         pre = "ExecStartPre=" + " ".join(quote(a, True) for a in waiting) + "\n"
     return (
-        f"# Managed by Reachy headless for {ROOT}\n[Unit]\nDescription=Reachy headless {name}\n"
+        f"# Managed by Edge Assistant for {ROOT}\n[Unit]\nDescription=Edge Assistant {name}\n"
         f"PartOf={PREFIX}.target\nAfter={' '.join(unit(d) for d in deps)}\nWants={' '.join(unit(d) for d in deps)}\n"
         "StartLimitIntervalSec=120\nStartLimitBurst=3\n\n[Service]\nType=exec\n"
         f"WorkingDirectory={str(ROOT).replace('%', '%%')}\n{pre}ExecStart={' '.join(quote(a, True) for a in argv)}\n"
@@ -305,7 +305,7 @@ def install(cfg):
     old = json.loads(record.read_text()) if record.exists() else {}
     files = {unit(name): render(name, cfg) for name in ORDER}
     files[PREFIX + ".target"] = (
-        "[Unit]\nDescription=Reachy headless selected local services\n"
+        "[Unit]\nDescription=Edge Assistant selected local services\n"
     )
     profile = json.dumps(cfg.effective(), ensure_ascii=False, indent=2) + "\n"
     changed = profile_path(cfg).exists() and profile_path(cfg).read_text() != profile

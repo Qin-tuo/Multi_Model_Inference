@@ -1,8 +1,8 @@
-# 项目二新版计划：基于 Reachy Mini 的无机身端侧多模型部署服务
+# 多模型端侧助手：Orin NX 部署与性能优化实施计划
 
 > 版本：v3.1｜2026-10-16｜面向Orin NX 16GB的实施与实操学习计划。
-> 上游基底：NVIDIA-AI-IOT/reachy-mini-jetson-assistant，固定提交2673202a360a41935b45ac79141ef0bb529492ba。
-> 当前状态：Reachy 派生实现已汇入 main，主目录默认运行四个新服务；完整应用循环、崩溃恢复与旧系统回退已验证，共存压力和准备工件的离线启动已验证，B0-SW 与架构导读已交付，等待用户从视觉复现开始；手势补测及后置验收保持开放。
+> 上游来源：[固定版本与审查清单](../01_src/deploy/upstream.lock.json)，提交2673202a360a41935b45ac79141ef0bb529492ba。
+> 当前状态：本项目派生实现已汇入 main，主目录默认运行四个新服务；完整应用循环、崩溃恢复与旧系统回退已验证，共存压力和准备工件的离线启动已验证，B0-SW 与架构导读已交付，等待用户从视觉复现开始；手势补测及后置验收保持开放。
 > 执行边界：助手推进R0～R4基础工程与当前基线，R5按用户实操反馈推进。
 > 2026-10-16用户确认：麦克风、扬声器实物环节暂时后置，不阻塞本阶段软件交接；用户接手后先从视觉项目开始优化。
 
@@ -21,7 +21,7 @@
 | 项目 | 当前决定 |
 |---|---|
 | 设备 | Orin NX 16GB；本机在线计算，不依赖云端或RK补算 |
-| 应用基底 | 直接派生Reachy Mini Jetson Assistant源码，保留其可复用模块和主要业务顺序 |
+| 应用基底 | 直接派生固定版本的上游应用源码，保留其可复用模块和主要业务顺序 |
 | 物理表达 | 无机器人机身、头部/天线/电机表达，不使用SO-101 |
 | 主模型 | 先用Qwen3.5-4B Q4_K_M＋匹配视觉投影，llama.cpp CUDA |
 | 输入/输出 | D435i摄像头、ReSpeaker Lite双麦、扬声器；音频外设当前尚未接入 |
@@ -55,10 +55,8 @@ A/B完成后，助手不能自动代用户开展多轮优化。每次教学围�
 
 ## 1 上游依据与复用方式
 
-- [上游仓库](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)
-- [固定版本源码](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/tree/2673202a360a41935b45ac79141ef0bb529492ba)
-- 本机审查副本：/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202。
-- [上游依赖兼容清单](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/blob/2673202a360a41935b45ac79141ef0bb529492ba/packaging/jetson-wheels.json)
+- [上游来源、固定提交及源码哈希](../01_src/deploy/upstream.lock.json)
+- [导入清单](../01_src/deploy/upstream-import.json)与[第三方说明](../THIRD-PARTY-NOTICES.md)
 - 岗位方向延续[已核验的JD资料](../benchmarks/manifests/target-jd-20261014.json)：模型部署、C++/Python/Linux、数据流、资源与profiling、可靠交付。具体招聘资格不作假设。
 
 “复用基底”指导入并派生实际代码，保留来源、许可证及上游commit，逐项记录本地差异。先固定可复现参考，再裁剪、适配和扩展；不只照目录另写一套，也不把旧项目主控整体塞入上游。
@@ -69,7 +67,7 @@ A/B完成后，助手不能自动代用户开展多轮优化。每次教学围�
 |---|---|
 | 主入口串接STT、VLM、TTS及共享相机；采用Python线程/队列，未使用Pipecat或ROS2 | 新应用以此单一主线为基底，第一版不并入第二套会话/消息主框架 |
 | 当前主路径配置为Orin Nano8GB、Python3.12、CUDA13.2、L4T39.2.0 | 我们是NX16GB，已记录L4T39.2.1；同为Orin不等于精确兼容，先核验 |
-| 使用YuNet，人脸初始化取决于Reachy连接；FaceTracker包含运动控制 | 必须把人脸感知从机身和电机管理中拆开 |
+| 使用YuNet，人脸初始化取决于机身连接；FaceTracker包含运动控制 | 必须把人脸感知从机身和电机管理中拆开 |
 | 无机身配置同时关闭face_tracking，且关闭AEC | 不能直接将该配置当作目标配置 |
 | 默认ASR/语音设置偏英文，部分输入过滤和TTS分句按英文空格处理 | 中文适配包括模型、过滤、分句和播放，不能只替换prompt |
 | VAD交出语音片段前暂停麦克风，主循环在处理/播放后恢复 | 需要改造监听与当前轮次处理关系，才能实现持续输入和整轮打断 |
@@ -78,7 +76,7 @@ A/B完成后，助手不能自动代用户开展多轮优化。每次教学围�
 | 机器人“speaking gestures”是输出动作 | 不视作用户挥手/静止举掌已实现 |
 | 提供网页、配置overlay、资源监控、部署材料和部分测试 | 直接复用并裁剪，减少新写通用管理代码 |
 
-依据为固定版本的[主入口](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/blob/2673202a360a41935b45ac79141ef0bb529492ba/run_web_vision_chat.py)、[音频流程](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/blob/2673202a360a41935b45ac79141ef0bb529492ba/app/pipeline.py)及上述配置。这里是源码事实和待验证风险，不把尚未复现的每个风险都称为已发生故障。
+依据为[上游审查清单](../01_src/deploy/upstream.lock.json)中固定版本的主入口、音频流程及配置。这里是源码事实和待验证风险，不把尚未复现的每个风险都称为已发生故障。
 
 ## 2 目标范围与裁剪清单
 
@@ -90,7 +88,7 @@ A/B完成后，助手不能自动代用户开展多轮优化。每次教学围�
 | 保留 | web.py、monitor.py、04_web/ | 保留画面、会话、运行状态和基础资源展示 |
 | 保留并修正 | pipeline.py、audio.py、camera.py | 有界I/O、中文分句、取消、纯软件选帧、作用域内清理 |
 | 保留并解耦 | face_detector.py、face_tracker.py | 保留检测/位置与时序状态，移除依赖电机的视觉伺服和扫描 |
-| 从目标运行路径移除 | reachy.py、movement_manager.py、speaking_movements.py、运动测试和运动配置 | 不安装/启动Reachy SDK或daemon，不写电机目标；历史源码在上游/归档保留 |
+| 从目标运行路径移除 | 机身适配模块、movement_manager.py、speaking_movements.py、运动测试和运动配置 | 不安装/启动机器人 SDK或daemon，不写电机目标；历史源码在上游/归档保留 |
 | 后置 | rag.py、ChromaDB及embedding启动链 | 当前不加载，不让运行入口隐式依赖 |
 | 必要新增 | perception.py、gestures.py、turn_control.py | 人体/手部结果、两个手势事件、单一活动轮次与取消 |
 | 可关闭扩展 | actions/下有限工具/笔记/提醒 | 选择性迁移，保持独立持久化和执行回执，不引入Mem0/Qdrant |
@@ -495,11 +493,11 @@ B0的作用是告诉用户“当前系统各部分实际怎样运行”。不能
 ## 14 文件、进度与实施边界
 
 - 当前计划：本文件；[总览](project-overview.md)只维护定位与分工。
-- [上游审查锁](../01_src/deploy/reachy-upstream.lock.json)：固定源码身份和关键文件哈希，状态为审查，不代表已部署。
-- [新版任务清单](../benchmarks/manifests/reachy-headless-roadmap-v3.json)：R0～R6、工程与学习验收、当前执行状态。
-- [迁移缺口清单](../benchmarks/manifests/reachy-gap-ledger-v3.json)：来源差异、待验证风险、处理与证据。
+- [上游审查锁](../01_src/deploy/upstream.lock.json)：固定源码身份和关键文件哈希，状态为审查，不代表已部署。
+- [新版任务清单](../benchmarks/manifests/headless-roadmap-v3.json)：R0～R6、工程与学习验收、当前执行状态。
+- [迁移缺口清单](../benchmarks/manifests/gap-ledger-v3.json)：来源差异、待验证风险、处理与证据。
 - [旧实现进度](archive/repository-cleanup-20261019.json)保留历史通过范围；新应用未自动继承。
-- [旧版计划](archive/02-plan-v2.1-before-reachy-20261015.md)与[旧版使用说明](archive/README-pre-reachy-20261015.md)留作追溯。
+- [旧版计划](archive/02-plan-v2.1-before-framework-20261015.md)与[旧版使用说明](archive/README-pre-framework-20261015.md)留作追溯。
 - 外部源码、环境、模型及原始数据统一位于/home/nvidia/AI_Stack；references/不删除。
 
 计划修订已完成，现已恢复基础工程实施。隔离迁移和验证通过前，主目录默认代码与服务保持旧版本；新入口是否可用以迁移分支及验证记录为准。R5仍以用户实际反馈推进，不由自动Goal循环代做。
@@ -508,4 +506,4 @@ B0的作用是告诉用户“当前系统各部分实际怎样运行”。不能
 
 以下保留完整项目目标。当前交接按2026-10-16用户确认分期：物理音频后置，先交付软件/视觉框架与B0-SW，之后等待用户从视觉开始实操优化。
 
-> 基于固定版本的NVIDIA Reachy Mini Jetson Assistant实际源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。
+> 基于来源已记录的固定版本开源应用源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。

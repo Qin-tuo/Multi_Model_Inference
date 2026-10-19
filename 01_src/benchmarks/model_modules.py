@@ -230,7 +230,7 @@ def worker(role, out):
             cases = [
                 c
                 for c in json.loads(
-                    (ROOT / "benchmarks/corpora/reachy-b0-llm-v1.json").read_text()
+                    (ROOT / "benchmarks/corpora/b0-llm-v1.json").read_text()
                 )["cases"]
                 if c["kind"] == role.removeprefix("l1-")
             ]
@@ -253,7 +253,7 @@ def worker(role, out):
                     (out / (case["id"] + ".jpg")).write_bytes(case["jpeg"])
         else:
             cases = json.loads(
-                (ROOT / "benchmarks/corpora/reachy-b0-speech-v1.json").read_text()
+                (ROOT / "benchmarks/corpora/b0-speech-v1.json").read_text()
             )["cases"]
             for case in cases:
                 case["path"] = str(
@@ -364,7 +364,7 @@ def main():
         raise RuntimeError("Managed services must be ready and idle")
     environment(out)
     runtime.write_json(out / "effective-config.json", cfg.effective())
-    for filename in ("reachy-b0-llm-v1.json", "reachy-b0-speech-v1.json"):
+    for filename in ("b0-llm-v1.json", "b0-speech-v1.json"):
         (out / filename).write_bytes(
             (ROOT / "benchmarks/corpora" / filename).read_bytes()
         )
@@ -376,7 +376,7 @@ def main():
         "tts_first_pcm": "First nonempty block from production iter_bytes(4096), not necessarily first byte on wire",
         "corpus_sha256": {
             name: runtime.sha256(out / name)
-            for name in ("reachy-b0-llm-v1.json", "reachy-b0-speech-v1.json")
+            for name in ("b0-llm-v1.json", "b0-speech-v1.json")
         },
     }
     runtime.write_json(out / "workload.json", workload)

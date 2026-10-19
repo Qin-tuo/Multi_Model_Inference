@@ -210,7 +210,7 @@ def instrument(module, model, times):
 
 def validate():
     protocol = json.loads(
-        (ROOT / "benchmarks/manifests/reachy-b0-sw-v1.json").read_text()
+        (ROOT / "benchmarks/manifests/b0-sw-v1.json").read_text()
     )
     for file, expected in protocol["locks"].items():
         if runtime.sha256(repo_path(file)) != expected:

@@ -5,13 +5,13 @@
   "purpose": "Prepared artifacts for this compatible Jetson host; application source is versioned separately in Git",
   "artifact_manifest": {
     "path": "05_runtime/bundle.manifest.json",
-    "sha256": "6522bfdd97d6f99794b86b46d64526e422c735170e5f983207c1453945d1496e",
+    "sha256": "02a658072b9d1c5dc97ea2051e974483d312234fe7aebdd0823d6c424c140c5e",
     "file_count": 14123,
-    "bytes": 5909496260
+    "bytes": 5909496233
   },
   "archive": {
-    "path": "05_runtime/exports/runtime-20261019.tar",
-    "sha256": "8dd2b817d320e3a776a8805da6c012d39f18e46603cbd1ac66bf71f2b697acb4",
+    "path": "05_runtime/exports/runtime-edge-assistant-20261019.tar",
+    "sha256": "38a06dcf8c7a7887581d2fe591074d96220eaea9d5fa83f258886c66c89755b6",
     "bytes": 6013542400,
     "excludes": [
       "cache",
@@ -62,11 +62,31 @@
     }
   },
   "native_and_model_hashes": "01_src/deploy/runtime-artifacts.lock.json and 03_models manifests",
-  "restore_tag": "before-project-runtime-20261019",
+  "restore_tag": "before-project-naming-20261019",
   "original_stack_preserved": true,
   "boundaries": [
     "Runtime package excludes private databases, replies, logs and validation output.",
     "System Python, Jetson drivers, CUDA/TensorRT and system-site packages remain host-provided.",
     "No cross-hardware or clean-OS deployment certification."
-  ]
+  ],
+  "updated_at": "2026-10-19T07:08:41.284593+00:00",
+  "previous_archive": {
+    "path": "05_runtime/exports/runtime-20261019.tar",
+    "sha256": "8dd2b817d320e3a776a8805da6c012d39f18e46603cbd1ac66bf71f2b697acb4",
+    "bytes": 6013542400,
+    "excludes": [
+      "cache",
+      "exports",
+      "import-report.json",
+      "runtime-data",
+      "state-transfer.json",
+      "validation"
+    ]
+  },
+  "application": {
+    "display_name": "多模型端侧助手",
+    "service_prefix": "edge-assistant",
+    "python_environment": "05_runtime/environments/edge-assistant",
+    "config_environment_variable": "EDGE_ASSISTANT_CONFIG"
+  }
 }

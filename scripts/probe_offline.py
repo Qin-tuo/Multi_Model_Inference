@@ -419,7 +419,7 @@ def main():
         if (
             args.hide_ai_stack
             and not (
-                LEGACY_STACK_DIR / "environments/reachy-headless/bin/python"
+                LEGACY_STACK_DIR / "environments/edge-assistant/bin/python"
             ).is_file()
         ):
             error = error or RuntimeError("Host source runtime became unavailable")

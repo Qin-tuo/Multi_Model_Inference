@@ -5,7 +5,7 @@
 
 ## 1 项目定位
 
-目标是在陪伴交互场景下掌握端侧模型部署、数据流、资源管理、性能分析与可靠交付。当前以NVIDIA Reachy Mini Jetson Assistant的真实源码为应用基底，做没有机器人运动载体的派生工程。
+目标是在陪伴交互场景下掌握端侧模型部署、数据流、资源管理、性能分析与可靠交付。当前复用固定版本的开源应用源码，做没有机器人运动载体的派生工程；原始来源见 [第三方说明](../THIRD-PARTY-NOTICES.md)。
 
 完整功能是人体/人脸/手部感知、中文语音、4B语义理解、图文问答和扬声器回应；挥手问候，静止举掌取消整轮。主模型先用Qwen3.5-4B＋llama.cpp。身份验证删除，长期记忆后置。
 
@@ -29,17 +29,17 @@
 | 文件 | 用途 |
 |---|---|
 | [完整新版计划书](implementation-plan.md) | 目标、模块、代码结构、迁移、R0～R6、功能和性能验收、教学路线及Goal |
-| [上游审查锁](../01_src/deploy/reachy-upstream.lock.json) | 固定commit、关键源码哈希和审查范围 |
-| [新版任务清单](../benchmarks/manifests/reachy-headless-roadmap-v3.json) | 任务依赖、工程/学习验收及暂停状态 |
-| [迁移缺口](../benchmarks/manifests/reachy-gap-ledger-v3.json) | 机身耦合、中文、打断、资源和兼容差异 |
+| [上游审查锁](../01_src/deploy/upstream.lock.json) | 固定commit、关键源码哈希和审查范围 |
+| [新版任务清单](../benchmarks/manifests/headless-roadmap-v3.json) | 任务依赖、工程/学习验收及暂停状态 |
+| [迁移缺口](../benchmarks/manifests/gap-ledger-v3.json) | 机身耦合、中文、打断、资源和兼容差异 |
 | [旧项目恢复索引](archive/repository-cleanup-20261019.json) | 旧实现、进度和实验数据的逐文件恢复入口 |
 | [岗位资料](../benchmarks/manifests/target-jd-20261014.json) | 端侧部署相关JD来源与能力对照 |
-| [历史计划](archive/02-plan-v2.1-before-reachy-20261015.md) | 旧设计和角色约定 |
-| [旧运行说明](archive/README-pre-reachy-20261015.md) | 固定旧源码快照的使用说明及历史结果 |
+| [历史计划](archive/02-plan-v2.1-before-framework-20261015.md) | 旧设计和角色约定 |
+| [旧运行说明](archive/README-pre-framework-20261015.md) | 固定旧源码快照的使用说明及历史结果 |
 
 ## 4 当前真实状态
 
-上游固定提交为2673202a360a41935b45ac79141ef0bb529492ba，审查副本保存在AI_Stack/research。Reachy 派生实现已汇入 `/home/nvidia/Multi_Model_Inference` 的 `main`，默认采用四个 `reachy-headless-*` 服务。4B、中文语音、人体/脸/手、手势、工具和取消已接通；173 项自动化测试、20 次连续完整应用循环、崩溃恢复与两次回退已验证。旧七服务停止，固定旧源码和数据保留；共存压力及隔离网络离线启动已通过，视觉、语音和 4B 接口基线已采集，架构导读已补入 README；完整应用 E1 和软件 B0 汇总已交付，当前等待用户亲自启动完整程序、理解架构，再开始视觉复现；真人手势质量及后置工程验收保持开放。
+上游固定提交为2673202a360a41935b45ac79141ef0bb529492ba，审查副本保存在AI_Stack/research。本项目派生实现已汇入 `/home/nvidia/Multi_Model_Inference` 的 `main`，默认采用四个 `edge-assistant-*` 服务。4B、中文语音、人体/脸/手、手势、工具和取消已接通；173 项自动化测试、20 次连续完整应用循环、崩溃恢复与两次回退已验证。旧七服务停止，固定旧源码和数据保留；共存压力及隔离网络离线启动已通过，视觉、语音和 4B 接口基线已采集，架构导读已补入 README；完整应用 E1 和软件 B0 汇总已交付，当前等待用户亲自启动完整程序、理解架构，再开始视觉复现；真人手势质量及后置工程验收保持开放。
 
 新数据流的模型、取消、持久回执、服务退出恢复与D435i断流重连已有独立证据，入口见计划和任务清单。ReSpeaker Lite及扬声器按用户要求后置，当前软件基线与视觉交接继续推进，不把文件输出计作物理播放。
 

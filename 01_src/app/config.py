@@ -76,7 +76,7 @@ class AudioConfig:
     input_device: Optional[str] = "ReSpeaker Lite"
     output_device: Optional[str] = None
     echo_cancellation: bool = True
-    output_directory: str = str(RUNTIME_DIR / "runtime-data/reachy-audio")
+    output_directory: str = str(RUNTIME_DIR / "runtime-data/audio")
     max_output_seconds: float = 120.0
     retained_files: int = 10
     voice_interruptions: bool = True
@@ -168,7 +168,7 @@ class SessionConfig:
 @dataclass
 class ActionsConfig:
     enabled: bool = False
-    database: str = str(RUNTIME_DIR / "runtime-data/reachy-actions/actions.sqlite")
+    database: str = str(RUNTIME_DIR / "runtime-data/actions/actions.sqlite")
     max_calls_per_turn: int = 2
     max_pending_reminders: int = 100
     max_records: int = 1000
@@ -253,7 +253,7 @@ class Config:
         启动管理器会保存最终有效配置；运行中的服务共同读取该冻结副本。
         """
         default_path = CONFIG_DIR / "settings.yaml"
-        profile_path = config_path or os.environ.get("REACHY_ASSISTANT_CONFIG")
+        profile_path = config_path or os.environ.get("EDGE_ASSISTANT_CONFIG")
         config_paths = [default_path]
         if profile_path and Path(profile_path).resolve() != default_path.resolve():
             config_paths.append(Path(profile_path))

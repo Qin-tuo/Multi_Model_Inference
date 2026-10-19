@@ -7,14 +7,14 @@
     {
       "id": "RG-01",
       "classification": "CONFIRMED_SOURCE_COUPLING",
-      "finding": "Face initialization/tracking depends on Reachy connection and movement manager",
+      "finding": "Face initialization/tracking depends on robot connection and movement manager",
       "source_file": "run_web_vision_chat.py",
       "planned_resolution": "Independent face detection/temporal state with no SDK/daemon",
       "phase": "R1",
       "status": "RESOLVED_FOR_R1",
       "evidence": [
-        "benchmarks/results/reachy-r1-live-face.json",
-        "benchmarks/results/reachy-r1-camera-web.json"
+        "benchmarks/results/r1-live-face.json",
+        "benchmarks/results/r1-camera-web.json"
       ]
     },
     {
@@ -26,9 +26,9 @@
       "phase": "R3",
       "status": "CONTINUOUS_SOFTWARE_VAD_AND_BARGE_IN_VERIFIED_PHYSICAL_AUDIO_DEFERRED",
       "evidence": [
-        "benchmarks/results/reachy-r2-summary.json",
-        "benchmarks/results/reachy-r3-cancellation-summary.json",
-        "benchmarks/results/reachy-r3-voice-summary.json"
+        "benchmarks/results/r2-summary.json",
+        "benchmarks/results/r3-cancellation-summary.json",
+        "benchmarks/results/r3-voice-summary.json"
       ]
     },
     {
@@ -40,8 +40,8 @@
       "phase": "R3",
       "status": "BOUNDED_AUDIO_QUEUES_IMPLEMENTED_R3_STRESS_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r2-summary.json",
-        "benchmarks/results/reachy-r3-cancellation-summary.json"
+        "benchmarks/results/r2-summary.json",
+        "benchmarks/results/r3-cancellation-summary.json"
       ]
     },
     {
@@ -53,7 +53,7 @@
       "phase": "R1",
       "status": "GLOBAL_CAMERA_AND_AUDIO_CLEANUP_REMOVED",
       "evidence": [
-        "benchmarks/results/reachy-r2-summary.json"
+        "benchmarks/results/r2-summary.json"
       ],
       "remaining": "Physical process/device failure matrix still requires R3/R4 evidence."
     },
@@ -66,8 +66,8 @@
       "phase": "R2",
       "status": "CHINESE_FILE_PIPELINE_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r2-speech-file.json",
-        "benchmarks/results/reachy-r2-chinese-chunks.json"
+        "benchmarks/results/r2-speech-file.json",
+        "benchmarks/results/r2-chinese-chunks.json"
       ]
     },
     {
@@ -79,8 +79,8 @@
       "phase": "R0",
       "status": "CORE_COMPATIBILITY_VERIFIED_R2_PROVIDER_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r1-core-environment.json",
-        "benchmarks/results/reachy-r1-camera-web.json"
+        "benchmarks/results/r1-core-environment.json",
+        "benchmarks/results/r1-camera-web.json"
       ]
     },
     {
@@ -92,8 +92,8 @@
       "phase": "R2",
       "status": "GESTURES_INTEGRATED_LIVE_POSITIVES_VERIFIED_FULL_QUALITY_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r2-perception-summary.json",
-        "benchmarks/results/reachy-r3-gesture-summary.json"
+        "benchmarks/results/r2-perception-summary.json",
+        "benchmarks/results/r3-gesture-summary.json"
       ]
     },
     {
@@ -125,8 +125,8 @@
       "phase": "R3",
       "status": "CURRENT_SESSION_AND_LOCAL_ACTIONS_SOFTWARE_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-session-summary.json",
-        "benchmarks/results/reachy-r3-actions-summary.json"
+        "benchmarks/results/r3-session-summary.json",
+        "benchmarks/results/r3-actions-summary.json"
       ]
     },
     {
@@ -137,10 +137,10 @@
       "phase": "R3",
       "status": "REPEATED_DRIVER_HANDOVER_RGB_DEPTH_RESTORED_FINAL_ENDURANCE_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r1-legacy-restore.json",
-        "benchmarks/results/reachy-r1-camera-web.json",
-        "benchmarks/results/reachy-r3-gesture-camera-restore.json",
-        "benchmarks/results/reachy-r3-camera-recovery-legacy-restore.json"
+        "benchmarks/results/r1-legacy-restore.json",
+        "benchmarks/results/r1-camera-web.json",
+        "benchmarks/results/r3-gesture-camera-restore.json",
+        "benchmarks/results/r3-camera-recovery-legacy-restore.json"
       ]
     },
     {
@@ -149,7 +149,7 @@
       "finding": "Palm example supplies xyxy boxes to OpenCV xywh NMS; two disjoint boxes can be merged.",
       "status": "FIXED_WITH_MINIMAL_PATCH",
       "evidence": [
-        "benchmarks/results/reachy-r2-palm-nms.json"
+        "benchmarks/results/r2-palm-nms.json"
       ],
       "phase": "R2"
     },
@@ -159,7 +159,7 @@
       "finding": "TensorRT engine emits device-compatibility warning after reboot; recorded hardware fields match build, similar upstream issue exists.",
       "status": "TRACKED_STABILITY_UNVERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r2-engine-warning.json"
+        "benchmarks/results/r2-engine-warning.json"
       ],
       "phase": "R3"
     },
@@ -171,8 +171,8 @@
       "planned_resolution": "Retain whole native tool groups, require fresh queries and preserve actual transaction receipts.",
       "status": "REPRO_CASE_FIXED_BROADER_MODEL_QUALITY_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r3-actions-initial-failure.json",
-        "benchmarks/results/reachy-r3-actions-integration.json"
+        "benchmarks/results/r3-actions-initial-failure.json",
+        "benchmarks/results/r3-actions-integration.json"
       ]
     },
     {
@@ -183,8 +183,8 @@
       "planned_resolution": "One scheduled drain with byte/event budgets, pre-accept reservations, bounded body/native read/send ownership and turn-keyed snapshot initialization.",
       "status": "REPRO_CASES_AND_TCP_BROWSER_REGRESSIONS_FIXED_FULL_STRESS_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r3-web-summary.json",
-        "benchmarks/results/reachy-r3-web-bounds-before.json"
+        "benchmarks/results/r3-web-summary.json",
+        "benchmarks/results/r3-web-bounds-before.json"
       ]
     },
     {
@@ -195,10 +195,10 @@
       "planned_resolution": "Own one absolute-deadline timer per inference operation, interrupt only its socket, join timer before releasing local admission, retain separate native release checks.",
       "status": "INFERENCE_AND_CONTROL_GET_DEADLINES_VERIFIED_NATIVE_PREEMPTION_NOT_CLAIMED",
       "evidence": [
-        "benchmarks/results/reachy-r3-recovery-summary.json",
-        "benchmarks/results/reachy-r3-recovery-deadline-before.json",
-        "benchmarks/results/reachy-r3-recovery-deadline-after.json",
-        "benchmarks/results/reachy-r3-health-camera-summary.json"
+        "benchmarks/results/r3-recovery-summary.json",
+        "benchmarks/results/r3-recovery-deadline-before.json",
+        "benchmarks/results/r3-recovery-deadline-after.json",
+        "benchmarks/results/r3-health-camera-summary.json"
       ]
     },
     {
@@ -208,8 +208,8 @@
       "finding": "Old LLM health_check accepted HTTP 200 even when the returned model alias differed from the configured alias.",
       "status": "FIXED_WITH_IDENTITY_VALIDATION",
       "evidence": [
-        "benchmarks/results/reachy-r3-health-before.json",
-        "benchmarks/results/reachy-r3-health-after.json"
+        "benchmarks/results/r3-health-before.json",
+        "benchmarks/results/r3-health-after.json"
       ]
     },
     {
@@ -219,8 +219,8 @@
       "finding": "Actual RGB driver detach terminated the capture thread; rebind restored the device node but not capture.",
       "status": "SAME_OWNER_RECONNECT_AND_EPOCH_INVALIDATION_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-camera-recovery-before.json",
-        "benchmarks/results/reachy-r3-camera-recovery-final.json"
+        "benchmarks/results/r3-camera-recovery-before.json",
+        "benchmarks/results/r3-camera-recovery-final.json"
       ]
     },
     {
@@ -230,8 +230,8 @@
       "finding": "New microphone utterances were rejected while the old turn ran, rather than entering the cancellation/release path.",
       "status": "SINGLE_PENDING_VOICE_AND_CONFIRMED_ONSET_CANCELLATION_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-voice-before.json",
-        "benchmarks/results/reachy-r3-voice-summary.json"
+        "benchmarks/results/r3-voice-before.json",
+        "benchmarks/results/r3-voice-summary.json"
       ]
     },
     {
@@ -241,7 +241,7 @@
       "finding": "Absent authoritative systemd LoadState could be treated as STOPPED; observation failure is not proof of process termination.",
       "status": "FIXED_WITH_EXPLICIT_OBSERVATION_ERROR",
       "evidence": [
-        "benchmarks/results/reachy-r4-deployment-summary.json"
+        "benchmarks/results/r4-deployment-summary.json"
       ]
     },
     {
@@ -251,7 +251,7 @@
       "finding": "Exact cgroup PID list equality rejects normal OVS watchdog subprocess churn. First native attempt preserved; follow-up recorded varying helper PID with stable native workers and zero restarts.",
       "status": "PROBE_FIXED_AND_NATIVE_COEXISTENCE_REVERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r4-coexistence-summary.json"
+        "benchmarks/results/r4-coexistence-summary.json"
       ]
     },
     {
@@ -261,8 +261,8 @@
       "finding": "Two measured image questions and two warmups invoked unrequested read-only note/reminder tools; responses still answered the image question. No unrequested mutations observed.",
       "status": "RETAINED_IN_B0_FOR_USER_GUIDED_ANALYSIS",
       "evidence": [
-        "benchmarks/results/reachy-b0-e1-summary.json",
-        "benchmarks/results/reachy-b0-e1-trace.png"
+        "benchmarks/results/b0-e1-summary.json",
+        "benchmarks/results/b0-e1-trace.png"
       ],
       "boundary": "Not claimed resolved; do not interpret the passing pipeline checks as perfect semantic/tool selection."
     }
@@ -272,5 +272,6 @@
     "speaker": "not connected per user",
     "rule": "Physical audio explicitly deferred by user on 2026-10-16; does not block B0-SW and vision-first handoff. File/PCM substitutes do not qualify acoustics."
   },
-  "updated_at": "2026-10-16T12:17:56.315953+00:00"
+  "updated_at": "2026-10-16T12:17:56.315953+00:00",
+  "naming_updated_at": "2026-10-19T07:07:32.176108+00:00"
 }

@@ -14,7 +14,7 @@ from pathlib import Path, PurePosixPath
 import shutil
 import tarfile
 
-from import_runtime import relocate_environments
+from import_runtime import normalize_runtime_layout, relocate_environments
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "05_runtime"
@@ -150,6 +150,7 @@ def unpack(archive_path, expected_sha, destination):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.symlink_to(entry["target"])
         verify(destination)
+        normalize_runtime_layout(destination)
         relocate_environments(destination, Path(original["installed_root"]))
         relocated = inventory(destination)
         return {

@@ -165,7 +165,7 @@ async def probe(args):
             and not initial["actions"]["reminders"]
         )
         assert (
-            "reachy-r3-recovery-" in cfg["actions"]["database"]
+            "assistant-r3-recovery-" in cfg["actions"]["database"]
             and not initial["active_turn"]
         )
         for unit in UNITS.values():

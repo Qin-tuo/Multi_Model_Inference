@@ -33,7 +33,7 @@ SOURCE_SUFFIXES = {
 def repository_files():
     # Preserve attribution on retained imported source; local additions must
     # not falsely claim NVIDIA authorship.
-    manifest = json.loads((ROOT / "01_src/deploy/reachy-import.json").read_text())
+    manifest = json.loads((ROOT / "01_src/deploy/upstream-import.json").read_text())
     return [
         repo_path(name)
         for name in manifest["source_sha256"]

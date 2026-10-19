@@ -105,22 +105,22 @@ def notes(path):
     with sqlite3.connect(f"file:{path}?mode=ro", uri=True) as connection:
         return {
             row[0]: {"title": row[1], "body": row[2]}
-            for row in connection.execute("SELECT id,title,body FROM reachy_notes")
+            for row in connection.execute("SELECT id,title,body FROM assistant_notes")
         }
 
 
 async def exercise(cfg, server, out, report):
     base = f"http://127.0.0.1:{cfg.web.port}"
-    inputs = runtime.paths(cfg)["stack"] / "datasets/reachy-b0-sw-v1"
+    inputs = runtime.paths(cfg)["stack"] / "datasets/b0-sw-v1"
     text_cases = [
         c
         for c in json.loads(
-            (ROOT / "benchmarks/corpora/reachy-b0-llm-v1.json").read_text()
+            (ROOT / "benchmarks/corpora/b0-llm-v1.json").read_text()
         )["cases"]
         if c["kind"] == "text"
     ]
     speech_cases = json.loads(
-        (ROOT / "benchmarks/corpora/reachy-b0-speech-v1.json").read_text()
+        (ROOT / "benchmarks/corpora/b0-speech-v1.json").read_text()
     )["cases"]
     identities = {
         name: backend_identity(name, cfg) for name in ("llama", "asr", "speech")
@@ -719,7 +719,7 @@ async def verify_restart(cfg, out, report):
                 expected = [
                     r[0]
                     for r in connection.execute(
-                        "SELECT id FROM reachy_notes ORDER BY created_at DESC LIMIT 3"
+                        "SELECT id FROM assistant_notes ORDER BY created_at DESC LIMIT 3"
                     )
                 ]
             if (
@@ -766,7 +766,7 @@ def main():
     cfg.validate()
     runtime.write_json(out / "settings.json", cfg.effective())
     runtime.write_json(out / "effective-config.json", original.effective())
-    fixture = ROOT / "benchmarks/manifests/reachy-b0-e1-input-v1.json"
+    fixture = ROOT / "benchmarks/manifests/b0-e1-input-v1.json"
     (out / "camera-input.json").write_bytes(fixture.read_bytes())
     workload = {
         "camera": "Constant frozen public street scene through production Camera, 10Hz absolute replay; no physical camera input in E1",
@@ -789,13 +789,13 @@ def main():
         "history": "Fresh app/DB, history retained within each class, cleared at class boundaries; durable state retained throughout",
         "arrival": "Serial interactive requests for normal classes; overload is twenty independently scheduled arrivals 50ms apart while a long request is active",
         "audio_input_manifest_sha256": runtime.sha256(
-            ROOT / "benchmarks/manifests/reachy-b0-inputs-v1.json"
+            ROOT / "benchmarks/manifests/b0-inputs-v1.json"
         ),
         "text_corpus_sha256": runtime.sha256(
-            ROOT / "benchmarks/corpora/reachy-b0-llm-v1.json"
+            ROOT / "benchmarks/corpora/b0-llm-v1.json"
         ),
         "audio_corpus_sha256": runtime.sha256(
-            ROOT / "benchmarks/corpora/reachy-b0-speech-v1.json"
+            ROOT / "benchmarks/corpora/b0-speech-v1.json"
         ),
         "measurement": "Client WS receipt, not browser paint; TTS first PCM estimate uses wrapper start + production first-block duration, not audible playback. Hooks/observers included in total time.",
     }

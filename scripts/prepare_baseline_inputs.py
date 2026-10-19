@@ -26,7 +26,7 @@ from deploy import runtime, services  # noqa: E402
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--output", type=Path, default=RUNTIME_DIR / "datasets/reachy-b0-sw-v1"
+        "--output", type=Path, default=RUNTIME_DIR / "datasets/b0-sw-v1"
     )
     args = parser.parse_args()
     out = args.output.resolve()
@@ -46,7 +46,7 @@ def main():
         or ready["services"]["app"]["health"]["phase"] != "idle"
     ):
         raise RuntimeError("Wait for the managed stack to be ready and idle")
-    corpus_path = ROOT / "benchmarks/corpora/reachy-b0-speech-v1.json"
+    corpus_path = ROOT / "benchmarks/corpora/b0-speech-v1.json"
     corpus = json.loads(corpus_path.read_text())
     public = RUNTIME_DIR / "datasets/perception-reference/woman_hands.jpg"
     expected = "70cbeb38e198c9862202e0979c21a99b40ca980d3e7b250176c85b1636a40f12"

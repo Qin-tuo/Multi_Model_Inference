@@ -7,7 +7,7 @@ from app import pipeline
 
 
 SPEAKERS = [
-    {"id": "alsa_output.usb-Pollen_Robotics_Reachy_Mini_Audio", "label": "Reachy Mini"},
+    {"id": "alsa_output.usb-Seeed_ReSpeaker_Lite_Audio", "label": "ReSpeaker Lite"},
     {"id": "alsa_output.usb-Anker_PowerConf", "label": "Anker PowerConf"},
 ]
 
@@ -22,7 +22,7 @@ def test_speaker_selector_prefers_configured_external_output(monkeypatch):
 
     selector = pipeline.SpeakerSelector(
         preferred_hint="Anker PowerConf",
-        fallback_hint="Reachy Mini Audio",
+        fallback_hint="ReSpeaker Lite Audio",
     )
 
     assert selector.get_sink() == SPEAKERS[1]["id"]
@@ -42,7 +42,7 @@ def test_speaker_selector_switches_without_restart(monkeypatch):
         return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
-    selector = pipeline.SpeakerSelector("Anker PowerConf", "Reachy Mini Audio")
+    selector = pipeline.SpeakerSelector("Anker PowerConf", "ReSpeaker Lite Audio")
 
     state = selector.select(SPEAKERS[0]["id"])
 
@@ -73,7 +73,7 @@ def test_speaker_selector_reports_and_sets_volume(monkeypatch):
         return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
-    selector = pipeline.SpeakerSelector("Reachy Mini Audio", None)
+    selector = pipeline.SpeakerSelector("ReSpeaker Lite Audio", None)
 
     assert selector.state()["volume"] == 50
     state = selector.set_volume(55)

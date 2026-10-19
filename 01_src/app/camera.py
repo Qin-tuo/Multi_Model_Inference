@@ -108,7 +108,7 @@ class Camera:
         self._state = "stopped"
         self._open_attempts = self._failures = self._reconnects = 0
         self._ever_streamed = False
-        # Reachy's camera can ignore the requested 640x480 mode and return
+        # The camera can ignore the requested 640x480 mode and return
         # 1920x1080 BGR frames. Keeping a 16.5 second raw ring at 10 FPS would
         # retain about 979 MiB. Preserve the temporal window as JPEG bytes and
         # keep only the newest frame raw for face tracking.

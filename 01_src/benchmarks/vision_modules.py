@@ -247,7 +247,7 @@ def main():
         "status": "RUNNING",
         "before": before,
         "protocol_sha256": runtime.sha256(
-            ROOT / "benchmarks/manifests/reachy-b0-sw-v1.json"
+            ROOT / "benchmarks/manifests/b0-sw-v1.json"
         ),
         "modules": {},
     }

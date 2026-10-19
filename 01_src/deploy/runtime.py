@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Native backend commands and locked local artifacts for the Reachy application.
+"""Native backend commands and locked local artifacts for the edge assistant application.
 
 systemd owns supervision. This module constructs existing upstream entrypoints;
 it does not schedule inference, download weights or alter CUDA/TensorRT.
@@ -48,8 +48,8 @@ def paths(cfg):
     stack = Path(cfg.backends.stack_root).expanduser().resolve()
     return {
         "stack": stack,
-        "data": stack / "runtime-data/reachy-headless",
-        "app_python": stack / "environments/reachy-headless/bin/python",
+        "data": stack / "runtime-data/edge-assistant",
+        "app_python": stack / "environments/edge-assistant/bin/python",
         "speech_python": stack / "environments/speech/bin/python",
         "llama": stack / "builds/llama/bin/llama-server",
         "models": stack / "models",

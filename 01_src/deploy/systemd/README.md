@@ -1,13 +1,13 @@
-# Reachy 软件服务部署
+# 多模型端侧助手服务部署
 
-当前部署使用 systemd 用户服务。Reachy 应用负责会话、相机、感知和语音数据流；llama.cpp 与 OpenVoiceStream 负责推理；systemd 负责启动顺序、重启和进程组清理。
+当前部署使用 systemd 用户服务。本项目 应用负责会话、相机、感知和语音数据流；llama.cpp 与 OpenVoiceStream 负责推理；systemd 负责启动顺序、重启和进程组清理。
 
 | 组件 | 实际入口与职责 | 默认端口 |
 |---|---|---|
 | `llama` | 原生 llama-server，Qwen3.5-4B 图文理解 | 8088 |
 | `asr` | 原生 llama-server，Qwen3-ASR-0.6B | 8089 |
 | `speech` | OpenVoiceStream，ASR 适配与 Matcha/Vocos TTS | 8621 |
-| `app` | Reachy Web、单一相机采集、人体/脸/手、VAD、整轮控制、笔记/提醒 | 8090 |
+| `app` | 本项目 Web、单一相机采集、人体/脸/手、VAD、整轮控制、笔记/提醒 | 8090 |
 
 当前软件配置采用语音文件输入/输出，不要求接入麦克风或扬声器。相机使用已连接的 D435i。物理录播、AEC、双讲与实际停播继续待验。
 
@@ -16,18 +16,18 @@
 在 `/home/nvidia/Multi_Model_Inference` 主目录执行；使用独立环境，不使用旧 `.venv`：
 
 ```bash
-./05_runtime/environments/reachy-headless/bin/python main.py services check
-./05_runtime/environments/reachy-headless/bin/python main.py services up
-./05_runtime/environments/reachy-headless/bin/python main.py services status
-./05_runtime/environments/reachy-headless/bin/python main.py services logs --components app --lines 50
-./05_runtime/environments/reachy-headless/bin/python main.py services down
+./05_runtime/environments/edge-assistant/bin/python main.py services check
+./05_runtime/environments/edge-assistant/bin/python main.py services up
+./05_runtime/environments/edge-assistant/bin/python main.py services status
+./05_runtime/environments/edge-assistant/bin/python main.py services logs --components app --lines 50
+./05_runtime/environments/edge-assistant/bin/python main.py services down
 ```
 
 `up --components app` 按依赖启动全部四个组件；`down --components app` 只停止应用，三个模型服务保持驻留。停止 ASR 会先停止其语音服务与应用消费者。当前不设置开机自启。
 
-`up` 加载 `02_config/settings.yaml` 和平台 overlay，或显式 `--config PATH`，把完整有效配置冻结为 `项目/05_runtime/runtime-data/reachy-headless/systemd/settings.json`。所有服务使用同一份冻结配置。运行时更换配置或源码入口会被拒绝，应先 `down` 再 `up`。`status/down/logs/wait` 默认读取已安装的冻结配置；`up` 默认重新读取源码配置。
+`up` 加载 `02_config/settings.yaml` 和平台 overlay，或显式 `--config PATH`，把完整有效配置冻结为 `项目/05_runtime/runtime-data/edge-assistant/systemd/settings.json`。所有服务使用同一份冻结配置。运行时更换配置或源码入口会被拒绝，应先 `down` 再 `up`。`status/down/logs/wait` 默认读取已安装的冻结配置；`up` 默认重新读取源码配置。
 
-新单元为 `reachy-headless-{llama,asr,speech,app}.service`，生成文件位于上述 systemd 目录，以链接注册到 `~/.config/systemd/user`。旧 `mmassistant-*` 不由此命令接管；启动前必须明确停止旧项目持有的端口和相机。占用冲突会报告并退出，不终止外部进程。
+新单元为 `edge-assistant-{llama,asr,speech,app}.service`，生成文件位于上述 systemd 目录，以链接注册到 `~/.config/systemd/user`。旧 `mmassistant-*` 不由此命令接管；启动前必须明确停止旧项目持有的端口和相机。占用冲突会报告并退出，不终止外部进程。
 
 ## 运行约束与状态口径
 
@@ -37,20 +37,20 @@
 - 启动保留旧部署的 2 GiB 可用内存下限。这只是启动准入条件，不能代替峰值资源测量或共存容量验收。未修改推理线程、并发、量化、上下文或缓存参数。
 - 模型入口持有共享构建租约，避免与持独占租约的重型 ORT 构建重叠。运行时不自动下载模型。
 - 模型清单、感知/VAD 锁及 `01_src/deploy/runtime-artifacts.lock.json` 校验现有权重、原生程序/库、TTS 工件和感知源码。OVS 源码要求固定提交且无未记录改动。全量校验会读取数 GiB 文件，请等待命令完成。
-- 日志位于 `项目/05_runtime/runtime-data/reachy-headless/logs`，每组件按 5 MiB 轮转并保留 4 份备份。实验 trace 和测试输出有各自目录。
+- 日志位于 `项目/05_runtime/runtime-data/edge-assistant/logs`，每组件按 5 MiB 轮转并保留 4 份备份。实验 trace 和测试输出有各自目录。
 
-`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、B0 性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。当前已另行通过 [隔离网络启动验证](../../../benchmarks/results/reachy-r4-offline-summary.json)：四个原生入口在只有 lo 的临时网络空间中冷启动并完成交互；整机重启、自启动及干净机器重部署仍分别待验。
+`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、B0 性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。当前已另行通过 [隔离网络启动验证](../../../benchmarks/results/r4-offline-summary.json)：四个原生入口在只有 lo 的临时网络空间中冷启动并完成交互；整机重启、自启动及干净机器重部署仍分别待验。
 
 ## 切换与回退
 
-2026-10-16：默认服务已切换到主目录的 Reachy 四服务；旧七服务停止。演练完成后又从主目录完成正式启动和交互验证，最新状态见 [切换报告](../../../benchmarks/results/reachy-r4-cutover.json)。
+2026-10-16：默认服务已切换到主目录的 本项目 四服务；旧七服务停止。演练完成后又从主目录完成正式启动和交互验证，最新状态见 [切换报告](../../../benchmarks/results/r4-cutover.json)。
 
 旧源码固定在 `/home/nvidia/AI_Stack/archives/legacy-runtime-972de50`，独立环境、模型和用户数据保留。演练脚本先核对旧七服务归属和就绪，切换到新四服务，测试文字/画面/文件语音及完整应用循环，最后恢复旧七服务并检查新鲜 RGB 与对齐深度：
 
 ```bash
-./05_runtime/environments/reachy-headless/bin/python scripts/probe_deployment.py \
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_deployment.py \
   --legacy-root /home/nvidia/AI_Stack/archives/legacy-runtime-972de50 \
-  --output /home/nvidia/AI_Stack/runtime-data/reachy-deployment-new-run --cycles 20
+  --output 05_runtime/validation/deployment-new-run --cycles 20
 ```
 
 输出目录必须是新目录。脚本只接受旧系统运行、新四服务停止的初始状态；当前默认运行新系统，需要先按回退步骤准备旧系统后再演练。该脚本会临时中断本项目服务；结束时保留旧系统运行。演练记录不能替代后续正式切换状态。
@@ -65,13 +65,13 @@
 两项命令都需要当前四服务就绪、没有正在处理的用户请求。它们使用新的独立数据库/音频目录；结束后恢复原冻结配置与默认服务。输出路径必须是尚不存在的目录。
 
 ```bash
-./05_runtime/environments/reachy-headless/bin/python scripts/probe_coexistence.py \
-  --output /home/nvidia/AI_Stack/runtime-data/reachy-pressure-new-run \
-  --input /home/nvidia/AI_Stack/datasets/reachy-b0-sw-v1/zh-20.wav
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_coexistence.py \
+  --output 05_runtime/validation/pressure-new-run \
+  --input 05_runtime/datasets/b0-sw-v1/zh-20.wav
 
-./05_runtime/environments/reachy-headless/bin/python scripts/probe_offline.py \
-  --output /home/nvidia/AI_Stack/runtime-data/reachy-offline-new-run \
-  --input /home/nvidia/AI_Stack/datasets/reachy-b0-sw-v1/zh-20.wav
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_offline.py \
+  --output 05_runtime/validation/offline-new-run \
+  --input 05_runtime/datasets/b0-sw-v1/zh-20.wav
 ```
 
 压力探针暂时替换应用，保留三个原生模型服务。离线探针暂时停止四服务，用 `sudo unshare --net` 创建只有回环接口的临时网络空间，再降回原普通用户执行推理；不改主机网络接口和路由。当前机器需要可用的 `sudo -n`、`unshare`、`ip`。离线探针验证的是准备工件上的原生入口，不声称在该空间内验证了用户级 systemd 或从零安装。

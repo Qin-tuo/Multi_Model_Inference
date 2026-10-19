@@ -1,10 +1,10 @@
 # Orin NX 端侧多模型陪伴服务
 
-基于固定版本的 [NVIDIA Reachy Mini Jetson Assistant](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant)，在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
+本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
 
 当前软件框架与 B0 基线已交付。**接手顺序：亲自启停完整系统 → 理解服务与数据流 → 复现视觉基线 → 在指导下分析和优化。** 实物麦克风/扬声器、真人手势负例、8 小时长稳和干净环境重部署仍待验收。
 
-[项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/reachy-b0-sw.json) · [阶段验证记录](docs/reachy-migration.md)
+[项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)
 
 
 ## 项目内直接运行
@@ -24,7 +24,7 @@
 
 通过 Remote SSH 打开整个 `Multi_Model_Inference/` 文件夹，并在远端安装推荐的 **Python** 和 **Pylance** 扩展。仓库的 `.vscode/settings.json` 已声明 `01_src/`、`scripts/` 源码搜索路径，以及项目内 Python 解释器；运行时的 `sys.path.insert(...)` 不会自动成为编辑器的搜索路径。
 
-如果 VS Code 已经选过解释器，请执行 `Ctrl+Shift+P` → `Python: Select Interpreter` → `Enter interpreter path`，选择项目下的 `05_runtime/environments/reachy-headless/bin/python`。根目录的 `.venv` 是保留的旧环境链接，不用于当前开发。默认解释器设置不会覆盖已经保存的选择。
+如果 VS Code 已经选过解释器，请执行 `Ctrl+Shift+P` → `Python: Select Interpreter` → `Enter interpreter path`，选择项目下的 `05_runtime/environments/edge-assistant/bin/python`。根目录的 `.venv` 是保留的旧环境链接，不用于当前开发。默认解释器设置不会覆盖已经保存的选择。
 
 执行 `Developer: Reload Window` 后，打开 `main.py`，在 `from app.cli import main` 的 `main` 上按 **F12** 或 **Ctrl+鼠标左键**，应跳到 `01_src/app/cli.py`。macOS 使用 **Cmd+鼠标左键**。如果 F12 可以跳转但鼠标不行，检查 `Editor: Multi Cursor Modifier`：设为 `alt` 时，Ctrl/Cmd+点击用于跳转，Alt+点击用于多光标。
 
@@ -36,7 +36,7 @@
 
 ```bash
 cd /home/nvidia/Multi_Model_Inference
-source ./05_runtime/environments/reachy-headless/bin/activate
+source ./05_runtime/environments/edge-assistant/bin/activate
 
 # 结束当前对话后，停止本项目四个服务，确认 STOPPED。
 python main.py services down
@@ -143,9 +143,9 @@ ssh -N -L 18090:127.0.0.1:8090 nvidia@板子IP
 
 然后打开 `http://127.0.0.1:18090/debug`，或在主网页点击“板端调试”。面板约每 2 秒显示板端实际采集/识别 FPS、最新帧的模型耗时/帧龄、资源和当前轮次时间线，支持导出最近 60 个样本；浏览器接收 FPS 单独标注。
 
-第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [阶段记录中的 V1/V2 命令](docs/reachy-migration.md)复现视觉基线，使用新的实验输出目录。
+第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [视觉基线复现命令](docs/visual-baseline.md)复现视觉基线，使用新的实验输出目录。
 
-冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](benchmarks/results/reachy-b0-vision-summary.json)、[模型接口](benchmarks/results/reachy-b0-models-summary.json)、[完整应用](benchmarks/results/reachy-b0-e1-summary.json)和 [原始包索引](benchmarks/results/reachy-b0-archive.json)均保留。
+冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](benchmarks/results/b0-vision-summary.json)、[模型接口](benchmarks/results/b0-models-summary.json)、[完整应用](benchmarks/results/b0-e1-summary.json)和 [原始包索引](benchmarks/results/b0-archive.json)均保留。
 
 ## 验证与历史恢复
 
@@ -155,10 +155,12 @@ python -m pytest -q
 
 `tests/` 为软件回归；真实模型/设备验证位于 `scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
 
-当前目标及剩余项见 [任务清单](benchmarks/manifests/reachy-headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/reachy-gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
+当前目标及剩余项见 [任务清单](benchmarks/manifests/headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
 
-旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前 Reachy 证据、模型数据、许可证及固定旧运行快照保持保留。
+旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前验证证据、模型数据、许可证及固定旧运行快照保持保留。
 
 仅五类核心目录保留编号并排在前面；脚本、测试、基准、文档、补丁和许可证目录使用普通名称。Python 包仍使用 `app`、`deploy`、`benchmarks`；主入口和直接运行的脚本会加入 `01_src` 搜索路径。交互式导入可使用 `PYTHONPATH=01_src python`。测试路径已在 `pytest.ini` 配置，无需额外设置。
 
 冻结清单和历史报告保持原字节，其中旧路径由 `01_src/project_paths.py` 解析。迁移前恢复点为 `before-numbered-layout-20261019`；旧命令中的脚本路径应使用当前编号路径，例如 `python 01_src/benchmarks/vision_modules.py --help`。
+
+应用基底、固定上游版本及本地适配的来源见 [第三方说明](THIRD-PARTY-NOTICES.md) 和 [导入清单](01_src/deploy/upstream-import.json)。项目名称为“多模型端侧助手”，运行服务统一使用 `edge-assistant-*`。

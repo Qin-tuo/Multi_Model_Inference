@@ -18,13 +18,13 @@ def test_aec_loads_webrtc_for_selected_physical_sink(monkeypatch):
         return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
-    aec = pipeline.PulseAudioAEC("reachy-physical-mic")
+    aec = pipeline.PulseAudioAEC("physical-mic")
 
     assert aec.start("selected-physical-speaker")
     assert aec.active
     load_call = next(call for call in calls if call[:3] == ["pactl", "load-module", "module-echo-cancel"])
     assert "aec_method=webrtc" in load_call
-    assert "source_master=reachy-physical-mic" in load_call
+    assert "source_master=physical-mic" in load_call
     assert "sink_master=selected-physical-speaker" in load_call
     assert f"source_name={aec.source_name}" in load_call
     assert f"sink_name={aec.sink_name}" in load_call
@@ -36,7 +36,7 @@ def test_aec_loads_webrtc_for_selected_physical_sink(monkeypatch):
 def test_virtual_aec_sink_is_hidden_from_speaker_selector(monkeypatch):
     stdout = (
         "0\tphysical-speaker\tmodule-alsa-card.c\ts16le 2ch 48000Hz\tIDLE\n"
-        "1\treachy_aec_sink\tmodule-echo-cancel.c\tfloat32le 1ch 32000Hz\tRUNNING\n"
+        "1\tassistant_aec_sink\tmodule-echo-cancel.c\tfloat32le 1ch 32000Hz\tRUNNING\n"
     )
     monkeypatch.setattr(
         pipeline.subprocess,

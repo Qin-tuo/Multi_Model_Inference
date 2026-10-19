@@ -21,7 +21,7 @@ class HandDetector:
             entry = manifest[role]
             filename = entry.get("runtime_source_file", entry["source_file"])
             source = entry["files"][filename]
-            module = load_source(source["path"], source["sha256"], "reachy_" + role)
+            module = load_source(source["path"], source["sha256"], "assistant_" + role)
             weight_name = Path(entry["model_path"]).name
             model = checked_file(
                 entry["model_path"], entry["files"][weight_name]["sha256"]

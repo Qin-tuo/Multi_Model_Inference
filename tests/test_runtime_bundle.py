@@ -11,7 +11,9 @@ from project_paths import LEGACY_STACK_DIR, RUNTIME_DIR, ROOT, load_artifact_man
 from runtime_bundle import digest, inventory, pack, unpack, verify
 
 
-@pytest.mark.parametrize("previous", [LEGACY_STACK_DIR, ROOT / "11_runtime"])
+@pytest.mark.parametrize(
+    "previous", [LEGACY_STACK_DIR, ROOT / "11_runtime", RUNTIME_DIR]
+)
 def test_legacy_config_rebases_only_runtime_paths(tmp_path, previous):
     profile = tmp_path / "settings.json"
     recorded = Config.load().effective()
@@ -23,8 +25,10 @@ def test_legacy_config_rebases_only_runtime_paths(tmp_path, previous):
     profile.write_text(json.dumps(recorded))
     cfg = Config.load(str(profile))
     assert cfg.backends.stack_root == str(RUNTIME_DIR)
-    assert cfg.actions.database.startswith(str(RUNTIME_DIR))
-    assert cfg.audio.output_directory.startswith(str(RUNTIME_DIR))
+    assert cfg.actions.database == str(
+        RUNTIME_DIR / "runtime-data/actions/actions.sqlite"
+    )
+    assert cfg.audio.output_directory == str(RUNTIME_DIR / "runtime-data/audio")
     assert cfg.llm.context_tokens == 2048 and cfg.llm.max_tokens == 128
 
 
@@ -47,7 +51,7 @@ def test_manifest_paths_rebase_without_rewriting_evidence(tmp_path):
 
 
 def prepared(root):
-    for name in ("reachy-headless", "speech"):
+    for name in ("edge-assistant", "speech"):
         env = root / "environments" / name
         (env / "bin").mkdir(parents=True)
         (env / "lib/python3.12/site-packages").mkdir(parents=True)
@@ -85,6 +89,29 @@ def test_archive_roundtrip_preserves_artifacts_and_excludes_private_state(tmp_pa
     (destination / "models/test.bin").write_bytes(b"corrupt")
     with pytest.raises(ValueError, match="mismatch"):
         verify(destination)
+
+
+def test_old_runtime_archive_restores_using_current_names(tmp_path):
+    source, destination = tmp_path / "old", tmp_path / "restored"
+    prepared(source)
+    env = source / "environments/edge-assistant"
+    old = source / "environments/reachy-headless"
+    env.rename(old)
+    (old / "bin/activate").write_text('VIRTUAL_ENV="' + str(old) + '"\n')
+    dataset = source / "datasets/reachy-b0-sw-v1"
+    dataset.mkdir(parents=True)
+    (dataset / "fixed.bin").write_bytes(b"frozen-input")
+    inventory(source)
+    archive = tmp_path / "old-runtime.tar"
+    packed = pack(source, archive)
+    unpack(archive, packed["sha256"], destination)
+    assert not (destination / "environments/reachy-headless").exists()
+    assert (
+        str(destination / "environments/edge-assistant")
+        in (destination / "environments/edge-assistant/bin/activate").read_text()
+    )
+    assert (destination / "datasets/b0-sw-v1/fixed.bin").read_bytes() == b"frozen-input"
+    verify(destination)
 
 
 def test_restore_rejects_bad_digest_and_path_escape(tmp_path):

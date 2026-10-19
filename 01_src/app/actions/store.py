@@ -3,7 +3,8 @@
 
 Adapted from the previous project's SQLAlchemy/ReminderService contracts, with
 memory, identity and visual-notice policy removed. Only this optional service
-owns its new database; old project databases are never opened or migrated.
+owns its database. Former names of these same tables migrate in one transaction;
+databases containing unrelated tables are refused.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -36,11 +37,12 @@ from sqlalchemy import (
     update,
 )
 from app.actions.schema import validate
+from app.actions.migrations import migrate_legacy_schema
 
 
 META = MetaData()
 REQUESTS = Table(
-    "reachy_action_requests",
+    "assistant_action_requests",
     META,
     Column("id", String, primary_key=True),
     Column("fingerprint", String, nullable=False),
@@ -48,7 +50,7 @@ REQUESTS = Table(
     Column("status", String, nullable=False),
 )
 OPERATIONS = Table(
-    "reachy_action_operations",
+    "assistant_action_operations",
     META,
     Column("id", String, primary_key=True),
     Column("request_id", String, nullable=False, index=True),
@@ -58,7 +60,7 @@ OPERATIONS = Table(
     Column("result", Text, nullable=False),
 )
 NOTES = Table(
-    "reachy_notes",
+    "assistant_notes",
     META,
     Column("id", String, primary_key=True),
     Column("title", String, nullable=False),
@@ -66,7 +68,7 @@ NOTES = Table(
     Column("created_at", String, nullable=False),
 )
 REMINDERS = Table(
-    "reachy_reminders",
+    "assistant_reminders",
     META,
     Column("id", String, primary_key=True),
     Column("text", Text, nullable=False),
@@ -158,6 +160,7 @@ class ActionStore:
                     "Another application owns this action database"
                 ) from None
             self.db = engine(self.path)
+            migrate_legacy_schema(self.db)
             existing = set(inspect(self.db).get_table_names())
             if existing and not existing <= set(META.tables) | {"apscheduler_jobs"}:
                 raise ValueError(

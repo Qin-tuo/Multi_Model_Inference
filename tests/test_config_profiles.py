@@ -11,7 +11,7 @@ from app.config import Config
 
 
 def test_default_profile_is_local_4b_without_robot_or_rag(monkeypatch):
-    monkeypatch.delenv("REACHY_ASSISTANT_CONFIG", raising=False)
+    monkeypatch.delenv("EDGE_ASSISTANT_CONFIG", raising=False)
     config = Config.load()
     assert config.llm.model == "assistant-vlm"
     assert config.llm.base_url == "http://127.0.0.1:8088"
@@ -60,7 +60,7 @@ def test_missing_explicit_profile_fails(tmp_path):
 
 def test_environment_selects_profile(monkeypatch):
     monkeypatch.setenv(
-        "REACHY_ASSISTANT_CONFIG", "02_config/settings.orin-nx-headless.yaml"
+        "EDGE_ASSISTANT_CONFIG", "02_config/settings.orin-nx-headless.yaml"
     )
     assert Config.load().llm.model == "assistant-vlm"
 

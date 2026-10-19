@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_PYTHON="$PROJECT_DIR/05_runtime/environments/reachy-headless/bin/python"
+PROJECT_PYTHON="$PROJECT_DIR/05_runtime/environments/edge-assistant/bin/python"
 case "${1:-}" in
     llama-bench|llama-cli)
         PROJECT_TOOL="$1"

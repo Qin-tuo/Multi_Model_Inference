@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-19T07:09:36.108252+00:00",
+  "status": "PASS",
+  "display_name": "多模型端侧助手",
+  "service_prefix": "edge-assistant",
+  "before_commit": "d90dde4244fee6949588422e28f86cce66b75f33",
+  "restore_tag": "before-project-naming-20261019",
+  "renamed_repository_files": 117,
+  "renamed_runtime_directories": 6,
+  "frozen_files_preserved_byte_for_byte": 135,
+  "baseline_fixed_inputs_verified": 23,
+  "automated_tests": {
+    "passed": 194,
+    "failures": 0,
+    "errors": 0,
+    "log": "05_runtime/validation/project-naming-20261019/tests-final.log"
+  },
+  "functional_checks": {
+    "text": "complete",
+    "camera": "complete",
+    "audio": "complete"
+  },
+  "api_checks": {
+    "/api/debug": {
+      "http_status": 200,
+      "keys": [
+        "schema_version",
+        "ready",
+        "source",
+        "session",
+        "sequence",
+        "sampled_monotonic",
+        "sampled_unix",
+        "interval_seconds",
+        "resources",
+        "vision",
+        "turn",
+        "transport",
+        "collection_ms",
+        "cache_age_seconds"
+      ]
+    },
+    "/api/debug/baseline": {
+      "http_status": 200,
+      "keys": [
+        "created_at",
+        "status",
+        "summarizer_sha256",
+        "modules",
+        "streams",
+        "raw_runs",
+        "boundaries",
+        "automatic_tests"
+      ]
+    }
+  },
+  "data_preservation": {
+    "preserved_rows": {
+      "assistant_notes": 0,
+      "assistant_reminders": 0
+    },
+    "schema_names": [
+      "assistant_action_requests",
+      "sqlite_autoindex_assistant_action_requests_1",
+      "assistant_action_operations",
+      "sqlite_autoindex_assistant_action_operations_1",
+      "assistant_notes",
+      "sqlite_autoindex_assistant_notes_1",
+      "assistant_reminders",
+      "sqlite_autoindex_assistant_reminders_1",
+      "apscheduler_jobs",
+      "sqlite_autoindex_apscheduler_jobs_1",
+      "ix_apscheduler_jobs_next_run_time",
+      "ix_assistant_action_operations_request_id"
+    ]
+  },
+  "live_processes_audited": 8,
+  "live_process_old_name_references": [],
+  "service_status": "READY",
+  "camera_state": "streaming",
+  "runtime_archive": {
+    "path": "05_runtime/exports/runtime-edge-assistant-20261019.tar",
+    "sha256": "38a06dcf8c7a7887581d2fe591074d96220eaea9d5fa83f258886c66c89755b6",
+    "bytes": 6013542400,
+    "verified_restored_files": 14123
+  },
+  "raw_validation_directory": "05_runtime/validation/project-naming-20261019",
+  "remaining_original_names": [
+    "Original upstream attribution and license material",
+    "Immutable benchmark evidence and historical documents",
+    "Explicit legacy path/schema compatibility and its regression cases"
+  ],
+  "scope": "Naming and data/path migration only. No model, resource, inference or baseline performance tuning.",
+  "regression_notes": [
+    "An unchanged 150 ms control timeout test failed during initial cold runs; final full suite passed with production limits unchanged."
+  ]
+}

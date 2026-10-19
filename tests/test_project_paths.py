@@ -13,7 +13,7 @@ from project_paths import ROOT, repo_path
 
 def test_frozen_baseline_locks_resolve_without_rewriting_records():
     protocol = json.loads(
-        repo_path("benchmarks/manifests/reachy-b0-sw-v1.json").read_text()
+        repo_path("benchmarks/manifests/b0-sw-v1.json").read_text()
     )
     for name, digest in protocol["locks"].items():
         assert hashlib.sha256(repo_path(name).read_bytes()).hexdigest() == digest
@@ -31,7 +31,7 @@ def test_source_and_data_locations_are_unambiguous():
     )
     assert (
         repo_path("benchmarks/results/reachy-b0-sw.json")
-        == ROOT / "benchmarks/results/reachy-b0-sw.json"
+        == ROOT / "benchmarks/results/b0-sw.json"
     )
     assert repo_path("02_config/settings.yaml") == ROOT / "02_config/settings.yaml"
     for name in ("../outside", "/etc/passwd"):

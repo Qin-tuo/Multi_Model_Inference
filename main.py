@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """
-Reachy Mini Jetson Assistant
+Edge Multimodal Assistant
 On-device, GPU-accelerated for NVIDIA Jetson
 
 Usage:

@@ -12,16 +12,45 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "01_src"))
+from project_paths import LEGACY_RUNTIME_PATHS
+
+
+def normalize_runtime_layout(destination):
+    """Upgrade an unpacked legacy bundle before rebasing its environment scripts."""
+    for old, new in LEGACY_RUNTIME_PATHS.items():
+        source, target = destination / old, destination / new
+        if source.exists():
+            if target.exists():
+                raise ValueError("Both legacy and current runtime paths exist: " + new)
+            source.rename(target)
+
+
+def source_directory(source, relative):
+    current = source / relative
+    if current.exists():
+        return current
+    for old, new in LEGACY_RUNTIME_PATHS.items():
+        if relative == new and (source / old).exists():
+            return source / old
+    return current
 
 
 def relocate_environments(destination, source):
     """Repair venv entry scripts; Python executables still use host Python 3.12."""
     changed = []
-    for name in ("reachy-headless", "speech"):
+    for name in ("edge-assistant", "speech"):
         env = destination / "environments" / name
         aliases = [str(source / "environments" / name)]
+        aliases += [
+            str(base / old)
+            for old, new in LEGACY_RUNTIME_PATHS.items()
+            if new == "environments/" + name
+            for base in (source, destination)
+        ]
         if name == "speech":
             aliases += [str(ROOT / ".venv-speech")]
         for file in [env / "pyvenv.cfg", *list((env / "bin").iterdir())]:
@@ -34,6 +63,12 @@ def relocate_environments(destination, source):
             updated = text
             for old in aliases:
                 updated = updated.replace(old, str(env))
+            if name == "edge-assistant":
+                for old, new in LEGACY_RUNTIME_PATHS.items():
+                    if new == "environments/" + name:
+                        updated = updated.replace(
+                            "(" + Path(old).name + ")", "(" + name + ")"
+                        )
             if updated != text:
                 file.write_text(updated)
                 changed.append(str(file.relative_to(destination)))
@@ -53,10 +88,12 @@ def copy_runtime(source, destination):
         raise ValueError(
             "Destination already exists; do not overwrite a prepared runtime"
         )
-    if not (source / "environments/reachy-headless/bin/python").is_file():
+    if not (
+        source_directory(source, "environments/edge-assistant") / "bin/python"
+    ).is_file():
         raise ValueError("Source is not a prepared AI_Stack")
     directories = [
-        "environments/reachy-headless",
+        "environments/edge-assistant",
         "environments/speech",
         "builds/llama/bin",
         "frameworks/llama.cpp",
@@ -67,8 +104,8 @@ def copy_runtime(source, destination):
         "models/face",
         "models/hands",
         "models/vad",
-        "datasets/reachy-b0-sw-v1",
-        "datasets/reachy-b0-e1-v1",
+        "datasets/b0-sw-v1",
+        "datasets/b0-e1-v1",
         "datasets/perception-reference",
     ]
     model_manifest = json.loads((ROOT / "03_models/manifest.json").read_text())[
@@ -86,7 +123,7 @@ def copy_runtime(source, destination):
     needed = sum(
         p.stat().st_size
         for name in directories
-        for p in (source / name).rglob("*")
+        for p in source_directory(source, name).rglob("*")
         if p.is_file() and not p.is_symlink()
     )
     needed += sum((source / name).stat().st_size for name in files)
@@ -96,7 +133,7 @@ def copy_runtime(source, destination):
     for name in directories:
         print("Copying " + name, flush=True)
         shutil.copytree(
-            source / name,
+            source_directory(source, name),
             destination / name,
             symlinks=True,
             ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"),
@@ -111,7 +148,8 @@ def copy_runtime(source, destination):
     shutil.copy2(
         prior
         if prior.is_file()
-        else source / "runtime-data/reachy-headless/systemd/settings.json",
+        else source_directory(source, "runtime-data/edge-assistant")
+        / "systemd/settings.json",
         frozen / "effective-config.json",
     )
     changes = relocate_environments(destination, source)

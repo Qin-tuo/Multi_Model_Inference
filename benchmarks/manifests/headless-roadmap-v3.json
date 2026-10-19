@@ -4,11 +4,11 @@
   "created_at": "2026-10-15T03:33:30.511226+00:00",
   "execution_status": "ACTIVE",
   "migration_status": "R3_FUNCTIONAL_MODULES_INTEGRATED_RELIABILITY_MATRIX_PENDING",
-  "goal": "基于固定版本的NVIDIA Reachy Mini Jetson Assistant实际源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。",
+  "goal": "基于固定版本的来源已记录的固定版本开源应用源码，在Orin NX16GB上派生无机身端侧多模型服务。保留上游模块组织及语音/视觉主线，裁掉机器人运动与默认RAG依赖，固定Qwen3.5-4B和本地中文ASR/TTS，补齐人体、人脸、手部感知、挥手问候、静止举掌整轮取消与必要有限工具。由助手先完成清晰简洁的工程结构、数据流、生命周期、有界资源、异常恢复、可复现部署及真实完整功能验证，再交付未预先调优的各模块/整机B0性能基线和架构导读。之后由用户在逐步指导下亲自使用专业工具，逐模块测量、定位、分析、提出并实施优化，回归并与冻结基准比较；助手负责解释、审查和明确请求的协助，不自动代替用户连续优化。最终同时满足E01～E08工程验收和K01～K06用户掌握验收。长期记忆另阶段，身份验证和机器人表达不包含，Edge-LLM仅作后续独立对照；所有完成结论以真实证据及其适用范围为准。",
   "current_runtime": "legacy Pipecat/ROS2 application remains unchanged",
-  "planned_runtime": "derived Reachy Mini Jetson Assistant without robot body",
-  "upstream_lock": "deploy/reachy-upstream.lock.json",
-  "gap_ledger": "benchmarks/manifests/reachy-gap-ledger-v3.json",
+  "planned_runtime": "Edge Multimodal Assistant without robot body",
+  "upstream_lock": "01_src/deploy/upstream.lock.json",
+  "gap_ledger": "benchmarks/manifests/gap-ledger-v3.json",
   "phases": [
     {
       "id": "R0",
@@ -24,7 +24,7 @@
           "deliverable": "上游锁、历史文档和迁移前来源记录",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r0-snapshot.json"
+            "benchmarks/results/r0-snapshot.json"
           ]
         },
         {
@@ -34,8 +34,8 @@
           "deliverable": "兼容性检查记录；不得将研究锁视为部署通过",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r1-core-environment.json",
-            "benchmarks/results/reachy-r1-camera-web.json"
+            "benchmarks/results/r1-core-environment.json",
+            "benchmarks/results/r1-camera-web.json"
           ],
           "boundary": "This is compatibility preparation and core verification; new body/hand inference providers are checked in R2, not certified here."
         },
@@ -46,8 +46,8 @@
           "deliverable": "独立worktree/环境、差异记录和回退步骤",
           "execution": "COMPLETE",
           "evidence": [
-            "deploy/reachy-import.json",
-            "benchmarks/results/reachy-r1-core-environment.json"
+            "01_src/deploy/upstream-import.json",
+            "benchmarks/results/r1-core-environment.json"
           ]
         },
         {
@@ -57,7 +57,7 @@
           "deliverable": "模块契约与有效配置定义",
           "execution": "COMPLETE",
           "evidence": [
-            "docs/reachy-migration.md"
+            "docs/migration-history.md"
           ]
         }
       ]
@@ -69,7 +69,7 @@
       "depends_on": [
         "R0"
       ],
-      "exit": "无机身文字/图像/Web路径可运行，人脸不依赖Reachy SDK/daemon；中文音频在R2接入后验证",
+      "exit": "无机身文字/图像/Web路径可运行，人脸不依赖robot SDK/daemon；中文音频在R2接入后验证",
       "tasks": [
         {
           "id": "R1.reference",
@@ -78,7 +78,7 @@
           "deliverable": "固定上游客户端配已选4B的最小参考证据；明确配置差异，不额外下载Gemma或开展选型",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r1-reference-text.json"
+            "benchmarks/results/r1-reference-text.json"
           ]
         },
         {
@@ -88,7 +88,7 @@
           "deliverable": "可追踪源码差异、精简运行依赖",
           "execution": "COMPLETE",
           "evidence": [
-            "deploy/reachy-import.json",
+            "01_src/deploy/upstream-import.json",
             "run_web_vision_chat.py",
             "app/config.py"
           ]
@@ -100,7 +100,7 @@
           "deliverable": "纯感知输出、无机身持续运行和关闭回归",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r1-live-face.json"
+            "benchmarks/results/r1-live-face.json"
           ]
         },
         {
@@ -110,8 +110,8 @@
           "deliverable": "公开入口文字/图像功能与模式说明；不伪造物理录播",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r1-web-text.json",
-            "benchmarks/results/reachy-r1-camera-web.json"
+            "benchmarks/results/r1-web-text.json",
+            "benchmarks/results/r1-camera-web.json"
           ]
         }
       ]
@@ -132,7 +132,7 @@
           "deliverable": "本机LLM/VLM实际调用与预算检查",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-perception-summary.json"
+            "benchmarks/results/r2-perception-summary.json"
           ]
         },
         {
@@ -142,8 +142,8 @@
           "deliverable": "STT接口、中文分段/识别和错误回归",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-summary.json",
-            "benchmarks/results/reachy-r2-speech-final.json"
+            "benchmarks/results/r2-summary.json",
+            "benchmarks/results/r2-speech-final.json"
           ]
         },
         {
@@ -153,8 +153,8 @@
           "deliverable": "合成/播放职责与中文输出检查",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-summary.json",
-            "benchmarks/results/reachy-r2-speech-final.json"
+            "benchmarks/results/r2-summary.json",
+            "benchmarks/results/r2-speech-final.json"
           ]
         },
         {
@@ -164,7 +164,7 @@
           "deliverable": "预后处理、坐标和参考输出对照",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-perception-summary.json"
+            "benchmarks/results/r2-perception-summary.json"
           ]
         },
         {
@@ -174,7 +174,7 @@
           "deliverable": "上游锁、参考与本机结果、失败限制",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-perception-summary.json"
+            "benchmarks/results/r2-perception-summary.json"
           ]
         },
         {
@@ -184,7 +184,7 @@
           "deliverable": "共享缓存、结果归属和观测记录",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r2-perception-summary.json"
+            "benchmarks/results/r2-perception-summary.json"
           ]
         }
       ]
@@ -205,8 +205,8 @@
           "deliverable": "正常/迟到/取消阶段回归及后端释放证据",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r3-cancellation-summary.json",
-            "benchmarks/results/reachy-r3-voice-summary.json"
+            "benchmarks/results/r3-cancellation-summary.json",
+            "benchmarks/results/r3-voice-summary.json"
           ],
           "boundary": "Software scope includes real models and controlled PCM; physical listening/AEC/stop remains explicitly DEFERRED_BY_USER, not PASS."
         },
@@ -217,7 +217,7 @@
           "deliverable": "真实正反例、互斥/冷却/过期/多人记录",
           "execution": "IN_PROGRESS",
           "evidence": [
-            "benchmarks/results/reachy-r3-gesture-summary.json"
+            "benchmarks/results/r3-gesture-summary.json"
           ],
           "user_test_availability": "User replied 稍后再测 on 2026-10-16; real negative/occlusion/multi-hand samples remain pending, independent work continues."
         },
@@ -228,13 +228,13 @@
           "deliverable": "慢消费者/队列满/重复生命周期记录",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r3-actions-summary.json",
-            "benchmarks/results/reachy-r3-web-summary.json",
-            "benchmarks/results/reachy-r3-recovery-summary.json",
-            "benchmarks/results/reachy-r3-health-camera-summary.json",
-            "benchmarks/results/reachy-r3-voice-summary.json",
-            "benchmarks/results/reachy-r4-deployment-summary.json",
-            "benchmarks/results/reachy-r4-coexistence-summary.json"
+            "benchmarks/results/r3-actions-summary.json",
+            "benchmarks/results/r3-web-summary.json",
+            "benchmarks/results/r3-recovery-summary.json",
+            "benchmarks/results/r3-health-camera-summary.json",
+            "benchmarks/results/r3-voice-summary.json",
+            "benchmarks/results/r4-deployment-summary.json",
+            "benchmarks/results/r4-coexistence-summary.json"
           ],
           "boundary": "Current enabled software scope; limited native pressure/cleanup evidence does not claim 8h leak freedom or physical device behavior."
         },
@@ -245,7 +245,7 @@
           "deliverable": "持久回执、幂等、重启和取消边界",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r3-actions-summary.json"
+            "benchmarks/results/r3-actions-summary.json"
           ]
         },
         {
@@ -255,11 +255,11 @@
           "deliverable": "故障台账、最小复现和下一轮验证",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/results/reachy-r3-actions-summary.json",
-            "benchmarks/results/reachy-r3-recovery-summary.json",
-            "benchmarks/results/reachy-r3-health-camera-summary.json",
-            "benchmarks/results/reachy-r3-voice-summary.json",
-            "benchmarks/results/reachy-r4-deployment-summary.json"
+            "benchmarks/results/r3-actions-summary.json",
+            "benchmarks/results/r3-recovery-summary.json",
+            "benchmarks/results/r3-health-camera-summary.json",
+            "benchmarks/results/r3-voice-summary.json",
+            "benchmarks/results/r4-deployment-summary.json"
           ],
           "boundary": "Current software fault scope; R6 repeated fault matrix and 8h tests remain separate. Physical audio is deferred, never counted as PASS."
         }
@@ -290,10 +290,10 @@
           "deliverable": "启用软件范围F01-F12证据、20次完整应用循环、已知局限和软件版本标签；声学项列DEFERRED",
           "execution": "IN_PROGRESS",
           "evidence": [
-            "benchmarks/results/reachy-r4-deployment-summary.json",
-            "benchmarks/results/reachy-r4-coexistence-summary.json",
-            "benchmarks/results/reachy-r4-offline-summary.json",
-            "benchmarks/results/reachy-b0-e1-summary.json"
+            "benchmarks/results/r4-deployment-summary.json",
+            "benchmarks/results/r4-coexistence-summary.json",
+            "benchmarks/results/r4-offline-summary.json",
+            "benchmarks/results/b0-e1-summary.json"
           ],
           "boundary": "No blanket complete-function claim: F06/F07 still need user-deferred real negative/occlusion/multi-hand samples; physical audio remains deferred."
         },
@@ -304,12 +304,12 @@
           "deliverable": "视觉实机与固定输入单体/共存指标、文件或PCM语音软件指标；标明时间起点，声学指标不填估值",
           "execution": "COMPLETE",
           "evidence": [
-            "benchmarks/manifests/reachy-b0-sw-v1.json",
-            "benchmarks/manifests/reachy-b0-inputs-v1.json",
-            "benchmarks/results/reachy-b0-vision-summary.json",
-            "benchmarks/results/reachy-b0-models-summary.json",
-            "benchmarks/results/reachy-b0-sw.json",
-            "benchmarks/results/reachy-b0-e1-summary.json"
+            "benchmarks/manifests/b0-sw-v1.json",
+            "benchmarks/manifests/b0-inputs-v1.json",
+            "benchmarks/results/b0-vision-summary.json",
+            "benchmarks/results/b0-models-summary.json",
+            "benchmarks/results/b0-sw.json",
+            "benchmarks/results/b0-e1-summary.json"
           ]
         },
         {
@@ -320,8 +320,8 @@
           "execution": "IN_PROGRESS",
           "evidence": [
             "README.md",
-            "docs/reachy-migration.md",
-            "benchmarks/results/reachy-b0-sw.json"
+            "docs/migration-history.md",
+            "benchmarks/results/b0-sw.json"
           ]
         }
       ]
@@ -409,95 +409,95 @@
     "F01": {
       "status": "PREPARED_SOFTWARE_START_STOP_RESTART_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r4-deployment-summary.json"
+        "benchmarks/results/r4-deployment-summary.json"
       ]
     },
     "F02": {
       "status": "REAL_AND_FIXED_INPUT_VISION_DATAFLOW_VERIFIED_QUALITY_SCOPE_LIMITED",
       "evidence": [
-        "benchmarks/results/reachy-r1-live-face.json",
-        "benchmarks/results/reachy-r2-perception-summary.json",
-        "benchmarks/results/reachy-r3-gesture-summary.json",
-        "benchmarks/results/reachy-b0-vision-summary.json"
+        "benchmarks/results/r1-live-face.json",
+        "benchmarks/results/r2-perception-summary.json",
+        "benchmarks/results/r3-gesture-summary.json",
+        "benchmarks/results/b0-vision-summary.json"
       ],
       "boundary": "Typed outputs, same-frame ownership and live positive samples; not full gesture or general perception accuracy acceptance."
     },
     "F03": {
       "status": "TEXT_AND_FILE_SPEECH_PIPELINE_VERIFIED_WITH_MODEL_LIMITATIONS",
       "evidence": [
-        "benchmarks/results/reachy-b0-models-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/b0-models-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ],
       "boundary": "Actual ASR/4B/TTS and WAV replies; synthetic CER and extra read-tool calls retained; physical acoustics deferred."
     },
     "F04": {
       "status": "CURRENT_FRAME_AND_STALE_SOURCE_REJECTION_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r1-camera-web.json",
-        "benchmarks/results/reachy-r3-health-camera-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/r1-camera-web.json",
+        "benchmarks/results/r3-health-camera-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ],
       "boundary": "Host-receipt freshness/epoch contract; not sensor-exposure latency or perfect VLM semantics."
     },
     "F05": {
       "status": "SOFTWARE_TEXT_AND_FILE_SPEECH_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-session-summary.json"
+        "benchmarks/results/r3-session-summary.json"
       ]
     },
     "F06": {
       "status": "PARTIAL_LIVE_POSITIVE_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-gesture-summary.json"
+        "benchmarks/results/r3-gesture-summary.json"
       ]
     },
     "F07": {
       "status": "PARTIAL_LIVE_POSITIVE_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-gesture-summary.json"
+        "benchmarks/results/r3-gesture-summary.json"
       ]
     },
     "F08": {
       "status": "SOFTWARE_VOICE_AND_UI_CANCEL_VERIFIED_PHYSICAL_ACOUSTICS_DEFERRED",
       "evidence": [
-        "benchmarks/results/reachy-r3-cancellation-summary.json",
-        "benchmarks/results/reachy-r3-voice-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/r3-cancellation-summary.json",
+        "benchmarks/results/r3-voice-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ]
     },
     "F09": {
       "status": "SOFTWARE_MODEL_DATABASE_SCHEDULER_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r3-actions-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/r3-actions-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ]
     },
     "F10": {
       "status": "SOFTWARE_COEXISTENCE_AND_TRANSPORT_VERIFIED_SHORT_WINDOW",
       "evidence": [
-        "benchmarks/results/reachy-r3-web-summary.json",
-        "benchmarks/results/reachy-r3-health-camera-summary.json",
-        "benchmarks/results/reachy-r4-coexistence-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/r3-web-summary.json",
+        "benchmarks/results/r3-health-camera-summary.json",
+        "benchmarks/results/r4-coexistence-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ]
     },
     "F11": {
       "status": "PREPARED_ARTIFACTS_OFFLINE_RUNTIME_START_VERIFIED",
       "evidence": [
-        "benchmarks/results/reachy-r4-offline-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/r4-offline-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ],
       "boundary": "Four native entrypoints, loopback-only namespace, unprivileged inference, normal cleanup and host-service restoration; clean-machine rebuild and OS reboot remain separate."
     },
     "F12": {
       "status": "PARTIAL_BACKEND_WEB_AND_CAMERA_DRIVER_RECOVERY_VERIFIED_PHYSICAL_MATRIX_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-r3-web-summary.json",
-        "benchmarks/results/reachy-r3-recovery-summary.json",
-        "benchmarks/results/reachy-r3-health-camera-summary.json",
-        "benchmarks/results/reachy-r4-deployment-summary.json",
-        "benchmarks/results/reachy-r4-coexistence-summary.json",
-        "benchmarks/results/reachy-b0-e1-summary.json"
+        "benchmarks/results/r3-web-summary.json",
+        "benchmarks/results/r3-recovery-summary.json",
+        "benchmarks/results/r3-health-camera-summary.json",
+        "benchmarks/results/r4-deployment-summary.json",
+        "benchmarks/results/r4-coexistence-summary.json",
+        "benchmarks/results/b0-e1-summary.json"
       ]
     }
   },
@@ -510,8 +510,8 @@
       "status": "SINGLE_APPLICATION_FRAMEWORK_AND_MODULE_OWNERSHIP_VERIFIED",
       "evidence": [
         "README.md",
-        "deploy/reachy-import.json",
-        "benchmarks/results/reachy-r4-cutover.json"
+        "01_src/deploy/upstream-import.json",
+        "benchmarks/results/r4-cutover.json"
       ]
     },
     "E03": {
@@ -529,7 +529,7 @@
     "E06": {
       "status": "ASSISTANT_BASELINE_AND_REPRODUCTION_ARTIFACTS_DELIVERED_USER_REPRO_PENDING",
       "evidence": [
-        "benchmarks/results/reachy-b0-sw.json"
+        "benchmarks/results/b0-sw.json"
       ]
     },
     "E07": {
@@ -583,9 +583,9 @@
       "E1"
     ],
     "pending_components": [],
-    "vision_evidence": "benchmarks/results/reachy-b0-vision-summary.json",
-    "model_interface_evidence": "benchmarks/results/reachy-b0-models-summary.json",
-    "summary": "benchmarks/results/reachy-b0-sw.json",
+    "vision_evidence": "benchmarks/results/b0-vision-summary.json",
+    "model_interface_evidence": "benchmarks/results/b0-models-summary.json",
+    "summary": "benchmarks/results/b0-sw.json",
     "user_reproduction": "NOT_VERIFIED"
   },
   "collaboration": {
@@ -615,8 +615,6 @@
   "completion_rule": "Evaluate engineering and user-mastery evidence within the current user-approved release scope. Deferred physical audio is never PASS; B0-SW handoff and vision-first guided work do not wait for it. User-led optimization still requires user execution and explanation.",
   "updated_at": "2026-10-16T12:17:56.313377+00:00",
   "execution_authority": "User activated the new goal on 2026-10-15; autonomous foundation and baseline work authorized, later optimization remains guided user work.",
-  "migration_branch": "migration/reachy-headless",
-  "migration_worktree": "/home/nvidia/AI_Stack/projects/reachy-headless",
   "current_scope_decision": {
     "date": "2026-10-16",
     "authority": "User explicitly deferred microphone/speaker hardware and selected vision as the first optimization area",
@@ -643,10 +641,10 @@
   "migration_merged": true,
   "deployment": {
     "source_commit": "a99bc8b37799b7549174d9bfd9d375dee4fc9204",
-    "unit_prefix": "reachy-headless",
+    "unit_prefix": "edge-assistant",
     "legacy_runtime": "STOPPED",
     "rollback_checkout": "/home/nvidia/AI_Stack/archives/legacy-runtime-972de50",
-    "evidence": "benchmarks/results/reachy-r4-cutover.json"
+    "evidence": "benchmarks/results/r4-cutover.json"
   },
   "handoff_state": {
     "status": "WAITING_FOR_USER_STARTUP_STEP",
@@ -654,5 +652,10 @@
     "first_area": "system_startup_then_vision",
     "instruction": "User first stops and starts the four managed services, verifies readiness, and learns the entrypoints/dataflow. Then reproduce the vision baseline and lead optimization; assistant explains and reviews.",
     "goal_complete": false
-  }
+  },
+  "historical_migration": {
+    "branch": "migration/reachy-headless",
+    "worktree": "/home/nvidia/AI_Stack/projects/reachy-headless"
+  },
+  "naming_updated_at": "2026-10-19T07:07:31.980969+00:00"
 }

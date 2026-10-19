@@ -49,7 +49,7 @@ def instrument_app(cfg, out):
     class FixedCamera(Camera):
         def _open(self):
             fixture = load_artifact_manifest(
-                ROOT / "benchmarks/manifests/reachy-b0-e1-input-v1.json"
+                ROOT / "benchmarks/manifests/b0-e1-input-v1.json"
             )
             if runtime.sha256(fixture["image_path"]) != fixture["sha256"]:
                 raise RuntimeError("E1 camera fixture changed")
