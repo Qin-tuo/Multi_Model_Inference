@@ -412,7 +412,7 @@ def create_app(
     @app.get("/api/debug/baseline")
     async def _debug_baseline():
         return FileResponse(
-            STATIC_DIR.parent / "06_benchmarks/results/reachy-b0-vision-summary.json",
+            STATIC_DIR.parent / "benchmarks/results/reachy-b0-vision-summary.json",
             media_type="application/json",
         )
 

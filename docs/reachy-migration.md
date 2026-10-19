@@ -37,8 +37,8 @@ cd /home/nvidia/Multi_Model_Inference
 另一个终端可以复现实际HTTP/WebSocket链路：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_web.py --text '只回答：连接成功'
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_web.py --camera --text '用一句话描述当前画面'
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_web.py --text '只回答：连接成功'
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_web.py --camera --text '用一句话描述当前画面'
 ```
 
 该阶段曾保留 `run_vision_chat.py` / `run_voice_chat.py` 兼容入口；2026-10-19 清理时已归档。当前统一通过 `main.py services` 启停；隔离的软件验证使用 `run_web_vision_chat.py --no-camera`。一次只接纳一个请求，多余请求返回409；网页停止本轮及原生后端释放确认已接入，具体边界见下方R3记录。
@@ -69,11 +69,11 @@ cd /home/nvidia/Multi_Model_Inference
 
 以下 R1～R3 是各阶段当时的测试记录；其中 `mmassistant-*` 指旧部署。当前启动、停止和回退以 [部署说明](../01_src/deploy/systemd/README.md) 为准。涉及旧服务名的历史故障脚本应在相应隔离配置中复现，不能直接套用到当前默认服务。
 
-[阶段汇总](../06_benchmarks/results/reachy-r1-summary.json)、[真实网页文字](../06_benchmarks/results/reachy-r1-web-text.json)、[真实D435i/网页/VLM](../06_benchmarks/results/reachy-r1-camera-web.json)、[真人脸检测](../06_benchmarks/results/reachy-r1-live-face.json)、[旧RGB/深度恢复](../06_benchmarks/results/reachy-r1-legacy-restore.json)。
+[阶段汇总](../benchmarks/results/reachy-r1-summary.json)、[真实网页文字](../benchmarks/results/reachy-r1-web-text.json)、[真实D435i/网页/VLM](../benchmarks/results/reachy-r1-camera-web.json)、[真人脸检测](../benchmarks/results/reachy-r1-live-face.json)、[旧RGB/深度恢复](../benchmarks/results/reachy-r1-legacy-restore.json)。
 
 43项R1适用测试通过。Silero模型集成测试属于尚未接入的R2，本次命令明确排除该文件，不宣称全部模型或完整应用已验收。测试命令见阶段汇总。
 
-YuNet固定版本和哈希见`03_models/perception.json`，权重与许可证存放AI_Stack，加载时验证哈希，运行时不联网下载。后端为OpenCV CPU；没有声称该小模型已使用GPU。缺失工件可显式运行`python 05_scripts/prepare_face.py`准备。
+YuNet固定版本和哈希见`03_models/perception.json`，权重与许可证存放AI_Stack，加载时验证哈希，运行时不联网下载。后端为OpenCV CPU；没有声称该小模型已使用GPU。缺失工件可显式运行`python scripts/prepare_face.py`准备。
 
 相机使用本机已验证的D435i RGB节点（当前解析为/dev/video4），不使用上游默认元数据节点/dev/video1。帧带epoch、序号和主机收帧单调时间；不是硬件曝光时间。失效/过期帧不能继续交给模型。网页预览使用与人脸结果相同的原帧，避免把旧框套在新画面上。
 
@@ -86,14 +86,14 @@ YuNet固定版本和哈希见`03_models/perception.json`，权重与许可证存
 
 ## R2中文语音接入
 
-[语音阶段汇总](../06_benchmarks/results/reachy-r2-summary.json)与[实际文件链路](../06_benchmarks/results/reachy-r2-speech-file.json)记录真实模型结果；[设备缺失](../06_benchmarks/results/reachy-r2-missing-device.json)证明缺麦克风时明确失败，不作为实物验收。
+[语音阶段汇总](../benchmarks/results/reachy-r2-summary.json)与[实际文件链路](../benchmarks/results/reachy-r2-speech-file.json)记录真实模型结果；[设备缺失](../benchmarks/results/reachy-r2-missing-device.json)证明缺麦克风时明确失败，不作为实物验收。
 
 沿用STT、TTS和pipeline接口。STT经本机OVS调用Qwen3-ASR，TTS使用Matcha/Vocos；原Whisper/Kokoro推理路径和额外TTS子进程已移除。Silero v6从固定faster-whisper 1.2.1发行包提取，校验PyPI wheel和模型SHA256，用CPU ORT执行；不安装Whisper/CTranslate2来加载这个小模型。
 
 输入文件先做格式/长度检查，再经同一个Silero分段器、ASR、4B和有界TTS队列。中文按标点和字符上限分句，支持短中文。文件时间为相对偏移，有限文件的结束使用补零，不冒充真实声学端点。话筒块带输入epoch和主机接收时刻，静音/恢复时清空旧epoch。
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_speech.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_speech.py \
   --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
   --output /home/nvidia/AI_Stack/runtime-data/reachy-r2-speech/reply.wav
 ```
@@ -109,12 +109,12 @@ YuNet固定版本和哈希见`03_models/perception.json`，权重与许可证存
 
 ## R2人体、手掌与21点手部
 
-[感知验证汇总](../06_benchmarks/results/reachy-r2-perception-summary.json)记录实际后端和证据范围。人体使用已有YOLOv8n FP32/TF32 TensorRT引擎；脸使用YuNet；手掌和21点手部使用OpenCV Zoo原始ONNX和上游预后处理。手部当前为OpenCV CPU，未进行INT8转换或性能调优。
+[感知验证汇总](../benchmarks/results/reachy-r2-perception-summary.json)记录实际后端和证据范围。人体使用已有YOLOv8n FP32/TF32 TensorRT引擎；脸使用YuNet；手掌和21点手部使用OpenCV Zoo原始ONNX和上游预后处理。手部当前为OpenCV CPU，未进行INT8转换或性能调优。
 
 ```bash
 cd /home/nvidia/AI_Stack/projects/reachy-headless
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/setup_native_perception.py
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/prepare_perception.py --check-only
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/setup_native_perception.py
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/prepare_perception.py --check-only
 ```
 
 setup只在本应用环境链接系统匹配版本的TensorRT Python包，避免引入整个系统site-packages。prepare校验已保留的人体ONNX和本机engine；可显式下载锁定的手部权重与参考源码、应用已审查的坐标修正。若本机人体工件丢失，需要从保留工件恢复或按独立构建流程重新验证，不会静默换用CPU。
@@ -124,24 +124,24 @@ setup只在本应用环境链接系统匹配版本的TensorRT Python包，避免
 运行应用后可以记录真实发布结果：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_perception.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_perception.py \
   --seconds 10 --output /home/nvidia/AI_Stack/runtime-data/perception-observation.json
 ```
 
 默认最多10个人体候选、2只手。手部每只返回21个点；z是模型估计的相对腕部量，不是D435i测量深度。模型没有逐点置信度，因此逐点confidence明确为空，保留整只手的置信度。
 
-源码审查并复现了Palm后处理的NMS格式问题：上游将xyxy框送入要求xywh的接口，两个不相交的框可能被误合并。[最小补丁](../09_patches/perception/palm-nms-xywh.patch)和[回归](../06_benchmarks/results/reachy-r2-palm-nms.json)保留原版1框、修正版2框的证据。
+源码审查并复现了Palm后处理的NMS格式问题：上游将xyxy框送入要求xywh的接口，两个不相交的框可能被误合并。[最小补丁](../patches/perception/palm-nms-xywh.patch)和[回归](../benchmarks/results/reachy-r2-palm-nms.json)保留原版1框、修正版2框的证据。
 
 原带标注缩略拼图没有得到可靠手部正例，这一结果仍保留。改用官方MediaPipe教程的干净图片后，得到1个人体、1张脸和2只手的完整21点结果。这些公开图验证模型/坐标接入，不能代替真人手势或质量基准。真机组合测试处理42个不同帧，无推理失败；该次未获得人体/手部正例，仍需补充真人验证。
 
-TensorRT加载旧engine提示设备兼容性警告。[审查记录](../06_benchmarks/results/reachy-r2-engine-warning.json)显示构建记录与当前Orin的计算能力、SM数一致，engine早于本次启动；NVIDIA记录过同版本重启后的同类问题。本机根因未被完全证明，警告保持可见，系统版本保持固定，长期稳定性仍待验证。参考[官方问题记录](https://forums.developer.nvidia.com/t/trt-engine-plan-file-across-devices-warning-after-reboot-on-jetson-orin-nano/376848)。
+TensorRT加载旧engine提示设备兼容性警告。[审查记录](../benchmarks/results/reachy-r2-engine-warning.json)显示构建记录与当前Orin的计算能力、SM数一致，engine早于本次启动；NVIDIA记录过同版本重启后的同类问题。本机根因未被完全证明，警告保持可见，系统版本保持固定，长期稳定性仍待验证。参考[官方问题记录](https://forums.developer.nvidia.com/t/trt-engine-plan-file-across-devices-warning-after-reboot-on-jetson-orin-nano/376848)。
 
-人体预后处理适配来自Ultralytics公开示例，保留AGPL-3.0声明；TensorRT运行辅助代码来自NVIDIA样例，保留Apache-2.0声明。对应原文、固定提交及许可证见`01_src/deploy/perception-sources.lock.json`、`10_licenses/`和`THIRD-PARTY-NOTICES.md`。
+人体预后处理适配来自Ultralytics公开示例，保留AGPL-3.0声明；TensorRT运行辅助代码来自NVIDIA样例，保留Apache-2.0声明。对应原文、固定提交及许可证见`01_src/deploy/perception-sources.lock.json`、`licenses/`和`THIRD-PARTY-NOTICES.md`。
 
 
 ## R3整轮取消的软件验证
 
-[阶段汇总](../06_benchmarks/results/reachy-r3-cancellation-summary.json)、[原生后端观察](../06_benchmarks/results/reachy-r3-native-cancellation.json)、[真实Web链路](../06_benchmarks/results/reachy-r3-web-cancellation.json)和[浏览器按钮](../06_benchmarks/results/reachy-r3-browser-cancellation.json)记录本次范围。74项适用测试通过，包含真实本地阻塞HTTP连接和自有播放器替身进程，不使用扬声器假回执。
+[阶段汇总](../benchmarks/results/reachy-r3-cancellation-summary.json)、[原生后端观察](../benchmarks/results/reachy-r3-native-cancellation.json)、[真实Web链路](../benchmarks/results/reachy-r3-web-cancellation.json)和[浏览器按钮](../benchmarks/results/reachy-r3-browser-cancellation.json)记录本次范围。74项适用测试通过，包含真实本地阻塞HTTP连接和自有播放器替身进程，不使用扬声器假回执。
 
 `TurnController`仍是唯一轮次所有者。停止请求携带当前`turn_id`；当前网页优先走已有WebSocket的`cancel`消息，`POST /api/cancel`仍可调用。迟到的旧轮次取消不能中断下一轮。取消标记先阻断新输出和后续模型调用，再中断自身HTTP连接、停止自身播放器。HTTPX的连接trace让应用在响应头到达之前也能中断阻塞读取；只shutdown该操作持有的socket，连接最终关闭由HTTPX负责。
 
@@ -154,23 +154,23 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 复现时保持这些共享后端没有其他请求；先启动无相机文件模式，再运行：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_cancellation.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_cancellation.py \
   --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
   --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-native-cancellation.json
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_turn_cancel.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_turn_cancel.py \
   --base-url http://127.0.0.1:8090 \
   --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
   --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-web-cancellation.json
 ```
 
-可选浏览器回归使用已安装Firefox与geckodriver，启动`geckodriver --host 127.0.0.1 --port 4445`后运行`python 05_scripts/probe_browser_cancel.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-browser-cancel.json`；完成后退出自己启动的驱动进程。
+可选浏览器回归使用已安装Firefox与geckodriver，启动`geckodriver --host 127.0.0.1 --port 4445`后运行`python scripts/probe_browser_cancel.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-browser-cancel.json`；完成后退出自己启动的驱动进程。
 
 这些单次时长属于功能诊断，不是B0或性能承诺。ASR当前已提交的识别和Matcha当前合成步骤仍可能运行至安全结束；不宣称CUDA kernel可被即时抢占。实物播放缓冲何时真正静音、AEC/双讲、手势完整质量、工具取消边界、模型崩溃/重启矩阵及长期持续运行尚未通过验收。
 
 
 ## R3挥手与静止举掌
 
-[手势汇总](../06_benchmarks/results/reachy-r3-gesture-summary.json)、[真人测试](../06_benchmarks/results/reachy-r3-live-gestures.json)、[轨迹回放](../06_benchmarks/results/reachy-r3-gesture-replay.json)和[RGB/深度恢复](../06_benchmarks/results/reachy-r3-gesture-camera-restore.json)分别说明验证范围。当前88项适用测试通过；F06/F07仍为部分正例通过，未标记完整验收完成。
+[手势汇总](../benchmarks/results/reachy-r3-gesture-summary.json)、[真人测试](../benchmarks/results/reachy-r3-live-gestures.json)、[轨迹回放](../benchmarks/results/reachy-r3-gesture-replay.json)和[RGB/深度恢复](../benchmarks/results/reachy-r3-gesture-camera-restore.json)分别说明验证范围。当前88项适用测试通过；F06/F07仍为部分正例通过，未标记完整验收完成。
 
 张掌判定复用[OpenCV Zoo固定版本demo](https://huggingface.co/opencv/handpose_estimation_mediapipe/blob/4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7/demo.py)的五指角度/距腕规则；原文、哈希和Apache-2.0许可证已锁定。这里只提取姿态规则，避免导入demo时解析命令行和联网下载。角度计算补充有限值、零向量及反余弦数值范围保护。
 
@@ -187,7 +187,7 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 在正常相机应用运行时，可从另一个终端记录（原始关键点默认只留本地，不提交Git）：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_gestures.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_gestures.py \
   --seconds 60 --output /home/nvidia/AI_Stack/runtime-data/gesture-observation.json
 ```
 
@@ -196,7 +196,7 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 本机已记录的关键点可复现规则和实际后端控制：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_gesture_replay.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_gesture_replay.py \
   --input /home/nvidia/AI_Stack/runtime-data/reachy-r3-live-gestures/observation.json \
   --output /home/nvidia/AI_Stack/runtime-data/reachy-r3-gesture-replay.json --exercise-models
 ```
@@ -206,7 +206,7 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 
 ## R3当前会话上下文
 
-[阶段汇总](../06_benchmarks/results/reachy-r3-session-summary.json)、[真实文字多轮](../06_benchmarks/results/reachy-r3-session-web.json)、[真实语音文件多轮](../06_benchmarks/results/reachy-r3-speech-session.json)及[浏览器清空竞态](../06_benchmarks/results/reachy-r3-session-browser.json)记录本次验证。96项适用测试通过。
+[阶段汇总](../benchmarks/results/reachy-r3-session-summary.json)、[真实文字多轮](../benchmarks/results/reachy-r3-session-web.json)、[真实语音文件多轮](../benchmarks/results/reachy-r3-speech-session.json)及[浏览器清空竞态](../benchmarks/results/reachy-r3-session-browser.json)记录本次验证。96项适用测试通过。
 
 沿用Reachy的消息/`few_shot`接口，由已有`TurnController`维护当前会话；没有新增记忆agent。默认`session.enabled: true`、`session.max_turns: 4`，最多保留4轮成功完成的文字。失败、取消、语音合成失败的轮次不记为完整回答；自动挥手问候不占用用户上下文。达到模型输出上限时，历史文字附带截断标记。
 
@@ -221,22 +221,22 @@ WAV先写到暂存文件，成功完成后由控制器在与取消共用的锁�
 在隔离、初始为空的应用实例运行以下脚本；脚本会测试清空，不要用于保留中的实际对话：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_session.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_session.py \
   --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-text.json
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_speech_session.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_speech_session.py \
   --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-speech.json
 ```
 
-第二个脚本要求另一个初始为空且启用文件语音的实例，输入由本机TTS生成；不代表真人录音。浏览器回归复用已安装的Firefox/geckodriver，运行`python 05_scripts/probe_browser_session.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-browser.json`。
+第二个脚本要求另一个初始为空且启用文件语音的实例，输入由本机TTS生成；不代表真人录音。浏览器回归复用已安装的Firefox/geckodriver，运行`python scripts/probe_browser_session.py --base-url http://127.0.0.1:8090 --output /home/nvidia/AI_Stack/runtime-data/session-browser.json`。
 
 代码代号测试保留原始输出“青鹭 63B”；评分仅忽略空白，未把格式完全一致当作已通过。当前会话通过不代表长期记忆、工具、物理语音或完整项目验收通过。
 
-[工具协议探测](../06_benchmarks/results/reachy-r3-tool-protocol-readiness.json)确认当前4B模板实际支持并选择了`create_note`，预检与实际输入token均为323；没有执行函数或写入笔记。工具协议探测之后已接入SQLAlchemy/SQLite与APScheduler，验证见下节。需要持续保持的边界包括：明确有限工具白名单和参数、重复操作幂等、取消前未开始的操作不执行、已开始事务收尾并保留回执、已提交内容跨取消/重启保留、到时通知与真实输出回执。
+[工具协议探测](../benchmarks/results/reachy-r3-tool-protocol-readiness.json)确认当前4B模板实际支持并选择了`create_note`，预检与实际输入token均为323；没有执行函数或写入笔记。工具协议探测之后已接入SQLAlchemy/SQLite与APScheduler，验证见下节。需要持续保持的边界包括：明确有限工具白名单和参数、重复操作幂等、取消前未开始的操作不执行、已开始事务收尾并保留回执、已提交内容跨取消/重启保留、到时通知与真实输出回执。
 
 
 ## R3持久笔记与提醒
 
-[工具汇总](../06_benchmarks/results/reachy-r3-actions-summary.json)、[真实集成](../06_benchmarks/results/reachy-r3-actions-integration.json)、[提交后取消](../06_benchmarks/results/reachy-r3-actions-cancel.json)、[浏览器回执](../06_benchmarks/results/reachy-r3-actions-browser.json)及[语音会话并存](../06_benchmarks/results/reachy-r3-actions-speech-context.json)记录软件证据。提醒输出目前为WAV文件，不能据此声称已完成喇叭、AEC或实际停播验收。
+[工具汇总](../benchmarks/results/reachy-r3-actions-summary.json)、[真实集成](../benchmarks/results/reachy-r3-actions-integration.json)、[提交后取消](../benchmarks/results/reachy-r3-actions-cancel.json)、[浏览器回执](../benchmarks/results/reachy-r3-actions-browser.json)及[语音会话并存](../benchmarks/results/reachy-r3-actions-speech-context.json)记录软件证据。提醒输出目前为WAV文件，不能据此声称已完成喇叭、AEC或实际停播验收。
 
 当前平台配置默认启用`actions.enabled: true`；`--no-tools`或配置false可关闭工具和调度器。`main.py ask`仍是诊断接口；完整工具从Web/语音应用入口使用。数据放在`~/AI_Stack/runtime-data/reachy-actions/actions.sqlite`，由单个应用进程持有文件锁，另一个实例需指定独立数据库或关闭工具。新库不打开、迁移或覆盖旧项目数据库。
 
@@ -258,23 +258,23 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 提醒先保存，再由APScheduler安排执行；调度暂时失败会明确显示，周期对账负责恢复。应用停止期间到时的提醒，重启后在未过期范围内进入待通知状态；已输出的提醒不会因再次重启重复输出。通知只有在播放器成功启动且即将写入，或WAV即将原子发布时，才记录输出开始。输出开始后未确认就重启，状态为`uncertain`，不能伪装已送达或自动重复。用户停止通知后保存`stopped`状态与原业务记录，不立即重播。取消已经输出的提醒返回`already_delivered`，保持原输出回执。
 
-初次集成曾发现实际错误：[模型未查询便编造提醒](../06_benchmarks/results/reachy-r3-actions-initial-failure.json)。当时历史只保留了普通问答。现已保留完整原生工具调用/回执消息组，并明确查询必须本轮读取数据库；原场景复测通过。失败记录保留，不能据此推断所有模型幻觉已经消除。业务状态始终以执行回执和数据库为依据。
+初次集成曾发现实际错误：[模型未查询便编造提醒](../benchmarks/results/reachy-r3-actions-initial-failure.json)。当时历史只保留了普通问答。现已保留完整原生工具调用/回执消息组，并明确查询必须本轮读取数据库；原场景复测通过。失败记录保留，不能据此推断所有模型幻觉已经消除。业务状态始终以执行回执和数据库为依据。
 
 复现完整工具链需独立测试配置，将`actions.database`与`audio.output_directory`指向测试目录，保持input/output为file，然后运行（脚本自行管理8093测试应用，勿与现有实例重叠）：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_actions.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_actions.py \
   --config /path/to/isolated-test-settings.yaml \
   --output /home/nvidia/AI_Stack/runtime-data/actions-integration.json
 ```
 
-该脚本创建测试笔记和提醒，重启应用、观察到期通知、验证查询/取消及工具关闭。`05_scripts/probe_action_cancel.py`针对已启动的隔离应用，在收到真实提交回执后立即取消当前轮次。脚本不操作旧业务数据库。纯会话预算探测若需要复现工具接入前的配置，启动时加`--no-tools`；工具定义本身也占用2K上下文预算。
+该脚本创建测试笔记和提醒，重启应用、观察到期通知、验证查询/取消及工具关闭。`scripts/probe_action_cancel.py`针对已启动的隔离应用，在收到真实提交回执后立即取消当前轮次。脚本不操作旧业务数据库。纯会话预算探测若需要复现工具接入前的配置，启动时加`--no-tools`；工具定义本身也占用2K上下文预算。
 
 该次工具集成114项适用测试通过；软件证据包含事务/幂等、容量拒绝、调度恢复、原生模型选择、实际TTS文件和浏览器显示。物理播放、完整设备/模型故障矩阵、代表性长时间运行及B0仍待后续阶段；不进行自动性能调优。
 
 ## R3网页传输与读取边界
 
-[汇总](../06_benchmarks/results/reachy-r3-web-summary.json)记录124项自动化测试，以及实际TCP、Firefox和本机4B的适用验证。[修复前复现](../06_benchmarks/results/reachy-r3-web-bounds-before.json)保留两处实际问题：事件循环暂停时，10000条画面消息留下10000个待执行回调；六个并发握手突破原四连接限制。修复后相同画面输入保留一个回调和最新一帧，握手先占位，最多四个客户端。
+[汇总](../benchmarks/results/reachy-r3-web-summary.json)记录124项自动化测试，以及实际TCP、Firefox和本机4B的适用验证。[修复前复现](../benchmarks/results/reachy-r3-web-bounds-before.json)保留两处实际问题：事件循环暂停时，10000条画面消息留下10000个待执行回调；六个并发握手突破原四连接限制。修复后相同画面输入保留一个回调和最新一帧，握手先占位，最多四个客户端。
 
 `01_src/app/web_limits.py`只负责传输缓冲、原生读取线程所有权与请求体边界；轮次仍由`TurnController`控制。初始容量集中在`WebConfig`，有效配置通过`/api/state`展示：
 
@@ -291,10 +291,10 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 初始化状态含事件游标，避免较旧回调覆盖已读取状态；未结束轮次的文本/回执单独保留。最终结果携带已提交回执，重连不会将旧轮答案拼进新轮。状态读取在限定线程中执行，取消接收不等待该读取；超时不意味着底层线程已退出。
 
-[TCP测试](../06_benchmarks/results/reachy-r3-web-transport.json)使用独立Uvicorn、本地真实网络、合成消息和可控阻塞，未启动模型。20次连接/断开后FD和线程回到测试前水平；PSS增加约0.70MiB，不能凭此宣称长期无泄漏。两个状态任务超时仍占用两槽，多余读取被拒绝，已有连接可取消；四个慢请求体不占用HTTP取消的读者额度。慢网页被超时清理，测试服务器关闭后只剩主线程。
+[TCP测试](../benchmarks/results/reachy-r3-web-transport.json)使用独立Uvicorn、本地真实网络、合成消息和可控阻塞，未启动模型。20次连接/断开后FD和线程回到测试前水平；PSS增加约0.70MiB，不能凭此宣称长期无泄漏。两个状态任务超时仍占用两槽，多余读取被拒绝，已有连接可取消；四个慢请求体不占用HTTP取消的读者额度。慢网页被超时清理，测试服务器关闭后只剩主线程。
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_web_transport.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_web_transport.py \
   --output /home/nvidia/AI_Stack/runtime-data/web-transport.json
 ```
 
@@ -304,15 +304,15 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 ## R3模型退出恢复与调用总时限
 
-[恢复汇总](../06_benchmarks/results/reachy-r3-recovery-summary.json)和[最终真实模型记录](../06_benchmarks/results/reachy-r3-recovery-native.json)覆盖四个场景：LLM推理中退出、ASR原生进程退出、TTS合成服务退出，以及笔记已提交后LLM退出。验证使用独立数据库和文件语音，未接触相机或实物声卡。
+[恢复汇总](../benchmarks/results/reachy-r3-recovery-summary.json)和[最终真实模型记录](../benchmarks/results/reachy-r3-recovery-native.json)覆盖四个场景：LLM推理中退出、ASR原生进程退出、TTS合成服务退出，以及笔记已提交后LLM退出。验证使用独立数据库和文件语音，未接触相机或实物声卡。
 
 测试先确认模型正在执行，再核验监听进程属于指定systemd服务的子进程及cgroup，使用pidfd向该进程发送SIGKILL。现有systemd的`Restart=on-failure`启动新进程；应用本轮明确失败，未确认释放时返回409，观察到恢复后的原生槽/语音占用空闲才放行下一轮。四个场景的下一轮均成功生成语音文件，失败轮没有发布WAV、遗留partial或写入会话历史。
 
 已提交笔记在模型退出后保持存在，同一request_id重试返回原回执，没有再次调用工具或新增笔记。恢复时长约11～18秒，仅为本次故障诊断记录，不是B0或性能承诺。四个场景在总时限修改前后各验证一次，未代替最终每类故障十次的要求。
 
-首次组信号注入曾发生管理命令兼容问题：[原始失败记录](../06_benchmarks/results/reachy-r3-recovery-injection-failure.json)。命令报告辅助进程错误，但服务实际退出并重启，因此该次按测试未完整完成记录，不冒充四场景通过。后续改用核验归属的单进程句柄。
+首次组信号注入曾发生管理命令兼容问题：[原始失败记录](../benchmarks/results/reachy-r3-recovery-injection-failure.json)。命令报告辅助进程错误，但服务实际退出并重启，因此该次按测试未完整完成记录，不冒充四场景通过。后续改用核验归属的单进程句柄。
 
-同时复现并修复了调用时限漏洞：HTTPX的读取超时约束单次等待，持续返回小块数据会延长整次请求。[旧实测](../06_benchmarks/results/reachy-r3-recovery-deadline-before.json)在80ms读取超时下仍持续约413ms；[修复后](../06_benchmarks/results/reachy-r3-recovery-deadline-after.json)在160ms总预算处中断该连接并回收计时线程。
+同时复现并修复了调用时限漏洞：HTTPX的读取超时约束单次等待，持续返回小块数据会延长整次请求。[旧实测](../benchmarks/results/reachy-r3-recovery-deadline-before.json)在80ms读取超时下仍持续约413ms；[修复后](../benchmarks/results/reachy-r3-recovery-deadline-after.json)在160ms总预算处中断该连接并回收计时线程。
 
 现有`llm.timeout`、`stt.timeout`、`tts.timeout`同时作为各自一次推理调用的总预算：LLM包括该次原生token计数、历史裁剪及生成；ASR为一个语音片段；TTS为一个文本分句。它不是整轮多次工具调用或全部语音分句的总时长。`RequestIO`每次操作最多持有一个计时线程，退出时取消并join，之后才允许新操作。取消优先保留取消语义；超时不会被解释成后端已空闲，也不意味着GPU内核被即时抢占。ASR/TTS下一次成功后清除旧错误。
 
@@ -321,27 +321,27 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 复现真实故障时，先以独立配置启动`--no-camera`应用，使用文件音频、空测试数据库和独立输出目录。脚本只允许已核验的固定本机端点和三个服务；测试会使这些共享后端短暂不可用，不应与其他任务同时运行：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_service_recovery.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_service_recovery.py \
   --inject-managed-service-crashes \
   --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
   --output /home/nvidia/AI_Stack/runtime-data/recovery-native.json
 ```
 
-测试配置的数据库目录须含`reachy-r3-recovery-`，防止误用日常数据。脚本等待应用就绪，记录全部故障和恢复，在退出前确保受影响服务重新就绪；最后还需关闭自己启动的测试应用。当前[退出核验](../06_benchmarks/results/reachy-r3-recovery-cleanup.json)确认8093关闭、七个原服务active、主模型/ASR槽和语音计数为空闲。默认服务入口仍在旧工程，迁移切换尚未完成。
+测试配置的数据库目录须含`reachy-r3-recovery-`，防止误用日常数据。脚本等待应用就绪，记录全部故障和恢复，在退出前确保受影响服务重新就绪；最后还需关闭自己启动的测试应用。当前[退出核验](../benchmarks/results/reachy-r3-recovery-cleanup.json)确认8093关闭、七个原服务active、主模型/ASR槽和语音计数为空闲。默认服务入口仍在旧工程，迁移切换尚未完成。
 
 ## R3健康探测与摄像头恢复
 
-[本次汇总](../06_benchmarks/results/reachy-r3-health-camera-summary.json)包含144项自动化测试、真实控制接口、D435i驱动断开/重绑定和摄像头重复启停。完整项目仍未验收，B0尚未采集。
+[本次汇总](../benchmarks/results/reachy-r3-health-camera-summary.json)包含144项自动化测试、真实控制接口、D435i驱动断开/重绑定和摄像头重复启停。完整项目仍未验收，B0尚未采集。
 
-健康探测的[修复前](../06_benchmarks/results/reachy-r3-health-before.json)及[修复后](../06_benchmarks/results/reachy-r3-health-after.json)记录两个问题：原健康检查仅凭HTTP 200判定主模型正常，即使返回的是另一模型名；原槽查询也会被持续小块返回拖长。现由`request_io.control_json`统一处理启动、模型身份、模板能力、语音能力和槽状态GET：独立连接、总时限、最多64KiB保留JSON，超过边界明确失败。ASR的语音能力和原生槽分别观察，不能只凭代理空闲就放行。
+健康探测的[修复前](../benchmarks/results/reachy-r3-health-before.json)及[修复后](../benchmarks/results/reachy-r3-health-after.json)记录两个问题：原健康检查仅凭HTTP 200判定主模型正常，即使返回的是另一模型名；原槽查询也会被持续小块返回拖长。现由`request_io.control_json`统一处理启动、模型身份、模板能力、语音能力和槽状态GET：独立连接、总时限、最多64KiB保留JSON，超过边界明确失败。ASR的语音能力和原生槽分别观察，不能只凭代理空闲就放行。
 
-主模型健康检查校验配置中的模型别名；部署工件身份仍由后端清单与启动配置保证。这不是对任意相同别名服务的权重证明。真实LLM/ASR/TTS控制接口以及中文识别/PCM合成已[复核](../06_benchmarks/results/reachy-r3-health-native.json)，错误探测不会被当作资源释放。
+主模型健康检查校验配置中的模型别名；部署工件身份仍由后端清单与启动配置保证。这不是对任意相同别名服务的权重证明。真实LLM/ASR/TTS控制接口以及中文识别/PCM合成已[复核](../benchmarks/results/reachy-r3-health-native.json)，错误探测不会被当作资源释放。
 
-相机的[原始故障](../06_benchmarks/results/reachy-r3-camera-recovery-before.json)来自实际D435i RGB UVC接口断开：原线程退出，驱动重新绑定后仍没有画面。现在`Camera`保留一个采集线程，由它依次打开、读取、释放和重试；重连没有新增采集者。失败立即清空缓存、更换来源epoch并设置失效标记，感知结果与待发送旧画面均不能继续使用；新帧成功到达才清除错误并恢复ready。Web状态新增`camera`字段，包含阶段、帧龄、重试次数和缓存占用，失效时同时隐藏旧的人脸裁剪。
+相机的[原始故障](../benchmarks/results/reachy-r3-camera-recovery-before.json)来自实际D435i RGB UVC接口断开：原线程退出，驱动重新绑定后仍没有画面。现在`Camera`保留一个采集线程，由它依次打开、读取、释放和重试；重连没有新增采集者。失败立即清空缓存、更换来源epoch并设置失效标记，感知结果与待发送旧画面均不能继续使用；新帧成功到达才清除错误并恢复ready。Web状态新增`camera`字段，包含阶段、帧龄、重试次数和缓存占用，失效时同时隐藏旧的人脸裁剪。
 
 `vision.reconnect_seconds`默认1秒。`vision.v4l_select_timeout`默认2秒，在首次采集前设置OpenCV的进程级参数；[OpenCV 4.11源码](https://github.com/opencv/opencv/blob/4.11.0/modules/videoio/src/cap_v4l.cpp#L926-L983)表明这个参数会被缓存，因此修改它需要重启应用进程。它限定的是select等待，不能保证所有驱动ioctl都能在两秒内退出。读取未释放时，关闭仍明确报告`close_unconfirmed`，不会并发release正在读取的句柄。
 
-[最终真实应用验证](../06_benchmarks/results/reachy-r3-camera-recovery-final.json)结果：
+[最终真实应用验证](../benchmarks/results/reachy-r3-camera-recovery-final.json)结果：
 
 - 断流期间图像请求返回400，文字问答正常；旧图像、人体/脸/手结果失效。
 - 重绑定后同一个采集线程恢复，新epoch贯穿小模型、Web画面和实际VLM图像请求。
@@ -354,7 +354,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 独占相机时，可执行以下有明确副作用的诊断。脚本只解绑配置中按序列号核验的D435i RGB接口，需已有免密码sudo；自动停止本项目旧相机服务、运行新应用、恢复驱动与服务，并用独立系统Python/ROS检查原RGB和深度。ROS只用于旧系统交接核验，不进入新应用运行依赖。
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_camera_recovery.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_camera_recovery.py \
   --detach-configured-camera \
   --output /home/nvidia/AI_Stack/runtime-data/camera-recovery.json
 ```
@@ -365,7 +365,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 用户于2026-10-16确认：实物音频暂时跳过，接手后先优化视觉。当前目标是软件框架、D435i视觉实机、B0-SW与代码/数据流导读；物理录播、声学AEC/双讲、可听首声和实际停播标记DEFERRED。完成软件交接后，助手等待用户实操结果，不自动展开连续性能优化。具体门槛见[计划v3.1](implementation-plan.md)。
 
-[语音打断汇总](../06_benchmarks/results/reachy-r3-voice-summary.json)、[原行为复现](../06_benchmarks/results/reachy-r3-voice-before.json)、[真实模型回放](../06_benchmarks/results/reachy-r3-voice-native.json)及[Firefox验证](../06_benchmarks/results/reachy-r3-voice-browser.json)记录软件范围。原来忙碌时的新麦克风片段直接被拒绝，没有触发取消；现在同一`TurnController`负责语音预留和轮次切换。
+[语音打断汇总](../benchmarks/results/reachy-r3-voice-summary.json)、[原行为复现](../benchmarks/results/reachy-r3-voice-before.json)、[真实模型回放](../benchmarks/results/reachy-r3-voice-native.json)及[Firefox验证](../benchmarks/results/reachy-r3-voice-browser.json)记录软件范围。原来忙碌时的新麦克风片段直接被拒绝，没有触发取消；现在同一`TurnController`负责语音预留和轮次切换。
 
 1. 采集读者持续产生带epoch、序号和主机单调时间的32ms PCM帧；静音、切换或故障使旧输入失效。
 2. 原Silero分段器确认新讲话后，控制器预留一条语音并取消当时观察到的旧轮次。默认累计160ms有效语音触发提前确认，短的有效话语可在端点确认；这是开发参数，不是声学质量结论。
@@ -382,7 +382,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 使用新的独立测试目录复现软件链路；测试会调用当前原生模型，保持它们没有其他请求。可选`--webdriver http://127.0.0.1:4445`连接自己启动的geckodriver：
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/probe_voice_interruptions.py \
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_voice_interruptions.py \
   --input /home/nvidia/AI_Stack/runtime-data/reachy-r2-input.wav \
   --control /home/nvidia/AI_Stack/runtime-data/voice-replay-check/source.json \
   --output /home/nvidia/AI_Stack/runtime-data/voice-replay-check/result.json
@@ -395,7 +395,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 新入口只托管四个服务：llama.cpp 图文、llama.cpp ASR、OpenVoiceStream 和 Reachy 应用。应用内唯一相机采集为人体/脸/手与网页提供共享帧；不再依赖旧 `tools.project` 启动模型。配置被冻结后由 systemd 单元统一使用；模型、线程、并发、上下文和缓存参数与旧配置相同。命令和管理边界见 [部署说明](../01_src/deploy/systemd/README.md)。
 
-[部署报告](../06_benchmarks/results/reachy-r4-deployment-summary.json)记录 20 次连续完整应用启停，随后在状态观察修复后再验 1 次；三个原生模型服务保持驻留。每次停止均检查 cgroup 无残留，启动核对模型身份、实际监听者、新鲜相机及有效配置。文字、画面问答与合成中文文件语音闭环成功；强制终止真实应用进程后，由 systemd 自动重启，下一次问答成功。166 项自动化测试通过。
+[部署报告](../benchmarks/results/reachy-r4-deployment-summary.json)记录 20 次连续完整应用启停，随后在状态观察修复后再验 1 次；三个原生模型服务保持驻留。每次停止均检查 cgroup 无残留，启动核对模型身份、实际监听者、新鲜相机及有效配置。文字、画面问答与合成中文文件语音闭环成功；强制终止真实应用进程后，由 systemd 自动重启，下一次问答成功。166 项自动化测试通过。
 
 两次真实回退都从固定旧源码 `AI_Stack/archives/legacy-runtime-972de50` 恢复旧七服务，并取得新鲜 RGB 和对齐深度。旧模型、数据和环境保留。此证据证明准备工件上的软件部署与回退，不代表完成断网冷启动、干净机器重建、B0 或 8 小时长稳。
 
@@ -404,20 +404,20 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 ## R4：真实软件共存与离线检查（2026-10-16）
 
-[共存报告](../06_benchmarks/results/reachy-r4-coexistence-summary.json)中的有效复测覆盖持续 D435i/人体/脸/手、20 次模型忙时取消、20 次文字或画面问答、20 次中文文件语音与 80 次并发拒绝；第 5 个网页查看者收到 403。取消输出不可下载，下一轮正常，最终网页连接与待发送事件归零，仅保留 10 个回复 WAV，没有暂存文件，应用正常退出并恢复默认服务。176 个周期样本中的相机/感知均就绪，可用内存最低约 4.35 GiB。该数值属于本次有限压力观察，不作为 B0 性能结果。
+[共存报告](../benchmarks/results/reachy-r4-coexistence-summary.json)中的有效复测覆盖持续 D435i/人体/脸/手、20 次模型忙时取消、20 次文字或画面问答、20 次中文文件语音与 80 次并发拒绝；第 5 个网页查看者收到 403。取消输出不可下载，下一轮正常，最终网页连接与待发送事件归零，仅保留 10 个回复 WAV，没有暂存文件，应用正常退出并恢复默认服务。176 个周期样本中的相机/感知均就绪，可用内存最低约 4.35 GiB。该数值属于本次有限压力观察，不作为 B0 性能结果。
 
 第一次尝试的 20 轮交互均成功，最终进程列表断言失败，记录保留。后续观察确认 OVS 会周期性创建 `tegrastats` watchdog 子进程，模型服务本身没有重启；复测改为核对实际监听 PID、创建时间、supervisor 和重启计数。测量工具本身需要被验证。
 
 短窗口中应用 PSS 约增加 11.8 MiB，FD 从 56 到 57，冷却窗口为 57–58；所有应用进程正常退出。这里没有把小幅增长直接判为泄漏，也没有宣称长时间无泄漏，原始曲线供基线及后续用户分析使用。
 
-[离线报告](../06_benchmarks/results/reachy-r4-offline-summary.json)记录四服务在只有 `lo` 的独立网络空间中启动，向非回环地址连接得到内核 `ENETUNREACH`；实际模型进程 UID 为 1000。文字、摄像头和文件语音交互通过，四服务退出码均为 0，无残留，主机网络拓扑不变，原托管服务恢复 READY。此检查不代表从零构建、操作系统重启或 8 小时运行。
+[离线报告](../benchmarks/results/reachy-r4-offline-summary.json)记录四服务在只有 `lo` 的独立网络空间中启动，向非回环地址连接得到内核 `ENETUNREACH`；实际模型进程 UID 为 1000。文字、摄像头和文件语音交互通过，四服务退出码均为 0，无残留，主机网络拓扑不变，原托管服务恢复 READY。此检查不代表从零构建、操作系统重启或 8 小时运行。
 
 ## B0-SW 输入与协议冻结
 
-[输入清单](../06_benchmarks/manifests/reachy-b0-inputs-v1.json)锁定 3 份图像和 20 份合成中文语音，原文件位于 `~/AI_Stack/datasets/reachy-b0-sw-v1`，不上传音频/图像。[采集协议](../06_benchmarks/manifests/reachy-b0-sw-v1.json)固定视觉单模块、固定到达率回放、实机周期采样、单体语音/图文、共存、取消和过载的测量口径；正式数据尚未采集。
+[输入清单](../benchmarks/manifests/reachy-b0-inputs-v1.json)锁定 3 份图像和 20 份合成中文语音，原文件位于 `~/AI_Stack/datasets/reachy-b0-sw-v1`，不上传音频/图像。[采集协议](../benchmarks/manifests/reachy-b0-sw-v1.json)固定视觉单模块、固定到达率回放、实机周期采样、单体语音/图文、共存、取消和过载的测量口径；正式数据尚未采集。
 
 ```bash
-/home/nvidia/AI_Stack/environments/reachy-headless/bin/python 05_scripts/prepare_baseline_inputs.py
+/home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/prepare_baseline_inputs.py
 ```
 
 存在清单时该命令只验证文件哈希并复用，不重新生成语音。首次准备需要本机 TTS 服务；不得用之后重新合成、波形不同的文件悄悄替换冻结输入。合成语音的参考文字是 TTS 输入提示，尚未经独立转写；后续 CER 只报告合成闭环一致性，不冒充真人噪声条件下的 ASR 准确率。
@@ -427,7 +427,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 ## B0-SW：视觉部分已采集（V1/V2，2026-10-16）
 
-[机器可读汇总](../06_benchmarks/results/reachy-b0-vision-summary.json)、[PNG 图表](../06_benchmarks/results/reachy-b0-vision.png)和 [SVG 图表](../06_benchmarks/results/reachy-b0-vision.svg)记录当前结果。应用推理代码、模型精度、并发、线程与频率参数保持原值，新增代码位于 `06_benchmarks/`，仅用于测量。正式 B0 尚未整体完成。
+[机器可读汇总](../benchmarks/results/reachy-b0-vision-summary.json)、[PNG 图表](../benchmarks/results/reachy-b0-vision.png)和 [SVG 图表](../benchmarks/results/reachy-b0-vision.svg)记录当前结果。应用推理代码、模型精度、并发、线程与频率参数保持原值，新增代码位于 `benchmarks/`，仅用于测量。正式 B0 尚未整体完成。
 
 V1 使用三个固定输入，每模块、每输入各 20 组原始调用/插桩调用交替对照，共 180 组，输出数值全部匹配。输入解码和结果 JSON 转换不计入调用耗时；第一次切换输入的调用及预热另存。下表仅展示固定 640×480 人物图片的原始调用：
 
@@ -466,7 +466,7 @@ V2 每条件记录 60 秒、600 个独立周期样本，回放输入按 10 Hz �
 
 ## B0-SW：语音与 4B 接口已采集（S1/T1/L1，2026-10-16）
 
-[汇总与原始文件索引](../06_benchmarks/results/reachy-b0-models-summary.json)、[PNG 图表](../06_benchmarks/results/reachy-b0-models.png)和 [SVG 图表](../06_benchmarks/results/reachy-b0-models.svg)保留全部结果。四组各有 20 个固定输入；每个输入先保存首次调用，再预热五次，最后采集正式调用。L1 另有一组相邻的原始/观察器调用，交替顺序，40 对输出全部一致。含首次、预热和对照在内，共 600 次调用，未发生接口/分段/生成完成性错误。173 项自动化测试通过，四个默认服务已恢复。
+[汇总与原始文件索引](../benchmarks/results/reachy-b0-models-summary.json)、[PNG 图表](../benchmarks/results/reachy-b0-models.png)和 [SVG 图表](../benchmarks/results/reachy-b0-models.svg)保留全部结果。四组各有 20 个固定输入；每个输入先保存首次调用，再预热五次，最后采集正式调用。L1 另有一组相邻的原始/观察器调用，交替顺序，40 对输出全部一致。含首次、预热和对照在内，共 600 次调用，未发生接口/分段/生成完成性错误。173 项自动化测试通过，四个默认服务已恢复。
 
 S1/T1 使用既有 OVS 语音 profile，ASR 与 TTS 权重一起驻留，但每次只向一类模型发请求；4B 和视觉停止。L1 只运行原生 4B 服务，使用生产适配器、空会话和无工具的请求。模型、量化、线程、上下文、缓存和功耗参数保持冻结值。
 
@@ -504,7 +504,7 @@ S1 的合成提示一致性为 4 次字符编辑 / 221 个归一化参考字符�
 
 ## B0-SW：完整应用 E1 与交接（2026-10-16）
 
-[总清单](../06_benchmarks/results/reachy-b0-sw.json)、[E1 汇总](../06_benchmarks/results/reachy-b0-e1-summary.json)、[性能图](../06_benchmarks/results/reachy-b0-e1.png)和[实际调用时间线](../06_benchmarks/results/reachy-b0-e1-trace.png)构成本轮软件交付入口。原始 E1 数据在 `~/AI_Stack/runtime-data/benchmarks/reachy-b0-e1-20261016-a`。
+[总清单](../benchmarks/results/reachy-b0-sw.json)、[E1 汇总](../benchmarks/results/reachy-b0-e1-summary.json)、[性能图](../benchmarks/results/reachy-b0-e1.png)和[实际调用时间线](../benchmarks/results/reachy-b0-e1-trace.png)构成本轮软件交付入口。原始 E1 数据在 `~/AI_Stack/runtime-data/benchmarks/reachy-b0-e1-20261016-a`。
 
 E1 复用生产 `build_app`、控制器、模型、工具、网页和取消逻辑；测量适配器只替换相机驱动读入并添加时间记录。公开街景输入避免把有意的举掌停止信号混入普通请求，手势模块始终启用，事件没有被压制。每类 20 个事件覆盖文字、语音文件、语音文件加图像、创建笔记、取消及固定到达率过载。另有 15 次不修改数据的预热、一个过载占用请求和一个恢复请求，不混入正式类统计。此处不反复预热有副作用的命令；完整应用按实际状态演进，类别间清空当前会话、保留持久数据。
 
@@ -543,7 +543,7 @@ V1/V2/S1/T1/L1/E1 已采集并索引，173 项测试通过，默认四服务就�
 先按 [README 的第一步](../README.md#你接手的第一步)读取状态和配置并反馈结果。随后由用户从视觉开始亲自复现、观察和提出假设，助手逐步指导。用户未反馈前，不自动继续优化，也不把助手的实验算作用户已掌握的案例。
 
 
-冻结数据包：`/home/nvidia/AI_Stack/archives/reachy-b0-sw-20261016.tar.gz`，约 36.7 MiB。[索引](../06_benchmarks/results/reachy-b0-archive.json)记录归档 SHA256、904 个成员以及输入/基线文件逐项校验。包中包括固定输入、原始数据、测量时的源文件快照与汇总；模型、系统和已安装环境不在包内，不能据此宣称完成干净机器重部署。冻结的合成 WAV 应复制校验，不应重新合成后冒充同一输入。
+冻结数据包：`/home/nvidia/AI_Stack/archives/reachy-b0-sw-20261016.tar.gz`，约 36.7 MiB。[索引](../benchmarks/results/reachy-b0-archive.json)记录归档 SHA256、904 个成员以及输入/基线文件逐项校验。包中包括固定输入、原始数据、测量时的源文件快照与汇总；模型、系统和已安装环境不在包内，不能据此宣称完成干净机器重部署。冻结的合成 WAV 应复制校验，不应重新合成后冒充同一输入。
 
 
 ## 板端实时调试视图（2026-10-19）
@@ -561,14 +561,14 @@ V1/V2/S1/T1/L1/E1 已采集并索引，173 项测试通过，默认四服务就�
 
 这是观测能力变更，模型、输入尺寸、线程、上下文、推理频率和调度策略未调优。B0 标签、原始数据及统计文件保持冻结；新的计时与采样会带来开销，`collection_ms` 仅计附加指标组装，不覆盖原有 CPU 采样、序列化和浏览器渲染。正式优化实验应固定观测配置与版本，复现原 B0 时使用冻结版本。
 
-验证记录见 `06_benchmarks/results/reachy-debug-ui-20261019.json`。真实浏览器验证覆盖页面切换、滚动、窄屏、真实文字/文件语音、取消后释放、JSON 导出和客户端断线提示；这轮没有追加真人手势质量或物理音频验收，也不作为性能优化成果。
+验证记录见 `benchmarks/results/reachy-debug-ui-20261019.json`。真实浏览器验证覆盖页面切换、滚动、窄屏、真实文字/文件语音、取消后释放、JSON 导出和客户端断线提示；这轮没有追加真人手势质量或物理音频验收，也不作为性能优化成果。
 
 
 ## 代码仓可读性整理（2026-10-19）
 
 清理前源版本为 `before-repository-cleanup-20261019`，逐文件哈希和本地完整归档见 [恢复索引](archive/repository-cleanup-20261019.json)。旧方案的部署目录、旧报告和未引用兼容入口移出当前工作树，当前 Reachy 证据与 B0 锁保持原字节。历史报告中出现的旧文件路径按原提交恢复，不改写实验记录。
 
-总览和实施计划集中到 `08_docs/`；README 以亲自启停、四个服务、目录地图、阅读顺序和基线复现为主线。网页拆为 HTML、CSS、JS，调试模块独立保留；应用入口、感知循环、轮次控制和部署生命周期增加职责注释，并统一当前 Python 源码格式。相机频率、模型、线程、上下文和调度逻辑保持原配置。旧 `.venv*` 链接被环境脚本的 shebang 使用，因此保留；只清除工作树缓存和空目录。
+总览和实施计划集中到 `docs/`；README 以亲自启停、四个服务、目录地图、阅读顺序和基线复现为主线。网页拆为 HTML、CSS、JS，调试模块独立保留；应用入口、感知循环、轮次控制和部署生命周期增加职责注释，并统一当前 Python 源码格式。相机频率、模型、线程、上下文和调度逻辑保持原配置。旧 `.venv*` 链接被环境脚本的 shebang 使用，因此保留；只清除工作树缓存和空目录。
 
 
 ## 主目录编号（2026-10-19）
@@ -576,3 +576,22 @@ V1/V2/S1/T1/L1/E1 已采集并索引，173 项测试通过，默认四服务就�
 应用、部署和性能测量代码集中到 `01_src/`，保持原 Python 包名；配置、模型清单、界面、脚本、基准数据、测试、文档、补丁和许可证依次编号 02～10。`main.py services ...` 启停命令和网页 URL 保持不变。已更新直接脚本入口、systemd 原生启动路径、测试搜索路径、当前文档链接和基准源文件快照目录。
 
 全部原 JSON 工件及配置文件仅移动位置；冻结 B0 中的旧相对路径通过 `project_paths.repo_path` 解析，不修改原始哈希和实验记录。模型权重、外部框架、运行数据、兼容环境链接和 references 子模块没有搬动。恢复标签为 `before-numbered-layout-20261019`。
+
+
+## 项目内运行依赖（2026-10-19）
+
+必需框架源码、GGUF/ONNX/TensorRT 工件、两个 Python 环境、基线输入和运行数据已复制到 `05_runtime/`。源 AI_Stack 未删除。原 systemd 单元经归属检查后停止，数据库与回复文件在退出后复制，单元注册改为指向项目内目录。默认路径与工件加载统一切换，旧 JSON 的原始来源路径及哈希保持不变。
+
+`./run.sh services up` 使用项目内环境；`llama-bench`/`llama-cli` 子命令设置本地共享库搜索路径。完整依赖包与逐文件清单由 `scripts/runtime_bundle.py` 生成和验证，默认不携带业务状态。
+
+独立性验证命令（会临时停止和恢复本项目服务）：
+
+```bash
+./05_runtime/environments/reachy-headless/bin/python scripts/probe_offline.py \
+  --hide-ai-stack --input 05_runtime/datasets/reachy-b0-sw-v1/zh-02.wav \
+  --output 05_runtime/validation/new-isolated-run
+```
+
+原 AI_Stack 仅在子进程的私有 mount namespace 被只读空目录遮盖；网络 namespace 只有 lo。四个原生服务以普通用户身份启动，文字、相机、ASR/TTS 与完整应用 WAV 对话通过，进程正常退出后恢复默认服务；主机原目录和网络未修改。此验证不等同跨硬件兼容、8h 长稳或干净操作系统安装验收。
+
+用户随后明确：仅主要目录保留编号。最终保留 `01_src`、`02_config`、`03_models`、`04_web`、`05_runtime`；辅助目录恢复 `scripts`、`benchmarks`、`tests`、`docs`、`patches`、`licenses`。运行依赖从中间目录 `11_runtime` 改为最终 `05_runtime`，虚拟环境入口、服务注册、配置与历史路径解析已同步调整。早先验证记录中的路径保留其当时含义。

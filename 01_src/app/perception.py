@@ -5,7 +5,7 @@ import json
 import threading
 import time
 from pathlib import Path
-from project_paths import MODEL_DIR
+from project_paths import MODEL_DIR, load_artifact_manifest
 import numpy as np
 from app.body_detector import BodyDetector, checked_file, load_source
 
@@ -116,7 +116,7 @@ class Perception:
         }
 
     def load(self):
-        manifest = json.loads(_MANIFEST.read_text())
+        manifest = load_artifact_manifest(_MANIFEST)
         try:
             if self.config.body_enabled:
                 self.body = BodyDetector(

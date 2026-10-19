@@ -21,6 +21,7 @@ from benchmarks.baseline_support import Events  # noqa: E402
 from benchmarks.http_observer import Observer  # noqa: E402
 from benchmarks.vision_stream import ReplayCapture  # noqa: E402
 from deploy import runtime  # noqa: E402
+from project_paths import load_artifact_manifest
 
 TURN = ContextVar("benchmark_turn", default=None)
 
@@ -47,10 +48,8 @@ def instrument_app(cfg, out):
 
     class FixedCamera(Camera):
         def _open(self):
-            fixture = json.loads(
-                (
-                    ROOT / "06_benchmarks/manifests/reachy-b0-e1-input-v1.json"
-                ).read_text()
+            fixture = load_artifact_manifest(
+                ROOT / "benchmarks/manifests/reachy-b0-e1-input-v1.json"
             )
             if runtime.sha256(fixture["image_path"]) != fixture["sha256"]:
                 raise RuntimeError("E1 camera fixture changed")

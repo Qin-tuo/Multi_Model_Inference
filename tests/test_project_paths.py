@@ -31,7 +31,7 @@ def test_source_and_data_locations_are_unambiguous():
     )
     assert (
         repo_path("benchmarks/results/reachy-b0-sw.json")
-        == ROOT / "06_benchmarks/results/reachy-b0-sw.json"
+        == ROOT / "benchmarks/results/reachy-b0-sw.json"
     )
     assert repo_path("02_config/settings.yaml") == ROOT / "02_config/settings.yaml"
     for name in ("../outside", "/etc/passwd"):

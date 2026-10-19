@@ -15,7 +15,7 @@ import time
 import psutil
 
 from deploy import runtime
-from project_paths import repo_path
+from project_paths import repo_path, RUNTIME_DIR, relocate_artifact_values
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -210,16 +210,22 @@ def instrument(module, model, times):
 
 def validate():
     protocol = json.loads(
-        (ROOT / "06_benchmarks/manifests/reachy-b0-sw-v1.json").read_text()
+        (ROOT / "benchmarks/manifests/reachy-b0-sw-v1.json").read_text()
     )
     for file, expected in protocol["locks"].items():
         if runtime.sha256(repo_path(file)) != expected:
             raise RuntimeError("Baseline artifact lock changed: " + file)
-    if (
-        runtime.sha256(protocol["effective_config_path"])
-        != protocol["effective_config_sha256"]
-    ):
-        raise RuntimeError("Installed baseline config changed")
+    frozen_config = RUNTIME_DIR / "baselines/b0/effective-config.json"
+    if runtime.sha256(frozen_config) != protocol["effective_config_sha256"]:
+        raise RuntimeError("Frozen baseline config changed")
+    baseline_cfg = runtime.config(frozen_config)
+    installed = runtime.paths(baseline_cfg)["data"] / "systemd/settings.json"
+    if runtime.config(installed).effective() != baseline_cfg.effective():
+        raise RuntimeError(
+            "Installed baseline parameters changed after path normalization"
+        )
+    protocol = relocate_artifact_values(protocol)
+    protocol["effective_config_path"] = str(frozen_config)
     manifest = json.loads(repo_path(protocol["input_manifest"]).read_text())
     if (
         runtime.sha256(repo_path(protocol["input_manifest"]))
@@ -232,7 +238,7 @@ def validate():
             != entry["sha256"]
         ):
             raise RuntimeError("Baseline input changed: " + entry["filename"])
-    return protocol, runtime.config(protocol["effective_config_path"]), manifest
+    return protocol, baseline_cfg, manifest
 
 
 def environment(out):

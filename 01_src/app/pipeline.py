@@ -36,7 +36,7 @@ from typing import Callable, Optional, Iterator, Union
 
 import numpy as np
 from pathlib import Path
-from project_paths import MODEL_DIR
+from project_paths import MODEL_DIR, load_artifact_manifest
 from rich.console import Console
 
 from app.audio import wav_pcm
@@ -498,7 +498,7 @@ class SileroVAD:
     def __init__(self):
         import onnxruntime as ort
 
-        entry = json.loads((MODEL_DIR / "speech.json").read_text())["vad"]
+        entry = load_artifact_manifest(MODEL_DIR / "speech.json")["vad"]
         model_path = Path(entry["directory"]) / entry["filename"]
         if (
             hashlib.sha256(model_path.read_bytes()).hexdigest()

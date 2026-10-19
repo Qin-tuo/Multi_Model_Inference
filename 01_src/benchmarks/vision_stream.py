@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
 # Shared native-process identity checks live with the functional probes.
-sys.path.insert(0, str(ROOT / "05_scripts"))
+sys.path.insert(0, str(ROOT / "scripts"))
 from benchmarks.baseline_support import (  # noqa: E402
     Events,
     Resources,

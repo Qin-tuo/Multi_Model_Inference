@@ -30,10 +30,10 @@
 |---|---|
 | [完整新版计划书](implementation-plan.md) | 目标、模块、代码结构、迁移、R0～R6、功能和性能验收、教学路线及Goal |
 | [上游审查锁](../01_src/deploy/reachy-upstream.lock.json) | 固定commit、关键源码哈希和审查范围 |
-| [新版任务清单](../06_benchmarks/manifests/reachy-headless-roadmap-v3.json) | 任务依赖、工程/学习验收及暂停状态 |
-| [迁移缺口](../06_benchmarks/manifests/reachy-gap-ledger-v3.json) | 机身耦合、中文、打断、资源和兼容差异 |
+| [新版任务清单](../benchmarks/manifests/reachy-headless-roadmap-v3.json) | 任务依赖、工程/学习验收及暂停状态 |
+| [迁移缺口](../benchmarks/manifests/reachy-gap-ledger-v3.json) | 机身耦合、中文、打断、资源和兼容差异 |
 | [旧项目恢复索引](archive/repository-cleanup-20261019.json) | 旧实现、进度和实验数据的逐文件恢复入口 |
-| [岗位资料](../06_benchmarks/manifests/target-jd-20261014.json) | 端侧部署相关JD来源与能力对照 |
+| [岗位资料](../benchmarks/manifests/target-jd-20261014.json) | 端侧部署相关JD来源与能力对照 |
 | [历史计划](archive/02-plan-v2.1-before-reachy-20261015.md) | 旧设计和角色约定 |
 | [旧运行说明](archive/README-pre-reachy-20261015.md) | 固定旧源码快照的使用说明及历史结果 |
 
@@ -50,3 +50,5 @@
 简历围绕实际模型落地、数据/资源策略、根因与优化证据组织。上游已有能力与本地适配明确区分；使用成熟后端不等于自研引擎。C++/CUDA工作以实际定位出的部署或热点问题为依据。
 
 原 references/、模型和数据保留；旧方案报告保存在清理前 Git 标签及校验过的归档中。RK跨平台对照、Edge-LLM和长期记忆为后续独立工作，不占当前关键路径。旧JT、SF/DP与新版E/K分别记录，不能混算通过率。
+
+2026-10-19：当前运行依赖已收拢到项目内 `05_runtime/`，四个服务使用本地环境与工件。已通过隐藏旧 AI_Stack 且断网的实际模型验证；系统 Jetson/CUDA/TensorRT 依赖仍由主机提供。详见 [依赖与恢复说明](../01_src/deploy/dependencies-layout.md)。

@@ -19,7 +19,7 @@ import os
 from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional, get_args, get_origin, get_type_hints, Union
 from pathlib import Path
-from project_paths import CONFIG_DIR
+from project_paths import CONFIG_DIR, RUNTIME_DIR, ROOT, artifact_path
 import yaml
 
 
@@ -76,7 +76,7 @@ class AudioConfig:
     input_device: Optional[str] = "ReSpeaker Lite"
     output_device: Optional[str] = None
     echo_cancellation: bool = True
-    output_directory: str = str(Path.home() / "AI_Stack/runtime-data/reachy-audio")
+    output_directory: str = str(RUNTIME_DIR / "runtime-data/reachy-audio")
     max_output_seconds: float = 120.0
     retained_files: int = 10
     voice_interruptions: bool = True
@@ -168,9 +168,7 @@ class SessionConfig:
 @dataclass
 class ActionsConfig:
     enabled: bool = False
-    database: str = str(
-        Path.home() / "AI_Stack/runtime-data/reachy-actions/actions.sqlite"
-    )
+    database: str = str(RUNTIME_DIR / "runtime-data/reachy-actions/actions.sqlite")
     max_calls_per_turn: int = 2
     max_pending_reminders: int = 100
     max_records: int = 1000
@@ -201,7 +199,7 @@ class WebConfig:
 
 @dataclass
 class BackendsConfig:
-    stack_root: str = str(Path.home() / "AI_Stack")
+    stack_root: str = str(RUNTIME_DIR)
     llm_threads: int = 4
     llm_gpu_layers: int = 99
     llm_parallel: int = 1
@@ -285,6 +283,18 @@ class Config:
                             f"Invalid configuration value: {section}.{key}"
                         )
                     setattr(obj, key, value)
+        # Rebase historical filesystem locations; keep model parameters intact.
+        for section, field in (
+            ("backends", "stack_root"),
+            ("audio", "output_directory"),
+            ("actions", "database"),
+        ):
+            obj = getattr(config, section)
+            value = getattr(obj, field)
+            if not value.strip():
+                raise ValueError("Runtime paths must not be empty")
+            path = artifact_path(value)
+            setattr(obj, field, str(path if path.is_absolute() else ROOT / path))
         config.validate()
         return config
 

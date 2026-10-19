@@ -4,15 +4,29 @@
 
 当前软件框架与 B0 基线已交付。**接手顺序：亲自启停完整系统 → 理解服务与数据流 → 复现视觉基线 → 在指导下分析和优化。** 实物麦克风/扬声器、真人手势负例、8 小时长稳和干净环境重部署仍待验收。
 
-[项目定位与分工](08_docs/project-overview.md) · [完整实施计划](08_docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](06_benchmarks/results/reachy-b0-sw.json) · [阶段验证记录](08_docs/reachy-migration.md)
+[项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/reachy-b0-sw.json) · [阶段验证记录](docs/reachy-migration.md)
+
+
+## 项目内直接运行
+
+```bash
+./run.sh services up
+./run.sh services status
+./run.sh services logs --components app --lines 80
+./run.sh services down
+```
+
+`run.sh` 使用项目自带的 Python 环境；原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
+
+完整运行依赖约 6 GB，存放在 `05_runtime/` 并排除出普通 Git 提交。本机项目已具备这些依赖；**单独克隆 Git 仓库后，需要恢复运行包或从已有工件导入**。运行包不包含笔记数据库、录音、回复和日志，恢复步骤见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)。
 
 ## 从停止状态亲自启动
 
-以下命令在板端以 `nvidia` 用户执行。模型与运行环境已经准备在 `~/AI_Stack/`。
+以下命令在板端以 `nvidia` 用户执行。模型、推理程序和 Python 环境均已准备在本项目 `05_runtime/`。系统层仍需要兼容的 Jetson Linux、CUDA、TensorRT 和 Python 3.12。
 
 ```bash
 cd /home/nvidia/Multi_Model_Inference
-source /home/nvidia/AI_Stack/environments/reachy-headless/bin/activate
+source ./05_runtime/environments/reachy-headless/bin/activate
 
 # 结束当前对话后，停止本项目四个服务，确认 STOPPED。
 python main.py services down
@@ -72,26 +86,28 @@ flowchart LR
 ## 代码仓地图
 
 ```text
-main.py                    统一 CLI；常用启停命令保持不变
+main.py                    统一 CLI
+run.sh                     使用项目内环境的启动器
 run_web_vision_chat.py      应用组装与生命周期入口
-01_src/                    Python 源码；外层编号，包名保持合法
+01_src/                    核心源码
   app/                     感知、对话、语音、工具、网页后端与诊断
-  deploy/                  systemd 管理、模型启动、工件锁与语音接入
+  deploy/                  服务管理、推理启动、工件锁与语音接入
   benchmarks/              性能采集、汇总和绘图代码
-  project_paths.py         公共目录位置、冻结记录的旧路径解析
-02_config/                 基础配置与 Orin NX 平台配置
-03_models/                 模型清单、来源与哈希；权重仍在 AI_Stack
-04_web/                    HTML、CSS、JS 与调试面板
-05_scripts/                工件准备与功能验证脚本
-06_benchmarks/              基准数据：corpora / manifests / results
-07_tests/                  自动化回归测试
-08_docs/                   总览、计划、阶段记录、上游文档与归档索引
-09_patches/                上游代码的最小修正补丁
-10_licenses/               第三方许可证
-references/                原有学习参考子模块，保持原样
+  project_paths.py         公共位置和历史路径解析
+02_config/                 运行配置
+03_models/                 模型清单与哈希；实际权重在 05_runtime/models
+04_web/                    网页与调试界面
+05_runtime/                必需框架、模型、环境和运行数据（不进 Git）
+benchmarks/                固定语料、测量协议和结果
+scripts/                   工件准备与功能验证脚本
+tests/                     自动化测试
+docs/                      文档与历史索引
+patches/                   上游补丁
+licenses/                  第三方许可证
+references/                原有学习参考子模块
 ```
 
-实际源码、权重、编译产物、环境、数据库与运行日志集中在 `/home/nvidia/AI_Stack/`，见 [依赖目录说明](01_src/deploy/dependencies-layout.md)。根目录 `.venv*` 是旧环境的兼容链接，部分已安装脚本仍通过它们启动；当前应用使用上面的 `reachy-headless` 环境。
+当前框架源码、权重、原生程序、环境、数据库与日志位于 `05_runtime/`，见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)。旧 `AI_Stack` 和 `.venv*` 链接仅保留用于回退，不参与当前服务启动。
 
 ## 按运行顺序阅读
 
@@ -117,9 +133,9 @@ ssh -N -L 18090:127.0.0.1:8090 nvidia@板子IP
 
 然后打开 `http://127.0.0.1:18090/debug`，或在主网页点击“板端调试”。面板约每 2 秒显示板端实际采集/识别 FPS、最新帧的模型耗时/帧龄、资源和当前轮次时间线，支持导出最近 60 个样本；浏览器接收 FPS 单独标注。
 
-第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [阶段记录中的 V1/V2 命令](08_docs/reachy-migration.md)复现视觉基线，使用新的实验输出目录。
+第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [阶段记录中的 V1/V2 命令](docs/reachy-migration.md)复现视觉基线，使用新的实验输出目录。
 
-冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](06_benchmarks/results/reachy-b0-vision-summary.json)、[模型接口](06_benchmarks/results/reachy-b0-models-summary.json)、[完整应用](06_benchmarks/results/reachy-b0-e1-summary.json)和 [原始包索引](06_benchmarks/results/reachy-b0-archive.json)均保留。
+冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](benchmarks/results/reachy-b0-vision-summary.json)、[模型接口](benchmarks/results/reachy-b0-models-summary.json)、[完整应用](benchmarks/results/reachy-b0-e1-summary.json)和 [原始包索引](benchmarks/results/reachy-b0-archive.json)均保留。
 
 ## 验证与历史恢复
 
@@ -127,12 +143,12 @@ ssh -N -L 18090:127.0.0.1:8090 nvidia@板子IP
 python -m pytest -q
 ```
 
-`07_tests/` 为软件回归；真实模型/设备验证位于 `05_scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
+`tests/` 为软件回归；真实模型/设备验证位于 `scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
 
-当前目标及剩余项见 [任务清单](06_benchmarks/manifests/reachy-headless-roadmap-v3.json)和 [迁移缺口](06_benchmarks/manifests/reachy-gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
+当前目标及剩余项见 [任务清单](benchmarks/manifests/reachy-headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/reachy-gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
 
-旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](08_docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前 Reachy 证据、模型数据、许可证及固定旧运行快照保持保留。
+旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前 Reachy 证据、模型数据、许可证及固定旧运行快照保持保留。
 
-编号仅用于仓库外层目录。Python 包仍使用 `app`、`deploy`、`benchmarks`；主入口和直接运行的脚本会加入 `01_src` 搜索路径。交互式导入可使用 `PYTHONPATH=01_src python`。测试路径已在 `pytest.ini` 配置，无需额外设置。
+仅五类核心目录保留编号并排在前面；脚本、测试、基准、文档、补丁和许可证目录使用普通名称。Python 包仍使用 `app`、`deploy`、`benchmarks`；主入口和直接运行的脚本会加入 `01_src` 搜索路径。交互式导入可使用 `PYTHONPATH=01_src python`。测试路径已在 `pytest.ini` 配置，无需额外设置。
 
 冻结清单和历史报告保持原字节，其中旧路径由 `01_src/project_paths.py` 解析。迁移前恢复点为 `before-numbered-layout-20261019`；旧命令中的脚本路径应使用当前编号路径，例如 `python 01_src/benchmarks/vision_modules.py --help`。

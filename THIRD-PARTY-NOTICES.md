@@ -130,7 +130,7 @@ finite-vector guards and temporal interaction rules.
 The optional notes/reminders module uses SQLAlchemy 2.1.4 and APScheduler
 3.11.3, both MIT licensed. Exact installed versions and license digests are
 recorded in `01_src/deploy/actions-dependencies.lock.json`; license copies are in
-`10_licenses/SQLAlchemy-MIT.txt` and `10_licenses/APScheduler-MIT.txt`.
+`licenses/SQLAlchemy-MIT.txt` and `licenses/APScheduler-MIT.txt`.
 Application transaction, idempotency and output-receipt rules adapt the
 previous project's SQLAlchemy/ReminderService contracts, without importing
 its Pipecat, memory or identity layers.

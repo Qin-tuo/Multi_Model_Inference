@@ -16,6 +16,9 @@ import sys
 
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parents[1]))
+from project_paths import RUNTIME_DIR
+
 LOCK = json.loads((HERE / "source-lock.json").read_text())
 
 
@@ -56,7 +59,7 @@ def main() -> int:
     parser.add_argument(
         "--source",
         type=Path,
-        default=Path.home() / ".cache/multi-model-assistant/upstreams/openvoicestream",
+        default=RUNTIME_DIR / "frameworks/openvoicestream",
     )
     parser.add_argument(
         "--fetch",

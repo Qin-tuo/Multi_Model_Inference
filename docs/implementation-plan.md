@@ -59,7 +59,7 @@ A/B完成后，助手不能自动代用户开展多轮优化。每次教学围�
 - [固定版本源码](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/tree/2673202a360a41935b45ac79141ef0bb529492ba)
 - 本机审查副本：/home/nvidia/AI_Stack/research/reachy-mini-jetson-assistant-2673202。
 - [上游依赖兼容清单](https://github.com/NVIDIA-AI-IOT/reachy-mini-jetson-assistant/blob/2673202a360a41935b45ac79141ef0bb529492ba/packaging/jetson-wheels.json)
-- 岗位方向延续[已核验的JD资料](../06_benchmarks/manifests/target-jd-20261014.json)：模型部署、C++/Python/Linux、数据流、资源与profiling、可靠交付。具体招聘资格不作假设。
+- 岗位方向延续[已核验的JD资料](../benchmarks/manifests/target-jd-20261014.json)：模型部署、C++/Python/Linux、数据流、资源与profiling、可靠交付。具体招聘资格不作假设。
 
 “复用基底”指导入并派生实际代码，保留来源、许可证及上游commit，逐项记录本地差异。先固定可复现参考，再裁剪、适配和扩展；不只照目录另写一套，也不把旧项目主控整体塞入上游。
 
@@ -119,7 +119,7 @@ A/B完成后，助手不能自动代用户开展多轮优化。每次教学围�
 | 会话控制 | 语音/文字/手势/结果 | 当前轮次、路由、取消与接纳决定 | turn_control.py | 仅实现单会话所需状态；不另造通用运行框架 |
 | 有限工具 | 校验后的请求 | 实际执行与持久结果 | actions/ | 幂等、取消边界、真实回执；可关闭 |
 | Web与监控 | 画面、事件、日志/资源 | 可视化状态和有限控制 | web.py、monitor.py | 展示和控制请求统一走主流程，不直接绕过状态 |
-| 部署管理 | 一套有效配置、模型锁 | 受管理进程与健康状态 | main.py、05_scripts/、01_src/deploy/ | 只管理本项目拥有的进程/资源 |
+| 部署管理 | 一套有效配置、模型锁 | 受管理进程与健康状态 | main.py、scripts/、01_src/deploy/ | 只管理本项目拥有的进程/资源 |
 
 所有模块具备明确的启动、就绪、请求、失败和关闭行为。状态上区分“进程存在”“端点可达”“模型就绪”“应用功能验证通过”，不能混用。
 
@@ -227,18 +227,14 @@ V4L2/OpenCV路径如果只能取得主机收帧时间，应明确标记，不冒
 
 ```text
 project/
-  main.py / run_web_vision_chat.py
-  01_src/                    # app、deploy、benchmarks 源码包
-  02_config/                 # 配置
-  03_models/                 # 模型清单与哈希
-  04_web/                    # 网页与调试界面
-  05_scripts/                # 准备与功能验证脚本
-  06_benchmarks/             # 固定语料、测量协议和结果
-  07_tests/                  # 自动化回归
-  08_docs/                   # 文档与历史索引
-  09_patches/                # 最小上游补丁
-  10_licenses/               # 第三方许可证
-  references/                # 原参考资料保留
+  main.py / run.sh / run_web_vision_chat.py
+  01_src/                  # app、deploy、benchmarks 源码包
+  02_config/               # 配置
+  03_models/               # 模型清单
+  04_web/                  # 界面
+  05_runtime/              # 必需依赖与运行数据
+  scripts/ / benchmarks/ / tests/
+  docs/ / patches/ / licenses/ / references/
 ```
 
 上图对应当前运行主线；2026-10-19 已清理旧方案文件，具体目录与阅读顺序以 [README](../README.md) 为准。精简要求：
@@ -500,8 +496,8 @@ B0的作用是告诉用户“当前系统各部分实际怎样运行”。不能
 
 - 当前计划：本文件；[总览](project-overview.md)只维护定位与分工。
 - [上游审查锁](../01_src/deploy/reachy-upstream.lock.json)：固定源码身份和关键文件哈希，状态为审查，不代表已部署。
-- [新版任务清单](../06_benchmarks/manifests/reachy-headless-roadmap-v3.json)：R0～R6、工程与学习验收、当前执行状态。
-- [迁移缺口清单](../06_benchmarks/manifests/reachy-gap-ledger-v3.json)：来源差异、待验证风险、处理与证据。
+- [新版任务清单](../benchmarks/manifests/reachy-headless-roadmap-v3.json)：R0～R6、工程与学习验收、当前执行状态。
+- [迁移缺口清单](../benchmarks/manifests/reachy-gap-ledger-v3.json)：来源差异、待验证风险、处理与证据。
 - [旧实现进度](archive/repository-cleanup-20261019.json)保留历史通过范围；新应用未自动继承。
 - [旧版计划](archive/02-plan-v2.1-before-reachy-20261015.md)与[旧版使用说明](archive/README-pre-reachy-20261015.md)留作追溯。
 - 外部源码、环境、模型及原始数据统一位于/home/nvidia/AI_Stack；references/不删除。

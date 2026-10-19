@@ -24,7 +24,7 @@ import hashlib
 import json
 import threading
 from pathlib import Path
-from project_paths import MODEL_DIR
+from project_paths import MODEL_DIR, load_artifact_manifest
 from typing import Optional
 
 import cv2
@@ -46,7 +46,7 @@ FaceBox = tuple[int, int, int, int]
 
 def _resolve_model_path() -> Path:
     """Use a prepared, pinned local artifact; runtime never downloads weights."""
-    entry = json.loads(_MANIFEST.read_text())["face"]
+    entry = load_artifact_manifest(_MANIFEST)["face"]
     path = Path(entry["directory"]).expanduser() / entry["filename"]
     expected = entry["files"][entry["filename"]]["sha256"]
     if hashlib.sha256(path.read_bytes()).hexdigest() != expected:

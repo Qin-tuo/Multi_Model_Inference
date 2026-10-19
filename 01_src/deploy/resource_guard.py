@@ -8,7 +8,9 @@ from pathlib import Path
 
 def hold_model_lease(cache=None):
     """Keep a shared lease across exec; the last model process exit releases it."""
-    cache = Path(cache or Path.home() / "AI_Stack/cache")
+    from project_paths import RUNTIME_DIR
+
+    cache = Path(cache or RUNTIME_DIR / "cache")
     cache.mkdir(parents=True, exist_ok=True)
     lease = open(cache / "ort-build.owner.lock", "a+b")
     try:

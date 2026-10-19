@@ -1,2 +1,2 @@
 # Unified diffs use a mandatory context marker on otherwise empty lines.
-09_patches/**/*.patch whitespace=-blank-at-eol
+patches/**/*.patch whitespace=-blank-at-eol

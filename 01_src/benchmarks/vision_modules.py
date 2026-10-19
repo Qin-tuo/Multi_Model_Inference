@@ -25,6 +25,7 @@ from benchmarks.baseline_support import (  # noqa: E402
     validate,
 )
 from deploy import runtime, services  # noqa: E402
+from project_paths import load_artifact_manifest
 
 
 def worker(module, out):
@@ -38,7 +39,7 @@ def worker(module, out):
     _lease = hold_model_lease(runtime.paths(cfg)["stack"] / "cache")
     resources = Resources(out, {module: [os.getpid()]}).start()
     events = Events(out / "events.jsonl")
-    manifest = json.loads((ROOT / "03_models/perception.json").read_text())
+    manifest = load_artifact_manifest(ROOT / "03_models/perception.json")
     model = None
     report = {
         "module": module,
@@ -246,7 +247,7 @@ def main():
         "status": "RUNNING",
         "before": before,
         "protocol_sha256": runtime.sha256(
-            ROOT / "06_benchmarks/manifests/reachy-b0-sw-v1.json"
+            ROOT / "benchmarks/manifests/reachy-b0-sw-v1.json"
         ),
         "modules": {},
     }

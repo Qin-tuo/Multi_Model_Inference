@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
 # Shared native-process identity checks live with the functional probes.
-sys.path.insert(0, str(ROOT / "05_scripts"))
+sys.path.insert(0, str(ROOT / "scripts"))
 from benchmarks.baseline_support import (  # noqa: E402
     Events,
     Resources,
@@ -230,7 +230,7 @@ def worker(role, out):
             cases = [
                 c
                 for c in json.loads(
-                    (ROOT / "06_benchmarks/corpora/reachy-b0-llm-v1.json").read_text()
+                    (ROOT / "benchmarks/corpora/reachy-b0-llm-v1.json").read_text()
                 )["cases"]
                 if c["kind"] == role.removeprefix("l1-")
             ]
@@ -253,7 +253,7 @@ def worker(role, out):
                     (out / (case["id"] + ".jpg")).write_bytes(case["jpeg"])
         else:
             cases = json.loads(
-                (ROOT / "06_benchmarks/corpora/reachy-b0-speech-v1.json").read_text()
+                (ROOT / "benchmarks/corpora/reachy-b0-speech-v1.json").read_text()
             )["cases"]
             for case in cases:
                 case["path"] = str(
@@ -366,7 +366,7 @@ def main():
     runtime.write_json(out / "effective-config.json", cfg.effective())
     for filename in ("reachy-b0-llm-v1.json", "reachy-b0-speech-v1.json"):
         (out / filename).write_bytes(
-            (ROOT / "06_benchmarks/corpora" / filename).read_bytes()
+            (ROOT / "benchmarks/corpora" / filename).read_bytes()
         )
     workload = {
         "speech_profile": "ASR and TTS resident together; one role requested, other idle; no 4B/perception",

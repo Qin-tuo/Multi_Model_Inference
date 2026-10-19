@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
+from project_paths import load_artifact_manifest
 
 
 def stamp():
@@ -199,7 +200,7 @@ def artifact_files(cfg, components):
         for name, row in lock["speech_files"].items():
             add(p["stack"] / name, row["sha256"])
     if "app" in components:
-        perception = json.loads((ROOT / "03_models/perception.json").read_text())
+        perception = load_artifact_manifest(ROOT / "03_models/perception.json")
         if cfg.face.enabled:
             row = perception["face"]
             add(
@@ -220,7 +221,7 @@ def artifact_files(cfg, components):
                     entry = row["files"][name]
                     add(entry["path"], entry["sha256"])
         if cfg.audio.enabled:
-            row = json.loads((ROOT / "03_models/speech.json").read_text())["vad"]
+            row = load_artifact_manifest(ROOT / "03_models/speech.json")["vad"]
             add(
                 Path(row["directory"]) / row["filename"],
                 row["files"][row["filename"]]["sha256"],
@@ -276,6 +277,11 @@ def main():
         TRANSFORMERS_OFFLINE="1",
         OVS_AUTO_DOWNLOAD_ARTIFACTS="0",
         OTEL_SDK_DISABLED="true",
+    )
+    # Prefer the copied sibling libraries over the original build RUNPATH.
+    library_dir = str(paths(cfg)["llama"].parent)
+    os.environ["LD_LIBRARY_PATH"] = library_dir + (
+        ":" + os.environ["LD_LIBRARY_PATH"] if os.environ.get("LD_LIBRARY_PATH") else ""
     )
     command = native_command(args.component, cfg, args.profile)
     os.execv(command[0], command)

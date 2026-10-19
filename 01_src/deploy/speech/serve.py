@@ -78,7 +78,7 @@ def main():
     os.environ["OVS_AUTO_DOWNLOAD_ARTIFACTS"] = "0"
     bundle_alias = p["models"] / "matcha-icefall-zh-en"
     if not bundle_alias.exists():
-        bundle_alias.symlink_to(model, target_is_directory=True)
+        bundle_alias.symlink_to(model.name, target_is_directory=True)
     elif bundle_alias.resolve() != model.resolve():
         raise RuntimeError("Matcha bundle alias points at another model")
     os.environ["HF_HUB_OFFLINE"] = "1"

@@ -42,7 +42,7 @@ def main():
         "scope": "Prepared deployment and rollback; no physical audio, B0 or 8h claim",
         "source_sha256": {
             str(p.relative_to(ROOT)): runtime.sha256(p)
-            for folder in ["01_src/app", "01_src/deploy", "05_scripts"]
+            for folder in ["01_src/app", "01_src/deploy", "scripts"]
             for p in (ROOT / folder).rglob("*.py")
         },
         "legacy_root": str(legacy),
@@ -128,7 +128,7 @@ def main():
                 label,
                 [
                     python,
-                    ROOT / "05_scripts/probe_web.py",
+                    ROOT / "scripts/probe_web.py",
                     *args_,
                     "--output",
                     out / (label + ".json"),
@@ -159,7 +159,7 @@ def main():
             "file-speech",
             [
                 python,
-                ROOT / "05_scripts/probe_speech.py",
+                ROOT / "scripts/probe_speech.py",
                 "--input",
                 out / "input.wav",
                 "--output",
@@ -194,7 +194,7 @@ def main():
             "after-cycles",
             [
                 python,
-                ROOT / "05_scripts/probe_web.py",
+                ROOT / "scripts/probe_web.py",
                 "--text",
                 "只回答：恢复成功",
                 "--output",
@@ -244,7 +244,7 @@ def main():
             "after-crash",
             [
                 python,
-                ROOT / "05_scripts/probe_web.py",
+                ROOT / "scripts/probe_web.py",
                 "--text",
                 "只回答：恢复成功",
                 "--output",
@@ -278,7 +278,7 @@ def main():
                     "-c",
                     'source /opt/ros/jazzy/setup.bash && exec /usr/bin/python3 "$1" "$2"',
                     "probe",
-                    ROOT / "05_scripts/probe_legacy_camera.py",
+                    ROOT / "scripts/probe_legacy_camera.py",
                     out / "legacy-camera.json",
                 ],
                 env=env,

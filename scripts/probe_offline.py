@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
 from deploy import runtime, services  # noqa: E402
+from project_paths import LEGACY_STACK_DIR
 
 
 def network_state():
@@ -127,6 +128,18 @@ def inside(args):
         "components": {},
         "checks": [],
     }
+    if args.hide_ai_stack:
+        mount_namespace = os.readlink("/proc/self/ns/mnt")
+        if mount_namespace == initial["mount_namespace"] or list(
+            LEGACY_STACK_DIR.iterdir()
+        ):
+            raise RuntimeError("AI_Stack was not hidden in a private mount namespace")
+        report["source_isolation"] = {
+            "path": str(LEGACY_STACK_DIR),
+            "mount_namespace": mount_namespace,
+            "directory_empty": True,
+            "read_only_mount": True,
+        }
     children = {}
     logs = []
     error = None
@@ -214,7 +227,7 @@ def inside(args):
                 label,
                 [
                     python,
-                    ROOT / "05_scripts/probe_web.py",
+                    ROOT / "scripts/probe_web.py",
                     *extra,
                     "--output",
                     out / (label + ".json"),
@@ -224,11 +237,22 @@ def inside(args):
             "file-speech",
             [
                 python,
-                ROOT / "05_scripts/probe_speech.py",
+                ROOT / "scripts/probe_speech.py",
                 "--input",
                 args.input,
                 "--output",
                 out / "reply.wav",
+            ],
+        )
+        check(
+            "application-audio",
+            [
+                python,
+                ROOT / "scripts/probe_web.py",
+                "--audio",
+                args.input,
+                "--output",
+                out / "application-audio.json",
             ],
         )
         report["status"] = "PASS"
@@ -271,6 +295,11 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--inside", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--hide-ai-stack",
+        action="store_true",
+        help="Also hide original AI_Stack in a private read-only mount namespace",
+    )
     args = parser.parse_args()
     if args.inside:
         return inside(args)
@@ -296,6 +325,7 @@ def main():
         ).strip(),
         "probe_sha256": runtime.sha256(__file__),
         "input_sha256": runtime.sha256(args.input),
+        "mount_namespace": os.readlink("/proc/self/ns/mnt"),
     }
     runtime.write_json(out / "outer.json", report)
     isolated = runtime.config(services.profile_path(cfg))
@@ -327,6 +357,35 @@ def main():
             "--input",
             str(args.input.resolve()),
         ]
+        if args.hide_ai_stack:
+            empty = out / "hidden-ai-stack"
+            empty.mkdir()
+            # The bind mount exists only in this child's mount namespace.
+            # The host source tree is neither renamed nor chmod'ed.
+            command = [
+                "sudo",
+                "-n",
+                "unshare",
+                "--net",
+                "--mount",
+                "--propagation",
+                "private",
+                "bash",
+                "-c",
+                'mount --bind "$1" "$2" && mount -o remount,bind,ro "$2" && /usr/sbin/ip link set lo up && exec sudo -n -H -u "$3" -- "${@:4}"',
+                "namespace",
+                str(empty),
+                str(LEGACY_STACK_DIR),
+                username,
+                sys.executable,
+                __file__,
+                "--inside",
+                "--hide-ai-stack",
+                "--output",
+                str(out),
+                "--input",
+                str(args.input.resolve()),
+            ]
         report["namespace_command"] = command
         with (out / "namespace.log").open("w") as log:
             result = subprocess.run(
@@ -355,6 +414,15 @@ def main():
                 error = error or exc
                 report["namespace_cleanup_error"] = repr(exc)
         report["network_after"] = network_state()
+        if os.readlink("/proc/self/ns/mnt") != report["mount_namespace"]:
+            error = error or RuntimeError("Host mount namespace changed")
+        if (
+            args.hide_ai_stack
+            and not (
+                LEGACY_STACK_DIR / "environments/reachy-headless/bin/python"
+            ).is_file()
+        ):
+            error = error or RuntimeError("Host source runtime became unavailable")
         if topology(report["network_after"]) != topology(report["network"]):
             error = error or RuntimeError(
                 "Host network snapshot changed; inspect before/after"
