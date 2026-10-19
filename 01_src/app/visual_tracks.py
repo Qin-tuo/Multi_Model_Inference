@@ -20,12 +20,10 @@ def appearance_distance(first, second):
 class VisualTracks:
     def __init__(self, namespace, capacity=20, ttl=2.0):
         self.namespace, self.capacity, self.ttl = namespace, capacity, ttl
-        self.epoch = None
-        self.stamp = None
-        self.frame_id = None
         self.reset()
 
     def reset(self):
+        self.epoch = self.stamp = self.frame_id = None
         self.generation = uuid.uuid4().hex[:8]
         self.tracker = Tracker(
             distance_function=self._distance,
@@ -86,7 +84,6 @@ class VisualTracks:
             self.stamp is not None and stamp - self.stamp > self.ttl
         ):
             self.reset()
-            self.stamp = self.frame_id = None
         if self.stamp is not None and (stamp <= self.stamp or index <= self.frame_id):
             raise ValueError("Out-of-order tracking observation")
         self.epoch, self.frame_id, self.stamp = epoch, index, stamp

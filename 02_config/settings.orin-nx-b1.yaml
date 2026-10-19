@@ -1,4 +1,4 @@
-# B1 integration profile; fixed serial FP32 baseline, acceptance still pending.
+# B1 serial FP32 profile; acceptance evidence is tracked in benchmarks/manifests.
 llm:
   model: assistant-vlm
   base_url: http://127.0.0.1:8088

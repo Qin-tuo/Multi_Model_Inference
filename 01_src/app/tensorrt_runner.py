@@ -61,6 +61,7 @@ class TensorRTModel:
         import tensorrt as trt
 
         self._lock = threading.RLock()
+        self._closing = False
         self.runtime = self.engine = self.context = self.stream = None
         self.inputs, self.outputs = [], []
         self.input_specs, self.output_specs = {}, {}
@@ -136,8 +137,8 @@ class TensorRTModel:
 
     def infer(self, values):
         with self._lock:
-            if self.context is None:
-                raise RuntimeError("TensorRT model is closed")
+            if self.context is None or self._closing:
+                raise RuntimeError("TensorRT model is closed or closing")
             arrays = validate_inputs(values, self.input_specs)
             self._select_device()
             for name, buffer in zip(self.input_specs, self.inputs):
@@ -164,14 +165,26 @@ class TensorRTModel:
 
     def close(self):
         with self._lock:
+            self._closing = True
             if self.stream is not None:
                 self._select_device()
                 self.stream.synchronize()
             if self.inputs or self.outputs:
                 self.common.free_buffers(self.inputs, self.outputs)
+                # The pinned NVIDIA RAII helpers intentionally suppress release
+                # errors. Keep ownership and prohibit inference until every
+                # explicit release is confirmed, so a later close can retry.
+                if any(
+                    b._device_mem.device_ptr is not None
+                    or b._host_mem._host_ptr is not None
+                    for b in self.inputs + self.outputs
+                ):
+                    raise RuntimeError("TensorRT I/O buffer release is unconfirmed")
                 self.inputs, self.outputs = [], []
             if self.stream is not None:
                 self.stream.free()
+                if self.stream._stream is not None:
+                    raise RuntimeError("TensorRT CUDA stream release is unconfirmed")
                 self.stream = None
             self.context = self.engine = self.runtime = None
 

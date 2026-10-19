@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "B1_INTEGRATION_PROFILE_NOT_ACCEPTED",
+  "status": "PINNED_RUNTIME_ARTIFACTS_ACCEPTANCE_RECORDED_SEPARATELY",
   "tensorrt_version": "10.16.2.10",
   "runtime_versions": {
     "numpy": "1.26.4",

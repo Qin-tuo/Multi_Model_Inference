@@ -71,16 +71,24 @@ class VisionModels:
             "max_detections": max_detections,
         }
 
-    def load(self):
+    def load(self, roles=None):
+        """Load the full app set, or an explicit subset for isolated measurements."""
         if self.models:
             raise RuntimeError("Visual models are already loaded")
+        roles = tuple(ROLES if roles is None else roles)
+        if not roles or len(set(roles)) != len(roles) or set(roles) - set(ROLES):
+            raise ValueError("Unknown, duplicate or empty visual model selection")
         for name, expected in self.manifest["runtime_versions"].items():
             if version(name) != expected:
                 raise RuntimeError(
                     "Runtime dependency differs from B1 contract: " + name
                 )
+        with self.lock:
+            self.stats.clear()
+            for sample in self.samples.values():
+                sample.clear()
         try:
-            for role in ROLES:
+            for role in roles:
                 spec = dict(self.manifest["models"][role])
                 spec["engine_path"] = str(ROOT / spec["engine_path"])
                 if spec["onnx_sha256"] != self.entries[role]["sha256"]:
@@ -114,7 +122,7 @@ class VisionModels:
                         "gaze": Gaze,
                     }[role](spec)
                 self.models[role] = model
-                self.stats[role] = {
+                stats = {
                     "provider": model.provider,
                     "calls": 0,
                     "errors": 0,
@@ -124,6 +132,8 @@ class VisionModels:
                     "io_bytes_each_host_device": model.model.io_bytes,
                     "available_ram_after_load_bytes": psutil.virtual_memory().available,
                 }
+                with self.lock:
+                    self.stats[role] = stats
         except BaseException:
             self.close()
             raise

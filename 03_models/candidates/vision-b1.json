@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "FEASIBILITY_CANDIDATES_NOT_RUNTIME_DEFAULTS",
+  "status": "PINNED_SOURCES_SELECTION_IN_RUNTIME_PROFILE",
   "created_at": "2026-10-19",
   "models": {
     "depth": {

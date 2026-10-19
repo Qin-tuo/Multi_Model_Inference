@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T15:03:09.158692+00:00",
+  "updated_at": "2026-10-19T15:30:24.680167+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -58,7 +58,11 @@
       "existing B0 conversation, cancellation, actions, deployment and visual regressions"
     ],
     "b0_frozen_protocol_and_inputs": "validate() PASS; original bytes preserved",
-    "after_final_flag_guard": "30 targeted tests passed, including 2 new partial-pipeline rejection cases"
+    "after_final_flag_guard": "30 targeted tests passed, including 2 new partial-pipeline rejection cases",
+    "latest_full_suite": {
+      "passed": 256,
+      "junit": "05_runtime/validation/b1-lifecycle-tests-20261019.xml"
+    }
   },
   "observed_issues": [
     {
@@ -91,5 +95,26 @@
     "summary": "benchmarks/results/b1-feasibility-20261019.json",
     "raw_report": "05_runtime/validation/b1-pose-source-20261019-affine-fixed/report.json",
     "pipeline_recheck": "05_runtime/validation/b1-pipeline-pose-affine-20261019/report.json"
+  },
+  "recovery": {
+    "status": "B1_RECOVERY_PROBE_PASS_LIMITED_SCOPE",
+    "raw_report": "05_runtime/validation/b1-recovery-strict-release-20261019/report.json",
+    "raw_report_sha256": "224dcf08ebd7fa63bbb195259f9134d8ad85b08a90651e46818291c3093fde56",
+    "live_report": "05_runtime/validation/b1-recovery-strict-release-20261019/live-recovery.json",
+    "gate_report": "05_runtime/validation/b1-recovery-strict-release-20261019/replay-gates.json",
+    "sdk_lifecycle_cycles": 3,
+    "injected_failure_recoveries": 3,
+    "fds_after_close": [
+      49,
+      49,
+      49
+    ],
+    "rss_after_close_bytes": [
+      866828288,
+      873058304,
+      893091840
+    ],
+    "resource_checks": "Every owned TensorRT engine/context/stream and host/device I/O allocation released; camera and perception threads joined; gallery closed",
+    "scope": "Controlled SDK stream restart, explicit fault injection, synthetic-depth gate tests. Short repeated lifecycle check, not physical USB disconnect or long soak."
   }
 }

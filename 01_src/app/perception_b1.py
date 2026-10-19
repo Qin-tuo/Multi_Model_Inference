@@ -74,6 +74,10 @@ class B1Perception(Perception):
         self._selected_last = None
 
     def load(self):
+        if self.networks.models or self.gallery is not None:
+            raise RuntimeError(
+                "B1 resources are already loaded; close before reloading"
+            )
         try:
             self.networks.load()
             self.gallery = IdentityGallery(ROOT / self.config.identity_gallery)
@@ -395,10 +399,24 @@ class B1Perception(Perception):
         return {"track_id": target}
 
     def close(self):
+        # If the worker cannot join, its native contexts must remain owned.
         super().close()
-        self.networks.close()
+        errors = []
+        try:
+            self.networks.close()
+        except Exception as exc:
+            errors.append(exc)
         if self.gallery:
-            self.gallery.close()
-            self.gallery = None
+            try:
+                self.gallery.close()
+            except Exception as exc:
+                errors.append(exc)
+            else:
+                self.gallery = None
         with self._lock:
             self._face_vectors.clear()
+            self._selected = self._selected_last = None
+        self.entities.reset()
+        self.faces.reset()
+        if errors:
+            raise ExceptionGroup("B1 resource release failed", errors)
