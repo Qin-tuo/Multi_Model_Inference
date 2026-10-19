@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-19T09:20:21.937724+00:00",
+  "status": "IN_PROGRESS_NOT_B1_ACCEPTED",
+  "scope": "Initial source/interface review and high-risk TensorRT conversion gates; production remains the B0 application",
+  "pose": {
+    "candidate": "RTMW3D-X community ONNX",
+    "onnx_sha256": "4a289c0e99d47eb595e99679d9d4a2d1def1b4241f9adcbafba44b9ff585ebcd",
+    "engine_sha256": "0af18f04367702db1782b7803d5cc4be515abb940628c94bd87d2537081ca424",
+    "parity_status": "PARITY_PASS_LIMITED_FIXTURES",
+    "fixed_input_cases": 2,
+    "max_abs_output_error": 7.368624210357666e-06,
+    "max_argmax_bin_shift": 0,
+    "overlay_review": "Body/face/hand overlay on the public fixture reviewed; not labeled task-accuracy evidence",
+    "raw_report": "05_runtime/validation/b1-feasibility-20261019/parity/body_hand_pose/report.json",
+    "remaining": [
+      "Original PyTorch/community export equivalence",
+      "Broader quality and scene coverage",
+      "Production integration and resource coexistence"
+    ]
+  },
+  "depth": {
+    "candidate": "NVIDIA C-Fast-FoundationStereo bp2",
+    "status": "BUILD_FEASIBILITY_PENDING",
+    "failed_workspace_mib": [
+      512,
+      1024
+    ],
+    "superseded_workspace_mib": [
+      2048
+    ],
+    "next_workspace_mib": 4096,
+    "observed_error": "TensorRT compiler ForeignNode tactic rejected under the configured workspace limits",
+    "minimum_available_gib_during_1024_build": 7.16,
+    "vendor_workspace_guidance": "https://docs.nvidia.com/tao/tao-toolkit/latest/text/cv_finetuning/pytorch/depth_estimation/fast_foundation_stereo.html",
+    "contract_correction": "The pinned exporter requires external ImageNet normalization; actual ONNX output is float32 disparity, despite conflicting model-card prose.",
+    "remaining": [
+      "Successful engine build",
+      "Numerical parity",
+      "Calibrated live stereo input and domain validation",
+      "Runtime resource budget"
+    ]
+  },
+  "software_checks": {
+    "passed": 200,
+    "failures": 0,
+    "evidence": "05_runtime/validation/b1-feasibility-20261019/tests.xml"
+  },
+  "preservation": {
+    "rollback_tag": "before-vision-b1-20261019",
+    "b0_manifests_unchanged": true,
+    "model_services_restored_after_completed_workflows": true,
+    "new_models_are_default": false
+  },
+  "raw_directory": "05_runtime/validation/b1-feasibility-20261019",
+  "other_modules": "Pending; see benchmarks/manifests/vision-b1-v1.json"
+}

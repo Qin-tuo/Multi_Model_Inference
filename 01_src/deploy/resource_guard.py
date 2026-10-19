@@ -18,7 +18,7 @@ def hold_model_lease(cache=None):
     except OSError:
         lease.close()
         raise RuntimeError(
-            "Heavy ORT build owns the deployment lease; start model services after it finishes"
+            "A heavy model build owns the deployment lease; start model services after it finishes"
         ) from None
     os.set_inheritable(lease.fileno(), True)
     return lease
