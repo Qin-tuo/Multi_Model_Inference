@@ -1,0 +1,144 @@
+{
+  "created_at": "2026-10-19T03:10:43.310725+00:00",
+  "status": "VALIDATED",
+  "source_before": {
+    "commit": "9c064d629e589008710e6716ec555aca5b01a913",
+    "archive": "/home/nvidia/AI_Stack/archives/before-numbered-layout-20261019-9c064d6.tar.gz",
+    "sha256": "197baf04f9ffe4c768b5654750b9503cec006fa2cc20a7d8ae7b4e1ff97e317c"
+  },
+  "restore_tag": "before-numbered-layout-20261019",
+  "directories": {
+    "01_src": "app, deploy and benchmarks Python packages",
+    "02_config": "application configuration",
+    "03_models": "model manifests",
+    "04_web": "browser UI",
+    "05_scripts": "preparation and functional probes",
+    "06_benchmarks": "corpora, manifests and results",
+    "07_tests": "regression tests",
+    "08_docs": "documentation and archive index",
+    "09_patches": "upstream patches",
+    "10_licenses": "third-party licenses"
+  },
+  "unchanged_serialized_artifacts": 121,
+  "reference_submodules": "unchanged",
+  "historical_path_resolver": "01_src/project_paths.py",
+  "public_entrypoints": "main.py and run_web_vision_chat.py unchanged",
+  "validation": {
+    "tests_passed": 182,
+    "tests_failed": 0,
+    "artifact_files_verified": 397,
+    "entrypoints": {
+      "entries": [
+        "main.py",
+        "run_web_vision_chat.py",
+        "01_src/deploy/services.py",
+        "01_src/deploy/runtime.py",
+        "01_src/deploy/logged_service.py",
+        "01_src/deploy/speech/serve.py",
+        "01_src/benchmarks/application_server.py",
+        "01_src/benchmarks/model_modules.py",
+        "01_src/benchmarks/vision_stream.py",
+        "01_src/benchmarks/plot_models.py",
+        "01_src/benchmarks/summarize_models.py",
+        "01_src/benchmarks/plot_application.py",
+        "01_src/benchmarks/vision_modules.py",
+        "01_src/benchmarks/summarize_application.py",
+        "01_src/benchmarks/application_workload.py",
+        "01_src/benchmarks/summarize_vision.py",
+        "01_src/benchmarks/plot_vision.py",
+        "05_scripts/prepare_baseline_inputs.py",
+        "05_scripts/probe_voice_interruptions.py",
+        "05_scripts/probe_gestures.py",
+        "05_scripts/probe_web_transport.py",
+        "05_scripts/probe_turn_cancel.py",
+        "05_scripts/probe_browser_cancel.py",
+        "05_scripts/prepare_speech.py",
+        "05_scripts/probe_actions.py",
+        "05_scripts/probe_camera_recovery.py",
+        "05_scripts/prepare_face.py",
+        "05_scripts/probe_deployment.py",
+        "05_scripts/probe_action_cancel.py",
+        "05_scripts/probe_speech_session.py",
+        "05_scripts/probe_service_recovery.py",
+        "05_scripts/probe_gesture_replay.py",
+        "05_scripts/probe_legacy_camera.py",
+        "05_scripts/probe_cancellation.py",
+        "05_scripts/probe_web.py",
+        "05_scripts/probe_browser_session.py",
+        "05_scripts/probe_offline.py",
+        "05_scripts/probe_perception.py",
+        "05_scripts/prepare_perception.py",
+        "05_scripts/probe_speech.py",
+        "05_scripts/probe_session.py",
+        "05_scripts/probe_coexistence.py"
+      ],
+      "failures": [],
+      "environment_specific_checks": [
+        {
+          "entry": "01_src/benchmarks/plot_models.py",
+          "environment": "system Python (matplotlib)",
+          "returncode": 0
+        },
+        {
+          "entry": "01_src/benchmarks/plot_application.py",
+          "environment": "system Python (matplotlib)",
+          "returncode": 0
+        },
+        {
+          "entry": "01_src/benchmarks/plot_vision.py",
+          "environment": "system Python (matplotlib)",
+          "returncode": 0
+        },
+        {
+          "entry": "05_scripts/probe_legacy_camera.py",
+          "environment": "system Python + ROS Jazzy",
+          "returncode": 0
+        }
+      ]
+    },
+    "browser_native": {
+      "browser": {
+        "connected": " Connected",
+        "frame_width": 640,
+        "capture": "10.4",
+        "baseline": "人体55.3259.15人脸10.6211.88手部37.8246.98"
+      },
+      "text_status": "complete",
+      "text_audio": "file_written",
+      "audio_status": "complete",
+      "asr_calls": 1,
+      "audio_output": "file_written"
+    },
+    "active_markdown_broken_links": 0
+  },
+  "services": {
+    "llama": {
+      "active": "active",
+      "ready": true,
+      "restarts": "0"
+    },
+    "asr": {
+      "active": "active",
+      "ready": true,
+      "restarts": "0"
+    },
+    "speech": {
+      "active": "active",
+      "ready": true,
+      "restarts": "0"
+    },
+    "app": {
+      "active": "active",
+      "ready": true,
+      "restarts": "0"
+    }
+  },
+  "test_timing_note": {
+    "initial_state": "managed model services stopped for directory migration",
+    "observation": "Two full-suite runs failed the existing 150ms ASR healthy-recovery assertion. The individual case and all 8 timeout tests passed in isolation; final full suite passed after normal services were restored. Root cause was not established; no production or test timeout threshold was changed.",
+    "initial_evidence": "/home/nvidia/AI_Stack/runtime-data/numbered-layout-20261019/tests-first-timeout.xml",
+    "final_evidence": "/home/nvidia/AI_Stack/runtime-data/numbered-layout-20261019/tests.xml"
+  },
+  "scope": "Directory/import/resource-path migration only; no model parameter or scheduling optimization",
+  "raw_artifacts": "/home/nvidia/AI_Stack/runtime-data/numbered-layout-20261019"
+}

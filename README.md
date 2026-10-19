@@ -4,7 +4,7 @@
 
 当前软件框架与 B0 基线已交付。**接手顺序：亲自启停完整系统 → 理解服务与数据流 → 复现视觉基线 → 在指导下分析和优化。** 实物麦克风/扬声器、真人手势负例、8 小时长稳和干净环境重部署仍待验收。
 
-[项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](deploy/systemd/README.md) · [B0 总清单](benchmarks/results/reachy-b0-sw.json) · [阶段验证记录](docs/reachy-migration.md)
+[项目定位与分工](08_docs/project-overview.md) · [完整实施计划](08_docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](06_benchmarks/results/reachy-b0-sw.json) · [阶段验证记录](08_docs/reachy-migration.md)
 
 ## 从停止状态亲自启动
 
@@ -32,7 +32,7 @@ python main.py services status
 
 最后应为 `READY`，四个服务均就绪，摄像头持续出图。以后用 `python main.py services up` 一次启动全部服务。失败时查看对应组件日志，例如 `python main.py services logs --components app --lines 80`。
 
-`up` 会复用已运行的依赖。退出终端不会停止 systemd 服务；完整停止使用 `services down`，仅停止应用使用 `services down --components app`。详细生命周期、冻结配置与回退方式见 [部署说明](deploy/systemd/README.md)。
+`up` 会复用已运行的依赖。退出终端不会停止 systemd 服务；完整停止使用 `services down`，仅停止应用使用 `services down --components app`。详细生命周期、冻结配置与回退方式见 [部署说明](01_src/deploy/systemd/README.md)。
 
 ## 四个服务与数据流
 
@@ -72,44 +72,40 @@ flowchart LR
 ## 代码仓地图
 
 ```text
-main.py                    CLI：配置、自检、服务管理、单次问答
-run_web_vision_chat.py      应用组装、启动与退出；由 app 服务调用
-app/                       当前业务与模型适配，保持 Reachy 的模块组织
-  actions/                 笔记/提醒工具、SQLAlchemy 持久回执
-config/                    基础配置 + Orin NX 平台配置
-models/                    模型身份、来源和哈希；实际权重在 AI_Stack
-  baselines/、candidates/  历史模型与候选清单，默认模型以 manifest.json 为准
-deploy/                    systemd 管理、原生启动参数、工件与上游锁
-  speech/                  OVS 接入和语音兼容层
-  systemd/                 单元模板、启停与回退说明
-static/                    index.html；app.css/app.js；debug.css/debug.js
-scripts/                   prepare_* 准备工件；probe_* 功能验证
-benchmarks/                性能采集、汇总、绘图；不参与业务决策
-  corpora/                 当前 B0 的固定中文文本/语音提示
-  manifests/               固定输入与测量协议、任务及验收清单
-  results/                 当前 Reachy 阶段证据与冻结 B0
-tests/                     自动化回归
-docs/                     项目定位、实施计划、阶段记录
-  archive/                 历史计划与清理恢复索引
-  upstream/                固定上游的原始文档
+main.py                    统一 CLI；常用启停命令保持不变
+run_web_vision_chat.py      应用组装与生命周期入口
+01_src/                    Python 源码；外层编号，包名保持合法
+  app/                     感知、对话、语音、工具、网页后端与诊断
+  deploy/                  systemd 管理、模型启动、工件锁与语音接入
+  benchmarks/              性能采集、汇总和绘图代码
+  project_paths.py         公共目录位置、冻结记录的旧路径解析
+02_config/                 基础配置与 Orin NX 平台配置
+03_models/                 模型清单、来源与哈希；权重仍在 AI_Stack
+04_web/                    HTML、CSS、JS 与调试面板
+05_scripts/                工件准备与功能验证脚本
+06_benchmarks/              基准数据：corpora / manifests / results
+07_tests/                  自动化回归测试
+08_docs/                   总览、计划、阶段记录、上游文档与归档索引
+09_patches/                上游代码的最小修正补丁
+10_licenses/               第三方许可证
 references/                原有学习参考子模块，保持原样
 ```
 
-实际源码、权重、编译产物、环境、数据库与运行日志集中在 `/home/nvidia/AI_Stack/`，见 [依赖目录说明](deploy/dependencies-layout.md)。根目录 `.venv*` 是旧环境的兼容链接，部分已安装脚本仍通过它们启动；当前应用使用上面的 `reachy-headless` 环境。
+实际源码、权重、编译产物、环境、数据库与运行日志集中在 `/home/nvidia/AI_Stack/`，见 [依赖目录说明](01_src/deploy/dependencies-layout.md)。根目录 `.venv*` 是旧环境的兼容链接，部分已安装脚本仍通过它们启动；当前应用使用上面的 `reachy-headless` 环境。
 
 ## 按运行顺序阅读
 
 | 顺序 | 文件 | 先回答的问题 |
 |---|---|---|
-| 1 | [main.py](main.py) → [app/cli.py](app/cli.py) → [deploy/services.py](deploy/services.py) → [deploy/runtime.py](deploy/runtime.py) | 一个启动命令如何变成四个受管理服务？ |
+| 1 | [main.py](main.py) → [01_src/app/cli.py](01_src/app/cli.py) → [01_src/deploy/services.py](01_src/deploy/services.py) → [01_src/deploy/runtime.py](01_src/deploy/runtime.py) | 一个启动命令如何变成四个受管理服务？ |
 | 2 | [run_web_vision_chat.py](run_web_vision_chat.py) | 谁创建相机、模型接口、感知线程和轮次控制器？谁负责退出？ |
-| 3 | [app/camera.py](app/camera.py) → [app/perception.py](app/perception.py) → [app/gestures.py](app/gestures.py) | 一帧如何得到三类识别结果？为什么目标频率为 5 FPS？ |
-| 4 | [app/turn_control.py](app/turn_control.py) | 请求如何接纳、选帧、调用模型/工具、提交输出和取消？ |
-| 5 | [app/llm.py](app/llm.py)、[app/stt.py](app/stt.py)、[app/tts.py](app/tts.py)、[app/request_io.py](app/request_io.py) | 后端契约、超时和取消由谁保证？ |
-| 6 | [app/pipeline.py](app/pipeline.py)、[app/audio.py](app/audio.py) | VAD、文本分块、PCM 队列和文件提交如何协作？ |
-| 7 | [app/web.py](app/web.py)、[app/web_limits.py](app/web_limits.py)、[app/diagnostics.py](app/diagnostics.py)、[static/](static/) | 网页输入、慢客户端和板端观测如何接入？ |
+| 3 | [01_src/app/camera.py](01_src/app/camera.py) → [01_src/app/perception.py](01_src/app/perception.py) → [01_src/app/gestures.py](01_src/app/gestures.py) | 一帧如何得到三类识别结果？为什么目标频率为 5 FPS？ |
+| 4 | [01_src/app/turn_control.py](01_src/app/turn_control.py) | 请求如何接纳、选帧、调用模型/工具、提交输出和取消？ |
+| 5 | [01_src/app/llm.py](01_src/app/llm.py)、[01_src/app/stt.py](01_src/app/stt.py)、[01_src/app/tts.py](01_src/app/tts.py)、[01_src/app/request_io.py](01_src/app/request_io.py) | 后端契约、超时和取消由谁保证？ |
+| 6 | [01_src/app/pipeline.py](01_src/app/pipeline.py)、[01_src/app/audio.py](01_src/app/audio.py) | VAD、文本分块、PCM 队列和文件提交如何协作？ |
+| 7 | [01_src/app/web.py](01_src/app/web.py)、[01_src/app/web_limits.py](01_src/app/web_limits.py)、[01_src/app/diagnostics.py](01_src/app/diagnostics.py)、[04_web/](04_web) | 网页输入、慢客户端和板端观测如何接入？ |
 
-配置由 [app/config.py](app/config.py) 加载 `config/settings.yaml`，默认叠加 `config/settings.orin-nx-headless.yaml`。启动后四个服务共用一份冻结配置，位置见部署说明。
+配置由 [01_src/app/config.py](01_src/app/config.py) 加载 `02_config/settings.yaml`，默认叠加 `02_config/settings.orin-nx-headless.yaml`。启动后四个服务共用一份冻结配置，位置见部署说明。
 
 ## 网页调试与基线
 
@@ -121,9 +117,9 @@ ssh -N -L 18090:127.0.0.1:8090 nvidia@板子IP
 
 然后打开 `http://127.0.0.1:18090/debug`，或在主网页点击“板端调试”。面板约每 2 秒显示板端实际采集/识别 FPS、最新帧的模型耗时/帧龄、资源和当前轮次时间线，支持导出最近 60 个样本；浏览器接收 FPS 单独标注。
 
-第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [阶段记录中的 V1/V2 命令](docs/reachy-migration.md)复现视觉基线，使用新的实验输出目录。
+第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [阶段记录中的 V1/V2 命令](08_docs/reachy-migration.md)复现视觉基线，使用新的实验输出目录。
 
-冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](benchmarks/results/reachy-b0-vision-summary.json)、[模型接口](benchmarks/results/reachy-b0-models-summary.json)、[完整应用](benchmarks/results/reachy-b0-e1-summary.json)和 [原始包索引](benchmarks/results/reachy-b0-archive.json)均保留。
+冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](06_benchmarks/results/reachy-b0-vision-summary.json)、[模型接口](06_benchmarks/results/reachy-b0-models-summary.json)、[完整应用](06_benchmarks/results/reachy-b0-e1-summary.json)和 [原始包索引](06_benchmarks/results/reachy-b0-archive.json)均保留。
 
 ## 验证与历史恢复
 
@@ -131,8 +127,12 @@ ssh -N -L 18090:127.0.0.1:8090 nvidia@板子IP
 python -m pytest -q
 ```
 
-`tests/` 为软件回归；真实模型/设备验证位于 `scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
+`07_tests/` 为软件回归；真实模型/设备验证位于 `05_scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
 
-当前目标及剩余项见 [任务清单](benchmarks/manifests/reachy-headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/reachy-gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
+当前目标及剩余项见 [任务清单](06_benchmarks/manifests/reachy-headless-roadmap-v3.json)和 [迁移缺口](06_benchmarks/manifests/reachy-gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
 
-旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前 Reachy 证据、模型数据、许可证及固定旧运行快照保持保留。
+旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](08_docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前 Reachy 证据、模型数据、许可证及固定旧运行快照保持保留。
+
+编号仅用于仓库外层目录。Python 包仍使用 `app`、`deploy`、`benchmarks`；主入口和直接运行的脚本会加入 `01_src` 搜索路径。交互式导入可使用 `PYTHONPATH=01_src python`。测试路径已在 `pytest.ini` 配置，无需额外设置。
+
+冻结清单和历史报告保持原字节，其中旧路径由 `01_src/project_paths.py` 解析。迁移前恢复点为 `before-numbered-layout-20261019`；旧命令中的脚本路径应使用当前编号路径，例如 `python 01_src/benchmarks/vision_modules.py --help`。

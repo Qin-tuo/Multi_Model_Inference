@@ -27,6 +27,11 @@ import logging
 import threading
 import time
 
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "01_src"))
+
 from app.config import Config
 from app.camera import Camera
 from app.face_detector import FaceDetector

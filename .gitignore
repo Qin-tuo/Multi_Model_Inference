@@ -23,4 +23,4 @@ backup.owner.lock
 *.nsys-rep
 *.qdrep
 *.mcap
-benchmarks/raw/
+06_benchmarks/raw/

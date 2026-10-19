@@ -53,7 +53,7 @@ This project uses the following third-party open source software.
 
 ## GPL-Licensed TTS Dependencies
 
-The following GPL-licensed packages are transitive dependencies of `kokoro-onnx` (MIT). They run in the separate `app/tts_worker.py` process and communicate with the main application over JSON stdin/stdout pipes. Distributions that include them must provide the required license notices and corresponding source material.
+The following GPL-licensed packages are transitive dependencies of `kokoro-onnx` (MIT). They run in the separate `01_src/app/tts_worker.py` process and communicate with the main application over JSON stdin/stdout pipes. Distributions that include them must provide the required license notices and corresponding source material.
 
 | Package | License | URL |
 |---------|---------|-----|
@@ -107,21 +107,21 @@ The tables above are a human-readable notice index. Keep an exact dependency loc
 
 ## Local perception adaptation
 
-`app/body_detector.py` derives the array preprocessing/postprocessing from
+`01_src/app/body_detector.py` derives the array preprocessing/postprocessing from
 Ultralytics' YOLOv8 OpenCV ONNX example, commit
 `00cd4b8b187b6c7bc34776a6fe25a000f08b5fcc`, under AGPL-3.0.
 The upstream original and license are retained in the directory recorded by
-`deploy/perception-sources.lock.json`. The TensorRT buffer/stream helper is
+`01_src/deploy/perception-sources.lock.json`. The TensorRT buffer/stream helper is
 NVIDIA's `common_runtime.py` at commit `16ed0636df41e4a27d46f82d9028fc50fadc7200`
 (Apache-2.0), loaded from the checked external source. OpenCV Zoo palm and
 hand-pose source/model identities and Apache-2.0 notices are recorded in
-`models/perception.json`. These components retain their own notices.
+`03_models/perception.json`. These components retain their own notices.
 
-`app/gestures.py` adapts the five-finger angle and wrist-distance predicate
+`01_src/app/gestures.py` adapts the five-finger angle and wrist-distance predicate
 from OpenCV Zoo's `GestureClassification` in the handpose demo at the same
 pinned Hugging Face revision `4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7`
 (Apache-2.0). The original demo, digest and download URL are retained in
-`models/perception.json`; the demo is not imported because it parses CLI
+`03_models/perception.json`; the demo is not imported because it parses CLI
 arguments and downloads a model at module import. Local adaptations add
 finite-vector guards and temporal interaction rules.
 
@@ -129,8 +129,8 @@ finite-vector guards and temporal interaction rules.
 
 The optional notes/reminders module uses SQLAlchemy 2.1.4 and APScheduler
 3.11.3, both MIT licensed. Exact installed versions and license digests are
-recorded in `deploy/actions-dependencies.lock.json`; license copies are in
-`licenses/SQLAlchemy-MIT.txt` and `licenses/APScheduler-MIT.txt`.
+recorded in `01_src/deploy/actions-dependencies.lock.json`; license copies are in
+`10_licenses/SQLAlchemy-MIT.txt` and `10_licenses/APScheduler-MIT.txt`.
 Application transaction, idempotency and output-receipt rules adapt the
 previous project's SQLAlchemy/ReminderService contracts, without importing
 its Pipecat, memory or identity layers.
