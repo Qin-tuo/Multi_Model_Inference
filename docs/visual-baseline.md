@@ -2,7 +2,7 @@
 
 ## B1 模型接入验证
 
-2026-10-19：B1 尚未冻结，默认服务仍使用 B0 配置。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐，不再要求神经网络深度推理。RTMW3D-X 姿态和 YuNet 人脸均已生成 TensorRT 引擎并通过有限固定输入的数值核验。证据与未完成项见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)；真人场景精度、完整多模型链路和 B1 性能仍待验收。
+2026-10-19：B1 尚未冻结，默认服务仍使用 B0 配置。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐，不再要求神经网络深度推理。当前通过有限固定输入核验的 TensorRT 模型为 RTMW3D-X、YuNet、SFace、Progressive Teacher 表情和 YOLOv8n-seg。证据与未完成项见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)；注册库匹配、真人场景精度、完整多模型链路和 B1 性能仍待验收。
 
 原生深度复现入口使用应用的 `Camera` 类，检查时间对应、SDK 对齐、米制单位、无效点和关闭后的释放。输出目录每次使用新名称：
 
@@ -25,6 +25,31 @@
 ```
 
 构建和核验会独占本项目的构建锁，暂时停止本项目服务，并在结束或失败后恢复原先运行的组件。当前模型验证采用 FP32、关闭 TF32；编译 workspace 上限不等于运行时内存。CPU ONNX Runtime 和 OpenCV FaceDetectorYN 仅作为独立核验参考，正式视觉神经网络使用 TensorRT。YuNet 的检测框及五点解码另与 OpenCV 官方实现比较，覆盖有人脸、镜像和黑色负样本。
+
+人脸特征和表情复用同一份人脸框及五点来源，各自遵循上游的 112×112 对齐方法。SFace 输出 128 维特征，匹配前做 L2 归一化；表情输出七类分值，包含 `happy`，不提供原始私有模型的 `exaggeration`。复现时先完成上面的人脸检测核验：
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
+  --role face_identity expression --output 05_runtime/validation/b1-face-tasks-new
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_face_tasks_b1.py \
+  --build-root 05_runtime/validation/b1-face-tasks-new \
+  --face-build-root 05_runtime/validation/b1-face-new \
+  --output 05_runtime/validation/b1-face-tasks-new/parity
+```
+
+检测分割复用官方 YOLOv8n-seg 权重，输出 80 类检测与原图大小的实例 mask。当前帧最多输出 10 个目标，输入像素和 mask 分配均有上限。已通过原始 Ultralytics PyTorch 的框、类别、置信度和 mask 对照，覆盖普通人物、多人公交场景、奇数尺寸及空白负样本。
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
+  --role detection_segmentation --output 05_runtime/validation/b1-segmentation-new
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_segmentation_b1.py \
+  --build-root 05_runtime/validation/b1-segmentation-new \
+  --output 05_runtime/validation/b1-segmentation-new/parity
+```
+
+CPU 导出／参考环境为项目内 `05_runtime/builds/vision-export`，完整版本在 [requirements-export.lock](../01_src/deploy/vision/requirements-export.lock)。首次恢复可用 Python 3.12 创建该 venv，然后执行 `./05_runtime/builds/vision-export/bin/python -m pip install --no-deps -r 01_src/deploy/vision/requirements-export.lock`；`--no-deps` 用于保留完整锁文件指定的 headless OpenCV。应用环境不安装 Torch。需要独立复核 ONNX 导出时，将锁定的 `yolov8n-seg.pt` 复制到 `05_runtime/` 下的新目录，再用应用 Python 运行 `scripts/export_segmentation_b1.py --weights 新目录/yolov8n-seg.pt --output 新验证目录`。已有 ONNX 不会被覆盖；导出脚本只移除日期元数据并排序描述字段，检查推理图字节不变。新的项目内环境已独立重复导出，部署 ONNX 的 SHA-256 与原记录完全相同。
+
+本次定位到一个参考环境问题：原工具环境使用 OpenCV 5.0、NumPy 2.5，而应用使用 OpenCV 4.11、NumPy 1.26。对同一输入张量，ONNX/TensorRT 已一致，但缩放图像存在一个灰度级的差异，影响了端到端框和 mask。固定参考环境后，原先的验收阈值全部通过；失败数据和修正记录均保留在可部署性报告中。后续优化比较必须同时固定模型、输入和预处理库版本。
 
 相机元数据探针使用独立工具环境，不启动视频流：
 

@@ -175,7 +175,7 @@ def build(role, entry, output, timeout, workspace_mib=512):
 def main():
     entries = json.loads(MANIFEST.read_text())["models"]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--role", choices=tuple(entries))
+    parser.add_argument("--role", nargs="+", choices=tuple(entries))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=2400)
     parser.add_argument(
@@ -189,7 +189,7 @@ def main():
     if profile.exists():
         cfg = runtime.config(profile)
     selected = (
-        [args.role]
+        args.role
         if args.role
         else [
             role

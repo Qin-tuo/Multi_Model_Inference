@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T10:33:23.589105+00:00",
+  "updated_at": "2026-10-19T11:27:26.099780+00:00",
   "status": "IN_PROGRESS_NOT_B1_ACCEPTED",
   "scope": "Initial source/interface review and high-risk TensorRT conversion gates; production remains the B0 application",
   "pose": {
@@ -20,10 +20,10 @@
     ]
   },
   "software_checks": {
-    "passed": 216,
+    "passed": 225,
     "failures": 0,
-    "evidence": "05_runtime/validation/b1-sdk-rgbd-app-20261019/tests.xml",
-    "sha256": "30d1399f2723c8f97ea2b322fc68ed4ead2f2a5af62038a5d7a81a4377e983a1",
+    "evidence": "05_runtime/validation/b1-segmentation-20261019/tests.xml",
+    "sha256": "45fd3a1cb9a5d56e41d698d3e2fc63553b88bcd87d4062e134c13b06e7f763bf",
     "warning": "Existing Starlette TestClient/httpx deprecation warning; no dependency change performed"
   },
   "preservation": {
@@ -151,5 +151,110 @@
       "Shared perception integration and downstream face tasks",
       "B1 performance and coexistence"
     ]
+  },
+  "face_identity": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+    "engine_sha256": "a216e4a3685ac6d091aa7fb8e91b78235cfc206a0e0e748e2e0d14df234b1756",
+    "fixed_input_cases": 3,
+    "max_raw_abs_error": 3.6954879760742188e-06,
+    "raw_report": "05_runtime/validation/b1-face-tasks-20261019/parity/report.json",
+    "scope": "Three public face fixtures; not identity error-rate or expression accuracy qualification",
+    "min_native_embedding_cosine": 0.9999998807907104,
+    "matching_smoke": {
+      "cosines": [
+        [
+          0.9999996423721313,
+          0.9291918873786926,
+          0.048057671636343
+        ],
+        [
+          0.9291918873786926,
+          0.9999998211860657,
+          0.034144286066293716
+        ],
+        [
+          0.048057671636343,
+          0.034144286066293716,
+          1.0000001192092896
+        ]
+      ],
+      "same_face_brightness_pass": true,
+      "different_fixture_rejected": true,
+      "scope": "Two public identities; no false-accept/false-reject rate claim"
+    },
+    "remaining": [
+      "Bounded enrollment/gallery with model-version compatibility and unknown handling",
+      "Target association, distance/quality gates and shared runtime integration",
+      "B1 measurements and broader functional coverage"
+    ]
+  },
+  "expression": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "4f61307602fc089ce20488a31d4e4614e3c9753a7d6c41578c854858b183e1a9",
+    "engine_sha256": "e40ff87f9f8064e8a994eb2aadfb3ddb7fb59db2b4676a01ed006430b3ddbb83",
+    "fixed_input_cases": 3,
+    "max_raw_abs_error": 1.9073486328125e-06,
+    "raw_report": "05_runtime/validation/b1-face-tasks-20261019/parity/report.json",
+    "scope": "Three public face fixtures; not identity error-rate or expression accuracy qualification",
+    "max_native_score_error": 1.0728836059570312e-06,
+    "classes": [
+      "angry",
+      "disgust",
+      "fearful",
+      "happy",
+      "neutral",
+      "sad",
+      "surprised"
+    ],
+    "exaggeration_available": false,
+    "remaining": [
+      "Shared face ROI and runtime integration",
+      "Scene coverage and B1 measurements"
+    ]
+  },
+  "detection_segmentation": {
+    "status": "TRT_AND_ORIGINAL_ULTRALYTICS_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "983f042e1adc755c52a452ec6238e3ebe4bcc3359f9f2b539443d80c033f8c2a",
+    "engine_sha256": "4ee5366d62ee5b0ab2bec1fb353de3383ab15b2a1371bd14e779f3a541430d83",
+    "fixed_input_cases": 4,
+    "native_positive_detection_counts": [
+      1,
+      6,
+      7
+    ],
+    "blank_detections": 0,
+    "min_native_box_iou": 0.9999987331162,
+    "min_native_mask_iou": 0.9999960735810903,
+    "max_native_score_error": 1.2218952178955078e-06,
+    "raw_report": "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/report.json",
+    "remaining": [
+      "Live RGBD person/object detection and mask validation",
+      "Tracking, target-region distance and task triggers",
+      "Shared bounded runtime and B1 measurements"
+    ],
+    "independent_reexport": {
+      "status": "EXACT_DEPLOYMENT_ONNX_HASH_REPRODUCED",
+      "report": "05_runtime/validation/b1-segmentation-reexport-20261019/export.json",
+      "sha256": "983f042e1adc755c52a452ec6238e3ebe4bcc3359f9f2b539443d80c033f8c2a",
+      "scope": "Export reproducibility, not a performance result"
+    }
+  },
+  "reference_environment_fix": {
+    "status": "VERIFIED_REFERENCE_ENVIRONMENT_CORRECTION",
+    "failed_report": "05_runtime/validation/b1-segmentation-20261019/parity/report.json",
+    "passed_report": "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/report.json",
+    "old_reference": {
+      "opencv": "5.0.0",
+      "numpy": "2.5.4"
+    },
+    "runtime_and_new_reference": {
+      "opencv": "4.11.0",
+      "numpy": "1.26.4"
+    },
+    "evidence": "Old resized RGB tensors differ by up to one uint8 intensity level; raw ONNX/TensorRT parity already passed on identical tensors. With the matched reference environment, preprocessing and original PyTorch detection/mask checks all pass. Thresholds, weights and engine are unchanged.",
+    "environment": "05_runtime/builds/vision-export",
+    "lock": "01_src/deploy/vision/requirements-export.lock",
+    "lock_sha256": "7c37337a79c83d702db77d6aad6bd7cd4cafb65794cbbc53079cfe5ce082294e"
   }
 }

@@ -34,7 +34,7 @@
     {
       "id": "detection_segmentation",
       "capability": "Person/object boxes, classes, scores and instance masks",
-      "status": "PENDING"
+      "status": "TRT_AND_ORIGINAL_ULTRALYTICS_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "body_hand_pose",
@@ -59,7 +59,7 @@
     {
       "id": "face_identity",
       "capability": "Face alignment, embedding, registered identity matching and unknown result",
-      "status": "PENDING"
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "person_reid",
@@ -74,7 +74,7 @@
     {
       "id": "expression",
       "capability": "The public model's documented expression scores",
-      "status": "PENDING"
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "gesture",
@@ -104,14 +104,18 @@
     {
       "id": "B1.2",
       "name": "Per-model TensorRT execution and reference parity",
-      "status": "PENDING",
-      "evidence": []
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "benchmarks/results/b1-feasibility-20261019.json"
+      ]
     },
     {
       "id": "B1.3",
       "name": "Shared frame provenance, ROI transforms, distance gates and target association",
-      "status": "PENDING",
-      "evidence": []
+      "status": "IN_PROGRESS",
+      "evidence": [
+        "benchmarks/results/b1-feasibility-20261019.json"
+      ]
     },
     {
       "id": "B1.4",
@@ -161,7 +165,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T10:24:37.041786+00:00",
+  "updated_at": "2026-10-19T11:27:26.099780+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",

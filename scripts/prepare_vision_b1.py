@@ -19,6 +19,42 @@ def digest(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def prepare_sources(entry, check_only):
+    """Restore the small pinned upstream helpers without executing their code."""
+    rows = []
+    for key in ("prepost_source", "postprocess_source"):
+        group = entry.get(key, {})
+        rows.extend(group.get("files", {}).values())
+        rows.extend(group.get("license_sources", []))
+    if source := entry.get("preprocessing", {}).get("source_cpp"):
+        rows.append(source)
+    for row in rows:
+        path = ROOT / row["path"]
+        if not path.resolve().is_relative_to(ROOT / "05_runtime/frameworks/b1"):
+            raise ValueError("Upstream helper path escapes the B1 framework directory")
+        if path.is_file():
+            if digest(path) != row["sha256"]:
+                raise ValueError("Upstream helper checksum mismatch: " + str(path))
+            continue
+        if check_only:
+            raise FileNotFoundError(path)
+        with urllib.request.urlopen(row["url"], timeout=30) as response:
+            data = response.read(2 * 1024**2 + 1)
+        if len(data) > 2 * 1024**2 or hashlib.sha256(data).hexdigest() != row["sha256"]:
+            raise ValueError("Downloaded upstream helper differs from its lock")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        partial = path.with_suffix(path.suffix + ".partial")
+        owned = False
+        try:
+            with partial.open("xb") as stream:
+                owned = True
+                stream.write(data)
+            os.link(partial, path)
+        finally:
+            if owned:
+                partial.unlink(missing_ok=True)
+
+
 def prepare(role, entry, check_only=False):
     path = ROOT / entry["path"]
     if not path.resolve().is_relative_to(ROOT / "05_runtime/models/b1"):
@@ -29,7 +65,10 @@ def prepare(role, entry, check_only=False):
     if not card_path.exists():
         if check_only:
             raise FileNotFoundError(card_path)
-        card_url = entry["repository"] + "/raw/" + entry["revision"] + "/README.md"
+        card_url = (
+            entry.get("model_card_url")
+            or entry["repository"] + "/raw/" + entry["revision"] + "/README.md"
+        )
         with urllib.request.urlopen(card_url, timeout=30) as response:
             card = response.read(256 * 1024 + 1)
         if (
@@ -42,6 +81,7 @@ def prepare(role, entry, check_only=False):
             out.write(card)
     if digest(card_path) != entry["model_card_sha256"]:
         raise ValueError("Existing model card differs from its lock")
+    prepare_sources(entry, check_only)
     if path.exists():
         if path.stat().st_size != entry["bytes"] or digest(path) != entry["sha256"]:
             raise ValueError("Existing candidate differs from its lock: " + role)
@@ -51,6 +91,11 @@ def prepare(role, entry, check_only=False):
             "downloaded": False,
             "model_card_sha256": entry["model_card_sha256"],
         }
+    if entry.get("artifact_kind") == "local_export":
+        raise FileNotFoundError(
+            "Export the pinned weights first using scripts/export_segmentation_b1.py: "
+            + str(path)
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
     url = (
         entry["repository"] + "/resolve/" + entry["revision"] + "/" + entry["filename"]
