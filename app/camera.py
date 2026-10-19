@@ -390,6 +390,7 @@ class Camera:
                 else self._state,
                 "error": self.last_error,
                 "source_epoch": self.source_epoch,
+                "frame_id": self._frame_id,
                 "frame_age_seconds": age,
                 "open_attempts": self._open_attempts,
                 "failures": self._failures,

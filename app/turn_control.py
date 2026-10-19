@@ -17,6 +17,7 @@ from pathlib import Path
 from app.audio import wav_pcm
 from app.pipeline import segment_pcm, SpeechOutput, TextChunker, SpeechOnset
 from app.request_io import TurnCancelled
+from app.diagnostics import TurnTrace
 
 
 class TurnController:
@@ -31,6 +32,7 @@ class TurnController:
         self._thread = None
         self._active = None
         self._last = None
+        self._trace = None
         self._gesture_seen = deque(maxlen=128)
         self._last_greeting = float('-inf')
         self._last_gesture = None
@@ -48,6 +50,7 @@ class TurnController:
             if self._active is not None: raise RuntimeError('Previous turn release is unconfirmed')
             self._history.clear()
             self._last = None
+            self._trace = None
             self._session_id = uuid.uuid4().hex
             self._voice = self._last_voice = None
         self._stop.clear()
@@ -259,6 +262,8 @@ class TurnController:
                        "cancel_event": threading.Event(), "phase": "running", "output": None,
                        "admitted_monotonic":time.monotonic()}
             request.update(request_id=request_id or request['turn_id'],fingerprint=digest)
+            self._trace = TurnTrace(request['turn_id'], request['admitted_monotonic'])
+            request['trace'] = self._trace
             self._active = request
             if _voice_id:
                 self._voice=None
@@ -282,6 +287,7 @@ class TurnController:
             event = request["cancel_event"]
             event.set()
             request.update(phase="cancelling", cancel_reason=reason)
+            request['trace'].mark('cancel_requested')
             output = request["output"]
             self.broadcaster.send({"type":"cancelled", "turn_id":request["turn_id"], "reason":reason})
         # Adapter event identity prevents a delayed abort from affecting a new turn.
@@ -382,6 +388,7 @@ class TurnController:
                     "action_error": self._action_error,
                     'voice':self._voice_state_locked(),
                     "last_result": deepcopy(self._last), "pending": self._queue.qsize(),
+                    "turn_trace": self._trace.snapshot() if self._trace else None,
                     "event_cursor": getattr(self.broadcaster,'cursor',0)}
 
     def _run(self):
@@ -400,6 +407,8 @@ class TurnController:
                 self.broadcaster.send({"type":kind, "turn_id":request["turn_id"], **values},
                                       cancel_event=request["cancel_event"] if discard else None)
             start = time.monotonic()
+            trace = request['trace']
+            trace.mark('dequeued')
             first = None
             output = None
             used = {}
@@ -436,14 +445,19 @@ class TurnController:
                     else:registered = True
                 if request["input_kind"] != "text" and fixed is None:
                     send("status", stage="transcribing")
-                    segments = ([request["segment"]] if request["input_kind"] == "microphone" else
-                                list(segment_pcm(request["pcm"], self.config.vad, self.vad)))
+                    if request["input_kind"] == "microphone":
+                        # Live VAD ran before admission; do not time list assembly as VAD.
+                        segments = [request["segment"]]
+                    else:
+                        with trace.span('vad'):
+                            segments = list(segment_pcm(request["pcm"], self.config.vad, self.vad))
                     if not segments: raise ValueError("No speech detected in audio input")
                     result["asr"] = []
                     for segment in segments:
                         check()
                         used["asr"] = self.stt
-                        transcript = self.stt.transcribe(segment.audio, cancel_event=event)
+                        with trace.span('asr'):
+                            transcript = self.stt.transcribe(segment.audio, cancel_event=event)
                         check()
                         if transcript.get("error"): raise RuntimeError(transcript["error"])
                         result["asr"].append(transcript)
@@ -479,7 +493,7 @@ class TurnController:
                         check()
                         output = SpeechOutput(self.tts, self.config.audio, request["turn_id"], self.output_sink,
                                               cancel_event=event, defer_commit=True,
-                                              on_output_start=begin_notice_output if notice else None)
+                                              on_output_start=begin_notice_output if notice else None, trace=trace)
                         request["output"] = output
                     used["tts"] = self.tts
                 chunker = TextChunker(self.config.tts.first_chunk_chars, self.config.tts.max_chunk_chars)
@@ -501,6 +515,7 @@ class TurnController:
                             if notice and output is None:begin_notice_output()
                             if len(result['text'])+len(text)>16384:raise ValueError('Model text exceeds turn response budget')
                             first = first or time.monotonic()
+                            trace.mark('first_content')
                             result["text"] += text
                             send("token", text=text)
                             if output:
@@ -519,6 +534,7 @@ class TurnController:
                     check()
                     if output:
                         receipt = output.publish()
+                        trace.mark('output_published')
                         result["speech"] = {"receipt":receipt, "chunks":output.chunks, "duration":output.bytes_written/32000}
                         if receipt["kind"] == "file_written": result["audio_url"] = f"/api/audio/{request['turn_id']}"
                     if notice:
@@ -556,6 +572,7 @@ class TurnController:
                     except Exception as exc:self._action_error=str(exc);result['notification_error']=str(exc)
                 result.update(elapsed_seconds=time.monotonic() - start,
                               first_content_seconds=first - start if first else None)
+                trace.mark('worker_done')
                 with self._lock:
                     if event.is_set() and result["status"] != "complete":
                         result["status"] = "cancelled"
@@ -569,7 +586,9 @@ class TurnController:
                      ttft=result["first_content_seconds"], total_time=result["elapsed_seconds"],
                      actions_committed=result.get('actions_committed',[]),
                      audio_url=result.get("audio_url"), output_kind=result.get("speech", {}).get("receipt", {}).get("kind"))
-                released = self._wait_for_release(request, used)
+                with trace.span('release'):
+                    released = self._wait_for_release(request, used)
+                trace.finish(result['status'] if released else 'release_unconfirmed')
                 with self._lock:
                     result["resources_released"] = released
                     result["release"] = request["release"]
@@ -583,7 +602,7 @@ class TurnController:
         if not registered:
             if self.actions is None and not request.get('gesture'):
                 system_prompt=(system_prompt or self.config.llm.system_prompt)+'\n当前未启用持久笔记或提醒工具，不能声称已保存笔记或已设置提醒。'
-            yield from self.llm.generate_stream(prompt,images_b64=images,system_prompt=system_prompt,
+            yield from self._traced_model(request, prompt,images_b64=images,system_prompt=system_prompt,
                 cancel_event=request['cancel_event'],few_shot=history,trim_history=True,history_group_sizes=history_sizes)
             return
         from app.actions.schema import tools,instruction,parse
@@ -594,7 +613,7 @@ class TurnController:
         while True:
             check();parts=[];meta={}
             send('status',stage='thinking')
-            stream=self.llm.generate_stream(prompt,images_b64=images,system_prompt=system_prompt,
+            stream=self._traced_model(request, prompt,images_b64=images,system_prompt=system_prompt,
                 cancel_event=request['cancel_event'],few_shot=history,trim_history=True,
                 history_group_sizes=history_sizes,
                 tools=tools() if count<self.config.actions.max_calls_per_turn else [],tool_messages=chain)
@@ -622,7 +641,8 @@ class TurnController:
                         check()
                         request['tool_started']={'name':name,'position':position,'started_monotonic':time.monotonic()}
                     send('status',stage='executing_tool')
-                    value=self.actions.execute(request['request_id'],position,name,arguments)
+                    with request['trace'].span('tool'):
+                        value=self.actions.execute(request['request_id'],position,name,arguments)
                     receipt={'name':name,'position':position,'committed':True,'result':value}
                 except ValueError as exc:
                     value={'status':'not_executed','error':str(exc)[:500]}
@@ -631,6 +651,11 @@ class TurnController:
                 send('action_receipt',receipt=receipt)
                 check()
                 chain.append({'role':'tool','tool_call_id':call['id'],'content':json.dumps(value,ensure_ascii=False)})
+
+    def _traced_model(self, request, *args, **kwargs):
+        # Host iterator lifetime includes consumer backpressure; not GPU decode time.
+        with request['trace'].span('llm'):
+            yield from self.llm.generate_stream(*args, **kwargs)
 
     def _dispatch_notice(self):
         if self.actions is None or self._stop.is_set() or self._action_error or time.monotonic()<self._next_notice_check:return

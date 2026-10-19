@@ -16,6 +16,7 @@ VOLATILE = frozenset(
     {
         "frame",
         "stats",
+        "diagnostics",
         "perception",
         "scene",
         "gesture_state",

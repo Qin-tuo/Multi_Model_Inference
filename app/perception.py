@@ -112,7 +112,8 @@ class Perception:
         return {'ready':True,'error':None,'frame':frame.metadata(),'persons':persons,'hands':hands,'face':face,
                 'hand_stats':hand_stats,'completed_monotonic':finished,'elapsed_ms':(finished-started)*1000,
                 'stages':stages,'providers':{'body':self.body.provider if self.body else None,
-                    'face':'YuNet OpenCV CPU' if self.tracker else None,'hands':self.hands.provider if self.hands else None}}
+                    'face':'YuNet OpenCV CPU' if self.tracker else None,'hands':self.hands.provider if self.hands else None},
+                'body_stages_ms':dict(getattr(self.body,'last_timings',{}))}
 
     def _loop(self):
         previous = None

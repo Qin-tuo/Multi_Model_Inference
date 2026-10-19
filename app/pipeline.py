@@ -30,6 +30,7 @@ import hashlib
 import re
 import uuid
 from collections import deque
+from contextlib import nullcontext
 from dataclasses import dataclass
 from typing import Callable, Optional, Iterator, Union
 
@@ -1071,7 +1072,7 @@ class TextChunker:
 
 class SpeechOutput:
     """One bounded synthesis worker; file and device receipts are distinct."""
-    def __init__(self, tts, audio_config, turn_id, output_sink=None, *, cancel_event=None, defer_commit=False, on_output_start=None):
+    def __init__(self, tts, audio_config, turn_id, output_sink=None, *, cancel_event=None, defer_commit=False, on_output_start=None, trace=None):
         self.tts, self.config, self.turn_id = tts, audio_config, turn_id
         self.output_sink = output_sink or (lambda: audio_config.output_device)
         self.queue = queue.Queue(maxsize=2)
@@ -1082,6 +1083,7 @@ class SpeechOutput:
         self.cancel_event = cancel_event if cancel_event is not None else threading.Event()
         self.defer_commit = defer_commit
         self.on_output_start = on_output_start
+        self.trace = trace
         self._output_started = False
         self._temporary = None
         self._path = None
@@ -1147,7 +1149,8 @@ class SpeechOutput:
                 except queue.Empty: continue
                 if text is None: break
                 self._check()
-                result = self.tts.synthesize(text, cancel_event=self._abort)
+                with self.trace.span('tts') if self.trace else nullcontext():
+                    result = self.tts.synthesize(text, cancel_event=self._abort)
                 self._check()
                 audio = result.get("audio")
                 if audio is None: raise RuntimeError(result.get("error", "TTS returned no audio"))

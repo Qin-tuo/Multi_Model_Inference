@@ -10,6 +10,7 @@ import hashlib
 import importlib.util
 from pathlib import Path
 import threading
+import time
 import cv2
 import numpy as np
 
@@ -123,8 +124,16 @@ class BodyDetector:
         return results
 
     def infer(self, image):
+        start = time.monotonic()
         tensor, scale = self.preprocess(image)
-        return self.postprocess(self.predict_tensor(tensor), scale)
+        prepared = time.monotonic()
+        output = self.predict_tensor(tensor)
+        predicted = time.monotonic()
+        result = self.postprocess(output, scale)
+        self.last_timings = {"preprocess_ms": (prepared-start)*1000,
+                             "native_sync_ms": (predicted-prepared)*1000,
+                             "postprocess_ms": (time.monotonic()-predicted)*1000}
+        return result
 
     def close(self):
         with self._lock:

@@ -402,6 +402,22 @@ def create_app(
     async def _state():
         return await read_state()
 
+    @app.get("/api/debug")
+    async def _debug_state():
+        value = await read_state()
+        return value.get("diagnostics", {"ready": False})
+
+    @app.get("/api/debug/baseline")
+    async def _debug_baseline():
+        return FileResponse(STATIC_DIR.parent / "benchmarks/results/reachy-b0-vision-summary.json",
+                            media_type="application/json")
+
+    @app.get("/static/{asset}")
+    async def _debug_asset(asset: str):
+        if asset not in {"debug.js", "debug.css"}:
+            raise HTTPException(404, "Asset not found")
+        return FileResponse(STATIC_DIR / asset, headers={"Cache-Control": "no-cache"})
+
     @app.post("/api/chat", status_code=202)
     async def _chat(request: ChatRequest):
         if submit is None:
@@ -467,6 +483,7 @@ def create_app(
         )
 
     @app.get("/")
+    @app.get("/debug")
     async def _index():
         path = STATIC_DIR / "index.html"
         if path.exists():

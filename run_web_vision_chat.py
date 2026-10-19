@@ -41,6 +41,7 @@ from rich.console import Console
 from app.monitor import get_system_stats, get_jetson_model
 from app.turn_control import TurnController
 from app.web import Broadcaster, create_app
+from app.diagnostics import BoardDiagnostics
 
 log = logging.getLogger(__name__)
 
@@ -81,11 +82,12 @@ def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None, perceptio
             broadcaster.send(message,cancel_event=frame.invalidated)
 
 
-def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
+def _stats_broadcast_thread(broadcaster, stop, state, diagnostics, interval=2):
     while not stop.is_set():
         try:
             stats = get_system_stats()
             current = state()
+            broadcaster.send({"type": "diagnostics", **diagnostics.sample(current, stats)})
             broadcaster.send({"type": "stats", "cpu": round(stats.cpu_percent, 1),
                 "ram_used": stats.ram_used_mb / 1024, "ram_total": stats.ram_total_mb / 1024,
                 "gpu": stats.gpu_percent, "models": current["models"],
@@ -102,6 +104,7 @@ def _stats_broadcast_thread(broadcaster, stop, state, interval=2):
 
 def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
     broadcaster = Broadcaster(config.web,frame_ttl=config.vision.stale_after)
+    diagnostics = BoardDiagnostics(config)
     stop = threading.Event()
     llm = LLM(model=config.llm.model, base_url=config.llm.base_url,
               backend=config.llm.backend, max_tokens=config.llm.max_tokens,
@@ -145,6 +148,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                         and (config.audio.output_mode!='device' or echo_ready)),
                     'aec_active':echo_ready},
                 'actions':action_state(), 'web':broadcaster.snapshot(),
+                'diagnostics':diagnostics.snapshot(),
                 "speech_ready": bool(speech_enabled and control.vad is not None),
                 "audio_input_mode": config.audio.input_mode if speech_enabled else "disabled",
                 "audio_output_mode": config.audio.output_mode if speech_enabled else "disabled",
@@ -234,7 +238,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                 threads.append(threading.Thread(target=_frame_broadcast_thread,
                     args=(cam, broadcaster, stop, config.web.ui_fps, tracker, perception), name="frame-broadcast", daemon=True))
             threads.append(threading.Thread(target=_stats_broadcast_thread,
-                args=(broadcaster, stop, state), name="stats-broadcast", daemon=True))
+                args=(broadcaster, stop, state, diagnostics), name="stats-broadcast", daemon=True))
             for thread in threads: thread.start()
             yield
         finally:

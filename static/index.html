@@ -188,12 +188,14 @@ body.resizing iframe,body.resizing img{pointer-events:none}
 .input-error{color:var(--danger);min-height:1.4em;padding:0 12px}
 .audio-route,.volume-route,#pttBtn{display:none}
 </style>
+<link rel="stylesheet" href="/static/debug.css">
 </head>
 <body>
 
 <header>
   <div class="logo">Orin NX <span>Companion</span> <span style="color:var(--dim);font-weight:400;font-size:.95rem">&mdash; on <span id="headerPlatform">Jetson</span></span></div>
   <div class="header-right">
+    <button id="debugToggle" class="debug-button" type="button" aria-pressed="false">板端调试</button>
     <span class="client-count" id="clientCount"></span>
     <span class="badge" id="platformBadge">Jetson</span>
     <div class="conn-status err" id="connStatus"><span class="conn-dot"></span> Disconnected</div>
@@ -337,6 +339,8 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       </div>
     </div>
 
+    <section id="debugPanel" class="panel debug-panel" hidden aria-label="板端性能调试"></section>
+
     <div class="panel conv-panel">
       <div class="panel-hdr">
         <span>Conversation</span>
@@ -369,6 +373,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
   </div>
 </div>
 
+<script src="/static/debug.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -394,6 +399,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
       if(reconnectTimer){ clearTimeout(reconnectTimer); reconnectTimer = null; }
     };
     ws.onclose = () => {
+      window.boardDebug?.disconnect();
       $('connStatus').className = 'conn-status err';
       $('connStatus').innerHTML = '<span class="conn-dot"></span> Disconnected';
       $('liveBadge').className = 'live-badge off';
@@ -417,6 +423,7 @@ body.resizing iframe,body.resizing img{pointer-events:none}
     ws.onmessage = (ev) => {
       let msg;
       try{ msg = JSON.parse(ev.data); } catch(e){ return; }
+      window.boardDebug?.receive(msg);
       if((msg.turn_id === cancelledTurn || finishedTurns.has(msg.turn_id)) && ['token','transcript'].includes(msg.type)) return;
       switch(msg.type){
         case 'frame':        onFrame(msg); break;
