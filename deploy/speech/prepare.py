@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Inspect the pinned OVS speech subset without loading models or containers."""
+
 from __future__ import annotations
 
 import argparse
@@ -19,7 +20,9 @@ LOCK = json.loads((HERE / "source-lock.json").read_text())
 
 
 def run(args: list[str], cwd: Path | None = None) -> str:
-    return subprocess.check_output(args, cwd=cwd, text=True, stderr=subprocess.STDOUT).strip()
+    return subprocess.check_output(
+        args, cwd=cwd, text=True, stderr=subprocess.STDOUT
+    ).strip()
 
 
 def package_version(package: str) -> str | None:
@@ -33,20 +36,41 @@ def acquire(source: Path) -> None:
     pin = LOCK["upstream"]["commit"]
     if not source.exists():
         source.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["git", "clone", "--depth", "1", LOCK["upstream"]["url"], str(source)], check=True)
+        subprocess.run(
+            ["git", "clone", "--depth", "1", LOCK["upstream"]["url"], str(source)],
+            check=True,
+        )
     if run(["git", "rev-parse", "HEAD"], source) != pin:
         if run(["git", "status", "--porcelain"], source):
-            raise RuntimeError("Cached OVS checkout has local changes; refusing to replace it")
-        subprocess.run(["git", "fetch", "--depth", "1", "origin", pin], cwd=source, check=True)
+            raise RuntimeError(
+                "Cached OVS checkout has local changes; refusing to replace it"
+            )
+        subprocess.run(
+            ["git", "fetch", "--depth", "1", "origin", pin], cwd=source, check=True
+        )
         subprocess.run(["git", "checkout", "--detach", pin], cwd=source, check=True)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, default=Path.home() / ".cache/multi-model-assistant/upstreams/openvoicestream")
-    parser.add_argument("--fetch", action="store_true", help="Acquire the pinned source; downloads no model/image")
-    parser.add_argument("--engine-source", action="store_true", help="Initialize only the pinned Jetson engine source submodule")
-    parser.add_argument("--output", type=Path, help="Write the inspection JSON to this path")
+    parser.add_argument(
+        "--source",
+        type=Path,
+        default=Path.home() / ".cache/multi-model-assistant/upstreams/openvoicestream",
+    )
+    parser.add_argument(
+        "--fetch",
+        action="store_true",
+        help="Acquire the pinned source; downloads no model/image",
+    )
+    parser.add_argument(
+        "--engine-source",
+        action="store_true",
+        help="Initialize only the pinned Jetson engine source submodule",
+    )
+    parser.add_argument(
+        "--output", type=Path, help="Write the inspection JSON to this path"
+    )
     args = parser.parse_args()
     source = args.source.expanduser().resolve()
     if args.fetch:
@@ -57,10 +81,25 @@ def main() -> int:
     if revision != LOCK["upstream"]["commit"]:
         parser.error(f"OVS revision differs from source-lock.json: {revision}")
     if args.engine_source:
-        subprocess.run(["git", "submodule", "update", "--init", "--depth", "1", "--", "third_party/jetson-voice-engine"], cwd=source, check=True)
+        subprocess.run(
+            [
+                "git",
+                "submodule",
+                "update",
+                "--init",
+                "--depth",
+                "1",
+                "--",
+                "third_party/jetson-voice-engine",
+            ],
+            cwd=source,
+            check=True,
+        )
     release_path = source / "deploy/artifacts/v091-release-lock.json"
     release = json.loads(release_path.read_text())
-    profile_path = source / "configs/profiles" / (LOCK["selection"]["profile"] + ".json")
+    profile_path = (
+        source / "configs/profiles" / (LOCK["selection"]["profile"] + ".json")
+    )
     profile = json.loads(profile_path.read_text())
     for model, expected in LOCK["models"].items():
         actual = release["model_artifacts"][model]
@@ -90,41 +129,78 @@ def main() -> int:
         "tensorrt_package": trt,
         "l4t_package": package_version("nvidia-l4t-core"),
         "docker": shutil.which("docker"),
-        "old_python_trt_mount_exists": Path("/usr/lib/python3.10/dist-packages/tensorrt").exists(),
+        "old_python_trt_mount_exists": Path(
+            "/usr/lib/python3.10/dist-packages/tensorrt"
+        ).exists(),
         "video_nodes": sorted(str(p) for p in Path("/dev").glob("video*")),
-        "alsa_cards": Path("/proc/asound/cards").read_text() if Path("/proc/asound/cards").exists() else None,
+        "alsa_cards": Path("/proc/asound/cards").read_text()
+        if Path("/proc/asound/cards").exists()
+        else None,
     }
     differences = []
-    if cuda is None or not cuda.startswith(LOCK["qualified_upstream_target"]["cuda"] + "."):
-        differences.append("Published engines target CUDA 12.6; observed toolkit is different or absent")
-    if trt is None or not trt.startswith(LOCK["qualified_upstream_target"]["tensorrt"] + "."):
-        differences.append("Published engines/plugins target TensorRT 10.3; observed package is different or absent")
+    if cuda is None or not cuda.startswith(
+        LOCK["qualified_upstream_target"]["cuda"] + "."
+    ):
+        differences.append(
+            "Published engines target CUDA 12.6; observed toolkit is different or absent"
+        )
+    if trt is None or not trt.startswith(
+        LOCK["qualified_upstream_target"]["tensorrt"] + "."
+    ):
+        differences.append(
+            "Published engines/plugins target TensorRT 10.3; observed package is different or absent"
+        )
     if not observed["old_python_trt_mount_exists"]:
-        differences.append("Standalone upstream compose requires an unavailable Python 3.10 TensorRT host mount")
+        differences.append(
+            "Standalone upstream compose requires an unavailable Python 3.10 TensorRT host mount"
+        )
     engine = source / "third_party/jetson-voice-engine"
-    engine_revision = run(["git", "rev-parse", "HEAD"], engine) if (engine / ".git").exists() else None
-    if engine_revision and engine_revision != LOCK["upstream"]["engine_submodule_commit"]:
+    engine_revision = (
+        run(["git", "rev-parse", "HEAD"], engine)
+        if (engine / ".git").exists()
+        else None
+    )
+    if (
+        engine_revision
+        and engine_revision != LOCK["upstream"]["engine_submodule_commit"]
+    ):
         raise RuntimeError(f"Engine submodule revision drifted: {engine_revision}")
     report = {
         "observed_at_utc": datetime.now(timezone.utc).isoformat(),
-        "status": "needs_host_port" if differences else "source_verified_runtime_unverified",
+        "status": "needs_host_port"
+        if differences
+        else "source_verified_runtime_unverified",
         "runtime_tested": False,
         "models_loaded": False,
         "source": str(source),
         "source_commit": revision,
         "engine_source_commit": engine_revision,
-        "upstream_release_lock_sha256": hashlib.sha256(release_path.read_bytes()).hexdigest(),
+        "upstream_release_lock_sha256": hashlib.sha256(
+            release_path.read_bytes()
+        ).hexdigest(),
         "upstream_qualified_target": release["target"],
         "observed": observed,
         "selected_services": services,
         "selected_profile": profile["name"],
-        "selected_backends": {"asr": profile["asr_backend"], "tts": profile["tts_backend"]},
+        "selected_backends": {
+            "asr": profile["asr_backend"],
+            "tts": profile["tts_backend"],
+        },
         "selected_models": LOCK["models"],
-        "tts_format": {"sample_rate": int(profile["env"]["OVS_TTS_SAMPLE_RATE"]), "channels": int(profile["env"]["OVS_TTS_CHANNELS"]), "pcm_bits": 16},
+        "tts_format": {
+            "sample_rate": int(profile["env"]["OVS_TTS_SAMPLE_RATE"]),
+            "channels": int(profile["env"]["OVS_TTS_CHANNELS"]),
+            "pcm_bits": 16,
+        },
         "compatibility_gaps": differences,
         "source_dependency_drift": {
             "release_lock_voxedge": release["dependencies"]["voxedge"]["version"],
-            "dockerfile_default_voxedge": re.search(r"ARG VOXEDGE_VERSION=(\S+)", (source / "deploy/docker/Dockerfile.jetson.edgellm-v091-runtime").read_text()).group(1),
+            "dockerfile_default_voxedge": re.search(
+                r"ARG VOXEDGE_VERSION=(\S+)",
+                (
+                    source / "deploy/docker/Dockerfile.jetson.edgellm-v091-runtime"
+                ).read_text(),
+            ).group(1),
         },
         "next_steps": [
             "Port the pinned engine-overlay target manifests and build preflight to the observed host tuple; retain source/model/patch provenance",

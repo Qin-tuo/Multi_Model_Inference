@@ -145,10 +145,11 @@ class Broadcaster:
 
     def set_ptt(self, active: bool):
         if self._input_setter:
-            try:self._input_setter(active)
+            try:
+                self._input_setter(active)
             except ValueError:
                 self._ptt.clear()
-                self.send({'type':'ptt_state','active':False})
+                self.send({"type": "ptt_state", "active": False})
                 raise
         if active:
             self._ptt.set()
@@ -409,12 +410,14 @@ def create_app(
 
     @app.get("/api/debug/baseline")
     async def _debug_baseline():
-        return FileResponse(STATIC_DIR.parent / "benchmarks/results/reachy-b0-vision-summary.json",
-                            media_type="application/json")
+        return FileResponse(
+            STATIC_DIR.parent / "benchmarks/results/reachy-b0-vision-summary.json",
+            media_type="application/json",
+        )
 
     @app.get("/static/{asset}")
     async def _debug_asset(asset: str):
-        if asset not in {"debug.js", "debug.css"}:
+        if asset not in {"app.js", "app.css", "debug.js", "debug.css"}:
             raise HTTPException(404, "Asset not found")
         return FileResponse(STATIC_DIR / asset, headers={"Cache-Control": "no-cache"})
 

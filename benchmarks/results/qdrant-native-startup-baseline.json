@@ -1,7 +1,0 @@
-{
-  "created_at": "2026-10-13T03:01:49.970978+00:00",
-  "status": "FAIL",
-  "scope": "Empty isolated native server startup; no application or test records imported",
-  "observed": "Pinned Qdrant1.19.2 did not recognize config.json; logged config-not-found and used default0.0.0.0:6333 plus6334. Readiness at the expected port timed out and the owned process was stopped.",
-  "correction": "Use supported .yaml extension, override host/HTTP port via scoped environment, and verify process-owned loopback listener before returning ready or importing data."
-}

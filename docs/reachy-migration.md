@@ -41,7 +41,7 @@ cd /home/nvidia/Multi_Model_Inference
 /home/nvidia/AI_Stack/environments/reachy-headless/bin/python scripts/probe_web.py --camera --text '用一句话描述当前画面'
 ```
 
-`run_vision_chat.py`复用同一入口与生命周期，不复制主控；`run_voice_chat.py`复用同一网页/会话生命周期，默认关闭相机。一次只接纳一个请求，多余请求返回409；网页停止本轮及原生后端释放确认已接入，具体边界见下方R3记录。
+该阶段曾保留 `run_vision_chat.py` / `run_voice_chat.py` 兼容入口；2026-10-19 清理时已归档。当前统一通过 `main.py services` 启停；隔离的软件验证使用 `run_web_vision_chat.py --no-camera`。一次只接纳一个请求，多余请求返回409；网页停止本轮及原生后端释放确认已接入，具体边界见下方R3记录。
 
 ## 配置与模型
 
@@ -363,7 +363,7 @@ HTTP文字请求可携带32位十六进制`request_id`，音频入口通过同�
 
 ## R3软件语音打断与当前交接范围
 
-用户于2026-10-16确认：实物音频暂时跳过，接手后先优化视觉。当前目标是软件框架、D435i视觉实机、B0-SW与代码/数据流导读；物理录播、声学AEC/双讲、可听首声和实际停播标记DEFERRED。完成软件交接后，助手等待用户实操结果，不自动展开连续性能优化。具体门槛见[计划v3.1](../02-jetson-multimodel-inference.md)。
+用户于2026-10-16确认：实物音频暂时跳过，接手后先优化视觉。当前目标是软件框架、D435i视觉实机、B0-SW与代码/数据流导读；物理录播、声学AEC/双讲、可听首声和实际停播标记DEFERRED。完成软件交接后，助手等待用户实操结果，不自动展开连续性能优化。具体门槛见[计划v3.1](implementation-plan.md)。
 
 [语音打断汇总](../benchmarks/results/reachy-r3-voice-summary.json)、[原行为复现](../benchmarks/results/reachy-r3-voice-before.json)、[真实模型回放](../benchmarks/results/reachy-r3-voice-native.json)及[Firefox验证](../benchmarks/results/reachy-r3-voice-browser.json)记录软件范围。原来忙碌时的新麦克风片段直接被拒绝，没有触发取消；现在同一`TurnController`负责语音预留和轮次切换。
 
@@ -562,3 +562,10 @@ V1/V2/S1/T1/L1/E1 已采集并索引，173 项测试通过，默认四服务就�
 这是观测能力变更，模型、输入尺寸、线程、上下文、推理频率和调度策略未调优。B0 标签、原始数据及统计文件保持冻结；新的计时与采样会带来开销，`collection_ms` 仅计附加指标组装，不覆盖原有 CPU 采样、序列化和浏览器渲染。正式优化实验应固定观测配置与版本，复现原 B0 时使用冻结版本。
 
 验证记录见 `benchmarks/results/reachy-debug-ui-20261019.json`。真实浏览器验证覆盖页面切换、滚动、窄屏、真实文字/文件语音、取消后释放、JSON 导出和客户端断线提示；这轮没有追加真人手势质量或物理音频验收，也不作为性能优化成果。
+
+
+## 代码仓可读性整理（2026-10-19）
+
+清理前源版本为 `before-repository-cleanup-20261019`，逐文件哈希和本地完整归档见 [恢复索引](archive/repository-cleanup-20261019.json)。旧方案的部署目录、旧报告和未引用兼容入口移出当前工作树，当前 Reachy 证据与 B0 锁保持原字节。历史报告中出现的旧文件路径按原提交恢复，不改写实验记录。
+
+总览和实施计划集中到 `docs/`；README 以亲自启停、四个服务、目录地图、阅读顺序和基线复现为主线。网页拆为 HTML、CSS、JS，调试模块独立保留；应用入口、感知循环、轮次控制和部署生命周期增加职责注释，并统一当前 Python 源码格式。相机频率、模型、线程、上下文和调度逻辑保持原配置。旧 `.venv*` 链接被环境脚本的 shebang 使用，因此保留；只清除工作树缓存和空目录。

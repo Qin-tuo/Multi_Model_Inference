@@ -49,23 +49,38 @@ def find_alsa_device(
 
 def local_speech_url(url: str) -> str:
     parsed = urlsplit(url)
-    if (parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
-            or parsed.username or parsed.password or parsed.query or parsed.fragment
-            or parsed.path.rstrip("/") != "/v1"):
+    if (
+        parsed.scheme != "http"
+        or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+        or parsed.path.rstrip("/") != "/v1"
+    ):
         raise ValueError("Speech endpoint must be local HTTP /v1")
     return url.rstrip("/")
 
 
 def speech_capability(url, kind, model, backend, timeout):
     from app.request_io import control_json
-    payload=control_json(url+'/capabilities',timeout)
-    if not isinstance(payload,dict) or not isinstance(payload.get(kind),dict):
-        raise ValueError(f'Invalid {kind} capability response')
+
+    payload = control_json(url + "/capabilities", timeout)
+    if not isinstance(payload, dict) or not isinstance(payload.get(kind), dict):
+        raise ValueError(f"Invalid {kind} capability response")
     capability = payload[kind]
-    if capability.get("ready") is not True or capability.get("model_id") != model or capability.get("backend") != backend:
+    if (
+        capability.get("ready") is not True
+        or capability.get("model_id") != model
+        or capability.get("backend") != backend
+    ):
         raise ValueError(f"Configured {kind} model/backend is not ready")
-    audio = capability.get('audio')
-    if not isinstance(audio,dict) or (audio.get("sample_rate"), audio.get("channels"), audio.get("sample_format")) != (16000, 1, "pcm_s16le"):
+    audio = capability.get("audio")
+    if not isinstance(audio, dict) or (
+        audio.get("sample_rate"),
+        audio.get("channels"),
+        audio.get("sample_format"),
+    ) != (16000, 1, "pcm_s16le"):
         raise ValueError(f"Unsupported {kind} audio contract")
     return capability
 
@@ -76,11 +91,18 @@ def wav_pcm(data: bytes, max_seconds: float = 15) -> bytes:
         raise ValueError("WAV exceeds input size limit")
     try:
         with wave.open(io.BytesIO(data), "rb") as source:
-            if (source.getframerate(), source.getnchannels(), source.getsampwidth(), source.getcomptype()) != (16000, 1, 2, "NONE"):
+            if (
+                source.getframerate(),
+                source.getnchannels(),
+                source.getsampwidth(),
+                source.getcomptype(),
+            ) != (16000, 1, 2, "NONE"):
                 raise ValueError("Expected PCM16 16kHz mono WAV")
             frames = source.getnframes()
             if not 0 < frames <= max_seconds * 16000:
-                raise ValueError("WAV duration exceeds the configured limit or is empty")
+                raise ValueError(
+                    "WAV duration exceeds the configured limit or is empty"
+                )
             pcm = source.readframes(frames)
             if len(pcm) != frames * 2:
                 raise ValueError("WAV data is truncated")
@@ -94,6 +116,8 @@ def pcm_wav(pcm: bytes) -> bytes:
         raise ValueError("Invalid PCM16 sample boundary")
     buffer = io.BytesIO()
     with wave.open(buffer, "wb") as output:
-        output.setnchannels(1); output.setsampwidth(2); output.setframerate(16000)
+        output.setnchannels(1)
+        output.setsampwidth(2)
+        output.setframerate(16000)
         output.writeframes(pcm)
     return buffer.getvalue()

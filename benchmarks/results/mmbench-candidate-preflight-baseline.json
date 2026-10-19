@@ -1,9 +1,0 @@
-{
-  "created_at": "2026-10-14T10:08:16.907708+00:00",
-  "status": "FAIL",
-  "stage": "readiness_prerequisite",
-  "log": "/home/nvidia/AI_Stack/runtime-data/benchmarks/qwen35-mmbench-controller-v1.log",
-  "sha256": "6f47a270d8d22940bae63ffeb0e277343affdcf0e3f0a83a628ee9aa9b8d5b82",
-  "error": "All managed backends must be ready before model screening",
-  "scope": "Controllerexited before stoppingmanagedVLMorstartingcandidate;readiness recheckrequired,notmodelqualityfailure."
-}

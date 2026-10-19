@@ -57,7 +57,7 @@
 
 正式回退顺序：当前入口执行 `main.py services down`，再到旧快照执行 `python3 tools/project.py up --components all`。旧管理器会将旧单元入口指向快照，避免回退依赖被更新的主目录。恢复后必须检查旧服务状态和 `scripts/probe_legacy_camera.py` 的新鲜 RGB/深度，不能只看进程。
 
-[旧部署文档](README-legacy.md)只解释历史方案。当前准备工件的可运行性与干净环境重建是两个验收范围；完整重部署仍在 R6。
+[旧部署文档](../../docs/archive/README-systemd-legacy.md)只解释历史方案。当前准备工件的可运行性与干净环境重建是两个验收范围；完整重部署仍在 R6。
 
 
 ## 当前软件压力与离线复现

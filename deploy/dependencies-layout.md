@@ -31,7 +31,7 @@
 | `references/` | 原项目参考资料的链接入口，保留原有 Git 子模块结构 |
 | `dependencies.json` | 框架实际路径与 Git commit、各 Python 环境全部已安装发行包的名称/版本/位置、系统主要依赖版本和参考仓库获取状态 |
 
-`frameworks/` 中，有些目录是 Git checkout，有些是指向已安装 Python 包的链接。包入口展示当前实际使用的实现代码；Git 源码及模型的锁定版本分别以项目 `deploy/upstreams.lock.json`、`models/manifest.json` 为准。运行入口使用各自环境的 `bin/python`；语音环境使用系统 TensorRT Python 包。
+`frameworks/` 中，有些目录是 Git checkout，有些是指向已安装 Python 包的链接。包入口展示当前实际使用的实现代码；Git 源码及模型的锁定版本分别以项目 `deploy/reachy-upstream.lock.json`、`deploy/runtime-artifacts.lock.json`、`deploy/speech/source-lock.json` 和 `models/manifest.json` 为准。运行入口使用各自环境的 `bin/python`；语音环境使用系统 TensorRT Python 包。
 
 常用框架的直接入口：
 
@@ -70,3 +70,5 @@ cd /home/nvidia/Multi_Model_Inference
 ```
 
 历史整理脚本位于旧源码快照的 `tools/organize_dependencies.py`，重复运行不会覆盖已有目录。迁移时应先短暂暂停使用这些目录的构建/服务进程，完成迁移和路径检查后恢复；不要直接删除兼容链接，否则现有构建缓存和虚拟环境脚本可能失效。模型、框架源码、编译产物和环境不会上传业务仓库；GitHub 保存可以重建它们的脚本、锁文件和本文档。
+
+2026-10-19 清理说明：主仓库旧方案部署脚本及报告已进入 [清理前归档](../docs/archive/repository-cleanup-20261019.json)。上述全机依赖目录保持保留。三个项目 `.venv*` 兼容链接仍被已安装环境中 pip/uvicorn 等脚本的 shebang 引用，删除会使这些脚本无法启动；当前应用入口继续使用 `environments/reachy-headless/bin/python`。

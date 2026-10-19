@@ -82,7 +82,8 @@ class FaceDetector:
         try:
             model_path = _resolve_model_path()
             self._detector = cv2.FaceDetectorYN.create(
-                str(model_path), "",
+                str(model_path),
+                "",
                 (320, 320),
                 score_threshold=_SCORE_THRESH,
                 nms_threshold=_NMS_THRESH,
@@ -125,7 +126,12 @@ class FaceDetector:
         if box is None or scale >= 1.0:
             return box
         inv = 1.0 / scale
-        return (int(box[0] * inv), int(box[1] * inv), int(box[2] * inv), int(box[3] * inv))
+        return (
+            int(box[0] * inv),
+            int(box[1] * inv),
+            int(box[2] * inv),
+            int(box[3] * inv),
+        )
 
     def health_check(self) -> bool:
         return self._detector is not None

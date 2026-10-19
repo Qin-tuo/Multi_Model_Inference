@@ -1,8 +1,0 @@
-cmake_minimum_required(VERSION 3.16)
-project(assistant_vision_bag)
-set(CMAKE_CXX_STANDARD 17)
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rosbag2_transport REQUIRED)
-add_executable(vision-bag-play player.cpp)
-ament_target_dependencies(vision-bag-play rclcpp rosbag2_transport)

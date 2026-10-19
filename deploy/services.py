@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from deploy import runtime  # noqa: E402 — direct script entrypoint
 
+# 按依赖先启动后端，最后启动应用；停止时反向处理依赖。
+# 这里管理进程生命周期，不参与 GPU 推理或应用轮次调度。
 ORDER = ("llama", "asr", "speech", "app")
 DEPENDENCIES = {"speech": ("asr",), "app": ("llama", "asr", "speech")}
 PREFIX = "reachy-headless"
@@ -428,6 +430,7 @@ def require_headroom():
 
 
 def start(names, cfg, seconds):
+    """校验工件与归属，顺序启动并检查真实就绪；失败回收本次新启动项。"""
     artifacts = preflight(names, cfg)
     install(cfg)
     started = []
@@ -457,6 +460,7 @@ def start(names, cfg, seconds):
 
 
 def stop(names, cfg):
+    """连同消费者一起停止指定组件，核验对应 cgroup 中没有残留进程。"""
     expanded = set(names)
     for name, deps in DEPENDENCIES.items():
         if expanded.intersection(deps):

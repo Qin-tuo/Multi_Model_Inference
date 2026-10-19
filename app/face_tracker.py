@@ -18,6 +18,7 @@
 Tracks anonymous face presence/position only. Consecutive *distinct* frames
 establish framing stability; this is not identity tracking or authentication.
 """
+
 import threading
 import time
 from app.camera import Camera
@@ -25,9 +26,16 @@ from app.face_detector import FaceDetector
 
 
 class FaceTracker:
-    def __init__(self, camera: Camera, detector: FaceDetector, fps=5.0,
-                 dead_zone=0.12, good_frame_zone=0.18, min_face_size=0.06,
-                 stable_frames=2):
+    def __init__(
+        self,
+        camera: Camera,
+        detector: FaceDetector,
+        fps=5.0,
+        dead_zone=0.12,
+        good_frame_zone=0.18,
+        min_face_size=0.06,
+        stable_frames=2,
+    ):
         self._camera, self._detector = camera, detector
         self._period = 1.0 / fps
         self._dead_zone, self._good_frame_zone = dead_zone, good_frame_zone
@@ -42,8 +50,15 @@ class FaceTracker:
 
     @staticmethod
     def _empty(error=None):
-        return {"face_detected": False, "face_box": None, "centered": False,
-                "stable": False, "error": error, "frame": None, "completed_monotonic": None}
+        return {
+            "face_detected": False,
+            "face_box": None,
+            "centered": False,
+            "stable": False,
+            "error": error,
+            "frame": None,
+            "completed_monotonic": None,
+        }
 
     def start(self):
         if self._thread and self._thread.is_alive():
@@ -51,7 +66,9 @@ class FaceTracker:
         if not self._detector.health_check():
             raise RuntimeError("Face detector is not ready")
         self._stop.clear()
-        self._thread = threading.Thread(target=self._loop, name="face-tracker", daemon=True)
+        self._thread = threading.Thread(
+            target=self._loop, name="face-tracker", daemon=True
+        )
         self._thread.start()
 
     def stop(self):
@@ -73,7 +90,11 @@ class FaceTracker:
     def preview(self):
         with self._state_lock:
             frame, state = self._preview, dict(self._state)
-        if frame is None or frame.source_epoch != self._camera.source_epoch or time.monotonic() - frame.received_monotonic > self._camera.stale_after:
+        if (
+            frame is None
+            or frame.source_epoch != self._camera.source_epoch
+            or time.monotonic() - frame.received_monotonic > self._camera.stale_after
+        ):
             return None, self._empty("Preview expired")
         return frame, state
 
@@ -81,26 +102,38 @@ class FaceTracker:
         with self._state_lock:
             result = dict(self._state)
         frame = result["frame"]
-        if frame and (frame["source_epoch"] != self._camera.source_epoch or
-                      time.monotonic() - frame["received_monotonic"] > self._camera.stale_after):
+        if frame and (
+            frame["source_epoch"] != self._camera.source_epoch
+            or time.monotonic() - frame["received_monotonic"] > self._camera.stale_after
+        ):
             return self._empty("Face result expired")
         return result
 
     @property
-    def face_detected(self): return self.snapshot()["face_detected"]
+    def face_detected(self):
+        return self.snapshot()["face_detected"]
+
     @property
-    def centered(self): return self.snapshot()["centered"]
+    def centered(self):
+        return self.snapshot()["centered"]
+
     @property
-    def stable(self): return self.snapshot()["stable"]
+    def stable(self):
+        return self.snapshot()["stable"]
+
     @property
-    def last_face_box(self): return self.snapshot()["face_box"]
+    def last_face_box(self):
+        return self.snapshot()["face_box"]
+
     @property
-    def is_tracking(self): return self.face_detected
+    def is_tracking(self):
+        return self.face_detected
 
     def wait_until_stable(self, timeout, poll_interval=0.03):
         deadline = time.monotonic() + max(0, timeout)
         while time.monotonic() < deadline and not self._stop.is_set():
-            if self.stable: return True
+            if self.stable:
+                return True
             self._stop.wait(poll_interval)
         return self.stable
 
@@ -137,11 +170,17 @@ class FaceTracker:
                 err_x = ((box[0] + box[2]) / 2 - w / 2) / (w / 2)
                 err_y = ((box[1] + box[3]) / 2 - h / 2) / (h / 2)
                 size = max((box[2] - box[0]) / w, (box[3] - box[1]) / h)
-                good = size >= self._min_face_size and max(abs(err_x), abs(err_y)) < self._good_frame_zone
+                good = (
+                    size >= self._min_face_size
+                    and max(abs(err_x), abs(err_y)) < self._good_frame_zone
+                )
                 self._stable_count = self._stable_count + 1 if good else 0
-                state.update(face_detected=True, face_box=box,
-                             centered=good or max(abs(err_x), abs(err_y)) < self._dead_zone,
-                             stable=self._stable_count >= self._stable_frames_required)
+                state.update(
+                    face_detected=True,
+                    face_box=box,
+                    centered=good or max(abs(err_x), abs(err_y)) < self._dead_zone,
+                    stable=self._stable_count >= self._stable_frames_required,
+                )
             else:
                 self._stable_count = 0
             self._state = state

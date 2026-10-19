@@ -1,9 +1,0 @@
-{
-  "status": "FAIL",
-  "scope": "Initial actual native Qdrant snapshot roundtrip, isolated synthetic fixture",
-  "server_version": "1.19.2",
-  "method": "QdrantClient.recover_snapshot(file URI outside the configured snapshots root)",
-  "http_status": 403,
-  "reason": "Snapshot file path must be inside the configured snapshots directory",
-  "followup": "Use the upstream authenticated snapshot upload endpoint for portable backup files; retain the server path restriction"
-}

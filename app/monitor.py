@@ -33,11 +33,20 @@ class SystemStats:
 def get_system_stats() -> SystemStats:
     cpu = _cpu()
     used, total, pct = _ram()
-    return SystemStats(cpu_percent=cpu, ram_used_mb=used, ram_total_mb=total, ram_percent=pct, gpu_percent=_gpu())
+    return SystemStats(
+        cpu_percent=cpu,
+        ram_used_mb=used,
+        ram_total_mb=total,
+        ram_percent=pct,
+        gpu_percent=_gpu(),
+    )
 
 
 def format_stats(s: SystemStats) -> str:
-    parts = [f"CPU: {s.cpu_percent:.1f}%", f"RAM: {s.ram_used_mb:.0f}/{s.ram_total_mb:.0f}MB ({s.ram_percent:.1f}%)"]
+    parts = [
+        f"CPU: {s.cpu_percent:.1f}%",
+        f"RAM: {s.ram_used_mb:.0f}/{s.ram_total_mb:.0f}MB ({s.ram_percent:.1f}%)",
+    ]
     if s.gpu_percent is not None:
         parts.append(f"GPU: {s.gpu_percent:.1f}%")
     return " | ".join(parts)
@@ -46,6 +55,7 @@ def format_stats(s: SystemStats) -> str:
 def _cpu() -> float:
     try:
         import psutil
+
         return psutil.cpu_percent(interval=0.1)
     except ImportError:
         try:
@@ -60,6 +70,7 @@ def _cpu() -> float:
 def _ram() -> tuple[float, float, float]:
     try:
         import psutil
+
         m = psutil.virtual_memory()
         return m.used / 1048576, m.total / 1048576, m.percent
     except ImportError:
@@ -89,7 +100,9 @@ def get_jetson_model() -> str:
     try:
         with open("/proc/device-tree/model") as f:
             raw = f.read().strip().rstrip("\x00")
-        name = raw.replace("NVIDIA ", "").replace(" Engineering Reference Developer Kit", "")
+        name = raw.replace("NVIDIA ", "").replace(
+            " Engineering Reference Developer Kit", ""
+        )
         return name
     except Exception:
         return "Jetson"
@@ -104,8 +117,14 @@ def _gpu() -> Optional[float]:
             continue
     try:
         r = subprocess.run(
-            ["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=2,
+            [
+                "nvidia-smi",
+                "--query-gpu=utilization.gpu",
+                "--format=csv,noheader,nounits",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=2,
         )
         if r.returncode == 0:
             return float(r.stdout.strip())

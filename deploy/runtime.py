@@ -89,6 +89,7 @@ def ports(cfg):
 
 
 def native_command(component, cfg, profile):
+    """把一份冻结配置转换为上游程序参数；不隐式下载、构建或调优。"""
     p = paths(cfg)
     listen = ports(cfg)
     b = cfg.backends

@@ -32,5 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from app.cli import main
 
+# 统一 CLI：这里只分发命令。services 交给 systemd 管理进程；
+# Web 应用由 run_web_vision_chat.py 组装，业务代码位于 app/。
 if __name__ == "__main__":
     main()

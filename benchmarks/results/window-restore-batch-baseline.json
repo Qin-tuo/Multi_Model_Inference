@@ -1,6 +1,0 @@
-{
-  "status": "FAIL",
-  "scope": "Real initial adapter/reindex/restore integration; dynamic-int8 cross-record batching produced a different embedding during restoration. Strict vector verification refused publication.",
-  "log_sha256": "05aa970d5d6fae95c944b3f99a38ccce1b89527cd6c3309f680eb5fb53adce75",
-  "fix": "Encode each record independently across add/update/reindex/restore; no tolerance relaxation."
-}

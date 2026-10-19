@@ -31,9 +31,13 @@ class LLMConfig:
     temperature: float = 0.7
     timeout: float = 120.0
     context_tokens: int = 2048
-    chat_template_kwargs: Dict[str, bool] = field(default_factory=lambda: {"enable_thinking": False})
+    chat_template_kwargs: Dict[str, bool] = field(
+        default_factory=lambda: {"enable_thinking": False}
+    )
     system_prompt: str = "You are a helpful AI assistant."
-    system_prompt_no_rag: str = "You are a helpful AI assistant. Answer from your own knowledge."
+    system_prompt_no_rag: str = (
+        "You are a helpful AI assistant. Answer from your own knowledge."
+    )
 
 
 @dataclass
@@ -163,13 +167,15 @@ class SessionConfig:
 @dataclass
 class ActionsConfig:
     enabled: bool = False
-    database: str = str(Path.home() / 'AI_Stack/runtime-data/reachy-actions/actions.sqlite')
+    database: str = str(
+        Path.home() / "AI_Stack/runtime-data/reachy-actions/actions.sqlite"
+    )
     max_calls_per_turn: int = 2
     max_pending_reminders: int = 100
     max_records: int = 1000
     max_requests: int = 10000
     notification_ttl_seconds: int = 3600
-    timezone: str = 'Asia/Shanghai'
+    timezone: str = "Asia/Shanghai"
 
 
 @dataclass
@@ -194,7 +200,7 @@ class WebConfig:
 
 @dataclass
 class BackendsConfig:
-    stack_root: str = str(Path.home() / 'AI_Stack')
+    stack_root: str = str(Path.home() / "AI_Stack")
     llm_threads: int = 4
     llm_gpu_layers: int = 99
     llm_parallel: int = 1
@@ -203,13 +209,13 @@ class BackendsConfig:
     asr_gpu_layers: int = 99
     asr_context_tokens: int = 2048
     asr_cache_ram_mib: int = 64
-    asr_model_id: str = 'assistant-asr'
+    asr_model_id: str = "assistant-asr"
     # Preserve the already running ASR hint; changes belong to later experiments.
-    asr_context: str = 'Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0'
+    asr_context: str = "Jetson, TensorRT, TensorFlow, CUDA, Pipecat, Mem0"
 
 
 _SECTIONS = [
-    ('backends','backends',BackendsConfig),
+    ("backends", "backends", BackendsConfig),
     ("llm", "llm", LLMConfig),
     ("stt", "stt", STTConfig),
     ("tts", "tts", TTSConfig),
@@ -243,6 +249,10 @@ class Config:
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
+        """加载基础配置，再叠加指定 profile；默认使用 Orin NX 无机身配置。
+
+        启动管理器会保存最终有效配置；运行中的服务共同读取该冻结副本。
+        """
         default_path = Path(__file__).parent.parent / "config" / "settings.yaml"
         profile_path = config_path or os.environ.get("REACHY_ASSISTANT_CONFIG")
         config_paths = [default_path]
@@ -252,7 +262,9 @@ class Config:
         # A named profile must exist; invalid config must never silently boot
         # an English/robot default. Preserve upstream dataclasses and overlays.
         if not profile_path:
-            config_paths.append(default_path.with_name("settings.orin-nx-headless.yaml"))
+            config_paths.append(
+                default_path.with_name("settings.orin-nx-headless.yaml")
+            )
         config = cls()
         sections = {key: (attr, kind) for key, attr, kind in _SECTIONS}
         for path in config_paths:
@@ -268,65 +280,119 @@ class Config:
                 hints = get_type_hints(kind)
                 for key, value in values.items():
                     if key not in hints or not _matches_type(value, hints[key]):
-                        raise ValueError(f"Invalid configuration value: {section}.{key}")
+                        raise ValueError(
+                            f"Invalid configuration value: {section}.{key}"
+                        )
                     setattr(obj, key, value)
         config.validate()
         return config
 
     def validate(self):
-        b=self.backends
-        if not (1<=b.llm_threads<=8 and 1<=b.asr_threads<=8 and b.llm_parallel==1
-                and 0<=b.llm_gpu_layers<=999 and 0<=b.asr_gpu_layers<=999
-                and 0<=b.llm_cache_ram_mib<=1024 and 0<=b.asr_cache_ram_mib<=1024
-                and 512<=b.asr_context_tokens<=8192 and b.asr_model_id
-                and len(b.asr_context)<=1024 and Path(b.stack_root).expanduser().is_absolute()):
-            raise ValueError('Invalid native backend capacity or paths')
-        if not (self.vad.max_speech_secs+1<=self.audio.pending_voice_seconds<=60
-                and .032<=self.audio.input_stale_seconds<=2
-                and 32<=self.vad.confirm_speech_ms<=1000):
-            raise ValueError('Invalid live voice timing bounds')
-        if not (.1<=self.vision.reconnect_seconds<=10 and 1<=self.vision.v4l_select_timeout<=3):
-            raise ValueError('Invalid camera recovery timing')
-        w=self.web
-        if not (1<=w.max_clients<=4 and 4<=w.queue_events<=64 and 4<=w.bridge_events<=256
-                and 65536<=w.message_bytes<=4*1024*1024 and w.message_bytes<=w.queue_bytes<=16*1024*1024
-                and w.message_bytes<=w.bridge_bytes<=16*1024*1024 and 24576<=w.json_body_bytes<=65536
-                and 512<=w.ws_message_bytes<=65536 and 1<=w.body_readers<=4 and 1<=w.read_workers<=2):
-            raise ValueError('Invalid Web resource bounds')
-        if not (0<w.body_timeout<=30 and 0<w.send_timeout<=10 and 0<w.read_timeout<=10):
-            raise ValueError('Invalid Web timeouts')
+        b = self.backends
+        if not (
+            1 <= b.llm_threads <= 8
+            and 1 <= b.asr_threads <= 8
+            and b.llm_parallel == 1
+            and 0 <= b.llm_gpu_layers <= 999
+            and 0 <= b.asr_gpu_layers <= 999
+            and 0 <= b.llm_cache_ram_mib <= 1024
+            and 0 <= b.asr_cache_ram_mib <= 1024
+            and 512 <= b.asr_context_tokens <= 8192
+            and b.asr_model_id
+            and len(b.asr_context) <= 1024
+            and Path(b.stack_root).expanduser().is_absolute()
+        ):
+            raise ValueError("Invalid native backend capacity or paths")
+        if not (
+            self.vad.max_speech_secs + 1 <= self.audio.pending_voice_seconds <= 60
+            and 0.032 <= self.audio.input_stale_seconds <= 2
+            and 32 <= self.vad.confirm_speech_ms <= 1000
+        ):
+            raise ValueError("Invalid live voice timing bounds")
+        if not (
+            0.1 <= self.vision.reconnect_seconds <= 10
+            and 1 <= self.vision.v4l_select_timeout <= 3
+        ):
+            raise ValueError("Invalid camera recovery timing")
+        w = self.web
+        if not (
+            1 <= w.max_clients <= 4
+            and 4 <= w.queue_events <= 64
+            and 4 <= w.bridge_events <= 256
+            and 65536 <= w.message_bytes <= 4 * 1024 * 1024
+            and w.message_bytes <= w.queue_bytes <= 16 * 1024 * 1024
+            and w.message_bytes <= w.bridge_bytes <= 16 * 1024 * 1024
+            and 24576 <= w.json_body_bytes <= 65536
+            and 512 <= w.ws_message_bytes <= 65536
+            and 1 <= w.body_readers <= 4
+            and 1 <= w.read_workers <= 2
+        ):
+            raise ValueError("Invalid Web resource bounds")
+        if not (
+            0 < w.body_timeout <= 30
+            and 0 < w.send_timeout <= 10
+            and 0 < w.read_timeout <= 10
+        ):
+            raise ValueError("Invalid Web timeouts")
         from zoneinfo import ZoneInfo
+
         ZoneInfo(self.actions.timezone)
-        if not (1 <= self.actions.max_calls_per_turn <= 2 and 1 <= self.actions.max_pending_reminders <= 100
-                and self.actions.max_pending_reminders <= self.actions.max_records <= 10000
-                and 1 <= self.actions.max_requests <= 100000 and 1 <= self.actions.notification_ttl_seconds <= 86400):
-            raise ValueError('Invalid action capacity')
+        if not (
+            1 <= self.actions.max_calls_per_turn <= 2
+            and 1 <= self.actions.max_pending_reminders <= 100
+            and self.actions.max_pending_reminders <= self.actions.max_records <= 10000
+            and 1 <= self.actions.max_requests <= 100000
+            and 1 <= self.actions.notification_ttl_seconds <= 86400
+        ):
+            raise ValueError("Invalid action capacity")
         if not 1 <= self.session.max_turns <= 16:
-            raise ValueError('Session history must contain at most 1–16 turns')
+            raise ValueError("Session history must contain at most 1–16 turns")
         from urllib.parse import urlparse
+
         url = urlparse(self.llm.base_url)
-        if (url.scheme != "http" or url.hostname not in {"127.0.0.1", "localhost", "::1"}
-                or url.username or url.password or url.query or url.fragment or url.path not in {"", "/"}):
+        if (
+            url.scheme != "http"
+            or url.hostname not in {"127.0.0.1", "localhost", "::1"}
+            or url.username
+            or url.password
+            or url.query
+            or url.fragment
+            or url.path not in {"", "/"}
+        ):
             raise ValueError("llm.base_url must be a local HTTP server root")
         if self.llm.backend != "openai" or not self.llm.model.strip():
-            raise ValueError("This profile requires an explicit local OpenAI-compatible model")
+            raise ValueError(
+                "This profile requires an explicit local OpenAI-compatible model"
+            )
         if not 0 < self.llm.max_tokens + 16 < self.llm.context_tokens:
             raise ValueError("Output reservation exceeds context capacity")
         if not 0 <= self.llm.temperature <= 2 or self.llm.timeout <= 0:
             raise ValueError("Invalid LLM sampling or timeout setting")
-        if min(self.vision.width, self.vision.height, self.vision.capture_fps, self.web.ui_fps) <= 0:
+        if (
+            min(
+                self.vision.width,
+                self.vision.height,
+                self.vision.capture_fps,
+                self.web.ui_fps,
+            )
+            <= 0
+        ):
             raise ValueError("Camera geometry and rates must be positive")
         if self.vision.frames != 1:
             raise ValueError("The initial 4B profile supports one image per request")
         from app.audio import local_speech_url
-        local_speech_url(self.stt.native_base_url.rstrip('/') + '/v1')
+
+        local_speech_url(self.stt.native_base_url.rstrip("/") + "/v1")
         for audio_config in (self.stt, self.tts):
             local_speech_url(audio_config.base_url)
             if audio_config.timeout <= 0:
                 raise ValueError("Speech timeout must be positive")
         if (self.audio.sample_rate, self.audio.channels) != (16000, 1):
             raise ValueError("Speech requires 16kHz mono")
-        if self.audio.input_mode not in {"file", "device"} or self.audio.output_mode not in {"file", "device"}:
+        if self.audio.input_mode not in {
+            "file",
+            "device",
+        } or self.audio.output_mode not in {"file", "device"}:
             raise ValueError("Unknown audio mode")
         if self.audio.output_mode == "device" and not self.audio.output_device:
             raise ValueError("Explicit output device required")
@@ -340,7 +406,13 @@ class Config:
             raise ValueError("Invalid generated audio duration limits")
         if not 1 <= self.audio.retained_files <= 100:
             raise ValueError("Invalid audio file retention")
-        if not (0 < self.vad.silero_threshold < 1 and 0 <= self.vad.min_utterance_secs < self.vad.max_speech_secs <= self.stt.max_seconds):
+        if not (
+            0 < self.vad.silero_threshold < 1
+            and 0
+            <= self.vad.min_utterance_secs
+            < self.vad.max_speech_secs
+            <= self.stt.max_seconds
+        ):
             raise ValueError("Invalid VAD thresholds or segment duration")
         if self.vad.silence_duration_ms < 32 or not 0 <= self.vad.lookback_ms <= 1000:
             raise ValueError("Invalid VAD endpoint/lookback settings")
@@ -348,31 +420,69 @@ class Config:
             raise ValueError("Silero v6 requires 32ms/512-sample frames")
         if not 1 <= self.web.port <= 65535:
             raise ValueError("Invalid web port")
-        if min(self.vision.stale_after, self.vision.buffer_bytes_limit, self.face.fps, self.face.stable_frames) <= 0:
+        if (
+            min(
+                self.vision.stale_after,
+                self.vision.buffer_bytes_limit,
+                self.face.fps,
+                self.face.stable_frames,
+            )
+            <= 0
+        ):
             raise ValueError("Perception timing and buffer limits must be positive")
         if not 0 < self.face.dead_zone <= self.face.good_frame_zone <= 1:
             raise ValueError("Invalid face framing zones")
         if not 0 < self.face.min_face_size <= 1:
             raise ValueError("Invalid face size threshold")
 
-        if self.perception.fps <= 0 or not 1 <= self.perception.max_hands <= 4 or not 1 <= self.perception.max_people <= 100:
+        if (
+            self.perception.fps <= 0
+            or not 1 <= self.perception.max_hands <= 4
+            or not 1 <= self.perception.max_people <= 100
+        ):
             raise ValueError("Invalid perception rate/capacity")
-        if not all(0 < value < 1 for value in (self.perception.body_threshold,self.perception.body_iou,self.perception.palm_threshold,self.perception.hand_threshold)):
+        if not all(
+            0 < value < 1
+            for value in (
+                self.perception.body_threshold,
+                self.perception.body_iou,
+                self.perception.palm_threshold,
+                self.perception.hand_threshold,
+            )
+        ):
             raise ValueError("Invalid perception threshold")
         g = self.gestures
         import math
-        if not all(math.isfinite(v) for v in vars(g).values() if type(v) in (int,float)):
-            raise ValueError('Gesture parameters must be finite')
-        if not (0 < g.stationary_palm_widths < g.wave_swing_palm_widths < g.association_palm_widths <= 4):
-            raise ValueError('Invalid gesture motion thresholds')
-        if not (0 < g.rearm_seconds <= g.stop_hold_seconds <= g.wave_window_seconds <= 5):
-            raise ValueError('Invalid gesture evidence windows')
-        if not (0 < g.max_gap_seconds < g.stop_hold_seconds and 0 < g.event_ttl_seconds <= self.vision.stale_after):
-            raise ValueError('Invalid gesture freshness bounds')
-        if not (3 <= g.min_observations <= 32 and 1 <= g.wave_reversals <= 4 and 1 <= g.max_tracks <= 8):
-            raise ValueError('Invalid gesture capacities')
+
+        if not all(
+            math.isfinite(v) for v in vars(g).values() if type(v) in (int, float)
+        ):
+            raise ValueError("Gesture parameters must be finite")
+        if not (
+            0
+            < g.stationary_palm_widths
+            < g.wave_swing_palm_widths
+            < g.association_palm_widths
+            <= 4
+        ):
+            raise ValueError("Invalid gesture motion thresholds")
+        if not (
+            0 < g.rearm_seconds <= g.stop_hold_seconds <= g.wave_window_seconds <= 5
+        ):
+            raise ValueError("Invalid gesture evidence windows")
+        if not (
+            0 < g.max_gap_seconds < g.stop_hold_seconds
+            and 0 < g.event_ttl_seconds <= self.vision.stale_after
+        ):
+            raise ValueError("Invalid gesture freshness bounds")
+        if not (
+            3 <= g.min_observations <= 32
+            and 1 <= g.wave_reversals <= 4
+            and 1 <= g.max_tracks <= 8
+        ):
+            raise ValueError("Invalid gesture capacities")
         if g.min_palm_pixels < 5 or g.greeting_cooldown_seconds < g.wave_window_seconds:
-            raise ValueError('Invalid gesture size/cooldown')
+            raise ValueError("Invalid gesture size/cooldown")
 
     def effective(self) -> dict:
         return asdict(self)
@@ -388,7 +498,9 @@ def _matches_type(value, expected) -> bool:
         return isinstance(value, list) and all(_matches_type(v, args[0]) for v in value)
     if origin is dict:
         return isinstance(value, dict) and all(
-            _matches_type(k, args[0]) and _matches_type(v, args[1]) for k, v in value.items())
+            _matches_type(k, args[0]) and _matches_type(v, args[1])
+            for k, v in value.items()
+        )
     if expected is float:
         return type(value) in (int, float)
     return type(value) is expected

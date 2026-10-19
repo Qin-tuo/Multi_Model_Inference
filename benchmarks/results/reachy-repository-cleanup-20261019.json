@@ -1,0 +1,190 @@
+{
+  "created_at": "2026-10-19T02:07:49.051426+00:00",
+  "status": "VERIFIED",
+  "scope": "Repository readability/organization and archival cleanup; no model tuning",
+  "archive_index": "docs/archive/repository-cleanup-20261019.json",
+  "archived_files": 327,
+  "archived_bytes": 25877677,
+  "source_before": "edafe48a988fd0cf98278f342aabb8e606cf8954",
+  "moved_documents": {
+    "00-project-overview.md": "docs/project-overview.md",
+    "02-jetson-multimodel-inference.md": "docs/implementation-plan.md",
+    "deploy/speech/README-legacy.md": "docs/archive/README-speech-legacy.md",
+    "deploy/systemd/README-legacy.md": "docs/archive/README-systemd-legacy.md"
+  },
+  "format": {
+    "tool": "ruff 0.12.12",
+    "files_reformatted": 23,
+    "python_files_ast_checked": 100,
+    "expected_exceptions": [
+      "Extend static asset allowlist with app.js/app.css",
+      "Test-only WebSocket close handshake before exiting TestClient cancellation scope"
+    ],
+    "other_execution_ast_changes": []
+  },
+  "preserved": [
+    "references/ and .gitmodules",
+    "22 frozen B0 protocol/result/lock files byte-for-byte",
+    "Model weights, native builds, external frameworks, runtime data",
+    "Existing .venv* compatibility symlinks required by installed script shebangs"
+  ],
+  "cache_cleanup": [
+    {
+      "path": "__pycache__",
+      "files": 1
+    },
+    {
+      "path": ".pytest_cache",
+      "files": 5
+    },
+    {
+      "path": ".ruff_cache",
+      "files": 9
+    },
+    {
+      "path": "deploy/__pycache__",
+      "files": 4
+    },
+    {
+      "path": "deploy/vision/__pycache__",
+      "files": 4
+    },
+    {
+      "path": "deploy/speech/__pycache__",
+      "files": 6
+    },
+    {
+      "path": "deploy/data/__pycache__",
+      "files": 3
+    },
+    {
+      "path": "deploy/memory/__pycache__",
+      "files": 5
+    },
+    {
+      "path": "tools/__pycache__",
+      "files": 74
+    },
+    {
+      "path": "benchmarks/__pycache__",
+      "files": 7
+    },
+    {
+      "path": "patches/mem0/__pycache__",
+      "files": 2
+    },
+    {
+      "path": "scripts/__pycache__",
+      "files": 2
+    },
+    {
+      "path": "app/__pycache__",
+      "files": 45
+    },
+    {
+      "path": "app/actions/__pycache__",
+      "files": 3
+    },
+    {
+      "path": "app/adapters/__pycache__",
+      "files": 8
+    },
+    {
+      "path": "tests/__pycache__",
+      "files": 63
+    }
+  ],
+  "removed_empty_directories": [
+    "src",
+    "interfaces",
+    "tools",
+    "deploy/memory",
+    "deploy/data",
+    "deploy/vision"
+  ],
+  "tests": {
+    "passed": 179,
+    "failed": 0,
+    "xml": "/home/nvidia/AI_Stack/runtime-data/repository-cleanup-20261019/tests.xml",
+    "initial_failure": {
+      "test": "test_headless_web_turn_and_shutdown",
+      "kind": "TestClient cancellation at WebSocket scope exit",
+      "evidence": "/home/nvidia/AI_Stack/runtime-data/repository-cleanup-20261019/tests-initial-close-race.xml",
+      "correction": "Explicit client close and bounded wait asserting server unregister before TestClient cancels its scope"
+    },
+    "close_regression_repeat_passes": 5
+  },
+  "verified_artifacts": 397,
+  "active_markdown_broken_links": 0,
+  "browser": {
+    "assets": {
+      "app.js": {
+        "status": 200,
+        "bytes": 35800,
+        "mime": "text/javascript; charset=utf-8"
+      },
+      "app.css": {
+        "status": 200,
+        "bytes": 11821,
+        "mime": "text/css; charset=utf-8"
+      },
+      "debug.js": {
+        "status": 200,
+        "bytes": 14613,
+        "mime": "text/javascript; charset=utf-8"
+      },
+      "debug.css": {
+        "status": 200,
+        "bytes": 3320,
+        "mime": "text/css; charset=utf-8"
+      }
+    },
+    "browser": {
+      "connected": " Connected",
+      "frame": 640,
+      "capture": "9.9",
+      "perception": "4.7",
+      "scroll": "auto",
+      "css": [
+        "http://127.0.0.1:8090/static/app.css",
+        "http://127.0.0.1:8090/static/debug.css"
+      ],
+      "scripts": [
+        "http://127.0.0.1:8090/static/debug.js",
+        "http://127.0.0.1:8090/static/app.js"
+      ]
+    },
+    "text_turn": {
+      "status": "complete",
+      "audio": "file_written"
+    },
+    "scope": "Functional browser smoke; no performance or accuracy comparison"
+  },
+  "services": {
+    "llama": {
+      "state": "active",
+      "ready": true,
+      "restarts": "0"
+    },
+    "asr": {
+      "state": "active",
+      "ready": true,
+      "restarts": "0"
+    },
+    "speech": {
+      "state": "active",
+      "ready": true,
+      "restarts": "0"
+    },
+    "app": {
+      "state": "active",
+      "ready": true,
+      "restarts": "0"
+    }
+  },
+  "raw_artifacts": "/home/nvidia/AI_Stack/runtime-data/repository-cleanup-20261019",
+  "boundaries": [
+    "Functional smoke and software tests; no additional gesture-quality, physical-audio or endurance acceptance.",
+    "Historical reports are immutable; their original source paths resolve in the archived/tagged source."
+  ]
+}

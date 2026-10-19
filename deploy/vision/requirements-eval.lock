@@ -1,3 +1,0 @@
-# Added to the separate vision export/evaluation environment; runtime unchanged.
-# PyPI release metadata, CPython 3.12+ aarch64 manylinux wheel.
-pycocotools==2.0.11 --hash=sha256:7fd4121766cc057133534679c0ec3f9023dbd96e9b31cf95c86a069ebdac2b65

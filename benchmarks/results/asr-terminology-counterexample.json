@@ -1,6 +1,0 @@
-{
-  "created_at": "2026-10-12T09:06:28.729339+00:00",
-  "scope": "single terminology counterexample; not independent ASR corpus",
-  "input": "项目使用 TensorFlow，不使用 TensorRT。",
-  "transcript": "项目使用TensorFlow，不使用TensorRT。"
-}

@@ -39,6 +39,14 @@ def test_headless_web_turn_and_shutdown(monkeypatch):
                 if event["type"] == "done": break
             assert messages[-1]["status"] == "complete" and messages[-1]["text"] == "测试回答"
             assert messages[-1]["turn_id"] == response.json()["turn_id"]
+            # Complete the close handshake before TestClient cancels its task
+            # scope on __exit__; otherwise its cancellation can race with the
+            # ASGI handler's finally block and obscure the cleanup assertion.
+            ws.close()
+            deadline = time.monotonic() + 2
+            while client.get("/api/state").json()["web"]["clients"] and time.monotonic() < deadline:
+                time.sleep(0.01)
+            assert client.get("/api/state").json()["web"]["clients"] == 0
     assert not any(t.name in {"conversation", "stats-broadcast"} for t in threading.enumerate())
 
 

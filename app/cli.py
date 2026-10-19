@@ -30,14 +30,19 @@ from app.llm import LLM
 from app.monitor import get_system_stats, format_stats
 
 console = Console()
-app = typer.Typer(name="assistant", help="Orin NX headless assistant", add_completion=False)
+app = typer.Typer(
+    name="assistant", help="Orin NX headless assistant", add_completion=False
+)
 
 
 def _load_llm(config: Config) -> LLM:
     llm = LLM(
-        model=config.llm.model, base_url=config.llm.base_url,
-        backend=config.llm.backend, max_tokens=config.llm.max_tokens,
-        temperature=config.llm.temperature, timeout=config.llm.timeout,
+        model=config.llm.model,
+        base_url=config.llm.base_url,
+        backend=config.llm.backend,
+        max_tokens=config.llm.max_tokens,
+        temperature=config.llm.temperature,
+        timeout=config.llm.timeout,
         system_prompt=config.llm.system_prompt,
         context_tokens=config.llm.context_tokens,
         chat_template_kwargs=config.llm.chat_template_kwargs,
@@ -49,6 +54,7 @@ def _load_llm(config: Config) -> LLM:
 
 def _image(path: Path, config: Config) -> str:
     import cv2
+
     if path.stat().st_size > 10 * 1024 * 1024:
         raise ValueError("Image exceeds 10 MiB")
     image = cv2.imread(str(path))
@@ -58,7 +64,9 @@ def _image(path: Path, config: Config) -> str:
     scale = min(1, config.vision.width / w, config.vision.height / h)
     if scale < 1:
         image = cv2.resize(image, (max(1, round(w * scale)), max(1, round(h * scale))))
-    ok, encoded = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, config.vision.jpeg_quality])
+    ok, encoded = cv2.imencode(
+        ".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, config.vision.jpeg_quality]
+    )
     if not ok:
         raise ValueError("Image cannot be encoded")
     return base64.b64encode(encoded).decode("ascii")
@@ -69,7 +77,9 @@ def _stream(llm: LLM, question: str, *, images=None, system_prompt=None, display
     first = None
     text = ""
     metadata = {}
-    for content, meta in llm.generate_stream(question, images_b64=images, system_prompt=system_prompt):
+    for content, meta in llm.generate_stream(
+        question, images_b64=images, system_prompt=system_prompt
+    ):
         metadata.update(meta)
         if content:
             if first is None:
@@ -79,9 +89,12 @@ def _stream(llm: LLM, question: str, *, images=None, system_prompt=None, display
             text += content
     if not metadata.get("done") or not text.strip():
         raise RuntimeError("Model produced no complete text response")
-    return {"text": text, "metadata": metadata,
-            "elapsed_seconds": time.monotonic() - t0,
-            "first_content_seconds": first - t0 if first is not None else None}
+    return {
+        "text": text,
+        "metadata": metadata,
+        "elapsed_seconds": time.monotonic() - t0,
+        "first_content_seconds": first - t0 if first is not None else None,
+    }
 
 
 @app.command()
@@ -97,8 +110,13 @@ def ask(
         config = Config.load(config_path)
         images = [_image(image, config)] if image else None
         llm = _load_llm(config)
-        result = _stream(llm, question, images=images, display=not json_output,
-                         system_prompt=config.vision.system_prompt if images else None)
+        result = _stream(
+            llm,
+            question,
+            images=images,
+            display=not json_output,
+            system_prompt=config.vision.system_prompt if images else None,
+        )
         result["mode"] = "file_image_text" if image else "text"
         result["model"] = llm.model
         if json_output:
@@ -113,17 +131,25 @@ def ask(
             llm.unload()
 
 
-@app.command(context_settings={'allow_extra_args':True,'ignore_unknown_options':True})
-def services(ctx: typer.Context, action: str = typer.Argument(...,help='check, install, up, down, status or logs')):
+@app.command(
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": True}
+)
+def services(
+    ctx: typer.Context,
+    action: str = typer.Argument(..., help="check, install, up, down, status or logs"),
+):
     """Manage native backends and the Web app through user systemd."""
     from deploy.services import main as service_main
-    raise typer.Exit(service_main([action,*ctx.args]))
+
+    raise typer.Exit(service_main([action, *ctx.args]))
 
 
 @app.command()
 def config(config_path: Optional[str] = typer.Option(None, "--config", "-c")):
     """Print the effective typed configuration."""
-    typer.echo(json.dumps(Config.load(config_path).effective(), ensure_ascii=False, indent=2))
+    typer.echo(
+        json.dumps(Config.load(config_path).effective(), ensure_ascii=False, indent=2)
+    )
 
 
 @app.command()

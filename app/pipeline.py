@@ -15,8 +15,8 @@
 
 """Pipeline — shared audio I/O, VAD, TTS streaming, and mic recording.
 
-Extracts the common infrastructure used by both run_voice_chat.py and
-run_vision_chat.py so each entry point only contains its unique logic.
+Reusable audio infrastructure for the headless application. TurnController
+owns each request; this module owns segmentation and bounded PCM output.
 """
 
 import sys
@@ -47,10 +47,17 @@ _ALSA_ERR_T = None
 _alsa_handler = None
 try:
     import ctypes
-    _ALSA_ERR_T = ctypes.CFUNCTYPE(None, ctypes.c_char_p, ctypes.c_int,
-                                    ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p)
+
+    _ALSA_ERR_T = ctypes.CFUNCTYPE(
+        None,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+    )
     _alsa_handler = _ALSA_ERR_T(lambda *_: None)
-    ctypes.cdll.LoadLibrary('libasound.so.2').snd_lib_error_set_handler(_alsa_handler)
+    ctypes.cdll.LoadLibrary("libasound.so.2").snd_lib_error_set_handler(_alsa_handler)
 except Exception:
     pass
 
@@ -61,16 +68,17 @@ SAMPLE_RATE = 16000
 SILERO_CHUNK_SAMPLES = 512  # Silero VAD requires exactly 512 samples (32ms) at 16kHz
 CHANNELS = 1
 
-TTS_BREAKS = frozenset('.,;:!?\n')
+TTS_BREAKS = frozenset(".,;:!?\n")
 AEC_SOURCE_NAME = "reachy_aec_source"
 AEC_SINK_NAME = "reachy_aec_sink"
 
 
 # ── Audio helpers ─────────────────────────────────────────────────
 
+
 def chunk_rms(raw: bytes) -> float:
     pcm = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
-    return float(np.sqrt(np.mean(pcm ** 2)))
+    return float(np.sqrt(np.mean(pcm**2)))
 
 
 def save_wav(chunks: list[bytes], path: str):
@@ -105,11 +113,19 @@ def _pa_match(needle: str, haystack: str) -> bool:
 def find_pa_source(name_hint: str) -> Optional[str]:
     """Find a PulseAudio input source matching name_hint."""
     try:
-        r = subprocess.run(["pactl", "list", "short", "sources"],
-                           capture_output=True, text=True, timeout=5)
+        r = subprocess.run(
+            ["pactl", "list", "short", "sources"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
         for line in r.stdout.splitlines():
             parts = line.split("\t")
-            if len(parts) >= 2 and _pa_match(name_hint, parts[1]) and "monitor" not in parts[1].lower():
+            if (
+                len(parts) >= 2
+                and _pa_match(name_hint, parts[1])
+                and "monitor" not in parts[1].lower()
+            ):
                 return parts[1]
     except Exception:
         pass
@@ -139,8 +155,12 @@ def _pa_sink_label(sink_name: str) -> str:
 def list_pa_sinks() -> list[dict[str, str]]:
     """List available PulseAudio output sinks for the web speaker selector."""
     try:
-        r = subprocess.run(["pactl", "list", "short", "sinks"],
-                           capture_output=True, text=True, timeout=5)
+        r = subprocess.run(
+            ["pactl", "list", "short", "sinks"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
         sinks = []
         for line in r.stdout.splitlines():
             parts = line.split("\t")
@@ -154,8 +174,9 @@ def list_pa_sinks() -> list[dict[str, str]]:
 def get_default_pa_sink() -> Optional[str]:
     """Return PulseAudio's current default sink, if available."""
     try:
-        r = subprocess.run(["pactl", "get-default-sink"],
-                           capture_output=True, text=True, timeout=5)
+        r = subprocess.run(
+            ["pactl", "get-default-sink"], capture_output=True, text=True, timeout=5
+        )
         sink = r.stdout.strip()
         return sink or None
     except Exception:
@@ -167,7 +188,9 @@ def get_pa_sink_volume(sink_name: str) -> Optional[int]:
     try:
         r = subprocess.run(
             ["pactl", "get-sink-volume", sink_name],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if r.returncode != 0:
             return None
@@ -194,7 +217,9 @@ class SpeakerSelector:
         self.refresh()
 
     @staticmethod
-    def _matching_sink(speakers: list[dict[str, str]], hint: Optional[str]) -> Optional[str]:
+    def _matching_sink(
+        speakers: list[dict[str, str]], hint: Optional[str]
+    ) -> Optional[str]:
         if not hint:
             return None
         for speaker in speakers:
@@ -210,8 +235,12 @@ class SpeakerSelector:
             selected = self._sink if self._sink in available else None
             selected = selected or self._matching_sink(speakers, self._preferred_hint)
             if not self._preferred_hint:
-                selected = selected or self._matching_sink(speakers, self._fallback_hint)
-                selected = selected or (default_sink if default_sink in available else None)
+                selected = selected or self._matching_sink(
+                    speakers, self._fallback_hint
+                )
+                selected = selected or (
+                    default_sink if default_sink in available else None
+                )
             self._speakers = speakers
             self._sink = selected
             return self._state_unlocked()
@@ -260,7 +289,9 @@ class SpeakerSelector:
         try:
             result = subprocess.run(
                 ["pactl", "set-sink-volume", sink_id, f"{volume}%"],
-                capture_output=True, text=True, timeout=5,
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode != 0:
                 state = self.refresh()
@@ -299,7 +330,9 @@ class PulseAudioAEC:
         self.stop()
         self.last_error = None
         args = [
-            "pactl", "load-module", "module-echo-cancel",
+            "pactl",
+            "load-module",
+            "module-echo-cancel",
             "aec_method=webrtc",
             f"source_master={self.source_master}",
             f"sink_master={sink_master}",
@@ -310,7 +343,10 @@ class PulseAudioAEC:
         ]
         try:
             result = subprocess.run(
-                args, capture_output=True, text=True, timeout=10,
+                args,
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
             if result.returncode != 0:
                 self.last_error = result.stderr.strip() or "Could not load WebRTC AEC"
@@ -325,9 +361,14 @@ class PulseAudioAEC:
             return False
 
     def stop(self):
-        if self.module_id is None: return
-        result = subprocess.run(["pactl", "unload-module", str(self.module_id)],
-                                capture_output=True, text=True, timeout=5)
+        if self.module_id is None:
+            return
+        result = subprocess.run(
+            ["pactl", "unload-module", str(self.module_id)],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
         if result.returncode != 0:
             raise RuntimeError(result.stderr.strip() or "AEC module did not unload")
         self.module_id = None
@@ -336,6 +377,7 @@ class PulseAudioAEC:
 
 class Playback:
     """Own only this turn's player; cancellation and process launch share a lock."""
+
     def __init__(self, event):
         self.event = event
         self._lock = threading.Lock()
@@ -343,70 +385,126 @@ class Playback:
 
     def start(self, cmd):
         from app.request_io import TurnCancelled
+
         with self._lock:
-            if self.event.is_set(): raise TurnCancelled('Playback cancelled')
-            self._process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+            if self.event.is_set():
+                raise TurnCancelled("Playback cancelled")
+            self._process = subprocess.Popen(
+                cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             return self._process
 
     def cancel(self):
         with self._lock:
             process = self._process
             if process is not None and process.poll() is None:
-                try: process.terminate()
-                except ProcessLookupError: pass
+                try:
+                    process.terminate()
+                except ProcessLookupError:
+                    pass
 
     def clear(self, process):
         with self._lock:
-            if self._process is process: self._process = None
+            if self._process is process:
+                self._process = None
 
 
-def play_audio(audio: np.ndarray, sample_rate: int, sink: Optional[str] = None, playback=None, on_start=None):
+def play_audio(
+    audio: np.ndarray,
+    sample_rate: int,
+    sink: Optional[str] = None,
+    playback=None,
+    on_start=None,
+):
     """Return a device-process receipt; physical audibility is a separate check."""
-    if not sink: raise ValueError("Explicit speaker device is required")
+    if not sink:
+        raise ValueError("Explicit speaker device is required")
     if audio.ndim != 1 or audio.dtype != np.int16 or sample_rate != 16000:
         raise ValueError("Playback requires mono PCM16 at 16kHz")
     if sink.startswith(("hw:", "plughw:")):
-        cmd = ["aplay", "-D", sink, "-f", "S16_LE", "-r", str(sample_rate), "-c", "1", "-t", "raw", "-q"]
+        cmd = [
+            "aplay",
+            "-D",
+            sink,
+            "-f",
+            "S16_LE",
+            "-r",
+            str(sample_rate),
+            "-c",
+            "1",
+            "-t",
+            "raw",
+            "-q",
+        ]
     else:
-        cmd = ["paplay", f"--device={sink}", "--format=s16le", f"--rate={sample_rate}", "--channels=1", "--raw"]
+        cmd = [
+            "paplay",
+            f"--device={sink}",
+            "--format=s16le",
+            f"--rate={sample_rate}",
+            "--channels=1",
+            "--raw",
+        ]
     from app.request_io import TurnCancelled
+
     playback = playback or Playback(threading.Event())
     process = playback.start(cmd)
     started = time.monotonic()
     try:
-        if on_start:on_start()
+        if on_start:
+            on_start()
         data = audio.tobytes()
-        deadline = started + audio.size/sample_rate + 5
+        deadline = started + audio.size / sample_rate + 5
         while True:
-            if playback.event.is_set(): raise TurnCancelled('Playback cancelled')
+            if playback.event.is_set():
+                raise TurnCancelled("Playback cancelled")
             try:
                 _, error = process.communicate(data, timeout=0.1)
                 break
             except subprocess.TimeoutExpired:
                 data = None
-                if time.monotonic() >= deadline: raise RuntimeError('Playback timed out')
-        if playback.event.is_set(): raise TurnCancelled('Playback cancelled')
-        if process.returncode != 0: raise RuntimeError(f"Playback failed: {error.decode(errors='replace')[:300]}")
-        return {"kind": "device_completed", "submitted_monotonic": started,
-                "completed_monotonic": time.monotonic(), "frames": audio.size}
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("Playback timed out")
+        if playback.event.is_set():
+            raise TurnCancelled("Playback cancelled")
+        if process.returncode != 0:
+            raise RuntimeError(
+                f"Playback failed: {error.decode(errors='replace')[:300]}"
+            )
+        return {
+            "kind": "device_completed",
+            "submitted_monotonic": started,
+            "completed_monotonic": time.monotonic(),
+            "frames": audio.size,
+        }
     finally:
         if process.poll() is None:
             process.terminate()
-            try: process.wait(timeout=0.5)
-            except subprocess.TimeoutExpired: process.kill(); process.wait()
+            try:
+                process.wait(timeout=0.5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
         playback.clear(process)
 
 
 # ── Silero VAD ────────────────────────────────────────────────────
+
 
 class SileroVAD:
     """Stateful streaming wrapper for faster-whisper's Silero VAD model."""
 
     def __init__(self):
         import onnxruntime as ort
-        entry = json.loads((Path(__file__).resolve().parents[1] / "models/speech.json").read_text())["vad"]
+
+        entry = json.loads(
+            (Path(__file__).resolve().parents[1] / "models/speech.json").read_text()
+        )["vad"]
         model_path = Path(entry["directory"]) / entry["filename"]
-        if hashlib.sha256(model_path.read_bytes()).hexdigest() != entry["files"][entry["filename"]]["sha256"]:
+        if (
+            hashlib.sha256(model_path.read_bytes()).hexdigest()
+            != entry["files"][entry["filename"]]["sha256"]
+        ):
             raise RuntimeError("Silero VAD model differs from lock")
 
         session_options = ort.SessionOptions()
@@ -456,9 +554,11 @@ def load_silero(console: Optional[Console] = None) -> SileroVAD:
 
 # ── Speech segment ────────────────────────────────────────────────
 
+
 @dataclass
 class SpeechSegment:
     """A completed speech utterance from the VAD."""
+
     audio: np.ndarray
     raw_chunks: list
     duration: float
@@ -468,7 +568,7 @@ class SpeechSegment:
     input_epoch: int = 0
     utterance_id: str | None = None
     input_invalidated: threading.Event | None = None
-    end_reason: str = 'silence'
+    end_reason: str = "silence"
 
 
 @dataclass(frozen=True)
@@ -481,6 +581,7 @@ class SpeechOnset:
 
 
 # ── Mic recorder ──────────────────────────────────────────────────
+
 
 @dataclass(frozen=True)
 class AudioChunk:
@@ -530,7 +631,7 @@ class MicRecorder:
         self.stop()
         self.alive = True
         self.last_error = None
-        self.suppressed_reason=None
+        self.suppressed_reason = None
         self.flush()
         self.listening.set()
 
@@ -558,12 +659,16 @@ class MicRecorder:
                     )
             self.console.print(f"  PA source: {self.pa_source.split('.')[-2]}")
         else:
-            self.console.print("  [yellow]PA source not found, using ALSA direct[/yellow]")
+            self.console.print(
+                "  [yellow]PA source not found, using ALSA direct[/yellow]"
+            )
             # A busy ALSA device fails explicitly; never stop the desktop audio service.
 
         if not self._start_capture():
             if self.aec and self.aec.active:
-                self.console.print("  [yellow]AEC capture failed; using direct audio[/yellow]")
+                self.console.print(
+                    "  [yellow]AEC capture failed; using direct audio[/yellow]"
+                )
                 self.aec.stop()
                 self.pa_sink = self.speaker_selector.get_sink()
                 if not self._start_capture():
@@ -579,32 +684,59 @@ class MicRecorder:
 
     def _record_command(self) -> list[str]:
         if self.pa_source:
-            source = self.aec.source_name if self.aec and self.aec.active else self.pa_source
+            source = (
+                self.aec.source_name if self.aec and self.aec.active else self.pa_source
+            )
             return [
-                "parecord", "-d", source, "--format=s16le",
-                f"--rate={SAMPLE_RATE}", f"--channels={CHANNELS}", "--raw",
+                "parecord",
+                "-d",
+                source,
+                "--format=s16le",
+                f"--rate={SAMPLE_RATE}",
+                f"--channels={CHANNELS}",
+                "--raw",
             ]
         plughw = self._hw.replace("hw:", "plughw:")
         return [
-            "arecord", "-D", plughw, "-f", "S16_LE", "-r", str(SAMPLE_RATE),
-            "-c", str(CHANNELS), "-t", "raw",
+            "arecord",
+            "-D",
+            plughw,
+            "-f",
+            "S16_LE",
+            "-r",
+            str(SAMPLE_RATE),
+            "-c",
+            str(CHANNELS),
+            "-t",
+            "raw",
         ]
 
     def _start_capture(self) -> bool:
         rec_cmd = self._record_command()
         for attempt in range(3):
-            proc = subprocess.Popen(rec_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = subprocess.Popen(
+                rec_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             time.sleep(0.5)
             if proc.poll() is None:
                 self._proc = proc
-                self._reader_thread = threading.Thread(target=self._reader, args=(proc,), name="microphone-reader", daemon=True)
+                self._reader_thread = threading.Thread(
+                    target=self._reader,
+                    args=(proc,),
+                    name="microphone-reader",
+                    daemon=True,
+                )
                 self._reader_thread.start()
                 return True
             err = proc.stderr.read().decode(errors="replace").strip()
-            if proc.stdout:proc.stdout.close()
-            if proc.stderr:proc.stderr.close()
-            self.last_error=err or f'Microphone process exited with status {proc.returncode}'
-            self.console.print(f"  [red]Mic attempt {attempt+1} failed: {err}[/red]")
+            if proc.stdout:
+                proc.stdout.close()
+            if proc.stderr:
+                proc.stderr.close()
+            self.last_error = (
+                err or f"Microphone process exited with status {proc.returncode}"
+            )
+            self.console.print(f"  [red]Mic attempt {attempt + 1} failed: {err}[/red]")
             time.sleep(1)
         self._proc = None
         return False
@@ -625,7 +757,9 @@ class MicRecorder:
                 self.console.print("  Mic: [yellow]quiet, waiting for speech[/yellow]")
         else:
             running = self._proc is not None and self._proc.poll() is None
-            self.console.print(f"  [yellow]Mic: no startup audio; capture running: {running}[/yellow]")
+            self.console.print(
+                f"  [yellow]Mic: no startup audio; capture running: {running}[/yellow]"
+            )
         return bool(test_chunks)
 
     def _stop_capture(self):
@@ -634,14 +768,20 @@ class MicRecorder:
         if proc is not None:
             if proc.poll() is None:
                 proc.terminate()
-                try: proc.wait(timeout=2)
-                except subprocess.TimeoutExpired: proc.kill(); proc.wait()
+                try:
+                    proc.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait()
             if self._reader_thread:
                 self._reader_thread.join(timeout=2)
-                if self._reader_thread.is_alive(): raise RuntimeError("Microphone reader has not released")
+                if self._reader_thread.is_alive():
+                    raise RuntimeError("Microphone reader has not released")
                 self._reader_thread = None
-            if proc.stdout: proc.stdout.close()
-            if proc.stderr: proc.stderr.close()
+            if proc.stdout:
+                proc.stdout.close()
+            if proc.stderr:
+                proc.stderr.close()
 
     def _rebuild_aec_route(self) -> bool:
         with self._route_lock:
@@ -686,17 +826,24 @@ class MicRecorder:
         state = self.speaker_selector.state()
         selected_sink = self.speaker_selector.get_sink()
         if (
-            self.alive and selected_sink
+            self.alive
+            and selected_sink
             and previous_sink != selected_sink
             and self.aec
             and self.aec.sink_master != selected_sink
         ):
             self._rebuild_aec_route()
-        if not self.alive:state['error']=self.last_error or 'Microphone input stopped; restart the application'
+        if not self.alive:
+            state["error"] = (
+                self.last_error or "Microphone input stopped; restart the application"
+            )
         return self._add_aec_state(state)
 
     def select_speaker(self, sink_id: str) -> dict:
-        if not self.alive:raise RuntimeError('Microphone input stopped; restart the application after checking the device')
+        if not self.alive:
+            raise RuntimeError(
+                "Microphone input stopped; restart the application after checking the device"
+            )
         if not self.speaker_selector:
             return {
                 "speakers": [],
@@ -725,7 +872,8 @@ class MicRecorder:
         while self.alive and proc.poll() is None:
             epoch = self.input_epoch
             raw = proc.stdout.read(self.chunk_bytes)
-            if raw:self.last_chunk_monotonic=time.monotonic()
+            if raw:
+                self.last_chunk_monotonic = time.monotonic()
             if not raw:
                 if proc.poll() is not None and proc is self._proc:
                     err = proc.stderr.read().decode(errors="replace").strip()
@@ -733,47 +881,70 @@ class MicRecorder:
                         self.console.print(f"\n  [red]audio capture died: {err}[/red]")
                 break
             with self._input_lock:
-                if proc is self._proc and self.listening.is_set() and epoch == self.input_epoch:
+                if (
+                    proc is self._proc
+                    and self.listening.is_set()
+                    and epoch == self.input_epoch
+                ):
                     if len(raw) != self.chunk_bytes:
                         self.last_error = "Microphone returned partial PCM frame"
                         self.alive = False
                         self._invalidate_input_locked()
                         break
-                    self._sequence+=1
-                    try: self.audio_q.put_nowait(AudioChunk(raw, epoch, time.monotonic(),self._sequence,self.input_invalidated))
+                    self._sequence += 1
+                    try:
+                        self.audio_q.put_nowait(
+                            AudioChunk(
+                                raw,
+                                epoch,
+                                time.monotonic(),
+                                self._sequence,
+                                self.input_invalidated,
+                            )
+                        )
                     except queue.Full:
-                        self.last_error = "Microphone input overflow; utterance invalidated"
+                        self.last_error = (
+                            "Microphone input overflow; utterance invalidated"
+                        )
                         self.alive = False
                         self._invalidate_input_locked()
                         break
         if proc is self._proc and self.alive:
             self.last_error = self.last_error or "Microphone capture ended"
             self.alive = False
-            with self._input_lock:self._invalidate_input_locked()
+            with self._input_lock:
+                self._invalidate_input_locked()
 
     def _invalidate_input_locked(self):
         self.input_invalidated.set()
-        self.input_invalidated=threading.Event()
-        self.input_epoch+=1
-        self._sequence=0
+        self.input_invalidated = threading.Event()
+        self.input_epoch += 1
+        self._sequence = 0
         self.flush()
 
-    def suppress(self,reason):
+    def suppress(self, reason):
         """Processing gate leaves the user's listening/mute preference intact."""
         with self._input_lock:
-            if reason!=self.suppressed_reason:
-                self.suppressed_reason=reason
+            if reason != self.suppressed_reason:
+                self.suppressed_reason = reason
                 self._invalidate_input_locked()
 
-    def fail_input(self,reason):
+    def fail_input(self, reason):
         with self._input_lock:
-            self.last_error=reason;self.alive=False
+            self.last_error = reason
+            self.alive = False
             self._invalidate_input_locked()
 
     def input_state(self):
-        return {'alive':self.alive,'listening':self.listening.is_set(),
-                'input_epoch':self.input_epoch,'suppressed_reason':self.suppressed_reason,
-                'error':self.last_error,'queued_chunks':self.audio_q.qsize(),'queue_capacity':self.audio_q.maxsize}
+        return {
+            "alive": self.alive,
+            "listening": self.listening.is_set(),
+            "input_epoch": self.input_epoch,
+            "suppressed_reason": self.suppressed_reason,
+            "error": self.last_error,
+            "queued_chunks": self.audio_q.qsize(),
+            "queue_capacity": self.audio_q.maxsize,
+        }
 
     def flush(self):
         while not self.audio_q.empty():
@@ -1049,6 +1220,7 @@ def vad_loop(
 
 class TextChunker:
     """Chinese punctuation and bounded characters; no English word-count gate."""
+
     def __init__(self, first_chars=8, max_chars=40):
         self.first_chars, self.max_chars = first_chars, max_chars
         self.buffer = ""
@@ -1060,9 +1232,11 @@ class TextChunker:
             self.buffer += char
             limit = self.max_chars if self.started else self.first_chars
             if char in "。！？!?；;\n" or len(self.buffer) >= limit:
-                chunk = self.buffer.strip(); self.buffer = ""
+                chunk = self.buffer.strip()
+                self.buffer = ""
                 if chunk and any(c.isalnum() for c in chunk):
-                    chunks.append(chunk); self.started = True
+                    chunks.append(chunk)
+                    self.started = True
         return chunks
 
     def finish(self):
@@ -1071,8 +1245,25 @@ class TextChunker:
 
 
 class SpeechOutput:
-    """One bounded synthesis worker; file and device receipts are distinct."""
-    def __init__(self, tts, audio_config, turn_id, output_sink=None, *, cancel_event=None, defer_commit=False, on_output_start=None, trace=None):
+    """One turn's bounded synthesis worker, with explicit output ownership.
+
+    中文导读：队列最多容纳两段文字，满时向生成端施加背压。文件先写
+    .partial，由 TurnController 在取消检查与提交锁内发布；已提交文件
+    与尚未交付的 PCM 分开处理，避免取消后留下可访问的半份回复。
+    """
+
+    def __init__(
+        self,
+        tts,
+        audio_config,
+        turn_id,
+        output_sink=None,
+        *,
+        cancel_event=None,
+        defer_commit=False,
+        on_output_start=None,
+        trace=None,
+    ):
         self.tts, self.config, self.turn_id = tts, audio_config, turn_id
         self.output_sink = output_sink or (lambda: audio_config.output_device)
         self.queue = queue.Queue(maxsize=2)
@@ -1080,7 +1271,9 @@ class SpeechOutput:
         self.bytes_written = 0
         self.chunks = []
         self.receipt = None
-        self.cancel_event = cancel_event if cancel_event is not None else threading.Event()
+        self.cancel_event = (
+            cancel_event if cancel_event is not None else threading.Event()
+        )
         self.defer_commit = defer_commit
         self.on_output_start = on_output_start
         self.trace = trace
@@ -1089,20 +1282,28 @@ class SpeechOutput:
         self._path = None
         self._abort = threading.Event()
         self._playback = Playback(self._abort)
-        self._thread = threading.Thread(target=self._run, name="speech-output", daemon=True)
+        self._thread = threading.Thread(
+            target=self._run, name="speech-output", daemon=True
+        )
         self._thread.start()
 
     def submit(self, text):
         while self._thread.is_alive():
             self._check()
-            if self.error: raise RuntimeError(self.error)
-            try: self.queue.put(text, timeout=0.1); return
-            except queue.Full: continue
+            if self.error:
+                raise RuntimeError(self.error)
+            try:
+                self.queue.put(text, timeout=0.1)
+                return
+            except queue.Full:
+                continue
         raise RuntimeError(self.error or "Speech worker stopped")
 
     def _check(self):
         from app.request_io import TurnCancelled
-        if self._abort.is_set() or self.cancel_event.is_set(): raise TurnCancelled('Speech output cancelled')
+
+        if self._abort.is_set() or self.cancel_event.is_set():
+            raise TurnCancelled("Speech output cancelled")
 
     def cancel(self):
         self._abort.set()
@@ -1115,26 +1316,44 @@ class SpeechOutput:
     def publish(self):
         """Caller serializes this commit with turn cancellation."""
         self._check()
-        if self._thread.is_alive(): raise RuntimeError('Speech output is still running')
-        if self.error: raise RuntimeError(self.error)
+        if self._thread.is_alive():
+            raise RuntimeError("Speech output is still running")
+        if self.error:
+            raise RuntimeError(self.error)
         if self._temporary:
             path = self._path
-            retained = sorted((p for p in path.parent.glob('reply-*.wav') if p != path and re.fullmatch(r'reply-[0-9a-f]{32}\.wav', p.name)), key=lambda p:(p.stat().st_mtime_ns,p.name), reverse=True)
-            for old in retained[self.config.retained_files - 1:]: old.unlink()
+            retained = sorted(
+                (
+                    p
+                    for p in path.parent.glob("reply-*.wav")
+                    if p != path and re.fullmatch(r"reply-[0-9a-f]{32}\.wav", p.name)
+                ),
+                key=lambda p: (p.stat().st_mtime_ns, p.name),
+                reverse=True,
+            )
+            for old in retained[self.config.retained_files - 1 :]:
+                old.unlink()
             self._begin_output()
             self._temporary.replace(path)
             self._temporary = None
-            self.receipt = {'kind':'file_written', 'path':str(path), 'bytes':self.bytes_written}
+            self.receipt = {
+                "kind": "file_written",
+                "path": str(path),
+                "bytes": self.bytes_written,
+            }
         return self.receipt
 
     def _begin_output(self):
         self._check()
         if not self._output_started:
-            if self.on_output_start:self.on_output_start()
-            self._output_started=True
+            if self.on_output_start:
+                self.on_output_start()
+            self._output_started = True
 
     def _run(self):
-        writer = None; temporary = None; path = None
+        writer = None
+        temporary = None
+        path = None
         try:
             if self.config.output_mode == "file":
                 folder = Path(self.config.output_directory).expanduser()
@@ -1142,35 +1361,63 @@ class SpeechOutput:
                 path = folder / f"reply-{self.turn_id}.wav"
                 temporary = path.with_suffix(".partial")
                 writer = wave.open(str(temporary), "wb")
-                writer.setnchannels(1); writer.setsampwidth(2); writer.setframerate(SAMPLE_RATE)
+                writer.setnchannels(1)
+                writer.setsampwidth(2)
+                writer.setframerate(SAMPLE_RATE)
             while True:
                 self._check()
-                try: text = self.queue.get(timeout=0.1)
-                except queue.Empty: continue
-                if text is None: break
+                try:
+                    text = self.queue.get(timeout=0.1)
+                except queue.Empty:
+                    continue
+                if text is None:
+                    break
                 self._check()
-                with self.trace.span('tts') if self.trace else nullcontext():
+                with self.trace.span("tts") if self.trace else nullcontext():
                     result = self.tts.synthesize(text, cancel_event=self._abort)
                 self._check()
                 audio = result.get("audio")
-                if audio is None: raise RuntimeError(result.get("error", "TTS returned no audio"))
-                if audio.dtype != np.int16 or audio.ndim != 1 or result["sample_rate"] != SAMPLE_RATE:
+                if audio is None:
+                    raise RuntimeError(result.get("error", "TTS returned no audio"))
+                if (
+                    audio.dtype != np.int16
+                    or audio.ndim != 1
+                    or result["sample_rate"] != SAMPLE_RATE
+                ):
                     raise ValueError("Unexpected synthesized PCM format")
                 raw = audio.tobytes()
-                if self.bytes_written + len(raw) > self.config.max_output_seconds * 32000:
+                if (
+                    self.bytes_written + len(raw)
+                    > self.config.max_output_seconds * 32000
+                ):
                     raise ValueError("Turn audio exceeds duration budget")
                 if writer:
                     writer.writeframesraw(raw)
                     receipt = {"kind": "file_chunk_written", "bytes": len(raw)}
                 else:
-                    receipt = play_audio(audio, SAMPLE_RATE, self.output_sink(), self._playback, on_start=self._begin_output)
+                    receipt = play_audio(
+                        audio,
+                        SAMPLE_RATE,
+                        self.output_sink(),
+                        self._playback,
+                        on_start=self._begin_output,
+                    )
                 self.bytes_written += len(raw)
-                self.chunks.append({"text": text, "bytes": len(raw), "elapsed_seconds": result.get("elapsed_seconds"),
-                                    "first_pcm_seconds": result.get("first_pcm_seconds"), "receipt": receipt})
+                self.chunks.append(
+                    {
+                        "text": text,
+                        "bytes": len(raw),
+                        "elapsed_seconds": result.get("elapsed_seconds"),
+                        "first_pcm_seconds": result.get("first_pcm_seconds"),
+                        "receipt": receipt,
+                    }
+                )
             self._check()
-            if not self.bytes_written: raise RuntimeError("No speech output produced")
+            if not self.bytes_written:
+                raise RuntimeError("No speech output produced")
             if writer:
-                writer.close(); writer = None
+                writer.close()
+                writer = None
                 self._temporary, self._path = temporary, path
                 temporary = None  # Publication belongs to the turn's commit.
             else:
@@ -1178,17 +1425,24 @@ class SpeechOutput:
         except Exception as exc:
             self.error = str(exc)
         finally:
-            if writer: writer.close()
-            if temporary and temporary.exists(): temporary.unlink()
+            if writer:
+                writer.close()
+            if temporary and temporary.exists():
+                temporary.unlink()
 
     def close(self, success=True):
-        if not success: self.cancel()
-        elif self._thread.is_alive(): self.submit(None)
+        if not success:
+            self.cancel()
+        elif self._thread.is_alive():
+            self.submit(None)
         self._thread.join(timeout=self.tts.timeout + 5)
-        if self._thread.is_alive(): raise RuntimeError("Speech worker has not released")
+        if self._thread.is_alive():
+            raise RuntimeError("Speech worker has not released")
         if not success and self._temporary:
             self._temporary.unlink(missing_ok=True)
             self._temporary = None
-        if self.error and success: raise RuntimeError(self.error)
-        if success and not self.defer_commit: return self.publish()
+        if self.error and success:
+            raise RuntimeError(self.error)
+        if success and not self.defer_commit:
+            return self.publish()
         return self.receipt

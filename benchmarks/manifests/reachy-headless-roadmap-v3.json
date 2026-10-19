@@ -649,10 +649,10 @@
     "evidence": "benchmarks/results/reachy-r4-cutover.json"
   },
   "handoff_state": {
-    "status": "WAITING_FOR_USER_VISION_STEP",
+    "status": "WAITING_FOR_USER_STARTUP_STEP",
     "delivered_at": "2026-10-16T12:17:56.313300+00:00",
-    "first_area": "vision",
-    "instruction": "User runs the first inspection/reproduction commands and provides output/interpretation. Assistant explains and reviews, does not automatically optimize.",
+    "first_area": "system_startup_then_vision",
+    "instruction": "User first stops and starts the four managed services, verifies readiness, and learns the entrypoints/dataflow. Then reproduce the vision baseline and lead optimization; assistant explains and reviews.",
     "goal_complete": false
   }
 }

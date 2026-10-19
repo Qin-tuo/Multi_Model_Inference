@@ -1,9 +1,0 @@
-{
-  "created_at": "2026-10-13T03:13:35.163171+00:00",
-  "status": "FAIL",
-  "scope": "First native recovery probe stopped before creating any test facts",
-  "phase": "fresh SDK history initialization",
-  "observed": "sqlite3.OperationalError: unable to open database file",
-  "cause": "Evaluation factory constructed the SDK before creating its fresh data directory; the imported capacity dataset had masked this setup omission.",
-  "correction": "Create the isolated data directory with0700 mode before SDK construction; rerun full native crash/recovery probe."
-}
