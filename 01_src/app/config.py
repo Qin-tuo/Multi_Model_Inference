@@ -99,6 +99,8 @@ class VADConfig:
 
 @dataclass
 class VisionConfig:
+    backend: str = "v4l2"
+    serial: Optional[str] = None
     camera_device: Union[int, str] = 0
     width: int = 640
     height: int = 480
@@ -389,6 +391,13 @@ class Config:
             <= 0
         ):
             raise ValueError("Camera geometry and rates must be positive")
+        if self.vision.backend not in {"v4l2", "realsense"}:
+            raise ValueError("Unknown camera backend")
+        if self.vision.backend == "realsense" and (
+            self.vision.width,
+            self.vision.height,
+        ) != (640, 480):
+            raise ValueError("The verified RealSense profile requires 640x480")
         if self.vision.frames != 1:
             raise ValueError("The initial 4B profile supports one image per request")
         from app.audio import local_speech_url

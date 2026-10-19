@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T10:04:47.628005+00:00",
+  "updated_at": "2026-10-19T10:33:23.589105+00:00",
   "status": "IN_PROGRESS_NOT_B1_ACCEPTED",
   "scope": "Initial source/interface review and high-risk TensorRT conversion gates; production remains the B0 application",
   "pose": {
@@ -19,7 +19,52 @@
       "Production integration and resource coexistence"
     ]
   },
-  "depth": {
+  "software_checks": {
+    "passed": 216,
+    "failures": 0,
+    "evidence": "05_runtime/validation/b1-sdk-rgbd-app-20261019/tests.xml",
+    "sha256": "30d1399f2723c8f97ea2b322fc68ed4ead2f2a5af62038a5d7a81a4377e983a1",
+    "warning": "Existing Starlette TestClient/httpx deprecation warning; no dependency change performed"
+  },
+  "preservation": {
+    "rollback_tag": "before-vision-b1-20261019",
+    "b0_manifests_unchanged": true,
+    "model_services_restored_after_completed_workflows": true,
+    "new_models_are_default": false
+  },
+  "raw_directory": "05_runtime/validation/b1-feasibility-20261019",
+  "other_modules": "Pending; see benchmarks/manifests/vision-b1-v1.json",
+  "camera": {
+    "status": "RAW_STEREO_AND_APPLICATION_RGBD_SHORT_WINDOWS_VERIFIED",
+    "raw_report": "05_runtime/validation/b1-camera-20261019/profiles.json",
+    "device": "RealSense D435I",
+    "usb_type": "3.2",
+    "sdk_version": "2.58.4",
+    "requested": {
+      "width": 640,
+      "height": 480,
+      "fps": 15
+    },
+    "all_requested_profiles_advertised": true,
+    "stereo_baseline_m": 0.04983324930071831,
+    "coordinate_requirement": "IR and RGB intrinsics/extrinsics differ; map depth into RGB before sampling an RGB detection ROI",
+    "remaining": [
+      "Full application/perception integration acceptance",
+      "Target distance and task-gate validation",
+      "Extended stability and recovery"
+    ],
+    "sdk_installation": "Pinned wheel added to the project-local runtime and isolated tools environment; no system SDK/BSP upgrades",
+    "raw_report_sha256": "3a43b27b81a3a9c20517c0c18c3d890ab5176d423e7eda95ef261952fb38160c",
+    "python_binding": {
+      "distribution": "pyrealsense2",
+      "version": "2.58.4.10922",
+      "wheel": "pyrealsense2-2.58.4.10922-cp312-cp312-manylinux2014_aarch64.whl",
+      "wheel_sha256": "04a61fad8d4c69bcd6acb3ddcee65630e6ce31f94f5bd309a72c5831b9fa83cd"
+    },
+    "stream_report": "05_runtime/validation/b1-stereo-capture-20261019/report.json",
+    "application_report": "05_runtime/validation/b1-sdk-rgbd-app-20261019/report.json"
+  },
+  "neural_depth_experiment": {
     "candidate": "NVIDIA C-Fast-FoundationStereo bp2",
     "status": "TRT_ENGINE_AND_LIMITED_ONNX_PARITY_VERIFIED_INTEGRATION_PENDING",
     "failed_workspace_mib": [
@@ -55,49 +100,56 @@
       1.785893584950827,
       1.6370040620677173
     ],
-    "timing_scope": "Two synchronous calls without a controlled benchmark window; not B1 latency/FPS or coexistence evidence"
+    "timing_scope": "Two synchronous calls without a controlled benchmark window; not B1 latency/FPS or coexistence evidence",
+    "phase": "DEFERRED_BY_USER_NOT_B1_ACCEPTANCE",
+    "sensor_reference_status": "SENSOR_REFERENCE_FAILED",
+    "sensor_reference_report": "05_runtime/validation/b1-stereo-domain-20261019/report.json",
+    "source_archive": "05_runtime/validation/b1-stereo-domain-20261019/source",
+    "decision": "User selected native D435i depth. Do not spend B1 work on neural depth inference or improving this comparison."
   },
-  "software_checks": {
-    "passed": 208,
-    "failures": 0,
-    "evidence": "05_runtime/validation/b1-feasibility-20261019/tests-camera-geometry.xml",
-    "sha256": "deb839b07183f05b161581344e1540860cefc8df924c3618d725fd70e3a8a9bb",
-    "warning": "Existing Starlette TestClient/httpx deprecation warning; no dependency change performed"
-  },
-  "preservation": {
-    "rollback_tag": "before-vision-b1-20261019",
-    "b0_manifests_unchanged": true,
-    "model_services_restored_after_completed_workflows": true,
-    "new_models_are_default": false
-  },
-  "raw_directory": "05_runtime/validation/b1-feasibility-20261019",
-  "other_modules": "Pending; see benchmarks/manifests/vision-b1-v1.json",
-  "camera": {
-    "status": "ADVERTISED_PROFILES_AND_CALIBRATION_VERIFIED_STREAMING_PENDING",
-    "raw_report": "05_runtime/validation/b1-camera-20261019/profiles.json",
-    "device": "RealSense D435I",
-    "usb_type": "3.2",
-    "sdk_version": "2.58.4",
-    "requested": {
-      "width": 640,
-      "height": 480,
-      "fps": 15
-    },
-    "all_requested_profiles_advertised": true,
-    "stereo_baseline_m": 0.04983324930071831,
-    "coordinate_requirement": "IR and RGB intrinsics/extrinsics differ; map depth into RGB before sampling an RGB detection ROI",
-    "remaining": [
-      "Simultaneous streams and timestamp/frame correspondence",
-      "Monochrome IR neural-depth quality",
-      "RGB registration and live metric-distance validation"
+  "depth": {
+    "provider": "D435i native depth / RealSense SDK 2.58.4",
+    "neural_inference": false,
+    "alignment": "rs.align(stream.color)",
+    "status": "APP_RGBD_CAPTURE_PASS_LIMITED_WINDOW",
+    "unique_application_frames": 30,
+    "image_hw": [
+      480,
+      640
     ],
-    "sdk_installation": "Pinned tools-only venv; existing runtime and system SDK untouched",
-    "raw_report_sha256": "3a43b27b81a3a9c20517c0c18c3d890ab5176d423e7eda95ef261952fb38160c",
-    "python_binding": {
-      "distribution": "pyrealsense2",
-      "version": "2.58.4.10922",
-      "wheel": "pyrealsense2-2.58.4.10922-cp312-cp312-manylinux2014_aarch64.whl",
-      "wheel_sha256": "04a61fad8d4c69bcd6acb3ddcee65630e6ce31f94f5bd309a72c5831b9fa83cd"
-    }
+    "sensor_fps": 15,
+    "application_capture_target_fps": 10,
+    "frame_semantics": "SDK sensor timestamps and group IDs plus host receive monotonic; software time matching is not hardware exposure synchronization",
+    "depth_unit": "meter",
+    "invalid_samples": "NaN plus boolean validity mask; nonzero SDK samples are not a ground-truth accuracy guarantee",
+    "bounded_history": "Only newest raw RGB and aligned depth; historical ring retains JPEG only",
+    "rejected_groups": 2,
+    "closed_worker": true,
+    "held_frame_invalidated": true,
+    "raw_report": "05_runtime/validation/b1-sdk-rgbd-app-20261019/report.json",
+    "raw_report_sha256": "291a1be82306dad86e7df999f49c4d3ea473aff93a8fd3296055c7a9adf40fe9",
+    "remaining": [
+      "Target-region distance calculation and conditional task gates",
+      "Full multi-model application acceptance and recovery cases",
+      "B1 resource/coexistence measurements"
+    ]
+  },
+  "face": {
+    "candidate": "YuNet 2023mar",
+    "status": "TRT_ENGINE_RAW_AND_OPENCV_DECODE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+    "engine_sha256": "38bdd5f1865f2ac283d5459fd718b8914a04123b5d53632a86968ad5097f7518",
+    "engine_bytes": 686020,
+    "fixed_input_cases": 3,
+    "max_raw_tensor_error": 1.9073486328125e-06,
+    "max_decoded_coordinate_error_px": 3.0517578125e-05,
+    "positive_cases_with_faces": 2,
+    "negative_cases_with_zero_faces": 1,
+    "raw_report": "05_runtime/validation/b1-face-20261019/parity/face/report.json",
+    "remaining": [
+      "Multi-target/live scene coverage",
+      "Shared perception integration and downstream face tasks",
+      "B1 performance and coexistence"
+    ]
   }
 }

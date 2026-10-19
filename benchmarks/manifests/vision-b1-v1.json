@@ -22,13 +22,14 @@
       "DeepStream",
       "quantization and concurrency tuning"
     ],
-    "platform_changes": "No BSP/CUDA/TensorRT upgrades"
+    "platform_changes": "No BSP/CUDA/TensorRT upgrades",
+    "sensor_depth": "D435i native depth and RealSense SDK alignment; TensorRT requirement applies to deployed visual neural networks"
   },
   "modules": [
     {
       "id": "depth",
-      "capability": "Calibrated stereo disparity and metric depth with validity",
-      "status": "TRT_ENGINE_AND_LIMITED_ONNX_PARITY_VERIFIED_INTEGRATION_PENDING"
+      "capability": "Native D435i metric depth registered to RGB, with invalid masks, timestamps and distance-gate validation",
+      "status": "NATIVE_SDK_APP_CAPTURE_VERIFIED_DISTANCE_GATES_PENDING"
     },
     {
       "id": "detection_segmentation",
@@ -43,7 +44,7 @@
     {
       "id": "face",
       "capability": "Face boxes, confidence and five landmarks",
-      "status": "PENDING"
+      "status": "TRT_ENGINE_RAW_AND_OPENCV_DECODE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "head_pose",
@@ -93,7 +94,7 @@
     },
     {
       "id": "B1.1",
-      "name": "Stereo and whole-body pose conversion/reference feasibility",
+      "name": "Native RGBD capture/alignment and whole-body pose conversion/reference feasibility",
       "status": "IN_PROGRESS",
       "evidence": [
         "03_models/candidates/vision-b1.json",
@@ -155,9 +156,17 @@
     "Robot actuation and navigation",
     "Long-term memory",
     "Full industrial qualification",
-    "Autonomous performance tuning"
+    "Autonomous performance tuning",
+    "Neural stereo depth; native D435i depth is required instead"
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T10:03:47.447220+00:00"
+  "updated_at": "2026-10-19T10:24:37.041786+00:00",
+  "scope_updates": [
+    {
+      "date": "2026-10-19",
+      "source": "Explicit user instruction: use native RealSense depth, no neural depth inference; finish remaining modules",
+      "effect": "D435i SDK depth/alignment replaces neural-stereo depth in required B1 acceptance. Neural stereo artifacts retained only as deferred experimental evidence."
+    }
+  ]
 }

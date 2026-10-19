@@ -4,6 +4,8 @@
 
 当前软件框架与 B0 基线已交付，正在推进 **B1：公开视觉模型的 TensorRT 部署与链路复现**。默认复用现有应用、采用进程内 TensorRT；4B 与语音后端保持现状。新模型尚未完成接入，当前运行状态以验证记录为准。
 
+B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT 用于视觉神经网络。神经双目深度按用户决定后置，不作为本阶段验收项。
+
 [B1 当前目标与实施边界](docs/implementation-plan.md#b1-当前阶段目标) · [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)。交付 B1 后由用户亲自使用专业工具分析和优化；实物声学、机身控制、导航及长期记忆继续后置。
 
 [项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)

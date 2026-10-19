@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Camera — USB webcam with shared latest frame and VLM ring buffer.
+"""Camera — shared latest RGB/RGBD frame and a bounded JPEG history.
 
 The background thread owns hardware reads and publishes frames into a
 timestamped ring buffer. Consumers such as the web UI, face tracker, and VLM
@@ -45,9 +45,12 @@ class FrameSnapshot:
     jpeg: bytes
     time_kind: str = "host_receive_monotonic"
     invalidated: threading.Event | None = None
+    depth_m: np.ndarray | None = None
+    depth_valid: np.ndarray | None = None
+    sensor: dict | None = None
 
     def metadata(self):
-        return {
+        result = {
             "frame_id": self.frame_id,
             "source_epoch": self.source_epoch,
             "received_monotonic": self.received_monotonic,
@@ -57,11 +60,18 @@ class FrameSnapshot:
             "stride": self.bgr.strides[0],
             "encoding": "bgr8",
         }
+        if self.sensor is not None:
+            result["sensor"] = self.sensor
+        return result
 
 
 class Camera:
-    """V4L2 USB webcam with a background capture thread and timestamped
-    ring buffer sized to cover the maximum speech duration plus lookback."""
+    """One owner reads V4L2 RGB or native RealSense RGBD. Consumers share frames.
+
+    Raw depth stays attached to the latest RGB frame; only JPEG is retained
+    for the speech lookback window. The two backends share invalidation and
+    recovery behavior, with no fallback from a failed RGBD source to RGB-only.
+    """
 
     _backend_config_lock = threading.Lock()
     _configured_select_timeout = None
@@ -77,10 +87,19 @@ class Camera:
         buffer_bytes_limit: int = 16 * 1024 * 1024,
         reconnect_seconds: float = 1.0,
         v4l_select_timeout: int = 2,
+        backend: str = "v4l2",
+        serial: str | None = None,
     ):
         if min(width, height, capture_fps, stale_after, buffer_bytes_limit) <= 0:
             raise ValueError("Camera sizes, rates and limits must be positive")
         self.stale_after = stale_after
+        if backend not in {"v4l2", "realsense"}:
+            raise ValueError("Unknown camera backend")
+        self.backend, self.serial = backend, serial
+        self._source = None
+        self._latest_depth = self._latest_depth_valid = self._latest_sensor = None
+        self._last_rgbd_counters = None
+        self._rgbd_rejected = 0
         self.buffer_bytes_limit = buffer_bytes_limit
         if (
             not 0.1 <= reconnect_seconds <= 10
@@ -123,6 +142,21 @@ class Camera:
         self._actual_fps: float = 0.0
 
     def _open(self) -> bool:
+        if self.backend == "realsense":
+            if self._source is None:
+                from app.realsense_source import RealSenseSource
+
+                self._source = RealSenseSource(
+                    self.width, self.height, serial=self.serial
+                )
+                try:
+                    self._source.open()
+                    self._last_rgbd_counters = None
+                except BaseException:
+                    self._source.close()
+                    self._source = None
+                    raise
+            return True
         if self._cap is not None and self._cap.isOpened():
             return True
 
@@ -140,6 +174,59 @@ class Camera:
         self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self._sync_actual_frame_geometry()
         return True
+
+    def _read_frame(self):
+        if self.backend == "v4l2":
+            ok, frame = self._cap.read()
+            return ok, frame, None
+        deadline = time.monotonic() + 4
+        while not self._stop.is_set() and time.monotonic() < deadline:
+            group = self._source.read(timeout_ms=1000)
+            matched = group.correspondence["rgb_depth_time_matched"]
+            if not matched or "aligned_depth" not in group.arrays:
+                self._rgbd_rejected += 1
+                continue
+            counters = tuple(
+                group.streams[name]["frame_number"] for name in ("color", "sdk_depth")
+            )
+            if self._last_rgbd_counters and any(
+                a <= b for a, b in zip(counters, self._last_rgbd_counters)
+            ):
+                self._rgbd_rejected += 1
+                continue
+            color, raw_depth = group.arrays["color"], group.arrays["aligned_depth"]
+            if raw_depth.shape != color.shape[:2] or raw_depth.dtype != np.uint16:
+                raise ValueError("Aligned depth geometry or dtype mismatch")
+            scale = self._source.calibration["depth_units_m"]
+            if not np.isfinite(scale) or scale <= 0:
+                raise ValueError("Invalid SDK depth units")
+            depth = raw_depth.astype(np.float32) * scale
+            valid = (raw_depth > 0) & np.isfinite(depth)
+            depth[~valid] = np.nan
+            depth.flags.writeable = valid.flags.writeable = False
+            self._last_rgbd_counters = counters
+            metadata = group.metadata()
+            metadata.update(
+                depth_provider="D435i native depth / RealSense SDK",
+                alignment="rs.align(stream.color)",
+                depth_unit="meter",
+                depth_valid_fraction=float(valid.mean()),
+                calibration=self._source.calibration,
+            )
+            return (
+                True,
+                cv2.cvtColor(color, cv2.COLOR_RGB2BGR),
+                (depth, valid, metadata),
+            )
+        return False, None, None
+
+    def _release_capture(self):
+        if self._source is not None:
+            self._source.close()
+            self._source = None
+        if self._cap is not None:
+            self._cap.release()
+            self._cap = None
 
     def _sync_actual_frame_geometry(self) -> None:
         """Record the mode accepted by the camera and calibrate for that mode."""
@@ -160,6 +247,7 @@ class Camera:
             self._frame_id = 0
             self._ring.clear()
             self._latest = self._latest_jpeg = None
+            self._latest_depth = self._latest_depth_valid = self._latest_sensor = None
             self._actual_fps = 0
             self._state = state
             if error is not None:
@@ -170,7 +258,7 @@ class Camera:
         with self._lifecycle_lock:
             if self._thread and self._thread.is_alive():
                 return self.health_check()
-            if self._cap is not None:
+            if self._cap is not None or self._source is not None:
                 raise RuntimeError(
                     "Previous camera release must complete before restart"
                 )
@@ -220,12 +308,14 @@ class Camera:
                     t_start = time.monotonic()
                     while not self._stop.is_set():
                         tick = time.monotonic()
-                        ret, frame = self._cap.read()
+                        ret, frame, rgbd = self._read_frame()
                         if self._stop.is_set():
                             break
                         if not ret:
-                            raise RuntimeError("V4L2 camera read failed")
-                        received = time.monotonic()
+                            raise RuntimeError("Camera produced no matched fresh frame")
+                        received = (
+                            rgbd[2]["received_monotonic"] if rgbd else time.monotonic()
+                        )
                         jpg = self._encode_frame_bytes(frame)
                         if jpg is None or len(jpg) > self.buffer_bytes_limit:
                             raise RuntimeError(
@@ -242,6 +332,12 @@ class Camera:
                             self._frame_id += 1
                             self._latest = (received, frame)
                             self._latest_jpeg = jpg
+                            if rgbd:
+                                (
+                                    self._latest_depth,
+                                    self._latest_depth_valid,
+                                    self._latest_sensor,
+                                ) = rgbd
                             self._ring.append((received, jpg))
                             while (
                                 sum(len(data) for _, data in self._ring)
@@ -260,9 +356,7 @@ class Camera:
                     self._invalidate("retrying", str(exc))
                 finally:
                     # Only this owner releases the handle, after read returns.
-                    if self._cap is not None:
-                        self._cap.release()
-                        self._cap = None
+                    self._release_capture()
                 if self._stop.wait(self.reconnect_seconds):
                     break
         except Exception as exc:
@@ -285,6 +379,13 @@ class Camera:
                 frame.copy() if copy else frame,
                 self._latest_jpeg,
                 invalidated=self._source_invalidated,
+                depth_m=self._latest_depth.copy()
+                if copy and self._latest_depth is not None
+                else self._latest_depth,
+                depth_valid=self._latest_depth_valid.copy()
+                if copy and self._latest_depth_valid is not None
+                else self._latest_depth_valid,
+                sensor=self._latest_sensor,
             )
 
     def _encode_frame_bytes(self, frame: np.ndarray) -> Optional[bytes]:
@@ -398,6 +499,12 @@ class Camera:
                 "buffer_count": len(self._ring),
                 "buffer_bytes": sum(len(data) for _, data in self._ring),
                 "capture_worker_alive": bool(self._thread and self._thread.is_alive()),
+                "backend": self.backend,
+                "rgbd_rejected_groups": self._rgbd_rejected,
+                "depth_ready": ready and self._latest_depth is not None,
+                "depth_valid_fraction": self._latest_sensor.get("depth_valid_fraction")
+                if self._latest_sensor
+                else None,
             }
 
     def close(self):
@@ -412,8 +519,6 @@ class Camera:
                         "Camera read has not released; close is unconfirmed"
                     )
                 self._thread = None
-            if self._cap is not None:
-                self._cap.release()
-                self._cap = None
+            self._release_capture()
             self._alive = False
             self._invalidate("stopped")

@@ -79,7 +79,8 @@
         }
       },
       "contract_discrepancy": "Model card says no preprocessing and uint16 output; pinned exporter and actual graph require external ImageNet normalization and produce float32 disparity. Execution follows graph/exporter evidence.",
-      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json",
+      "phase": "DEFERRED_EXPERIMENT"
     },
     "body_hand_pose": {
       "name": "RTMW3D-X 384 community ONNX conversion",
@@ -161,6 +162,178 @@
         "source": "Pinned MMPose projects/rtmpose3d/configs/rtmw3d-x_8xb32_cocktail14-384x288.py"
       },
       "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
+    },
+    "face": {
+      "name": "YuNet 2023mar",
+      "repository": "https://huggingface.co/opencv/face_detection_yunet",
+      "revision": "3cc26e7f1014a5ee5d74a42acee58bafc9d0a310",
+      "filename": "face_detection_yunet_2023mar.onnx",
+      "path": "05_runtime/models/b1/face/face_detection_yunet_2023mar.onnx",
+      "bytes": 232589,
+      "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+      "model_card_sha256": "a45578c40b04f9aaa1e154bca1d0179ffad6dab840458ac8f7cb0a9362413b72",
+      "license": "MIT (model); Apache-2.0 (OpenCV decoder reference)",
+      "license_url": "https://huggingface.co/opencv/face_detection_yunet/blob/3cc26e7f1014a5ee5d74a42acee58bafc9d0a310/LICENSE",
+      "reference": "Pinned OpenCV model ONNX; OpenCV 4.11.0 FaceDetectorYN for decoded boxes and five landmarks",
+      "input_contract_status": "RAW_ONNX_TRT_AND_OFFICIAL_DECODE_PARITY_VERIFIED_LIMITED_FIXTURES",
+      "observed_onnx_contract": {
+        "inputs": [
+          {
+            "name": "input",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "cls_8",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              6400,
+              1
+            ]
+          },
+          {
+            "name": "cls_16",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1600,
+              1
+            ]
+          },
+          {
+            "name": "cls_32",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              400,
+              1
+            ]
+          },
+          {
+            "name": "obj_8",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              6400,
+              1
+            ]
+          },
+          {
+            "name": "obj_16",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1600,
+              1
+            ]
+          },
+          {
+            "name": "obj_32",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              400,
+              1
+            ]
+          },
+          {
+            "name": "bbox_8",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              6400,
+              4
+            ]
+          },
+          {
+            "name": "bbox_16",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1600,
+              4
+            ]
+          },
+          {
+            "name": "bbox_32",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              400,
+              4
+            ]
+          },
+          {
+            "name": "kps_8",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              6400,
+              10
+            ]
+          },
+          {
+            "name": "kps_16",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1600,
+              10
+            ]
+          },
+          {
+            "name": "kps_32",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              400,
+              10
+            ]
+          }
+        ],
+        "opsets": {
+          "": 11
+        },
+        "nodes": 106,
+        "producer": "pytorch",
+        "producer_version": "1.7"
+      },
+      "preprocessing": {
+        "color": "BGR",
+        "layout": "NCHW",
+        "dtype": "float32",
+        "pixel_range": [
+          0,
+          255
+        ],
+        "normalization": "none",
+        "resize": "fit within 640x640; preserve aspect ratio; pad bottom/right with zero"
+      },
+      "postprocess_source": {
+        "revision": "31b0eeea0b44b370fd0712312df4214d4ae1b158",
+        "files": {
+          "face_detect.cpp": {
+            "path": "05_runtime/frameworks/b1/opencv-31b0eeea/face_detect.cpp",
+            "url": "https://raw.githubusercontent.com/opencv/opencv/31b0eeea0b44b370fd0712312df4214d4ae1b158/modules/objdetect/src/face_detect.cpp",
+            "sha256": "03d1a0c8e9580b2eeb78e42b02aa15564e0e387281c73b93467740dce0ee685d"
+          },
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/opencv-31b0eeea/LICENSE",
+            "url": "https://raw.githubusercontent.com/opencv/opencv/31b0eeea0b44b370fd0712312df4214d4ae1b158/LICENSE",
+            "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+          }
+        }
+      },
+      "outputs_semantics": "box xywh and right eye, left eye, nose tip, right mouth corner, left mouth corner; score=sqrt(clamped cls * clamped obj)",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
     }
   },
   "source_decisions": [
@@ -174,5 +347,11 @@
       "revision": "23d71c92e33ad1f80dfc42bf29f5c6a914d38769",
       "decision": "LightStereo remains an alternative research candidate; README restricts commercial use. Probe the vendor-published stereo ONNX first."
     }
-  ]
+  ],
+  "sensor_depth": {
+    "provider": "D435i native depth via RealSense SDK",
+    "decision": "User selected native hardware depth on 2026-10-19; no neural stereo inference required for B1",
+    "alignment": "SDK rs.align(stream.color)",
+    "neural_depth_phase": "DEFERRED_EXPERIMENT"
+  }
 }

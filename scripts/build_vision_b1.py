@@ -173,8 +173,9 @@ def build(role, entry, output, timeout, workspace_mib=512):
 
 
 def main():
+    entries = json.loads(MANIFEST.read_text())["models"]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--role", choices=("depth", "body_hand_pose"))
+    parser.add_argument("--role", choices=tuple(entries))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--timeout", type=int, default=2400)
     parser.add_argument(
@@ -187,10 +188,18 @@ def main():
     profile = services.profile_path(cfg)
     if profile.exists():
         cfg = runtime.config(profile)
-    entries = json.loads(MANIFEST.read_text())["models"]
+    selected = (
+        [args.role]
+        if args.role
+        else [
+            role
+            for role, item in entries.items()
+            if item.get("phase") != "DEFERRED_EXPERIMENT"
+        ]
+    )
     failures = []
     with exclusive_build(cfg, output):
-        for role in [args.role] if args.role else ("body_hand_pose", "depth"):
+        for role in selected:
             try:
                 result = build(
                     role, entries[role], output, args.timeout, args.workspace_mib

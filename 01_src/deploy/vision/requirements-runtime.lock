@@ -1,0 +1,2 @@
+# D435i native depth. Keep the host BSP and SDK version unchanged.
+pyrealsense2==2.58.4.10922

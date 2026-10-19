@@ -185,6 +185,8 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             buffer_bytes_limit=config.vision.buffer_bytes_limit,
             reconnect_seconds=config.vision.reconnect_seconds,
             v4l_select_timeout=config.vision.v4l_select_timeout,
+            backend=config.vision.backend,
+            serial=config.vision.serial,
         )
     )
     detector = FaceDetector() if cam and config.face.enabled else None

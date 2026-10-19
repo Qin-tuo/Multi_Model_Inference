@@ -96,12 +96,21 @@ def prepare(role, entry, check_only=False):
 
 
 def main():
+    entries = json.loads(MANIFEST.read_text())["models"]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--role", choices=("depth", "body_hand_pose"))
+    parser.add_argument("--role", choices=tuple(entries))
     parser.add_argument("--check-only", action="store_true")
     args = parser.parse_args()
-    entries = json.loads(MANIFEST.read_text())["models"]
-    for role in [args.role] if args.role else entries:
+    selected = (
+        [args.role]
+        if args.role
+        else [
+            role
+            for role, item in entries.items()
+            if item.get("phase") != "DEFERRED_EXPERIMENT"
+        ]
+    )
+    for role in selected:
         print(json.dumps(prepare(role, entries[role], args.check_only)), flush=True)
 
 
