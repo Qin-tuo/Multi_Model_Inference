@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T15:30:24.680167+00:00",
+  "updated_at": "2026-10-19T15:39:45.581851+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -116,5 +116,15 @@
     ],
     "resource_checks": "Every owned TensorRT engine/context/stream and host/device I/O allocation released; camera and perception threads joined; gallery closed",
     "scope": "Controlled SDK stream restart, explicit fault injection, synthetic-depth gate tests. Short repeated lifecycle check, not physical USB disconnect or long soak."
+  },
+  "module_baseline": {
+    "status": "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+    "summary": "benchmarks/results/b1-vision-modules-summary.json",
+    "protocol": "benchmarks/manifests/b1-vision-measurements-v1.json",
+    "modules": 10,
+    "paired_calls": 440,
+    "raw_directory": "05_runtime/validation/b1-modules-20261019",
+    "all_observer_pairs_match": true,
+    "pipeline_fps_measured": false
   }
 }

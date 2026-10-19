@@ -1,0 +1,3474 @@
+{
+  "created_at": "2026-10-19T15:36:37.735337+00:00",
+  "status": "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+  "raw_directory": "05_runtime/validation/b1-modules-20261019",
+  "protocol_sha256": "3a2d74e0d90382f37d23e19056d06b0bf0eed0fa3e2840deb816748d590214ac",
+  "scope": "One engine per process, fixed 640x480 public inputs, five warmups and twenty alternating plain/instrumented pairs per input; no pipeline FPS estimate",
+  "units": "milliseconds; percentiles use nearest-rank",
+  "stage_rules": "Host pre/native/post spans partition an instrumented adapter call. CUDA stream spans overlap host native time and include host-submit gaps; do not sum separate percentiles or add CUDA to host durations.",
+  "resource_rules": "1s host/process/tegrastats samples include harness validation. Short GPU calls may be missed by sampling; RSS high-water includes model loading, not just steady inference. CPU/GPU share board RAM.",
+  "modules": {
+    "detection_segmentation": {
+      "paired_count": 60,
+      "plain_adapter_ms": {
+        "count": 60,
+        "p50": 28.54721702169627,
+        "p95": 39.3499459605664,
+        "max": 61.75233202520758,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 60,
+          "p50": 28.812442906200886,
+          "p95": 42.36362501978874,
+          "max": 47.920340090058744,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 60,
+          "p50": 3.174707992002368,
+          "p95": 4.919667961075902,
+          "max": 7.98649899661541,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 60,
+          "p50": 19.703341997228563,
+          "p95": 23.792930995114148,
+          "max": 28.77602493390441,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 60,
+          "p50": 4.153848043642938,
+          "p95": 14.58197203464806,
+          "max": 16.882566967979074,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 60,
+          "p50": 1.494838041253388,
+          "p95": 1.9677520031109452,
+          "max": 5.254879011772573,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 60,
+          "p50": 1.2060279259458184,
+          "p95": 1.4685660135000944,
+          "max": 2.719203010201454,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 60,
+          "p50": 0.9768999880179763,
+          "p95": 1.3233120553195477,
+          "max": 1.5438959235325456,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 60,
+          "p50": 0.47996801137924194,
+          "p95": 0.8189759850502014,
+          "max": 4.427008152008057,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 60,
+          "p50": 14.924320220947266,
+          "p95": 15.286432266235352,
+          "max": 19.260480880737305,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 60,
+          "p50": 0.3059520125389099,
+          "p95": 0.3165760040283203,
+          "max": 0.31907200813293457,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -15.026308014057577,
+        "median": 0.5034419591538608,
+        "max": 6.82153005618602,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 88.04698602762073,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 27.737715980038047,
+            "p95": 49.67243503779173,
+            "max": 61.75233202520758,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 27.151389978826046,
+              "p95": 46.72602401115,
+              "max": 47.920340090058744,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 2.8950170380994678,
+              "p95": 7.445167982950807,
+              "max": 7.98649899661541,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 19.4404530338943,
+              "p95": 24.63337907101959,
+              "max": 28.77602493390441,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 4.153848043642938,
+              "p95": 15.371504006907344,
+              "max": 16.882566967979074,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 1.4767260290682316,
+              "p95": 1.6857900191098452,
+              "max": 3.3710990101099014,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 1.1953720822930336,
+              "p95": 1.3998589711263776,
+              "max": 1.568793086335063,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.9476830018684268,
+              "p95": 1.1148890480399132,
+              "max": 1.5438959235325456,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.4671359956264496,
+              "p95": 2.0304319858551025,
+              "max": 4.427008152008057,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 14.913087844848633,
+              "p95": 15.740639686584473,
+              "max": 19.260480880737305,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.30534398555755615,
+              "p95": 0.31811198592185974,
+              "max": 0.31907200813293457,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            2.5967020774260163,
+            1.3887230306863785,
+            -2.544124028645456,
+            -1.2408139882609248,
+            5.443303030915558,
+            -7.308810018002987,
+            -15.026308014057577,
+            6.82153005618602,
+            -9.810757939703763,
+            1.0451899142935872,
+            0.9783080313354731,
+            -0.870942953042686,
+            -3.0284939566627145,
+            -2.5107150431722403,
+            2.8988259145990014,
+            0.9111369727179408,
+            1.860419986769557,
+            0.5380359943956137,
+            -0.1817028969526291,
+            0.7262339349836111
+          ]
+        },
+        {
+          "input": "bus",
+          "first_call_ms": 36.31662006955594,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 30.549466027878225,
+            "p95": 34.81765394099057,
+            "max": 35.7324390206486,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 31.359320040792227,
+              "p95": 33.72967801988125,
+              "max": 38.007145980373025,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 2.9778360622003675,
+              "p95": 4.286044044420123,
+              "max": 5.644749966450036,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 19.535047933459282,
+              "p95": 21.25757490284741,
+              "max": 21.39428397640586,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 7.987108081579208,
+              "p95": 10.616259067319334,
+              "max": 10.96811203751713,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 1.4737820019945502,
+              "p95": 1.9562949892133474,
+              "max": 3.1167210545390844,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 1.1834349716082215,
+              "p95": 1.347025972791016,
+              "max": 2.719203010201454,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.9758759988471866,
+              "p95": 1.0153009789064527,
+              "max": 1.0564860422164202,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.4646399915218353,
+              "p95": 0.5449600219726562,
+              "max": 2.346496105194092,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 14.884832382202148,
+              "p95": 14.93558406829834,
+              "max": 14.970720291137695,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.30640000104904175,
+              "p95": 0.3125759959220886,
+              "max": 0.31356799602508545,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            2.2747069597244263,
+            -2.566110109910369,
+            0.34558004699647427,
+            2.501114970073104,
+            2.867432893253863,
+            0.47083303797990084,
+            3.127921954728663,
+            0.740220071747899,
+            -0.9769320022314787,
+            0.14227698557078838,
+            2.880168962292373,
+            -0.41896000038832426,
+            -4.708235966973007,
+            -0.6889839423820376,
+            -0.2233680570498109,
+            -2.907177899032831,
+            -0.3956949803978205,
+            -4.462499171495438,
+            2.652000985108316,
+            0.5599560681730509
+          ]
+        },
+        {
+          "input": "blank",
+          "first_call_ms": 24.187122005969286,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 27.636879007332027,
+            "p95": 28.677397989667952,
+            "max": 31.526238075457513,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 28.363529941998422,
+              "p95": 29.01481802109629,
+              "max": 29.346382012590766,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 4.527684999629855,
+              "p95": 4.910578951239586,
+              "max": 4.919667961075902,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 20.526124979369342,
+              "p95": 20.86136897560209,
+              "max": 23.792930995114148,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 3.2244700705632567,
+              "p95": 3.379835980013013,
+              "max": 3.4175649052485824,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 1.7948809545487165,
+              "p95": 1.9677520031109452,
+              "max": 5.254879011772573,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 1.3916989555582404,
+              "p95": 1.4685660135000944,
+              "max": 1.6496289754286408,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 1.2243959354236722,
+              "p95": 1.3756979024037719,
+              "max": 1.393395010381937,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.4899199903011322,
+              "p95": 0.5095360279083252,
+              "max": 0.53193598985672,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 15.075424194335938,
+              "p95": 15.134176254272461,
+              "max": 15.147871971130371,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.3065600097179413,
+              "p95": 0.3102400004863739,
+              "max": 0.3129599988460541,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.5159549182280898,
+            0.2524900482967496,
+            0.4002070054411888,
+            4.39116801135242,
+            1.37227401137352,
+            1.0699909180402756,
+            0.6247259443625808,
+            1.1951150372624397,
+            0.844221911393106,
+            0.9890289511531591,
+            0.4579370142892003,
+            0.6159270415082574,
+            0.44769502710551023,
+            0.4909290000796318,
+            0.8115819655358791,
+            0.5351239815354347,
+            0.3496140707284212,
+            0.3161400090903044,
+            -2.511420054361224,
+            0.22483989596366882
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 351.1153949657455,
+        "io_bytes_each_host_device": 12089600,
+        "available_ram_after_load_bytes": 10357772288,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 681816064,
+      "host_min_available_bytes_sampled": 10190417920,
+      "sampled_rss_max_bytes": 687243264,
+      "resource_sample_count": 5,
+      "raw_hashes": {
+        "events.jsonl": "9bf385d327ebbd53bb6d8848ce52b866b1c8d975fd58402c08fe619fc738f15e",
+        "resources.csv": "312a9c117d33ad045f29ef6079de40c8f3defe8be3fd706c8df110421cffd2e8",
+        "tegrastats.log": "13cb78d47a51adda1ad51bf5ddd5ce7d4c8c243a628e40505470685abd89e3b5",
+        "report.json": "4405d77138dff2d5be0eca54791ba86338f878a914c8d6ba6a7f1f6786364456"
+      }
+    },
+    "face": {
+      "paired_count": 60,
+      "plain_adapter_ms": {
+        "count": 60,
+        "p50": 8.02010006736964,
+        "p95": 8.767167921178043,
+        "max": 9.993740008212626,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 60,
+          "p50": 8.15354601945728,
+          "p95": 8.861187030561268,
+          "max": 19.43869306705892,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 60,
+          "p50": 1.3280169805511832,
+          "p95": 1.4276040019467473,
+          "max": 11.751949088647962,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 60,
+          "p50": 6.145375897176564,
+          "p95": 6.5332939848303795,
+          "max": 6.6454579355195165,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 60,
+          "p50": 0.8433270268142223,
+          "p95": 1.0954960016533732,
+          "max": 1.492631039582193,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 60,
+          "p50": 1.3910910347476602,
+          "p95": 1.5168549725785851,
+          "max": 1.6273549990728498,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 60,
+          "p50": 0.35898899659514427,
+          "p95": 0.3909899387508631,
+          "max": 0.39867102168500423,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 60,
+          "p50": 0.2991469809785485,
+          "p95": 0.6468399660661817,
+          "max": 0.7590670138597488,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 60,
+          "p50": 0.43769600987434387,
+          "p95": 0.4697279930114746,
+          "max": 0.4811840057373047,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 60,
+          "p50": 3.471424102783203,
+          "p95": 3.527519941329956,
+          "max": 3.5603840351104736,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 60,
+          "p50": 0.03939199820160866,
+          "p95": 0.04566400125622749,
+          "max": 0.0461760014295578,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -1.7367990221828222,
+        "median": 0.0955390278249979,
+        "max": 10.709223104640841,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 58.0123879481107,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 7.993891951628029,
+            "p95": 8.354481076821685,
+            "max": 9.993740008212626,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 8.096838952042162,
+              "p95": 8.399537997320294,
+              "max": 8.594040991738439,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.16004201117903,
+              "p95": 1.275214017368853,
+              "max": 1.2973269913345575,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 6.077021942473948,
+              "p95": 6.430763052776456,
+              "max": 6.4494829857721925,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.8433270268142223,
+              "p95": 0.9006409673020244,
+              "max": 0.9364179568365216,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 1.3395050773397088,
+              "p95": 1.4399250503629446,
+              "max": 1.472502015531063,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.3247479908168316,
+              "p95": 0.36433397326618433,
+              "max": 0.3768779570236802,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.2702820347622037,
+              "p95": 0.5588999483734369,
+              "max": 0.6518959999084473,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.43769600987434387,
+              "p95": 0.45555201172828674,
+              "max": 0.45558398962020874,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 3.4641919136047363,
+              "p95": 3.499232053756714,
+              "max": 3.5327680110931396,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.03859199956059456,
+              "p95": 0.0459199994802475,
+              "max": 0.0461760014295578,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.25629799347370863,
+            -0.030688941478729248,
+            0.4689130000770092,
+            0.07574702613055706,
+            0.10214792564511299,
+            -0.18096796702593565,
+            0.2555289538577199,
+            0.39806205313652754,
+            0.1065949909389019,
+            0.17613382078707218,
+            0.0692830653861165,
+            0.2035590587183833,
+            0.05171308293938637,
+            0.039650010876357555,
+            0.5120179848745465,
+            -1.7367990221828222,
+            0.08905900176614523,
+            -0.03913813270628452,
+            0.24173595011234283,
+            -0.021343817934393883
+          ]
+        },
+        {
+          "input": "bus",
+          "first_call_ms": 8.276205975562334,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 8.63580300938338,
+            "p95": 8.788769016973674,
+            "max": 9.076299029402435,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 8.722046040929854,
+              "p95": 9.15761396754533,
+              "max": 19.43869306705892,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.3280169805511832,
+              "p95": 1.5418799594044685,
+              "max": 11.751949088647962,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 6.25514006242156,
+              "p95": 6.584783899597824,
+              "max": 6.6454579355195165,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 1.0065330425277352,
+              "p95": 1.1019600788131356,
+              "max": 1.492631039582193,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 1.4439249644055963,
+              "p95": 1.5418159309774637,
+              "max": 1.6273549990728498,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.3706379793584347,
+              "p95": 0.3927180077880621,
+              "max": 0.3946059150621295,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.31044299248605967,
+              "p95": 0.375213916413486,
+              "max": 0.6468399660661817,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.46083199977874756,
+              "p95": 0.4758079946041107,
+              "max": 0.4811840057373047,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 3.4876160621643066,
+              "p95": 3.527519941329956,
+              "max": 3.5603840351104736,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.04255999997258186,
+              "p95": 0.0453759990632534,
+              "max": 0.04585599899291992,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.2722010249271989,
+            0.2721059136092663,
+            0.09248300921171904,
+            0.0711709726601839,
+            0.09936315473169088,
+            0.0862430315464735,
+            0.4223498981446028,
+            0.3934541018679738,
+            0.08813198655843735,
+            0.02009596209973097,
+            -0.26989798061549664,
+            0.10928395204246044,
+            10.709223104640841,
+            0.1738950377330184,
+            -0.029216986149549484,
+            0.07241801358759403,
+            -0.056641874834895134,
+            0.09859504643827677,
+            0.4732969682663679,
+            0.0457629794254899
+          ]
+        },
+        {
+          "input": "blank",
+          "first_call_ms": 8.129704976454377,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 7.791771902702749,
+            "p95": 7.889632019214332,
+            "max": 8.173962007276714,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 7.885695085860789,
+              "p95": 8.309806929901242,
+              "max": 8.36395297665149,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.371153979562223,
+              "p95": 1.3979710638523102,
+              "max": 1.3999870279803872,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 6.105629960075021,
+              "p95": 6.5332939848303795,
+              "max": 6.576303974725306,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.41067099664360285,
+              "p95": 0.4158230731263757,
+              "max": 0.4158230731263757,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 1.3852660777047276,
+              "p95": 1.4013629406690598,
+              "max": 1.4197949785739183,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.36318099591881037,
+              "p95": 0.3909899387508631,
+              "max": 0.39867102168500423,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.30337099451571703,
+              "p95": 0.7286979816854,
+              "max": 0.7590670138597488,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.4320000112056732,
+              "p95": 0.438400000333786,
+              "max": 0.4403519928455353,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 3.4685120582580566,
+              "p95": 3.488032102584839,
+              "max": 3.532543897628784,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.04464000090956688,
+              "p95": 0.04543999955058098,
+              "max": 0.04560000076889992,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            -0.05024205893278122,
+            0.1106279669329524,
+            0.06163306534290314,
+            0.028673093765974045,
+            0.059523037634789944,
+            0.061058090068399906,
+            0.028031994588673115,
+            0.07001787889748812,
+            0.5208189832046628,
+            0.3292589681223035,
+            0.10336411651223898,
+            0.06253004539757967,
+            0.14249992091208696,
+            0.05171401426196098,
+            0.1447730464860797,
+            0.11075602378696203,
+            0.05789007991552353,
+            0.5577158881351352,
+            0.12205308303236961,
+            0.1554620685055852
+          ]
+        }
+      ],
+      "load": {
+        "provider": "YuNet TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 288.5461379773915,
+        "io_bytes_each_host_device": 5452800,
+        "available_ram_after_load_bytes": 10361397248,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 609234944,
+      "host_min_available_bytes_sampled": 10250772480,
+      "sampled_rss_max_bytes": 611934208,
+      "resource_sample_count": 2,
+      "raw_hashes": {
+        "events.jsonl": "1b3d8b9736ab27cc413c83222172b6d8f2f8b974b9f1eb5e568f6c52dce57e12",
+        "resources.csv": "b5e1fac8a61b2ad9236ff0c6edc38501023c87f9e5e132a9ab2c52d87e651864",
+        "tegrastats.log": "d4b92558178fa1071647a5d85c3f6a22393a7b18d50cf5db1ee37b244cc7e354",
+        "report.json": "0ca73b1e24f65ac90a195fe5f8acbaf880c8d59e17b8d5e08542f3bbaf383def"
+      }
+    },
+    "body_hand_pose": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 88.5313879698515,
+        "p95": 89.06132797710598,
+        "max": 89.09009699709713,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 88.6954580200836,
+          "p95": 88.95617199596018,
+          "max": 89.35468306299299,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 11.203640955500305,
+          "p95": 11.3591980189085,
+          "max": 11.407104087993503,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 76.03454904165119,
+          "p95": 76.1492089368403,
+          "max": 76.363904052414,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 1.403635018505156,
+          "p95": 1.5549689996987581,
+          "max": 2.093165065161884,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.8311979472637177,
+          "p95": 0.8835199987515807,
+          "max": 0.9184970986098051,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.4879219923168421,
+          "p95": 0.561075983569026,
+          "max": 0.8882560068741441,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.40139094926416874,
+          "p95": 0.42094301898032427,
+          "max": 0.5568210035562515,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.2958720028400421,
+          "p95": 0.3117760121822357,
+          "max": 0.350816011428833,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 73.57046508789062,
+          "p95": 73.65484619140625,
+          "max": 73.73379516601562,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.05321599915623665,
+          "p95": 0.05718399956822395,
+          "max": 0.05769599974155426,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -6.105854990892112,
+        "median": 0.1667895121499896,
+        "max": 5.768466042354703,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 125.3881239099428,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 88.53321301285177,
+            "p95": 88.60620693303645,
+            "max": 89.0831210417673,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 88.6954580200836,
+              "p95": 88.95617199596018,
+              "max": 89.07918399199843,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 11.215609963983297,
+              "p95": 11.296252021566033,
+              "max": 11.403776006773114,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 76.04933297261596,
+              "p95": 76.1492089368403,
+              "max": 76.363904052414,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 1.4124989975243807,
+              "p95": 1.5549689996987581,
+              "max": 1.733951037749648,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.8207019418478012,
+              "p95": 0.9011529618874192,
+              "max": 0.9184970986098051,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.4879219923168421,
+              "p95": 0.557939987629652,
+              "max": 0.8882560068741441,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.40228699799627066,
+              "p95": 0.42971200309693813,
+              "max": 0.5568210035562515,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.2955839931964874,
+              "p95": 0.3117760121822357,
+              "max": 0.350816011428833,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 73.56886291503906,
+              "p95": 73.62371063232422,
+              "max": 73.65484619140625,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.05244800075888634,
+              "p95": 0.05734400078654289,
+              "max": 0.05769599974155426,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            1.6545241232961416,
+            0.4445279482752085,
+            0.23245601914823055,
+            0.03712112084031105,
+            0.15974906273186207,
+            0.17382996156811714,
+            0.1229490153491497,
+            0.0969000393524766,
+            0.014335964806377888,
+            0.3995349397882819,
+            0.04134594928473234,
+            -0.44900900684297085,
+            0.20797608885914087,
+            0.29674696270376444,
+            0.21427904721349478,
+            0.2797540510073304,
+            0.05088199395686388,
+            0.48542500007897615,
+            0.14563812874257565,
+            0.40411099325865507
+          ]
+        },
+        {
+          "input": "bus",
+          "first_call_ms": 88.83309597149491,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 88.49922800436616,
+            "p95": 89.06132797710598,
+            "max": 89.09009699709713,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 88.59103894792497,
+              "p95": 88.8358480297029,
+              "max": 89.35468306299299,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 11.186712072230875,
+              "p95": 11.3591980189085,
+              "max": 11.407104087993503,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 76.0213959729299,
+              "p95": 76.13547996152192,
+              "max": 76.16162509657443,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 1.3910910347476602,
+              "p95": 1.4782299986109138,
+              "max": 2.093165065161884,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.8388139540329576,
+              "p95": 0.8642880711704493,
+              "max": 0.8835199987515807,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.4830899415537715,
+              "p95": 0.561075983569026,
+              "max": 0.5854930495843291,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.3975828876718879,
+              "p95": 0.41419093031436205,
+              "max": 0.42094301898032427,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.2958720028400421,
+              "p95": 0.30774399638175964,
+              "max": 0.3364799916744232,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 73.57046508789062,
+              "p95": 73.6690902709961,
+              "max": 73.73379516601562,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.0533440001308918,
+              "p95": 0.05651199817657471,
+              "max": 0.05718399956822395,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            -0.5783569067716599,
+            0.40711788460612297,
+            -0.02822396345436573,
+            -0.1472699223086238,
+            0.18893496599048376,
+            -0.2517850371077657,
+            0.9145610965788364,
+            4.582151072099805,
+            0.4547679563984275,
+            -0.13530009891837835,
+            0.09408302139490843,
+            0.13872608542442322,
+            0.15533308032900095,
+            5.768466042354703,
+            -5.907990969717503,
+            -6.105854990892112,
+            0.31428399961441755,
+            0.2664730418473482,
+            0.27319404762238264,
+            -0.19178399816155434
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 1293.8347670715302,
+        "io_bytes_each_host_device": 2348544,
+        "available_ram_after_load_bytes": 10153238528,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 1430106112,
+      "host_min_available_bytes_sampled": 9823944704,
+      "sampled_rss_max_bytes": 1111670784,
+      "resource_sample_count": 10,
+      "raw_hashes": {
+        "events.jsonl": "3fdd0fee41b290d2fc61fd0c93b8390f4cbe7fbc574e19869419a94e7766e0ef",
+        "resources.csv": "852743fa2edf307c16bff36f51303d9e71f10e3c59112fdf4110b636b2ede858",
+        "tegrastats.log": "220f197f468bdb9cd02e2070800a75b039c3f7155d8f36eaa792db0fb253cde7",
+        "report.json": "7bf2a49cba19b05f711ff7ca0762b9b780f899003a237cc8e69456d1f00902e0"
+      }
+    },
+    "person_reid": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 4.0500679751858115,
+        "p95": 4.66477801091969,
+        "max": 4.798062960617244,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 4.428289947099984,
+          "p95": 4.715468036010861,
+          "max": 4.985942039638758,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 1.349297002889216,
+          "p95": 1.7408309504389763,
+          "max": 1.8100820016115904,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 2.711490960791707,
+          "p95": 2.993165049701929,
+          "max": 3.2058130018413067,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.05936203524470329,
+          "p95": 0.06285100243985653,
+          "max": 0.06368197500705719,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.17863092944025993,
+          "p95": 0.20765606313943863,
+          "max": 0.5689489189535379,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.050178030505776405,
+          "p95": 0.07081800140440464,
+          "max": 0.33028400503098965,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.0493460102006793,
+          "p95": 0.06729899905622005,
+          "max": 0.073570990934968,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.09827200323343277,
+          "p95": 0.12294399738311768,
+          "max": 0.13171200454235077,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 2.262784004211426,
+          "p95": 2.2702720165252686,
+          "max": 2.2720959186553955,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.008352000266313553,
+          "p95": 0.011648000217974186,
+          "max": 0.011935999616980553,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.29434694442898035,
+        "median": 0.05518598482012749,
+        "max": 0.5369801074266434,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 17.244757036678493,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 4.442306002601981,
+            "p95": 4.698570934124291,
+            "max": 4.798062960617244,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 4.508228972554207,
+              "p95": 4.7678539995104074,
+              "max": 4.985942039638758,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.7145269084721804,
+              "p95": 1.7534720245748758,
+              "max": 1.8100820016115904,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 2.7222749777138233,
+              "p95": 2.993165049701929,
+              "max": 3.2058130018413067,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.0585620291531086,
+              "p95": 0.06269104778766632,
+              "max": 0.0629139831289649,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.1835899893194437,
+              "p95": 0.20765606313943863,
+              "max": 0.21293596364557743,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.04956894554197788,
+              "p95": 0.07280206773430109,
+              "max": 0.33028400503098965,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.0483860494568944,
+              "p95": 0.06729899905622005,
+              "max": 0.073570990934968,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.09663999825716019,
+              "p95": 0.12214399874210358,
+              "max": 0.12294399738311768,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 2.2604479789733887,
+              "p95": 2.2702720165252686,
+              "max": 2.271456003189087,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.009119999594986439,
+              "p95": 0.01119999960064888,
+              "max": 0.011872000060975552,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            -0.003072083927690983,
+            -0.11430785525590181,
+            0.04931306466460228,
+            0.058209989219903946,
+            -0.29434694442898035,
+            0.042050029151141644,
+            0.0687700230628252,
+            0.33194897696375847,
+            0.055682030506432056,
+            0.06076903082430363,
+            0.2725541125983,
+            0.08557201363146305,
+            0.029952963814139366,
+            0.2259289612993598,
+            0.06105797365307808,
+            0.09053200483322144,
+            -0.15654903836548328,
+            0.008928938768804073,
+            0.10611605830490589,
+            0.5369801074266434
+          ]
+        },
+        {
+          "input": "bus",
+          "first_call_ms": 4.303741035982966,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 4.02126694098115,
+            "p95": 4.0482759941369295,
+            "max": 4.0500679751858115,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 4.078036989085376,
+              "p95": 4.121494013816118,
+              "max": 4.470370942726731,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.3025120133534074,
+              "p95": 1.3372009852901101,
+              "max": 1.349297002889216,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 2.7050579665228724,
+              "p95": 2.7423719875514507,
+              "max": 3.1107369577512145,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.059394980780780315,
+              "p95": 0.06285100243985653,
+              "max": 0.06368197500705719,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.17395801842212677,
+              "p95": 0.18074200488626957,
+              "max": 0.5689489189535379,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.05117000546306372,
+              "p95": 0.053314026445150375,
+              "max": 0.05379400681704283,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.05004997365176678,
+              "p95": 0.0660190125927329,
+              "max": 0.06976304575800896,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.09833600372076035,
+              "p95": 0.1303039938211441,
+              "max": 0.13171200454235077,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 2.2633280754089355,
+              "p95": 2.26857590675354,
+              "max": 2.2720959186553955,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.005696000065654516,
+              "p95": 0.011648000217974186,
+              "max": 0.011935999616980553,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.06918702274560928,
+            0.025537912733852863,
+            0.04953786265105009,
+            0.04995299968868494,
+            0.05468993913382292,
+            0.046561937779188156,
+            0.07213198114186525,
+            0.04198600072413683,
+            0.04953797906637192,
+            0.05209888331592083,
+            0.06937806028872728,
+            0.007327995263040066,
+            0.05091307684779167,
+            0.05801906809210777,
+            0.10880397167056799,
+            0.08310796692967415,
+            0.4491040017455816,
+            0.04342501051723957,
+            0.041345017962157726,
+            0.057058059610426426
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 291.5475621121004,
+        "io_bytes_each_host_device": 395264,
+        "available_ram_after_load_bytes": 10333642752,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 489299968,
+      "host_min_available_bytes_sampled": 10412158976,
+      "sampled_rss_max_bytes": 56164352,
+      "resource_sample_count": 1,
+      "raw_hashes": {
+        "events.jsonl": "ac9feca4a094c2492aee4ac412baf5e5952feb088fa6bf5699bef91ed8282899",
+        "resources.csv": "a701fe2d2a3b08fd64fa4145f7338db35d8629546b42467087fec09e1e221ab2",
+        "tegrastats.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "report.json": "5e3ae6c52a131af12844ad71cb6a40fd803f2e05a9dca559235cef76e82f2d76"
+      }
+    },
+    "head_pose": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 1.0227249003946781,
+        "p95": 1.2454859679564834,
+        "max": 1.2690069852396846,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 1.0651580523699522,
+          "p95": 1.1063440470024943,
+          "max": 1.1442980030551553,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 0.12365204747766256,
+          "p95": 0.13818091247230768,
+          "max": 0.14934898354113102,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 0.9258580394089222,
+          "p95": 0.9666600963100791,
+          "max": 0.9945000056177378,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.011711963452398777,
+          "p95": 0.012736069038510323,
+          "max": 0.012865057215094566,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.08489890024065971,
+          "p95": 0.09731505997478962,
+          "max": 0.10745902545750141,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.06489793304353952,
+          "p95": 0.07062603253871202,
+          "max": 0.07984298281371593,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.05133007653057575,
+          "p95": 0.06205099634826183,
+          "max": 0.0671379966661334,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.06454399973154068,
+          "p95": 0.07487999647855759,
+          "max": 0.07932800054550171,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 0.6112959980964661,
+          "p95": 0.6274240016937256,
+          "max": 0.642687976360321,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.00902399979531765,
+          "p95": 0.014208000153303146,
+          "max": 0.019519999623298645,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.1947280252352357,
+        "median": 0.042801606468856335,
+        "max": 0.08480297401547432,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 65.43240300379694,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 1.026693033054471,
+            "p95": 1.2320129899308085,
+            "max": 1.2690069852396846,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 1.0722950100898743,
+              "p95": 1.1094800429418683,
+              "max": 1.1442980030551553,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.12461293954402208,
+              "p95": 0.13818091247230768,
+              "max": 0.14934898354113102,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 0.9350740583613515,
+              "p95": 0.9672360029071569,
+              "max": 0.9945000056177378,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.011711963452398777,
+              "p95": 0.012736069038510323,
+              "max": 0.012865057215094566,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.08627492934465408,
+              "p95": 0.09731505997478962,
+              "max": 0.10019598994404078,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.06496300920844078,
+              "p95": 0.06880308501422405,
+              "max": 0.07139507215470076,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.05206593777984381,
+              "p95": 0.06205099634826183,
+              "max": 0.06230699364095926,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.06550399959087372,
+              "p95": 0.07487999647855759,
+              "max": 0.07744000107049942,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 0.6156479716300964,
+              "p95": 0.6338559985160828,
+              "max": 0.642687976360321,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.008287999778985977,
+              "p95": 0.012927999719977379,
+              "max": 0.019519999623298645,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.08185906335711479,
+            0.026848982088267803,
+            0.024607987143099308,
+            0.011807889677584171,
+            -0.1947280252352357,
+            0.009824056178331375,
+            0.05142600275576115,
+            0.049410038627684116,
+            0.02499297261238098,
+            0.07321801967918873,
+            0.02451299224048853,
+            0.061794999055564404,
+            0.07190706674009562,
+            0.07837091106921434,
+            0.030368915759027004,
+            0.08480297401547432,
+            -0.1743099419400096,
+            0.03904104232788086,
+            0.02809602301567793,
+            0.044130138121545315
+          ]
+        },
+        {
+          "input": "public-person-dimmed",
+          "first_call_ms": 1.1754990555346012,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 1.012645079754293,
+            "p95": 1.2454859679564834,
+            "max": 1.2536139693111181,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 1.0578620713204145,
+              "p95": 1.0866320226341486,
+              "max": 1.0929679265245795,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.12307707220315933,
+              "p95": 0.13587693683803082,
+              "max": 0.1493169693276286,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 0.9228810667991638,
+              "p95": 0.9455700637772679,
+              "max": 0.9469148935750127,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.011584023013710976,
+              "p95": 0.012288917787373066,
+              "max": 0.012479955330491066,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.0844830647110939,
+              "p95": 0.09082001633942127,
+              "max": 0.10745902545750141,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.06451399531215429,
+              "p95": 0.07062603253871202,
+              "max": 0.07984298281371593,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.051042065024375916,
+              "p95": 0.05337793845683336,
+              "max": 0.0671379966661334,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.06425599753856659,
+              "p95": 0.06880000233650208,
+              "max": 0.07932800054550171,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 0.6092479825019836,
+              "p95": 0.6139519810676575,
+              "max": 0.6240959763526917,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.009247999638319016,
+              "p95": 0.014208000153303146,
+              "max": 0.0144640002399683,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.047810026444494724,
+            0.05645107012242079,
+            0.04502595402300358,
+            0.05590589717030525,
+            0.07094710599631071,
+            -0.18845591694116592,
+            -0.03014504909515381,
+            0.0249610748142004,
+            0.04861003253608942,
+            0.05309004336595535,
+            0.041473074816167355,
+            -0.013568904250860214,
+            0.018816906958818436,
+            0.07606693543493748,
+            0.03763299901038408,
+            0.07734599057585001,
+            0.05638599395751953,
+            -0.18701492808759212,
+            0.04569801967591047,
+            0.004449044354259968
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 288.0234010517597,
+        "io_bytes_each_host_device": 43212,
+        "available_ram_after_load_bytes": 10333224960,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 610955264,
+      "host_min_available_bytes_sampled": 10419605504,
+      "sampled_rss_max_bytes": 56152064,
+      "resource_sample_count": 1,
+      "raw_hashes": {
+        "events.jsonl": "f1d2a7a73276aa66b66e22a7fb25da1d89b41bb23acd616004bd6056ddfc78c8",
+        "resources.csv": "bec8e1eaef07cd10350ce89eb292f561f4c7a80e8b6f3a18ee87338f3405c788",
+        "tegrastats.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "report.json": "f6ea7f84bf2e865a36bd31c7f0545038c9e962a39f634d4b69d3efcc273a1103"
+      }
+    },
+    "gaze_landmarks": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 2.6385600212961435,
+        "p95": 2.6818260084837675,
+        "max": 2.737604081630707,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 2.675328985787928,
+          "p95": 2.963884035125375,
+          "max": 3.6433649947866797,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 0.12755696661770344,
+          "p95": 0.1365169882774353,
+          "max": 0.32439606729894876,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 2.4921869626268744,
+          "p95": 2.7444520965218544,
+          "max": 3.2546150032430887,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.05465804133564234,
+          "p95": 0.06281794048845768,
+          "max": 0.08963607251644135,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.08758693002164364,
+          "p95": 0.23293693084269762,
+          "max": 0.3833100199699402,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.036224955692887306,
+          "p95": 0.04800199531018734,
+          "max": 0.07155491039156914,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.03641704097390175,
+          "p95": 0.049410038627684116,
+          "max": 0.0592030119150877,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.06543999910354614,
+          "p95": 0.08076799660921097,
+          "max": 0.16697600483894348,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 2.2178239822387695,
+          "p95": 2.2336320877075195,
+          "max": 2.6768319606781006,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.004575999919325113,
+          "p95": 0.009855999611318111,
+          "max": 0.011136000044643879,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.057218014262616634,
+        "median": 0.037393998354673386,
+        "max": 0.9923889301717281,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 73.38946091476828,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 2.6396799366921186,
+            "p95": 2.6618889532983303,
+            "max": 2.662337035872042,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 2.675328985787928,
+              "p95": 2.963884035125375,
+              "max": 3.6433649947866797,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.12749293819069862,
+              "p95": 0.1649659825488925,
+              "max": 0.32439606729894876,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 2.494491054676473,
+              "p95": 2.7444520965218544,
+              "max": 3.2546150032430887,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.05465792492032051,
+              "p95": 0.06281794048845768,
+              "max": 0.06435392424464226,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.0888989306986332,
+              "p95": 0.23293693084269762,
+              "max": 0.3439810825511813,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.03683299291878939,
+              "p95": 0.04800199531018734,
+              "max": 0.051073962822556496,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.03667303826659918,
+              "p95": 0.05814607720822096,
+              "max": 0.0592030119150877,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.06543999910354614,
+              "p95": 0.07366400212049484,
+              "max": 0.16697600483894348,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 2.2175040245056152,
+              "p95": 2.2574400901794434,
+              "max": 2.6768319606781006,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.00508800009265542,
+              "p95": 0.009664000011980534,
+              "max": 0.010208000428974628,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.050144968554377556,
+            0.9923889301717281,
+            0.04073791205883026,
+            0.010368064977228642,
+            0.03219395875930786,
+            0.0363839790225029,
+            0.05027407314628363,
+            0.1330290688201785,
+            0.34218805376440287,
+            0.02886389847844839,
+            0.027136877179145813,
+            0.04566588904708624,
+            0.034208991564810276,
+            0.09264401160180569,
+            0.017920974642038345,
+            0.03734603524208069,
+            0.031713047064840794,
+            0.0367059838026762,
+            0.0351370545104146,
+            0.09795487858355045
+          ]
+        },
+        {
+          "input": "public-person-dimmed",
+          "first_call_ms": 3.154578967951238,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 2.632543910294771,
+            "p95": 2.699906937777996,
+            "max": 2.737604081630707,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 2.673697075806558,
+              "p95": 2.7160990284755826,
+              "max": 2.981868921779096,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.12755696661770344,
+              "p95": 0.13334897812455893,
+              "max": 0.1355890417471528,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 2.4920590221881866,
+              "p95": 2.528508077375591,
+              "max": 2.796645974740386,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.05465804133564234,
+              "p95": 0.057570054195821285,
+              "max": 0.08963607251644135,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.0869150971993804,
+              "p95": 0.09363493882119656,
+              "max": 0.3833100199699402,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.03452890086919069,
+              "p95": 0.03974605351686478,
+              "max": 0.07155491039156914,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.03590492997318506,
+              "p95": 0.03875396214425564,
+              "max": 0.03936199937015772,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.06543999910354614,
+              "p95": 0.08076799660921097,
+              "max": 0.08694399893283844,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 2.2178239822387695,
+              "p95": 2.225856065750122,
+              "max": 2.2286078929901123,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.004480000119656324,
+              "p95": 0.009855999611318111,
+              "max": 0.011136000044643879,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.040162005461752415,
+            -0.022304942831397057,
+            -0.057218014262616634,
+            0.0903070904314518,
+            0.03961706534028053,
+            0.32877991907298565,
+            0.03744196146726608,
+            0.011296011507511139,
+            -0.003968016244471073,
+            0.056258984841406345,
+            0.06371503695845604,
+            0.038498081266880035,
+            0.035585020668804646,
+            0.003839842975139618,
+            0.01580908428877592,
+            0.016192090697586536,
+            0.08320307824760675,
+            0.04179298412054777,
+            0.01881597563624382,
+            0.05401694215834141
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 312.61655408889055,
+        "io_bytes_each_host_device": 43480,
+        "available_ram_after_load_bytes": 10264772608,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 621400064,
+      "host_min_available_bytes_sampled": 10387734528,
+      "sampled_rss_max_bytes": 56156160,
+      "resource_sample_count": 1,
+      "raw_hashes": {
+        "events.jsonl": "2812139f1a7ce95f20ebaa37e695f83b192f455cd2c22543f236dc1937662ae4",
+        "resources.csv": "447bfee70a3111977645c8b8940cf0f0d4be0864fa898e685acb4f9cce78ef19",
+        "tegrastats.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "report.json": "2d9089d50d3f6b717fb8a2ef79f9f7a7ab2c20cab54c6e444bc1acad95214d83"
+      }
+    },
+    "gaze": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 1.59317790530622,
+        "p95": 1.650140038691461,
+        "max": 1.8672359874472022,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 1.6377880237996578,
+          "p95": 1.69481395278126,
+          "max": 1.848387997597456,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 0.29229908250272274,
+          "p95": 0.30676298774778843,
+          "max": 0.31786796171218157,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 1.2407810427248478,
+          "p95": 1.2786389561370015,
+          "max": 1.4504530699923635,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.1096680061891675,
+          "p95": 0.11578097473829985,
+          "max": 0.11945993173867464,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.16170204617083073,
+          "p95": 0.18413399811834097,
+          "max": 0.1886140089482069,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.03529700916260481,
+          "p95": 0.037088990211486816,
+          "max": 0.04537799395620823,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.03469001967459917,
+          "p95": 0.038849073462188244,
+          "max": 0.043425941839814186,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.13315199315547943,
+          "p95": 0.15328000485897064,
+          "max": 0.1629759967327118,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 0.8197759985923767,
+          "p95": 0.8304319977760315,
+          "max": 0.8355519771575928,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.005727999843657017,
+          "p95": 0.007648000027984381,
+          "max": 0.008704000152647495,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.21943205501884222,
+        "median": 0.04734547110274434,
+        "max": 0.2802989911288023,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 68.5488999588415,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 1.602043048478663,
+            "p95": 1.636604079976678,
+            "max": 1.8672359874472022,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 1.6629729652777314,
+              "p95": 1.701533910818398,
+              "max": 1.848387997597456,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.2958179684355855,
+              "p95": 0.31588401179760695,
+              "max": 0.31786796171218157,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 1.2553739361464977,
+              "p95": 1.293551060371101,
+              "max": 1.4504530699923635,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.11072400957345963,
+              "p95": 0.11757202446460724,
+              "max": 0.11945993173867464,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.1650619087740779,
+              "p95": 0.18698303028941154,
+              "max": 0.1886140089482069,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.03494496922940016,
+              "p95": 0.03676896449178457,
+              "max": 0.04537799395620823,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.03500992897897959,
+              "p95": 0.03961799666285515,
+              "max": 0.043425941839814186,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.13497599959373474,
+              "p95": 0.15542399883270264,
+              "max": 0.1629759967327118,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 0.8229119777679443,
+              "p95": 0.831712007522583,
+              "max": 0.8355519771575928,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.00598399993032217,
+              "p95": 0.007840000092983246,
+              "max": 0.008704000152647495,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.06595405284315348,
+            0.06678595673292875,
+            0.036161975003778934,
+            0.09949086233973503,
+            -0.21492002997547388,
+            0.061794184148311615,
+            0.07728300988674164,
+            0.049152993597090244,
+            0.024928012862801552,
+            0.051649054512381554,
+            0.025183893740177155,
+            0.04255992826074362,
+            0.03542494960129261,
+            0.04553794860839844,
+            -0.0011521624401211739,
+            0.10931596625596285,
+            0.023458153009414673,
+            0.10243593715131283,
+            0.2802989911288023,
+            0.10589102748781443
+          ]
+        },
+        {
+          "input": "public-person-dimmed",
+          "first_call_ms": 2.1135170245543122,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 1.5825210139155388,
+            "p95": 1.650140038691461,
+            "max": 1.8655720632523298,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 1.6353559913113713,
+              "p95": 1.6461400082334876,
+              "max": 1.6623650444671512,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.28829905204474926,
+              "p95": 0.2963950391858816,
+              "max": 0.29777095187455416,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 1.2285889824852347,
+              "p95": 1.2435340322554111,
+              "max": 1.2608139077201486,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.10883610229939222,
+              "p95": 0.1113000325858593,
+              "max": 0.11152401566505432,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.15942996833473444,
+              "p95": 0.17402309458702803,
+              "max": 0.18413399811834097,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.03580900374799967,
+              "p95": 0.037088990211486816,
+              "max": 0.037762103602290154,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.0344329746440053,
+              "p95": 0.03542599733918905,
+              "max": 0.03574590664356947,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.13062399625778198,
+              "p95": 0.14239999651908875,
+              "max": 0.14246399700641632,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 0.8176000118255615,
+              "p95": 0.8225280046463013,
+              "max": 0.8254079818725586,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.005280000157654285,
+              "p95": 0.006912000011652708,
+              "max": 0.007648000027984381,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.05219411104917526,
+            0.06409897468984127,
+            0.06675394251942635,
+            0.0548830721527338,
+            0.02435303758829832,
+            -0.21943205501884222,
+            -0.011872965842485428,
+            0.045377062633633614,
+            -0.0033279648050665855,
+            0.001792912371456623,
+            0.056739081628620625,
+            0.05331309512257576,
+            0.03113702405244112,
+            0.08749100379645824,
+            0.03388989716768265,
+            0.03305799327790737,
+            0.02819288056343794,
+            0.05123403389006853,
+            0.02368201967328787,
+            0.0669469591230154
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 290.54611700121313,
+        "io_bytes_each_host_device": 86424,
+        "available_ram_after_load_bytes": 10242510848,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 620699648,
+      "host_min_available_bytes_sampled": 10316619776,
+      "sampled_rss_max_bytes": 56197120,
+      "resource_sample_count": 1,
+      "raw_hashes": {
+        "events.jsonl": "d13e762c157cf57b54fdf4650645f9e531e131980885af06288160c387f69b58",
+        "resources.csv": "fc7a28c3c3c817869356e3a07a787a787856f30c24c9d02f15f2ad90b0e6144e",
+        "tegrastats.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "report.json": "f19cf5a1c9ce03a6b7c9a39c63c902afc574c172944f7f16491a287760453316"
+      }
+    },
+    "face_identity": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 5.741970031522214,
+        "p95": 6.391593022271991,
+        "max": 6.428970955312252,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 5.842261016368866,
+          "p95": 6.360679981298745,
+          "max": 6.643122062087059,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 1.4603730523958802,
+          "p95": 1.9376699347048998,
+          "max": 1.9763919990509748,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 4.204441094771028,
+          "p95": 4.383519059047103,
+          "max": 4.757644957862794,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.11357199400663376,
+          "p95": 0.1339889131486416,
+          "max": 0.17069501336663961,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.2133840462192893,
+          "p95": 0.3095470601692796,
+          "max": 0.8014049381017685,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.08221098687499762,
+          "p95": 0.10048295371234417,
+          "max": 0.11162005830556154,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.07472303695976734,
+          "p95": 0.09741203393787146,
+          "max": 0.12803601566702127,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.13763199746608734,
+          "p95": 0.1656319946050644,
+          "max": 0.4176639914512634,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 3.5240960121154785,
+          "p95": 3.5969278812408447,
+          "max": 3.611135959625244,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.006719999946653843,
+          "p95": 0.009631999768316746,
+          "max": 0.010879999957978725,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.3500930033624172,
+        "median": 0.07769896183162928,
+        "max": 0.611382070928812,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 46.07348900754005,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 5.202205968089402,
+            "p95": 5.792627111077309,
+            "max": 6.118398974649608,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 5.260000005364418,
+              "p95": 5.822867969982326,
+              "max": 5.968632991425693,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.0225650621578097,
+              "p95": 1.4532689237967134,
+              "max": 1.4603730523958802,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 4.1149340104311705,
+              "p95": 4.371550981886685,
+              "max": 4.383519059047103,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.08643593173474073,
+              "p95": 0.13670895714312792,
+              "max": 0.17069501336663961,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.1683579757809639,
+              "p95": 0.21114398259669542,
+              "max": 0.244265072979033,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.06361794658005238,
+              "p95": 0.0937639269977808,
+              "max": 0.11162005830556154,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.05677004810422659,
+              "p95": 0.07561896927654743,
+              "max": 0.07885100785642862,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.10809600353240967,
+              "p95": 0.14876799285411835,
+              "max": 0.4176639914512634,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 3.511039972305298,
+              "p95": 3.605695962905884,
+              "max": 3.611135959625244,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.006783999968320131,
+              "p95": 0.008063999935984612,
+              "max": 0.009472000412642956,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.02000096719712019,
+            0.6094620330259204,
+            0.0719709787517786,
+            -0.23399211931973696,
+            -0.09193900041282177,
+            -0.024001114070415497,
+            -0.10214804206043482,
+            -0.15936593990772963,
+            0.28839497826993465,
+            -0.3500930033624172,
+            0.25757693219929934,
+            0.21879211999475956,
+            -0.16522209625691175,
+            0.32676407136023045,
+            0.31418807338923216,
+            0.09549199603497982,
+            -0.053058029152452946,
+            0.22666295990347862,
+            0.030240858905017376,
+            -0.3425079630687833
+          ]
+        },
+        {
+          "input": "public-person-dimmed",
+          "first_call_ms": 5.699247005395591,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 6.019579013809562,
+            "p95": 6.403433973900974,
+            "max": 6.428970955312252,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 6.063453969545662,
+              "p95": 6.40852190554142,
+              "max": 6.643122062087059,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 1.7231990350410342,
+              "p95": 1.9449989777058363,
+              "max": 1.9763919990509748,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 4.205561010167003,
+              "p95": 4.475266905501485,
+              "max": 4.757644957862794,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.11849997099488974,
+              "p95": 0.1322290627285838,
+              "max": 0.1339889131486416,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.25418493896722794,
+              "p95": 0.32343599013984203,
+              "max": 0.8014049381017685,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.08937891107052565,
+              "p95": 0.10048295371234417,
+              "max": 0.10861200280487537,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.08173089008778334,
+              "p95": 0.12560503091663122,
+              "max": 0.12803601566702127,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.1493760049343109,
+              "p95": 0.1656319946050644,
+              "max": 0.19913600385189056,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 3.527776002883911,
+              "p95": 3.5455679893493652,
+              "max": 3.5462400913238525,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.006527999881654978,
+              "p95": 0.009664000011980534,
+              "max": 0.010879999957978725,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.12387603055685759,
+            -0.04147400613874197,
+            -0.046369037590920925,
+            -0.005824025720357895,
+            0.14647003263235092,
+            0.611382070928812,
+            0.22445607464760542,
+            -0.013151904568076134,
+            0.08342694491147995,
+            -0.33614097628742456,
+            0.23952790070325136,
+            0.10857998859137297,
+            0.1933510648086667,
+            0.24106597993522882,
+            0.13190996833145618,
+            -0.3073069965466857,
+            -0.020449049770832062,
+            0.3374529769644141,
+            0.1196529483422637,
+            -0.0045120250433683395
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 351.3002370018512,
+        "io_bytes_each_host_device": 151040,
+        "available_ram_after_load_bytes": 10256601088,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 620511232,
+      "host_min_available_bytes_sampled": 10376630272,
+      "sampled_rss_max_bytes": 56242176,
+      "resource_sample_count": 1,
+      "raw_hashes": {
+        "events.jsonl": "a7b402310ae8ce01759c6d0d1757fceed1a756b817358db6e6fb4273ec5f9ffc",
+        "resources.csv": "2b57993c7418b3869c3add0f104a5205491edf9883ecc67ba29961cbd90b4e42",
+        "tegrastats.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "report.json": "b206b5dc611aef5f6088ee25f28e4940a9d9418e3085d7c72f794844b5a127ad"
+      }
+    },
+    "expression": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 3.323224955238402,
+        "p95": 3.4100760240107775,
+        "max": 3.4343970473855734,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 3.3902990398928523,
+          "p95": 3.4928630338981748,
+          "max": 3.6574779078364372,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 0.9704680414870381,
+          "p95": 1.0261809220537543,
+          "max": 1.2301249662414193,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 2.3582939757034183,
+          "p95": 2.409718930721283,
+          "max": 2.43455299641937,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.06003398448228836,
+          "p95": 0.06742600817233324,
+          "max": 0.07005094084888697,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.11555594392120838,
+          "p95": 0.13789301738142967,
+          "max": 0.1577329821884632,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.037794001400470734,
+          "p95": 0.04217703826725483,
+          "max": 0.047585926949977875,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.040097045712172985,
+          "p95": 0.04924891982227564,
+          "max": 0.06461003795266151,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.0748480036854744,
+          "p95": 0.08905600011348724,
+          "max": 0.0915519967675209,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 2.0315840244293213,
+          "p95": 2.0463359355926514,
+          "max": 2.0800321102142334,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.007327999919652939,
+          "p95": 0.010239999741315842,
+          "max": 0.01104000024497509,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.0007029157131910324,
+        "median": 0.05726650124415755,
+        "max": 0.32292481046169996,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "public-person",
+          "first_call_ms": 50.071873934939504,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 3.323224955238402,
+            "p95": 3.413244034163654,
+            "max": 3.4343970473855734,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 3.4064280334860086,
+              "p95": 3.5223040031269193,
+              "max": 3.6574779078364372,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.9730280144140124,
+              "p95": 1.0397819569334388,
+              "max": 1.2301249662414193,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 2.35976604744792,
+              "p95": 2.409718930721283,
+              "max": 2.43455299641937,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.06003398448228836,
+              "p95": 0.06707396823912859,
+              "max": 0.06742600817233324,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.1186929875984788,
+              "p95": 0.12938096188008785,
+              "max": 0.13789301738142967,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.03808096516877413,
+              "p95": 0.045249005779623985,
+              "max": 0.047585926949977875,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.040097045712172985,
+              "p95": 0.04819408059120178,
+              "max": 0.04924891982227564,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.0756480023264885,
+              "p95": 0.08953599631786346,
+              "max": 0.0915519967675209,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 2.031008005142212,
+              "p95": 2.0463359355926514,
+              "max": 2.0800321102142334,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.008224000222980976,
+              "p95": 0.010239999741315842,
+              "max": 0.01071999967098236,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.01475214958190918,
+            0.06985897198319435,
+            0.03980903420597315,
+            0.049410038627684116,
+            0.0023050233721733093,
+            0.10205106809735298,
+            0.06976304575800896,
+            0.32292481046169996,
+            0.056160963140428066,
+            0.11433998588472605,
+            0.09987503290176392,
+            0.14826201368123293,
+            0.04899397026747465,
+            0.016415957361459732,
+            0.034976983442902565,
+            0.10013103019446135,
+            0.01824100036174059,
+            0.05657796282321215,
+            0.10406807996332645,
+            0.17866201233118773
+          ]
+        },
+        {
+          "input": "public-person-dimmed",
+          "first_call_ms": 3.4784310264512897,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 3.3227780368179083,
+            "p95": 3.399292007088661,
+            "max": 3.4100760240107775,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 3.378618974238634,
+              "p95": 3.4394540125504136,
+              "max": 3.4928630338981748,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 0.9603869402781129,
+              "p95": 1.0053160367533565,
+              "max": 1.017124974168837,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 2.351829083636403,
+              "p95": 2.409560023806989,
+              "max": 2.4254010058939457,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.060003018006682396,
+              "p95": 0.06806699093431234,
+              "max": 0.07005094084888697,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.11379609350115061,
+              "p95": 0.14522194396704435,
+              "max": 0.1577329821884632,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.037473044358193874,
+              "p95": 0.040609040297567844,
+              "max": 0.04217703826725483,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.040065962821245193,
+              "p95": 0.0576340826228261,
+              "max": 0.06461003795266151,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.07414399832487106,
+              "p95": 0.08707199990749359,
+              "max": 0.08905600011348724,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 2.0315840244293213,
+              "p95": 2.0405759811401367,
+              "max": 2.048896074295044,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.007199999876320362,
+              "p95": 0.010048000141978264,
+              "max": 0.01104000024497509,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.10336400009691715,
+            0.05795503966510296,
+            0.05280191544443369,
+            0.03603193908929825,
+            0.01984101254492998,
+            -0.0007029157131910324,
+            0.012160046026110649,
+            0.07261103019118309,
+            0.07558590732514858,
+            0.08557003457099199,
+            0.15552504919469357,
+            0.06752100307494402,
+            0.08118606638163328,
+            0.11632393579930067,
+            0.040896935388445854,
+            0.004447996616363525,
+            0.017824117094278336,
+            0.053249066695570946,
+            0.07289799395948648,
+            0.048483023419976234
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 287.4940390465781,
+        "io_bytes_each_host_device": 150556,
+        "available_ram_after_load_bytes": 10215809024,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 589451264,
+      "host_min_available_bytes_sampled": 10278600704,
+      "sampled_rss_max_bytes": 56287232,
+      "resource_sample_count": 1,
+      "raw_hashes": {
+        "events.jsonl": "f8c46390925efa36dba715fa110ba56c972d268e3d4ff87375f51d20dd5e6f0e",
+        "resources.csv": "174a045a759ca3bc96d169b06c2a64168878a3a977c8c3052f65d67d8f273449",
+        "tegrastats.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "report.json": "8b5278afa83de17c32e71977ce9d615a5ab4cc22bd8ad1d9a6c5c2a784ca9a15"
+      }
+    },
+    "object_embedding": {
+      "paired_count": 40,
+      "plain_adapter_ms": {
+        "count": 40,
+        "p50": 20.54122998379171,
+        "p95": 20.81256697420031,
+        "max": 21.26224699895829,
+        "method": "nearest-rank"
+      },
+      "instrumented": {
+        "adapter_ms": {
+          "count": 40,
+          "p50": 20.680243032984436,
+          "p95": 21.10045007430017,
+          "max": 21.543474053032696,
+          "method": "nearest-rank"
+        },
+        "preprocess_ms": {
+          "count": 40,
+          "p50": 7.189542055130005,
+          "p95": 7.455247920006514,
+          "max": 7.663128082640469,
+          "method": "nearest-rank"
+        },
+        "native_sync_ms": {
+          "count": 40,
+          "p50": 13.372743967920542,
+          "p95": 13.908763066865504,
+          "max": 14.21511103399098,
+          "method": "nearest-rank"
+        },
+        "postprocess_ms": {
+          "count": 40,
+          "p50": 0.12342899572104216,
+          "p95": 0.13129995204508305,
+          "max": 0.14918891247361898,
+          "method": "nearest-rank"
+        },
+        "input_validation_host_copy_ms": {
+          "count": 40,
+          "p50": 0.445615965873003,
+          "p95": 0.5478280363604426,
+          "max": 1.2420290149748325,
+          "method": "nearest-rank"
+        },
+        "output_host_copy_ms": {
+          "count": 40,
+          "p50": 0.10179600212723017,
+          "p95": 0.1203250139951706,
+          "max": 0.6256550550460815,
+          "method": "nearest-rank"
+        },
+        "output_validation_ms": {
+          "count": 40,
+          "p50": 0.10096398182213306,
+          "p95": 0.12746092397719622,
+          "max": 0.16957498155534267,
+          "method": "nearest-rank"
+        },
+        "cuda_h2d_ms": {
+          "count": 40,
+          "p50": 0.17875200510025024,
+          "p95": 0.21807999908924103,
+          "max": 0.25116801261901855,
+          "method": "nearest-rank"
+        },
+        "cuda_execution_ms": {
+          "count": 40,
+          "p50": 12.40287971496582,
+          "p95": 12.904095649719238,
+          "max": 12.977503776550293,
+          "method": "nearest-rank"
+        },
+        "cuda_d2h_ms": {
+          "count": 40,
+          "p50": 0.0055680000223219395,
+          "p95": 0.009344000369310379,
+          "max": 0.010111999697983265,
+          "method": "nearest-rank"
+        }
+      },
+      "observer_delta_ms": {
+        "min": -0.8972169598564506,
+        "median": 0.13835699064657092,
+        "max": 1.070854952558875,
+        "meaning": "signed instrumented minus paired plain; contains measurement noise"
+      },
+      "fixtures": [
+        {
+          "input": "bus",
+          "first_call_ms": 25.704105966724455,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 20.50519606564194,
+            "p95": 20.81256697420031,
+            "max": 21.26224699895829,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 20.696370978839695,
+              "p95": 21.10045007430017,
+              "max": 21.14022697787732,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 7.193765952251852,
+              "p95": 7.460783934220672,
+              "max": 7.663128082640469,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 13.403785065747797,
+              "p95": 13.908763066865504,
+              "max": 14.015455963090062,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.12246798723936081,
+              "p95": 0.13011705595999956,
+              "max": 0.13123697135597467,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.445615965873003,
+              "p95": 0.5478280363604426,
+              "max": 0.5961180431768298,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.10179600212723017,
+              "p95": 0.13674097135663033,
+              "max": 0.6256550550460815,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.10390800889581442,
+              "p95": 0.12746092397719622,
+              "max": 0.15533401165157557,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.176256000995636,
+              "p95": 0.21807999908924103,
+              "max": 0.25116801261901855,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 12.420415878295898,
+              "p95": 12.943679809570312,
+              "max": 12.977503776550293,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.005375999957323074,
+              "p95": 0.008383999578654766,
+              "max": 0.009312000125646591,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.640951911918819,
+            1.070854952558875,
+            0.35342108458280563,
+            -0.8972169598564506,
+            -0.2805220428854227,
+            0.0543700298294425,
+            -0.16179692465811968,
+            0.14685397036373615,
+            -0.11520402040332556,
+            0.48731395509094,
+            0.04076980985701084,
+            0.1531579764559865,
+            0.3583809593692422,
+            0.32759690657258034,
+            0.3335479414090514,
+            0.10537903290241957,
+            0.34657283686101437,
+            0.30951504595577717,
+            0.3200109349563718,
+            0.32766000367701054
+          ]
+        },
+        {
+          "input": "bus-dimmed",
+          "first_call_ms": 20.89599403552711,
+          "paired_count": 20,
+          "plain_adapter_ms": {
+            "count": 20,
+            "p50": 20.544845960102975,
+            "p95": 20.798837998881936,
+            "max": 21.061119972728193,
+            "method": "nearest-rank"
+          },
+          "instrumented": {
+            "adapter_ms": {
+              "count": 20,
+              "p50": 20.67870693281293,
+              "p95": 20.88034595362842,
+              "max": 21.543474053032696,
+              "method": "nearest-rank"
+            },
+            "preprocess_ms": {
+              "count": 20,
+              "p50": 7.180070038884878,
+              "p95": 7.367245038039982,
+              "max": 7.455247920006514,
+              "method": "nearest-rank"
+            },
+            "native_sync_ms": {
+              "count": 20,
+              "p50": 13.33565404638648,
+              "p95": 13.44221900217235,
+              "max": 14.21511103399098,
+              "method": "nearest-rank"
+            },
+            "postprocess_ms": {
+              "count": 20,
+              "p50": 0.12410001363605261,
+              "p95": 0.13171695172786713,
+              "max": 0.14918891247361898,
+              "method": "nearest-rank"
+            },
+            "input_validation_host_copy_ms": {
+              "count": 20,
+              "p50": 0.4447520477697253,
+              "p95": 0.4799210000783205,
+              "max": 1.2420290149748325,
+              "method": "nearest-rank"
+            },
+            "output_host_copy_ms": {
+              "count": 20,
+              "p50": 0.10137900244444609,
+              "p95": 0.11872395407408476,
+              "max": 0.1203250139951706,
+              "method": "nearest-rank"
+            },
+            "output_validation_ms": {
+              "count": 20,
+              "p50": 0.09958806913346052,
+              "p95": 0.12496497947722673,
+              "max": 0.16957498155534267,
+              "method": "nearest-rank"
+            },
+            "cuda_h2d_ms": {
+              "count": 20,
+              "p50": 0.17945599555969238,
+              "p95": 0.2043199986219406,
+              "max": 0.22659200429916382,
+              "method": "nearest-rank"
+            },
+            "cuda_execution_ms": {
+              "count": 20,
+              "p50": 12.392671585083008,
+              "p95": 12.454815864562988,
+              "max": 12.459232330322266,
+              "method": "nearest-rank"
+            },
+            "cuda_d2h_ms": {
+              "count": 20,
+              "p50": 0.005791999865323305,
+              "p95": 0.009631999768316746,
+              "max": 0.010111999697983265,
+              "method": "nearest-rank"
+            }
+          },
+          "paired_observer_delta_ms": [
+            0.4063509404659271,
+            0.1374769490212202,
+            0.1107238931581378,
+            -0.2589209470897913,
+            -0.125412130728364,
+            -0.01139205414801836,
+            -0.19034207798540592,
+            0.18723891116678715,
+            -0.03628910053521395,
+            0.2973228693008423,
+            0.08275604341179132,
+            0.017984071746468544,
+            0.13923703227192163,
+            0.05744106601923704,
+            0.09436998516321182,
+            0.28823409229516983,
+            0.9986280929297209,
+            0.03238499630242586,
+            0.14682195615023375,
+            0.09712402243167162
+          ]
+        }
+      ],
+      "load": {
+        "provider": "TensorRT 10.16.2.10",
+        "calls": 0,
+        "errors": 0,
+        "last_error": null,
+        "last_ms": null,
+        "load_ms": 1073.055492946878,
+        "io_bytes_each_host_device": 604160,
+        "available_ram_after_load_bytes": 10019319808,
+        "p50_ms": null,
+        "p95_ms": null,
+        "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+      },
+      "rss_high_water_bytes": 1155870720,
+      "host_min_available_bytes_sampled": 9886560256,
+      "sampled_rss_max_bytes": 1154850816,
+      "resource_sample_count": 4,
+      "raw_hashes": {
+        "events.jsonl": "d62873c52df0560a539af222cc911834559f04b99376d9a69f1dc1ad29eda3e9",
+        "resources.csv": "73dd25e308aacc833d28e41e748c082f4dc86a5867c9ed097aeb62501df6a8f4",
+        "tegrastats.log": "183975e79123d5fcc662831ce3d13b55cd285c4cf8b44b72055e549d8ea0bbe8",
+        "report.json": "875470671218aff91d2993b085d36a24a0170da2d7c9e349b3da298edee115b5"
+      }
+    }
+  }
+}

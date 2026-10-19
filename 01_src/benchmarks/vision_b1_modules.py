@@ -3,10 +3,12 @@
 """B1 isolated-module baseline: paired wall-clock and CUDA stream measurements."""
 
 import argparse
+import csv
 import json
 import os
 from pathlib import Path
 import resource
+import statistics
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,6 +31,76 @@ from benchmarks.vision_b1_support import (
 from benchmarks.vision_b1_timing import TensorRTTrace
 from build_vision_b1 import exclusive_build
 from deploy import runtime, services
+
+
+def summarize(output):
+    run = json.loads((output / "report.json").read_text())
+    if run["status"] != "MEASURED_MODULES_ONLY_PIPELINE_PENDING":
+        raise ValueError("Cannot summarize an incomplete measurement")
+    summary = {
+        "created_at": runtime.stamp(),
+        "status": "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+        "raw_directory": str(output.relative_to(ROOT)),
+        "protocol_sha256": run["protocol_sha256"],
+        "scope": "One engine per process, fixed 640x480 public inputs, five warmups and twenty alternating plain/instrumented pairs per input; no pipeline FPS estimate",
+        "units": "milliseconds; percentiles use nearest-rank",
+        "stage_rules": "Host pre/native/post spans partition an instrumented adapter call. CUDA stream spans overlap host native time and include host-submit gaps; do not sum separate percentiles or add CUDA to host durations.",
+        "resource_rules": "1s host/process/tegrastats samples include harness validation. Short GPU calls may be missed by sampling; RSS high-water includes model loading, not just steady inference. CPU/GPU share board RAM.",
+        "modules": {},
+    }
+    for role in run["modules"]:
+        folder = output / role
+        report = json.loads((folder / "report.json").read_text())
+        monitor = json.loads((folder / "monitor.json").read_text())
+        if report["status"] != "MEASURED" or monitor["errors"]:
+            raise ValueError("Incomplete module or resource samples: " + role)
+        samples = [
+            json.loads(line)
+            for line in (folder / "events.jsonl").read_text().splitlines()
+        ]
+        pairs = [r for r in samples if r["phase"] == "paired-measurement"]
+        if not pairs or not all(r["parity"] for r in pairs):
+            raise ValueError("Missing paired output parity: " + role)
+        with (folder / "resources.csv").open() as stream:
+            resources = list(csv.DictReader(stream))
+        deltas = [r["instrumented"]["adapter_ms"] - r["plain_ms"] for r in pairs]
+        summary["modules"][role] = {
+            "paired_count": len(pairs),
+            "plain_adapter_ms": distribution([r["plain_ms"] for r in pairs]),
+            "instrumented": {
+                key: distribution([r["instrumented"][key] for r in pairs])
+                for key in pairs[0]["instrumented"]
+            },
+            "observer_delta_ms": {
+                "min": min(deltas),
+                "median": statistics.median(deltas),
+                "max": max(deltas),
+                "meaning": "signed instrumented minus paired plain; contains measurement noise",
+            },
+            "fixtures": report["fixtures"],
+            "load": report["loaded"],
+            "rss_high_water_bytes": report["rss_high_water_bytes"],
+            "host_min_available_bytes_sampled": min(
+                int(r["mem_available"]) for r in resources
+            )
+            if resources
+            else None,
+            "sampled_rss_max_bytes": max(int(r["module_rss"]) for r in resources)
+            if resources
+            else None,
+            "resource_sample_count": len(resources),
+            "raw_hashes": {
+                name: runtime.sha256(folder / name)
+                for name in (
+                    "events.jsonl",
+                    "resources.csv",
+                    "tegrastats.log",
+                    "report.json",
+                )
+            },
+        }
+    runtime.write_json(output / "summary.json", summary)
+    return summary
 
 
 def save_prediction(path, prediction):
@@ -145,8 +217,17 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--role", choices=ROLES, nargs="+")
     parser.add_argument("--worker", choices=ROLES, help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--summarize",
+        action="store_true",
+        help="Summarize an existing successful run without inference",
+    )
     args = parser.parse_args()
     output = args.output.resolve()
+    if args.summarize:
+        summarize(output)
+        print(output / "summary.json")
+        return
     if args.worker:
         worker(args.worker, output)
         return
@@ -200,6 +281,7 @@ def main():
         raise
     finally:
         runtime.write_json(output / "report.json", report)
+    summarize(output)
 
 
 if __name__ == "__main__":

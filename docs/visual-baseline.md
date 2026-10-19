@@ -46,6 +46,33 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 
 计时只在测量进程中安装，继续调用项目锁定的 NVIDIA 推理辅助代码。主机预处理、同步原生调用和后处理属于连续墙钟区间；H2D、引擎执行、D2H 由同一 CUDA 流上的事件计时，包含可能的主机提交间隙，不等于单个 kernel 的执行时间，也不能与主机区间相加。配对数据用于展示观测开销，完整管线与 4B/语音共存数据另测，B0 原始记录保持不变。
 
+### B1 单模块初始数据
+
+2026-10-19 已完成 10 个模块、22 组固定输入的测量，共 440 对普通/计时调用，全部输出一致；资源采样无错误。测量为 Orin NX 16GB、MAXN 模式、FP32/关闭 TF32，每个进程只加载一个视觉引擎，4B/语音服务停止。下表是每模块不同固定输入合并后的普通调用耗时，包含该适配器的预处理和后处理；检测/人脸包含黑色负样本，各输入分别统计的数据保留在 [完整汇总](../benchmarks/results/b1-vision-modules-summary.json)。
+
+| 模块 | P50 / ms | P95 / ms |
+|---|---:|---:|
+| 检测与实例分割 | 28.55 | 39.35 |
+| 人脸检测 | 8.02 | 8.77 |
+| 人体与手部关键点 | 88.53 | 89.06 |
+| 行人特征 | 4.05 | 4.66 |
+| 头部姿态 | 1.02 | 1.25 |
+| 视线辅助关键点 | 2.64 | 2.68 |
+| 视线 | 1.59 | 1.65 |
+| 人脸特征 | 5.74 | 6.39 |
+| 表情 | 3.32 | 3.41 |
+| 物体特征 | 20.54 | 20.81 |
+
+这些数据不代表整机帧率，各行或不同阶段的分位数不能直接相加。输入与运行代码契约在 [冻结协议](../benchmarks/manifests/b1-vision-measurements-v1.json)，协议记录的是冻结时状态；当前进度以 B1 验收清单为准。实际测量脚本源码、每次原始耗时、CUDA 事件区间、预测样本、进程/系统资源和 tegrastats 都保存在 `05_runtime/validation/b1-modules-20261019/`。完整管线、4B/语音共存及最终交接仍待完成。
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
+  --output 05_runtime/validation/b1-modules-new
+# 已有结果重新汇总，无推理和服务切换：
+./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
+  --output 05_runtime/validation/b1-modules-20261019 --summarize
+```
+
 ### RTMW3D 原始权重与裁剪核验
 
 原始权重采用 [MMPose 固定版本模型页](https://github.com/open-mmlab/mmpose/blob/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/projects/rtmpose3d/README.md) 所列的 RTMW3D-X，完整 SHA-256 为 `b0a0eab7ca501e2c88028fe1cfd78b50c7130e220d39541da7f669e5de25e6ca`。权重地址、本地路径和大小记录在候选清单的 `body_hand_pose.source_checkpoint`。项目内已准备该文件与固定版本 MMPose 仓库。
