@@ -1,0 +1,14 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/05_runtime/environments/reachy-headless/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/01_src",
+    "${workspaceFolder}/scripts"
+  ],
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    "05_runtime",
+    "references"
+  ]
+}

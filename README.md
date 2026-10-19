@@ -20,6 +20,16 @@
 
 完整运行依赖约 6 GB，存放在 `05_runtime/` 并排除出普通 Git 提交。本机项目已具备这些依赖；**单独克隆 Git 仓库后，需要恢复运行包或从已有工件导入**。运行包不包含笔记数据库、录音、回复和日志，恢复步骤见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)。
 
+## 在 VS Code 中阅读和跳转代码
+
+通过 Remote SSH 打开整个 `Multi_Model_Inference/` 文件夹，并在远端安装推荐的 **Python** 和 **Pylance** 扩展。仓库的 `.vscode/settings.json` 已声明 `01_src/`、`scripts/` 源码搜索路径，以及项目内 Python 解释器；运行时的 `sys.path.insert(...)` 不会自动成为编辑器的搜索路径。
+
+如果 VS Code 已经选过解释器，请执行 `Ctrl+Shift+P` → `Python: Select Interpreter` → `Enter interpreter path`，选择项目下的 `05_runtime/environments/reachy-headless/bin/python`。根目录的 `.venv` 是保留的旧环境链接，不用于当前开发。默认解释器设置不会覆盖已经保存的选择。
+
+执行 `Developer: Reload Window` 后，打开 `main.py`，在 `from app.cli import main` 的 `main` 上按 **F12** 或 **Ctrl+鼠标左键**，应跳到 `01_src/app/cli.py`。macOS 使用 **Cmd+鼠标左键**。如果 F12 可以跳转但鼠标不行，检查 `Editor: Multi Cursor Modifier`：设为 `alt` 时，Ctrl/Cmd+点击用于跳转，Alt+点击用于多光标。
+
+运行工件与参考仓库不参与默认批量分析，避免在板端扫描大量外部文件；被源码导入的依赖仍可参与分析。
+
 ## 从停止状态亲自启动
 
 以下命令在板端以 `nvidia` 用户执行。模型、推理程序和 Python 环境均已准备在本项目 `05_runtime/`。系统层仍需要兼容的 Jetson Linux、CUDA、TensorRT 和 Python 3.12。
