@@ -63,7 +63,7 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 | 表情 | 3.32 | 3.41 |
 | 物体特征 | 20.54 | 20.81 |
 
-这些数据不代表整机帧率，各行或不同阶段的分位数不能直接相加。输入与运行代码契约在 [冻结协议](../benchmarks/manifests/b1-vision-measurements-v1.json)，协议记录的是冻结时状态；当前进度以 B1 验收清单为准。实际测量脚本源码、每次原始耗时、CUDA 事件区间、预测样本、进程/系统资源和 tegrastats 都保存在 `05_runtime/validation/b1-modules-20261019/`。完整管线、4B/语音共存及最终交接仍待完成。
+这些数据不代表整机帧率，各行或不同阶段的分位数不能直接相加。输入与运行代码契约在 [冻结协议](../benchmarks/manifests/b1-vision-measurements-v1.json)，协议记录的是冻结时状态；当前进度以 B1 验收清单为准。实际测量脚本源码、每次原始耗时、CUDA 事件区间、预测样本、进程/系统资源和 tegrastats 都保存在 `05_runtime/validation/b1-modules-20261019/`。完整管线数据见下一节，持续稳定性及部署交接仍待完成。
 
 ```bash
 ./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
@@ -71,6 +71,36 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 # 已有结果重新汇总，无推理和服务切换：
 ./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
   --output 05_runtime/validation/b1-modules-20261019 --summarize
+```
+
+### B1 连续视觉与共存数据
+
+已完成 [固定共存协议](../benchmarks/manifests/b1-vision-stream-v1.json) 的 7 组测量，每组预热后测 60 秒，共 4,200 次周期采样，均有有效结果，无整帧处理失败、过期丢弃或后端进程重启。采集目标 10 FPS，处理目标上限 5 FPS；最新帧策略主动跳过部分采集帧以避免积压，这与异常掉帧分开计数。全部原始结果见 [整链路汇总](../benchmarks/results/b1-vision-stream-summary.json)。
+
+下表前五行使用相同的五份固定图片、模拟对齐深度和相同的回放时序。后两行为 D435i 实拍，当时没有人体/人脸进入画面，条件触发的任务较少，不能与前五行直接比较加速比。
+
+| 条件 | 处理 FPS | 整帧处理 P50 / P95，ms | 最新结果帧龄 P95，ms | 系统最低可用内存，GiB |
+|---|---:|---:|---:|---:|
+| 回放，仅视觉 | 4.95 | 150.45 / 201.69 | 428.40 | 9.27 |
+| 回放，4B/语音后端驻留 | 4.93 | 151.58 / 205.66 | 439.62 | 2.54 |
+| 回放，4B 连续生成 | 3.95 | 238.73 / 315.62 | 622.90 | 2.46 |
+| 回放，文件语音→ASR→4B→TTS | 3.98 | 226.42 / 335.95 | 649.62 | 2.34 |
+| 回放，带图问答→TTS | 3.88 | 242.23 / 336.24 | 656.37 | 2.35 |
+| 实拍，后端驻留 | 4.98 | 43.76 / 61.74 | 348.77 | 2.55 |
+| 实拍，完整文件语音请求 | 4.98 | 63.01 / 79.47 | 365.73 | 2.33 |
+
+帧龄来自接收单调时钟，不含传感器曝光到主机接收的时间；周期采样会观察到一帧在下次结果产生前逐渐变旧，因此它与单次处理耗时不同。原始数据同时给出接收→开始、JPEG 完成→开始、接收→完成和各阶段耗时。GUI/WebSocket 传输未计入本次性能窗口，相关功能已由独立服务/浏览器探针验证。
+
+所有后端驻留条件都加载相同的客户端、VAD、动作库和 TurnController；请求负载使用隔离存储，逐轮清空会话，但保留服务器原有提示缓存策略。回放语音组有 20 个完整请求落在测量窗口内，请求 P50/P95 为 2.97/3.15 秒；实拍语音组为 25 个、2.35/2.41 秒。带图问答组只有 7 个完整请求，P50/P95 为 7.78/8.57 秒，样本数较少，不能据此作长期 SLA 承诺。窗口边缘及终止时取消的请求保留原始记录，不混入这些完整请求统计；各阶段、排队时间和缓存 token 数也已汇总。
+
+整帧失败为零不代表每个属性均可用：回放中的部分视线适配器调用被拒绝，原始累计错误计数保留在 `model_adapter_counters_total_including_warmup`，需要与输入质量检查和模型执行故障区分。真人准确率、手势补测和长期稳定性依旧按原边界单列。板端 GPU 负载为 1 秒采样；当前 tegrastats 未提供 GPU MHz 字段，汇总保留缺失标记，不推算频率。
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_stream.py \
+  --output 05_runtime/validation/b1-stream-new
+# 仅重新读取原始数据，不启动模型：
+./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_stream_summary.py \
+  --output 05_runtime/validation/b1-stream-20261019
 ```
 
 ### RTMW3D 原始权重与裁剪核验

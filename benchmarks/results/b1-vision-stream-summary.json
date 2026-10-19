@@ -1,0 +1,3719 @@
+{
+  "created_at": "2026-10-19T23:39:07.712223+00:00",
+  "status": "STREAM_CONDITIONS_MEASURED",
+  "raw_directory": "05_runtime/validation/b1-stream-20261019",
+  "workload_sha256": "71847e80c042f4d4570fc99d0b34f97e8ec790709b16ff94aac10a85e9c77593",
+  "conditions": {
+    "replay-only": {
+      "condition": "replay-only",
+      "seconds": 60.00011279003229,
+      "capture_fps": 9.94998129568814,
+      "processing_fps_counter": 4.949990694839828,
+      "completion_fps_events": 4.949990694839828,
+      "completed_frames": 297,
+      "frames_used_for_latency": 297,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 297,
+          "p50": 59.5682020066306,
+          "p95": 102.08246600814164,
+          "max": 105.65174999646842,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 297,
+          "p50": 56.27518496476114,
+          "p95": 98.60483394004405,
+          "max": 103.15095400437713,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 297,
+          "p50": 150.45006503351033,
+          "p95": 201.6900909366086,
+          "max": 275.9865450207144,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 297,
+          "p50": 204.33191489428282,
+          "p95": 294.6673260303214,
+          "max": 313.63675906322896,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 297,
+          "p50": 265.4049190459773,
+          "p95": 358.5553109878674,
+          "max": 388.7611200334504,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 313.22618399281055,
+        "p95": 428.40455402620137,
+        "max": 500.2143899910152,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 428.40455402620137,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 5.15023700427264,
+        "p95": 8.768610074184835,
+        "max": 120.39484991692007,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 301,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 0,
+      "camera_buffer_peak_bytes_sampled": 5698646,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 447,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 30.024909996427596,
+          "load_ms": 363.71779697947204,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 10227130368,
+          "p50_ms": 27.727673528715968,
+          "p95_ms": 31.958596844924614,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 447,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 10.66160702612251,
+          "load_ms": 27.443054947070777,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 10219663360,
+          "p50_ms": 8.782194461673498,
+          "p95_ms": 10.963902861112729,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 337,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 79.62122606113553,
+          "load_ms": 1074.9878670321777,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 10010587136,
+          "p50_ms": 79.98106355080381,
+          "p95_ms": 83.16122962278314,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 355,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 5.16290997620672,
+          "load_ms": 41.57048498746008,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 10002386944,
+          "p50_ms": 5.496041500009596,
+          "p95_ms": 7.930881646461784,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 503,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 1.5541689936071634,
+          "load_ms": 36.14151803776622,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 9998626816,
+          "p50_ms": 1.7797455075196922,
+          "p95_ms": 2.169079257873818,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 503,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 3.1065469374880195,
+          "load_ms": 60.61006395611912,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 9993117696,
+          "p50_ms": 3.321834490634501,
+          "p95_ms": 4.120756121119483,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 260,
+          "errors": 243,
+          "last_error": null,
+          "last_ms": 2.0634999964386225,
+          "load_ms": 35.621147020719945,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 9993256960,
+          "p50_ms": 2.417417010292411,
+          "p95_ms": 2.927301562158391,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 530,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 5.25235291570425,
+          "load_ms": 103.02998893894255,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 9991340032,
+          "p50_ms": 5.403750983532518,
+          "p95_ms": 5.7547037897165865,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 503,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 3.862094017677009,
+          "load_ms": 33.86137099005282,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 9996664832,
+          "p50_ms": 4.4288665521889925,
+          "p95_ms": 5.2321281167678535,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 175,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 16.683235997334123,
+          "load_ms": 803.5924670984969,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 10013589504,
+          "p50_ms": 16.71674201497808,
+          "p95_ms": 18.481564411194995,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 224,
+          "p50": 79.75105498917401,
+          "p95": 83.67267099674791,
+          "max": 88.97628996055573,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 297,
+          "p50": 28.066918021067977,
+          "p95": 33.474155934527516,
+          "max": 41.86291201040149,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 297,
+          "p50": 28.066918021067977,
+          "p95": 33.474155934527516,
+          "max": 41.86291201040149,
+          "method": "nearest-rank"
+        },
+        "expression_ms": {
+          "count": 224,
+          "p50": 5.4031419567763805,
+          "p95": 10.306905955076218,
+          "max": 18.158011022023857,
+          "method": "nearest-rank"
+        },
+        "face_identity_ms": {
+          "count": 236,
+          "p50": 7.429072051309049,
+          "p95": 11.439461028203368,
+          "max": 19.959964090958238,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 297,
+          "p50": 9.021483012475073,
+          "p95": 12.370022013783455,
+          "max": 131.21278292965144,
+          "method": "nearest-rank"
+        },
+        "gaze_landmarks_ms": {
+          "count": 224,
+          "p50": 4.053684999234974,
+          "p95": 7.824319996871054,
+          "max": 12.368005933240056,
+          "method": "nearest-rank"
+        },
+        "gaze_ms": {
+          "count": 224,
+          "p50": 2.3581029381603003,
+          "p95": 2.9491009190678596,
+          "max": 6.455948925577104,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 297,
+          "p50": 79.4978610938415,
+          "p95": 83.41819699853659,
+          "max": 88.97628996055573,
+          "method": "nearest-rank"
+        },
+        "head_pose_ms": {
+          "count": 224,
+          "p50": 2.291412092745304,
+          "p95": 4.348062910139561,
+          "max": 10.47039998229593,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 116,
+          "p50": 16.735750949010253,
+          "p95": 18.591177999041975,
+          "max": 20.33687406219542,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 236,
+          "p50": 5.519466940313578,
+          "p95": 8.91655101440847,
+          "max": 15.131531050428748,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 9962121147.733334,
+          "min": 9955385344.0,
+          "max": 9964085248.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147109273.6,
+          "min": 2147045376.0,
+          "max": 2147168256.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 36.44,
+          "min": 6.8,
+          "max": 45.5,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 30.835,
+          "min": 0.0,
+          "max": 99.0,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 731141973.3333334,
+          "min": 730402816.0,
+          "max": 731856896.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1887559338.6666667,
+          "min": 1886990336.0,
+          "max": 1888161792.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 51.0,
+          "min": 51.0,
+          "max": 51.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 28.0,
+          "min": 28.0,
+          "max": 28.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 170.35616666666667,
+          "min": 86.75,
+          "max": 251.04,
+          "count": 60,
+          "cpu_seconds_delta": 164.29,
+          "average_cpu_cores": 2.7830793300800285,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 2016571392,
+      "board_1s_window": {
+        "sample_count": 60,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 6103.65,
+            "max": 6110.0,
+            "min": 6102.0,
+            "count": 60
+          },
+          "cpu_temp_c": {
+            "mean": 59.67885,
+            "max": 60.531,
+            "min": 58.5,
+            "count": 60
+          },
+          "gpu_temp_c": {
+            "mean": 60.15683333333333,
+            "max": 62.468,
+            "min": 57.312,
+            "count": 60
+          },
+          "module_input_w": {
+            "mean": 11.9545,
+            "max": 14.3,
+            "min": 6.771,
+            "count": 60
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 1624.5166666666667,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 60
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 0,
+        "turn_latency_ms": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {},
+        "controller_marks_ms": {},
+        "output_tokens": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": null,
+        "busy_fraction_sampled": 0,
+        "end_window_censored_requests": 0,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "1e234efde3fa524e1d2591edec5e433602ef3020fa42dbdc3149fbba3d6c3225",
+        "events.jsonl": "dcfda271848cc5546ed34d8a154233b84b45fad1da539777d98997f5d3b760be",
+        "resources.csv": "7ce65c7f72b3db2c16f3ed4908468ea45ab3d5aa3bb08329879a912335b1d1fd",
+        "tegrastats.log": "55c7dff0f12e924e7dee8b044c1362dcd696f21a7697d06f6cb15a41584c264d",
+        "monitor.json": "9c1e82f7e5050ebcd70ee1c07d75d8579a0b1b02cbb7665163995abd1d323ed8"
+      }
+    },
+    "replay-resident": {
+      "condition": "replay-resident",
+      "seconds": 60.00009594298899,
+      "capture_fps": 9.933317449463889,
+      "processing_fps_counter": 4.933325444700186,
+      "completion_fps_events": 4.933325444700186,
+      "completed_frames": 296,
+      "frames_used_for_latency": 296,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 296,
+          "p50": 55.3043830441311,
+          "p95": 100.08435603231192,
+          "max": 103.423708002083,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 296,
+          "p50": 51.93497601430863,
+          "p95": 97.8492769645527,
+          "max": 101.03214194532484,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 296,
+          "p50": 151.58047701697797,
+          "p95": 205.66032291390002,
+          "max": 312.7220219466835,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 296,
+          "p50": 217.65726106241345,
+          "p95": 286.86043398920447,
+          "max": 323.08001804631203,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 296,
+          "p50": 264.365102048032,
+          "p95": 356.56375903636217,
+          "max": 408.6970220087096,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 315.2350540040061,
+        "p95": 439.6245339885354,
+        "max": 524.1365330293775,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 439.6245339885354,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 5.12842193711549,
+        "p95": 9.626775979995728,
+        "max": 19.07822396606207,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 301,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 0,
+      "camera_buffer_peak_bytes_sampled": 5665022,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 445,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 30.841746018268168,
+          "load_ms": 494.5761359995231,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 4084658176,
+          "p50_ms": 30.154089501593262,
+          "p95_ms": 35.92199450940825,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 445,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 10.726239997893572,
+          "load_ms": 36.41669696662575,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 4084793344,
+          "p50_ms": 9.223245491739362,
+          "p95_ms": 12.400162068661302,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 336,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 79.61767900269479,
+          "load_ms": 5429.633619030938,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 3475931136,
+          "p50_ms": 79.8193845548667,
+          "p95_ms": 83.72182807070203,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 354,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 9.86061105504632,
+          "load_ms": 59.57220203708857,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 3447554048,
+          "p50_ms": 5.5170595296658576,
+          "p95_ms": 9.891816851450129,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 501,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 1.4859359944239259,
+          "load_ms": 38.271197001449764,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 3454107648,
+          "p50_ms": 1.7832585144788027,
+          "p95_ms": 2.7784936479292806,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 501,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 3.1238460214808583,
+          "load_ms": 61.01558299269527,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 3458797568,
+          "p50_ms": 3.3081399742513895,
+          "p95_ms": 4.347772046457975,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 258,
+          "errors": 243,
+          "last_error": null,
+          "last_ms": 2.074018935672939,
+          "load_ms": 43.31518895924091,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 3429638144,
+          "p50_ms": 2.4561439640820026,
+          "p95_ms": 2.978837216505781,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 528,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 5.146024050191045,
+          "load_ms": 110.75478501152247,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 3254915072,
+          "p50_ms": 5.401744449045509,
+          "p95_ms": 5.981364636681974,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 501,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 3.8734390400350094,
+          "load_ms": 34.086370957084,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 3253452800,
+          "p50_ms": 4.6049829688854516,
+          "p95_ms": 5.752138880779966,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 174,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 16.49439602624625,
+          "load_ms": 982.7857989585027,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 2737692672,
+          "p50_ms": 16.69641403714195,
+          "p95_ms": 19.156117888633162,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 223,
+          "p50": 79.82874603476375,
+          "p95": 83.73026095796376,
+          "max": 95.7075780024752,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 296,
+          "p50": 29.159158933907747,
+          "p95": 36.07064299285412,
+          "max": 43.0133119225502,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 296,
+          "p50": 29.159158933907747,
+          "p95": 36.07064299285412,
+          "max": 43.0133119225502,
+          "method": "nearest-rank"
+        },
+        "expression_ms": {
+          "count": 223,
+          "p50": 7.744314963929355,
+          "p95": 12.046763906255364,
+          "max": 15.720479073934257,
+          "method": "nearest-rank"
+        },
+        "face_identity_ms": {
+          "count": 235,
+          "p50": 6.328333984129131,
+          "p95": 12.402580003254116,
+          "max": 19.424694939516485,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 296,
+          "p50": 8.910979027859867,
+          "p95": 12.53884204197675,
+          "max": 18.020298914052546,
+          "method": "nearest-rank"
+        },
+        "gaze_landmarks_ms": {
+          "count": 223,
+          "p50": 4.027300048619509,
+          "p95": 8.751805988140404,
+          "max": 128.98092193063349,
+          "method": "nearest-rank"
+        },
+        "gaze_ms": {
+          "count": 223,
+          "p50": 2.363756997510791,
+          "p95": 3.0448678880929947,
+          "max": 9.60066297557205,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 296,
+          "p50": 79.50573100242764,
+          "p95": 83.47007795237005,
+          "max": 95.7075780024752,
+          "method": "nearest-rank"
+        },
+        "head_pose_ms": {
+          "count": 223,
+          "p50": 3.1605829717591405,
+          "p95": 4.620149964466691,
+          "max": 14.58341907709837,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 115,
+          "p50": 16.72390499152243,
+          "p95": 21.23336400836706,
+          "max": 27.466143015772104,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 235,
+          "p50": 5.548211978748441,
+          "p95": 9.879971970804036,
+          "max": 18.43560510315001,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 2740578030.9333334,
+          "min": 2728742912.0,
+          "max": 2750779392.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147391010.1333334,
+          "min": 2147299328.0,
+          "max": 2147430400.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 37.19166666666667,
+          "min": 8.4,
+          "max": 47.3,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 45.49,
+          "min": 0.0,
+          "max": 99.8,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 581730594.1333333,
+          "min": 580759552.0,
+          "max": 582432768.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1785398272.0,
+          "min": 1784623104.0,
+          "max": 1785950208.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 56.766666666666666,
+          "min": 55.0,
+          "max": 57.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 31.0,
+          "min": 31.0,
+          "max": 31.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 175.85750000000002,
+          "min": 91.44,
+          "max": 257.09000000000003,
+          "count": 60,
+          "cpu_seconds_delta": 165.65000000000003,
+          "average_cpu_cores": 2.805271740173247,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "llama_pss": {
+          "mean": 689318809.6,
+          "min": 689313792.0,
+          "max": 689332224.0,
+          "count": 60
+        },
+        "llama_rss": {
+          "mean": 4939653120.0,
+          "min": 4939653120.0,
+          "max": 4939653120.0,
+          "count": 60
+        },
+        "llama_fds": {
+          "mean": 52.0,
+          "min": 52.0,
+          "max": 52.0,
+          "count": 60
+        },
+        "llama_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "llama_cpu_seconds": {
+          "mean": 8.713000000000001,
+          "min": 8.71,
+          "max": 8.73,
+          "count": 60,
+          "cpu_seconds_delta": 0.019999999999999574,
+          "average_cpu_cores": 0.00033869867071212637,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "asr_pss": {
+          "mean": 375977984.0,
+          "min": 375962624.0,
+          "max": 375981056.0,
+          "count": 60
+        },
+        "asr_rss": {
+          "mean": 2454404915.2,
+          "min": 2454380544.0,
+          "max": 2454409216.0,
+          "count": 60
+        },
+        "asr_fds": {
+          "mean": 52.0,
+          "min": 52.0,
+          "max": 52.0,
+          "count": 60
+        },
+        "asr_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "asr_cpu_seconds": {
+          "mean": 4.562833333333333,
+          "min": 4.55,
+          "max": 4.569999999999999,
+          "count": 60,
+          "cpu_seconds_delta": 0.019999999999999574,
+          "average_cpu_cores": 0.00033869867071212637,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "speech_pss": {
+          "mean": 538276864.0,
+          "min": 538262528.0,
+          "max": 538283008.0,
+          "count": 60
+        },
+        "speech_rss": {
+          "mean": 872185036.8,
+          "min": 872173568.0,
+          "max": 872189952.0,
+          "count": 60
+        },
+        "speech_fds": {
+          "mean": 62.6,
+          "min": 62.0,
+          "max": 64.0,
+          "count": 60
+        },
+        "speech_threads": {
+          "mean": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "count": 60
+        },
+        "speech_cpu_seconds": {
+          "mean": 5.649333333333333,
+          "min": 5.58,
+          "max": 5.719999999999999,
+          "count": 60,
+          "cpu_seconds_delta": 0.1399999999999988,
+          "average_cpu_cores": 0.0023708906949849147,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 1897160704,
+      "board_1s_window": {
+        "sample_count": 59,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 12792.305084745763,
+            "max": 12803.0,
+            "min": 12783.0,
+            "count": 59
+          },
+          "cpu_temp_c": {
+            "mean": 59.99327118644068,
+            "max": 60.843,
+            "min": 59.093,
+            "count": 59
+          },
+          "gpu_temp_c": {
+            "mean": 59.93706779661017,
+            "max": 62.187,
+            "min": 57.375,
+            "count": 59
+          },
+          "module_input_w": {
+            "mean": 11.990322033898305,
+            "max": 14.103,
+            "min": 6.771,
+            "count": 59
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 1666.2033898305085,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 59
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 0,
+        "turn_latency_ms": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {},
+        "controller_marks_ms": {},
+        "output_tokens": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": null,
+        "busy_fraction_sampled": 0,
+        "end_window_censored_requests": 0,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "c79bed4042856ded640a1e68a064df8d88328caad9f0c48575c792101fb2833b",
+        "events.jsonl": "7e35d4b5f568ccee28b025d8108156abc0fb8030e48ab70e289ddc79dae8e56e",
+        "resources.csv": "02eaa7f82fea3104846a8eba9fde03996b7cc2591de139aaeac5401c78a06566",
+        "tegrastats.log": "f2cafb749547623ad28884962826500840e12dc8066354b7ebe68ef6714f393d",
+        "monitor.json": "7cdb646163cb7c5cdac3c3d681e011cd34e7905e7a0f4e9bdacce2fc541bf7f6"
+      }
+    },
+    "replay-4b": {
+      "condition": "replay-4b",
+      "seconds": 60.0000825219322,
+      "capture_fps": 9.933319671387792,
+      "processing_fps_counter": 3.949994567313602,
+      "completion_fps_events": 3.949994567313602,
+      "completed_frames": 237,
+      "frames_used_for_latency": 237,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 237,
+          "p50": 49.792199046351016,
+          "p95": 101.95893805939704,
+          "max": 103.02202892489731,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 237,
+          "p50": 46.008400968275964,
+          "p95": 97.40600001532584,
+          "max": 99.39076704904437,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 237,
+          "p50": 238.7325749732554,
+          "p95": 315.62417501118034,
+          "max": 340.14913195278496,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 237,
+          "p50": 296.8785029370338,
+          "p95": 394.06454702839255,
+          "max": 437.3397739836946,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 237,
+          "p50": 346.53223492205143,
+          "p95": 444.9493889696896,
+          "max": 499.28432889282703,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 409.8463379777968,
+        "p95": 622.8986351052299,
+        "max": 745.057431049645,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 622.8986351052299,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 6.647519068792462,
+        "p95": 11.752556078135967,
+        "max": 18.715732032433152,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 359,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 0,
+      "camera_buffer_peak_bytes_sampled": 5698646,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 437,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 30.56884102988988,
+          "load_ms": 437.31623399071395,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 4178345984,
+          "p50_ms": 42.13287401944399,
+          "p95_ms": 48.949417285621166,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 437,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 17.952222959138453,
+          "load_ms": 36.80896502919495,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 4196700160,
+          "p50_ms": 12.07338203676045,
+          "p95_ms": 17.823649098863825,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 308,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 140.26803302112967,
+          "load_ms": 1272.9874840006232,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 3477987328,
+          "p50_ms": 141.0186254652217,
+          "p95_ms": 156.46825451985933,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 330,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.526583943516016,
+          "load_ms": 46.76187096629292,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 3439939584,
+          "p50_ms": 4.907333059236407,
+          "p95_ms": 8.842492493567988,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 447,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 2.893697004765272,
+          "load_ms": 36.382711958140135,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 3442167808,
+          "p50_ms": 2.2642845287919044,
+          "p95_ms": 4.384356632363051,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 447,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.302448942326009,
+          "load_ms": 59.552759979851544,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 3442462720,
+          "p50_ms": 5.710511934012175,
+          "p95_ms": 6.786759285023436,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 241,
+          "errors": 206,
+          "last_error": null,
+          "last_ms": 3.2389250118285418,
+          "load_ms": 41.59667599014938,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 3321450496,
+          "p50_ms": 3.2780785113573074,
+          "p95_ms": 5.299490061588585,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 480,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 7.836233009584248,
+          "load_ms": 123.45852900762111,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 3237744640,
+          "p50_ms": 8.4190524648875,
+          "p95_ms": 10.20444085006602,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 447,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.213455016724765,
+          "load_ms": 35.64489504788071,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 3239059456,
+          "p50_ms": 4.391267488244921,
+          "p95_ms": 8.369514701189473,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 150,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 28.26623502187431,
+          "load_ms": 988.9723090454936,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 2723471360,
+          "p50_ms": 28.133427491411567,
+          "p95_ms": 32.3126919742208,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 165,
+          "p50": 140.36150299943984,
+          "p95": 156.5395670477301,
+          "max": 162.64264099299908,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 237,
+          "p50": 41.27278504893184,
+          "p95": 49.01534493546933,
+          "max": 57.299657026305795,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 237,
+          "p50": 41.27278504893184,
+          "p95": 49.01534493546933,
+          "max": 57.299657026305795,
+          "method": "nearest-rank"
+        },
+        "expression_ms": {
+          "count": 165,
+          "p50": 8.12548992689699,
+          "p95": 16.178494901396334,
+          "max": 27.243155986070633,
+          "method": "nearest-rank"
+        },
+        "face_identity_ms": {
+          "count": 177,
+          "p50": 11.221849010325968,
+          "p95": 19.722778000868857,
+          "max": 25.25688090827316,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 237,
+          "p50": 12.184603023342788,
+          "p95": 18.930397927761078,
+          "max": 123.35213704500347,
+          "method": "nearest-rank"
+        },
+        "gaze_landmarks_ms": {
+          "count": 165,
+          "p50": 6.780516006983817,
+          "p95": 13.194075901992619,
+          "max": 17.69678806886077,
+          "method": "nearest-rank"
+        },
+        "gaze_ms": {
+          "count": 165,
+          "p50": 3.304910962469876,
+          "p95": 5.3180670365691185,
+          "max": 13.222013018094003,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 237,
+          "p50": 137.8604529891163,
+          "p95": 156.08031791634858,
+          "max": 162.64264099299908,
+          "method": "nearest-rank"
+        },
+        "head_pose_ms": {
+          "count": 165,
+          "p50": 4.415411967784166,
+          "p95": 10.1935911225155,
+          "max": 13.074613991193473,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 80,
+          "p50": 28.141646995209157,
+          "p95": 32.31068595778197,
+          "max": 36.91282495856285,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 177,
+          "p50": 4.922501975670457,
+          "p95": 9.66624601278454,
+          "max": 14.164414023980498,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 2665840162.133333,
+          "min": 2644930560.0,
+          "max": 2674548736.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147449582.9333334,
+          "min": 2147332096.0,
+          "max": 2147479552.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 30.046666666666667,
+          "min": 8.8,
+          "max": 39.9,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 97.66,
+          "min": 59.2,
+          "max": 100.0,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 622592750.9333333,
+          "min": 621984768.0,
+          "max": 622894080.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1836983637.3333333,
+          "min": 1836408832.0,
+          "max": 1837412352.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 56.0,
+          "min": 56.0,
+          "max": 56.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 33.0,
+          "min": 33.0,
+          "max": 33.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 183.32150000000001,
+          "min": 117.11999999999999,
+          "max": 246.34,
+          "count": 60,
+          "cpu_seconds_delta": 129.22000000000003,
+          "average_cpu_cores": 2.189159651252485,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "llama_pss": {
+          "mean": 968973397.3333334,
+          "min": 967370752.0,
+          "max": 969676800.0,
+          "count": 60
+        },
+        "llama_rss": {
+          "mean": 5226704964.266666,
+          "min": 5223305216.0,
+          "max": 5228335104.0,
+          "count": 60
+        },
+        "llama_fds": {
+          "mean": 53.0,
+          "min": 53.0,
+          "max": 53.0,
+          "count": 60
+        },
+        "llama_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "llama_cpu_seconds": {
+          "mean": 11.647166666666667,
+          "min": 10.65,
+          "max": 12.68,
+          "count": 60,
+          "cpu_seconds_delta": 2.0299999999999994,
+          "average_cpu_cores": 0.034390915431377046,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "asr_pss": {
+          "mean": 383146820.26666665,
+          "min": 381399040.0,
+          "max": 384025600.0,
+          "count": 60
+        },
+        "asr_rss": {
+          "mean": 2468693060.266667,
+          "min": 2465202176.0,
+          "max": 2470449152.0,
+          "count": 60
+        },
+        "asr_fds": {
+          "mean": 52.0,
+          "min": 52.0,
+          "max": 52.0,
+          "count": 60
+        },
+        "asr_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "asr_cpu_seconds": {
+          "mean": 4.298666666666667,
+          "min": 4.29,
+          "max": 4.3100000000000005,
+          "count": 60,
+          "cpu_seconds_delta": 0.020000000000000462,
+          "average_cpu_cores": 0.000338826753018501,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "speech_pss": {
+          "mean": 564412125.8666667,
+          "min": 562817024.0,
+          "max": 564842496.0,
+          "count": 60
+        },
+        "speech_rss": {
+          "mean": 919620403.2,
+          "min": 917520384.0,
+          "max": 920240128.0,
+          "count": 60
+        },
+        "speech_fds": {
+          "mean": 62.53333333333333,
+          "min": 62.0,
+          "max": 64.0,
+          "count": 60
+        },
+        "speech_threads": {
+          "mean": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "count": 60
+        },
+        "speech_cpu_seconds": {
+          "mean": 5.783166666666666,
+          "min": 5.72,
+          "max": 5.85,
+          "count": 60,
+          "cpu_seconds_delta": 0.1299999999999999,
+          "average_cpu_cores": 0.002202373894620204,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 1941950464,
+      "board_1s_window": {
+        "sample_count": 60,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 13060.8,
+            "max": 13080.0,
+            "min": 13053.0,
+            "count": 60
+          },
+          "cpu_temp_c": {
+            "mean": 66.373,
+            "max": 67.718,
+            "min": 64.5,
+            "count": 60
+          },
+          "gpu_temp_c": {
+            "mean": 68.3267,
+            "max": 69.812,
+            "min": 66.25,
+            "count": 60
+          },
+          "module_input_w": {
+            "mean": 19.18005,
+            "max": 20.06,
+            "min": 16.711,
+            "count": 60
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 1333.0166666666667,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 60
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 3,
+        "turn_latency_ms": {
+          "count": 3,
+          "p50": 14405.43769998476,
+          "p95": 14533.579356968403,
+          "max": 14533.579356968403,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {},
+        "controller_marks_ms": {},
+        "output_tokens": {
+          "count": 3,
+          "p50": 128,
+          "p95": 128,
+          "max": 128,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 3,
+          "p50": 26,
+          "p95": 26,
+          "max": 26,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": 7,
+        "busy_fraction_sampled": 0.9966666666666667,
+        "end_window_censored_requests": 1,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "df6eff0741bccefcaa933c925689e5b4a9cb1af950e3af3fc7a2baab3914f0e2",
+        "events.jsonl": "4dc804fb9f53b72caa96fa831dd638b6a304d7c5ae54f209990b329f40ca0928",
+        "resources.csv": "353d10c8f18f36139ce3c3972db7d27dc87deece603ee8f446196247ac27f107",
+        "tegrastats.log": "90617615f62c779623fd5e7b86a84ea51230d347b007be21530ed9c3fa2653e4",
+        "monitor.json": "e4535d306af30e4b402e74047787e9bdb6fb6e1a303e56bbabdb274afd27cbec"
+      }
+    },
+    "replay-conversation": {
+      "condition": "replay-conversation",
+      "seconds": 60.000096200965345,
+      "capture_fps": 9.933317406754606,
+      "processing_fps_counter": 3.9833269466683743,
+      "completion_fps_events": 3.9833269466683743,
+      "completed_frames": 239,
+      "frames_used_for_latency": 239,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 239,
+          "p50": 48.15537598915398,
+          "p95": 97.38238109275699,
+          "max": 104.82422006316483,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 239,
+          "p50": 42.94035106431693,
+          "p95": 93.5821890598163,
+          "max": 99.71726802177727,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 239,
+          "p50": 226.41858691349626,
+          "p95": 335.9529139706865,
+          "max": 355.00822600442916,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 239,
+          "p50": 267.0642649754882,
+          "p95": 405.98303405568004,
+          "max": 453.75227101612836,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 239,
+          "p50": 325.80518000759184,
+          "p95": 471.8855239916593,
+          "max": 494.11891505587846,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 411.6961379768327,
+        "p95": 649.6196830412373,
+        "max": 759.7900279797614,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 649.6196830412373,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 5.555518087930977,
+        "p95": 11.384133948013186,
+        "max": 19.445016980171204,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 357,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 0,
+      "camera_buffer_peak_bytes_sampled": 5709853,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 359,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 43.26401406433433,
+          "load_ms": 423.5454029403627,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 4203966464,
+          "p50_ms": 43.115960026625544,
+          "p95_ms": 52.8221475542523,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 359,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 10.353539022617042,
+          "load_ms": 33.6452069459483,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 4157337600,
+          "p50_ms": 12.348072021268308,
+          "p95_ms": 18.086363578913733,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 253,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 165.21492309402674,
+          "load_ms": 1394.3293769843876,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 3491037184,
+          "p50_ms": 141.40098850475624,
+          "p95_ms": 172.9761099908501,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 271,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 13.042176025919616,
+          "load_ms": 51.89478804823011,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 3452727296,
+          "p50_ms": 6.33346545509994,
+          "p95_ms": 13.042742479592562,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 365,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 2.870594966225326,
+          "load_ms": 42.01282002031803,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 3434328064,
+          "p50_ms": 2.7369100134819746,
+          "p95_ms": 4.135717137251049,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 365,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.289139062166214,
+          "load_ms": 64.0020789578557,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 3417305088,
+          "p50_ms": 4.298851010389626,
+          "p95_ms": 6.934913410805166,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 198,
+          "errors": 167,
+          "last_error": null,
+          "last_ms": 3.221038030460477,
+          "load_ms": 45.11235002428293,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 3341942784,
+          "p50_ms": 3.22537450119853,
+          "p95_ms": 5.232926353346556,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 392,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 8.786958060227334,
+          "load_ms": 126.67713803239167,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 3195895808,
+          "p50_ms": 8.570517529733479,
+          "p95_ms": 11.479507177136837,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 365,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.188079969026148,
+          "load_ms": 39.42345199175179,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 3140440064,
+          "p50_ms": 4.505690943915397,
+          "p95_ms": 6.517108960542826,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 121,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 29.4453629758209,
+          "load_ms": 981.4892399590462,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 2752360448,
+          "p50_ms": 28.938171977642924,
+          "p95_ms": 33.613702503498644,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 168,
+          "p50": 143.44970299862325,
+          "p95": 172.98812605440617,
+          "max": 181.19649298023432,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 239,
+          "p50": 42.29559097439051,
+          "p95": 53.61051205545664,
+          "max": 66.53476203791797,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 239,
+          "p50": 42.29559097439051,
+          "p95": 53.61051205545664,
+          "max": 66.53476203791797,
+          "method": "nearest-rank"
+        },
+        "expression_ms": {
+          "count": 168,
+          "p50": 6.507550948299468,
+          "p95": 13.360456097871065,
+          "max": 22.599015850573778,
+          "method": "nearest-rank"
+        },
+        "face_identity_ms": {
+          "count": 180,
+          "p50": 10.314592975191772,
+          "p95": 20.196689991280437,
+          "max": 25.90018103364855,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 239,
+          "p50": 12.403271975927055,
+          "p95": 20.497374003753066,
+          "max": 102.20442293211818,
+          "method": "nearest-rank"
+        },
+        "gaze_landmarks_ms": {
+          "count": 168,
+          "p50": 6.814889959059656,
+          "p95": 11.13484613597393,
+          "max": 26.459048967808485,
+          "method": "nearest-rank"
+        },
+        "gaze_ms": {
+          "count": 168,
+          "p50": 3.2427679980173707,
+          "p95": 5.247923079878092,
+          "max": 11.72913599293679,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 239,
+          "p50": 119.52076794113964,
+          "p95": 171.73903493676335,
+          "max": 181.19649298023432,
+          "method": "nearest-rank"
+        },
+        "head_pose_ms": {
+          "count": 168,
+          "p50": 3.169676987454295,
+          "p95": 7.2630009381100535,
+          "max": 18.937927088700235,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 81,
+          "p50": 29.04428797774017,
+          "p95": 33.621313981711864,
+          "max": 55.145760998129845,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 180,
+          "p50": 6.4110669773072,
+          "p95": 13.243495021015406,
+          "max": 19.11896001547575,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 2559030340.266667,
+          "min": 2510626816.0,
+          "max": 2649591808.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147451767.4666667,
+          "min": 2147422208.0,
+          "max": 2147479552.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 33.33,
+          "min": 10.2,
+          "max": 48.7,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 88.40166666666667,
+          "min": 0.0,
+          "max": 99.9,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 605825006.9333333,
+          "min": 603983872.0,
+          "max": 606541824.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1811334348.8,
+          "min": 1809838080.0,
+          "max": 1811836928.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 56.78333333333333,
+          "min": 55.0,
+          "max": 57.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 33.78333333333333,
+          "min": 32.0,
+          "max": 34.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 141.387,
+          "min": 73.94999999999999,
+          "max": 206.14000000000001,
+          "count": 60,
+          "cpu_seconds_delta": 132.19000000000003,
+          "average_cpu_cores": 2.2389716881640633,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "llama_pss": {
+          "mean": 814688870.4,
+          "min": 697785344.0,
+          "max": 856151040.0,
+          "count": 60
+        },
+        "llama_rss": {
+          "mean": 5066920277.333333,
+          "min": 4965908480.0,
+          "max": 5108318208.0,
+          "count": 60
+        },
+        "llama_fds": {
+          "mean": 52.81666666666667,
+          "min": 52.0,
+          "max": 53.0,
+          "count": 60
+        },
+        "llama_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "llama_cpu_seconds": {
+          "mean": 20.069166666666668,
+          "min": 14.469999999999999,
+          "max": 25.83,
+          "count": 60,
+          "cpu_seconds_delta": 11.36,
+          "average_cpu_cores": 0.1924103062073058,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "asr_pss": {
+          "mean": 599042850.1333333,
+          "min": 598675456.0,
+          "max": 599384064.0,
+          "count": 60
+        },
+        "asr_rss": {
+          "mean": 2705619490.133333,
+          "min": 2705170432.0,
+          "max": 2706157568.0,
+          "count": 60
+        },
+        "asr_fds": {
+          "mean": 52.166666666666664,
+          "min": 52.0,
+          "max": 53.0,
+          "count": 60
+        },
+        "asr_threads": {
+          "mean": 16.05,
+          "min": 16.0,
+          "max": 19.0,
+          "count": 60
+        },
+        "asr_cpu_seconds": {
+          "mean": 5.28,
+          "min": 4.890000000000001,
+          "max": 5.67,
+          "count": 60,
+          "cpu_seconds_delta": 0.7799999999999994,
+          "average_cpu_cores": 0.013211271024797395,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "speech_pss": {
+          "mean": 554803029.3333334,
+          "min": 554591232.0,
+          "max": 555064320.0,
+          "count": 60
+        },
+        "speech_rss": {
+          "mean": 900849117.8666667,
+          "min": 900403200.0,
+          "max": 901345280.0,
+          "count": 60
+        },
+        "speech_fds": {
+          "mean": 62.9,
+          "min": 62.0,
+          "max": 66.0,
+          "count": 60
+        },
+        "speech_threads": {
+          "mean": 21.0,
+          "min": 21.0,
+          "max": 21.0,
+          "count": 60
+        },
+        "speech_cpu_seconds": {
+          "mean": 8.5985,
+          "min": 6.96,
+          "max": 10.24,
+          "count": 60,
+          "cpu_seconds_delta": 3.2800000000000002,
+          "average_cpu_cores": 0.05555508841196858,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 1921355776,
+      "board_1s_window": {
+        "sample_count": 60,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 13164.8,
+            "max": 13209.0,
+            "min": 13097.0,
+            "count": 60
+          },
+          "cpu_temp_c": {
+            "mean": 65.0913,
+            "max": 66.187,
+            "min": 63.687,
+            "count": 60
+          },
+          "gpu_temp_c": {
+            "mean": 66.61165,
+            "max": 68.156,
+            "min": 63.531,
+            "count": 60
+          },
+          "module_input_w": {
+            "mean": 17.079233333333335,
+            "max": 18.812,
+            "min": 12.549,
+            "count": 60
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 1566.5,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 60
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 20,
+        "turn_latency_ms": {
+          "count": 20,
+          "p50": 2973.138901987113,
+          "p95": 3145.8437900291756,
+          "max": 3213.16670300439,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {
+          "vad": {
+            "count": 20,
+            "p50": 27.065247064456344,
+            "p95": 37.717518978752196,
+            "max": 37.77316492050886,
+            "method": "nearest-rank"
+          },
+          "asr": {
+            "count": 20,
+            "p50": 367.90057201869786,
+            "p95": 430.0354430451989,
+            "max": 438.8917959295213,
+            "method": "nearest-rank"
+          },
+          "llm": {
+            "count": 20,
+            "p50": 2283.7832600343972,
+            "p95": 2432.05962900538,
+            "max": 2457.523185061291,
+            "method": "nearest-rank"
+          },
+          "tts": {
+            "count": 20,
+            "p50": 61.66969204787165,
+            "p95": 74.78099409490824,
+            "max": 76.78381295409054,
+            "method": "nearest-rank"
+          },
+          "release": {
+            "count": 20,
+            "p50": 177.2205469897017,
+            "p95": 244.11824299022555,
+            "max": 293.1906330632046,
+            "method": "nearest-rank"
+          }
+        },
+        "controller_marks_ms": {
+          "dequeued": {
+            "count": 20,
+            "p50": 0.16682199202477932,
+            "p95": 0.6156689487397671,
+            "max": 4.32066002395004,
+            "method": "nearest-rank"
+          },
+          "first_content": {
+            "count": 20,
+            "p50": 2745.537781971507,
+            "p95": 2885.0316549651325,
+            "max": 2933.6749099893495,
+            "method": "nearest-rank"
+          },
+          "output_published": {
+            "count": 20,
+            "p50": 2790.8312079962343,
+            "p95": 2960.7333530439064,
+            "max": 3009.178514010273,
+            "method": "nearest-rank"
+          },
+          "worker_done": {
+            "count": 20,
+            "p50": 2796.2662420468405,
+            "p95": 2963.677741936408,
+            "max": 3017.9934080224484,
+            "method": "nearest-rank"
+          }
+        },
+        "output_tokens": {
+          "count": 20,
+          "p50": 3,
+          "p95": 3,
+          "max": 3,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 20,
+          "p50": 448,
+          "p95": 448,
+          "max": 448,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": 30,
+        "busy_fraction_sampled": 1,
+        "end_window_censored_requests": 1,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "05707b201426eef9d3a8de6b3c463a04cadd28efd551c2403a189a0a55778de1",
+        "events.jsonl": "1c8f83b422febc32df8c76d0cb1fce93ba2116a7674cf5961a05b8374b1d039e",
+        "resources.csv": "a880a82b8aedb3c1de3f291f9e5cd8ff0be89a9d771c644616c904338658e834",
+        "tegrastats.log": "087fca9996744691f1691afad079ad4492bad126d6e9335987861129954a7e9d",
+        "monitor.json": "a426b6a1840a945bd5bb9434ef82dff5de7b3e85bf09909b8fe2f23504fd44a6"
+      }
+    },
+    "replay-vision-chat": {
+      "condition": "replay-vision-chat",
+      "seconds": 60.00007447390817,
+      "capture_fps": 9.94998764975889,
+      "processing_fps_counter": 3.883328513222482,
+      "completion_fps_events": 3.883328513222482,
+      "completed_frames": 233,
+      "frames_used_for_latency": 233,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 233,
+          "p50": 54.35674102045596,
+          "p95": 97.38914004992694,
+          "max": 105.1136099267751,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 233,
+          "p50": 49.532957025803626,
+          "p95": 92.75627601891756,
+          "max": 102.72626299411058,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 233,
+          "p50": 242.23004805389792,
+          "p95": 336.238257936202,
+          "max": 354.4628929812461,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 233,
+          "p50": 294.8123310925439,
+          "p95": 413.4758950676769,
+          "max": 450.8389999391511,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 233,
+          "p50": 349.1228739731014,
+          "p95": 487.88444697856903,
+          "max": 521.8940329505131,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 427.20501497387886,
+        "p95": 656.3677119556814,
+        "max": 760.8412000117823,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 656.3677119556814,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 6.173014990054071,
+        "p95": 12.035234016366303,
+        "max": 109.07306801527739,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 364,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 0,
+      "camera_buffer_peak_bytes_sampled": 5709853,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 349,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 43.22387289721519,
+          "load_ms": 525.6894550984725,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 4203286528,
+          "p50_ms": 42.81036800239235,
+          "p95_ms": 53.78073478350415,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 349,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 12.210824992507696,
+          "load_ms": 37.033728091046214,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 4172623872,
+          "p50_ms": 12.458001438062638,
+          "p95_ms": 17.558887461200356,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 247,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 166.9496209360659,
+          "load_ms": 1185.4046320077032,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 3627569152,
+          "p50_ms": 149.91401153383777,
+          "p95_ms": 169.74374480778351,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 265,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 12.519220006652176,
+          "load_ms": 47.2829130012542,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 3585855488,
+          "p50_ms": 6.01528154220432,
+          "p95_ms": 15.225014387397094,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 359,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 1.5803748974576592,
+          "load_ms": 37.976288003847,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 3571634176,
+          "p50_ms": 2.7702725492417812,
+          "p95_ms": 4.020590760046615,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 359,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.286356968805194,
+          "load_ms": 62.39159498363733,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 3547385856,
+          "p50_ms": 4.346887464635074,
+          "p95_ms": 6.964741210686043,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 193,
+          "errors": 166,
+          "last_error": null,
+          "last_ms": 3.22971201967448,
+          "load_ms": 43.27096708584577,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 3351314432,
+          "p50_ms": 3.2383365323767066,
+          "p95_ms": 3.9027288381475937,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 386,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 7.1963469963520765,
+          "load_ms": 127.11178394965827,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 3299610624,
+          "p50_ms": 8.555753505788743,
+          "p95_ms": 10.76742592267692,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 359,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 4.203826072625816,
+          "load_ms": 35.35914106760174,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 3291885568,
+          "p50_ms": 4.397512995637953,
+          "p95_ms": 8.092559076612815,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 121,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 32.209248980507255,
+          "load_ms": 1008.2920859567821,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 2961141760,
+          "p50_ms": 28.949195460882038,
+          "p95_ms": 32.06481737433933,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 164,
+          "p50": 150.0787460245192,
+          "p95": 170.25172500871122,
+          "max": 181.46259803324938,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 233,
+          "p50": 42.722605052404106,
+          "p95": 52.20290005672723,
+          "max": 58.090950013138354,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 233,
+          "p50": 42.722605052404106,
+          "p95": 52.20290005672723,
+          "max": 58.090950013138354,
+          "method": "nearest-rank"
+        },
+        "expression_ms": {
+          "count": 164,
+          "p50": 6.852654041722417,
+          "p95": 14.496344025246799,
+          "max": 20.770385046489537,
+          "method": "nearest-rank"
+        },
+        "face_identity_ms": {
+          "count": 176,
+          "p50": 10.507468017749488,
+          "p95": 22.25066104438156,
+          "max": 28.881771955639124,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 233,
+          "p50": 12.512178043834865,
+          "p95": 19.913748954422772,
+          "max": 26.55983401928097,
+          "method": "nearest-rank"
+        },
+        "gaze_landmarks_ms": {
+          "count": 164,
+          "p50": 6.789484992623329,
+          "p95": 12.388814939185977,
+          "max": 17.522369977086782,
+          "method": "nearest-rank"
+        },
+        "gaze_ms": {
+          "count": 164,
+          "p50": 3.27598606236279,
+          "p95": 3.888647072017193,
+          "max": 15.126893064007163,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 233,
+          "p50": 139.1243590041995,
+          "p95": 169.64796197135,
+          "max": 181.46259803324938,
+          "method": "nearest-rank"
+        },
+        "head_pose_ms": {
+          "count": 164,
+          "p50": 3.4700080286711454,
+          "p95": 6.408542045392096,
+          "max": 11.69934996869415,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 79,
+          "p50": 28.965261997655034,
+          "p95": 33.856821013614535,
+          "max": 122.60969798080623,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 176,
+          "p50": 5.922797950915992,
+          "p95": 15.195952029898763,
+          "max": 21.03141904808581,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 2588042308.266667,
+          "min": 2525667328.0,
+          "max": 2732539904.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147466240.0,
+          "min": 2147438592.0,
+          "max": 2147479552.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 31.676666666666666,
+          "min": 9.5,
+          "max": 54.4,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 97.87166666666667,
+          "min": 62.7,
+          "max": 99.9,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 612622557.8666667,
+          "min": 610962432.0,
+          "max": 613568512.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1807858005.3333333,
+          "min": 1807052800.0,
+          "max": 1808543744.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 57.0,
+          "min": 57.0,
+          "max": 57.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 34.0,
+          "min": 34.0,
+          "max": 34.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 135.95333333333335,
+          "min": 71.31,
+          "max": 197.26999999999998,
+          "count": 60,
+          "cpu_seconds_delta": 125.95999999999998,
+          "average_cpu_cores": 2.1331699267456283,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "llama_pss": {
+          "mean": 984319829.3333334,
+          "min": 851788800.0,
+          "max": 1031404544.0,
+          "count": 60
+        },
+        "llama_rss": {
+          "mean": 5252349678.933333,
+          "min": 5120868352.0,
+          "max": 5299240960.0,
+          "count": 60
+        },
+        "llama_fds": {
+          "mean": 53.0,
+          "min": 53.0,
+          "max": 53.0,
+          "count": 60
+        },
+        "llama_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "llama_cpu_seconds": {
+          "mean": 17.496666666666666,
+          "min": 13.489999999999998,
+          "max": 21.369999999999997,
+          "count": 60,
+          "cpu_seconds_delta": 7.879999999999999,
+          "average_cpu_cores": 0.13345013514413745,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "asr_pss": {
+          "mean": 363405482.6666667,
+          "min": 362692608.0,
+          "max": 364410880.0,
+          "count": 60
+        },
+        "asr_rss": {
+          "mean": 2428992238.9333334,
+          "min": 2427572224.0,
+          "max": 2431004672.0,
+          "count": 60
+        },
+        "asr_fds": {
+          "mean": 52.0,
+          "min": 52.0,
+          "max": 52.0,
+          "count": 60
+        },
+        "asr_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "asr_cpu_seconds": {
+          "mean": 4.246666666666666,
+          "min": 4.239999999999999,
+          "max": 4.26,
+          "count": 60,
+          "cpu_seconds_delta": 0.020000000000000462,
+          "average_cpu_cores": 0.000338705926761778,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "speech_pss": {
+          "mean": 548057036.8,
+          "min": 546684928.0,
+          "max": 548966400.0,
+          "count": 60
+        },
+        "speech_rss": {
+          "mean": 882866517.3333334,
+          "min": 881770496.0,
+          "max": 884744192.0,
+          "count": 60
+        },
+        "speech_fds": {
+          "mean": 62.56666666666667,
+          "min": 62.0,
+          "max": 65.0,
+          "count": 60
+        },
+        "speech_threads": {
+          "mean": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "count": 60
+        },
+        "speech_cpu_seconds": {
+          "mean": 9.099333333333334,
+          "min": 7.0,
+          "max": 11.03,
+          "count": 60,
+          "cpu_seconds_delta": 4.029999999999999,
+          "average_cpu_cores": 0.06824924424249669,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 1932873728,
+      "board_1s_window": {
+        "sample_count": 60,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 13138.466666666667,
+            "max": 13195.0,
+            "min": 12997.0,
+            "count": 60
+          },
+          "cpu_temp_c": {
+            "mean": 65.55216666666666,
+            "max": 66.875,
+            "min": 64.031,
+            "count": 60
+          },
+          "gpu_temp_c": {
+            "mean": 67.36008333333334,
+            "max": 68.937,
+            "min": 65.125,
+            "count": 60
+          },
+          "module_input_w": {
+            "mean": 18.27166666666667,
+            "max": 19.864,
+            "min": 15.069,
+            "count": 60
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 1523.4166666666667,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 60
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 7,
+        "turn_latency_ms": {
+          "count": 7,
+          "p50": 7775.155175011605,
+          "p95": 8567.210369976237,
+          "max": 8567.210369976237,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {
+          "llm": {
+            "count": 7,
+            "p50": 7432.093004928902,
+            "p95": 8212.12053799536,
+            "max": 8212.12053799536,
+            "method": "nearest-rank"
+          },
+          "tts": {
+            "count": 7,
+            "p50": 230.15716311056167,
+            "p95": 274.02929798699915,
+            "max": 274.02929798699915,
+            "method": "nearest-rank"
+          },
+          "release": {
+            "count": 7,
+            "p50": 85.49736498389393,
+            "p95": 180.0015470944345,
+            "max": 180.0015470944345,
+            "method": "nearest-rank"
+          }
+        },
+        "controller_marks_ms": {
+          "dequeued": {
+            "count": 7,
+            "p50": 0.21043908782303333,
+            "p95": 4.505917080678046,
+            "max": 4.505917080678046,
+            "method": "nearest-rank"
+          },
+          "first_content": {
+            "count": 7,
+            "p50": 7439.993663923815,
+            "p95": 8224.84814899508,
+            "max": 8224.84814899508,
+            "method": "nearest-rank"
+          },
+          "output_published": {
+            "count": 7,
+            "p50": 7673.018352943473,
+            "p95": 8456.987526034936,
+            "max": 8456.987526034936,
+            "method": "nearest-rank"
+          },
+          "worker_done": {
+            "count": 7,
+            "p50": 7679.292939021252,
+            "p95": 8462.337824050337,
+            "max": 8462.337824050337,
+            "method": "nearest-rank"
+          }
+        },
+        "output_tokens": {
+          "count": 7,
+          "p50": 29,
+          "p95": 44,
+          "max": 44,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 7,
+          "p50": 0,
+          "p95": 792,
+          "max": 792,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": 11,
+        "busy_fraction_sampled": 1,
+        "end_window_censored_requests": 1,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "79ffa673e3ac5c7fc7cac02ab5dc1b0b536866a7989567e4235f664f5ca520c7",
+        "events.jsonl": "742a5fa3a1ba9f8cffb87a1af19da09bb39b90986a77fe8156a25ff7cc7b6ec7",
+        "resources.csv": "a27d27f02ca03c03d74228c57bcd75a9081683a00ad52a8344d9da936e043bd8",
+        "tegrastats.log": "a83337b71bdfcd99604d9740e9a9409565a25181523618819d01aba57080f5f7",
+        "monitor.json": "1e02ea248ea78a60e514aed0442367c08cf431ad20e1b47aa2db8e63efe8a265"
+      }
+    },
+    "live-resident": {
+      "condition": "live-resident",
+      "seconds": 60.00010507600382,
+      "capture_fps": 9.983315849884427,
+      "processing_fps_counter": 4.983324606202744,
+      "completion_fps_events": 4.983324606202744,
+      "completed_frames": 299,
+      "frames_used_for_latency": 299,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 299,
+          "p50": 102.47268003877252,
+          "p95": 104.23264501150697,
+          "max": 106.81746900081635,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 299,
+          "p50": 91.51751699391752,
+          "p95": 96.86688298825175,
+          "max": 98.28763792756945,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 299,
+          "p50": 43.76313590910286,
+          "p95": 61.73880607821047,
+          "max": 146.85064798686653,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 299,
+          "p50": 148.76803697552532,
+          "p95": 165.91439698822796,
+          "max": 250.5367751000449,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 255.8595020091161,
+        "p95": 348.7684939755127,
+        "max": 395.38556104525924,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 348.7684939755127,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 4.379770020022988,
+        "p95": 6.8788970820605755,
+        "max": 10.14877192210406,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 300,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 0,
+      "camera_buffer_peak_bytes_sampled": 2672314,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 402,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 36.45270597189665,
+          "load_ms": 425.6348779890686,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 4200509440,
+          "p50_ms": 33.431510033551604,
+          "p95_ms": 38.384476146893576,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 402,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 13.387062004767358,
+          "load_ms": 32.55944198463112,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 4180905984,
+          "p50_ms": 10.816844005603343,
+          "p95_ms": 13.577582128345966,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 3,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 79.55558795947582,
+          "load_ms": 1263.5238469811156,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 3426889728,
+          "p50_ms": 79.55558795947582,
+          "p95_ms": 93.95683985203505,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 38,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 5.392796942032874,
+          "load_ms": 47.91505099274218,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 3380977664,
+          "p50_ms": 5.38082851562649,
+          "p95_ms": 13.500812015263362,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 38.262073998339474,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 3370958848,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 61.812751926481724,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 3346300928,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 42.04716603271663,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 3308875776,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 112.30181402061135,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 3228344320,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 35.288561950437725,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 3229806592,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 16,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 16.552262008190155,
+          "load_ms": 1028.627127991058,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 2989105152,
+          "p50_ms": 17.55316002527252,
+          "p95_ms": 21.07709922711365,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 3,
+          "p50": 79.5792369171977,
+          "p95": 95.57806805241853,
+          "max": 95.57806805241853,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 299,
+          "p50": 31.034048064611852,
+          "p95": 37.20472997520119,
+          "max": 45.18987098708749,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 299,
+          "p50": 31.034048064611852,
+          "p95": 37.20472997520119,
+          "max": 45.18987098708749,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 299,
+          "p50": 10.84793300833553,
+          "p95": 14.850921113975346,
+          "max": 17.658378928899765,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 299,
+          "p50": 0,
+          "p95": 0,
+          "max": 95.57806805241853,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 12,
+          "p50": 17.196218948811293,
+          "p95": 20.516847958788276,
+          "max": 20.516847958788276,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 33,
+          "p50": 5.283545004203916,
+          "p95": 9.353094967082143,
+          "max": 13.322322978638113,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 2760280405.3333335,
+          "min": 2734505984.0,
+          "max": 2789150720.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147387596.8,
+          "min": 2147328000.0,
+          "max": 2147446784.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 14.841666666666667,
+          "min": 9.1,
+          "max": 28.6,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 2.0933333333333333,
+          "min": 0.0,
+          "max": 21.4,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 606727577.6,
+          "min": 576510976.0,
+          "max": 625376256.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1824737075.2,
+          "min": 1796476928.0,
+          "max": 1842905088.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 69.0,
+          "min": 69.0,
+          "max": 69.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 41.0,
+          "min": 41.0,
+          "max": 41.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 49.400166666666664,
+          "min": 21.61,
+          "max": 75.55000000000001,
+          "count": 60,
+          "cpu_seconds_delta": 53.94000000000001,
+          "average_cpu_cores": 0.9140780738915613,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "llama_pss": {
+          "mean": 694793420.8,
+          "min": 694791168.0,
+          "max": 694794240.0,
+          "count": 60
+        },
+        "llama_rss": {
+          "mean": 4951777280.0,
+          "min": 4951777280.0,
+          "max": 4951777280.0,
+          "count": 60
+        },
+        "llama_fds": {
+          "mean": 52.0,
+          "min": 52.0,
+          "max": 52.0,
+          "count": 60
+        },
+        "llama_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "llama_cpu_seconds": {
+          "mean": 8.832166666666666,
+          "min": 8.819999999999999,
+          "max": 8.84,
+          "count": 60,
+          "cpu_seconds_delta": 0.02000000000000135,
+          "average_cpu_cores": 0.00033892401701580375,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "asr_pss": {
+          "mean": 382752836.26666665,
+          "min": 382749696.0,
+          "max": 382753792.0,
+          "count": 60
+        },
+        "asr_rss": {
+          "mean": 2467811328.0,
+          "min": 2467811328.0,
+          "max": 2467811328.0,
+          "count": 60
+        },
+        "asr_fds": {
+          "mean": 52.0,
+          "min": 52.0,
+          "max": 52.0,
+          "count": 60
+        },
+        "asr_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "asr_cpu_seconds": {
+          "mean": 4.172666666666667,
+          "min": 4.16,
+          "max": 4.19,
+          "count": 60,
+          "cpu_seconds_delta": 0.03000000000000025,
+          "average_cpu_cores": 0.0005083860255236755,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "speech_pss": {
+          "mean": 552670139.7333333,
+          "min": 552659968.0,
+          "max": 552677376.0,
+          "count": 60
+        },
+        "speech_rss": {
+          "mean": 904103936.0,
+          "min": 904097792.0,
+          "max": 904110080.0,
+          "count": 60
+        },
+        "speech_fds": {
+          "mean": 62.53333333333333,
+          "min": 62.0,
+          "max": 64.0,
+          "count": 60
+        },
+        "speech_threads": {
+          "mean": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "count": 60
+        },
+        "speech_cpu_seconds": {
+          "mean": 5.6115,
+          "min": 5.52,
+          "max": 5.7,
+          "count": 60,
+          "cpu_seconds_delta": 0.1800000000000006,
+          "average_cpu_cores": 0.003050316153142038,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 1933938688,
+      "board_1s_window": {
+        "sample_count": 60,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 12798.033333333333,
+            "max": 12822.0,
+            "min": 12770.0,
+            "count": 60
+          },
+          "cpu_temp_c": {
+            "mean": 57.16738333333333,
+            "max": 58.281,
+            "min": 56.312,
+            "count": 60
+          },
+          "gpu_temp_c": {
+            "mean": 55.614266666666666,
+            "max": 57.406,
+            "min": 54.656,
+            "count": 60
+          },
+          "module_input_w": {
+            "mean": 7.4126,
+            "max": 10.276,
+            "min": 7.043,
+            "count": 60
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 861.2833333333333,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 60
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 0,
+        "turn_latency_ms": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {},
+        "controller_marks_ms": {},
+        "output_tokens": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": null,
+        "busy_fraction_sampled": 0,
+        "end_window_censored_requests": 0,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "e1f412536d90d73aa91cfab8afadd6d61d6465d9221dd7aba0177f9d334a049b",
+        "events.jsonl": "87bddfc1ec04d2dbc6e0882c503162078e81cde28cf66a5587150de8293d3fe0",
+        "resources.csv": "63356631b2e6ad02d8304405593f46b541ad80ac53f1932bd4ee9913f4efd412",
+        "tegrastats.log": "82e032e1a94403f980c9d4a42fc5e42b6d688c0d438333a96116ac01150dc822",
+        "monitor.json": "19da43d1019bb94766402046b0277402a3b771922aad2975dc756581be9f4450"
+      }
+    },
+    "live-conversation": {
+      "condition": "live-conversation",
+      "seconds": 60.00009898899589,
+      "capture_fps": 9.949983584351932,
+      "processing_fps_counter": 4.98332511176085,
+      "completion_fps_events": 4.98332511176085,
+      "completed_frames": 299,
+      "frames_used_for_latency": 299,
+      "latency_ms": {
+        "received_to_start_ms": {
+          "count": 299,
+          "p50": 103.35091699380428,
+          "p95": 109.37077400740236,
+          "max": 167.99391608219594,
+          "method": "nearest-rank"
+        },
+        "post_jpeg_wait_ms": {
+          "count": 299,
+          "p50": 91.50720294564962,
+          "p95": 98.92554697580636,
+          "max": 142.75260688737035,
+          "method": "nearest-rank"
+        },
+        "processing_ms": {
+          "count": 299,
+          "p50": 63.01115395035595,
+          "p95": 79.47445998433977,
+          "max": 253.44822695478797,
+          "method": "nearest-rank"
+        },
+        "received_to_complete_ms": {
+          "count": 299,
+          "p50": 153.1716900644824,
+          "p95": 184.73215901758522,
+          "max": 347.9777770116925,
+          "method": "nearest-rank"
+        },
+        "source_schedule_to_complete_ms": {
+          "count": 0,
+          "p50": null,
+          "p95": null,
+          "max": null,
+          "method": "nearest-rank"
+        }
+      },
+      "periodic_latest_age_ms": {
+        "count": 600,
+        "p50": 259.1595930280164,
+        "p95": 365.7289919210598,
+        "max": 539.6276259562001,
+        "method": "nearest-rank"
+      },
+      "age_p95_including_unavailable_ms": 365.7289919210598,
+      "no_result_samples": 0,
+      "periodic_samples": 600,
+      "no_result_fraction": 0.0,
+      "observer_missed_deadlines": 0,
+      "observer_ms": {
+        "count": 600,
+        "p50": 4.246935015544295,
+        "p95": 7.1065559750422835,
+        "max": 22.18289696611464,
+        "method": "nearest-rank"
+      },
+      "skipped_captured_frames": 298,
+      "frame_failure_counter_delta": 0,
+      "frame_failure_events": 0,
+      "expired_frames": 0,
+      "unexpected_frame_errors": [],
+      "camera_reconnects": 0,
+      "rgbd_groups_rejected": 11,
+      "camera_buffer_peak_bytes_sampled": 2679504,
+      "model_adapter_counters_total_including_warmup": {
+        "detection_segmentation": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 401,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 24.98069207649678,
+          "load_ms": 437.4329940183088,
+          "io_bytes_each_host_device": 12089600,
+          "available_ram_after_load_bytes": 4205645824,
+          "p50_ms": 49.86542998813093,
+          "p95_ms": 59.471146028954536,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face": {
+          "provider": "YuNet TensorRT 10.16.2.10",
+          "calls": 401,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 8.299461915157735,
+          "load_ms": 33.293494023382664,
+          "io_bytes_each_host_device": 5452800,
+          "available_ram_after_load_bytes": 4175081472,
+          "p50_ms": 13.815608574077487,
+          "p95_ms": 20.14667742769234,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "body_hand_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 2,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 173.8778289873153,
+          "load_ms": 1243.7131109181792,
+          "io_bytes_each_host_device": 2348544,
+          "available_ram_after_load_bytes": 3519062016,
+          "p50_ms": 185.49127294681966,
+          "p95_ms": 195.9433725103736,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "person_reid": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 46,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 9.073856985196471,
+          "load_ms": 47.026170999743044,
+          "io_bytes_each_host_device": 395264,
+          "available_ram_after_load_bytes": 3468713984,
+          "p50_ms": 8.494219975546002,
+          "p95_ms": 14.275993249611929,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "head_pose": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 37.99401200376451,
+          "io_bytes_each_host_device": 43212,
+          "available_ram_after_load_bytes": 3458416640,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze_landmarks": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 61.98429805226624,
+          "io_bytes_each_host_device": 43480,
+          "available_ram_after_load_bytes": 3433938944,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "gaze": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 41.99853795580566,
+          "io_bytes_each_host_device": 86424,
+          "available_ram_after_load_bytes": 3391680512,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "face_identity": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 127.10813095327467,
+          "io_bytes_each_host_device": 151040,
+          "available_ram_after_load_bytes": 3290218496,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "expression": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 0,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": null,
+          "load_ms": 34.603715990670025,
+          "io_bytes_each_host_device": 150556,
+          "available_ram_after_load_bytes": 3289579520,
+          "p50_ms": null,
+          "p95_ms": null,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        },
+        "object_embedding": {
+          "provider": "TensorRT 10.16.2.10",
+          "calls": 11,
+          "errors": 0,
+          "last_error": null,
+          "last_ms": 17.55748502910137,
+          "load_ms": 1079.7477149171755,
+          "io_bytes_each_host_device": 604160,
+          "available_ram_after_load_bytes": 2971213824,
+          "p50_ms": 34.766254015266895,
+          "p95_ms": 44.32292451383546,
+          "timing_scope": "model adapter wall time including preprocessing/inference/postprocessing"
+        }
+      },
+      "model_counter_note": "Adapter errors include input rejection; they are not automatically engine failures. Per-frame failures/expiry are counted separately.",
+      "stages_ms": {
+        "body_hand_pose_ms": {
+          "count": 1,
+          "p50": 173.89546101912856,
+          "p95": 173.89546101912856,
+          "max": 173.89546101912856,
+          "method": "nearest-rank"
+        },
+        "body_ms": {
+          "count": 299,
+          "p50": 48.637753003276885,
+          "p95": 57.47992196120322,
+          "max": 166.8028300628066,
+          "method": "nearest-rank"
+        },
+        "detection_segmentation_ms": {
+          "count": 299,
+          "p50": 48.637753003276885,
+          "p95": 57.47992196120322,
+          "max": 166.8028300628066,
+          "method": "nearest-rank"
+        },
+        "face_ms": {
+          "count": 299,
+          "p50": 13.527486007660627,
+          "p95": 19.67445609625429,
+          "max": 30.279792030341923,
+          "method": "nearest-rank"
+        },
+        "hands_ms": {
+          "count": 299,
+          "p50": 0,
+          "p95": 0,
+          "max": 173.89546101912856,
+          "method": "nearest-rank"
+        },
+        "object_embedding_ms": {
+          "count": 7,
+          "p50": 29.117734055034816,
+          "p95": 38.840380031615496,
+          "max": 38.840380031615496,
+          "method": "nearest-rank"
+        },
+        "person_reid_ms": {
+          "count": 33,
+          "p50": 8.954652934335172,
+          "p95": 12.288531055673957,
+          "max": 14.962162007577717,
+          "method": "nearest-rank"
+        }
+      },
+      "resources_1s_window": {
+        "mem_available": {
+          "mean": 2550424371.2,
+          "min": 2500030464.0,
+          "max": 2624823296.0,
+          "count": 60
+        },
+        "swap_used": {
+          "mean": 2147431970.1333334,
+          "min": 2147389440.0,
+          "max": 2147479552.0,
+          "count": 60
+        },
+        "cpu_percent": {
+          "mean": 17.78,
+          "min": 8.7,
+          "max": 26.9,
+          "count": 60
+        },
+        "gpu_load_percent": {
+          "mean": 68.965,
+          "min": 0.0,
+          "max": 99.9,
+          "count": 60
+        },
+        "worker_pss": {
+          "mean": 607923712.0,
+          "min": 603361280.0,
+          "max": 611629056.0,
+          "count": 60
+        },
+        "worker_rss": {
+          "mean": 1812082619.7333333,
+          "min": 1808003072.0,
+          "max": 1815281664.0,
+          "count": 60
+        },
+        "worker_fds": {
+          "mean": 70.78333333333333,
+          "min": 69.0,
+          "max": 71.0,
+          "count": 60
+        },
+        "worker_threads": {
+          "mean": 43.78333333333333,
+          "min": 42.0,
+          "max": 44.0,
+          "count": 60
+        },
+        "worker_cpu_seconds": {
+          "mean": 55.7765,
+          "min": 27.25,
+          "max": 84.99,
+          "count": 60,
+          "cpu_seconds_delta": 57.739999999999995,
+          "average_cpu_cores": 0.978283342975077,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "llama_pss": {
+          "mean": 818909132.8,
+          "min": 749398016.0,
+          "max": 855079936.0,
+          "count": 60
+        },
+        "llama_rss": {
+          "mean": 5069951249.066667,
+          "min": 4999880704.0,
+          "max": 5105926144.0,
+          "count": 60
+        },
+        "llama_fds": {
+          "mean": 52.733333333333334,
+          "min": 52.0,
+          "max": 53.0,
+          "count": 60
+        },
+        "llama_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "llama_cpu_seconds": {
+          "mean": 19.325166666666668,
+          "min": 12.87,
+          "max": 25.65,
+          "count": 60,
+          "cpu_seconds_delta": 12.78,
+          "average_cpu_cores": 0.21653032773158096,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "asr_pss": {
+          "mean": 598708224.0,
+          "min": 598195200.0,
+          "max": 599242752.0,
+          "count": 60
+        },
+        "asr_rss": {
+          "mean": 2703852066.133333,
+          "min": 2703597568.0,
+          "max": 2704637952.0,
+          "count": 60
+        },
+        "asr_fds": {
+          "mean": 52.1,
+          "min": 52.0,
+          "max": 53.0,
+          "count": 60
+        },
+        "asr_threads": {
+          "mean": 16.0,
+          "min": 16.0,
+          "max": 16.0,
+          "count": 60
+        },
+        "asr_cpu_seconds": {
+          "mean": 5.474333333333333,
+          "min": 4.870000000000001,
+          "max": 6.03,
+          "count": 60,
+          "cpu_seconds_delta": 1.1599999999999993,
+          "average_cpu_cores": 0.019653769966246775,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        },
+        "speech_pss": {
+          "mean": 545779029.3333334,
+          "min": 545664000.0,
+          "max": 545969152.0,
+          "count": 60
+        },
+        "speech_rss": {
+          "mean": 882810538.6666666,
+          "min": 882622464.0,
+          "max": 883191808.0,
+          "count": 60
+        },
+        "speech_fds": {
+          "mean": 62.81666666666667,
+          "min": 62.0,
+          "max": 65.0,
+          "count": 60
+        },
+        "speech_threads": {
+          "mean": 21.0,
+          "min": 21.0,
+          "max": 21.0,
+          "count": 60
+        },
+        "speech_cpu_seconds": {
+          "mean": 9.469000000000001,
+          "min": 6.98,
+          "max": 12.040000000000001,
+          "count": 60,
+          "cpu_seconds_delta": 5.0600000000000005,
+          "average_cpu_cores": 0.08573110002517996,
+          "counter_note": "Values are lifetime CPU-second counters; use delta/interval for average occupied CPU cores."
+        }
+      },
+      "worker_rss_high_water_bytes_entire_lifetime": 1906712576,
+      "board_1s_window": {
+        "sample_count": 60,
+        "timestamp_scope": "Tegrastats local Asia/Shanghai timestamps, 1-second resolution, mapped to monitor monotonic anchor",
+        "metrics": {
+          "ram_used_mb_reported": {
+            "mean": 13169.85,
+            "max": 13219.0,
+            "min": 13096.0,
+            "count": 60
+          },
+          "cpu_temp_c": {
+            "mean": 60.142316666666666,
+            "max": 61.718,
+            "min": 58.187,
+            "count": 60
+          },
+          "gpu_temp_c": {
+            "mean": 60.867383333333336,
+            "max": 63.0,
+            "min": 57.375,
+            "count": 60
+          },
+          "module_input_w": {
+            "mean": 13.675283333333333,
+            "max": 16.363,
+            "min": 11.539,
+            "count": 60
+          },
+          "cpu_freq_max_mhz": {
+            "mean": 1102.0666666666666,
+            "max": 1984.0,
+            "min": 729.0,
+            "count": 60
+          }
+        },
+        "gpu_clock_mhz": null,
+        "gpu_clock_note": "This board's recorded tegrastats lines omit GPU MHz; do not infer clock from utilization."
+      },
+      "background": {
+        "complete_turns_entirely_inside_window": 25,
+        "turn_latency_ms": {
+          "count": 25,
+          "p50": 2354.058295954019,
+          "p95": 2410.638913977891,
+          "max": 2487.3203919269145,
+          "method": "nearest-rank"
+        },
+        "controller_stage_ms": {
+          "vad": {
+            "count": 25,
+            "p50": 24.877869989722967,
+            "p95": 34.9674760363996,
+            "max": 36.140511045232415,
+            "method": "nearest-rank"
+          },
+          "asr": {
+            "count": 25,
+            "p50": 251.85735104605556,
+            "p95": 266.885555931367,
+            "max": 268.3850299799815,
+            "method": "nearest-rank"
+          },
+          "llm": {
+            "count": 25,
+            "p50": 1770.426957984455,
+            "p95": 1797.0509839942679,
+            "max": 1894.396819989197,
+            "method": "nearest-rank"
+          },
+          "tts": {
+            "count": 25,
+            "p50": 55.49914704170078,
+            "p95": 70.79709495883435,
+            "max": 71.2691779481247,
+            "method": "nearest-rank"
+          },
+          "release": {
+            "count": 25,
+            "p50": 215.75236890930682,
+            "p95": 249.4339660042897,
+            "max": 253.99695802479982,
+            "method": "nearest-rank"
+          }
+        },
+        "controller_marks_ms": {
+          "dequeued": {
+            "count": 25,
+            "p50": 0.22314395755529404,
+            "p95": 0.5965649615973234,
+            "max": 3.3309980062767863,
+            "method": "nearest-rank"
+          },
+          "first_content": {
+            "count": 25,
+            "p50": 2065.9711739281192,
+            "p95": 2092.9544139653444,
+            "max": 2187.682557036169,
+            "method": "nearest-rank"
+          },
+          "output_published": {
+            "count": 25,
+            "p50": 2116.6223799809813,
+            "p95": 2155.9435420203954,
+            "max": 2243.1934810010716,
+            "method": "nearest-rank"
+          },
+          "worker_done": {
+            "count": 25,
+            "p50": 2123.385297949426,
+            "p95": 2162.9633420379832,
+            "max": 2249.521033023484,
+            "method": "nearest-rank"
+          }
+        },
+        "output_tokens": {
+          "count": 25,
+          "p50": 3,
+          "p95": 3,
+          "max": 3,
+          "method": "nearest-rank"
+        },
+        "cached_prompt_tokens": {
+          "count": 25,
+          "p50": 448,
+          "p95": 448,
+          "max": 448,
+          "method": "nearest-rank"
+        },
+        "stage_scope": "Production TurnTrace wall times, potentially overlapping LLM/TTS spans; not kernel times. Caller total includes up to 25ms polling delay after owner release. Dequeued mark reports admission-to-worker queue delay.",
+        "completed_total_including_warmup": 33,
+        "busy_fraction_sampled": 1,
+        "end_window_censored_requests": 1,
+        "latency_scope": "Only requests starting and completing inside the measured window; raw events retain warmup, boundary and cancelled requests. Small request counts are reported explicitly."
+      },
+      "raw_hashes": {
+        "result.json": "4760ccba681f8508f1819c754e94ef88e27e4d4366f04ad2035c909df1ddc921",
+        "events.jsonl": "631203a7cda3b33144f87e2d05ec7b1d65b63d1194aa1be8f37b437edf5ced8c",
+        "resources.csv": "0032c71121a02455ba94de3df3ed0e0565cd642722ffa99f8bf29badf80d6c18",
+        "tegrastats.log": "6423701e892115c138a2aa2c9e01c79cb924e523768b2ee37d6e0008a617d6a0",
+        "monitor.json": "8091db16903ff7e3c2b806443eb1c99acc0e40b372f0a82485e0d84808197805"
+      }
+    }
+  },
+  "scope": "Production Camera source publication, JPEG, bounded ring, B1Perception and tracking. Websocket/browser excluded. App control included as resident/pressure owner. Sources are not ground-truth pose/distance labels.",
+  "gesture_policy": "Execute unchanged gesture rules but log events without dispatching to load requests. Gesture interaction acceptance is separate.",
+  "comparison_rules": [
+    "Replay conditions use identical frozen images/synthetic depth; live scenes are not paired equivalent inputs.",
+    "Processing target is capped at 5 FPS. Latest-frame skips are intentional bounded-backlog behavior, distinct from capture faults and expired/failed results.",
+    "Receive-to-start includes JPEG/dispatch; post-JPEG wait isolates the interval after encoding. Monotonic receive is not sensor exposure time.",
+    "Reported stage percentiles cannot be added to obtain end-to-end percentiles.",
+    "Resource peaks are 1s sampled within the window, except worker RSS high-water which covers its entire lifetime; CPU/GPU share board memory.",
+    "GUI/browser/websocket not measured here; full browser/service functional probes are separate."
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T15:39:45.581851+00:00",
+  "updated_at": "2026-10-19T23:42:12.065960+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -81,8 +81,8 @@
   "remaining": [
     "Broader live person, wave, occlusion, crossing and distance-gate coverage; previously deferred user-assisted cases remain separate",
     "Stale-source/failure recovery and sustained bounded resource acceptance",
-    "Frozen module, pipeline and 4B/audio coexistence B1 measurements with raw samples",
-    "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance"
+    "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance",
+    "Interpret input-quality rejections separately from frame failures; finish bounded soak and deployment/handoff acceptance"
   ],
   "not_claimed": [
     "Industrial qualification",
@@ -126,5 +126,17 @@
     "raw_directory": "05_runtime/validation/b1-modules-20261019",
     "all_observer_pairs_match": true,
     "pipeline_fps_measured": false
+  },
+  "stream_baseline": {
+    "status": "STREAM_CONDITIONS_MEASURED",
+    "summary": "benchmarks/results/b1-vision-stream-summary.json",
+    "protocol": "benchmarks/manifests/b1-vision-stream-v1.json",
+    "raw_directory": "05_runtime/validation/b1-stream-20261019",
+    "conditions": 7,
+    "seconds_per_condition": 60,
+    "periodic_samples": 4200,
+    "no_result_samples": 0,
+    "expired_frames": 0,
+    "scope": "Controlled replay and live scene measured separately; no browser transport or physical audio. Some gaze adapter calls were rejected; counters are retained and the exact input-quality causes still need separate inspection. Frame success does not imply complete attribute accuracy."
   }
 }
