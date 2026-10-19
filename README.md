@@ -2,7 +2,9 @@
 
 本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
 
-当前软件框架与 B0 基线已交付。**接手顺序：亲自启停完整系统 → 理解服务与数据流 → 复现视觉基线 → 在指导下分析和优化。** 实物麦克风/扬声器、真人手势负例、8 小时长稳和干净环境重部署仍待验收。
+当前软件框架与 B0 基线已交付，正在推进 **B1：公开视觉模型的 TensorRT 部署与链路复现**。默认复用现有应用、采用进程内 TensorRT；4B 与语音后端保持现状。新模型尚未完成接入，当前运行状态以验证记录为准。
+
+[B1 当前目标与实施边界](docs/implementation-plan.md#b1-当前阶段目标) · [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)。交付 B1 后由用户亲自使用专业工具分析和优化；实物声学、机身控制、导航及长期记忆继续后置。
 
 [项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)
 

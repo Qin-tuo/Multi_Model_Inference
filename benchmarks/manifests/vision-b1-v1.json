@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-19",
+  "status": "IMPLEMENTATION_ACTIVE_NOT_ACCEPTED",
+  "objective": "Public visual-model TensorRT deployment, integrated bounded dataflow and reproducible B1 handoff before user-led optimization",
+  "source_start_commit": "0a29ddf",
+  "rollback_tag": "before-vision-b1-20261019",
+  "architecture": {
+    "inference": "In-process TensorRT for every deployed visual neural network",
+    "application": "Reuse the existing application and pinned upstream components; scene-specific adapters only",
+    "reference": "PyTorch, ONNX Runtime or OpenCV may be used as explicit validation references, never a silent production inference fallback",
+    "preserved": ["Qwen3.5-4B llama.cpp", "existing ASR and TTS", "session and cancellation", "notes and reminders", "board diagnostics", "B0 evidence"],
+    "optional_later": ["Triton", "DeepStream", "quantization and concurrency tuning"],
+    "platform_changes": "No BSP/CUDA/TensorRT upgrades"
+  },
+  "modules": [
+    {"id": "depth", "capability": "Calibrated stereo disparity and metric depth with validity", "status": "SOURCE_AND_DEPLOYABILITY_REVIEW"},
+    {"id": "detection_segmentation", "capability": "Person/object boxes, classes, scores and instance masks", "status": "PENDING"},
+    {"id": "body_hand_pose", "capability": "Public model body/hand keypoints with explicit topology, confidence and coordinate semantics", "status": "SOURCE_AND_DEPLOYABILITY_REVIEW"},
+    {"id": "face", "capability": "Face boxes, confidence and five landmarks", "status": "PENDING"},
+    {"id": "head_pose", "capability": "Head orientation with documented axes and units", "status": "PENDING"},
+    {"id": "gaze", "capability": "Gaze direction with documented axes and units", "status": "PENDING"},
+    {"id": "face_identity", "capability": "Face alignment, embedding, registered identity matching and unknown result", "status": "PENDING"},
+    {"id": "person_reid", "capability": "Person appearance features and bounded target association", "status": "PENDING"},
+    {"id": "object_embedding", "capability": "Object features and measured association cases, not a claim of universal instance recognition", "status": "PENDING"},
+    {"id": "expression", "capability": "The public model's documented expression scores", "status": "PENDING"},
+    {"id": "gesture", "capability": "Wave greeting and stationary open-palm full-turn cancellation", "status": "B0_RULES_EXIST_B1_INPUT_REVALIDATION_PENDING"}
+  ],
+  "gates": [
+    {"id": "B1.0", "name": "Pinned sources, weights, license and interface contracts", "status": "IN_PROGRESS", "evidence": []},
+    {"id": "B1.1", "name": "Stereo and whole-body pose conversion/reference feasibility", "status": "IN_PROGRESS", "evidence": []},
+    {"id": "B1.2", "name": "Per-model TensorRT execution and reference parity", "status": "PENDING", "evidence": []},
+    {"id": "B1.3", "name": "Shared frame provenance, ROI transforms, distance gates and target association", "status": "PENDING", "evidence": []},
+    {"id": "B1.4", "name": "Bounded resource ownership, stale data, cancellation and recovery", "status": "PENDING", "evidence": []},
+    {"id": "B1.5", "name": "Fixed-input and live-camera functional acceptance with explicit coverage", "status": "PENDING", "evidence": []},
+    {"id": "B1.6", "name": "Frozen B1 module/pipeline/coexistence measurements and raw evidence", "status": "PENDING", "evidence": []},
+    {"id": "B1.7", "name": "Startup, architecture, diagnostics and user profiling handoff", "status": "PENDING", "evidence": []}
+  ],
+  "contract_requirements": [
+    "Repository commit, weight checksum and license scope",
+    "Input names, shapes, dtype, color, normalization and crop/resize transform",
+    "Output topology, confidence semantics, coordinate frame, units and invalid markers",
+    "Frame-group id, source epoch, timestamps, target id and expiry",
+    "Trigger/exit conditions, rates, maximum targets, queues and inference instances",
+    "Reference-parity method, functional fixtures and acceptance thresholds fixed before measurement"
+  ],
+  "deferred_contracts": [
+    "Original proprietary 70/52 keypoint indexing and exact output equivalence",
+    "The complete original ten-class gesture classifier",
+    "The original exaggeration score"
+  ],
+  "deferred_scope": ["Physical audio/AEC qualification", "Robot actuation and navigation", "Long-term memory", "Full industrial qualification", "Autonomous performance tuning"],
+  "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
+  "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification."
+}
