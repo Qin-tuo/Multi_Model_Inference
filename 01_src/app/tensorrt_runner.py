@@ -16,6 +16,18 @@ import numpy as np
 
 from project_paths import MODEL_DIR, load_artifact_manifest
 
+_LOGGER = None
+_LOGGER_LOCK = threading.Lock()
+
+
+def runtime_logger(trt):
+    """TensorRT shares one logger; retain it while any model/context can exist."""
+    global _LOGGER
+    with _LOGGER_LOCK:
+        if _LOGGER is None:
+            _LOGGER = trt.Logger(trt.Logger.WARNING)
+        return _LOGGER
+
 
 def validate_inputs(values, specs):
     if set(values) != set(specs):
@@ -61,7 +73,7 @@ class TensorRTModel:
         )
         self.common = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.common)
-        self.logger = trt.Logger(trt.Logger.WARNING)
+        self.logger = runtime_logger(trt)
         try:
             self._select_device()
             self.runtime = trt.Runtime(self.logger)

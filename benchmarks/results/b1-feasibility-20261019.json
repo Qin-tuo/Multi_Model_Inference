@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T11:27:26.099780+00:00",
+  "updated_at": "2026-10-19T13:14:24.687114+00:00",
   "status": "IN_PROGRESS_NOT_B1_ACCEPTED",
   "scope": "Initial source/interface review and high-risk TensorRT conversion gates; production remains the B0 application",
   "pose": {
@@ -20,10 +20,10 @@
     ]
   },
   "software_checks": {
-    "passed": 225,
+    "passed": 232,
     "failures": 0,
-    "evidence": "05_runtime/validation/b1-segmentation-20261019/tests.xml",
-    "sha256": "45fd3a1cb9a5d56e41d698d3e2fc63553b88bcd87d4062e134c13b06e7f763bf",
+    "evidence": "05_runtime/validation/b1-remaining-20261019/tests.xml",
+    "sha256": "563a0fe56ae89e84d63952f86aa71b5e506e606ff1fc2d17e888ec123ef1bc1d",
     "warning": "Existing Starlette TestClient/httpx deprecation warning; no dependency change performed"
   },
   "preservation": {
@@ -256,5 +256,101 @@
     "environment": "05_runtime/builds/vision-export",
     "lock": "01_src/deploy/vision/requirements-export.lock",
     "lock_sha256": "7c37337a79c83d702db77d6aad6bd7cd4cafb65794cbbc53079cfe5ce082294e"
+  },
+  "person_reid": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "ec9d5810cf1aac0d59d9c42a9be71b505ab1e41341ac25380668a2a9b9c008a5",
+    "engine_sha256": "45c2bffbc4b06556f4c04766a5afb83c02d4f1bb5217feae7d83ee936f8e8fe3",
+    "fixed_input_cases": 3,
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "remaining": [
+      "Bounded target association and measured recovery/ambiguity cases",
+      "Unified live RGBD/task scheduling and target provenance",
+      "B1 performance/coexistence and broader scene coverage"
+    ],
+    "minimum_native_embedding_cosine": 0.9999999403953552,
+    "maximum_raw_abs_error": 9.775161743164062e-06
+  },
+  "object_embedding": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "0c624bc43ad66219f7ef1a68974da0573bb4e15642830b45340f32824d3e5ea1",
+    "engine_sha256": "7cf3e8719db6089cf6b474e36e7c07b96f22fa7c6d8f92eee22e9d9edee7d392",
+    "fixed_input_cases": 2,
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "remaining": [
+      "Bounded target association and measured recovery/ambiguity cases",
+      "Unified live RGBD/task scheduling and target provenance",
+      "B1 performance/coexistence and broader scene coverage"
+    ],
+    "minimum_native_embedding_cosine": 1.0,
+    "maximum_raw_abs_error": 1.6808509826660156e-05,
+    "scope": "CLIP image features; no universal instance-ReID claim"
+  },
+  "head_pose": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "e48bdb1d653ebd7d12423c9c6458b41f14d0123dfb30f43cec3993465c52cf1a",
+    "engine_sha256": "b7b5b53d7fae6af3da832b08db72ce49be9b5c217e97c9e2f39e6ba044acef5d",
+    "fixed_input_cases": 3,
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "remaining": [
+      "Unified live RGBD/task scheduling and target provenance",
+      "B1 performance/coexistence and broader scene coverage"
+    ],
+    "maximum_raw_abs_error": 0.0004439353942871094
+  },
+  "gaze_landmarks": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "089829c1222b9de080d452b25d75a7f1df37659839a198743a3d29ece88d64dc",
+    "engine_sha256": "84c93bff9185d9a50f3c1db8f049ee3198dc94eff6bf2bcdc8afc0754042d160",
+    "fixed_input_cases": 3,
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "remaining": [
+      "Unified live RGBD/task scheduling and target provenance",
+      "B1 performance/coexistence and broader scene coverage"
+    ],
+    "maximum_raw_abs_error": 5.1915645599365234e-05,
+    "scope": "Auxiliary OMZ35 face landmarks for eye ROI construction; not the proprietary 70/52 topology"
+  },
+  "gaze": {
+    "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING",
+    "onnx_sha256": "9e527d35307be7f5385844b4fc819da347aa0e7e321d4b8f72713cabe543c98d",
+    "engine_sha256": "ed2a8d802bab85e3ec8d5875e2792b128a27babbddb37f9df00f427ac02402ce",
+    "fixed_input_cases": 3,
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "remaining": [
+      "Unified live RGBD/task scheduling and target provenance",
+      "B1 performance/coexistence and broader scene coverage"
+    ],
+    "maximum_raw_abs_error": 1.7881393432617188e-07
+  },
+  "head_gaze_cascade": {
+    "status": "NATIVE_REFERENCE_PARITY_PASS_LIMITED_FIXTURES",
+    "cases": 3,
+    "max_head_angle_error_deg": 0.0004439353942871094,
+    "max_eye_landmark_error_px": 0,
+    "max_gaze_direction_error_deg": 0.004329800401101328,
+    "scope": "Difference from the published model reference, not human gaze/head-pose ground-truth accuracy",
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "eye_openness_estimated": false
+  },
+  "onnx_compatibility": {
+    "tool": "NVIDIA ONNX GraphSurgeon 0.5.8",
+    "original_failed_builds": "05_runtime/validation/b1-remaining-20261019",
+    "repairs": [
+      "Remove unused optional MaxPool index outputs unsupported by TensorRT",
+      "Supply explicit leading Slice axes after verifying original StridedSlice masks and ranks"
+    ],
+    "native_ir_to_repaired_onnx": "05_runtime/validation/b1-omz-compat-20261019/native-parity.json",
+    "repaired_builds": "05_runtime/validation/b1-omz-repaired-20261019",
+    "precision_unchanged": "FP32, TF32 disabled"
+  },
+  "runtime_lifecycle": {
+    "status": "SHARED_LOGGER_AND_RESIDENT_MODEL_RELOAD_VERIFIED",
+    "evidence": {
+      "head_reloaded_with_other_models_resident": true,
+      "shared_logger": true
+    },
+    "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
+    "change": "One strong process-lifetime TensorRT logger shared by all visual runners, including the B0 body runner"
   }
 }

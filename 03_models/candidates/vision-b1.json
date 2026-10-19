@@ -742,6 +742,555 @@
         "opencv": "4.11.0",
         "numpy": "1.26.4"
       }
+    },
+    "head_pose": {
+      "name": "head-pose-estimation-adas-0001",
+      "repository": "https://github.com/openvinotoolkit/open_model_zoo",
+      "revision": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+      "license": "Apache-2.0 as referenced by official model.yml",
+      "model_card_url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/head-pose-estimation-adas-0001/README.md",
+      "model_card_sha256": "715f5dcd4d48dce5f057d2c73c2aa84ce9ed997564e64d05f89c2068429a5a41",
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "bytes": 11357,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/LICENSE"
+          },
+          "models/intel/head-pose-estimation-adas-0001/README.md": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/head-pose-estimation-adas-0001/README.md",
+            "sha256": "715f5dcd4d48dce5f057d2c73c2aa84ce9ed997564e64d05f89c2068429a5a41",
+            "bytes": 3523,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/head-pose-estimation-adas-0001/README.md"
+          },
+          "models/intel/head-pose-estimation-adas-0001/model.yml": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/head-pose-estimation-adas-0001/model.yml",
+            "sha256": "35ea6808641eedfbdd08c595661de37896987cd42ad0f2d8aafb420a9524b0e1",
+            "bytes": 2979,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/head-pose-estimation-adas-0001/model.yml"
+          },
+          "demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp",
+            "sha256": "3b74047424ad6af3d16038f429b0cfa5aaf716ee9d3d375e8714b5e73e8e208c",
+            "bytes": 4177,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp",
+            "sha256": "b6113d7f90a9c1789d01bbad3fc3a64e9b39c017618504cd8caf808effbb2510",
+            "bytes": 1843,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/main.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/main.cpp",
+            "sha256": "5bbb9a6b22732199cd7bd9bacae48cdf818745e82652947c4911aaf910cb0f3e",
+            "bytes": 5804,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/main.cpp"
+          }
+        }
+      },
+      "artifact_kind": "local_export",
+      "filename": "head-pose-estimation-adas-0001-trt.onnx",
+      "path": "05_runtime/models/b1/head_pose_adas/head-pose-estimation-adas-0001-trt.onnx",
+      "bytes": 7663804,
+      "sha256": "e48bdb1d653ebd7d12423c9c6458b41f14d0123dfb30f43cec3993465c52cf1a",
+      "observed_onnx_contract": {
+        "inputs": [
+          {
+            "name": "data",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "fc_r",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "fc_y",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "fc_p",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              1
+            ]
+          }
+        ],
+        "nodes": 106,
+        "opsets": {
+          "": 17
+        },
+        "producer": "openvino2onnx",
+        "producer_version": ""
+      },
+      "export_record": "05_runtime/validation/b1-remaining-export-20261019/head_pose/export.json",
+      "input_contract_status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_LIMITED_FIXTURES",
+      "preprocessing": {
+        "color": "BGR",
+        "layout": "NCHW",
+        "input_size_hw": [
+          60,
+          60
+        ],
+        "pixel_transform": "uint8 BGR crop resized with OpenCV INTER_LINEAR, cast to float32 without external normalization",
+        "roi": "clipped integer face box in source RGB coordinates"
+      },
+      "reference": "Native OpenVINO FP32 CPU",
+      "compatibility_record": "05_runtime/validation/b1-omz-compat-20261019/head_pose.json",
+      "output_semantics": "fc_y/fc_p/fc_r are yaw/pitch/roll degrees; supported yaw [-90,90], pitch/roll [-70,70]",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
+    },
+    "gaze": {
+      "name": "gaze-estimation-adas-0002",
+      "repository": "https://github.com/openvinotoolkit/open_model_zoo",
+      "revision": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+      "license": "Apache-2.0 as referenced by official model.yml",
+      "model_card_url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/gaze-estimation-adas-0002/README.md",
+      "model_card_sha256": "eea58e3d8d4e363521aa975236cc130c0eba46f2d19a89d6c0ef28811cfc1404",
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "bytes": 11357,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/LICENSE"
+          },
+          "models/intel/gaze-estimation-adas-0002/README.md": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/gaze-estimation-adas-0002/README.md",
+            "sha256": "eea58e3d8d4e363521aa975236cc130c0eba46f2d19a89d6c0ef28811cfc1404",
+            "bytes": 3159,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/gaze-estimation-adas-0002/README.md"
+          },
+          "models/intel/gaze-estimation-adas-0002/model.yml": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/gaze-estimation-adas-0002/model.yml",
+            "sha256": "530b344466db5fd29a51f181250a13c707ed603947e233b49db32aa7f4218d8a",
+            "bytes": 2986,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/gaze-estimation-adas-0002/model.yml"
+          },
+          "demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp",
+            "sha256": "3b74047424ad6af3d16038f429b0cfa5aaf716ee9d3d375e8714b5e73e8e208c",
+            "bytes": 4177,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp",
+            "sha256": "b6113d7f90a9c1789d01bbad3fc3a64e9b39c017618504cd8caf808effbb2510",
+            "bytes": 1843,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/main.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/main.cpp",
+            "sha256": "5bbb9a6b22732199cd7bd9bacae48cdf818745e82652947c4911aaf910cb0f3e",
+            "bytes": 5804,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/main.cpp"
+          }
+        }
+      },
+      "artifact_kind": "local_export",
+      "filename": "gaze-estimation-adas-0002-trt.onnx",
+      "path": "05_runtime/models/b1/gaze_adas/gaze-estimation-adas-0002-trt.onnx",
+      "bytes": 7547309,
+      "sha256": "9e527d35307be7f5385844b4fc819da347aa0e7e321d4b8f72713cabe543c98d",
+      "observed_onnx_contract": {
+        "inputs": [
+          {
+            "name": "left_eye_image",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ]
+          },
+          {
+            "name": "right_eye_image",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ]
+          },
+          {
+            "name": "head_pose_angles",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "gaze_vector/sink_port_0",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3
+            ]
+          }
+        ],
+        "nodes": 139,
+        "opsets": {
+          "": 17
+        },
+        "producer": "openvino2onnx",
+        "producer_version": ""
+      },
+      "export_record": "05_runtime/validation/b1-remaining-export-20261019/gaze/export.json",
+      "input_contract_status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_LIMITED_FIXTURES",
+      "preprocessing": {
+        "color": "BGR",
+        "layout": "NCHW",
+        "inputs": "two 60x60 eye crops and yaw/pitch/roll [1,3] degrees",
+        "eye_crop": "OMZ35 corner pairs 0/1 and 2/3; square side 1.8*corner distance; reject outside/too-small crops",
+        "roll_alignment": "warp each eye around integer center with roll degrees and BORDER_REPLICATE; supply head roll=0; compensate vector rotation afterward",
+        "eye_openness_estimated": false
+      },
+      "reference": "Native OpenVINO FP32 CPU",
+      "compatibility_record": "05_runtime/validation/b1-omz-compat-20261019/gaze.json",
+      "output_semantics": "Normalize gaze vector, undo roll, then use OMZ demo yaw=90+atan2(z,x) wrapped to [-180,180), pitch=asin(y/norm), both in degrees. Zero yaw follows model -Z. No calibrated camera/world ray is claimed.",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json",
+      "dependencies": [
+        "head_pose",
+        "gaze_landmarks"
+      ]
+    },
+    "person_reid": {
+      "name": "OSNet x0.25 MSMT17",
+      "repository": "https://github.com/KaiyangZhou/deep-person-reid",
+      "revision": "f8cd150fdf77e8d9e1ed143b7f308c2c609ded50",
+      "license": "MIT",
+      "model_card_url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/README.rst",
+      "model_card_sha256": "20b769511aa854ae74f303a9e7f7281e1d9509d335df4bf3043e0151313d8b25",
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/torchreid/LICENSE",
+            "sha256": "3ac8ce2a83d170cb1c7c84152e0c1faca1f187794303514383960d2441716247",
+            "bytes": 1069,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/LICENSE"
+          },
+          "README.rst": {
+            "path": "05_runtime/frameworks/b1/torchreid/README.rst",
+            "sha256": "20b769511aa854ae74f303a9e7f7281e1d9509d335df4bf3043e0151313d8b25",
+            "bytes": 17379,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/README.rst"
+          },
+          "torchreid/models/osnet.py": {
+            "path": "05_runtime/frameworks/b1/torchreid/torchreid/models/osnet.py",
+            "sha256": "c7c1c29187d6330f859c91da229271531920464c7011aec13842a086b2263cae",
+            "bytes": 17037,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/torchreid/models/osnet.py"
+          },
+          "torchreid/data/transforms.py": {
+            "path": "05_runtime/frameworks/b1/torchreid/torchreid/data/transforms.py",
+            "sha256": "b6b578a72d97f6c450584ff7758907063183b53aad80b6402767cd38184db210",
+            "bytes": 10596,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/torchreid/data/transforms.py"
+          }
+        }
+      },
+      "artifact_kind": "local_export",
+      "filename": "person_reid.onnx",
+      "path": "05_runtime/models/b1/person_reid/person_reid.onnx",
+      "bytes": 891053,
+      "sha256": "ec9d5810cf1aac0d59d9c42a9be71b505ab1e41341ac25380668a2a9b9c008a5",
+      "observed_onnx_contract": {
+        "inputs": [
+          {
+            "name": "images",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              256,
+              128
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "embedding",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              512
+            ]
+          }
+        ],
+        "nodes": 392,
+        "opsets": {
+          "": 17
+        },
+        "producer": "pytorch",
+        "producer_version": "2.9.1"
+      },
+      "export_record": "05_runtime/validation/b1-remaining-export-20261019/person_reid/export.json",
+      "input_contract_status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_LIMITED_FIXTURES",
+      "preprocessing": {
+        "color": "RGB",
+        "layout": "NCHW",
+        "input_size_hw": [
+          256,
+          128
+        ],
+        "resize": "Pillow 12.3.0 bilinear to fixed 128x256; Torchreid evaluation transform",
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ],
+        "pixel_transform": "(RGB/255-mean)/std"
+      },
+      "reference": "Pinned upstream PyTorch FP32 CPU",
+      "output_semantics": "512D OSNet MSMT17 appearance features; L2 normalization and model-specific embedding space. Tracking/association remains separate.",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
+    },
+    "object_embedding": {
+      "name": "OpenAI CLIP ViT-B/32 image encoder",
+      "repository": "https://github.com/openai/CLIP",
+      "revision": "d05afc436d78f1c48dc0dbf8e5980a9d471f35f6",
+      "license": "MIT",
+      "model_card_url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/README.md",
+      "model_card_sha256": "f82c5c75e140532eb37a7d943921e1bdd57d740c6b40d0030985bc5b5d11d6f1",
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/clip/LICENSE",
+            "sha256": "987e63b32f6c89ff5160e429458a872ff048e6860b590a3912e938f9da8f14db",
+            "bytes": 1064,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/LICENSE"
+          },
+          "README.md": {
+            "path": "05_runtime/frameworks/b1/clip/README.md",
+            "sha256": "f82c5c75e140532eb37a7d943921e1bdd57d740c6b40d0030985bc5b5d11d6f1",
+            "bytes": 7306,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/README.md"
+          },
+          "clip/__init__.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/__init__.py",
+            "sha256": "d7930eb290ebed432116795c91473200d098451a94c0aedd4ae0f934f97955e8",
+            "bytes": 20,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/__init__.py"
+          },
+          "clip/clip.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/clip.py",
+            "sha256": "9540f200fbf8145479fa655382a56dab048d238cc698b9cbd8df3b6d86d3f1b6",
+            "bytes": 9644,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/clip.py"
+          },
+          "clip/model.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/model.py",
+            "sha256": "9902cbe5ee90a1da2aa3e6f043e8a23dc1f8831193b963785c9af03d5c7bef2c",
+            "bytes": 17374,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/model.py"
+          },
+          "clip/simple_tokenizer.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/simple_tokenizer.py",
+            "sha256": "d1b09f10ed3d1e2c343619cb98cbfacb92363dd8607526a43aa7fe2d60d15bad",
+            "bytes": 4632,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/simple_tokenizer.py"
+          },
+          "clip/bpe_simple_vocab_16e6.txt.gz": {
+            "path": "05_runtime/frameworks/b1/clip/clip/bpe_simple_vocab_16e6.txt.gz",
+            "sha256": "924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a",
+            "bytes": 1356917,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/bpe_simple_vocab_16e6.txt.gz"
+          }
+        }
+      },
+      "artifact_kind": "local_export",
+      "filename": "object_embedding.onnx",
+      "path": "05_runtime/models/b1/object_embedding/object_embedding.onnx",
+      "bytes": 351609856,
+      "sha256": "0c624bc43ad66219f7ef1a68974da0573bb4e15642830b45340f32824d3e5ea1",
+      "observed_onnx_contract": {
+        "inputs": [
+          {
+            "name": "images",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              224,
+              224
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "embedding",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              512
+            ]
+          }
+        ],
+        "nodes": 991,
+        "opsets": {
+          "": 17
+        },
+        "producer": "pytorch",
+        "producer_version": "2.9.1"
+      },
+      "export_record": "05_runtime/validation/b1-remaining-export-20261019/object_embedding/export.json",
+      "input_contract_status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_LIMITED_FIXTURES",
+      "preprocessing": {
+        "color": "RGB",
+        "layout": "NCHW",
+        "input_size_hw": [
+          224,
+          224
+        ],
+        "resize": "Pillow 12.3.0 bicubic shortest side 224 then centered 224 crop; OpenAI CLIP transform",
+        "mean": [
+          0.48145466,
+          0.4578275,
+          0.40821073
+        ],
+        "std": [
+          0.26862954,
+          0.26130258,
+          0.27577711
+        ],
+        "pixel_transform": "(RGB/255-mean)/std",
+        "resize_pixel_bound": 802816
+      },
+      "reference": "Pinned upstream PyTorch FP32 CPU",
+      "output_semantics": "512D CLIP image-encoder features, L2 normalized. General appearance/semantic features, not universal instance identity; measured association cases are still required.",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
+    },
+    "gaze_landmarks": {
+      "name": "facial-landmarks-35-adas-0002",
+      "repository": "https://github.com/openvinotoolkit/open_model_zoo",
+      "revision": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+      "license": "Apache-2.0, as referenced by official model.yml",
+      "model_card_url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/facial-landmarks-35-adas-0002/README.md",
+      "model_card_sha256": "2e5ba5fe31829c911687fce97c18937b53c6c42e9810f89aadda96a8e8561729",
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "bytes": 11357,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/LICENSE"
+          },
+          "models/intel/facial-landmarks-35-adas-0002/README.md": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/facial-landmarks-35-adas-0002/README.md",
+            "sha256": "2e5ba5fe31829c911687fce97c18937b53c6c42e9810f89aadda96a8e8561729",
+            "bytes": 3884,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/facial-landmarks-35-adas-0002/README.md"
+          },
+          "models/intel/facial-landmarks-35-adas-0002/model.yml": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/facial-landmarks-35-adas-0002/model.yml",
+            "sha256": "6a2212a65afe4155f7f6135e083736645475fdd72a7fa22e703ca76493e7f6f4",
+            "bytes": 2982,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/facial-landmarks-35-adas-0002/model.yml"
+          },
+          "demos/gaze_estimation_demo/cpp/src/face_inference_results.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/face_inference_results.cpp",
+            "sha256": "fa2890f2b8d2821810c8b9a9d0a35c05398226013f94040435b093f255879ca6",
+            "bytes": 1671,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/face_inference_results.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/eye_state_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/eye_state_estimator.cpp",
+            "sha256": "5660962af76e1b6c47f4ddabf529dc176e75367cd51b007a7d42b756bea4bf63",
+            "bytes": 3528,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/eye_state_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp",
+            "sha256": "3b74047424ad6af3d16038f429b0cfa5aaf716ee9d3d375e8714b5e73e8e208c",
+            "bytes": 4177,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/utils.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/utils.cpp",
+            "sha256": "a38c048684b91cb44c8594b1ae0e48e265bc4d9299c1e7471489dca3efc6a8d7",
+            "bytes": 784,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/utils.cpp"
+          }
+        }
+      },
+      "artifact_kind": "local_export",
+      "filename": "facial-landmarks-35-adas-0002.onnx",
+      "path": "05_runtime/models/b1/gaze_landmarks/facial-landmarks-35-adas-0002.onnx",
+      "bytes": 18477073,
+      "sha256": "089829c1222b9de080d452b25d75a7f1df37659839a198743a3d29ece88d64dc",
+      "observed_onnx_contract": {
+        "inputs": [
+          {
+            "name": "data",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "name": "align_fc3/sink_port_0",
+            "dtype": "FLOAT",
+            "shape": [
+              1,
+              70
+            ]
+          }
+        ],
+        "nodes": 462,
+        "opsets": {
+          "": 17
+        },
+        "producer": "openvino2onnx",
+        "producer_version": ""
+      },
+      "export_record": "05_runtime/validation/b1-gaze-landmarks-export-20261019/gaze_landmarks/export.json",
+      "input_contract_status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_LIMITED_FIXTURES",
+      "preprocessing": {
+        "color": "BGR",
+        "layout": "NCHW",
+        "input_size_hw": [
+          60,
+          60
+        ],
+        "pixel_transform": "same clipped face ROI as head pose; OpenCV INTER_LINEAR and float32 cast"
+      },
+      "reference": "Native OpenVINO FP32 CPU",
+      "output_semantics": "35 normalized face xy pairs, projected to integer source pixels; first four points are the two eye-corner pairs. Auxiliary gaze model, not proprietary body 70/52 topology.",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json",
+      "auxiliary_for": "gaze"
     }
   },
   "source_decisions": [
@@ -754,6 +1303,17 @@
       "repository": "https://github.com/XiandaGuo/OpenStereo",
       "revision": "23d71c92e33ad1f80dfc42bf29f5c6a914d38769",
       "decision": "LightStereo remains an alternative research candidate; README restricts commercial use. Probe the vendor-published stereo ONNX first."
+    },
+    {
+      "repository": "https://github.com/Ahmednull/L2CS-Net",
+      "revision": "a4d8f7fa5436a2b2b9f088471623b552a85811bd",
+      "decision": "Not selected: upstream weight folder currently 404; Gaze360 license explicitly restricts commercial applications of trained models. Use official OMZ gaze model with its declared model license.",
+      "license_source": "https://github.com/erkil1452/gaze360/blob/master/LICENSE.md"
+    },
+    {
+      "repository": "https://github.com/thohemp/6DRepNet",
+      "revision": "464b2ba55c3d9b3d3b707c6271cf329a983ded20",
+      "decision": "Weights acquired for source review; retain as an alternative. Select the OMZ head-pose model paired with the OMZ gaze demo so angle and roll conventions match its published cascade."
     }
   ],
   "sensor_depth": {
@@ -761,5 +1321,354 @@
     "decision": "User selected native hardware depth on 2026-10-19; no neural stereo inference required for B1",
     "alignment": "SDK rs.align(stream.color)",
     "neural_depth_phase": "DEFERRED_EXPERIMENT"
+  },
+  "export_sources": {
+    "head_pose": {
+      "kind": "openvino_ir",
+      "name": "head-pose-estimation-adas-0001",
+      "repository": "https://github.com/openvinotoolkit/open_model_zoo",
+      "revision": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+      "license": "Apache-2.0 as referenced by official model.yml",
+      "source_files": [
+        {
+          "path": "05_runtime/models/b1/head_pose_adas/head-pose-estimation-adas-0001.xml",
+          "url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml",
+          "bytes": 53705,
+          "sha384": "7b155bf7821ff6e7f46e32fc6fc2cc11c7f8692957e3762d84e2aaba2718a5e07dfd1eb885a3f2953ac2b170d83975a7",
+          "sha256": "5e6764af6246d6ed48f35f5eda2088e470bf204d820b6ad63fcf7ba961976678"
+        },
+        {
+          "path": "05_runtime/models/b1/head_pose_adas/head-pose-estimation-adas-0001.bin",
+          "url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin",
+          "bytes": 7647616,
+          "sha384": "29c6f24561fd81516c2d12c3648fb8a5018b1a09846ef57a664667f39c3796b1007c71d8c8801eb0babaf38ac8c2556e",
+          "sha256": "dda80461641b0bc1f2b8aea81f045179d0e89e8348850e49eb9cc8273dea0152"
+        }
+      ],
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "bytes": 11357,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/LICENSE"
+          },
+          "models/intel/head-pose-estimation-adas-0001/README.md": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/head-pose-estimation-adas-0001/README.md",
+            "sha256": "715f5dcd4d48dce5f057d2c73c2aa84ce9ed997564e64d05f89c2068429a5a41",
+            "bytes": 3523,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/head-pose-estimation-adas-0001/README.md"
+          },
+          "models/intel/head-pose-estimation-adas-0001/model.yml": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/head-pose-estimation-adas-0001/model.yml",
+            "sha256": "35ea6808641eedfbdd08c595661de37896987cd42ad0f2d8aafb420a9524b0e1",
+            "bytes": 2979,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/head-pose-estimation-adas-0001/model.yml"
+          },
+          "demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp",
+            "sha256": "3b74047424ad6af3d16038f429b0cfa5aaf716ee9d3d375e8714b5e73e8e208c",
+            "bytes": 4177,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp",
+            "sha256": "b6113d7f90a9c1789d01bbad3fc3a64e9b39c017618504cd8caf808effbb2510",
+            "bytes": 1843,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/main.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/main.cpp",
+            "sha256": "5bbb9a6b22732199cd7bd9bacae48cdf818745e82652947c4911aaf910cb0f3e",
+            "bytes": 5804,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/main.cpp"
+          }
+        }
+      },
+      "model_card_url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/head-pose-estimation-adas-0001/README.md",
+      "model_card_sha256": "715f5dcd4d48dce5f057d2c73c2aa84ce9ed997564e64d05f89c2068429a5a41",
+      "directory": "05_runtime/models/b1/head_pose_adas",
+      "onnx_name": "head-pose-estimation-adas-0001.onnx",
+      "source_xml": "05_runtime/models/b1/head_pose_adas/head-pose-estimation-adas-0001.xml"
+    },
+    "gaze": {
+      "kind": "openvino_ir",
+      "name": "gaze-estimation-adas-0002",
+      "repository": "https://github.com/openvinotoolkit/open_model_zoo",
+      "revision": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+      "license": "Apache-2.0 as referenced by official model.yml",
+      "source_files": [
+        {
+          "path": "05_runtime/models/b1/gaze_adas/gaze-estimation-adas-0002.xml",
+          "url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml",
+          "bytes": 68724,
+          "sha384": "2c70fa1448aa923869b96848f1d218ac2efab5f718a57b486d7256c46853726fde71e3165398458e973200612e17529c",
+          "sha256": "4f413ad706a622a8f1411e3eec6f40e4d51f062a6eb76c22498970235195ffa0"
+        },
+        {
+          "path": "05_runtime/models/b1/gaze_adas/gaze-estimation-adas-0002.bin",
+          "url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin",
+          "bytes": 7529380,
+          "sha384": "044e39075331a7e5b3a7da7a39ccc40defda03326375295aa091b273e7395b3ab92db076d7828b9a68795fd496b572c8",
+          "sha256": "4947253671d1984f0c0b03392854b3af022bfca3b3dd055768db4531f031e1d4"
+        }
+      ],
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "bytes": 11357,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/LICENSE"
+          },
+          "models/intel/gaze-estimation-adas-0002/README.md": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/gaze-estimation-adas-0002/README.md",
+            "sha256": "eea58e3d8d4e363521aa975236cc130c0eba46f2d19a89d6c0ef28811cfc1404",
+            "bytes": 3159,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/gaze-estimation-adas-0002/README.md"
+          },
+          "models/intel/gaze-estimation-adas-0002/model.yml": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/gaze-estimation-adas-0002/model.yml",
+            "sha256": "530b344466db5fd29a51f181250a13c707ed603947e233b49db32aa7f4218d8a",
+            "bytes": 2986,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/gaze-estimation-adas-0002/model.yml"
+          },
+          "demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp",
+            "sha256": "3b74047424ad6af3d16038f429b0cfa5aaf716ee9d3d375e8714b5e73e8e208c",
+            "bytes": 4177,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp",
+            "sha256": "b6113d7f90a9c1789d01bbad3fc3a64e9b39c017618504cd8caf808effbb2510",
+            "bytes": 1843,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/head_pose_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/main.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/main.cpp",
+            "sha256": "5bbb9a6b22732199cd7bd9bacae48cdf818745e82652947c4911aaf910cb0f3e",
+            "bytes": 5804,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/main.cpp"
+          }
+        }
+      },
+      "model_card_url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/gaze-estimation-adas-0002/README.md",
+      "model_card_sha256": "eea58e3d8d4e363521aa975236cc130c0eba46f2d19a89d6c0ef28811cfc1404",
+      "directory": "05_runtime/models/b1/gaze_adas",
+      "onnx_name": "gaze-estimation-adas-0002.onnx",
+      "source_xml": "05_runtime/models/b1/gaze_adas/gaze-estimation-adas-0002.xml"
+    },
+    "person_reid": {
+      "kind": "pytorch",
+      "name": "OSNet x0.25 MSMT17",
+      "repository": "https://github.com/KaiyangZhou/deep-person-reid",
+      "revision": "f8cd150fdf77e8d9e1ed143b7f308c2c609ded50",
+      "license": "MIT",
+      "source_files": [
+        {
+          "url": "https://drive.google.com/uc?id=1sSwXSUlj4_tHZequ_iZ8w_Jh0VaRQMqF",
+          "path": "05_runtime/models/b1/person_reid/osnet_x0_25_msmt17.pt",
+          "bytes": 3057863,
+          "sha256": "6f57607fed9f502b9efed546108132ee715df5a5b6e6932c6269bacb47f59f99",
+          "source": "Official Torchreid model zoo / BoxMOT OSNet x0.25 MSMT17 entry"
+        }
+      ],
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/torchreid/LICENSE",
+            "sha256": "3ac8ce2a83d170cb1c7c84152e0c1faca1f187794303514383960d2441716247",
+            "bytes": 1069,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/LICENSE"
+          },
+          "README.rst": {
+            "path": "05_runtime/frameworks/b1/torchreid/README.rst",
+            "sha256": "20b769511aa854ae74f303a9e7f7281e1d9509d335df4bf3043e0151313d8b25",
+            "bytes": 17379,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/README.rst"
+          },
+          "torchreid/models/osnet.py": {
+            "path": "05_runtime/frameworks/b1/torchreid/torchreid/models/osnet.py",
+            "sha256": "c7c1c29187d6330f859c91da229271531920464c7011aec13842a086b2263cae",
+            "bytes": 17037,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/torchreid/models/osnet.py"
+          },
+          "torchreid/data/transforms.py": {
+            "path": "05_runtime/frameworks/b1/torchreid/torchreid/data/transforms.py",
+            "sha256": "b6b578a72d97f6c450584ff7758907063183b53aad80b6402767cd38184db210",
+            "bytes": 10596,
+            "url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/torchreid/data/transforms.py"
+          }
+        }
+      },
+      "model_card_url": "https://raw.githubusercontent.com/KaiyangZhou/deep-person-reid/f8cd150fdf77e8d9e1ed143b7f308c2c609ded50/README.rst",
+      "model_card_sha256": "20b769511aa854ae74f303a9e7f7281e1d9509d335df4bf3043e0151313d8b25",
+      "directory": "05_runtime/models/b1/person_reid",
+      "onnx_name": "person_reid.onnx",
+      "input_shapes": {
+        "images": [
+          1,
+          3,
+          256,
+          128
+        ]
+      },
+      "output_names": [
+        "embedding"
+      ]
+    },
+    "object_embedding": {
+      "kind": "pytorch",
+      "name": "OpenAI CLIP ViT-B/32 image encoder",
+      "repository": "https://github.com/openai/CLIP",
+      "revision": "d05afc436d78f1c48dc0dbf8e5980a9d471f35f6",
+      "license": "MIT",
+      "source_files": [
+        {
+          "url": "https://openaipublic.azureedge.net/clip/models/40d365715913c9da98579312b702a82c18be219cc2a73407c4526f58eba950af/ViT-B-32.pt",
+          "sha256": "40d365715913c9da98579312b702a82c18be219cc2a73407c4526f58eba950af",
+          "published_sha256": "40d365715913c9da98579312b702a82c18be219cc2a73407c4526f58eba950af",
+          "bytes": 353976522,
+          "path": "05_runtime/models/b1/object_embedding/ViT-B-32.pt"
+        }
+      ],
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/clip/LICENSE",
+            "sha256": "987e63b32f6c89ff5160e429458a872ff048e6860b590a3912e938f9da8f14db",
+            "bytes": 1064,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/LICENSE"
+          },
+          "README.md": {
+            "path": "05_runtime/frameworks/b1/clip/README.md",
+            "sha256": "f82c5c75e140532eb37a7d943921e1bdd57d740c6b40d0030985bc5b5d11d6f1",
+            "bytes": 7306,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/README.md"
+          },
+          "clip/__init__.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/__init__.py",
+            "sha256": "d7930eb290ebed432116795c91473200d098451a94c0aedd4ae0f934f97955e8",
+            "bytes": 20,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/__init__.py"
+          },
+          "clip/clip.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/clip.py",
+            "sha256": "9540f200fbf8145479fa655382a56dab048d238cc698b9cbd8df3b6d86d3f1b6",
+            "bytes": 9644,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/clip.py"
+          },
+          "clip/model.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/model.py",
+            "sha256": "9902cbe5ee90a1da2aa3e6f043e8a23dc1f8831193b963785c9af03d5c7bef2c",
+            "bytes": 17374,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/model.py"
+          },
+          "clip/simple_tokenizer.py": {
+            "path": "05_runtime/frameworks/b1/clip/clip/simple_tokenizer.py",
+            "sha256": "d1b09f10ed3d1e2c343619cb98cbfacb92363dd8607526a43aa7fe2d60d15bad",
+            "bytes": 4632,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/simple_tokenizer.py"
+          },
+          "clip/bpe_simple_vocab_16e6.txt.gz": {
+            "path": "05_runtime/frameworks/b1/clip/clip/bpe_simple_vocab_16e6.txt.gz",
+            "sha256": "924691ac288e54409236115652ad4aa250f48203de50a9e4722a6ecd48d6804a",
+            "bytes": 1356917,
+            "url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/clip/bpe_simple_vocab_16e6.txt.gz"
+          }
+        }
+      },
+      "model_card_url": "https://raw.githubusercontent.com/openai/CLIP/d05afc436d78f1c48dc0dbf8e5980a9d471f35f6/README.md",
+      "model_card_sha256": "f82c5c75e140532eb37a7d943921e1bdd57d740c6b40d0030985bc5b5d11d6f1",
+      "directory": "05_runtime/models/b1/object_embedding",
+      "onnx_name": "object_embedding.onnx",
+      "input_shapes": {
+        "images": [
+          1,
+          3,
+          224,
+          224
+        ]
+      },
+      "output_names": [
+        "embedding"
+      ]
+    },
+    "gaze_landmarks": {
+      "kind": "openvino_ir",
+      "name": "facial-landmarks-35-adas-0002",
+      "repository": "https://github.com/openvinotoolkit/open_model_zoo",
+      "revision": "2c9b5c563ab3a202d085a42e2bbfc48f77961f4b",
+      "license": "Apache-2.0, as referenced by official model.yml",
+      "source_files": [
+        {
+          "path": "05_runtime/models/b1/gaze_landmarks/facial-landmarks-35-adas-0002.xml",
+          "url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml",
+          "bytes": 254460,
+          "sha384": "8f004da1bd7cc8124dbaab6d5514402bd48067b4a4f6e63bb1a37c607fbb0e7af2da5e215563e6f6f652795c105cf9c2",
+          "sha256": "85c5bbc71d0cdb4e815b64507ac5d0d5355f3d5faaca54b575743415a3df7ca4"
+        },
+        {
+          "path": "05_runtime/models/b1/gaze_landmarks/facial-landmarks-35-adas-0002.bin",
+          "url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin",
+          "bytes": 18381164,
+          "sha384": "22a134ab9f84ab362a725696def1f26e4fc8bf47d3333a9717f6678a32779b5d1996f74abfddf98637c0a67bb1dc008d",
+          "sha256": "caf9b17a7dea89984f07a5c903bab256208c832a19b1cc2b3b675e2d534e24f5"
+        }
+      ],
+      "prepost_source": {
+        "files": {
+          "LICENSE": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/LICENSE",
+            "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+            "bytes": 11357,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/LICENSE"
+          },
+          "models/intel/facial-landmarks-35-adas-0002/README.md": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/facial-landmarks-35-adas-0002/README.md",
+            "sha256": "2e5ba5fe31829c911687fce97c18937b53c6c42e9810f89aadda96a8e8561729",
+            "bytes": 3884,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/facial-landmarks-35-adas-0002/README.md"
+          },
+          "models/intel/facial-landmarks-35-adas-0002/model.yml": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/models/intel/facial-landmarks-35-adas-0002/model.yml",
+            "sha256": "6a2212a65afe4155f7f6135e083736645475fdd72a7fa22e703ca76493e7f6f4",
+            "bytes": 2982,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/facial-landmarks-35-adas-0002/model.yml"
+          },
+          "demos/gaze_estimation_demo/cpp/src/face_inference_results.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/face_inference_results.cpp",
+            "sha256": "fa2890f2b8d2821810c8b9a9d0a35c05398226013f94040435b093f255879ca6",
+            "bytes": 1671,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/face_inference_results.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/eye_state_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/eye_state_estimator.cpp",
+            "sha256": "5660962af76e1b6c47f4ddabf529dc176e75367cd51b007a7d42b756bea4bf63",
+            "bytes": 3528,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/eye_state_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp",
+            "sha256": "3b74047424ad6af3d16038f429b0cfa5aaf716ee9d3d375e8714b5e73e8e208c",
+            "bytes": 4177,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/gaze_estimator.cpp"
+          },
+          "demos/gaze_estimation_demo/cpp/src/utils.cpp": {
+            "path": "05_runtime/frameworks/b1/open-model-zoo/demos/gaze_estimation_demo/cpp/src/utils.cpp",
+            "sha256": "a38c048684b91cb44c8594b1ae0e48e265bc4d9299c1e7471489dca3efc6a8d7",
+            "bytes": 784,
+            "url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/demos/gaze_estimation_demo/cpp/src/utils.cpp"
+          }
+        }
+      },
+      "model_card_url": "https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/2c9b5c563ab3a202d085a42e2bbfc48f77961f4b/models/intel/facial-landmarks-35-adas-0002/README.md",
+      "model_card_sha256": "2e5ba5fe31829c911687fce97c18937b53c6c42e9810f89aadda96a8e8561729",
+      "directory": "05_runtime/models/b1/gaze_landmarks",
+      "onnx_name": "facial-landmarks-35-adas-0002.onnx",
+      "source_xml": "05_runtime/models/b1/gaze_landmarks/facial-landmarks-35-adas-0002.xml",
+      "purpose": "Auxiliary 35-point face landmarks provide the four eye corners required by the published gaze pipeline; not the proprietary 70/52 body topology."
+    }
   }
 }

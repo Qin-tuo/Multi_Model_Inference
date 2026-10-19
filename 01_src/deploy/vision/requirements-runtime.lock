@@ -1,2 +1,4 @@
 # D435i native depth. Keep the host BSP and SDK version unchanged.
 pyrealsense2==2.58.4.10922
+# Match the upstream image preprocessing in the CPU reference environment.
+pillow==12.3.0

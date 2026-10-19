@@ -49,12 +49,12 @@
     {
       "id": "head_pose",
       "capability": "Head orientation with documented axes and units",
-      "status": "PENDING"
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "gaze",
       "capability": "Gaze direction with documented axes and units",
-      "status": "PENDING"
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "face_identity",
@@ -64,12 +64,12 @@
     {
       "id": "person_reid",
       "capability": "Person appearance features and bounded target association",
-      "status": "PENDING"
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "object_embedding",
       "capability": "Object features and measured association cases, not a claim of universal instance recognition",
-      "status": "PENDING"
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "expression",
@@ -165,12 +165,20 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T11:27:26.099780+00:00",
+  "updated_at": "2026-10-19T13:14:24.687114+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",
       "source": "Explicit user instruction: use native RealSense depth, no neural depth inference; finish remaining modules",
       "effect": "D435i SDK depth/alignment replaces neural-stereo depth in required B1 acceptance. Neural stereo artifacts retained only as deferred experimental evidence."
+    }
+  ],
+  "auxiliary_models": [
+    {
+      "id": "gaze_landmarks",
+      "capability": "35-point face landmarks needed to crop both eyes for the published OMZ gaze cascade",
+      "parent_capability": "gaze",
+      "status": "TRT_AND_NATIVE_REFERENCE_PARITY_VERIFIED_INTEGRATION_PENDING"
     }
   ]
 }

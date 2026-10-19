@@ -79,10 +79,14 @@ class BodyDetector:
         if trt.__version__ != entry["tensorrt_version"]:
             raise ValueError("TensorRT runtime differs from engine lock")
         self.common = load_source(
-            entry["runtime_helper"], entry["runtime_helper_sha256"], "assistant_trt_common"
+            entry["runtime_helper"],
+            entry["runtime_helper_sha256"],
+            "assistant_trt_common",
         )
         self.common.cuda_call(self.common.cudart.cudaSetDevice(0))
-        self.logger = trt.Logger(trt.Logger.WARNING)
+        from app.tensorrt_runner import runtime_logger
+
+        self.logger = runtime_logger(trt)
         try:
             # Runtime 将已经编译的引擎反序列化为 Engine，此处不重新构建网络。
             self.runtime = trt.Runtime(self.logger)
