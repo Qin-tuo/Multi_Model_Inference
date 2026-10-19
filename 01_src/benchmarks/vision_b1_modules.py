@@ -72,8 +72,9 @@ def worker(role, output):
         report["loaded"] = owner.snapshot()[role]
         with TensorRTTrace(model) as observer:
             for case in protocol["module_cases"][role]:
-                args = arguments(protocol, case)
                 name = case["input"]
+                resources.phase = name + ":load-input"
+                args = arguments(protocol, case)
                 resources.phase = name + ":first-call"
                 first, first_ms = plain_call(model, args)
                 save_prediction(output / (name + "-prediction.npz"), first)
@@ -123,6 +124,7 @@ def worker(role, output):
         error = exc
         report["errors"].append(repr(exc))
     finally:
+        resources.phase = "release"
         for close in (owner.close, resources.close, events.close):
             try:
                 close()

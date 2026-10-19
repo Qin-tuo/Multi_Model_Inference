@@ -137,8 +137,10 @@
     {
       "id": "B1.6",
       "name": "Frozen B1 module/pipeline/coexistence measurements and raw evidence",
-      "status": "INPUT_FREEZE_AND_GPU_TIMING_SMOKE_PENDING",
-      "evidence": []
+      "status": "INPUTS_FROZEN_GPU_TIMING_PARITY_PASSED_MEASUREMENTS_PENDING",
+      "evidence": [
+        "benchmarks/manifests/b1-vision-measurements-v1.json"
+      ]
     },
     {
       "id": "B1.7",
@@ -170,7 +172,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T15:30:24.681769+00:00",
+  "updated_at": "2026-10-19T15:32:32.361384+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",
