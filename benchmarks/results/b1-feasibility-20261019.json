@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T09:20:21.937724+00:00",
+  "updated_at": "2026-10-19T10:04:47.628005+00:00",
   "status": "IN_PROGRESS_NOT_B1_ACCEPTED",
   "scope": "Initial source/interface review and high-risk TensorRT conversion gates; production remains the B0 application",
   "pose": {
@@ -21,7 +21,7 @@
   },
   "depth": {
     "candidate": "NVIDIA C-Fast-FoundationStereo bp2",
-    "status": "BUILD_FEASIBILITY_PENDING",
+    "status": "TRT_ENGINE_AND_LIMITED_ONNX_PARITY_VERIFIED_INTEGRATION_PENDING",
     "failed_workspace_mib": [
       512,
       1024
@@ -29,22 +29,40 @@
     "superseded_workspace_mib": [
       2048
     ],
-    "next_workspace_mib": 4096,
     "observed_error": "TensorRT compiler ForeignNode tactic rejected under the configured workspace limits",
     "minimum_available_gib_during_1024_build": 7.16,
     "vendor_workspace_guidance": "https://docs.nvidia.com/tao/tao-toolkit/latest/text/cv_finetuning/pytorch/depth_estimation/fast_foundation_stereo.html",
     "contract_correction": "The pinned exporter requires external ImageNet normalization; actual ONNX output is float32 disparity, despite conflicting model-card prose.",
     "remaining": [
-      "Successful engine build",
-      "Numerical parity",
-      "Calibrated live stereo input and domain validation",
-      "Runtime resource budget"
-    ]
+      "Calibrated live stereo input and IR-domain validation",
+      "Metric-depth mapping into RGB coordinates and functional fixtures",
+      "Runtime resource budget and coexistence",
+      "Production integration"
+    ],
+    "onnx_sha256": "794647dc718c9564d5ccb56d15527b70a9267e8ddfbd5ecb1e784b323fbd60ed",
+    "engine_sha256": "c98a9aa8af820b3f8e6496a0b1bdad7ef1784db0a924370a4ee856f944c08632",
+    "engine_bytes": 80220668,
+    "successful_workspace_mib": 4096,
+    "build_seconds": 1152.3159603460226,
+    "parity_status": "PARITY_PASS_LIMITED_FIXTURES",
+    "fixed_input_cases": 2,
+    "max_abs_disparity_error_px": 0.001800537109375,
+    "max_p99_abs_disparity_error_px": 3.814697265625e-05,
+    "build_report": "05_runtime/validation/b1-depth-workspace4096-20261019/depth/build.json",
+    "raw_report": "05_runtime/validation/b1-depth-workspace4096-20261019/parity/depth/report.json",
+    "services_restored_status": "READY",
+    "feasibility_call_seconds": [
+      1.785893584950827,
+      1.6370040620677173
+    ],
+    "timing_scope": "Two synchronous calls without a controlled benchmark window; not B1 latency/FPS or coexistence evidence"
   },
   "software_checks": {
-    "passed": 200,
+    "passed": 208,
     "failures": 0,
-    "evidence": "05_runtime/validation/b1-feasibility-20261019/tests.xml"
+    "evidence": "05_runtime/validation/b1-feasibility-20261019/tests-camera-geometry.xml",
+    "sha256": "deb839b07183f05b161581344e1540860cefc8df924c3618d725fd70e3a8a9bb",
+    "warning": "Existing Starlette TestClient/httpx deprecation warning; no dependency change performed"
   },
   "preservation": {
     "rollback_tag": "before-vision-b1-20261019",
@@ -53,5 +71,33 @@
     "new_models_are_default": false
   },
   "raw_directory": "05_runtime/validation/b1-feasibility-20261019",
-  "other_modules": "Pending; see benchmarks/manifests/vision-b1-v1.json"
+  "other_modules": "Pending; see benchmarks/manifests/vision-b1-v1.json",
+  "camera": {
+    "status": "ADVERTISED_PROFILES_AND_CALIBRATION_VERIFIED_STREAMING_PENDING",
+    "raw_report": "05_runtime/validation/b1-camera-20261019/profiles.json",
+    "device": "RealSense D435I",
+    "usb_type": "3.2",
+    "sdk_version": "2.58.4",
+    "requested": {
+      "width": 640,
+      "height": 480,
+      "fps": 15
+    },
+    "all_requested_profiles_advertised": true,
+    "stereo_baseline_m": 0.04983324930071831,
+    "coordinate_requirement": "IR and RGB intrinsics/extrinsics differ; map depth into RGB before sampling an RGB detection ROI",
+    "remaining": [
+      "Simultaneous streams and timestamp/frame correspondence",
+      "Monochrome IR neural-depth quality",
+      "RGB registration and live metric-distance validation"
+    ],
+    "sdk_installation": "Pinned tools-only venv; existing runtime and system SDK untouched",
+    "raw_report_sha256": "3a43b27b81a3a9c20517c0c18c3d890ab5176d423e7eda95ef261952fb38160c",
+    "python_binding": {
+      "distribution": "pyrealsense2",
+      "version": "2.58.4.10922",
+      "wheel": "pyrealsense2-2.58.4.10922-cp312-cp312-manylinux2014_aarch64.whl",
+      "wheel_sha256": "04a61fad8d4c69bcd6acb3ddcee65630e6ce31f94f5bd309a72c5831b9fa83cd"
+    }
+  }
 }

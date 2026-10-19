@@ -28,7 +28,7 @@
     {
       "id": "depth",
       "capability": "Calibrated stereo disparity and metric depth with validity",
-      "status": "ONNX_CONTRACT_REVIEWED_ENGINE_BUILD_PENDING"
+      "status": "TRT_ENGINE_AND_LIMITED_ONNX_PARITY_VERIFIED_INTEGRATION_PENDING"
     },
     {
       "id": "detection_segmentation",
@@ -159,5 +159,5 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T09:20:21.937724+00:00"
+  "updated_at": "2026-10-19T10:03:47.447220+00:00"
 }

@@ -14,7 +14,7 @@
       "license": "NVIDIA Open Model Agreement; model card also describes research/evaluation use, so no commercial qualification is claimed",
       "license_url": "https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/",
       "reference": "NVIDIA-published ONNX evaluated with ONNX Runtime CPU",
-      "input_contract_status": "ONNX_SCHEMA_VALIDATED_PREPROCESSING_SOURCE_REVIEWED_ENGINE_AND_PARITY_GATES_PENDING",
+      "input_contract_status": "ONNX_SCHEMA_PREPROCESSING_AND_LIMITED_TRT_PARITY_VERIFIED",
       "scope": "Rectified stereo disparity; calibrated metric-depth conversion and D435i input-domain validation remain required",
       "model_card_sha256": "5259f9f2675526f1db6bcb5823cd805ba6fbabba79dfd52ee34e51a212aa762c",
       "observed_onnx_contract": {
@@ -78,7 +78,8 @@
           "file": "scripts/make_single_onnx.py"
         }
       },
-      "contract_discrepancy": "Model card says no preprocessing and uint16 output; pinned exporter and actual graph require external ImageNet normalization and produce float32 disparity. Execution follows graph/exporter evidence."
+      "contract_discrepancy": "Model card says no preprocessing and uint16 output; pinned exporter and actual graph require external ImageNet normalization and produce float32 disparity. Execution follows graph/exporter evidence.",
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
     },
     "body_hand_pose": {
       "name": "RTMW3D-X 384 community ONNX conversion",
@@ -92,7 +93,7 @@
       "upstream_repository": "https://github.com/open-mmlab/mmpose",
       "upstream_revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
       "reference": "Pinned public ONNX for numerical conversion checks; this alone does not certify the community export against original PyTorch weights",
-      "input_contract_status": "ONNX_SCHEMA_VALIDATED_PREPROCESSING_SOURCE_REVIEWED_ENGINE_AND_PARITY_GATES_PENDING",
+      "input_contract_status": "ONNX_SCHEMA_PREPROCESSING_AND_LIMITED_TRT_PARITY_VERIFIED",
       "scope": "133-point whole-body 3D candidate; original proprietary 70/52 topology is not assumed",
       "model_card_sha256": "4bcf87ecfbbb8e07a01b21415a970c8b53a5283bf6872b657040d3f45c9241f7",
       "observed_onnx_contract": {
@@ -158,7 +159,8 @@
           57.375
         ],
         "source": "Pinned MMPose projects/rtmpose3d/configs/rtmw3d-x_8xb32_cocktail14-384x288.py"
-      }
+      },
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
     }
   },
   "source_decisions": [

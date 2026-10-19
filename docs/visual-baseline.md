@@ -1,5 +1,35 @@
 # 视觉基线复现入口
 
+## B1 模型接入验证
+
+2026-10-19：B1 尚未冻结，当前默认程序仍使用 B0 模型。RTMW3D-X 姿态和 C-Fast-FoundationStereo 深度均已在本板生成 TensorRT 引擎，各通过两组固定输入的 ONNX/TensorRT 数值核验。证据与未完成项见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)；这不代表真人场景精度、实时链路或整机性能已经验收。
+
+模型来源、校验值与预处理在 [候选模型清单](../03_models/candidates/vision-b1.json)。从项目根目录复现深度验证，输出目录每次使用新名称：
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python scripts/prepare_vision_b1.py --role depth
+./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
+  --role depth --workspace-mib 4096 --output 05_runtime/validation/b1-depth-new
+./05_runtime/environments/edge-assistant/bin/python scripts/probe_vision_b1.py \
+  --role depth --build-root 05_runtime/validation/b1-depth-new \
+  --output 05_runtime/validation/b1-depth-new/parity
+```
+
+构建和核验会独占本项目的构建锁，暂时停止本项目服务，并在结束或失败后恢复原先运行的组件。当前验证采用 FP32、关闭 TF32；4096 MiB 是编译 workspace 上限，运行时内存需另行测量。核验中的 CPU ONNX Runtime 仅用于生成参考输出，正式视觉推理使用 TensorRT。固定双目样本来自 `05_runtime/frameworks/b1/fast-foundationstereo/demo_data/`，提交版本与输入哈希记录在核验报告中。
+
+相机元数据探针使用独立工具环境，不启动视频流：
+
+```bash
+./05_runtime/builds/vision-tools/bin/python scripts/probe_stereo_metadata.py \
+  --output 05_runtime/validation/b1-camera-new/profiles.json
+```
+
+工具环境版本在 [requirements-tools.lock](../01_src/deploy/vision/requirements-tools.lock)。已读到 D435i 的左右 IR、RGB 与 SDK 深度参考配置及约 49.83 mm 双目基线；仍需验证同时采集、时间对应与真实测距。IR 和 RGB 的内参、外参不同，不能直接用 RGB 检测框坐标索引 IR 深度。SDK 深度仅作为对照来源。
+
+`01_src/app/stereo_geometry.py` 按同一像素坐标下的视差、焦距和基线换算米制深度，并保留无效标记。有限正视差仅证明数值有效，遮挡、错匹配和传感器域适配还需单独验证；姿态模型的相对 z 不参与该换算。
+
+## 已冻结的 B0
+
 先从项目根目录启动完整程序，确认相机与四个服务正常，再理解各模块职责。当前名称为“多模型端侧助手”，服务前缀为 `edge-assistant`。
 
 ```bash
