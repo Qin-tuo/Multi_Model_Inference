@@ -206,6 +206,8 @@ class BoardDiagnostics:
                 "processing_ms": scene.get("elapsed_ms") if valid else None,
                 "stages_ms": scene.get("stages", {}) if valid else {},
                 "body_stages_ms": scene.get("body_stages_ms", {}) if valid else {},
+                "model_metrics": scene.get("model_metrics", {}),
+                "task_counts": scene.get("task_counts", {}) if valid else {},
                 "processed": processed,
                 "skipped_capture_frames": scene.get("skipped_capture_frames"),
                 "failures": scene.get("failures"),

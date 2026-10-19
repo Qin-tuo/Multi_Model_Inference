@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-19T14:45:28.774388+00:00",
+  "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
+  "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
+  "runtime_manifest": "03_models/vision-b1-runtime.json",
+  "default_services": "B0 restored READY; B1 not default",
+  "architecture": {
+    "neural_inference": "10 in-process TensorRT models; serial latest-frame worker",
+    "depth": "D435i SDK native depth registered to color",
+    "tracking": "Norfair 2.3.0 with bounded source-scoped IDs and optional appearance distance",
+    "identity_gallery": "SQLAlchemy SQLite; 32 explicit labels; versioned SFace embeddings; no authorization gate"
+  },
+  "public_replay": {
+    "status": "COMPLETE_PIPELINE_PUBLIC_REPLAY_PASS_LIMITED_SCOPE",
+    "report": "05_runtime/validation/b1-pipeline-interactions-20261019/report.json",
+    "report_sha256": "fe537781ce9558b5175f936cd1b8d39afe4a4930894165e6f2d3892507861257",
+    "real_models_exercised": [
+      "detection_segmentation",
+      "face",
+      "body_hand_pose",
+      "person_reid",
+      "head_pose",
+      "gaze_landmarks",
+      "gaze",
+      "face_identity",
+      "expression",
+      "object_embedding"
+    ],
+    "observations": 10,
+    "public_palm_stop_events": 2,
+    "identity_enrollment_match_reopen": "PASS on public fixture only",
+    "selected_target": "Stable over repeated fixed-image observations",
+    "depth": "SYNTHETIC uniform 1.5 m; does not prove sensor distance or natural motion"
+  },
+  "live_services": {
+    "report": "05_runtime/validation/b1-services-interactions-20261019-retry/report.json",
+    "report_sha256": "a001c7c761f332632b222b50f1c4c3b01f6aab696936e28d1aa12728c56af065",
+    "text_4b_tts": "PASS",
+    "file_vad_asr_4b_tts": "PASS; synthesized fixture, no microphone",
+    "turn_cancel": "PASS; output unpublished and backend release confirmed",
+    "browser": "PASS actual Firefox camera and diagnostics pages",
+    "clean_shutdown": true,
+    "restored": "READY",
+    "person_scene_coverage": "No person visible; live calls cover detection, face detector, object encoder. Person-dependent models exercised by public replay separately.",
+    "vision_processed_at_cancel": 54,
+    "vision_failures_at_cancel": 0
+  },
+  "software_tests": {
+    "full_suite_before_final_flag_guard": "241 passed",
+    "coverage": [
+      "gallery persistence, capacity, ambiguity, model space isolation",
+      "Norfair observed geometry, class, epoch, out-of-order and TTL/capacity",
+      "unique appearance recovery versus ambiguous candidates",
+      "native depth invalid pixels/ROI geometry",
+      "vision API routing and stale target rejection",
+      "SimCC raw scores and hand-owner change",
+      "existing B0 conversation, cancellation, actions, deployment and visual regressions"
+    ],
+    "b0_frozen_protocol_and_inputs": "validate() PASS; original bytes preserved",
+    "after_final_flag_guard": "30 targeted tests passed, including 2 new partial-pipeline rejection cases"
+  },
+  "observed_issues": [
+    {
+      "case": "services interaction initial run",
+      "evidence": "05_runtime/validation/b1-services-interactions-20261019/report.json",
+      "status": "FAILED_SHUTDOWN_CAUSED_BY_PROBE_SIGNAL",
+      "detail": "Probe sent SIGUSR2 after Python/uvicorn completion; child returned -12 without stack dump. Removed signal and application handler, replaced with read-only /proc observation. Failure evidence retained."
+    },
+    {
+      "case": "read-only teardown retry",
+      "evidence": "05_runtime/validation/b1-services-interactions-20261019-retry/shutdown-stall.json",
+      "status": "EXIT_ZERO_WITH_DELAY_REQUIRES_RESOURCE_STUDY",
+      "detail": "About 13.2 s between Uvicorn completion and process exit. During wait: state D, wchan folio_wait_bit_common, VmSwap 0. No attribution to a particular library or root cause established. Four managed cgroups empty afterward."
+    }
+  ],
+  "remaining": [
+    "RTMW3D original checkpoint/export equivalence",
+    "Broader live person, wave, occlusion, crossing and distance-gate coverage; previously deferred user-assisted cases remain separate",
+    "Stale-source/failure recovery and sustained bounded resource acceptance",
+    "Frozen module, pipeline and 4B/audio coexistence B1 measurements with raw samples",
+    "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance"
+  ],
+  "not_claimed": [
+    "Industrial qualification",
+    "Accuracy of real-world face recognition or universal object instance ReID",
+    "Performance baseline or optimization improvement",
+    "Physical audio/AEC",
+    "Neural stereo depth"
+  ]
+}

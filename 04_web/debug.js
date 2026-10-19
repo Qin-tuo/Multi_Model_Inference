@@ -27,6 +27,8 @@
       <tr><td>人脸检测</td><td id="debugFace">—</td></tr>
       <tr><td>掌检测＋手部关键点</td><td id="debugHands">—</td></tr>
     </tbody></table>
+    <div class="debug-note">B1 各模型：最近 120 次成功调用的板端墙钟耗时，包含预处理／推理／后处理；未触发时显示 —。</div>
+    <table class="debug-table"><thead><tr><th>模型模块</th><th>调用数</th><th>最新 ms</th><th>P50 / P95 ms</th><th>异常</th></tr></thead><tbody id="debugModels"></tbody></table>
     <canvas id="debugRateChart" class="debug-chart" aria-label="板端实际帧率趋势"></canvas>
     <div class="debug-legend"><span class="blue">● 采集 FPS</span><span class="green">● 识别 FPS</span></div>
     <canvas id="debugLatencyChart" class="debug-chart" aria-label="板端处理时间与结果帧龄趋势"></canvas>
@@ -109,6 +111,9 @@
     put('debugVisionError',v.ready?'':v.error||'暂无新鲜感知结果');
     for(const [id,key] of [['debugBody','body_ms'],['debugFace','face_ms'],['debugHands','hands_ms']])put(id,f(v.stages_ms[key],2));
     for(const [id,key] of [['debugBodyPre','preprocess_ms'],['debugBodyNative','native_sync_ms'],['debugBodyPost','postprocess_ms']])put(id,f(v.body_stages_ms[key],2));
+    const models=$('debugModels');models.replaceChildren();
+    const names={detection_segmentation:'检测分割',body_hand_pose:'人体/手部关键点',face:'人脸检测',face_identity:'人脸特征',expression:'表情',head_pose:'头姿',gaze_landmarks:'眼角关键点',gaze:'视线',person_reid:'行人特征',object_embedding:'物体特征'};
+    for(const [name,data] of Object.entries(v.model_metrics||{}))models.append(row([names[name]||name,data.calls,f(data.last_ms,2),f(data.p50_ms,2)+' / '+f(data.p95_ms,2),data.errors||0]));
     put('debugLoad',`${f(r.cpu_percent)} / ${f(r.gpu_percent)}`);
     put('debugMemory',`${f(r.ram_available_gib,2)} / ${f(r.ram_total_gib,2)}`);
     put('debugTemp',`${f(r.temperatures_c['cpu-thermal'])} / ${f(r.temperatures_c['gpu-thermal'])}`);

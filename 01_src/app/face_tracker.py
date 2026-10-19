@@ -158,7 +158,14 @@ class FaceTracker:
         if key == self._last_frame:
             return
         box = self._detector.detect(frame.bgr)
+        self.process_box(frame, box)
+
+    def process_box(self, frame, box):
+        """Accept a same-frame box from the shared B1 worker without re-inference."""
+        key = (frame.source_epoch, frame.frame_id)
         with self._state_lock:
+            if key == self._last_frame:
+                return
             if self._last_frame and self._last_frame[0] != frame.source_epoch:
                 self._stable_count = 0
             self._last_frame = key

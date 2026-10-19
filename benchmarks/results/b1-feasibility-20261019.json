@@ -16,7 +16,7 @@
     "remaining": [
       "Original PyTorch/community export equivalence",
       "Broader quality and scene coverage",
-      "Production integration and resource coexistence"
+      "Sustained resource/coexistence acceptance and B1 measurements"
     ]
   },
   "software_checks": {
@@ -49,8 +49,7 @@
     "stereo_baseline_m": 0.04983324930071831,
     "coordinate_requirement": "IR and RGB intrinsics/extrinsics differ; map depth into RGB before sampling an RGB detection ROI",
     "remaining": [
-      "Full application/perception integration acceptance",
-      "Target distance and task-gate validation",
+      "Target distance and task-gate real scene coverage",
       "Extended stability and recovery"
     ],
     "sdk_installation": "Pinned wheel added to the project-local runtime and isolated tools environment; no system SDK/BSP upgrades",
@@ -129,8 +128,8 @@
     "raw_report": "05_runtime/validation/b1-sdk-rgbd-app-20261019/report.json",
     "raw_report_sha256": "291a1be82306dad86e7df999f49c4d3ea473aff93a8fd3296055c7a9adf40fe9",
     "remaining": [
-      "Target-region distance calculation and conditional task gates",
-      "Full multi-model application acceptance and recovery cases",
+      "Target-region distance and task-gate real scene coverage",
+      "Full multi-model recovery cases",
       "B1 resource/coexistence measurements"
     ]
   },
@@ -148,8 +147,7 @@
     "raw_report": "05_runtime/validation/b1-face-20261019/parity/face/report.json",
     "remaining": [
       "Multi-target/live scene coverage",
-      "Shared perception integration and downstream face tasks",
-      "B1 performance and coexistence"
+      "B1 performance and sustained coexistence"
     ]
   },
   "face_identity": {
@@ -184,9 +182,8 @@
       "scope": "Two public identities; no false-accept/false-reject rate claim"
     },
     "remaining": [
-      "Bounded enrollment/gallery with model-version compatibility and unknown handling",
-      "Target association, distance/quality gates and shared runtime integration",
-      "B1 measurements and broader functional coverage"
+      "Broader real identity matching and target association cases",
+      "B1 measurements and sustained resource acceptance"
     ]
   },
   "expression": {
@@ -209,8 +206,7 @@
     ],
     "exaggeration_available": false,
     "remaining": [
-      "Shared face ROI and runtime integration",
-      "Scene coverage and B1 measurements"
+      "Broader real scene coverage and B1 measurements"
     ]
   },
   "detection_segmentation": {
@@ -229,9 +225,8 @@
     "max_native_score_error": 1.2218952178955078e-06,
     "raw_report": "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/report.json",
     "remaining": [
-      "Live RGBD person/object detection and mask validation",
-      "Tracking, target-region distance and task triggers",
-      "Shared bounded runtime and B1 measurements"
+      "Live person/mask accuracy and distance-gate coverage",
+      "Sustained recovery and B1 measurements"
     ],
     "independent_reexport": {
       "status": "EXACT_DEPLOYMENT_ONNX_HASH_REPRODUCED",
@@ -264,9 +259,8 @@
     "fixed_input_cases": 3,
     "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
     "remaining": [
-      "Bounded target association and measured recovery/ambiguity cases",
-      "Unified live RGBD/task scheduling and target provenance",
-      "B1 performance/coexistence and broader scene coverage"
+      "Real target recovery/crossing/ambiguity coverage",
+      "B1 performance/coexistence measurements"
     ],
     "minimum_native_embedding_cosine": 0.9999999403953552,
     "maximum_raw_abs_error": 9.775161743164062e-06
@@ -278,9 +272,8 @@
     "fixed_input_cases": 2,
     "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
     "remaining": [
-      "Bounded target association and measured recovery/ambiguity cases",
-      "Unified live RGBD/task scheduling and target provenance",
-      "B1 performance/coexistence and broader scene coverage"
+      "Real object association/recovery coverage",
+      "B1 performance/coexistence measurements"
     ],
     "minimum_native_embedding_cosine": 1.0,
     "maximum_raw_abs_error": 1.6808509826660156e-05,
@@ -293,8 +286,8 @@
     "fixed_input_cases": 3,
     "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
     "remaining": [
-      "Unified live RGBD/task scheduling and target provenance",
-      "B1 performance/coexistence and broader scene coverage"
+      "Real person RGBD/task gate coverage",
+      "B1 performance/coexistence measurements"
     ],
     "maximum_raw_abs_error": 0.0004439353942871094
   },
@@ -305,8 +298,8 @@
     "fixed_input_cases": 3,
     "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
     "remaining": [
-      "Unified live RGBD/task scheduling and target provenance",
-      "B1 performance/coexistence and broader scene coverage"
+      "Real person RGBD/task gate coverage",
+      "B1 performance/coexistence measurements"
     ],
     "maximum_raw_abs_error": 5.1915645599365234e-05,
     "scope": "Auxiliary OMZ35 face landmarks for eye ROI construction; not the proprietary 70/52 topology"
@@ -318,8 +311,8 @@
     "fixed_input_cases": 3,
     "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
     "remaining": [
-      "Unified live RGBD/task scheduling and target provenance",
-      "B1 performance/coexistence and broader scene coverage"
+      "Real person RGBD/task gate coverage",
+      "B1 performance/coexistence measurements"
     ],
     "maximum_raw_abs_error": 1.7881393432617188e-07
   },
@@ -352,5 +345,6 @@
     },
     "raw_report": "05_runtime/validation/b1-remaining-20261019/parity-shared-logger/report.json",
     "change": "One strong process-lifetime TensorRT logger shared by all visual runners, including the B0 body runner"
-  }
+  },
+  "integration_summary": "benchmarks/results/b1-integration-20261019.json"
 }

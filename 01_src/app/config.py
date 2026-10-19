@@ -130,6 +130,19 @@ class FaceConfig:
 
 @dataclass
 class PerceptionConfig:
+    backend: str = "b0"
+    model_manifest: str = "03_models/vision-b1-runtime.json"
+    max_pose_people: int = 1
+    max_face_targets: int = 2
+    max_object_targets: int = 1
+    track_capacity: int = 20
+    track_ttl_seconds: float = 2.0
+    distance_min_m: float = 0.35
+    distance_max_m: float = 3.0
+    min_depth_fraction: float = 0.15
+    min_depth_pixels: int = 25
+    pose_joint_threshold: float = 0.2
+    identity_gallery: str = "05_runtime/runtime-data/vision/identities.sqlite"
     enabled: bool = True
     body_enabled: bool = True
     hands_enabled: bool = True
@@ -454,6 +467,40 @@ class Config:
             raise ValueError("Invalid face framing zones")
         if not 0 < self.face.min_face_size <= 1:
             raise ValueError("Invalid face size threshold")
+
+        p = self.perception
+        if p.backend not in {"b0", "tensorrt_b1"}:
+            raise ValueError("Unknown perception backend")
+        if p.backend == "tensorrt_b1":
+            if (
+                self.vision.backend != "realsense"
+                or not p.enabled
+                or not p.body_enabled
+                or not p.hands_enabled
+                or not self.face.enabled
+            ):
+                raise ValueError(
+                    "B1 requires enabled RGBD, body, hand and face processing"
+                )
+            if not (
+                1 <= p.max_pose_people <= 2
+                and 1 <= p.max_face_targets <= 2
+                and 1 <= p.max_object_targets <= 2
+                and 1 <= p.max_people <= 10
+                and 10 <= p.track_capacity <= 30
+                and 0.5 <= p.track_ttl_seconds <= 5
+                and 0.1 <= p.distance_min_m < p.distance_max_m <= 8
+                and 0 < p.min_depth_fraction <= 1
+                and 1 <= p.min_depth_pixels <= 1000
+                and 0 < p.pose_joint_threshold <= 2
+            ):
+                raise ValueError("Invalid B1 task/resource limits")
+            if (
+                not (ROOT / p.identity_gallery)
+                .resolve()
+                .is_relative_to(RUNTIME_DIR / "runtime-data")
+            ):
+                raise ValueError("B1 gallery must be inside project runtime-data")
 
         if (
             self.perception.fps <= 0

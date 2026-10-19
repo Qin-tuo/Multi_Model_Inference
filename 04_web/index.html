@@ -78,6 +78,20 @@
       </div>
     </div>
 
+    <div class="panel" id="visionTools" hidden>
+      <div class="panel-hdr"><span>视觉目标与本地人脸标签</span></div>
+      <div class="panel-body">
+        <label>观察目标 <select id="visionTarget"><option value="">未选择</option></select></label>
+        <button id="visionSelectTarget" type="button">选择目标</button>
+        <label>人脸 <select id="visionFace"></select></label>
+        <input id="visionLabel" maxlength="64" placeholder="本地人脸标签" aria-label="本地人脸标签">
+        <button id="visionEnroll" type="button">登记当前人脸</button>
+        <button id="visionList" type="button">查看已登记标签</button>
+        <div id="visionIdentities"></div>
+        <div id="visionAction" role="status"></div>
+        <div id="visionAttributes"></div>
+      </div>
+    </div>
     <div class="panel resource-panel">
       <div class="panel-hdr"><span>System Resources</span></div>
       <div class="resource-grid">

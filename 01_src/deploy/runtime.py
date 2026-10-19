@@ -201,17 +201,34 @@ def artifact_files(cfg, components):
             add(p["stack"] / name, row["sha256"])
     if "app" in components:
         perception = load_artifact_manifest(ROOT / "03_models/perception.json")
-        if cfg.face.enabled:
+        b1 = cfg.perception.enabled and cfg.perception.backend == "tensorrt_b1"
+        if b1:
+            selected = json.loads((ROOT / cfg.perception.model_manifest).read_text())
+            sources = json.loads((ROOT / selected["source_manifest"]).read_text())[
+                "models"
+            ]
+            for role, row in selected["models"].items():
+                add(ROOT / row["engine_path"], row["engine_sha256"])
+            for row in (
+                sources["body_hand_pose"]["decoder_source"],
+                sources["expression"]["prepost_source"]["files"]["facial_fer_model.py"],
+            ):
+                add(ROOT / row["path"], row["sha256"])
+            add(
+                perception["body"]["runtime_helper"],
+                perception["body"]["runtime_helper_sha256"],
+            )
+        if cfg.face.enabled and not b1:
             row = perception["face"]
             add(
                 Path(row["directory"]) / row["filename"],
                 row["files"][row["filename"]]["sha256"],
             )
-        if cfg.perception.enabled and cfg.perception.body_enabled:
+        if cfg.perception.enabled and cfg.perception.body_enabled and not b1:
             row = perception["body"]
             add(row["engine_path"], row["engine_sha256"])
             add(row["runtime_helper"], row["runtime_helper_sha256"])
-        if cfg.perception.enabled and cfg.perception.hands_enabled:
+        if cfg.perception.enabled and cfg.perception.hands_enabled and not b1:
             for role in ["palm", "hand"]:
                 row = perception[role]
                 for name in [

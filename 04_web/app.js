@@ -123,7 +123,7 @@
         clearFaceBox();
         scheduleFaceHide();
       }
-      drawScene(msg.persons || [], msg.hands || []);
+      drawScene(msg.persons || [], msg.hands || [], msg.objects || []);
     };
 
     img.src = 'data:image/jpeg;base64,' + msg.data;
@@ -357,9 +357,35 @@
 
   function onScene(msg){
     $('sceneInfo').textContent=msg.ready ? '人体 '+msg.persons.length+' · 人脸 '+(msg.face && msg.face.face_detected ? 1 : 0)+' · 手 '+msg.hands.length : (msg.error || '感知尚未就绪');
+    $('visionTools').hidden=msg.backend!=='tensorrt_b1';
+    if(msg.backend!=='tensorrt_b1') return;
+    const update=(id,rows,empty)=>{const select=$(id),old=select.value;select.replaceChildren();
+      if(empty){const o=document.createElement('option');o.value='';o.textContent='未选择';select.append(o);}
+      for(const row of rows.filter(r=>r.track_id)){const o=document.createElement('option');o.value=row.track_id;
+        o.textContent=(row.identity?.label || row.class_name || '人脸')+' #'+row.track_id.split(':').at(-1)+(row.range?.available ? ' · '+row.range.meters.toFixed(2)+' m':'');select.append(o);}
+      if([...select.options].some(o=>o.value===old))select.value=old;};
+    update('visionTarget',[...(msg.persons||[]),...(msg.objects||[])],true);
+    update('visionFace',msg.faces||[],false);
+    $('visionEnroll').disabled=!msg.ready || !$('visionFace').value;
+    $('visionAttributes').textContent=(msg.attributes||[]).map(a=>{
+      const h=a.head_pose?.angles_degrees?.map(v=>v.toFixed(1)).join(' / ') || '--';
+      const g=a.gaze?.gaze_yaw_deg!=null ? a.gaze.gaze_yaw_deg.toFixed(1)+' / '+a.gaze.gaze_pitch_deg.toFixed(1):'不可用';
+      return '人脸 #'+a.target_id.split(':').at(-1)+' · 头姿 '+h+'° · 视线 '+g+'° · 表情 '+(a.expression?.label || '--');
+    }).join('；');
   }
 
-  function drawScene(persons,hands){
+  async function visionRequest(path,method,body){
+    const response=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body ? JSON.stringify(body):undefined});
+    const value=await response.json();if(!response.ok)throw new Error(typeof value.detail==='string'?value.detail:JSON.stringify(value.detail));return value;
+  }
+  $('visionSelectTarget').onclick=async()=>{try{await visionRequest('/api/vision/target','POST',{track_id:$('visionTarget').value||null});$('visionAction').textContent='目标选择已更新';}catch(e){$('visionAction').textContent=e.message;}};
+  $('visionEnroll').onclick=async()=>{try{const row=await visionRequest('/api/vision/identities','POST',{target_id:$('visionFace').value,label:$('visionLabel').value});$('visionAction').textContent='已登记：'+row.label;}catch(e){$('visionAction').textContent=e.message;}};
+  $('visionList').onclick=async()=>{try{const rows=await visionRequest('/api/vision/identities','GET');const area=$('visionIdentities');area.replaceChildren();
+    for(const row of rows){const line=document.createElement('div'),text=document.createElement('span'),button=document.createElement('button');text.textContent=row.label+' ';button.textContent='移除';
+      button.onclick=async()=>{try{await visionRequest('/api/vision/identities','DELETE',{label:row.label});line.remove();}catch(e){$('visionAction').textContent=e.message;}};line.append(text,button);area.append(line);}
+    if(!rows.length)area.textContent='尚无登记标签';}catch(e){$('visionAction').textContent=e.message;}};
+
+  function drawScene(persons,hands,objects=[]){
     const canvas=$('faceOverlay'),ctx=canvas.getContext('2d');
     const scale=Math.min(canvas.width/camNatural.w,canvas.height/camNatural.h);
     const ox=(canvas.width-camNatural.w*scale)/2,oy=(canvas.height-camNatural.h*scale)/2;
@@ -368,7 +394,9 @@
       ctx.strokeRect(ox+b[0]*scale,oy+b[1]*scale,(b[2]-b[0])*scale,(b[3]-b[1])*scale);
       ctx.font='13px sans-serif';ctx.fillText(label,ox+b[0]*scale,Math.max(14,oy+b[1]*scale-4));
     }
-    for(const person of persons) box(person,'#76b900','人体');
+    const label=(row,name)=>name+(row.track_id?' #'+row.track_id.split(':').at(-1):'')+(row.range?.available?' '+row.range.meters.toFixed(2)+'m':'');
+    for(const person of persons) box(person,'#76b900',label(person,'人体'));
+    for(const object of objects) box(object,'#64b5f6',label(object,object.class_name));
     const edges=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
     for(const hand of hands){
       box(hand,'#f0a64b','手');const points=hand.landmarks;
@@ -411,6 +439,7 @@
   }
 
   function onCapabilities(msg){
+    if(msg.face) onPerception(msg.face);
     if(msg.voice) onVoiceState(msg.voice);
     if(msg.live_audio) onLiveAudio(msg.live_audio);
     if(msg.session) onSession(msg.session);

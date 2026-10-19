@@ -353,6 +353,19 @@ class ClearSessionRequest(BaseModel):
     session_id: str = Field(pattern=r"^[0-9a-f]{32}$")
 
 
+class VisionIdentityRequest(BaseModel):
+    target_id: str = Field(min_length=1, max_length=160)
+    label: str = Field(min_length=1, max_length=64)
+
+
+class VisionTargetRequest(BaseModel):
+    track_id: str | None = Field(default=None, max_length=160)
+
+
+class VisionRemoveIdentityRequest(BaseModel):
+    label: str = Field(min_length=1, max_length=64)
+
+
 def create_app(
     broadcaster: Broadcaster,
     *,
@@ -363,6 +376,7 @@ def create_app(
     audio_file=None,
     cancel=None,
     clear_history=None,
+    vision=None,
     max_upload_bytes=484096,
 ) -> FastAPI:
     config = broadcaster.config
@@ -403,6 +417,34 @@ def create_app(
     @app.get("/api/state")
     async def _state():
         return await read_state()
+
+    async def vision_call(name, *args):
+        if vision is None or name not in vision:
+            raise HTTPException(503, "B1 vision operation unavailable")
+        try:
+            return await app.state.calls.run(
+                lambda: vision[name](*args), config.read_timeout, True
+            )
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except (BusyRead, asyncio.TimeoutError) as exc:
+            raise HTTPException(503, "Vision operation occupied or timed out") from exc
+
+    @app.get("/api/vision/identities")
+    async def _vision_identities():
+        return await vision_call("identities")
+
+    @app.post("/api/vision/identities")
+    async def _vision_enroll(request: VisionIdentityRequest):
+        return await vision_call("enroll", request.target_id, request.label)
+
+    @app.delete("/api/vision/identities")
+    async def _vision_remove(request: VisionRemoveIdentityRequest):
+        return await vision_call("remove", request.label)
+
+    @app.post("/api/vision/target")
+    async def _vision_target(request: VisionTargetRequest):
+        return await vision_call("target", request.track_id)
 
     @app.get("/api/debug")
     async def _debug_state():

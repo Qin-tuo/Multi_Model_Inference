@@ -109,6 +109,10 @@ def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None, perceptio
                 message.update(
                     persons=scene["persons"],
                     hands=scene["hands"],
+                    objects=scene.get("objects", []),
+                    poses=scene.get("poses", []),
+                    faces=scene.get("faces", []),
+                    attributes=scene.get("attributes", []),
                     perception_frame=scene["frame"],
                 )
             else:
@@ -189,7 +193,8 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             serial=config.vision.serial,
         )
     )
-    detector = FaceDetector() if cam and config.face.enabled else None
+    b1 = config.perception.backend == "tensorrt_b1"
+    detector = FaceDetector() if cam and config.face.enabled and not b1 else None
     tracker = (
         FaceTracker(
             cam,
@@ -200,11 +205,17 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             min_face_size=config.face.min_face_size,
             stable_frames=config.face.stable_frames,
         )
-        if detector
+        if cam and config.face.enabled
         else None
     )
+    if b1:
+        from app.perception_b1 import B1Perception
+
+        perception_class = B1Perception
+    else:
+        perception_class = Perception
     perception = (
-        Perception(cam, config.perception, tracker)
+        perception_class(cam, config.perception, tracker)
         if cam and config.perception.enabled
         else None
     )
@@ -227,7 +238,11 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         config, llm, broadcaster, cam, stt=stt, tts=tts, perception=perception
     )
     gestures = (
-        GestureRecognizer(config.gestures, config.perception.hand_threshold)
+        GestureRecognizer(
+            config.gestures,
+            config.perception.hand_threshold,
+            config.perception.pose_joint_threshold,
+        )
         if perception and config.perception.hands_enabled
         else None
     )
@@ -499,6 +514,14 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         audio_file=control.audio_file,
         cancel=control.cancel,
         clear_history=control.clear_history,
+        vision={
+            "identities": lambda: perception.gallery.list(),
+            "enroll": perception.enroll,
+            "remove": lambda label: perception.gallery.remove(label),
+            "target": perception.select_target,
+        }
+        if b1 and perception
+        else None,
         max_upload_bytes=int(config.stt.max_seconds * 32000) + 4096,
     )
 

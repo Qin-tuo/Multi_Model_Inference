@@ -161,7 +161,13 @@
         ],
         "source": "Pinned MMPose projects/rtmpose3d/configs/rtmw3d-x_8xb32_cocktail14-384x288.py"
       },
-      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json"
+      "validation_summary": "benchmarks/results/b1-feasibility-20261019.json",
+      "decoder_source": {
+        "path": "05_runtime/frameworks/b1/mmpose/projects/rtmpose3d/rtmpose3d/utils.py",
+        "sha256": "d7c848e1ae6e25841ec98dcf20675cff17ec28d9055415e0e3c128fa28053fd6",
+        "url": "https://raw.githubusercontent.com/open-mmlab/mmpose/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/projects/rtmpose3d/rtmpose3d/utils.py"
+      },
+      "output_semantics": "133 COCO-WholeBody joints. xy: original RGB pixels after inverse affine. z: root-relative learned training scale, not camera meters. score: min(x/y SimCC peaks), not bounded probability; left hand91:112, right hand112:133."
     },
     "face": {
       "name": "YuNet 2023mar",

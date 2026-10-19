@@ -48,6 +48,7 @@ class _Track:
             sample["handedness"],
         )
         self.seen = stamp
+        self.owner = sample.get("owner")
         self.latched = False
         self.neutral_since = None
         self.samples = deque(maxlen=32)
@@ -63,8 +64,9 @@ class _Track:
 class GestureRecognizer:
     """One writer (perception); readers only receive compact status copies."""
 
-    def __init__(self, config, min_hand_score=0.8):
+    def __init__(self, config, min_hand_score=0.8, min_pose_joint_score=0.2):
         self.config, self.min_hand_score = config, min_hand_score
+        self.min_pose_joint_score = min_pose_joint_score
         self._lock = threading.Lock()
         self._tracks = {}
         self._epoch = None
@@ -108,10 +110,24 @@ class GestureRecognizer:
         points = np.asarray(hand["landmarks"], dtype=float)
         if points.shape != (21, 3) or not np.isfinite(points).all():
             return None, "invalid_landmarks"
-        if not self.min_hand_score <= hand["score"] <= 1:
-            return None, "low_confidence"
-        if not 0 <= hand["handedness_score"] <= 1:
-            return None, "invalid_handedness"
+        if hand.get("score_kind") == "simcc_peak":
+            scores = np.asarray(hand.get("landmark_scores"), dtype=float)
+            if (
+                scores.shape != (21,)
+                or not np.isfinite(scores).all()
+                or scores.min() < self.min_pose_joint_score
+            ):
+                return None, "low_pose_confidence"
+            if hand.get("side") not in {"left", "right"}:
+                return None, "invalid_handedness"
+            # An anatomical topology label is categorical, not a probability.
+            handedness = 0.0 if hand["side"] == "left" else 1.0
+        else:
+            if not self.min_hand_score <= hand["score"] <= 1:
+                return None, "low_confidence"
+            if not 0 <= hand["handedness_score"] <= 1:
+                return None, "invalid_handedness"
+            handedness = hand["handedness_score"]
         if (
             points[:, 0].min() < 0
             or points[:, 0].max() >= frame["width"]
@@ -127,7 +143,8 @@ class GestureRecognizer:
             "center": points[[0, 5, 9, 13, 17], :2].mean(axis=0),
             "motion_x": float(points[:, :2].mean(axis=0)[0]),
             "scale": scale,
-            "handedness": hand["handedness_score"],
+            "handedness": handedness,
+            "owner": hand.get("person_track_id"),
             "open": open_palm(points),
         }, None
 
@@ -138,6 +155,8 @@ class GestureRecognizer:
         reverse = {}
         for i, sample in enumerate(samples):
             for track in tracks:
+                if sample.get("owner") != track.owner:
+                    continue
                 # Strongly conflicting handedness is not one continuous track.
                 if (sample["handedness"] > 0.8 and track.handedness < 0.2) or (
                     sample["handedness"] < 0.2 and track.handedness > 0.8

@@ -43,6 +43,7 @@ def exclusive_build(cfg, output):
         lease = None
         try:
             stopped = services.stop(list(services.ORDER), cfg)
+            runtime.write_json(output / "services-stopped.json", stopped)
             if stopped["status"] != "STOPPED":
                 raise RuntimeError("Managed processes have not stopped")
             cache = runtime.paths(cfg)["stack"] / "cache"

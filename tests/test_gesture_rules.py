@@ -41,6 +41,30 @@ def test_open_hand_predicate_is_rotation_scale_invariant_and_rejects_folds():
     assert not open_palm(np.zeros((21,3)))
 
 
+def test_simcc_scores_are_not_probabilities_and_joint_quality_is_required():
+    recognizer = GestureRecognizer(GestureConfig())
+    value = hand()
+    value.update(score=3.5, score_kind="simcc_peak", landmark_scores=[3.5] * 21,
+                 side="right", person_track_id="person-a")
+    events = []
+    for i in range(5):
+        events += recognizer.update(scene(i, 1000 + i * .25, [value]), now=1000 + i * .25)
+    assert [e["kind"] for e in events] == ["stop"]
+    value["landmark_scores"][8] = .1
+    assert not recognizer.update(scene(5, 1001.25, [value]), now=1001.25)
+    assert recognizer._state["rejected_hands"] == {"low_pose_confidence": 1}
+
+
+def test_person_switch_does_not_inherit_stationary_hand_evidence():
+    recognizer = GestureRecognizer(GestureConfig())
+    for i in range(8):
+        value = hand()
+        value["person_track_id"] = "person-a" if i < 4 else "person-b"
+        assert not recognizer.update(scene(i, 1000 + i * .25, [value]), now=1000 + i * .25)
+    value["person_track_id"] = "person-b"
+    assert recognizer.update(scene(8, 1002, [value]), now=1002)[0]["kind"] == "stop"
+
+
 def test_stationary_palm_requires_distinct_frames_and_emits_once_per_raise():
     recognizer=GestureRecognizer(GestureConfig());same=scene(0,1000)
     for _ in range(20):assert not recognizer.update(same,now=1000)
