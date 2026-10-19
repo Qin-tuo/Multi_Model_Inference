@@ -404,11 +404,19 @@ def worker(condition, output):
 
 
 def main():
+    global WORKLOAD
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--conditions", nargs="+")
     parser.add_argument("--worker", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--workload",
+        type=Path,
+        default=WORKLOAD,
+        help="Recorded workload JSON; use a separate file for bounded soak runs",
+    )
     args = parser.parse_args()
+    WORKLOAD = args.workload.resolve()
     output = args.output.resolve()
     spec = workload()
     conditions = args.conditions or spec["conditions"]
@@ -470,6 +478,8 @@ def main():
                             condition,
                             "--output",
                             str(folder),
+                            "--workload",
+                            str(WORKLOAD),
                         ],
                         log,
                         seconds=spec["worker_timeout_seconds"],
