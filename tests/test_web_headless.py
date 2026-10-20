@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from app.config import Config
 from app.web import Broadcaster
 from app.web_limits import ClientBuffer, encode
-import run_web_vision_chat as entry
+import app.application as entry
 
 
 class FakeLLM:

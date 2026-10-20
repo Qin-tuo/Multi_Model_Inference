@@ -58,8 +58,8 @@ async def probe(args):
     import uvicorn
     from websockets.asyncio.client import connect
     from app.config import Config
-    from app import pipeline
-    import run_web_vision_chat as entry
+    from app.speech import capture as pipeline
+    import app.application as entry
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     folder = args.output.parent

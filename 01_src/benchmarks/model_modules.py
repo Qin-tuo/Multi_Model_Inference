@@ -54,7 +54,7 @@ def wait_idle(adapter, seconds=30):
 
 def speech_case(role, cfg, model, vad, case, phase, out):
     from app.audio import pcm_wav, wav_pcm
-    from app.pipeline import segment_pcm
+    from app.speech.vad import segment_pcm
 
     row = {"case": case["id"], "phase": phase, "reference_prompt": case["text"]}
     if role == "s1":
@@ -196,7 +196,7 @@ def worker(role, out):
     try:
         if role == "s1":
             from app.stt import STT
-            from app.pipeline import SileroVAD
+            from app.speech.vad import SileroVAD
 
             start = time.monotonic()
             vad = SileroVAD()

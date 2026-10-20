@@ -62,8 +62,19 @@
     {
       "id": "C4",
       "requirement": "按职责拆分核心模块",
-      "status": "pending",
-      "evidence": []
+      "status": "in_progress",
+      "evidence": [
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/application-stages-tests.xml",
+          "sha256": "9574bcc516f7bfd13e375747b1e656d8b89cd54e491adcf6893d348078710f88"
+        }
+      ],
+      "implemented": [
+        "Speech ownership split into devices, capture, VAD, playback, output and typed events",
+        "Web entry delegates to app.application and app.broadcast",
+        "Single controller worker delegates per-turn stages to TurnExecution"
+      ],
+      "remaining": "Native text/WAV/cancellation regression and final architecture review."
     },
     {
       "id": "C5",

@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 from app.actions.store import ActionStore
 from app.llm import LLM
-from app.pipeline import SileroVAD
+from app.speech.vad import SileroVAD
 from app.stt import STT
 from app.tts import create_tts
 from app.turn_control import TurnController

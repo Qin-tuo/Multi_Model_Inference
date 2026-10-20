@@ -14,14 +14,9 @@ import pytest
 from rich.console import Console
 
 from app.config import Config
-from app.pipeline import (
-    AudioChunk,
-    MicRecorder,
-    SpeechOnset,
-    SpeechSegment,
-    SpeechSegmenter,
-    vad_loop,
-)
+from app.speech.types import AudioChunk, SpeechOnset, SpeechSegment
+from app.speech.capture import MicRecorder
+from app.speech.vad import SpeechSegmenter, vad_loop
 from app.turn_control import TurnController
 
 
@@ -363,7 +358,7 @@ def test_failed_capture_attempts_close_owned_process_pipes(monkeypatch):
         children.append(child)
         return child
 
-    monkeypatch.setattr("app.pipeline.subprocess.Popen", exited)
+    monkeypatch.setattr("app.speech.capture.subprocess.Popen", exited)
     mic = MicRecorder(Console())
     try:
         assert not mic._start_capture()

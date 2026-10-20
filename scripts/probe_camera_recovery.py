@@ -25,7 +25,7 @@ import uvicorn
 from websockets.asyncio.client import connect
 
 from app.config import Config
-import run_web_vision_chat as entry
+import app.application as entry
 
 
 async def command(*args, timeout=45):

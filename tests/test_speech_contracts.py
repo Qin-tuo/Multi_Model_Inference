@@ -11,7 +11,9 @@ from app.audio import pcm_wav, wav_pcm
 from app.config import Config
 from app.stt import STT
 from app.tts import LocalTTS
-from app.pipeline import TextChunker, SpeechOutput, play_audio, PulseAudioAEC
+from app.speech.output import TextChunker, SpeechOutput
+from app.speech.playback import play_audio
+from app.speech.devices import PulseAudioAEC
 
 
 def test_strict_audio_container_and_sample_format():
@@ -72,14 +74,14 @@ def test_playback_failure_is_not_a_completion(monkeypatch):
         returncode=1
         def communicate(self,*args,**kwargs):return None,b'device gone'
         def poll(self):return 1
-    monkeypatch.setattr('app.pipeline.subprocess.Popen',lambda *a,**k:Process())
+    monkeypatch.setattr('app.speech.playback.subprocess.Popen',lambda *a,**k:Process())
     with pytest.raises(RuntimeError,match='device gone'):play_audio(np.ones(16,dtype=np.int16),16000,'chosen-sink')
     with pytest.raises(ValueError):play_audio(np.ones(16,dtype=np.int16),16000)
 
 
 def test_missing_player_does_not_mark_output_started(monkeypatch):
     def missing(*args,**kwargs):raise FileNotFoundError('player is unavailable')
-    monkeypatch.setattr('app.pipeline.subprocess.Popen',missing);started=[]
+    monkeypatch.setattr('app.speech.playback.subprocess.Popen',missing);started=[]
     with pytest.raises(FileNotFoundError):
         play_audio(np.ones(16,dtype=np.int16),16000,'chosen-sink',on_start=lambda:started.append(True))
     assert not started
@@ -119,7 +121,8 @@ def test_aec_names_are_instance_scoped():
 
 
 def test_microphone_mute_discards_old_epoch_without_device_operations():
-    from app.pipeline import MicRecorder, AudioChunk
+    from app.speech.capture import MicRecorder
+    from app.speech.types import AudioChunk
     from rich.console import Console
     mic=MicRecorder(Console())
     epoch=mic.input_epoch
@@ -144,7 +147,7 @@ def test_only_retained_managed_audio_can_be_downloaded(tmp_path):
 
 
 def test_file_vad_offsets_cover_the_actual_pcm_duration():
-    from app.pipeline import segment_pcm
+    from app.speech.vad import segment_pcm
     class Speech:
         def reset(self):pass
         def __call__(self, raw):return 1.0

@@ -18,8 +18,8 @@
 import subprocess
 import io
 import wave
+import numpy as np
 from urllib.parse import urlsplit
-from pathlib import Path
 from typing import Optional
 
 
@@ -121,3 +121,8 @@ def pcm_wav(pcm: bytes) -> bytes:
         output.setframerate(16000)
         output.writeframes(pcm)
     return buffer.getvalue()
+
+
+def chunk_rms(raw: bytes) -> float:
+    pcm = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    return float(np.sqrt(np.mean(pcm**2)))

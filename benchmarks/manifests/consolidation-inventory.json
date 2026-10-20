@@ -433,5 +433,41 @@
     "05_runtime/models/stage1_unified_face.onnx",
     "05_runtime/models/stage2_tiny_expression.onnx"
   ],
-  "preservation_rule": "Keep selected runtime dependencies, B2 comparison inputs/engines/raw results, uploaded ONNX, references, licenses and failure evidence. Each deletion/move needs a dependency disposition and a recovery location."
+  "preservation_rule": "Keep selected runtime dependencies, B2 comparison inputs/engines/raw results, uploaded ONNX, references, licenses and failure evidence. Each deletion/move needs a dependency disposition and a recovery location.",
+  "dispositions": {
+    "01_src/app/pipeline.py": {
+      "action": "split_and_remove",
+      "replacements": [
+        "01_src/app/speech/devices.py",
+        "01_src/app/speech/types.py",
+        "01_src/app/speech/capture.py",
+        "01_src/app/speech/vad.py",
+        "01_src/app/speech/playback.py",
+        "01_src/app/speech/output.py",
+        "01_src/app/speech/constants.py",
+        "01_src/app/audio.py"
+      ],
+      "removed_unreferenced_helpers": [
+        "save_wav",
+        "warmup_stt",
+        "load_silero"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "run_web_vision_chat.py": {
+      "action": "thin_entry",
+      "implementation": [
+        "01_src/app/application.py",
+        "01_src/app/broadcast.py"
+      ]
+    },
+    "01_src/app/turn_control.py": {
+      "action": "retain_admission_and_state_owner",
+      "execution": "01_src/app/turn_execution.py"
+    },
+    "scripts/validation_inputs.py": {
+      "action": "move_shared_helper",
+      "replacement": "01_src/deploy/validation_inputs.py"
+    }
+  }
 }

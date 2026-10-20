@@ -3,7 +3,7 @@
 
 from types import SimpleNamespace
 
-from app import pipeline
+from app.speech import devices as pipeline
 
 
 def test_aec_loads_webrtc_for_selected_physical_sink(monkeypatch):

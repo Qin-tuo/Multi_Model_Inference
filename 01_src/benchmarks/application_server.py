@@ -28,14 +28,14 @@ TURN = ContextVar("benchmark_turn", default=None)
 
 def instrument_app(cfg, out):
     import cv2
-    import run_web_vision_chat as entry
+    import app.application as entry
     import app.turn_control as turns
     import app.actions.store as store
     from app.camera import Camera
     from app.llm import LLM
     from app.stt import STT
     from app.tts import LocalTTS
-    from app.pipeline import SpeechOutput
+    from app.speech.output import SpeechOutput
     from deploy.resource_guard import hold_model_lease
 
     lease = hold_model_lease(runtime.paths(cfg)["stack"] / "cache")

@@ -3,7 +3,7 @@
 
 from types import SimpleNamespace
 
-from app import pipeline
+from app.speech import devices as pipeline
 
 
 SPEAKERS = [

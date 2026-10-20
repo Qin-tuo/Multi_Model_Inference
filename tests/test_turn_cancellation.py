@@ -15,7 +15,8 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 from app.config import Config
-from app.pipeline import SpeechOutput, Playback, play_audio
+from app.speech.output import SpeechOutput
+from app.speech.playback import Playback, play_audio
 from app.request_io import RequestIO, TurnCancelled
 from app.turn_control import TurnController
 from app.web import Broadcaster, create_app
@@ -167,7 +168,7 @@ def test_cancel_terminates_only_owned_playback_even_if_it_ignores_term(monkeypat
                       stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         assert process.stdout.readline()==b'ready\n'
         owned.append(process);started.set();return process
-    monkeypatch.setattr('app.pipeline.subprocess.Popen',launch)
+    monkeypatch.setattr('app.speech.playback.subprocess.Popen',launch)
     event=threading.Event();playback=Playback(event);errors=[]
     def play():
         try:play_audio(np.ones(160,dtype=np.int16),16000,'test-sink',playback)

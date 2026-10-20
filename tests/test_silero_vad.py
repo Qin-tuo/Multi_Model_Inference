@@ -4,7 +4,8 @@
 import numpy as np
 import pytest
 
-from app.pipeline import SILERO_CHUNK_SAMPLES, SileroVAD
+from app.speech.constants import SILERO_CHUNK_SAMPLES
+from app.speech.vad import SileroVAD
 
 
 def test_silero_vad_streaming_state_and_reset():
