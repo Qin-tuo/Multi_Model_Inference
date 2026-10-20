@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20T07:11:47.357115+00:00",
-  "status": "B2_DEFAULT_READY_FUNCTIONAL_PASS_BASELINE_PENDING",
+  "updated_at": "2026-10-20T07:52:49.460684+00:00",
+  "status": "REPLACEMENTS_DEPLOYED_BASELINE_MEASURED_OPEN_SHUTDOWN_ISSUE",
   "authorized_replacements": [
     "body_hand_pose",
     "face_identity",
@@ -14,7 +14,7 @@
   },
   "retained_model_count": 7,
   "retained_sources_and_engines_identical": true,
-  "default_profile": "02_config/settings.orin-nx-b2.yaml; four services READY",
+  "default_profile": "02_config/settings.orin-nx-b2.yaml; four services READY after measurements",
   "rollback_tag": "before-upstream-standard-20261020",
   "export_reports": {
     "body_hand_pose": {
@@ -88,16 +88,49 @@
     "sha256": "a8e2a7da61ad84e3d389673086fe41900fc8640a5c00d44129edc0876095eba7"
   },
   "software_tests": {
-    "passed": 280,
+    "passed": 277,
+    "source_commit": "45af3ed6a8487f580f2e50dabff96931bad9ebab",
     "junit": {
-      "path": "05_runtime/validation/b2-software-tests-final-20261020.xml",
-      "sha256": "3091604aa9c893a086d9b2441b7af911fd9edff3d144d67d8eb6c3fb742d0c33"
+      "path": "05_runtime/validation/b2-committed-software-tests-20261020.xml",
+      "sha256": "2342909116bcdaaefcde5b14f714fb3d1fb307f310e9bfa94b330091fa0830b9"
     },
-    "scope": "Current worktree suite including three unrelated benchmark-coordinator tests; deployment/model code and tests committed independently."
+    "scope": "Full test suite in the detached committed source checkout, excluding unrelated worktree additions.",
+    "earlier_worktree_run": {
+      "passed": 280,
+      "junit": {
+        "path": "05_runtime/validation/b2-software-tests-final-20261020.xml",
+        "sha256": "3091604aa9c893a086d9b2441b7af911fd9edff3d144d67d8eb6c3fb742d0c33"
+      },
+      "scope": "Current worktree suite including three unrelated benchmark-coordinator tests; deployment/model code and tests committed independently."
+    }
   },
   "baseline": {
-    "status": "PENDING",
-    "comparison_rule": "Model revision, not same-model performance optimization"
+    "status": "TEN_MODULES_AND_SEVEN_STREAM_CONDITIONS_MEASURED",
+    "runtime_source_commit": "45af3ed6a8487f580f2e50dabff96931bad9ebab",
+    "module_protocol": {
+      "path": "benchmarks/manifests/b2-vision-measurements-v1.json",
+      "sha256": "66f1297dec32f4307d252710b36435bb027b39f5f086db7720e1455b96771b38"
+    },
+    "stream_workload": {
+      "path": "benchmarks/manifests/b2-vision-stream-v1.json",
+      "sha256": "280583b67cc7486934cf7645b74a36f7d94f1c06ea7558d098fda426e7da4074"
+    },
+    "module_summary": {
+      "path": "benchmarks/results/b2-vision-modules-v1.json",
+      "sha256": "dc9ee27dea0171f71898f0bd31b1dc8164329882fbfe832a0f7f0ea7fe1c1bdf"
+    },
+    "stream_summary": {
+      "path": "benchmarks/results/b2-vision-stream-v1.json",
+      "sha256": "050ab6ca4fc2299dcccb7d2d6b019c7026358879f0316115742f3cfd00900404"
+    },
+    "controller": {
+      "path": "05_runtime/validation/b2-measurement-control-r2-20261020/controller.json",
+      "sha256": "0bed81527fd835f8be2d1384179e364c832c5ca18c3916c19248872739f90f07"
+    },
+    "comparison_rule": "Three models changed. No same-model optimization claim. Live conditions have different task activation and are not paired comparable scenes.",
+    "total_completed_frames": 1955,
+    "frame_failures": 0,
+    "observer_missed_deadlines": 0
   },
   "not_claimed": [
     "Field gesture precision or recall; complete multi-person/occlusion coverage",
@@ -113,5 +146,37 @@
   "browser_probe": {
     "path": "05_runtime/validation/b2-browser-20261020/browser.json",
     "sha256": "cdd5f560bdf1615a69f4aefaf42beb2d5f58acefc058efcb65273f1ed812a16e"
-  }
+  },
+  "final_check": {
+    "path": "05_runtime/validation/b2-final-check-20261020/services.json",
+    "sha256": "4ce6a345bee18fe88e70f05f12cc172166da7197d57a57b99900c744e6611d5d"
+  },
+  "open_issues": [
+    {
+      "id": "B2-EXIT-01",
+      "status": "OPEN_INTERMITTENT_NOT_ATTRIBUTED",
+      "description": "One pre-measurement stop attempt timed out for app and speech after application-level shutdown. Cgroups were empty and services restored READY. The subsequent measured run had clean stops; this does not establish a fix.",
+      "evidence": {
+        "path": "05_runtime/validation/b2-measurement-control-r1-20261020/services-stopped.json",
+        "sha256": "a0ed53781c9076f709af04f10e8c42e3a0f5ca2ad8931dcc3dcfe60d8cb8a8e5"
+      },
+      "recovery": {
+        "path": "05_runtime/validation/b2-measurement-control-r1-20261020/services-restored.json",
+        "sha256": "700c2774b6bd54867a2825bd70193740f5b9612a8eecfe75ddc739f58bd7afa2"
+      },
+      "later_clean_stop": {
+        "path": "05_runtime/validation/b2-measurement-control-r2-20261020/services-stopped-after.json",
+        "sha256": "45d43578d4b28dc962114d2141dc305d5e664a11268ac24c52fff58a7a71f4a4"
+      },
+      "policy": "No shutdown timeout or production lifecycle semantics changed; keep for a separate stability investigation."
+    }
+  ],
+  "measurement_setup_failure": {
+    "reason": "An independent checkout refused main-project service ownership before inference. Corrected by having the main project coordinate unchanged frozen measurement workers.",
+    "evidence": {
+      "path": "05_runtime/validation/b2-measurement-control-20261020/controller.json",
+      "sha256": "84278ba5593fdae1363689b861f8ac6a2d0fc5d69fa9fbef75c086710d506d69"
+    }
+  },
+  "runtime_archive": "B2 artifacts are present locally; the existing B1 R2 archive does not contain them. No complete B2 recovery archive or new independent offline restore is claimed."
 }

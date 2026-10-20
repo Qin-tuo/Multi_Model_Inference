@@ -1,5 +1,7 @@
 # 项目内运行依赖
 
+> 当前默认配置为 B2，三个标准模型的替换和新基线见 [B2 说明](../../docs/b2-model-replacements.md)。本机新增工件已经位于 `05_runtime/`；下文 B1 运行包及其独立恢复证据只覆盖 B1，尚未制作 B2 完整运行包。
+
 当前服务使用仓库内 `05_runtime/`。原 `/home/nvidia/AI_Stack` 保留为回退来源；当前启动路径、模型读取和数据库写入不再依赖它。独立性通过私有 mount/network namespace 验证：隐藏原 AI_Stack，网络只保留 lo，真实启动四个后端并完成文字、相机、语音接口及完整文件语音对话。主机目录和网络保持原状。
 
 上述旧运行包记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包约 7.14 GB，索引见 [B1 运行包锁](project-runtime-b1.lock.json)。在另一个 Git 副本中恢复后，已通过隐藏原项目和 AI_Stack、网络仅保留 lo 的真实启动验证；R2 默认启动切换已通过，实时手势验收仍单独跟踪。历史 R1 包索引保存在 [R1 运行包锁](project-runtime-b1-r1.lock.json)。
@@ -60,7 +62,7 @@ python3 scripts/runtime_bundle.py unpack --archive /path/to/runtime-edge-assista
 ./run.sh services up --config 02_config/settings.orin-nx-headless.yaml
 ```
 
-上例恢复的是 B0。当前 B1 R2 使用下列运行包与锁中的 SHA256；`run.sh` 已默认选择 B1，显式参数可避免已有环境变量覆盖：
+上例恢复的是 B0。当前 B1 R2 使用下列运行包与锁中的 SHA256；当前 `run.sh` 默认选择 B2；以下显式参数用于选择 B1 历史配置：
 
 ```bash
 python3 scripts/runtime_bundle.py unpack \
