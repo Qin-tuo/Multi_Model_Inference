@@ -30,12 +30,13 @@ from app.identity_gallery import IdentityGallery
 from build_vision_b1 import exclusive_build
 from benchmarks.vision_b1_support import PROTOCOL, validate
 from deploy import runtime, services
+from validation_inputs import input_path, is_local_input
 
 
 def held_palm_images(fixture_path):
     """Load an independently labeled segment; never select frames by predictions."""
     fixture = json.loads(fixture_path.read_text())
-    recording = ROOT / fixture["recording"]
+    recording = input_path(ROOT / fixture["recording"], ROOT)
     if runtime.sha256(recording) != fixture["recording_sha256"]:
         raise ValueError("Held-palm recording changed")
     record = json.loads(recording.read_text())
@@ -49,9 +50,9 @@ def held_palm_images(fixture_path):
         raise ValueError("Held-palm segment is incomplete or unbounded")
     images = []
     for row in rows:
-        path = (ROOT / row["path"]).resolve()
+        path = input_path(ROOT / row["path"], ROOT).resolve()
         if (
-            not path.is_relative_to(ROOT / "05_runtime/validation")
+            not is_local_input(path, ROOT)
             or runtime.sha256(path) != row["sha256"]
         ):
             raise ValueError("Held-palm preview changed")

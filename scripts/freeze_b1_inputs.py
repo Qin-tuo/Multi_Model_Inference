@@ -24,6 +24,7 @@ from benchmarks.vision_b1_support import PROTOCOL, outputs_match
 from benchmarks.vision_b1_timing import TensorRTTrace
 from build_vision_b1 import exclusive_build
 from deploy import runtime, services
+from validation_inputs import input_path
 
 
 def letterbox(image):
@@ -74,6 +75,7 @@ def input_images(output, parent_path=None):
         ROOT
         / "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/reference/bus.npz"
     )
+    bus = input_path(bus, ROOT)
     with np.load(bus, allow_pickle=False) as data:
         bus_image = data["source"]
     originals = {

@@ -21,9 +21,11 @@ from app.gestures import GestureRecognizer
 from app.vision_models import VisionModels
 from build_vision_b1 import exclusive_build
 from deploy import runtime, services
+from validation_inputs import input_path, is_local_input
 
 
 def replay(recording, models, cfg, output):
+    recording = input_path(recording, ROOT)
     record = json.loads(recording.read_text())
     images = {
         (row["frame"]["source_epoch"], row["frame"]["frame_id"]): row
@@ -51,9 +53,9 @@ def replay(recording, models, cfg, output):
             # Absence is a continuity break, never an invented observation.
             recognizer.update({"ready": False}, now=sample["observed_monotonic"])
             continue
-        path = (ROOT / item["path"]).resolve()
+        path = input_path(ROOT / item["path"], ROOT).resolve()
         if (
-            not path.is_relative_to(ROOT / "05_runtime/validation")
+            not is_local_input(path, ROOT)
             or runtime.sha256(path) != item["sha256"]
         ):
             raise ValueError("Preview source changed or is outside local validation")

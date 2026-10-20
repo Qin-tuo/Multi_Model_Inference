@@ -1,5 +1,7 @@
 # 视觉基线复现入口
 
+2026-10-20：按用户要求清理本机旧 `05_runtime/validation/` 测试目录。下文旧原始目录为历史记录；仓库内的版本化汇总、冻结协议和 `05_runtime/baselines/` 输入保持保留。仍需使用的参考样本迁入 `05_runtime/datasets/validation-inputs/`。
+
 ## B1 模型接入验证
 
 当前新增了 **R2 规则修复版本**，冻结协议为 [v2](../benchmarks/manifests/b1-vision-measurements-v2.json)。相对原 R1，只有运行文件 `gestures.py` 改变；模型、引擎、输入像素、模块 ROI 参数和有效配置均相同，22 组普通/计时调用的一致性重新核验通过。R1 的协议和数据保持原字节；R2 单模块沿用相同推理路径的已测数据，整链路七组窗口已单独复测，见 [版本范围](../benchmarks/results/b1-r2-scope.json)。R1/R2 数据分别列出，不将规则修复记作性能优化收益。

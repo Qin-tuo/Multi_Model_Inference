@@ -10,6 +10,10 @@
 
 [B1 历史交接入口](docs/b1-handoff.md) · [B1 历史实测数据和复现口径](docs/visual-baseline.md)。B1 数据对应旧模型和源码，不能充当 B2 的当前性能指标。
 
+[多模型推理优化学习指南](docs/inference-optimization-guide.md)：优化职责、量化与剪枝、指标与工具、YOLO 代码阅读、单模型与整体迭代、实机验收及实验记录。
+
+[人体检测完整优化实操](docs/body-detection-optimization.md)：以 YOLOv8n-seg 走通质量与性能基线、部署优化、FP16、INT8、结构化剪枝与微调，以及多模型共存对照。
+
 [项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)
 
 

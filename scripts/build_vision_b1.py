@@ -24,7 +24,7 @@ from prepare_vision_b1 import MANIFEST, prepare
 
 
 @contextmanager
-def exclusive_build(cfg, output):
+def exclusive_build(cfg, output, *, allow_failed_stop=False):
     """Keep deployment operations and model startup excluded until restoration."""
     with services.operation(cfg):
         before = services.state(list(services.ORDER), cfg)
@@ -45,7 +45,33 @@ def exclusive_build(cfg, output):
             stopped = services.stop(list(services.ORDER), cfg)
             runtime.write_json(output / "services-stopped.json", stopped)
             if stopped["status"] != "STOPPED":
-                raise RuntimeError("Managed processes have not stopped")
+                rows = stopped.get("services", {})
+                terminal_and_empty = set(rows) == set(services.ORDER) and all(
+                    row.get("managed_by_project") is True
+                    and row.get("cgroup_pids") == []
+                    and row.get("main_pid") == 0
+                    and row.get("ActiveState") in ("inactive", "failed")
+                    for row in rows.values()
+                )
+                if not (allow_failed_stop and terminal_and_empty):
+                    raise RuntimeError(
+                        "Service shutdown was not clean; see services-stopped.json"
+                        if terminal_and_empty
+                        else "Managed processes have not stopped"
+                    )
+                runtime.write_json(
+                    output / "shutdown-warning.json",
+                    {
+                        "status": "UNCLEAN_SHUTDOWN_PROCESSES_CONFIRMED_EXITED",
+                        "scope": "Diagnostic profiling may proceed; shutdown reliability is not qualified",
+                        "services": rows,
+                    },
+                )
+                print(
+                    "Shutdown warning: all managed processes exited, but a service "
+                    "reported failure; see shutdown-warning.json. Continuing diagnostic profiling.",
+                    flush=True,
+                )
             cache = runtime.paths(cfg)["stack"] / "cache"
             cache.mkdir(parents=True, exist_ok=True)
             lease = open(cache / "ort-build.owner.lock", "a+b")

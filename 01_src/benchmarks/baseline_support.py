@@ -241,7 +241,9 @@ def validate():
     return protocol, baseline_cfg, manifest
 
 
-def environment(out):
+def environment(out, *, source_root=None):
+    source_root = ROOT if source_root is None else Path(source_root).resolve()
+
     def command(args):
         result = subprocess.run(args, capture_output=True, text=True, timeout=20)
         return {
@@ -254,20 +256,21 @@ def environment(out):
     sources = [
         p
         for folder in ("01_src/app", "01_src/benchmarks", "01_src/deploy")
-        for p in (ROOT / folder).glob("**/*.py")
+        for p in (source_root / folder).glob("**/*.py")
     ]
-    sources += list((ROOT / "02_config").glob("*.yaml"))
+    sources += list((source_root / "02_config").glob("*.yaml"))
     sources += [
-        ROOT / "01_src/project_paths.py",
-        ROOT / "run_web_vision_chat.py",
-        ROOT / "main.py",
+        source_root / "01_src/project_paths.py",
+        source_root / "run_web_vision_chat.py",
+        source_root / "main.py",
     ]
     result = {
         "created_at": runtime.stamp(),
         "pid": os.getpid(),
         "kernel": command(["uname", "-a"]),
         "power": command(["sudo", "-n", "nvpmodel", "-q"]),
-        "git_commit": command(["git", "-C", str(ROOT), "rev-parse", "HEAD"]),
+        "source_root": str(source_root),
+        "git_commit": command(["git", "-C", str(source_root), "rev-parse", "HEAD"]),
         "l4t": Path("/etc/nv_tegra_release").read_text(),
         "python": os.sys.version,
         "cuda_version_manifest": json.loads(
@@ -284,11 +287,29 @@ def environment(out):
             {k: p.info[k] for k in ("pid", "ppid", "name", "create_time")}
             for p in psutil.process_iter(["pid", "ppid", "name", "create_time"])
         ],
-        "source_sha256": {str(p.relative_to(ROOT)): runtime.sha256(p) for p in sources},
+        "source_sha256": {
+            str(p.relative_to(source_root)): runtime.sha256(p) for p in sources
+        },
     }
+    coordinator_sources = []
+    if source_root != ROOT:
+        coordinator_sources = [
+            Path(__file__),
+            ROOT / "01_src/benchmarks/vision_b1_modules.py",
+            ROOT / "01_src/benchmarks/vision_b1_support.py",
+            ROOT / "scripts/build_vision_b1.py",
+        ]
+    if coordinator_sources:
+        result["coordinator_source_sha256"] = {
+            str(p.relative_to(ROOT)): runtime.sha256(p) for p in coordinator_sources
+        }
     runtime.write_json(out / "environment.json", result)
     for p in sources:
-        target = out / "source" / p.relative_to(ROOT)
+        target = out / "source" / p.relative_to(source_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(p, target)
+    for p in coordinator_sources:
+        target = out / "coordinator-source" / p.relative_to(ROOT)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(p, target)
     return result

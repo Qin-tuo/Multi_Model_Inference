@@ -1,0 +1,2 @@
+# Optional profiling overlay for Jetson Python 3.12 aarch64.
+nvtx==0.2.16 --hash=sha256:4a94c321fc3fe489e40f82e2d7fe7db7ef312882e85228aaaa97ee3dfadc067c

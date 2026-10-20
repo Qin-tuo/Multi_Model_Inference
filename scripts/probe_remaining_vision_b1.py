@@ -16,6 +16,7 @@ import sys
 
 import cv2
 import numpy as np
+from validation_inputs import input_path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
@@ -41,7 +42,7 @@ def source_fixtures(output):
 
     rows = []
     for name, image, face, provenance in fixtures(
-        ROOT / "05_runtime/validation/b1-face-20261019"
+        input_path(ROOT / "05_runtime/validation/b1-face-20261019", ROOT)
     ):
         crop, roi = crop_roi(image, face["box_xyxy"])
         key = "face-" + name
@@ -51,6 +52,7 @@ def source_fixtures(output):
         ROOT
         / "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/reference"
     )
+    base = input_path(base, ROOT)
     for filename in ("public-person", "bus"):
         with np.load(base / (filename + ".npz"), allow_pickle=False) as data:
             image = data["source"]

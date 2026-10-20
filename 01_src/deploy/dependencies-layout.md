@@ -6,6 +6,12 @@
 
 上述旧运行包记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包约 7.14 GB，索引见 [B1 运行包锁](project-runtime-b1.lock.json)。在另一个 Git 副本中恢复后，已通过隐藏原项目和 AI_Stack、网络仅保留 lo 的真实启动验证；R2 默认启动切换已通过，实时手势验收仍单独跟踪。历史 R1 包索引保存在 [R1 运行包锁](project-runtime-b1-r1.lock.json)。
 
+2026-10-20 按用户要求，本机 `exports/` 仅保留 `runtime-b1-r2-20261020.tar`。旧 B0、命名迁移后 B0 和 B1 R1 的三个运行包已删除；历史锁文件仍保留来源和哈希，但不代表对应包仍在本机。打包暂存目录只保留清单，恢复请使用运行包。
+
+`validation/` 已清理失败尝试中未被外部引用的 `.npz` 大数组和空输出目录，失败报告与日志保留。十个 B1 验证引擎经 SHA256 核对后改为指向 `models/b1/runtime/` 的相对符号链接，原验证路径仍可读取；重新构建必须使用新输出目录，勿覆盖这些历史路径。已通过的参考输入、B2 结果和原始报告保留。清理明细见 `05_runtime/validation/runtime-cleanup-20261020/latest-only.json`。
+
+重复的 B1 参考数组及分割重复导出也已按 SHA256 合并为相对链接，原路径和内容哈希保持可读；明细见同目录 `reference-deduplication.json`。未启用实验、上传模型和仍在推进的 B2 工件保留，用途与占用见 `remaining-audit.json`。
+
 ## 目录
 
 | 路径（相对 05_runtime） | 内容 |

@@ -19,6 +19,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from deploy import runtime, services
+from validation_inputs import input_path
 
 CRITERIA = {
     "input_atol": 1e-6,
@@ -41,6 +42,7 @@ def fixtures(output):
         ROOT
         / "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/reference/bus.npz"
     )
+    path = input_path(path, ROOT)
     with np.load(path, allow_pickle=False) as values:
         image, boxes = values["source"], values["boxes"]
     for i in np.flatnonzero(boxes[:, 5] == 0)[:2]:

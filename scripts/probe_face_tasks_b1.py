@@ -30,6 +30,7 @@ from app.face_tasks import (
 from app.body_detector import load_source
 from build_vision_b1 import exclusive_build
 from deploy import runtime, services
+from validation_inputs import input_path
 from prepare_vision_b1 import MANIFEST, prepare
 
 CRITERIA = {
@@ -43,7 +44,9 @@ CRITERIA = {
 
 
 def fixtures(face_root):
+    face_root = input_path(face_root, ROOT)
     build = json.loads((face_root / "face/build.json").read_text())
+    build["engine_path"] = str(input_path(ROOT / build["engine_path"], ROOT))
     passed = json.loads((face_root / "parity/face/report.json").read_text())
     if (
         passed["status"] != "PARITY_PASS_LIMITED_FIXTURES"

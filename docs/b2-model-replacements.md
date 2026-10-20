@@ -61,7 +61,7 @@ RTMPose-M 在已保存的真人张掌序列中未触发停止；RTMPose-L 虽能
 
 两组实拍工作量不同：常驻组只有 14/299 帧执行姿态、2/299 帧执行面部属性；语音对话组分别为 255/255 和 244/255 帧。它们记录各自当时的实际距离门控和场景，不适合直接估计等负载并发开销。固定回放使用模拟对齐深度，实拍使用 D435i 原生深度；计时不含浏览器和 WebSocket 传输。
 
-[单模块汇总](../benchmarks/results/b2-vision-modules-v1.json) · [整链路汇总](../benchmarks/results/b2-vision-stream-v1.json) · [冻结协议](../benchmarks/manifests/b2-vision-measurements-v1.json) · [负载定义](../benchmarks/manifests/b2-vision-stream-v1.json)。原始数据在 `05_runtime/validation/b2-modules-20261020/` 和 `b2-stream-20261020/`。计时使用独立的已提交源码副本，原项目负责服务归属；复制回主仓后冻结校验再次通过。
+[单模块汇总](../benchmarks/results/b2-vision-modules-v1.json) · [整链路汇总](../benchmarks/results/b2-vision-stream-v1.json) · [冻结协议](../benchmarks/manifests/b2-vision-measurements-v1.json) · [负载定义](../benchmarks/manifests/b2-vision-stream-v1.json)。旧原始测量目录已于 2026-10-20 按用户要求删除，版本化汇总与冻结输入保留；仍需使用的参考输入迁入 `05_runtime/datasets/validation-inputs/`。原计时使用独立的已提交源码副本，原项目负责服务归属；复制回主仓后冻结校验再次通过。
 
 复现时结束当前交互，并使用新输出目录：
 

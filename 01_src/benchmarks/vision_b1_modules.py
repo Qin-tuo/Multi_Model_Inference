@@ -3,12 +3,14 @@
 """B1 isolated-module baseline: paired wall-clock and CUDA stream measurements."""
 
 import argparse
+from contextlib import nullcontext
 import csv
 import json
 import os
 from pathlib import Path
 import resource
 import statistics
+import shlex
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,17 +31,22 @@ from benchmarks.vision_b1_support import (
     validate,
 )
 from benchmarks.vision_b1_timing import TensorRTTrace
+from benchmarks.vision_nvtx import model_annotations, profile_command, profiling_tools
 from build_vision_b1 import exclusive_build
 from deploy import runtime, services
 
 
 def summarize(output):
     run = json.loads((output / "report.json").read_text())
-    if run["status"] != "MEASURED_MODULES_ONLY_PIPELINE_PENDING":
+    if run["status"] not in (
+        "MEASURED_MODULES_ONLY_PIPELINE_PENDING", "PROFILED_MODULES_ONLY_PIPELINE_PENDING"
+    ):
         raise ValueError("Cannot summarize an incomplete measurement")
+    profiled = bool(run.get("profiling"))
     summary = {
         "created_at": runtime.stamp(),
-        "status": "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+        "status": "MODULE_DIAGNOSTIC_PROFILED" if profiled else "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+        "measurement_mode": "nsys_diagnostic_not_latency_baseline" if profiled else "ordinary_baseline",
         "raw_directory": str(output.relative_to(ROOT)),
         "protocol_sha256": run["protocol_sha256"],
         "scope": "One engine per process, fixed 640x480 public inputs, five warmups and twenty alternating plain/instrumented pairs per input; no pipeline FPS estimate",
@@ -126,7 +133,7 @@ def save_prediction(path, prediction):
     np.savez(path, metadata=np.asarray(json.dumps(tree)), **arrays)
 
 
-def worker(role, output, protocol_path=PROTOCOL):
+def worker(role, output, protocol_path=PROTOCOL, *, nvtx=False):
     protocol, cfg = validate(protocol_path)
     owner = VisionModels(cfg.perception.model_manifest)
     resources = Resources(output, {"module": [os.getpid()]}).start()
@@ -136,25 +143,29 @@ def worker(role, output, protocol_path=PROTOCOL):
         "fixtures": [],
         "errors": [],
         "scope": "Isolated selected TensorRT engine; plain adapter calls and paired stream instrumentation",
+        "nvtx_enabled": nvtx,
     }
     error = None
     try:
         owner.load([role])
         model = owner.models[role]
         report["loaded"] = owner.snapshot()[role]
-        with TensorRTTrace(model) as observer:
+        annotations = model_annotations(model, role) if nvtx else nullcontext(lambda _: nullcontext())
+        with TensorRTTrace(model) as observer, annotations as annotate:
             for case in protocol["module_cases"][role]:
                 name = case["input"]
                 resources.phase = name + ":load-input"
                 args = arguments(protocol, case)
                 resources.phase = name + ":first-call"
-                first, first_ms = plain_call(model, args)
+                with annotate(f"frame/{name}/first"):
+                    first, first_ms = plain_call(model, args)
                 save_prediction(output / (name + "-prediction.npz"), first)
                 del first
                 events.write(phase="first-call", input=name, adapter_ms=first_ms)
                 resources.phase = name + ":warmup"
                 for i in range(protocol["measurement"]["warmup_per_case"]):
-                    _, elapsed = plain_call(model, args)
+                    with annotate(f"frame/{name}/warmup/{i}"):
+                        _, elapsed = plain_call(model, args)
                     events.write(
                         phase="warmup", input=name, index=i, adapter_ms=elapsed
                     )
@@ -163,12 +174,14 @@ def worker(role, output, protocol_path=PROTOCOL):
                 for i in range(protocol["measurement"]["paired_samples_per_case"]):
                     row, outputs = {"index": i, "input": name}, {}
                     for traced in (False, True) if i % 2 == 0 else (True, False):
-                        if traced:
-                            outputs["instrumented"], row["instrumented"] = (
-                                observer.call(*args)
-                            )
-                        else:
-                            outputs["plain"], row["plain_ms"] = plain_call(model, args)
+                        label = "instrumented" if traced else "plain"
+                        with annotate(f"frame/{name}/{label}/{i}"):
+                            if traced:
+                                outputs["instrumented"], row["instrumented"] = (
+                                    observer.call(*args)
+                                )
+                            else:
+                                outputs["plain"], row["plain_ms"] = plain_call(model, args)
                     row["parity"] = outputs_match(
                         outputs["plain"], outputs["instrumented"]
                     )
@@ -217,6 +230,17 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--role", choices=ROLES, nargs="+")
     parser.add_argument("--protocol", type=Path, default=PROTOCOL)
+    parser.add_argument(
+        "--nsys", action="store_true",
+        help="Profile only model workers with Nsight Systems and NVTX; timings are diagnostic",
+    )
+    parser.add_argument("--nvtx", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--source-root",
+        type=Path,
+        default=ROOT,
+        help="Validate and run the worker from this frozen checkout; manage services from the current project",
+    )
     parser.add_argument("--worker", choices=ROLES, help=argparse.SUPPRESS)
     parser.add_argument(
         "--summarize",
@@ -225,16 +249,27 @@ def main():
     )
     args = parser.parse_args()
     output = args.output.resolve()
+    source_root = args.source_root.resolve()
     if args.summarize:
         summarize(output)
         print(output / "summary.json")
         return
     if args.worker:
-        worker(args.worker, output, args.protocol.resolve())
+        if source_root != ROOT or args.nsys:
+            parser.error("--source-root is only supported by the coordinating process")
+        worker(args.worker, output, args.protocol.resolve(), nvtx=args.nvtx)
         return
+    if args.nvtx:
+        parser.error("--nvtx is an internal worker option; use --nsys")
+    if args.nsys and source_root != ROOT:
+        parser.error("--nsys requires the current worker checkout")
+    tools = profiling_tools() if args.nsys else None
+    protocol, cfg = validate(args.protocol.resolve(), source_root=source_root)
+    worker_script = source_root / "01_src/benchmarks/vision_b1_modules.py"
+    if not worker_script.is_file():
+        parser.error("Source checkout is missing the module worker")
     output.mkdir(parents=True, exist_ok=False)
-    protocol, cfg = validate(args.protocol.resolve())
-    environment(output)
+    environment(output, source_root=source_root)
     runtime.write_json(output / "protocol-used.json", protocol)
     before = runtime.config()
     before = runtime.config(services.profile_path(before))
@@ -242,28 +277,36 @@ def main():
         "created_at": runtime.stamp(),
         "status": "RUNNING",
         "protocol_sha256": runtime.sha256(args.protocol),
+        "runtime_source_root": str(source_root),
+        "worker_source_sha256": runtime.sha256(worker_script),
+        "profiling": tools,
         "modules": {},
     }
     try:
-        with exclusive_build(before, output):
+        exclusive = (
+            exclusive_build(before, output, allow_failed_stop=True)
+            if args.nsys else exclusive_build(before, output)
+        )
+        with exclusive:
             for role in args.role or ROLES:
                 folder = output / role
                 folder.mkdir()
+                command = [
+                    sys.executable,
+                    str(worker_script),
+                    "--worker",
+                    role,
+                    "--output",
+                    str(folder),
+                    "--protocol",
+                    str(args.protocol.resolve()),
+                ]
+                if args.nsys:
+                    command = profile_command(command, folder, tools["nsys"])
+                    print("Profiling worker: " + shlex.join(command), flush=True)
+                runtime.write_json(folder / "worker-command.json", command)
                 with (folder / "worker.log").open("w") as log:
-                    code = run_worker(
-                        [
-                            sys.executable,
-                            str(Path(__file__).resolve()),
-                            "--worker",
-                            role,
-                            "--output",
-                            str(folder),
-                            "--protocol",
-                            str(args.protocol.resolve()),
-                        ],
-                        log,
-                        seconds=300,
-                    )
+                    code = run_worker(command, log, seconds=300)
                 result = (
                     json.loads((folder / "report.json").read_text())
                     if (folder / "report.json").exists()
@@ -277,8 +320,17 @@ def main():
                 runtime.write_json(output / "report.json", report)
                 if code or result.get("status") != "MEASURED":
                     raise RuntimeError("B1 module measurement failed: " + role)
-                print(role, "MEASURED", flush=True)
-        report["status"] = "MEASURED_MODULES_ONLY_PIPELINE_PENDING"
+                if args.nsys:
+                    trace = folder / "timeline.nsys-rep"
+                    if not trace.is_file():
+                        raise RuntimeError("Nsight did not produce the expected report")
+                    print(role, "PROFILED", str(trace), flush=True)
+                else:
+                    print(role, "MEASURED", flush=True)
+        report["status"] = (
+            "PROFILED_MODULES_ONLY_PIPELINE_PENDING" if args.nsys
+            else "MEASURED_MODULES_ONLY_PIPELINE_PENDING"
+        )
     except BaseException as exc:
         report.update(status="FAILED", error=repr(exc))
         raise

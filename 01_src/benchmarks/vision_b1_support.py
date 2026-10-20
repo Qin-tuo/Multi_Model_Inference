@@ -12,24 +12,28 @@ from project_paths import ROOT
 PROTOCOL = ROOT / "benchmarks/manifests/b1-vision-measurements-v2.json"
 
 
-def validate(protocol_path=PROTOCOL):
+def validate(protocol_path=PROTOCOL, *, source_root=None):
+    root = ROOT if source_root is None else Path(source_root).resolve()
     protocol = json.loads(Path(protocol_path).read_text())
     for path, expected in protocol["locked_files"].items():
-        if runtime.sha256(ROOT / path) != expected:
+        if runtime.sha256(root / path) != expected:
             raise ValueError("B1 frozen file changed: " + path)
     for row in protocol["inputs"].values():
-        if runtime.sha256(ROOT / row["path"]) != row["sha256"]:
+        if runtime.sha256(root / row["path"]) != row["sha256"]:
             raise ValueError("B1 input changed: " + row["path"])
-    return protocol, relocated_config(ROOT / protocol["effective_config"])
+    return protocol, relocated_config(
+        root / protocol["effective_config"], source_root=root
+    )
 
 
-def relocated_config(path):
+def relocated_config(path, *, source_root=None):
     """Relocate runtime paths in memory; never rewrite the frozen input bytes.
 
     A restored checkout can have a different parent directory. Numerical/model
     settings remain identical, and paths outside the recorded runtime stay as
     recorded so an unrelated dependency cannot silently become a local one.
     """
+    root = ROOT if source_root is None else Path(source_root).resolve()
     recorded = json.loads(Path(path).read_text())
     previous = Path(recorded["backends"]["stack_root"])
     cfg = Config.load(path)
@@ -40,7 +44,7 @@ def relocated_config(path):
     ):
         value = Path(recorded[section][field])
         if value.is_absolute() and value.is_relative_to(previous):
-            relocated = ROOT / "05_runtime" / value.relative_to(previous)
+            relocated = root / "05_runtime" / value.relative_to(previous)
             setattr(getattr(cfg, section), field, str(relocated))
     cfg.validate()
     return cfg

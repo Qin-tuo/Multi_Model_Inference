@@ -21,6 +21,7 @@ from app.wholebody_pose import prepare_pose
 from app.wholebody_pose2d import WholeBodyPose2D
 from build_vision_b1 import build, exclusive_build
 from deploy import runtime, services
+from validation_inputs import input_path
 
 MANIFEST = ROOT / "03_models/candidates/vision-b2.json"
 ROLES = ("body_hand_pose", "face_identity", "person_reid")
@@ -45,7 +46,7 @@ def parity(role, entry, built, output):
         model = ArcFaceIdentity(spec)
     else:
         model = AppearanceFeatures(spec, role)
-    exported = json.loads((ROOT / entry["export_report"]).read_text())
+    exported = json.loads(input_path(ROOT / entry["export_report"], ROOT).read_text())
     report = {
         "role": role,
         "status": "RUNNING",
@@ -62,9 +63,10 @@ def parity(role, entry, built, output):
     path = output / "parity.json"
     try:
         for case in exported["cases"]:
-            if runtime.sha256(ROOT / case["fixture"]) != case["sha256"]:
+            fixture_path = input_path(ROOT / case["fixture"], ROOT)
+            if runtime.sha256(fixture_path) != case["sha256"]:
                 raise ValueError("Native fixture changed")
-            with np.load(ROOT / case["fixture"], allow_pickle=False) as f:
+            with np.load(fixture_path, allow_pickle=False) as f:
                 fixture = dict(f)
             input_name = next(iter(entry["input_shapes"]))
             raw = model.model.infer({input_name: fixture["input"]})

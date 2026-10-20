@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "objective_file": "docs/consolidation-goal.md",
+  "goal_text_sha256": "1e8efc0764fb97e7d65c0a1ed6344bdf4e76756444ec2e367169cda49005ecac",
+  "status": "IN_PROGRESS",
+  "source_before": "9b24ca038680a436743545202481bd38eb00476f",
+  "recovery_tag": "before-mainline-consolidation-20261020",
+  "work_branch": "refactor/b2-mainline",
+  "pending_edits_backup": "05_runtime/refactor-checkpoints/consolidation-20261020-start",
+  "baseline_raw_archive": "benchmarks/raw/b2-before-consolidation",
+  "steps": [
+    {
+      "id": "C1",
+      "requirement": "恢复点、未提交改动与工件清单",
+      "status": "in_progress",
+      "evidence": [
+        "benchmarks/manifests/consolidation-inventory.json",
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/incoming-tests-isolated.xml",
+          "sha256": "89f2c7d1988ac294e7c2b4daf0e2ada1d1a15222eb68ffa94061001235940698"
+        }
+      ],
+      "checkpoint_ready": true
+    },
+    {
+      "id": "C2",
+      "requirement": "统一当前版本启动与配置",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C3",
+      "requirement": "解除新旧实现耦合",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C4",
+      "requirement": "按职责拆分核心模块",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C5",
+      "requirement": "整合构建、验证和基准工具",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C6",
+      "requirement": "旧版专用实现退出主线",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C7",
+      "requirement": "当前运行包与独立恢复验证",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C8",
+      "requirement": "回归、性能对照、文档与推送",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "invariants": [
+    "Ten selected visual model hashes and TensorRT precision unchanged",
+    "D435i native aligned depth",
+    "Four services and existing 4B/ASR/TTS",
+    "Cancellation, frame identity, bounded resources and persistent actions retained",
+    "User ONNX, references and license notices retained",
+    "No quantization, pruning, concurrency tuning or new framework"
+  ],
+  "open_issues": [
+    {
+      "id": "B2-EXIT-01",
+      "status": "OPEN",
+      "description": "Intermittent app/speech stop timeout; preserve observations and disposition separately."
+    }
+  ],
+  "completion_audit": "Every C1-C8 requirement needs current artifacts and verification. Partial stages do not complete this Goal.",
+  "incoming_tests": {
+    "passed": 295,
+    "scope": "Snapshotted pending tooling changes; isolated worktree runtime-data."
+  }
+}
