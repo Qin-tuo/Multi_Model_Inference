@@ -2,7 +2,7 @@
 
 ## B1 模型接入验证
 
-2026-10-20：B1 的运行代码与输入契约已冻结，10 个视觉 TensorRT 模型的单模块、连续管线和多模型共存基线已测量；默认服务仍使用 B0 配置，B1 尚未完成部署交接。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的参考核验，包括 RTMW3D 原始权重与预后处理。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。持续稳定性、运行包恢复验证与交接仍在进行；真实人物和复杂手势覆盖单列，不能据固定图片与无人场景声明通过。
+2026-10-20：B1 的运行代码与输入契约已冻结，10 个视觉 TensorRT 模型的单模块、连续管线和多模型共存基线已测量；默认服务仍使用 B0 配置，B1 尚未完成部署交接。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的参考核验，包括 RTMW3D 原始权重与预后处理。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。独立运行包恢复已通过，持续稳定性和手势覆盖仍在进行；真实人物和复杂手势覆盖单列，不能据固定图片与无人场景声明通过。
 
 ### 集成结构与当前资源边界
 
@@ -102,6 +102,20 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 ./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_stream_summary.py \
   --output 05_runtime/validation/b1-stream-20261019
 ```
+
+### 持续运行与独立恢复
+
+独立的 20 分钟回放共存窗口处理 4,793 帧，完成 416 个完整文件语音请求，未观察到整帧失败、过期结果、无结果采样或相机重连；处理约 3.99 FPS。JPEG 历史峰值约 5.45 MiB，低于 16 MiB 配置限额。视觉测试进程首尾一分钟平均 PSS 增加约 13.4 MiB，RSS 增加约 5.9 MiB；进程还持有基准观测样本，不能将变化全部归因为业务泄漏，也不能声明长期无泄漏。内核在测量窗口内记录了 `hot-surface-alert` 的 0/1 状态切换；是否影响时钟或吞吐尚未建立因果证据。完整记录见 [持续回放汇总](../benchmarks/results/b1-soak-replay-summary.json)。
+
+该窗口使用 [独立工作负载](../benchmarks/manifests/b1-soak-replay-v1.json)，不覆盖上述 60 秒基线，也不代替工业长时验收。复现时向 `vision_b1_stream.py` 传入 `--workload benchmarks/manifests/b1-soak-replay-v1.json` 与新的输出目录；实拍版本在 `b1-soak-live-v1.json`。
+
+B1 运行包在新 Git 副本解包后，通过了隐藏原项目与 AI_Stack、仅有 loopback 网络的真实服务验证：四个服务退出码均为 0，文本、相机、文件语音接口及应用音频轮次通过，原服务恢复 READY。副本 B1 处理 90 帧、无整帧失败、原生深度可用；当时无人场景不证明全部人物属性的实际精度。恢复协议、包摘要和系统依赖见 [B1 运行包锁](../01_src/deploy/project-runtime-b1.lock.json)。
+
+### 动态手势覆盖缺口
+
+`scripts/probe_b1_motion.py` 使用当前 B1 模型、原始媒体时序和真实 TurnController/4B/TTS。固定张掌图片成功取消正在执行的真实轮次，取消后没有发布音频 URL。三段公开动态演示均没有触发挥手问候，结果保留为未通过：远景检测与手掌尺寸、关键点置信度、五指张开判断间断都影响了连续证据，尚未确认完整修复方案。没有修改门限、模型或冻结基线来消除失败。
+
+输入来源与摘要在 [动态输入清单](../benchmarks/manifests/b1-public-motion-v1.json)，观测和失败摘要在 [动态覆盖结果](../benchmarks/results/b1-motion-summary.json)。这些有上游标注的视频使用模拟深度，不是 D435i 真人或手势准确率基准；运行包不携带这些外部演示文件。准备清单中的原文件并核对 SHA256 后，可用 `scripts/probe_b1_motion.py --output 新目录` 复查，或通过 `--case` 选择单个样本。未满足预期交互时命令返回非零。
 
 ### RTMW3D 原始权重与裁剪核验
 

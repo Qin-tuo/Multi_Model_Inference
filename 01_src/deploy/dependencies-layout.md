@@ -2,7 +2,7 @@
 
 当前服务使用仓库内 `05_runtime/`。原 `/home/nvidia/AI_Stack` 保留为回退来源；当前启动路径、模型读取和数据库写入不再依赖它。独立性通过私有 mount/network namespace 验证：隐藏原 AI_Stack，网络只保留 lo，真实启动四个后端并完成文字、相机、语音接口及完整文件语音对话。主机目录和网络保持原状。
 
-上述运行包与独立性记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包的实际恢复验证完成前，不声明交接通过。
+上述旧运行包记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包约 7.14 GB，索引见 [B1 运行包锁](project-runtime-b1.lock.json)。在另一个 Git 副本中恢复后，已通过隐藏原项目和 AI_Stack、网络仅保留 lo 的真实启动验证；默认启动切换与阶段交接仍单独跟踪。
 
 ## 目录
 
@@ -57,6 +57,18 @@ python3 scripts/runtime_bundle.py unpack --archive /path/to/runtime-edge-assista
 ./run.sh services check
 ./run.sh services up
 ```
+
+上例恢复的是 B0。恢复当前 B1 使用对应运行包与锁中的 SHA256，并显式选择配置：
+
+```bash
+python3 scripts/runtime_bundle.py unpack \
+  --archive /path/to/runtime-b1-20261020.tar \
+  --sha256 663ddefbf7f5b478ab38855fcbc1933e3db1666923f738e9fd8b9af48b1df52f
+./run.sh services check --config 02_config/settings.orin-nx-b1.yaml
+./run.sh services up --config 02_config/settings.orin-nx-b1.yaml
+```
+
+运行包可以执行应用和 B1 固定输入基准。原始 PyTorch/OpenVINO 参考核验与重新导出还需要开发工件和对应隔离环境；这些大体积参考资源不属于精简运行包，也不作为生产推理回退。
 
 恢复器验证包和文件摘要，重建已声明的系统 Python/TensorRT 链接，并调整环境脚本中的项目路径。源码和模型哈希保持可查。服务注册仍执行归属检查；同一台机器更换项目位置前应先停止并卸载旧注册，不覆盖其他实例。
 

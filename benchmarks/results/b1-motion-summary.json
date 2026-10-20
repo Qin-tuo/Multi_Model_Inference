@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-20T00:43:59.768013+00:00",
+  "status": "WAVE_COVERAGE_INCOMPLETE_PALM_CANCEL_PASS",
+  "cases": {
+    "whc-output-1": {
+      "status": "EXPECTED_INTERACTION_NOT_PROVEN",
+      "raw_report": "05_runtime/validation/b1-motion-20261020/whc-output-1/report.json",
+      "raw_report_sha256": "7a3b0a97af5e34be2ee82265cc27d85746b9301d98ea2d308161d810e964706e",
+      "media_seconds": 28.366666666666667,
+      "processed_at_report": 142,
+      "logged_scenes_including_teardown": 142,
+      "perception_failures": 0,
+      "frames_without_hands": 105,
+      "hand_rejections": {
+        "small_hand": 67,
+        "low_pose_confidence": 2
+      },
+      "gesture_decisions": [],
+      "turns": [],
+      "cleanup_errors": []
+    },
+    "handwave-example": {
+      "status": "EXPECTED_INTERACTION_NOT_PROVEN",
+      "raw_report": "05_runtime/validation/b1-motion-20261020/handwave-example/report.json",
+      "raw_report_sha256": "f46bf356119d714510352c93789bf3b6c1f7d34f4461f5e3c9ca5494d1879761",
+      "media_seconds": 11.429999999999941,
+      "processed_at_report": 57,
+      "logged_scenes_including_teardown": 57,
+      "perception_failures": 0,
+      "frames_without_hands": 1,
+      "hand_rejections": {
+        "low_pose_confidence": 38,
+        "small_hand": 2,
+        "clipped_hand": 1
+      },
+      "gesture_decisions": [],
+      "turns": [],
+      "cleanup_errors": []
+    },
+    "stationary-public-palm": {
+      "status": "EXPECTED_INTERACTION_PASS",
+      "raw_report": "05_runtime/validation/b1-motion-20261020/stationary-public-palm/report.json",
+      "raw_report_sha256": "e0c8f70ee999196b6ce6526c698e1d3c1c227a14a9b6278ef1bd8f9d78a856d5",
+      "media_seconds": 5.0,
+      "processed_at_report": 23,
+      "logged_scenes_including_teardown": 29,
+      "perception_failures": 0,
+      "frames_without_hands": 1,
+      "hand_rejections": {},
+      "gesture_decisions": [
+        {
+          "kind": "stop",
+          "reason": "turn_cancelled",
+          "accepted": true
+        },
+        {
+          "kind": "stop",
+          "reason": "turn_cancelled",
+          "accepted": true
+        }
+      ],
+      "turns": [
+        {
+          "status": "cancelled",
+          "audio_published": false,
+          "cancel_reason": "stationary_palm"
+        }
+      ],
+      "cleanup_errors": []
+    },
+    "whc-output-2": {
+      "status": "EXPECTED_INTERACTION_NOT_PROVEN",
+      "raw_report": "05_runtime/validation/b1-motion-close-20261020/whc-output-2/report.json",
+      "raw_report_sha256": "733840d653b0c6359d5400e21d57be4a6938377f865755108b7702f425767715",
+      "media_seconds": 23.2,
+      "processed_at_report": 115,
+      "logged_scenes_including_teardown": 115,
+      "perception_failures": 0,
+      "frames_without_hands": 37,
+      "hand_rejections": {
+        "low_pose_confidence": 56,
+        "clipped_hand": 27,
+        "small_hand": 14
+      },
+      "gesture_decisions": [],
+      "turns": [],
+      "cleanup_errors": []
+    }
+  },
+  "inputs": "benchmarks/manifests/b1-public-motion-v1.json",
+  "interpretation": [
+    "No real greeting was admitted by any of the three inspected public videos under the unchanged B1 configuration.",
+    "The distant video often has no detected person or hands below the 20-pixel palm-width gate. Other samples contain low-confidence/clipped hands and intermittent five-finger-open predicates; continuous wave evidence is not established.",
+    "The stationary public palm image exercised real TensorRT perception and cancelled a real active 4B/TTS turn; no audio URL was published.",
+    "Keep these non-passing samples as evidence; do not lower thresholds or call the goal complete merely to pass a demo. Wave compatibility and representative coverage still need resolution."
+  ],
+  "scope": "Public annotated media, natural playback timing, 640x480 letterbox; explicit uniform synthetic 1.5m depth. Source/overlay quality differs from D435i. Not a gesture accuracy benchmark or physical audio test."
+}

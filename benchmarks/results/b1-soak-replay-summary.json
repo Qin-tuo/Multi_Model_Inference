@@ -743,5 +743,16 @@
   "resource_interpretation": "No unbounded FD/thread growth observed in this window. Worker first-to-last-minute mean PSS increased about 13.4 MiB and RSS 5.9 MiB; observer retains periodic samples and shared pages may change. Attribution and long-term leak bounds are not established. Existing system swap remains around 2 GiB. No zero-leak claim.",
   "restored_services": "READY",
   "workload_copy": "benchmarks/manifests/b1-soak-replay-v1.json",
-  "summary_raw_sha256": "e6008f13c561fe4dd2e92ef06eeeaf35dee812ef7326d4400790bcfbfc809d8b"
+  "summary_raw_sha256": "e6008f13c561fe4dd2e92ef06eeeaf35dee812ef7326d4400790bcfbfc809d8b",
+  "kernel_window_observation": {
+    "raw": "05_runtime/validation/b1-soak-replay-20261020/kernel-window.log",
+    "sha256": "664e40f8fdd7f17137ac6281f53ca5a09147d3b101e49581ea0322daa92a4dcf",
+    "thermal_transitions": 194,
+    "device": "cooling_device11 hot-surface-alert",
+    "observed_states": [
+      0,
+      1
+    ],
+    "scope": "Kernel monotonic timestamps filtered to measured window. State transitions are observed; no attribution of clock changes or throughput to this cooling device has been established."
+  }
 }

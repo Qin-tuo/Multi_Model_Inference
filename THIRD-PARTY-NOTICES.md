@@ -134,3 +134,29 @@ recorded in `01_src/deploy/actions-dependencies.lock.json`; license copies are i
 Application transaction, idempotency and output-receipt rules adapt the
 previous project's SQLAlchemy/ReminderService contracts, without importing
 its Pipecat, memory or identity layers.
+
+## B1 visual runtime
+
+The selected artifacts and exact upstream revisions are recorded in
+`03_models/candidates/vision-b1.json`; engine and runtime contracts are in
+`03_models/vision-b1-runtime.json`. Upstream license declarations remain separate
+from the application license. These records describe selected public models,
+not the unavailable proprietary models or their original output taxonomy.
+
+| Component | Declared upstream license | Retained notice/source |
+|---|---|---|
+| YOLOv8n-seg and adapted segmentation preprocessing/postprocessing | AGPL-3.0 | `licenses/Ultralytics-AGPL-3.0.txt`; pinned Ultralytics sources in the candidate manifest |
+| RTMW3D-X and MMPose geometry/SimCC decoding | Apache-2.0 | Fixed MMPose revision and `frameworks/b1/mmpose/LICENSE` in the runtime bundle |
+| YuNet model | MIT | `licenses/YuNet-MIT.txt`, copied from model revision `3cc26e7f1014a5ee5d74a42acee58bafc9d0a310` |
+| YuNet decoder reference and OpenCV | Apache-2.0 | `licenses/OpenCV-Apache-2.0.txt`; pinned `face_detect.cpp` reference |
+| SFace | Apache-2.0 | `frameworks/b1/sface/LICENSE` and pinned model card |
+| ProgressiveTeacher facial expression model | Apache-2.0 declaration in model README | Model card and `frameworks/b1/expression/UPSTREAM-LICENSE`; the model-specific LICENSE link was unavailable, as recorded in the candidate manifest |
+| Open Model Zoo head pose, 35-point landmarks and gaze cascade | Apache-2.0 | `frameworks/b1/open-model-zoo/LICENSE`, model cards and `model.yml` records |
+| OSNet person appearance | MIT | `frameworks/b1/torchreid/LICENSE` and model card |
+| CLIP image appearance | MIT | `frameworks/b1/clip/LICENSE` and model card |
+| Norfair / FilterPy | BSD-3-Clause / MIT | License metadata in the packaged Python distributions; versions in the B1 runtime requirements lock |
+
+Runtime paths in this table are relative to `05_runtime/`. PyTorch, ONNX Runtime
+and OpenVINO reference environments are development-only and excluded from the
+prepared B1 runtime bundle. The existing 4B and speech backends retain their
+previous source/model notices.

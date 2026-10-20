@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20T00:09:20.378117+00:00",
+  "updated_at": "2026-10-20T00:43:59.768013+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -62,6 +62,16 @@
     "latest_full_suite": {
       "passed": 256,
       "junit": "05_runtime/validation/b1-lifecycle-tests-20261019.xml"
+    },
+    "latest_targeted": {
+      "passed": 36,
+      "files": [
+        "tests/test_b1_relocation.py",
+        "tests/test_runtime_bundle.py",
+        "tests/test_gesture_rules.py",
+        "tests/test_turn_cancellation.py"
+      ],
+      "scope": "Restored paths/archive preservation, existing gesture policies and whole-turn cancellation. Does not replace dynamic visual evidence."
     }
   },
   "observed_issues": [
@@ -79,6 +89,7 @@
     }
   ],
   "remaining": [
+    "Resolve and verify B1 wave-to-greeting coverage; three inspected public demonstrations did not admit a greeting",
     "Broader live person, wave, occlusion, crossing and distance-gate coverage; previously deferred user-assisted cases remain separate",
     "Sustained bounded resource acceptance; short stale-source/failure recovery probes already pass",
     "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance"
@@ -161,5 +172,29 @@
     },
     "live": "PENDING",
     "scope": "Short bounded stability evidence; not industrial long-term qualification; resource drift recorded without a zero-leak claim"
+  },
+  "deployment_restore": {
+    "status": "PASS",
+    "index": "01_src/deploy/project-runtime-b1.lock.json",
+    "raw_report": "05_runtime/validation/b1-restore-20261020/report.json",
+    "source_isolation": [
+      "/home/nvidia/Multi_Model_Inference",
+      "/home/nvidia/AI_Stack"
+    ],
+    "scope": [
+      "Prepared runtime plus Git checkout on this compatible host; not a Jetson OS image.",
+      "All native services used the restored checkout with the original project and AI_Stack hidden in a private mount namespace.",
+      "Host CUDA/TensorRT, system libraries and speech system-site packages remain required."
+    ]
+  },
+  "motion_coverage": {
+    "status": "WAVE_COVERAGE_INCOMPLETE_PALM_CANCEL_PASS",
+    "summary": "benchmarks/results/b1-motion-summary.json",
+    "production_changes": "None; original B1 model parameters and gesture rules unchanged"
+  },
+  "bundled_input_pipeline": {
+    "status": "COMPLETE_PIPELINE_PUBLIC_REPLAY_PASS_LIMITED_SCOPE",
+    "raw_report": "05_runtime/validation/b1-pipeline-bundled-inputs-20261020/report.json",
+    "scope": "Probe now uses bundled frozen inputs rather than an ignored segmentation-reference artifact; all 10 models executed, gallery reopen and public palm events pass."
   }
 }

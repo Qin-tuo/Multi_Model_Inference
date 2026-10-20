@@ -22,17 +22,17 @@ import psutil
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import FrameSnapshot
-from app.config import Config
 from app.face_tracker import FaceTracker
 from app.perception_b1 import B1Perception
 from app.gestures import GestureRecognizer
 from app.identity_gallery import IdentityGallery
 from build_vision_b1 import exclusive_build
+from benchmarks.vision_b1_support import validate
 from deploy import runtime, services
 
 
 def probe(output):
-    cfg = Config.load(str(ROOT / "02_config/settings.orin-nx-b1.yaml"))
+    protocol, cfg = validate()
     cfg.perception.identity_gallery = (
         "05_runtime/runtime-data/vision-probes/" + output.name + "/identities.sqlite"
     )
@@ -50,22 +50,15 @@ def probe(output):
         "scope": __doc__,
         "available_before_bytes": psutil.virtual_memory().available,
         "frames": [],
+        "input_protocol": "benchmarks/manifests/b1-vision-measurements-v1.json",
     }
     try:
         perception.load()
         report["after_load_available_bytes"] = psutil.virtual_memory().available
         for name in ("public-person", "bus"):
-            if name == "public-person":
-                image = cv2.imread(
-                    str(ROOT / "05_runtime/datasets/b0-sw-v1/public-original.png")
-                )
-            else:
-                with np.load(
-                    ROOT
-                    / "05_runtime/validation/b1-segmentation-20261019/parity-opencv411/reference/bus.npz",
-                    allow_pickle=False,
-                ) as f:
-                    image = f["source"]
+            # Frozen inputs ship with the runtime bundle. A fresh checkout must
+            # not depend on another experiment's ignored validation directory.
+            image = np.load(ROOT / protocol["inputs"][name]["path"], allow_pickle=False)
             camera.source_epoch = name
             tracker._reset()
             events_seen = []

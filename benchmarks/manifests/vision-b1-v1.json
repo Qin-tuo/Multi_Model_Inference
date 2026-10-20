@@ -79,18 +79,22 @@
     {
       "id": "gesture",
       "capability": "Wave greeting and stationary open-palm full-turn cancellation",
-      "status": "RTMW_PUBLIC_PALM_REPLAY_AND_POLICY_TESTS_PASS_LIVE_COVERAGE_PENDING"
+      "status": "PUBLIC_PALM_REAL_TURN_CANCEL_PASS_DYNAMIC_WAVE_COVERAGE_NOT_PROVEN"
     }
   ],
   "gates": [
     {
       "id": "B1.0",
       "name": "Pinned sources, weights, license and interface contracts",
-      "status": "IN_PROGRESS",
+      "status": "PASS_SELECTED_SOURCES_AND_CONTRACTS_PINNED",
       "evidence": [
         "03_models/candidates/vision-b1.json",
-        "benchmarks/results/b1-feasibility-20261019.json"
-      ]
+        "benchmarks/results/b1-feasibility-20261019.json",
+        "03_models/vision-b1-runtime.json",
+        "THIRD-PARTY-NOTICES.md",
+        "01_src/deploy/project-runtime-b1.lock.json"
+      ],
+      "scope": "Selected public artifacts, versions, declared upstream licenses and IO/prepost semantics inspected; proprietary topology/classes remain explicitly deferred."
     },
     {
       "id": "B1.1",
@@ -112,27 +116,32 @@
     {
       "id": "B1.3",
       "name": "Shared frame provenance, ROI transforms, distance gates and target association",
-      "status": "IN_PROGRESS",
+      "status": "PASS_IMPLEMENTED_DATAFLOW_LIMITED_SCENE_COVERAGE",
       "evidence": [
         "benchmarks/results/b1-feasibility-20261019.json",
         "benchmarks/results/b1-integration-20261019.json"
-      ]
+      ],
+      "scope": "Frozen public replay, source/expiry/distance invalidation probes and SDK lifecycle evidence; real crossing/occlusion/distance accuracy is not asserted."
     },
     {
       "id": "B1.4",
       "name": "Bounded resource ownership, stale data, cancellation and recovery",
       "status": "IN_PROGRESS",
       "evidence": [
-        "benchmarks/results/b1-integration-20261019.json"
-      ]
+        "benchmarks/results/b1-integration-20261019.json",
+        "benchmarks/results/b1-soak-replay-summary.json"
+      ],
+      "scope": "Lifecycle/recovery probes and 20-minute replay completed; live soak and final handoff review pending. Resource drift and thermal transitions retained."
     },
     {
       "id": "B1.5",
       "name": "Fixed-input and live-camera functional acceptance with explicit coverage",
-      "status": "IN_PROGRESS",
+      "status": "INCOMPLETE_PUBLIC_WAVE_COVERAGE",
       "evidence": [
-        "benchmarks/results/b1-integration-20261019.json"
-      ]
+        "benchmarks/results/b1-integration-20261019.json",
+        "benchmarks/results/b1-motion-summary.json"
+      ],
+      "scope": "Real stationary-palm cancellation passes; three public motion videos did not admit a wave greeting. Resolve compatibility and retain non-passing examples."
     },
     {
       "id": "B1.6",
@@ -148,8 +157,13 @@
     {
       "id": "B1.7",
       "name": "Startup, architecture, diagnostics and user profiling handoff",
-      "status": "PENDING",
-      "evidence": []
+      "status": "IN_PROGRESS_ISOLATED_RESTORE_PASS_DEFAULT_SWITCH_PENDING",
+      "evidence": [
+        "01_src/deploy/project-runtime-b1.lock.json",
+        "docs/b1-handoff.md",
+        "docs/visual-baseline.md",
+        "01_src/deploy/dependencies-layout.md"
+      ]
     }
   ],
   "contract_requirements": [
@@ -175,7 +189,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-19T23:42:12.066741+00:00",
+  "updated_at": "2026-10-20T00:46:34.475904+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",
