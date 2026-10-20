@@ -17,7 +17,7 @@ def test_degenerate_face_landmarks_cannot_produce_an_aligned_identity_crop():
 @pytest.mark.parametrize("value", [0, np.nan, np.inf])
 def test_invalid_embedding_does_not_become_an_unknown_or_matching_zero_vector(value):
     with pytest.raises(ValueError, match="embedding"):
-        normalize_embedding(np.full(128, value, np.float32))
+        normalize_embedding(np.full(512, value, np.float32))
 
 
 def test_expression_scores_stay_finite_for_large_logits_and_keep_public_labels():

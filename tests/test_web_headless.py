@@ -3,11 +3,23 @@ import queue
 import json
 import threading
 import time
+import anyio
 from fastapi.testclient import TestClient
 from app.config import Config
 from app.web import Broadcaster
 from app.web_limits import ClientBuffer, encode
 import app.application as entry
+
+
+def receive_json(ws):
+    """Bound TestClient's otherwise unbounded synchronous receive."""
+    async def receive():
+        with anyio.fail_after(5):
+            packet = await ws._send_rx.receive()
+            ws._raise_on_close(packet)
+            return json.loads(packet["text"])
+
+    return ws.portal.call(receive)
 
 
 class FakeLLM:
@@ -31,11 +43,15 @@ def test_headless_web_turn_and_shutdown(monkeypatch):
         assert client.post("/api/chat", json={"text":"看图", "use_image":True}).status_code == 400
         assert client.post("/api/chat", json={"text":"x", "use_image":"yes"}).status_code == 422
         with client.websocket_connect("/ws") as ws:
+            # Streaming starts after the initial snapshot. An earlier completed
+            # turn may correctly appear only in that snapshot, not as a new event.
+            while receive_json(ws)["type"] != "capabilities":
+                pass
             response = client.post("/api/chat", json={"text":"你好"})
             assert response.status_code == 202
             messages = []
             while True:
-                event = ws.receive_json(); messages.append(event)
+                event = receive_json(ws); messages.append(event)
                 if event["type"] == "done": break
             assert messages[-1]["status"] == "complete" and messages[-1]["text"] == "测试回答"
             assert messages[-1]["turn_id"] == response.json()["turn_id"]

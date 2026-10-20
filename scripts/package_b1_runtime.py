@@ -38,8 +38,8 @@ DIRECTORIES = (
 
 def selection():
     configs = [
-        runtime.config(ROOT / "02_config/settings.orin-nx-b1.yaml"),
-        runtime.config(ROOT / "02_config/settings.orin-nx-headless.yaml"),
+        runtime.config(ROOT / "02_config/settings.orin-nx.yaml"),
+        runtime.config(ROOT / "02_config/settings.orin-nx.yaml"),
     ]
     selected = {}
     for cfg in configs:
@@ -122,8 +122,8 @@ def stage_assets(destination):
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
         "profiles": [
-            "02_config/settings.orin-nx-b1.yaml",
-            "02_config/settings.orin-nx-headless.yaml",
+            "02_config/settings.orin-nx.yaml",
+            "02_config/settings.orin-nx.yaml",
         ],
         "runtime_directories": list(DIRECTORIES),
         "selected_assets": {

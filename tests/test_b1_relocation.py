@@ -5,7 +5,7 @@ import json
 import pytest
 
 from app.config import Config
-from benchmarks import vision_b1_support as support
+from benchmarks import vision_protocol as support
 
 
 @pytest.mark.parametrize("external_audio", [False, True])
@@ -14,7 +14,7 @@ def test_restored_baseline_rebases_only_owned_paths_and_preserves_bytes(
 ):
     old = tmp_path / "previous/05_runtime"
     restored = tmp_path / "restored"
-    recorded = Config.load("02_config/settings.orin-nx-b1.yaml").effective()
+    recorded = Config.load("02_config/settings.orin-nx.yaml").effective()
     recorded["backends"]["stack_root"] = str(old)
     recorded["audio"]["output_directory"] = (
         "/separate/audio" if external_audio else str(old / "runtime-data/audio")

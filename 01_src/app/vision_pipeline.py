@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-"""B1: one latest-frame worker, shared RGBD, TensorRT models and Norfair IDs.
+"""One latest-frame worker, shared RGBD, TensorRT models and Norfair IDs.
 
 This deliberately starts with a serial, bounded baseline. Every result in a
 published scene belongs to the same frame; expensive work is gated by range
-and target limits. Scheduling/precision optimizations belong after B1 capture.
+and target limits. Scheduling/precision optimizations belong after vision capture.
 """
 
 from copy import deepcopy
@@ -52,7 +52,7 @@ def range_from_mask(frame, mask, min_fraction=0.15, min_pixels=25):
     }
 
 
-class B1Perception(FrameWorker):
+class VisionPipeline(FrameWorker):
     def __init__(self, camera, config, tracker=None, on_result=None):
         super().__init__(camera, config, tracker, on_result)
         self.networks = VisionModels(
@@ -75,7 +75,7 @@ class B1Perception(FrameWorker):
     def load(self):
         if self.networks.models or self.gallery is not None:
             raise RuntimeError(
-                "B1 resources are already loaded; close before reloading"
+                "vision resources are already loaded; close before reloading"
             )
         try:
             self.networks.load()
@@ -108,7 +108,7 @@ class B1Perception(FrameWorker):
 
     def process_frame(self, frame):
         if not self._fresh(frame):
-            raise RuntimeError("B1 input frame expired")
+            raise RuntimeError("vision input frame expired")
         started = time.monotonic()
         stages = {}
         skips = {}
@@ -116,7 +116,7 @@ class B1Perception(FrameWorker):
 
         def run(role, *args, **kwargs):
             if not self._fresh(frame):
-                raise RuntimeError("B1 frame expired before " + role)
+                raise RuntimeError("vision frame expired before " + role)
             tick = time.monotonic()
             try:
                 return self.networks.run(role, *args, **kwargs)
@@ -269,7 +269,7 @@ class B1Perception(FrameWorker):
                 item["expression"] = {"available": False, "error": str(exc)}
             attributes.append(item)
         if not self._fresh(frame):
-            raise RuntimeError("B1 result expired before publication")
+            raise RuntimeError("vision result expired before publication")
         prominent = public_faces[0]["box_xyxy"] if public_faces else None
         if self.tracker:
             self.tracker.process_box(frame, prominent)
@@ -348,15 +348,15 @@ class B1Perception(FrameWorker):
             frame["source_epoch"] != self.camera.source_epoch
             or time.monotonic() - frame["received_monotonic"] > self.camera.stale_after
         ):
-            result = self._empty("B1 result expired")
+            result = self._empty("vision result expired")
         return {
             **result,
             "processed": self.processed,
             "skipped_capture_frames": self.skipped,
             "failures": self.failures,
             "callback_error": self.callback_error,
-            "backend": "tensorrt_b1",
-            "model_set": self.networks.manifest.get("model_set", "B1"),
+            "backend": "tensorrt",
+            "model_set": self.networks.manifest.get("model_set", "vision"),
             "model_metrics": self.networks.snapshot(),
         }
 
@@ -416,4 +416,4 @@ class B1Perception(FrameWorker):
         self.entities.reset()
         self.faces.reset()
         if errors:
-            raise ExceptionGroup("B1 resource release failed", errors)
+            raise ExceptionGroup("vision resource release failed", errors)

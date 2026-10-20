@@ -357,8 +357,8 @@
 
   function onScene(msg){
     $('sceneInfo').textContent=msg.ready ? '人体 '+msg.persons.length+' · 人脸 '+(msg.face && msg.face.face_detected ? 1 : 0)+' · 手 '+msg.hands.length : (msg.error || '感知尚未就绪');
-    $('visionTools').hidden=msg.backend!=='tensorrt_b1';
-    if(msg.backend!=='tensorrt_b1') return;
+    $('visionTools').hidden=msg.backend!=='tensorrt';
+    if(msg.backend!=='tensorrt') return;
     const update=(id,rows,empty)=>{const select=$(id),old=select.value;select.replaceChildren();
       if(empty){const o=document.createElement('option');o.value='';o.textContent='未选择';select.append(o);}
       for(const row of rows.filter(r=>r.track_id)){const o=document.createElement('option');o.value=row.track_id;

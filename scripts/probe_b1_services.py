@@ -81,7 +81,7 @@ def wait_turn(base, turn_id, seconds=90):
 def probe(output, webdriver=None, config_path=None):
     cfg = runtime.config()
     cfg = runtime.config(services.profile_path(cfg))
-    b1 = runtime.config(config_path or ROOT / "02_config/settings.orin-nx-b1.yaml")
+    b1 = runtime.config(config_path or ROOT / "02_config/settings.orin-nx.yaml")
     # Automated greetings could take admission while the probe submits a turn.
     # This test-specific override is saved in services-started.json.
     b1.gestures.greetings_enabled = False

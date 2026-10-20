@@ -13,40 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""YuNet detection state from the upstream tracker, with all motor logic removed.
-
-Tracks anonymous face presence/position only. Consecutive *distinct* frames
-establish framing stability; this is not identity tracking or authentication.
-"""
+"""Passive face framing state; the shared visual pipeline owns all inference."""
 
 import threading
 import time
 from app.camera import Camera
-from app.face_detector import FaceDetector
 
 
-class FaceTracker:
+class FaceState:
     def __init__(
         self,
         camera: Camera,
-        detector: FaceDetector,
-        fps=5.0,
+        *,
         dead_zone=0.12,
         good_frame_zone=0.18,
         min_face_size=0.06,
         stable_frames=2,
     ):
-        self._camera, self._detector = camera, detector
-        self._period = 1.0 / fps
+        self._camera = camera
         self._dead_zone, self._good_frame_zone = dead_zone, good_frame_zone
         self._min_face_size, self._stable_frames_required = min_face_size, stable_frames
-        self._stop = threading.Event()
         self._state_lock = threading.Lock()
-        self._thread = None
         self._stable_count = 0
         self._last_frame = None
         self._state = self._empty()
         self._preview = None
+
+    def stop(self):
+        self._reset()
 
     @staticmethod
     def _empty(error=None):
@@ -59,26 +53,6 @@ class FaceTracker:
             "frame": None,
             "completed_monotonic": None,
         }
-
-    def start(self):
-        if self._thread and self._thread.is_alive():
-            return
-        if not self._detector.health_check():
-            raise RuntimeError("Face detector is not ready")
-        self._stop.clear()
-        self._thread = threading.Thread(
-            target=self._loop, name="face-tracker", daemon=True
-        )
-        self._thread.start()
-
-    def stop(self):
-        self._stop.set()
-        if self._thread:
-            self._thread.join(timeout=5)
-            if self._thread.is_alive():
-                raise RuntimeError("Face inference has not released")
-        self._thread = None
-        self._reset()
 
     def _reset(self, error=None):
         with self._state_lock:
@@ -129,39 +103,16 @@ class FaceTracker:
     def is_tracking(self):
         return self.face_detected
 
-    def wait_until_stable(self, timeout, poll_interval=0.03):
-        deadline = time.monotonic() + max(0, timeout)
-        while time.monotonic() < deadline and not self._stop.is_set():
-            if self.stable:
-                return True
-            self._stop.wait(poll_interval)
-        return self.stable
-
-    def _loop(self):
-        while not self._stop.is_set():
-            start = time.monotonic()
-            try:
-                self._tick()
-            except Exception as exc:
-                self._reset(str(exc))
-            self._stop.wait(max(0, self._period - (time.monotonic() - start)))
-
-    def _tick(self):
-        frame = self._camera.snapshot()
-        if frame is None:
-            self._reset("No fresh camera frame")
-            return
-        self.process_frame(frame)
-
-    def process_frame(self, frame):
-        key = (frame.source_epoch, frame.frame_id)
-        if key == self._last_frame:
-            return
-        box = self._detector.detect(frame.bgr)
-        self.process_box(frame, box)
-
     def process_box(self, frame, box):
-        """Accept a same-frame box from the shared B1 worker without re-inference."""
+        """Accept a same-frame box from the shared vision worker without re-inference."""
+        if (
+            frame is None
+            or frame.source_epoch != self._camera.source_epoch
+            or (frame.invalidated and frame.invalidated.is_set())
+            or time.monotonic() - frame.received_monotonic > self._camera.stale_after
+        ):
+            self._reset("No fresh face observation")
+            return
         key = (frame.source_epoch, frame.frame_id)
         with self._state_lock:
             if key == self._last_frame:

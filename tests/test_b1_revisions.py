@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from app.config import Config
-from benchmarks import vision_b1_support as support
+from benchmarks import vision_protocol as support
 from deploy import runtime
 import freeze_b1_inputs as freezing
 
@@ -58,7 +58,7 @@ def test_explicit_protocol_checks_its_own_runtime_lock(tmp_path, monkeypatch):
     code.write_text("revision one\n")
     config = tmp_path / "config.json"
     config.write_text(
-        json.dumps(Config.load("02_config/settings.orin-nx-b1.yaml").effective())
+        json.dumps(Config.load("02_config/settings.orin-nx.yaml").effective())
     )
     protocol = tmp_path / "revision.json"
     protocol.write_text(
@@ -73,7 +73,7 @@ def test_explicit_protocol_checks_its_own_runtime_lock(tmp_path, monkeypatch):
     loaded, cfg = support.validate(protocol)
     assert (
         loaded["effective_config"] == "config.json"
-        and cfg.perception.backend == "tensorrt_b1"
+        and cfg.perception.backend == "tensorrt"
     )
     code.write_text("revision two\n")
     with pytest.raises(ValueError, match="frozen file changed"):

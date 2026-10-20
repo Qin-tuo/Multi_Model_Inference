@@ -1,5 +1,7 @@
 # Orin NX 端侧多模型陪伴服务
 
+> 当前为 `refactor/b2-mainline` 整合分支，尚未完成独立恢复包、最终性能对照和主分支交付。完成范围与验证证据见 [整合 Goal](docs/consolidation-goal.md) 和 [执行清单](benchmarks/manifests/consolidation-progress.json)。当前默认配置为 `02_config/settings.orin-nx.yaml`；下方历史 B0/B1/B2 文档中的旧版命令需在相应 Git 恢复点执行。
+
 本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
 
 当前默认启动 **B2：三个标准视觉模型替换**。人体／手部采用 RTMW-L 2D，人脸特征采用 ArcFace-MobileNetV1，行人 ReID 采用 OSNet x1.0，另外七个视觉模型保持 B1，仍统一使用 TensorRT。参考一致性、十模型回放、张掌正样本与四服务共存通过；十模块及七组整链路基线已测量。已记录一次应用／语音退出超时，根因待定位。真人手势精度与实体声学验收仍开放，B1 历史工件和数据保留。
@@ -26,7 +28,7 @@
 ./run.sh services down
 ```
 
-`run.sh` 使用项目自带的 Python 环境，默认选择 `02_config/settings.orin-nx-b2.yaml`；已有 `EDGE_ASSISTANT_CONFIG` 或显式 `--config` 可覆盖。原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
+`run.sh` 使用项目自带的 Python 环境，默认选择 `02_config/settings.orin-nx.yaml`；已有 `EDGE_ASSISTANT_CONFIG` 或显式 `--config` 可覆盖。原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
 
 运行依赖存放在 `05_runtime/` 并排除出普通 Git 提交。本机已准备 B2 所需模型与环境；**单独克隆 Git 仓库不会取得这些工件**。已有 B1 R2 运行包不含三个新增 B2 模型，不能直接作为 B2 完整恢复包。历史恢复说明见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)，新增模型来源与验证见 [B2 说明](docs/b2-model-replacements.md)。
 
@@ -47,8 +49,8 @@
 ```bash
 cd /home/nvidia/Multi_Model_Inference
 source ./05_runtime/environments/edge-assistant/bin/activate
-# 直接调用 Python 时显式选择 B2；run.sh 已设置此默认值。
-export EDGE_ASSISTANT_CONFIG="$PWD/02_config/settings.orin-nx-b2.yaml"
+# Python 与 run.sh 共用同一默认配置；显式覆盖时可设置：
+export EDGE_ASSISTANT_CONFIG="$PWD/02_config/settings.orin-nx.yaml"
 
 # 结束当前对话后，停止本项目四个服务，确认 STOPPED。
 python main.py services down

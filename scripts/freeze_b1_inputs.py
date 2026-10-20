@@ -20,8 +20,8 @@ sys.path.insert(0, str(ROOT / "01_src"))
 from app.config import Config
 from app.vision_models import ROLES, VisionModels
 from benchmarks.baseline_support import jsonable
-from benchmarks.vision_b1_support import PROTOCOL, outputs_match
-from benchmarks.vision_b1_timing import TensorRTTrace
+from benchmarks.vision_protocol import PROTOCOL, outputs_match
+from benchmarks.vision_timing import TensorRTTrace
 from deploy.operations import exclusive_build
 from deploy import runtime, services
 from deploy.validation_inputs import input_path
@@ -198,7 +198,7 @@ def prepare(output, cfg, inputs_from=None, config_path=None):
             "requirements.lock",
             "01_src/deploy/vision/requirements-runtime.lock",
             "03_models/manifest.json",
-            "03_models/perception.json",
+            "03_models/runtime-components.json",
             "03_models/speech.json",
             "02_config/settings.yaml",
         )
@@ -208,7 +208,7 @@ def prepare(output, cfg, inputs_from=None, config_path=None):
     paths += [
         selected_manifest,
         ROOT / selected_sources,
-        Path(config_path or ROOT / "02_config/settings.orin-nx-b1.yaml"),
+        Path(config_path or ROOT / "02_config/settings.orin-nx.yaml"),
     ]
     paths.append(effective_path)
     protocol = {
@@ -286,7 +286,7 @@ def main():
     )
     parser.add_argument("--protocol", type=Path, default=PROTOCOL)
     parser.add_argument(
-        "--config", type=Path, default=ROOT / "02_config/settings.orin-nx-b1.yaml"
+        "--config", type=Path, default=ROOT / "02_config/settings.orin-nx.yaml"
     )
     parser.add_argument(
         "--inputs-from",

@@ -111,7 +111,7 @@ def test_recorded_b1_rotating_open_hand_produces_one_wave():
     from pathlib import Path
 
     recorded = json.loads((Path(__file__).parent / "fixtures/b1-rotating-wave.json").read_text())
-    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
+    cfg = Config.load("02_config/settings.orin-nx.yaml")
     recognizer = GestureRecognizer(cfg.gestures, cfg.perception.hand_threshold, cfg.perception.pose_joint_threshold)
     events = []
     for row in recorded["frames"]:

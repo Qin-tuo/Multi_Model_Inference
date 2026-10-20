@@ -200,9 +200,7 @@ def artifact_files(cfg, components):
         for name, row in lock["speech_files"].items():
             add(p["stack"] / name, row["sha256"])
     if "app" in components:
-        perception = load_artifact_manifest(ROOT / "03_models/perception.json")
-        b1 = cfg.perception.enabled and cfg.perception.backend == "tensorrt_b1"
-        if b1:
+        if cfg.perception.enabled:
             selected = json.loads((ROOT / cfg.perception.model_manifest).read_text())
             sources = json.loads((ROOT / selected["source_manifest"]).read_text())[
                 "models"
@@ -212,32 +210,14 @@ def artifact_files(cfg, components):
                 decoder = sources[role].get("decoder_source", {})
                 if "path" in decoder and "sha256" in decoder:
                     add(ROOT / decoder["path"], decoder["sha256"])
-            for role in ("body_hand_pose", "expression"):
-                for row in sources[role]["prepost_source"]["files"].values():
-                    add(ROOT / row["path"], row["sha256"])
+                for helper in (
+                    sources[role].get("prepost_source", {}).get("files", {}).values()
+                ):
+                    add(ROOT / helper["path"], helper["sha256"])
             trt = load_artifact_manifest(ROOT / "03_models/runtime-components.json")[
                 "tensorrt"
             ]
             add(ROOT / trt["runtime_helper"], trt["runtime_helper_sha256"])
-        if cfg.face.enabled and not b1:
-            row = perception["face"]
-            add(
-                Path(row["directory"]) / row["filename"],
-                row["files"][row["filename"]]["sha256"],
-            )
-        if cfg.perception.enabled and cfg.perception.body_enabled and not b1:
-            row = perception["body"]
-            add(row["engine_path"], row["engine_sha256"])
-            add(row["runtime_helper"], row["runtime_helper_sha256"])
-        if cfg.perception.enabled and cfg.perception.hands_enabled and not b1:
-            for role in ["palm", "hand"]:
-                row = perception[role]
-                for name in [
-                    Path(row["model_path"]).name,
-                    row.get("runtime_source_file", row["source_file"]),
-                ]:
-                    entry = row["files"][name]
-                    add(entry["path"], entry["sha256"])
         if cfg.audio.enabled:
             row = load_artifact_manifest(ROOT / "03_models/speech.json")["vad"]
             add(

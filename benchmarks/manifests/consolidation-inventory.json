@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "INITIAL_CLASSIFICATION_NOT_DELETION_AUTHORIZATION",
+  "status": "CODE_DISPOSITIONS_IN_PROGRESS_RUNTIME_ARTIFACT_DELETION_DEFERRED",
   "base_commit": "9b24ca038680a436743545202481bd38eb00476f",
   "classification": {
     ".gitattributes": "documentation_or_project_metadata",
@@ -15,22 +15,22 @@
     "01_src/app/actions/store.py": "runtime_or_shared_dependency_review",
     "01_src/app/appearance.py": "runtime_or_shared_dependency_review",
     "01_src/app/audio.py": "runtime_or_shared_dependency_review",
-    "01_src/app/body_detector.py": "runtime_or_shared_dependency_review",
+    "01_src/app/body_detector.py": "retired_from_current_source",
     "01_src/app/camera.py": "runtime_or_shared_dependency_review",
     "01_src/app/cli.py": "runtime_or_shared_dependency_review",
     "01_src/app/config.py": "runtime_or_shared_dependency_review",
     "01_src/app/diagnostics.py": "runtime_or_shared_dependency_review",
-    "01_src/app/face_detector.py": "runtime_or_shared_dependency_review",
+    "01_src/app/face_detector.py": "retired_from_current_source",
     "01_src/app/face_tasks.py": "runtime_or_shared_dependency_review",
-    "01_src/app/face_tracker.py": "runtime_or_shared_dependency_review",
+    "01_src/app/face_tracker.py": "retired_from_current_source",
     "01_src/app/face_trt.py": "runtime_or_shared_dependency_review",
     "01_src/app/gestures.py": "runtime_or_shared_dependency_review",
     "01_src/app/head_gaze.py": "runtime_or_shared_dependency_review",
     "01_src/app/identity_gallery.py": "runtime_or_shared_dependency_review",
     "01_src/app/llm.py": "runtime_or_shared_dependency_review",
     "01_src/app/monitor.py": "runtime_or_shared_dependency_review",
-    "01_src/app/perception.py": "runtime_or_shared_dependency_review",
-    "01_src/app/perception_b1.py": "runtime_or_shared_dependency_review",
+    "01_src/app/perception.py": "retired_from_current_source",
+    "01_src/app/perception_b1.py": "retired_from_current_source",
     "01_src/app/pipeline.py": "runtime_or_shared_dependency_review",
     "01_src/app/realsense_source.py": "runtime_or_shared_dependency_review",
     "01_src/app/request_io.py": "runtime_or_shared_dependency_review",
@@ -44,29 +44,29 @@
     "01_src/app/visual_tracks.py": "runtime_or_shared_dependency_review",
     "01_src/app/web.py": "runtime_or_shared_dependency_review",
     "01_src/app/web_limits.py": "runtime_or_shared_dependency_review",
-    "01_src/app/wholebody_pose.py": "runtime_or_shared_dependency_review",
+    "01_src/app/wholebody_pose.py": "retired_from_current_source",
     "01_src/app/wholebody_pose2d.py": "runtime_or_shared_dependency_review",
     "01_src/benchmarks/__init__.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/application_server.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/application_workload.py": "build_validation_or_experiment_review",
+    "01_src/benchmarks/application_server.py": "retired_from_current_source",
+    "01_src/benchmarks/application_workload.py": "retired_from_current_source",
     "01_src/benchmarks/baseline_support.py": "build_validation_or_experiment_review",
     "01_src/benchmarks/http_observer.py": "build_validation_or_experiment_review",
     "01_src/benchmarks/model_modules.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/plot_application.py": "build_validation_or_experiment_review",
+    "01_src/benchmarks/plot_application.py": "retired_from_current_source",
     "01_src/benchmarks/plot_models.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/plot_vision.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/stereo_depth_experiment.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/stereo_geometry.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/summarize_application.py": "build_validation_or_experiment_review",
+    "01_src/benchmarks/plot_vision.py": "retired_from_current_source",
+    "01_src/benchmarks/stereo_depth_experiment.py": "retired_from_current_source",
+    "01_src/benchmarks/stereo_geometry.py": "retired_from_current_source",
+    "01_src/benchmarks/summarize_application.py": "retired_from_current_source",
     "01_src/benchmarks/summarize_models.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/summarize_vision.py": "build_validation_or_experiment_review",
+    "01_src/benchmarks/summarize_vision.py": "retired_from_current_source",
     "01_src/benchmarks/text_metrics.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/vision_b1_load.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/vision_b1_modules.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/vision_b1_stream.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/vision_b1_stream_summary.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/vision_b1_support.py": "build_validation_or_experiment_review",
-    "01_src/benchmarks/vision_b1_timing.py": "build_validation_or_experiment_review",
+    "01_src/benchmarks/vision_b1_load.py": "retired_from_current_source",
+    "01_src/benchmarks/vision_b1_modules.py": "retired_from_current_source",
+    "01_src/benchmarks/vision_b1_stream.py": "retired_from_current_source",
+    "01_src/benchmarks/vision_b1_stream_summary.py": "retired_from_current_source",
+    "01_src/benchmarks/vision_b1_support.py": "retired_from_current_source",
+    "01_src/benchmarks/vision_b1_timing.py": "retired_from_current_source",
     "01_src/benchmarks/vision_modules.py": "build_validation_or_experiment_review",
     "01_src/benchmarks/vision_stream.py": "build_validation_or_experiment_review",
     "01_src/deploy/actions-dependencies.lock.json": "runtime_or_shared_dependency_review",
@@ -95,16 +95,16 @@
     "01_src/deploy/upstream.lock.json": "runtime_or_shared_dependency_review",
     "01_src/deploy/vision/export_models.py": "build_validation_or_experiment_review",
     "01_src/deploy/vision/onnx_compat.py": "build_validation_or_experiment_review",
-    "01_src/deploy/vision/pose_reference.py": "build_validation_or_experiment_review",
+    "01_src/deploy/vision/pose_reference.py": "retired_from_current_source",
     "01_src/deploy/vision/requirements-export.lock": "build_validation_or_experiment_review",
     "01_src/deploy/vision/requirements-openvino.lock": "build_validation_or_experiment_review",
     "01_src/deploy/vision/requirements-runtime.lock": "build_validation_or_experiment_review",
     "01_src/deploy/vision/requirements-tools.lock": "build_validation_or_experiment_review",
     "01_src/deploy/vision/standard_reference.py": "build_validation_or_experiment_review",
     "01_src/project_paths.py": "documentation_or_project_metadata",
-    "02_config/settings.orin-nx-b1.yaml": "runtime_or_shared_dependency_review",
-    "02_config/settings.orin-nx-b2.yaml": "runtime_or_shared_dependency_review",
-    "02_config/settings.orin-nx-headless.yaml": "runtime_or_shared_dependency_review",
+    "02_config/settings.orin-nx-b1.yaml": "retired_from_current_source",
+    "02_config/settings.orin-nx-b2.yaml": "retired_from_current_source",
+    "02_config/settings.orin-nx-headless.yaml": "retired_from_current_source",
     "02_config/settings.yaml": "runtime_or_shared_dependency_review",
     "03_models/baselines/qwen2.5-vl-3b.json": "runtime_or_shared_dependency_review",
     "03_models/candidates/qwen3-vl-4b-instruct.json": "runtime_or_shared_dependency_review",
@@ -313,8 +313,8 @@
     "scripts/import_runtime.py": "build_validation_or_experiment_review",
     "scripts/package_b1_runtime.py": "build_validation_or_experiment_review",
     "scripts/prepare_baseline_inputs.py": "build_validation_or_experiment_review",
-    "scripts/prepare_face.py": "build_validation_or_experiment_review",
-    "scripts/prepare_perception.py": "build_validation_or_experiment_review",
+    "scripts/prepare_face.py": "retired_from_current_source",
+    "scripts/prepare_perception.py": "retired_from_current_source",
     "scripts/prepare_speech.py": "build_validation_or_experiment_review",
     "scripts/prepare_vision_b1.py": "build_validation_or_experiment_review",
     "scripts/probe_action_cancel.py": "build_validation_or_experiment_review",
@@ -332,13 +332,13 @@
     "scripts/probe_cancellation.py": "build_validation_or_experiment_review",
     "scripts/probe_coexistence.py": "build_validation_or_experiment_review",
     "scripts/probe_deployment.py": "build_validation_or_experiment_review",
-    "scripts/probe_face_tasks_b1.py": "build_validation_or_experiment_review",
+    "scripts/probe_face_tasks_b1.py": "retired_from_current_source",
     "scripts/probe_gesture_replay.py": "build_validation_or_experiment_review",
     "scripts/probe_gestures.py": "build_validation_or_experiment_review",
-    "scripts/probe_legacy_camera.py": "build_validation_or_experiment_review",
+    "scripts/probe_legacy_camera.py": "retired_from_current_source",
     "scripts/probe_offline.py": "build_validation_or_experiment_review",
-    "scripts/probe_perception.py": "build_validation_or_experiment_review",
-    "scripts/probe_pose_source_b1.py": "build_validation_or_experiment_review",
+    "scripts/probe_perception.py": "retired_from_current_source",
+    "scripts/probe_pose_source_b1.py": "retired_from_current_source",
     "scripts/probe_remaining_vision_b1.py": "build_validation_or_experiment_review",
     "scripts/probe_rgbd_camera.py": "build_validation_or_experiment_review",
     "scripts/probe_segmentation_b1.py": "build_validation_or_experiment_review",
@@ -347,16 +347,16 @@
     "scripts/probe_speech.py": "build_validation_or_experiment_review",
     "scripts/probe_speech_session.py": "build_validation_or_experiment_review",
     "scripts/probe_standard_pose_replay.py": "build_validation_or_experiment_review",
-    "scripts/probe_stereo_depth.py": "build_validation_or_experiment_review",
-    "scripts/probe_stereo_metadata.py": "build_validation_or_experiment_review",
-    "scripts/probe_stereo_stream.py": "build_validation_or_experiment_review",
+    "scripts/probe_stereo_depth.py": "retired_from_current_source",
+    "scripts/probe_stereo_metadata.py": "retired_from_current_source",
+    "scripts/probe_stereo_stream.py": "retired_from_current_source",
     "scripts/probe_turn_cancel.py": "build_validation_or_experiment_review",
     "scripts/probe_vision_b1.py": "build_validation_or_experiment_review",
     "scripts/probe_voice_interruptions.py": "build_validation_or_experiment_review",
     "scripts/probe_web.py": "build_validation_or_experiment_review",
     "scripts/probe_web_transport.py": "build_validation_or_experiment_review",
     "scripts/runtime_bundle.py": "build_validation_or_experiment_review",
-    "scripts/setup_native_perception.py": "build_validation_or_experiment_review",
+    "scripts/setup_native_perception.py": "retired_from_current_source",
     "tests/fixtures/b1-rotating-wave.json": "build_validation_or_experiment_review",
     "tests/fixtures/pose-affine-reference.json": "build_validation_or_experiment_review",
     "tests/test_action_migration.py": "build_validation_or_experiment_review",
@@ -396,8 +396,8 @@
     "tests/test_speaker_selection.py": "build_validation_or_experiment_review",
     "tests/test_speech_contracts.py": "build_validation_or_experiment_review",
     "tests/test_standard_vision_contracts.py": "build_validation_or_experiment_review",
-    "tests/test_stereo_correspondence.py": "build_validation_or_experiment_review",
-    "tests/test_stereo_geometry.py": "build_validation_or_experiment_review",
+    "tests/test_stereo_correspondence.py": "retired_from_current_source",
+    "tests/test_stereo_geometry.py": "retired_from_current_source",
     "tests/test_tensorrt_contract.py": "build_validation_or_experiment_review",
     "tests/test_turn_cancellation.py": "build_validation_or_experiment_review",
     "tests/test_vision_artifacts.py": "build_validation_or_experiment_review",
@@ -468,6 +468,284 @@
     "scripts/validation_inputs.py": {
       "action": "move_shared_helper",
       "replacement": "01_src/deploy/validation_inputs.py"
+    },
+    "01_src/app/body_detector.py": {
+      "action": "extract_and_retire",
+      "reason": "B0 detector retired; hash-checked artifact loading retained in model_artifacts.",
+      "replacements": [
+        "01_src/app/model_artifacts.py",
+        "01_src/app/segmentation.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/app/face_detector.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Legacy independent OpenCV detector; current YuNet TensorRT adapter remains app/face_trt.py.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/app/face_tracker.py": {
+      "action": "extract_and_retire",
+      "reason": "Remove the independent detector/thread; preserve passive same-frame face state.",
+      "replacements": [
+        "01_src/app/face_state.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/app/perception.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "B0-only orchestration and CPU palm/hand adapters; current VisionPipeline owns all ten models.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/app/perception_b1.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/app/vision_pipeline.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/app/wholebody_pose.py": {
+      "action": "extract_and_retire",
+      "reason": "Old relative-3D adapter retired; geometry helpers shared with current 2D adapter.",
+      "replacements": [
+        "01_src/app/pose_geometry.py",
+        "01_src/app/wholebody_pose2d.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/application_server.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Old B0 application/visual experiment; reproduce with the recovery tag. Current ten-model stream/pressure benchmark and application regression probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/application_workload.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Old B0 application/visual experiment; reproduce with the recovery tag. Current ten-model stream/pressure benchmark and application regression probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/plot_application.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Old B0 application/visual experiment; reproduce with the recovery tag. Current ten-model stream/pressure benchmark and application regression probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/plot_vision.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Old B0 application/visual experiment; reproduce with the recovery tag. Current ten-model stream/pressure benchmark and application regression probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/stereo_depth_experiment.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/stereo_geometry.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/summarize_application.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Old B0 application/visual experiment; reproduce with the recovery tag. Current ten-model stream/pressure benchmark and application regression probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/summarize_vision.py": {
+      "action": "extract_and_retire",
+      "reason": "Legacy B0 visual report CLI retired; shared report readers remain for speech/LLM.",
+      "replacements": [
+        "01_src/benchmarks/report_utils.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_b1_load.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/benchmarks/conversation_load.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_b1_modules.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/benchmarks/vision_modules.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_b1_stream.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/benchmarks/vision_stream.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_b1_stream_summary.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/benchmarks/vision_summary.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_b1_support.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/benchmarks/vision_protocol.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_b1_timing.py": {
+      "action": "rename_by_responsibility",
+      "reason": "Current implementation retained under a responsibility-based name.",
+      "replacements": [
+        "01_src/benchmarks/vision_timing.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/deploy/vision/pose_reference.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Native reference tool exclusively targets the retired 3D pose model.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "02_config/settings.orin-nx-b1.yaml": {
+      "action": "retire_old_profile",
+      "reason": "One current TensorRT profile replaces daily B0/B1/B2 selection; frozen originals remain in Git and B2 records.",
+      "replacements": [
+        "02_config/settings.orin-nx.yaml"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "02_config/settings.orin-nx-b2.yaml": {
+      "action": "retire_old_profile",
+      "reason": "One current TensorRT profile replaces daily B0/B1/B2 selection; frozen originals remain in Git and B2 records.",
+      "replacements": [
+        "02_config/settings.orin-nx.yaml"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "02_config/settings.orin-nx-headless.yaml": {
+      "action": "retire_old_profile",
+      "reason": "One current TensorRT profile replaces daily B0/B1/B2 selection; frozen originals remain in Git and B2 records.",
+      "replacements": [
+        "02_config/settings.orin-nx.yaml"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/prepare_face.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Legacy B0 camera/perception setup or probe has no current runtime consumer; current native pipeline/recovery probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/prepare_perception.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Legacy B0 camera/perception setup or probe has no current runtime consumer; current native pipeline/recovery probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_face_tasks_b1.py": {
+      "action": "extract_and_retire",
+      "reason": "Old SFace comparison removed; native fixture loading preserved for retained head/gaze/expression models.",
+      "replacements": [
+        "01_src/deploy/vision/reference_inputs.py",
+        "scripts/build_standard_vision.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_legacy_camera.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Legacy B0 camera/perception setup or probe has no current runtime consumer; current native pipeline/recovery probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_perception.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Legacy B0 camera/perception setup or probe has no current runtime consumer; current native pipeline/recovery probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_pose_source_b1.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Native reference tool exclusively targets the retired 3D pose model.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_stereo_depth.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_stereo_metadata.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/probe_stereo_stream.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/setup_native_perception.py": {
+      "action": "retire_version_exclusive_tool_or_implementation",
+      "reason": "Legacy B0 camera/perception setup or probe has no current runtime consumer; current native pipeline/recovery probes remain.",
+      "replacements": [],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "tests/test_stereo_correspondence.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "tests/test_stereo_geometry.py": {
+      "action": "retire_deferred_experiment",
+      "reason": "Neural stereo experiment is outside the selected D435i native depth runtime.",
+      "replacements": [
+        "01_src/app/realsense_source.py"
+      ],
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_modules.py": {
+      "action": "replace_old_experiment_with_current_worker",
+      "reason": "Current ten-model worker replaces B0 three-model benchmark. Historical --source-root chooses the worker in that checkout.",
+      "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "01_src/benchmarks/vision_stream.py": {
+      "action": "replace_old_experiment_with_current_worker",
+      "extracted": [
+        "01_src/benchmarks/replay.py",
+        "01_src/benchmarks/conversation_load.py"
+      ],
+      "reason": "Keep fixed-clock replay and 4B pressure; run the current ten-model production pipeline.",
+      "source_recovery": "before-mainline-consolidation-20261020"
     }
-  }
+  },
+  "artifact_cleanup_gate": "No original models, engines, archives or baseline inputs removed in this stage; independently restored current bundle required first."
 }

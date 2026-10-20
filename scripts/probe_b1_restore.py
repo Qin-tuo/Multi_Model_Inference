@@ -35,7 +35,7 @@ def probe(checkout, output):
     python = checkout / "05_runtime/environments/edge-assistant/bin/python"
     script = checkout / "scripts/probe_offline.py"
     audio = checkout / "05_runtime/datasets/b0-sw-v1/zh-20.wav"
-    profile = checkout / "02_config/settings.orin-nx-b1.yaml"
+    profile = checkout / "02_config/settings.orin-nx.yaml"
     if not all(p.is_file() for p in (python, script, audio, profile)):
         raise ValueError("Prepare the Git checkout and unpack its runtime first")
     # Read defaults using the restored project itself, without importing two

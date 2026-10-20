@@ -43,7 +43,7 @@ def test_current_pose_and_face_helpers_do_not_load_old_detector_or_pose():
 def test_current_frame_worker_has_no_legacy_model_owner():
     code = (
         f"import sys,json;sys.path.insert(0,{str(SOURCE_DIR)!r});"
-        "import app.perception_b1;"
+        "import app.vision_pipeline;"
         "print(json.dumps(sorted(sys.modules)))"
     )
     loaded = json.loads(

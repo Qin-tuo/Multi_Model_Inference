@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from benchmarks.vision_b1_timing import TensorRTTrace
+from benchmarks.vision_timing import TensorRTTrace
 
 
 def fixture():

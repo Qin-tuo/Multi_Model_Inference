@@ -37,7 +37,7 @@
     {
       "id": "C3",
       "requirement": "解除新旧实现耦合",
-      "status": "in_progress",
+      "status": "complete",
       "evidence": [
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/shared-components-tests.xml",
@@ -54,10 +54,30 @@
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-components/services-restored.json",
           "sha256": "528ce863e232d207718d834683814f80712e0496fe5788288c4bdea8d51896b7"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/current-runtime-verification.json",
+          "sha256": "4ce2853464ef84a4e4b04813f4505132d280d7db3100b5f1a0da7ce926a80b47"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/current-mainline-pass.xml",
+          "sha256": "b81aab137143ccd0646ae7bd5f5eba2b9978e7443d2275795d8ee043f41e5222"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-current-runtime/parity.json",
+          "sha256": "e5f8353ccd671a0ea990b5632e64895d8559c0df0c28a18a6ca1ca33b4b7e68a"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-current-runtime/pipeline/report.json",
+          "sha256": "408eb74dd767897791f8d3e2ac18aa7d80b3daf257e796f84427d2786ac56ed4"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-current-runtime/services-restored.json",
+          "sha256": "915cb6d05b46fc40909d4d814d2778a99d82f2d56a4c6a5e0a82dc10ffee59cc"
         }
       ],
       "common_components_extracted": true,
-      "remaining": "Remove obsolete adapter choices and stage-specific names with C6; then audit the complete current import graph."
+      "remaining": null
     },
     {
       "id": "C4",
@@ -94,13 +114,23 @@
         "01_src/deploy/operations.py",
         "01_src/deploy/validation_inputs.py"
       ],
-      "source_imports_scripts": 0
+      "source_imports_scripts": 0,
+      "implemented": [
+        "Current visual benchmark and timing modules use responsibility-based names",
+        "4B pressure and fixed-clock replay extracted from obsolete benchmark implementation",
+        "Frozen-checkout coordinator validates source/input hashes without parsing historical config in current runtime"
+      ],
+      "remaining": "Move and consolidate build/validation/restore commands into formal modules; freeze current protocols before final comparisons."
     },
     {
       "id": "C6",
       "requirement": "旧版专用实现退出主线",
-      "status": "pending",
-      "evidence": []
+      "status": "in_progress",
+      "evidence": [
+        "benchmarks/manifests/consolidation-inventory.json",
+        "tests/test_module_boundaries.py"
+      ],
+      "remaining": "Current runtime retired old adapters and profiles; construction/validation tools, historical catalogs/reports and runtime artifact disposition still require consolidation."
     },
     {
       "id": "C7",
@@ -149,5 +179,11 @@
     "Consolidate current build/validation/benchmark entrypoints and remove retired mainline branches",
     "Build and independently restore the current runtime package before deleting superseded runtime artifacts",
     "Run and compare final frozen B2 inputs, document and integrate the reviewed branch without losing concurrent main-worktree edits"
-  ]
+  ],
+  "latest_current_tests": {
+    "passed": 289,
+    "legacy_test_disposition": "Removed exclusive B0 detector/hand and deferred neural stereo cases with their implementations. Current ten-model frame ownership, epoch invalidation, artifacts, cancellation and lifecycle checks retained."
+  },
+  "progress_estimate_percent": 50,
+  "progress_basis": "Milestone estimate for consolidation only, not performance or product accuracy."
 }

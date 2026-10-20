@@ -6,7 +6,7 @@ import time
 import numpy as np
 
 from app.config import Config
-from benchmarks.vision_b1_stream import MeasuredCamera
+from benchmarks.vision_stream import MeasuredCamera
 
 
 def test_replay_preserves_camera_ownership_jpeg_and_explicit_synthetic_depth(tmp_path):
@@ -14,7 +14,7 @@ def test_replay_preserves_camera_ownership_jpeg_and_explicit_synthetic_depth(tmp
     image[:, :, 1] = 100
     path = tmp_path / "input.npy"
     np.save(path, image, allow_pickle=False)
-    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
+    cfg = Config.load("02_config/settings.orin-nx.yaml")
     protocol = {"inputs": {"fixed": {"path": str(path)}}}
     spec = {"replay_inputs": ["fixed"], "hold_source_frames": 20}
 

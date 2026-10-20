@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
 from benchmarks.baseline_support import distribution  # noqa: E402
-from benchmarks.summarize_vision import artifacts, resource_summary  # noqa: E402
+from benchmarks.report_utils import artifacts, resource_summary  # noqa: E402
 from deploy import runtime  # noqa: E402
 
 

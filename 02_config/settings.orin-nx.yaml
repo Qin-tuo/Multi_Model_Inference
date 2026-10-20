@@ -28,15 +28,14 @@ web:
   port: 8090
 face:
   enabled: true
-  fps: 5.0
   stable_frames: 2
 vad:
   chunk_ms: 32
 actions:
   enabled: true
 perception:
-  backend: tensorrt_b1
-  model_manifest: 03_models/vision-b2-runtime.json
+  backend: tensorrt
+  model_manifest: 03_models/vision-runtime.json
   body_threshold: 0.25
   max_people: 10
   max_pose_people: 1

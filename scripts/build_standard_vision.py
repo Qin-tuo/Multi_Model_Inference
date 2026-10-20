@@ -156,7 +156,7 @@ def main():
     if services.profile_path(cfg).exists():
         cfg = runtime.config(services.profile_path(cfg))
     source = json.loads(MANIFEST.read_text())
-    previous = ROOT / "03_models/vision-b2-runtime.json"
+    previous = ROOT / "03_models/vision-runtime.json"
     if not previous.exists():
         previous = ROOT / "03_models/vision-b1-runtime.json"
     selected = deepcopy(json.loads(previous.read_text()))
@@ -195,7 +195,7 @@ def main():
             records[role] = checked
             print(role, checked["status"], flush=True)
     selected["status"] = "REPLACEMENTS_REFERENCE_CHECKED_INTEGRATION_PENDING"
-    runtime.write_json(ROOT / "03_models/vision-b2-runtime.json", selected)
+    runtime.write_json(ROOT / "03_models/vision-runtime.json", selected)
     runtime.write_json(
         output / "summary.json",
         {

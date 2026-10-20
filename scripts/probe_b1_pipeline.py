@@ -23,12 +23,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import FrameSnapshot
 from app.config import Config
-from app.face_tracker import FaceTracker
-from app.perception_b1 import B1Perception
+from app.face_state import FaceState
+from app.vision_pipeline import VisionPipeline
 from app.gestures import GestureRecognizer
 from app.identity_gallery import IdentityGallery
 from deploy.operations import exclusive_build
-from benchmarks.vision_b1_support import PROTOCOL, validate
+from benchmarks.vision_protocol import PROTOCOL, validate
 from deploy import runtime, services
 from deploy.validation_inputs import input_path, is_local_input
 
@@ -85,8 +85,8 @@ def probe(output, protocol_path=PROTOCOL, config_path=None, gesture_fixture=None
     camera = SimpleNamespace(
         source_epoch="public-person", stale_after=cfg.vision.stale_after
     )
-    tracker = FaceTracker(camera, None)
-    perception = B1Perception(camera, cfg.perception, tracker)
+    tracker = FaceState(camera)
+    perception = VisionPipeline(camera, cfg.perception, tracker)
     gestures = GestureRecognizer(
         cfg.gestures, cfg.perception.hand_threshold, cfg.perception.pose_joint_threshold
     )

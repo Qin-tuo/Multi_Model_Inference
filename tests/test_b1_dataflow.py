@@ -9,21 +9,21 @@ from fastapi.testclient import TestClient
 
 from app.identity_gallery import IdentityGallery
 from app.config import Config
-from app.perception_b1 import range_from_mask
+from app.vision_pipeline import range_from_mask
 from app.visual_tracks import VisualTracks
 from app.web import Broadcaster, create_app
 
 
 @pytest.mark.parametrize("field", ["body_enabled", "hands_enabled"])
 def test_b1_rejects_unsupported_partial_pipeline_flags(field):
-    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
+    cfg = Config.load("02_config/settings.orin-nx.yaml")
     setattr(cfg.perception, field, False)
-    with pytest.raises(ValueError, match="B1 requires"):
+    with pytest.raises(ValueError, match="Vision requires"):
         cfg.validate()
 
 
 def vector(index=0):
-    result = np.zeros(128, np.float32)
+    result = np.zeros(512, np.float32)
     result[index] = 1
     return result
 
@@ -32,28 +32,28 @@ def test_identity_persistence_unknown_and_separate_model_spaces(tmp_path):
     path = tmp_path / "gallery.sqlite"
     gallery = IdentityGallery(path, capacity=2)
     try:
-        assert gallery.match("sface-v1", vector())["status"] == "unknown"
-        gallery.enroll("sample", "sface-v1", vector())
-        assert gallery.match("sface-v1", vector())["label"] == "sample"
-        assert gallery.match("sface-v1", vector(1))["status"] == "unknown"
-        assert gallery.match("sface-v2", vector())["status"] == "unknown"
-        gallery.enroll("similar", "sface-v1", vector())
-        ambiguous = gallery.match("sface-v1", vector())
+        assert gallery.match("face-v1", vector())["status"] == "unknown"
+        gallery.enroll("sample", "face-v1", vector())
+        assert gallery.match("face-v1", vector())["label"] == "sample"
+        assert gallery.match("face-v1", vector(1))["status"] == "unknown"
+        assert gallery.match("face-v2", vector())["status"] == "unknown"
+        gallery.enroll("similar", "face-v1", vector())
+        ambiguous = gallery.match("face-v1", vector())
         assert ambiguous["status"] == "ambiguous" and ambiguous["label"] is None
         with pytest.raises(ValueError, match="full"):
-            gallery.enroll("third", "sface-v1", vector(2))
+            gallery.enroll("third", "face-v1", vector(2))
         # Re-enrollment replaces a label atomically even at capacity.
-        gallery.enroll("similar", "sface-v1", vector(1))
-        assert gallery.match("sface-v1", vector())["label"] == "sample"
+        gallery.enroll("similar", "face-v1", vector(1))
+        assert gallery.match("face-v1", vector())["label"] == "sample"
     finally:
         gallery.close()
     reopened = IdentityGallery(path)
     try:
-        assert reopened.match("sface-v1", vector())["label"] == "sample"
+        assert reopened.match("face-v1", vector())["label"] == "sample"
         assert len(reopened.list()) == 2
         assert reopened.remove("sample")
         assert not reopened.remove("sample")
-        assert reopened.match("sface-v1", vector())["status"] == "unknown"
+        assert reopened.match("face-v1", vector())["status"] == "unknown"
     finally:
         reopened.close()
 

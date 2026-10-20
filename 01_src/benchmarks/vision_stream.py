@@ -1,389 +1,371 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""V2: production Camera/Perception, fixed-rate replay and native 4B coexistence.
-
-The replay replaces only the camera driver read, keeping the production capture,
-JPEG ring, frame ownership and perception worker. It has an independent arrival
-clock and skips already missed arrivals rather than slowing down for inference.
-"""
+"""Continuous visual pipeline and backend coexistence; no runtime tuning."""
 
 import argparse
+from copy import deepcopy
 import json
 import math
 import os
 from pathlib import Path
+import resource
 import sys
-import threading
 import time
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "01_src"))
-# Shared native-process identity checks live with the functional probes.
-sys.path.insert(0, str(ROOT / "scripts"))
-from benchmarks.baseline_support import (  # noqa: E402
+sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
+from app.camera import Camera
+from app.face_state import FaceState
+from app.gestures import GestureRecognizer
+from app.vision_pipeline import VisionPipeline
+from benchmarks.baseline_support import (
     Events,
     Resources,
-    distribution,
     environment,
     run_worker,
-    validate,
 )
-from deploy import runtime, services  # noqa: E402
+from benchmarks.conversation_load import ConversationLoad
+from benchmarks.vision_protocol import validate
+from benchmarks.conversation_load import BackgroundLLM
+from deploy import runtime, services
+from deploy.resource_guard import hold_model_lease
+from deploy.operations import backend_identity
 
-CONDITIONS = ("replay-only", "replay-resident", "replay-4b", "live-resident")
-PROMPT = "用中文分点介绍如何分析程序的性能，先测量再定位瓶颈，回答尽量具体。"
+WORKLOAD = ROOT / "benchmarks/manifests/vision-stream.json"
 
 
-class ReplayCapture:
-    def __init__(self, images, stop, events, phase, rate=10):
-        self.images, self.stop, self.events, self.phase = images, stop, events, phase
-        self.rate = rate
-        self.origin = time.monotonic()
-        self.last = -1
-        self.missed = 0
-        self.delivered = 0
-        self.closed = False
+def protocol_path(spec):
+    # Older workload bytes stay unchanged. Each revision identifies its own
+    # runtime lock; a newer implementation cannot silently reuse an old lock.
+    return ROOT / spec.get(
+        "module_protocol", "benchmarks/manifests/b1-vision-measurements-v1.json"
+    )
 
-    def read(self):
-        now = time.monotonic()
-        index = max(self.last + 1, int((now - self.origin) * self.rate))
-        due = self.origin + index / self.rate
-        if self.stop.wait(max(0, due - now)) or self.closed:
-            return False, None
-        self.missed += max(0, index - self.last - 1)
-        self.last = index
-        self.delivered += 1
-        name, image = self.images[(index // 20) % len(self.images)]
-        self.events.write(
-            kind="source_arrival",
-            phase=self.phase(),
-            source_index=index,
-            delivered_index=self.delivered,
-            scheduled_monotonic=due,
-            delivered_monotonic=time.monotonic(),
-            input=name,
-            missed_arrivals_total=self.missed,
+
+def workload():
+    spec = json.loads(WORKLOAD.read_text())
+    if runtime.sha256(protocol_path(spec)) != spec["module_protocol_sha256"]:
+        raise ValueError("Frozen module protocol changed")
+    audio = spec["audio_input"]
+    if runtime.sha256(ROOT / audio["path"]) != audio["sha256"]:
+        raise ValueError("Background speech fixture changed")
+    return spec
+
+
+class MeasuredCamera(Camera):
+    """Production camera publication/JPEG/history with a controlled RGBD source."""
+
+    def __init__(self, config, protocol, spec, events, phase, live):
+        super().__init__(
+            device=config.camera_device,
+            width=config.width,
+            height=config.height,
+            jpeg_quality=config.jpeg_quality,
+            capture_fps=config.capture_fps,
+            stale_after=config.stale_after,
+            buffer_bytes_limit=config.buffer_bytes_limit,
+            reconnect_seconds=config.reconnect_seconds,
+            v4l_select_timeout=config.v4l_select_timeout,
+            backend=config.backend,
+            serial=config.serial,
         )
-        return True, image
-
-    def release(self):
-        self.closed = True
-
-
-class BackgroundLLM:
-    def __init__(self, cfg, events, phase):
-        from app.llm import LLM
-
-        self.model = LLM(
-            **{k: v for k, v in vars(cfg.llm).items() if k != "system_prompt_no_rag"}
-        )
-        self.events, self.phase = events, phase
-        self.cancel = threading.Event()
-        self.thread = None
-        self.completed = 0
-        self.errors = []
-        self.busy = False
-
-    def start(self):
-        if not self.model.load():
-            raise RuntimeError(self.model.last_error)
-        self.thread = threading.Thread(
-            target=self._loop, name="baseline-4b", daemon=True
-        )
-        self.thread.start()
-
-    def _loop(self):
-        index = 0
-        while not self.cancel.is_set():
-            index += 1
-            start = time.monotonic()
-            first = None
-            chars = 0
-            metadata = {}
-            self.busy = True
-            text = PROMPT + f"这是第{index}个请求。"
-            error = None
-            try:
-                for chunk, meta in self.model.generate_stream(
-                    text, cancel_event=self.cancel
-                ):
-                    metadata.update(meta)
-                    if chunk:
-                        first = first or time.monotonic()
-                        chars += len(chunk)
-                if not metadata.get("done") and not self.cancel.is_set():
-                    raise RuntimeError("Background generation did not complete")
-                if metadata.get("done"):
-                    self.completed += 1
-            except Exception as exc:
-                error = repr(exc)
-                if not self.cancel.is_set():
-                    self.errors.append(error)
-            finally:
-                self.busy = False
-                self.events.write(
-                    kind="background_llm",
-                    phase=self.phase(),
-                    request=index,
-                    prompt=text,
-                    started_monotonic=start,
-                    completed_monotonic=time.monotonic(),
-                    first_content_seconds=first - start if first else None,
-                    chars=chars,
-                    metadata=metadata,
-                    window_end_cancel=self.cancel.is_set(),
-                    error=error,
+        self.events, self.phase, self.live, self.spec = events, phase, live, spec
+        self.origin = None
+        self.last_source = -1
+        self.missed_source = 0
+        self.read_meta = None
+        self.images = {}
+        if not live:
+            for name in spec["replay_inputs"]:
+                image = np.load(
+                    ROOT / protocol["inputs"][name]["path"], allow_pickle=False
                 )
-            if self.errors:
-                return
-            deadline = time.monotonic() + 30
-            while not self.cancel.is_set() and not self.model.idle():
-                if time.monotonic() > deadline:
-                    self.errors.append("Background native slot did not release")
-                    return
-                self.cancel.wait(0.02)
+                image.flags.writeable = False
+                self.images[name] = image
+            self.depth = np.full((480, 640), 1.5, np.float32)
+            self.valid = np.ones((480, 640), bool)
+            self.depth.flags.writeable = self.valid.flags.writeable = False
 
-    def close(self):
-        self.cancel.set()
-        self.model.cancel(self.cancel)
-        if self.thread:
-            self.thread.join(10)
-            if self.thread.is_alive():
-                raise RuntimeError("Background model client did not release")
-        deadline = time.monotonic() + 30
-        while not self.model.idle():
-            if time.monotonic() > deadline:
-                raise RuntimeError("Background native model did not release")
-            time.sleep(0.02)
-        self.model.unload()
+    def _open(self):
+        if self.live:
+            return super()._open()
+        if self.origin is None:
+            self.origin = time.monotonic()
+        return True
+
+    def _read_frame(self):
+        start = time.monotonic()
+        if self.live:
+            ok, image, rgbd = super()._read_frame()
+        else:
+            index = max(
+                self.last_source + 1, int((start - self.origin) * self.capture_fps)
+            )
+            due = self.origin + index / self.capture_fps
+            if self._stop.wait(max(0, due - time.monotonic())):
+                return False, None, None
+            self.missed_source += max(0, index - self.last_source - 1)
+            self.last_source = index
+            name = self.spec["replay_inputs"][
+                (index // self.spec["hold_source_frames"])
+                % len(self.spec["replay_inputs"])
+            ]
+            received = time.monotonic()
+            meta = {
+                "received_monotonic": received,
+                "input": name,
+                "source_index": index,
+                "scheduled_arrival_monotonic": due,
+                "source_missed_total": self.missed_source,
+                "depth_provider": "SYNTHETIC uniform aligned 1.5m; not sensor depth",
+                "depth_unit": "meter",
+                "depth_valid_fraction": 1.0,
+            }
+            ok, image, rgbd = True, self.images[name], (self.depth, self.valid, meta)
+        if ok and rgbd:
+            self.read_meta = rgbd[2]
+            self.read_meta["benchmark_read_ms"] = (time.monotonic() - start) * 1000
+        return ok, image, rgbd
+
+    def _encode_frame_bytes(self, image):
+        start = time.monotonic()
+        value = super()._encode_frame_bytes(image)
+        end = time.monotonic()
+        if self.read_meta:
+            self.read_meta["benchmark_jpeg_complete_monotonic"] = end
+            self.read_meta["benchmark_jpeg_ms"] = (end - start) * 1000
+        self.events.write(
+            kind="jpeg",
+            phase=self.phase(),
+            source_epoch=self.source_epoch,
+            frame_id=self._frame_id + 1,
+            started_monotonic=start,
+            completed_monotonic=end,
+            ms=(end - start) * 1000,
+            bytes=len(value) if value else None,
+        )
+        return value
 
 
-def worker(condition, out):
-    import cv2
-    from app.camera import Camera
-    from app.face_detector import FaceDetector
-    from app.face_tracker import FaceTracker
-    from app.perception import Perception
-    from deploy.resource_guard import hold_model_lease
-    from deploy.operations import backend_identity
-
-    protocol, cfg, _ = validate()
-    _lease = hold_model_lease(runtime.paths(cfg)["stack"] / "cache")
-    phase = "warmup"
-    events = Events(out / "events.jsonl")
-    groups = {"vision": [os.getpid()]}
-    identities = {}
-    if condition != "replay-only":
-        identities = {
-            name: backend_identity(name, cfg) for name in ("llama", "asr", "speech")
-        }
-        groups.update({name: row["stable_pids"] for name, row in identities.items()})
-    resources = Resources(out, groups).start()
+def worker(condition, output):
+    spec = workload()
+    protocol, frozen = validate(protocol_path(spec))
+    cfg = deepcopy(frozen)
+    task = (
+        ROOT
+        / "05_runtime/runtime-data/vision-benchmark"
+        / output.parent.name
+        / condition
+    )
+    cfg.perception.identity_gallery = str(
+        (task / "identities.sqlite").relative_to(ROOT)
+    )
+    cfg.actions.database = str(task / "actions.sqlite")
+    cfg.audio.output_directory = str(task / "audio")
+    cfg.validate()
+    runtime.write_json(output / "effective-config.json", cfg.effective())
+    lease = hold_model_lease()
+    phase = "setup"
+    events = Events(output / "events.jsonl")
+    live = condition.startswith("live")
+    resident = condition != "replay-only"
+    identities = (
+        {name: backend_identity(name, cfg) for name in ("llama", "asr", "speech")}
+        if resident
+        else {}
+    )
+    groups = {
+        "worker": [os.getpid()],
+        **{name: row["stable_pids"] for name, row in identities.items()},
+    }
+    resources = Resources(output, groups).start()
     report = {
         "condition": condition,
-        "status": "RUNNING",
         "errors": [],
-        "backend_identity_before": identities,
-        "opencv_threads": cv2.getNumThreads(),
         "periodic_samples": [],
-        "scope": "Production Camera + FaceTracker + Perception only; GUI, gestures, VAD and action control are in E1, not this controlled vision comparison.",
+        "backend_identity_before": identities,
+        "status": "RUNNING",
+        "scope": "Production Camera/JPEG/history, VisionPipeline, FaceState and gesture rules; rules logged without dispatch to pressure requests. GUI/websocket transport excluded. Resident conditions include production conversation clients/VAD/actions/owner.",
     }
-    camera = face = tracker = perception = background = None
+    camera = tracker = perception = controls = background = None
+    failure = None
+
+    class MeasuredPerception(VisionPipeline):
+        def process_frame(self, frame):
+            started = time.monotonic()
+            try:
+                result = super().process_frame(frame)
+            except Exception as exc:
+                expired = "expired" in str(exc)
+                events.write(
+                    kind="frame_failure",
+                    phase=phase,
+                    frame=frame.metadata(),
+                    started_monotonic=started,
+                    completed_monotonic=time.monotonic(),
+                    error=repr(exc),
+                    expired=expired,
+                )
+                if not expired:
+                    report["errors"].append(repr(exc))
+                raise
+            completed = time.monotonic()
+            sensor = frame.sensor or {}
+            jpeg_end = sensor.get("benchmark_jpeg_complete_monotonic")
+            events.write(
+                kind="perception",
+                phase=phase,
+                frame=frame.metadata(),
+                started_monotonic=started,
+                completed_monotonic=completed,
+                received_to_start_ms=(started - frame.received_monotonic) * 1000,
+                post_jpeg_wait_ms=(started - jpeg_end) * 1000 if jpeg_end else None,
+                processing_ms=result["elapsed_ms"],
+                received_to_complete_ms=(completed - frame.received_monotonic) * 1000,
+                source_schedule_to_complete_ms=(
+                    completed - sensor["scheduled_arrival_monotonic"]
+                )
+                * 1000
+                if "scheduled_arrival_monotonic" in sensor
+                else None,
+                stages=result["stages"],
+                task_counts=result["task_counts"],
+                task_errors=result["task_errors"],
+                persons=len(result["persons"]),
+                faces=len(result["faces"]),
+                objects=len(result["objects"]),
+                hands=len(result["hands"]),
+            )
+            return result
+
     try:
-
-        class BenchCamera(Camera):
-            def _open(self):
-                if condition == "live-resident":
-                    result = super()._open()
-                    if result:
-                        # A local driver proxy times read while forwarding release.
-                        from benchmarks.baseline_support import NativeProxy
-
-                        class ReadTimes:
-                            def wrap(self, label, function):
-                                def read(*args, **kwargs):
-                                    start = time.monotonic()
-                                    value = function(*args, **kwargs)
-                                    events.write(
-                                        kind=label,
-                                        phase=phase,
-                                        ms=(time.monotonic() - start) * 1000,
-                                        ok=bool(value[0]),
-                                    )
-                                    return value
-
-                                return read
-
-                        self._cap = NativeProxy(
-                            self._cap, ReadTimes(), {"read": "driver_read"}
-                        )
-                    return result
-                images = []
-                for name in ("public-camera-shape.png", "blank-camera-shape.png"):
-                    image = cv2.imread(str(Path(protocol["input_directory"]) / name))
-                    image.flags.writeable = False
-                    images.append((name, image))
-                self._cap = ReplayCapture(
-                    images, self._stop, events, lambda: phase, cfg.vision.capture_fps
-                )
-                self.replay = self._cap
-                return True
-
-            def _encode_frame_bytes(self, frame):
-                start = time.monotonic()
-                value = super()._encode_frame_bytes(frame)
-                events.write(
-                    kind="jpeg_encode",
-                    phase=phase,
-                    ms=(time.monotonic() - start) * 1000,
-                    bytes=len(value) if value is not None else 0,
-                )
-                return value
-
-            def snapshot(self, **kwargs):
-                start = time.monotonic()
-                value = super().snapshot(**kwargs)
-                events.write(
-                    kind="frame_fetch",
-                    phase=phase,
-                    ms=(time.monotonic() - start) * 1000,
-                    available=value is not None,
-                )
-                return value
-
-        camera = BenchCamera(
-            device=cfg.vision.camera_device,
-            width=cfg.vision.width,
-            height=cfg.vision.height,
-            jpeg_quality=cfg.vision.jpeg_quality,
-            capture_fps=cfg.vision.capture_fps,
-            stale_after=cfg.vision.stale_after,
-            buffer_bytes_limit=cfg.vision.buffer_bytes_limit,
-            reconnect_seconds=cfg.vision.reconnect_seconds,
-            v4l_select_timeout=cfg.vision.v4l_select_timeout,
-        )
-        face = FaceDetector()
-        if not face.load():
-            raise RuntimeError(face.last_error)
-        tracker = FaceTracker(
+        camera = MeasuredCamera(cfg.vision, protocol, spec, events, lambda: phase, live)
+        tracker = FaceState(
             camera,
-            face,
-            fps=cfg.face.fps,
             dead_zone=cfg.face.dead_zone,
             good_frame_zone=cfg.face.good_frame_zone,
             min_face_size=cfg.face.min_face_size,
             stable_frames=cfg.face.stable_frames,
         )
-        previous = None
+        gestures = GestureRecognizer(
+            cfg.gestures,
+            cfg.perception.hand_threshold,
+            cfg.perception.pose_joint_threshold,
+        )
 
-        def completed(scene):
-            nonlocal previous
-            key = (scene.get("completed_monotonic"), scene["failures"])
-            if key == previous:
-                return
-            previous = key
-            events.write(
-                kind="perception",
-                phase=phase,
-                **{
-                    k: scene.get(k)
-                    for k in (
-                        "ready",
-                        "error",
-                        "frame",
-                        "completed_monotonic",
-                        "elapsed_ms",
-                        "stages",
-                        "processed",
-                        "skipped_capture_frames",
-                        "failures",
-                    )
-                },
-                persons=len(scene["persons"]),
-                hands=len(scene["hands"]),
-                face=scene["face"]["face_detected"],
-            )
+        def observed(scene):
+            for event in gestures.update(scene):
+                events.write(kind="gesture", phase=phase, event=event)
 
-        perception = Perception(camera, cfg.perception, tracker, completed)
+        perception = MeasuredPerception(camera, cfg.perception, tracker, observed)
         perception.load()
         if not camera.start():
             raise RuntimeError(camera.last_error)
         perception.start()
+        if resident:
+            controls = ConversationLoad(
+                cfg, camera, perception, events, lambda: phase, spec
+            )
         if condition == "replay-4b":
             background = BackgroundLLM(cfg, events, lambda: phase)
             background.start()
-        warm_start = time.monotonic()
-        while time.monotonic() - warm_start < 20 or (
-            background and background.completed < 5
+        elif condition.endswith("conversation") or condition == "replay-vision-chat":
+            controls.start("vision" if condition == "replay-vision-chat" else "audio")
+            background = controls
+        phase = resources.phase = "warmup"
+        started = time.monotonic()
+        while time.monotonic() - started < spec["warmup_min_seconds"] or (
+            background and background.completed < spec["warmup_background_completions"]
         ):
-            if background and background.errors:
-                raise RuntimeError(str(background.errors))
-            if time.monotonic() - warm_start > 120:
-                raise RuntimeError("Vision/background warmup did not finish")
+            if (background and background.errors) or report["errors"]:
+                raise RuntimeError("Warmup recorded inference errors")
+            if time.monotonic() - started > spec["warmup_deadline_seconds"]:
+                raise TimeoutError("Warmup did not finish")
             time.sleep(0.1)
-        report["warmup_seconds"] = time.monotonic() - warm_start
-        if condition != "live-resident":
-            # Align every measured replay to the same 40-frame input cycle.
-            cycle_seconds = 40 / cfg.vision.capture_fps
+        if not live:
+            cycle = (
+                len(spec["replay_inputs"])
+                * spec["hold_source_frames"]
+                / cfg.vision.capture_fps
+            )
             start = (
-                camera.replay.origin
-                + math.ceil((time.monotonic() - camera.replay.origin) / cycle_seconds)
-                * cycle_seconds
+                camera.origin
+                + math.ceil((time.monotonic() - camera.origin) / cycle) * cycle
             )
             time.sleep(max(0, start - time.monotonic()))
         else:
             start = time.monotonic()
+        report["warmup_seconds"] = time.monotonic() - started
         phase = resources.phase = "measured"
         report["window_start_monotonic"] = start
         report["camera_before"] = camera.status()
-        rate, count = 10, 600
-        for index in range(count):
+        report["perception_before"] = {
+            key: perception.snapshot()[key]
+            for key in ("processed", "failures", "skipped_capture_frames")
+        }
+        seconds, rate = spec["window_seconds"], spec["sample_hz"]
+        for index in range(seconds * rate):
             due = start + index / rate
             time.sleep(max(0, due - time.monotonic()))
             tick = time.monotonic()
+            row = {
+                "index": index,
+                "scheduled_monotonic": due,
+                "sampled_monotonic": tick,
+                "lag_ms": (tick - due) * 1000,
+                "missing_reason": None,
+            }
             if tick - due >= 1 / rate:
-                row = {
-                    "index": index,
-                    "scheduled_monotonic": due,
-                    "sampled_monotonic": None,
-                    "missing_reason": "observer_missed_deadline",
-                    "latest_age_ms": None,
-                }
+                row.update(
+                    missing_reason="observer_missed_deadline", latest_age_ms=None
+                )
             else:
                 scene = perception.snapshot()
+                snapshot_at = time.monotonic()
                 frame = scene.get("frame")
-                row = {
-                    "index": index,
-                    "scheduled_monotonic": due,
-                    "sampled_monotonic": tick,
-                    "lag_ms": (tick - due) * 1000,
-                    "ready": scene["ready"],
-                    "latest_age_ms": (tick - frame["received_monotonic"]) * 1000
+                row.update(
+                    ready=scene["ready"],
+                    error=scene.get("error"),
+                    callback_error=scene["callback_error"],
+                    snapshot_monotonic=snapshot_at,
+                    latest_age_ms=(snapshot_at - frame["received_monotonic"]) * 1000
                     if scene["ready"] and frame
                     else None,
-                    "scene_error": scene.get("error"),
-                    "camera": camera.status(),
-                    "captured_count": camera._frame_id,
-                    "capture_fps_since_open": camera.actual_fps,
-                    "processed": scene["processed"],
-                    "skipped_capture_frames": scene["skipped_capture_frames"],
-                    "failures": scene["failures"],
-                    "background_api_busy": bool(background and background.busy),
-                }
-            report["periodic_samples"].append(row)
+                    processed=scene["processed"],
+                    failures=scene["failures"],
+                    skipped_capture_frames=scene["skipped_capture_frames"],
+                    camera=camera.status(),
+                    background_busy=bool(background and background.busy),
+                    observer_ms=(time.monotonic() - tick) * 1000,
+                )
+                if scene["callback_error"]:
+                    raise RuntimeError(scene["callback_error"])
             events.write(kind="periodic_sample", phase=phase, **row)
-        time.sleep(max(0, start + 60 - time.monotonic()))
+            report["periodic_samples"].append(row)
+            if report["errors"] or (background and background.errors):
+                raise RuntimeError("Measurement recorded inference errors")
+        time.sleep(max(0, start + seconds - time.monotonic()))
         report["window_end_monotonic"] = time.monotonic()
         report["camera_after"] = camera.status()
-        report["replay_missed_arrivals"] = getattr(
-            getattr(camera, "replay", None), "missed", None
+        final = perception.snapshot()
+        report["perception_after"] = {
+            key: final[key]
+            for key in ("processed", "failures", "skipped_capture_frames")
+        }
+        report["models"] = final["model_metrics"]
+        report["replay_missed_source_arrivals"] = (
+            camera.missed_source if not live else None
         )
+        report["task_counts_at_end"] = final.get("task_counts")
         phase = resources.phase = "finish"
         if background:
             background.close()
-            report["background_completed"] = background.completed
+            report["background_completed_total"] = background.completed
             report["errors"].extend(background.errors)
+            if background is controls:
+                controls = None
             background = None
         report["backend_identity_after"] = {
             name: backend_identity(name, cfg) for name in identities
@@ -392,137 +374,145 @@ def worker(condition, out):
             row["identity"] != report["backend_identity_after"][name]["identity"]
             for name, row in identities.items()
         ):
-            report["errors"].append(
-                "Native backend identity changed during measurement"
-            )
+            raise RuntimeError("Backend identity changed during measurement")
     except BaseException as exc:
+        failure = exc
         report["errors"].append(repr(exc))
-        raise
     finally:
-        for name, obj in [
-            ("background", background),
-            ("perception", perception),
-            ("camera", camera),
-        ]:
-            if obj:
-                try:
-                    obj.close()
-                except Exception as exc:
-                    report["errors"].append(name + " cleanup: " + repr(exc))
+        phase = resources.phase = "release"
+        objects = []
+        for obj in (background, controls, perception, camera):
+            if obj is not None and obj not in objects:
+                objects.append(obj)
+        for obj in objects:
+            try:
+                obj.close()
+            except Exception as exc:
+                failure = failure or exc
+                report["errors"].append(repr(exc))
         if tracker:
             tracker.stop()
-        if face:
-            face.unload()
-        resources.close()
-        events.close()
+        try:
+            resources.close()
+        finally:
+            events.close()
+            lease.close()
         report["errors"].extend(resources.errors)
-        finite = [
-            x["latest_age_ms"]
-            for x in report["periodic_samples"]
-            if x["latest_age_ms"] is not None
-        ]
-        missing = len(report["periodic_samples"]) - len(finite)
-        report["finite_age_ms"] = distribution(finite)
-        rank = math.ceil(0.95 * len(report["periodic_samples"])) - 1
-        report["age_p95_including_missing_ms"] = (
-            sorted(finite)[rank] if 0 <= rank < len(finite) else None
+        report["rss_high_water_bytes"] = (
+            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
         )
-        report["no_result_fraction"] = (
-            missing / len(report["periodic_samples"])
-            if report["periodic_samples"]
-            else 1
-        )
-        report["status"] = (
-            "MEASURED" if not report["errors"] else "MEASURED_WITH_FAILURES"
-        )
-        runtime.write_json(out / "result.json", report)
-    if report["errors"]:
-        raise RuntimeError("Continuous vision measurement recorded failures")
+        report["status"] = "MEASURED" if not report["errors"] else "FAILED"
+        runtime.write_json(output / "result.json", report)
+    if failure or report["errors"]:
+        raise RuntimeError(
+            "B1 stream measurement failed; inspect result.json"
+        ) from failure
 
 
 def main():
+    global WORKLOAD
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--worker", choices=CONDITIONS)
+    parser.add_argument("--conditions", nargs="+")
+    parser.add_argument("--worker", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--workload",
+        type=Path,
+        default=WORKLOAD,
+        help="Recorded workload JSON; use a separate file for bounded soak runs",
+    )
     args = parser.parse_args()
-    if args.worker:
-        return worker(args.worker, args.output)
-    out = args.output.resolve()
-    out.mkdir(parents=True, exist_ok=False)
-    _, cfg, _ = validate()
-    before = services.state(services.ORDER, cfg)
-    if (
-        before["status"] != "READY"
-        or before["services"]["app"]["health"]["phase"] != "idle"
+    WORKLOAD = args.workload.resolve()
+    output = args.output.resolve()
+    spec = workload()
+    conditions = args.conditions or spec["conditions"]
+    if set(conditions) - set(spec["conditions"]) or (
+        args.worker and args.worker not in spec["conditions"]
     ):
-        raise RuntimeError("Managed services must be ready and idle")
-    environment(out)
-    runtime.write_json(out / "effective-config.json", cfg.effective())
-    workload = {
-        "seconds_each": 60,
-        "sample_hz": 10,
-        "replay_arrival_hz": cfg.vision.capture_fps,
-        "replay_pattern": "public-camera-shape.png for source indices 0..19, blank-camera-shape.png for 20..39, repeat on absolute source clock",
-        "background_prompt": PROMPT,
-        "background_suffix": "这是第{index}个请求。",
-        "background_policy": "Single backlogged caller, same native config, no history/tools; next call after actual slot idle; cancel in-flight call at window end. This is interference load, not fixed-arrival LLM capacity.",
-        "warmup": "At least 20 seconds for full JPEG ring; with background 4B also wait for five completed model calls.",
-    }
-    runtime.write_json(out / "workload.json", workload)
+        raise ValueError("Unknown stream condition")
+    if args.worker:
+        worker(args.worker, output)
+        return
+    output.mkdir(parents=True, exist_ok=False)
+    _, cfg = validate(protocol_path(spec))
+    environment(output)
+    runtime.write_json(output / "workload.json", spec)
+    prior = runtime.config()
+    prior = runtime.config(services.profile_path(prior))
     report = {
         "created_at": runtime.stamp(),
         "status": "RUNNING",
-        "before": before,
         "conditions": {},
-        "workload_sha256": runtime.sha256(out / "workload.json"),
+        "workload_sha256": runtime.sha256(WORKLOAD),
+        "module_protocol": str(protocol_path(spec).relative_to(ROOT)),
     }
-    error = None
-    try:
-        with services.operation(cfg):
-            services.stop(list(services.ORDER), cfg)
-        for index, condition in enumerate(CONDITIONS):
-            if index == 1:
-                with services.operation(cfg):
-                    services.start(["llama", "asr", "speech"], cfg, 240)
-            print("V2 measuring: " + condition, flush=True)
-            folder = out / condition
-            folder.mkdir()
-            with (folder / "process.log").open("w") as log:
-                code = run_worker(
-                    [
-                        sys.executable,
-                        __file__,
-                        "--worker",
-                        condition,
-                        "--output",
-                        str(folder),
-                    ],
-                    log,
-                    360,
-                )
-            report["conditions"][condition] = {
-                "exit_code": code,
-                "result": str(folder / "result.json"),
-            }
-            runtime.write_json(out / "report.json", report)
-            if code:
-                raise RuntimeError("Vision condition failed: " + condition)
-    except BaseException as exc:
-        error = exc
-        report["error"] = repr(exc)
-    finally:
+    with services.operation(prior):
+        before = services.state(list(services.ORDER), prior)
+        runtime.write_json(output / "services-before.json", before)
+        if before["services"]["app"].get("health", {}).get("phase") not in (
+            None,
+            "idle",
+        ):
+            raise RuntimeError("Wait for the active application turn")
+        for name, row in before["services"].items():
+            if row["cgroup_pids"] and not row["managed_by_project"]:
+                raise RuntimeError("Unrelated service: " + name)
+        active = [
+            n
+            for n in services.ORDER
+            if before["services"][n].get("ActiveState") == "active"
+        ]
         try:
-            with services.operation(cfg):
-                report["restored"] = services.start(list(services.ORDER), cfg, 240)
+            for condition in conditions:
+                stopped = services.stop(list(services.ORDER), prior)
+                if any(r["cgroup_pids"] for r in stopped["services"].values()):
+                    raise RuntimeError("Managed service processes remain")
+                folder = output / condition
+                folder.mkdir()
+                runtime.write_json(folder / "services-stopped.json", stopped)
+                if condition != "replay-only":
+                    runtime.write_json(
+                        folder / "services-started.json",
+                        services.start(["llama", "asr", "speech"], cfg, 240),
+                    )
+                print("B1 measuring:", condition, flush=True)
+                with (folder / "worker.log").open("w") as log:
+                    code = run_worker(
+                        [
+                            sys.executable,
+                            str(Path(__file__).resolve()),
+                            "--worker",
+                            condition,
+                            "--output",
+                            str(folder),
+                            "--workload",
+                            str(WORKLOAD),
+                        ],
+                        log,
+                        seconds=spec["worker_timeout_seconds"],
+                    )
+                report["conditions"][condition] = {
+                    "exit_code": code,
+                    "result": str((folder / "result.json").relative_to(ROOT)),
+                }
+                runtime.write_json(output / "report.json", report)
+                if code:
+                    raise RuntimeError("Condition failed: " + condition)
+            report["status"] = "MEASURED"
         except BaseException as exc:
-            error = error or exc
-            report["restore_error"] = repr(exc)
-        report["status"] = "FAIL" if error else "MEASURED"
-        report["finished_at"] = runtime.stamp()
-        runtime.write_json(out / "report.json", report)
-    if error:
-        raise error
-    print(json.dumps({"status": report["status"], "report": str(out / "report.json")}))
+            report.update(status="FAILED", error=repr(exc))
+            raise
+        finally:
+            try:
+                services.stop(list(services.ORDER), cfg)
+                restored = (
+                    services.start(active, prior, 240)
+                    if active
+                    else services.state(list(services.ORDER), prior, False)
+                )
+                runtime.write_json(output / "services-restored.json", restored)
+            finally:
+                runtime.write_json(output / "report.json", report)
 
 
 if __name__ == "__main__":

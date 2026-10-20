@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import Camera, FrameSnapshot
 from app.config import Config
-from app.perception_b1 import B1Perception
+from app.vision_pipeline import VisionPipeline
 from deploy.operations import exclusive_build
 from deploy import runtime, services
 
@@ -64,7 +64,7 @@ def replay_gates(cfg, output):
     camera = SimpleNamespace(
         source_epoch="synthetic-rgbd-recovery", stale_after=cfg.vision.stale_after
     )
-    owner = B1Perception(camera, cfg.perception)
+    owner = VisionPipeline(camera, cfg.perception)
     image = cv2.imread(str(ROOT / "05_runtime/datasets/b0-sw-v1/public-original.png"))
     _, jpeg = cv2.imencode(".jpg", image)
     index = 0
@@ -178,7 +178,7 @@ def live_recovery(cfg, output, cycles=3):
         capture_fps=cfg.vision.capture_fps,
         stale_after=cfg.vision.stale_after,
     )
-    owner = B1Perception(camera, cfg.perception)
+    owner = VisionPipeline(camera, cfg.perception)
     report = {
         "cycles": [],
         "scope": "Controlled SDK close/start and injected worker exception; no physical USB disconnect",
@@ -290,7 +290,7 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    cfg = Config.load(str(ROOT / "02_config/settings.orin-nx-b1.yaml"))
+    cfg = Config.load(str(ROOT / "02_config/settings.orin-nx.yaml"))
     cfg.perception.identity_gallery = (
         "05_runtime/runtime-data/vision-probes/" + output.name + "/identities.sqlite"
     )

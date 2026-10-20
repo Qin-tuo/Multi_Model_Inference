@@ -106,6 +106,11 @@ def controls():
 )
 def test_control_get_is_bounded_before_parsing_and_recovers(mode):
     with controls() as (url, setting, entered):
+        # Establish the listener/client before measuring the injected fault.
+        # Otherwise cold client initialization can consume the entire 150 ms
+        # budget before this test ever reaches its delayed-header handler.
+        assert control_json(url + "/slots", 2) == [{"is_processing": False}]
+        entered.clear()
         setting["kind"] = mode
         started = time.monotonic()
         with pytest.raises((httpx.TimeoutException, ValueError)):

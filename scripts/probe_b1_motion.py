@@ -24,12 +24,12 @@ from PIL import Image, ImageSequence
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
 from app.camera import Camera
-from app.face_tracker import FaceTracker
+from app.face_state import FaceState
 from app.gestures import GestureRecognizer
-from app.perception_b1 import B1Perception
+from app.vision_pipeline import VisionPipeline
 from benchmarks.baseline_support import Events
-from benchmarks.vision_b1_load import ConversationLoad
-from benchmarks.vision_b1_support import PROTOCOL, validate
+from benchmarks.conversation_load import ConversationLoad
+from benchmarks.vision_protocol import PROTOCOL, validate
 from deploy import runtime, services
 from deploy.resource_guard import hold_model_lease
 from freeze_b1_inputs import letterbox
@@ -255,7 +255,7 @@ def case(output, cfg, name, rows, duration, expect_stop=False, recorded=None):
         if recorded
         else MovieCamera(cfg.vision, rows, duration, name)
     )
-    tracker = FaceTracker(camera, None)
+    tracker = FaceState(camera)
     gestures = GestureRecognizer(
         cfg.gestures, cfg.perception.hand_threshold, cfg.perception.pose_joint_threshold
     )
@@ -279,7 +279,7 @@ def case(output, cfg, name, rows, duration, expect_stop=False, recorded=None):
         if recorded and scene.get("frame") and scene.get("ready"):
             camera.mark_processed(scene["frame"]["frame_id"])
 
-    perception = B1Perception(camera, cfg.perception, tracker, observed)
+    perception = VisionPipeline(camera, cfg.perception, tracker, observed)
     report = {
         "name": name,
         "status": "RUNNING",

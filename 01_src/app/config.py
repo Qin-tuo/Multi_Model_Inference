@@ -121,7 +121,6 @@ class VisionConfig:
 @dataclass
 class FaceConfig:
     enabled: bool = True
-    fps: float = 5.0
     dead_zone: float = 0.12
     good_frame_zone: float = 0.18
     min_face_size: float = 0.06
@@ -130,8 +129,8 @@ class FaceConfig:
 
 @dataclass
 class PerceptionConfig:
-    backend: str = "b0"
-    model_manifest: str = "03_models/vision-b1-runtime.json"
+    backend: str = "tensorrt"
+    model_manifest: str = "03_models/vision-runtime.json"
     max_pose_people: int = 1
     max_face_targets: int = 2
     max_object_targets: int = 1
@@ -150,8 +149,8 @@ class PerceptionConfig:
     body_threshold: float = 0.5
     body_iou: float = 0.45
     max_people: int = 10
-    palm_threshold: float = 0.5
     hand_threshold: float = 0.8
+    # Bound the published hands independently of the number of pose targets.
     max_hands: int = 2
 
 
@@ -455,7 +454,6 @@ class Config:
             min(
                 self.vision.stale_after,
                 self.vision.buffer_bytes_limit,
-                self.face.fps,
                 self.face.stable_frames,
             )
             <= 0
@@ -467,9 +465,9 @@ class Config:
             raise ValueError("Invalid face size threshold")
 
         p = self.perception
-        if p.backend not in {"b0", "tensorrt_b1"}:
+        if p.backend != "tensorrt":
             raise ValueError("Unknown perception backend")
-        if p.backend == "tensorrt_b1":
+        if p.backend == "tensorrt":
             if (
                 self.vision.backend != "realsense"
                 or not p.enabled
@@ -478,7 +476,7 @@ class Config:
                 or not self.face.enabled
             ):
                 raise ValueError(
-                    "B1 requires enabled RGBD, body, hand and face processing"
+                    "Vision requires enabled RGBD, body, hand and face processing"
                 )
             if not (
                 1 <= p.max_pose_people <= 2
@@ -492,13 +490,13 @@ class Config:
                 and 1 <= p.min_depth_pixels <= 1000
                 and 0 < p.pose_joint_threshold <= 2
             ):
-                raise ValueError("Invalid B1 task/resource limits")
+                raise ValueError("Invalid vision task/resource limits")
             if (
                 not (ROOT / p.identity_gallery)
                 .resolve()
                 .is_relative_to(RUNTIME_DIR / "runtime-data")
             ):
-                raise ValueError("B1 gallery must be inside project runtime-data")
+                raise ValueError("Gallery must be inside project runtime-data")
 
         if (
             self.perception.fps <= 0
@@ -511,7 +509,6 @@ class Config:
             for value in (
                 self.perception.body_threshold,
                 self.perception.body_iou,
-                self.perception.palm_threshold,
                 self.perception.hand_threshold,
             )
         ):

@@ -22,7 +22,7 @@ def test_default_profile_is_local_4b_without_robot_or_rag(monkeypatch):
     assert not hasattr(config, "reachy") and not hasattr(config, "rag")
     assert config.face.enabled
     assert config.vision.backend == "realsense"
-    assert config.perception.model_manifest == "03_models/vision-b2-runtime.json"
+    assert config.perception.model_manifest == "03_models/vision-runtime.json"
 
 
 @pytest.mark.parametrize(
@@ -43,7 +43,7 @@ def test_bad_config_fails_instead_of_falling_back(tmp_path, content):
     # Supply a complete platform overlay, then introduce one invalid field.
     import yaml
 
-    base = yaml.safe_load(Path("02_config/settings.orin-nx-headless.yaml").read_text())
+    base = yaml.safe_load(Path("02_config/settings.orin-nx.yaml").read_text())
     for key, value in yaml.safe_load(content).items():
         if isinstance(value, dict):
             base.setdefault(key, {}).update(value)
@@ -62,7 +62,7 @@ def test_missing_explicit_profile_fails(tmp_path):
 
 def test_environment_selects_profile(monkeypatch):
     monkeypatch.setenv(
-        "EDGE_ASSISTANT_CONFIG", "02_config/settings.orin-nx-headless.yaml"
+        "EDGE_ASSISTANT_CONFIG", "02_config/settings.orin-nx.yaml"
     )
     assert Config.load().llm.model == "assistant-vlm"
 

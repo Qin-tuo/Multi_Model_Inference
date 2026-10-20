@@ -25,9 +25,8 @@ import threading
 import time
 from app.config import Config
 from app.camera import Camera
-from app.face_detector import FaceDetector
-from app.face_tracker import FaceTracker
-from app.perception import Perception
+from app.face_state import FaceState
+from app.vision_pipeline import VisionPipeline
 from app.gestures import GestureRecognizer
 from app.llm import LLM
 from app.stt import STT
@@ -82,13 +81,9 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             serial=config.vision.serial,
         )
     )
-    b1 = config.perception.backend == "tensorrt_b1"
-    detector = FaceDetector() if cam and config.face.enabled and not b1 else None
     tracker = (
-        FaceTracker(
+        FaceState(
             cam,
-            detector,
-            fps=config.face.fps,
             dead_zone=config.face.dead_zone,
             good_frame_zone=config.face.good_frame_zone,
             min_face_size=config.face.min_face_size,
@@ -97,14 +92,8 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         if cam and config.face.enabled
         else None
     )
-    if b1:
-        from app.perception_b1 import B1Perception
-
-        perception_class = B1Perception
-    else:
-        perception_class = Perception
     perception = (
-        perception_class(cam, config.perception, tracker)
+        VisionPipeline(cam, config.perception, tracker)
         if cam and config.perception.enabled
         else None
     )
@@ -266,8 +255,6 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                 control.actions = await asyncio.to_thread(ActionStore, config.actions)
             if cam and not await asyncio.to_thread(cam.start):
                 raise RuntimeError(cam.last_error or "Camera is not ready")
-            if detector and not await asyncio.to_thread(detector.load):
-                raise RuntimeError(detector.last_error or "Face detector is not ready")
             if speech_enabled:
                 for model in (stt, tts):
                     if not await asyncio.to_thread(model.load):
@@ -324,8 +311,6 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             if perception:
                 await asyncio.to_thread(perception.load)
                 perception.start()
-            elif tracker:
-                tracker.start()
             control.start()
             if mic:
                 threads.append(
@@ -385,8 +370,6 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                     await asyncio.to_thread(control.actions.close)
                 except Exception as exc:
                     errors.append(exc)
-            if detector:
-                detector.unload()
             llm.unload()
             for model in (stt, tts):
                 if model:
@@ -409,7 +392,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             "remove": lambda label: perception.gallery.remove(label),
             "target": perception.select_target,
         }
-        if b1 and perception
+        if perception
         else None,
         max_upload_bytes=int(config.stt.max_seconds * 32000) + 4096,
     )

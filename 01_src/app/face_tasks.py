@@ -87,7 +87,7 @@ def face_tensor(crop, *, expression=False):
     return {"data": np.ascontiguousarray(rgb.transpose(2, 0, 1)[None])}
 
 
-def normalize_embedding(value, dimensions=128):
+def normalize_embedding(value, dimensions=512):
     vector = np.asarray(value, np.float32).reshape(-1)
     norm = float(np.linalg.norm(vector))
     if (
@@ -116,27 +116,6 @@ def expression_alignment(entry):
         str(ROOT / source["path"]), source["sha256"], "assistant_expression_source"
     )
     return module.FaceAlignment(reflective=False)
-
-
-class FaceIdentity:
-    def __init__(self, build):
-        self.model = TensorRTModel(
-            build["engine_path"], build["engine_sha256"], {"data": [1, 3, 112, 112]}
-        )
-        self.provider = self.model.provider
-
-    def infer(self, image, landmarks):
-        matrix = sface_transform(landmarks)
-        crop = aligned_bgr(image, matrix)
-        vector = normalize_embedding(self.model.infer(face_tensor(crop))["fc1"])
-        return {
-            "embedding": vector,
-            "alignment_source_to_crop": matrix.tolist(),
-            "space": "SFace128_L2",
-        }
-
-    def close(self):
-        self.model.close()
 
 
 class ArcFaceIdentity:

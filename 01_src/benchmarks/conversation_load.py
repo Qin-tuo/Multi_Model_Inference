@@ -166,3 +166,95 @@ class ConversationLoad:
         self.models.clear()
         if errors:
             raise ExceptionGroup("Conversation benchmark cleanup failed", errors)
+
+
+PROMPT = "用中文分点介绍如何分析程序的性能，先测量再定位瓶颈，回答尽量具体。"
+
+
+class BackgroundLLM:
+    def __init__(self, cfg, events, phase):
+        from app.llm import LLM
+
+        self.model = LLM(
+            **{k: v for k, v in vars(cfg.llm).items() if k != "system_prompt_no_rag"}
+        )
+        self.events, self.phase = events, phase
+        self.cancel = threading.Event()
+        self.thread = None
+        self.completed = 0
+        self.errors = []
+        self.busy = False
+
+    def start(self):
+        if not self.model.load():
+            raise RuntimeError(self.model.last_error)
+        self.thread = threading.Thread(
+            target=self._loop, name="baseline-4b", daemon=True
+        )
+        self.thread.start()
+
+    def _loop(self):
+        index = 0
+        while not self.cancel.is_set():
+            index += 1
+            start = time.monotonic()
+            first = None
+            chars = 0
+            metadata = {}
+            self.busy = True
+            text = PROMPT + f"这是第{index}个请求。"
+            error = None
+            try:
+                for chunk, meta in self.model.generate_stream(
+                    text, cancel_event=self.cancel
+                ):
+                    metadata.update(meta)
+                    if chunk:
+                        first = first or time.monotonic()
+                        chars += len(chunk)
+                if not metadata.get("done") and not self.cancel.is_set():
+                    raise RuntimeError("Background generation did not complete")
+                if metadata.get("done"):
+                    self.completed += 1
+            except Exception as exc:
+                error = repr(exc)
+                if not self.cancel.is_set():
+                    self.errors.append(error)
+            finally:
+                self.busy = False
+                self.events.write(
+                    kind="background_llm",
+                    phase=self.phase(),
+                    request=index,
+                    prompt=text,
+                    started_monotonic=start,
+                    completed_monotonic=time.monotonic(),
+                    first_content_seconds=first - start if first else None,
+                    chars=chars,
+                    metadata=metadata,
+                    window_end_cancel=self.cancel.is_set(),
+                    error=error,
+                )
+            if self.errors:
+                return
+            deadline = time.monotonic() + 30
+            while not self.cancel.is_set() and not self.model.idle():
+                if time.monotonic() > deadline:
+                    self.errors.append("Background native slot did not release")
+                    return
+                self.cancel.wait(0.02)
+
+    def close(self):
+        self.cancel.set()
+        self.model.cancel(self.cancel)
+        if self.thread:
+            self.thread.join(10)
+            if self.thread.is_alive():
+                raise RuntimeError("Background model client did not release")
+        deadline = time.monotonic() + 30
+        while not self.model.idle():
+            if time.monotonic() > deadline:
+                raise RuntimeError("Background native model did not release")
+            time.sleep(0.02)
+        self.model.unload()
+

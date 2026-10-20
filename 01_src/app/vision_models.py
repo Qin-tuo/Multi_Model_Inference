@@ -13,11 +13,10 @@ import psutil
 
 from project_paths import ROOT
 from app.appearance import AppearanceFeatures
-from app.face_tasks import ArcFaceIdentity, FaceIdentity, FaceExpression
+from app.face_tasks import ArcFaceIdentity, FaceExpression
 from app.face_trt import TensorRTFace
 from app.head_gaze import HeadPose, GazeLandmarks, Gaze
 from app.segmentation import DetectionSegmentation
-from app.wholebody_pose import WholeBodyPose
 from app.wholebody_pose2d import WholeBodyPose2D
 
 ROLES = (
@@ -97,7 +96,7 @@ class VisionModels:
         for name, expected in self.manifest["runtime_versions"].items():
             if version(name) != expected:
                 raise RuntimeError(
-                    "Runtime dependency differs from B1 contract: " + name
+                    "Runtime dependency differs from visual runtime contract: " + name
                 )
         with self.lock:
             self.stats.clear()
@@ -108,11 +107,11 @@ class VisionModels:
                 spec = dict(self.manifest["models"][role])
                 spec["engine_path"] = str(ROOT / spec["engine_path"])
                 if spec["onnx_sha256"] != self.entries[role]["sha256"]:
-                    raise ValueError("B1 model/source lock mismatch: " + role)
+                    raise ValueError("Visual model/source lock mismatch: " + role)
                 if spec["candidate_contract_sha256"] != contract_hash(
                     self.entries[role]
                 ):
-                    raise ValueError("B1 model semantic contract changed: " + role)
+                    raise ValueError("Visual model semantic contract changed: " + role)
                 available = psutil.virtual_memory().available
                 if available < 2 * spec["engine_bytes"] + 256 * 1024**2:
                     raise RuntimeError("Insufficient available RAM to load " + role)
@@ -124,23 +123,15 @@ class VisionModels:
                 elif role == "face":
                     model = TensorRTFace(spec)
                 elif role == "body_hand_pose":
-                    adapter = self.entries[role].get("adapter", "rtmw3d")
-                    if adapter not in ("rtmw3d", "rtmpose2d"):
-                        raise ValueError("Unknown whole-body adapter")
-                    model = (
-                        WholeBodyPose2D if adapter == "rtmpose2d" else WholeBodyPose
-                    )(spec, self.entries[role])
+                    if self.entries[role].get("adapter") != "rtmpose2d":
+                        raise ValueError("Unsupported current whole-body adapter")
+                    model = WholeBodyPose2D(spec, self.entries[role])
                 elif role in ("person_reid", "object_embedding"):
                     model = AppearanceFeatures(spec, role)
                 elif role == "face_identity":
-                    adapter = self.entries[role].get("adapter", "sface")
-                    if adapter not in ("sface", "arcface_mobilenet_v1"):
-                        raise ValueError("Unknown face identity adapter")
-                    model = (
-                        ArcFaceIdentity
-                        if adapter == "arcface_mobilenet_v1"
-                        else FaceIdentity
-                    )(spec)
+                    if self.entries[role].get("adapter") != "arcface_mobilenet_v1":
+                        raise ValueError("Unsupported current face identity adapter")
+                    model = ArcFaceIdentity(spec)
                 elif role == "expression":
                     model = FaceExpression(spec, self.entries[role])
                 else:

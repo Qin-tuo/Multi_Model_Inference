@@ -1,6 +1,5 @@
 """Measurement-only helpers; no runtime scheduling or inference changes."""
 
-from contextlib import contextmanager
 import csv
 import json
 import math
@@ -141,72 +140,6 @@ class NativeProxy:
         )
 
 
-@contextmanager
-def instrument(module, model, times):
-    restore = []
-
-    def replace(obj, name, value):
-        # Preserve absence of an instance attribute (important for bound methods).
-        present = name in vars(obj)
-        old = getattr(obj, name)
-        restore.append((obj, name, old, present))
-        setattr(obj, name, value)
-
-    try:
-        if module == "body":
-            for name, label in [
-                ("preprocess", "body.preprocess"),
-                ("predict_tensor", "body.native_sync"),
-                ("postprocess", "body.postprocess"),
-            ]:
-                replace(model, name, times.wrap(label, getattr(model, name)))
-        elif module == "face":
-            replace(
-                model,
-                "_detector",
-                NativeProxy(
-                    model._detector,
-                    times,
-                    {
-                        "setInputSize": "face.native_config",
-                        "detect": "face.native_detect",
-                    },
-                ),
-            )
-        elif module == "hands":
-            for role in ("palm", "hand"):
-                submodel = getattr(model, role)
-                for name, label in [
-                    ("_preprocess", "preprocess"),
-                    ("_postprocess", "postprocess"),
-                ]:
-                    replace(
-                        submodel,
-                        name,
-                        times.wrap(role + "." + label, getattr(submodel, name)),
-                    )
-                replace(
-                    submodel,
-                    "model",
-                    NativeProxy(
-                        submodel.model,
-                        times,
-                        {
-                            "setInput": role + ".set_input",
-                            "forward": role + ".native_forward",
-                        },
-                    ),
-                )
-        else:
-            raise ValueError("Unknown vision module")
-        yield
-    finally:
-        for obj, name, value, present in reversed(restore):
-            if present:
-                setattr(obj, name, value)
-            else:
-                delattr(obj, name)
-
 
 def validate():
     protocol = json.loads(
@@ -295,8 +228,8 @@ def environment(out, *, source_root=None):
     if source_root != ROOT:
         coordinator_sources = [
             Path(__file__),
-            ROOT / "01_src/benchmarks/vision_b1_modules.py",
-            ROOT / "01_src/benchmarks/vision_b1_support.py",
+            ROOT / "01_src/benchmarks/vision_modules.py",
+            ROOT / "01_src/benchmarks/vision_protocol.py",
             ROOT / "scripts/build_vision_b1.py",
         ]
     if coordinator_sources:

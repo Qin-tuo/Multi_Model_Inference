@@ -1,299 +1,349 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""V1: unchanged native vision models, paired plain/instrumented calls."""
+"""Isolated visual models: paired wall-clock and CUDA stream measurements."""
 
 import argparse
+from contextlib import nullcontext
+import csv
 import json
 import os
 from pathlib import Path
+import resource
+import statistics
+import shlex
 import sys
-import time
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "01_src"))
-from benchmarks.baseline_support import (  # noqa: E402
-    CallTimes,
+sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
+from app.vision_models import ROLES, VisionModels
+from benchmarks.baseline_support import (
     Events,
     Resources,
     distribution,
     environment,
-    instrument,
-    jsonable,
-    matching,
     run_worker,
-    validate,
 )
-from deploy import runtime, services  # noqa: E402
-from project_paths import load_artifact_manifest
+from benchmarks.vision_protocol import (
+    PROTOCOL,
+    arguments,
+    outputs_match,
+    plain_call,
+    validate,
+    validate_locks,
+)
+from benchmarks.vision_timing import TensorRTTrace
+from benchmarks.vision_nvtx import model_annotations, profile_command, profiling_tools
+from deploy.operations import exclusive_build
+from deploy import runtime, services
 
 
-def worker(module, out):
-    import cv2
-    from app.body_detector import BodyDetector
-    from app.face_detector import FaceDetector
-    from app.perception import HandDetector
-    from deploy.resource_guard import hold_model_lease
+def summarize(output):
+    run = json.loads((output / "report.json").read_text())
+    if run["status"] not in (
+        "MEASURED_MODULES_ONLY_PIPELINE_PENDING", "PROFILED_MODULES_ONLY_PIPELINE_PENDING"
+    ):
+        raise ValueError("Cannot summarize an incomplete measurement")
+    profiled = bool(run.get("profiling"))
+    summary = {
+        "created_at": runtime.stamp(),
+        "status": "MODULE_DIAGNOSTIC_PROFILED" if profiled else "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+        "measurement_mode": "nsys_diagnostic_not_latency_baseline" if profiled else "ordinary_baseline",
+        "raw_directory": str(output.relative_to(ROOT)),
+        "protocol_sha256": run["protocol_sha256"],
+        "scope": "One engine per process, fixed 640x480 public inputs, five warmups and twenty alternating plain/instrumented pairs per input; no pipeline FPS estimate",
+        "units": "milliseconds; percentiles use nearest-rank",
+        "stage_rules": "Host pre/native/post spans partition an instrumented adapter call. CUDA stream spans overlap host native time and include host-submit gaps; do not sum separate percentiles or add CUDA to host durations.",
+        "resource_rules": "1s host/process/tegrastats samples include harness validation. Short GPU calls may be missed by sampling; RSS high-water includes model loading, not just steady inference. CPU/GPU share board RAM.",
+        "modules": {},
+    }
+    for role in run["modules"]:
+        folder = output / role
+        report = json.loads((folder / "report.json").read_text())
+        monitor = json.loads((folder / "monitor.json").read_text())
+        if report["status"] != "MEASURED" or monitor["errors"]:
+            raise ValueError("Incomplete module or resource samples: " + role)
+        samples = [
+            json.loads(line)
+            for line in (folder / "events.jsonl").read_text().splitlines()
+        ]
+        pairs = [r for r in samples if r["phase"] == "paired-measurement"]
+        if not pairs or not all(r["parity"] for r in pairs):
+            raise ValueError("Missing paired output parity: " + role)
+        with (folder / "resources.csv").open() as stream:
+            resources = list(csv.DictReader(stream))
+        deltas = [r["instrumented"]["adapter_ms"] - r["plain_ms"] for r in pairs]
+        summary["modules"][role] = {
+            "paired_count": len(pairs),
+            "plain_adapter_ms": distribution([r["plain_ms"] for r in pairs]),
+            "instrumented": {
+                key: distribution([r["instrumented"][key] for r in pairs])
+                for key in pairs[0]["instrumented"]
+            },
+            "observer_delta_ms": {
+                "min": min(deltas),
+                "median": statistics.median(deltas),
+                "max": max(deltas),
+                "meaning": "signed instrumented minus paired plain; contains measurement noise",
+            },
+            "fixtures": report["fixtures"],
+            "load": report["loaded"],
+            "rss_high_water_bytes": report["rss_high_water_bytes"],
+            "host_min_available_bytes_sampled": min(
+                int(r["mem_available"]) for r in resources
+            )
+            if resources
+            else None,
+            "sampled_rss_max_bytes": max(int(r["module_rss"]) for r in resources)
+            if resources
+            else None,
+            "resource_sample_count": len(resources),
+            "raw_hashes": {
+                name: runtime.sha256(folder / name)
+                for name in (
+                    "events.jsonl",
+                    "resources.csv",
+                    "tegrastats.log",
+                    "report.json",
+                )
+            },
+        }
+    runtime.write_json(output / "summary.json", summary)
+    return summary
 
-    protocol, cfg, fixtures = validate()
-    _lease = hold_model_lease(runtime.paths(cfg)["stack"] / "cache")
-    resources = Resources(out, {module: [os.getpid()]}).start()
-    events = Events(out / "events.jsonl")
-    manifest = load_artifact_manifest(ROOT / "03_models/perception.json")
-    model = None
+
+def save_prediction(path, prediction):
+    """Preserve a structured reference without pickle or expanding mask arrays."""
+    import numpy as np
+
+    arrays = {}
+
+    def visit(value):
+        if isinstance(value, np.ndarray):
+            key = "array_" + str(len(arrays))
+            arrays[key] = value
+            return {"array": key}
+        if isinstance(value, dict):
+            return {k: visit(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [visit(v) for v in value]
+        if isinstance(value, np.generic):
+            return value.item()
+        return value
+
+    tree = visit(prediction)
+    np.savez(path, metadata=np.asarray(json.dumps(tree)), **arrays)
+
+
+def worker(role, output, protocol_path=PROTOCOL, *, nvtx=False):
+    protocol, cfg = validate(protocol_path)
+    owner = VisionModels(cfg.perception.model_manifest)
+    resources = Resources(output, {"module": [os.getpid()]}).start()
+    events = Events(output / "events.jsonl")
     report = {
-        "module": module,
-        "opencv_threads": cv2.getNumThreads(),
+        "role": role,
         "fixtures": [],
         "errors": [],
-        "scope": "Isolated module process; hands loads the production palm+landmark pair. Native call times include provider's synchronous work, not pure kernel durations.",
+        "scope": "Isolated selected TensorRT engine; plain adapter calls and paired stream instrumentation",
+        "nvtx_enabled": nvtx,
     }
+    error = None
     try:
-        start = time.perf_counter()
-        if module == "body":
-            model = BodyDetector(
-                manifest["body"],
-                cfg.perception.body_threshold,
-                cfg.perception.body_iou,
-                cfg.perception.max_people,
-            )
-            call = model.infer
-        elif module == "face":
-            model = FaceDetector()
-            if not model.load():
-                raise RuntimeError(model.last_error)
-            call = model.detect
-        else:
-            model = HandDetector(
-                manifest,
-                cfg.perception.palm_threshold,
-                cfg.perception.hand_threshold,
-                cfg.perception.max_hands,
-            )
-            call = model.infer
-        report["load_seconds"] = time.perf_counter() - start
-        for entry in [x for x in fixtures["files"] if x["kind"] == "image"]:
-            image = cv2.imread(
-                str(Path(protocol["input_directory"]) / entry["filename"])
-            )
-            image.flags.writeable = False
-            row = {
-                "input": entry["filename"],
-                "input_sha256": entry["sha256"],
-                "pairs": [],
-                "stages_ms": {},
-            }
-            report["fixtures"].append(row)
-            resources.phase = entry["filename"] + ":warmup"
-            # First invocation after fixture change plus the five planned warmups.
-            for index in range(6):
-                started = time.perf_counter()
-                try:
-                    output = jsonable(call(image))
+        owner.load([role])
+        model = owner.models[role]
+        report["loaded"] = owner.snapshot()[role]
+        annotations = model_annotations(model, role) if nvtx else nullcontext(lambda _: nullcontext())
+        with TensorRTTrace(model) as observer, annotations as annotate:
+            for case in protocol["module_cases"][role]:
+                name = case["input"]
+                resources.phase = name + ":load-input"
+                args = arguments(protocol, case)
+                resources.phase = name + ":first-call"
+                with annotate(f"frame/{name}/first"):
+                    first, first_ms = plain_call(model, args)
+                save_prediction(output / (name + "-prediction.npz"), first)
+                del first
+                events.write(phase="first-call", input=name, adapter_ms=first_ms)
+                resources.phase = name + ":warmup"
+                for i in range(protocol["measurement"]["warmup_per_case"]):
+                    with annotate(f"frame/{name}/warmup/{i}"):
+                        _, elapsed = plain_call(model, args)
                     events.write(
-                        phase="first" if index == 0 else "warmup",
-                        module=module,
-                        input=entry["filename"],
-                        index=index,
-                        ms=(time.perf_counter() - started) * 1000,
-                        output=output,
+                        phase="warmup", input=name, index=i, adapter_ms=elapsed
                     )
-                except Exception as exc:
-                    report["errors"].append(repr(exc))
-                    events.write(
-                        phase="warmup_error",
-                        module=module,
-                        input=entry["filename"],
-                        index=index,
-                        error=repr(exc),
+                resources.phase = name + ":paired-measurement"
+                rows = []
+                for i in range(protocol["measurement"]["paired_samples_per_case"]):
+                    row, outputs = {"index": i, "input": name}, {}
+                    for traced in (False, True) if i % 2 == 0 else (True, False):
+                        label = "instrumented" if traced else "plain"
+                        with annotate(f"frame/{name}/{label}/{i}"):
+                            if traced:
+                                outputs["instrumented"], row["instrumented"] = (
+                                    observer.call(*args)
+                                )
+                            else:
+                                outputs["plain"], row["plain_ms"] = plain_call(model, args)
+                    row["parity"] = outputs_match(
+                        outputs["plain"], outputs["instrumented"]
                     )
-            resources.phase = entry["filename"] + ":measured"
-            for index in range(20):
-                pair = {"index": index, "parity": False}
-                outputs = {}
-                for measured in [False, True] if index % 2 == 0 else [True, False]:
-                    label = "instrumented" if measured else "plain"
-                    times = CallTimes()
-                    try:
-                        if measured:
-                            with instrument(module, model, times):
-                                start = time.perf_counter()
-                                output = call(image)
-                                end = time.perf_counter()
-                        else:
-                            start = time.perf_counter()
-                            output = call(image)
-                            end = time.perf_counter()
-                        pair[label + "_ms"] = (end - start) * 1000
-                        output = jsonable(output)
-                        outputs[label] = output
-                        if measured and module == "face":
-                            setup = next(
-                                c
-                                for c in times.calls
-                                if c["label"] == "face.native_config"
-                            )
-                            native = next(
-                                c
-                                for c in times.calls
-                                if c["label"] == "face.native_detect"
-                            )
-                            times.calls.extend(
-                                [
-                                    {
-                                        "label": "face.python_pre_and_lock",
-                                        "ms": (setup["start"] - start) * 1000,
-                                    },
-                                    {
-                                        "label": "face.python_post",
-                                        "ms": (end - native["end"]) * 1000,
-                                    },
-                                ]
-                            )
-                        for timing in times.calls:
-                            row["stages_ms"].setdefault(timing["label"], []).append(
-                                timing["ms"]
-                            )
-                        events.write(
-                            phase="measured",
-                            module=module,
-                            input=entry["filename"],
-                            pair=index,
-                            variant=label,
-                            ms=pair[label + "_ms"],
-                            calls=times.calls,
-                            output=output,
-                        )
-                    except Exception as exc:
-                        pair[label + "_error"] = repr(exc)
-                        report["errors"].append(repr(exc))
-                        events.write(
-                            phase="measured_error",
-                            input=entry["filename"],
-                            pair=index,
-                            variant=label,
-                            error=repr(exc),
-                        )
-                pair["parity"] = len(outputs) == 2 and matching(
-                    outputs["plain"], outputs["instrumented"]
-                )
-                if not pair["parity"]:
-                    report["errors"].append("Pair output mismatch or failed call")
-                row["pairs"].append(pair)
-            row["plain_ms"] = distribution(
-                [p["plain_ms"] for p in row["pairs"] if "plain_ms" in p]
-            )
-            row["instrumented_ms"] = distribution(
-                [p["instrumented_ms"] for p in row["pairs"] if "instrumented_ms" in p]
-            )
-            row["stage_summary_ms"] = {
-                k: distribution(v) for k, v in row["stages_ms"].items()
-            }
-            # Signed paired differences retained; never subtract noisy medians to
-            # manufacture corrected native timings or claim negative overhead.
-            row["paired_overhead_ms"] = [
-                p["instrumented_ms"] - p["plain_ms"]
-                for p in row["pairs"]
-                if "instrumented_ms" in p and "plain_ms" in p
-            ]
-            runtime.write_json(out / "result.json", report)
-        resources.phase = "resident_after_measurement"
-        time.sleep(2)
+                    events.write(phase="paired-measurement", **row)
+                    if not row["parity"]:
+                        raise RuntimeError("Observer altered model output: " + name)
+                    rows.append(row)
+                summary = {
+                    "input": name,
+                    "first_call_ms": first_ms,
+                    "paired_count": len(rows),
+                    "plain_adapter_ms": distribution([r["plain_ms"] for r in rows]),
+                    "instrumented": {
+                        k: distribution([r["instrumented"][k] for r in rows])
+                        for k in rows[0]["instrumented"]
+                    },
+                    "paired_observer_delta_ms": [
+                        r["instrumented"]["adapter_ms"] - r["plain_ms"] for r in rows
+                    ],
+                }
+                report["fixtures"].append(summary)
+                runtime.write_json(output / "report.json", report)
+                print(role, name, "measured", flush=True)
     except BaseException as exc:
+        error = exc
         report["errors"].append(repr(exc))
-        raise
     finally:
-        try:
-            if model:
-                model.unload() if module == "face" else model.close()
-        except Exception as exc:
-            report["errors"].append("model cleanup: " + repr(exc))
-        try:
-            resources.close()
-        except Exception as exc:
-            report["errors"].append("monitor cleanup: " + repr(exc))
-        events.close()
-        report["monitor_errors"] = resources.errors
-        report["status"] = (
-            "MEASURED"
-            if not report["errors"] and not resources.errors
-            else "MEASURED_WITH_FAILURES"
+        resources.phase = "release"
+        for close in (owner.close, resources.close, events.close):
+            try:
+                close()
+            except Exception as exc:
+                error = error or exc
+                report["errors"].append(repr(exc))
+        report["rss_high_water_bytes"] = (
+            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
         )
-        runtime.write_json(out / "result.json", report)
-    if report["status"] != "MEASURED":
-        raise RuntimeError("Module measurement recorded failures; see result.json")
+        report["status"] = "FAILED" if error else "MEASURED"
+        runtime.write_json(output / "report.json", report)
+    if error:
+        raise error
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--worker", choices=["body", "face", "hands"])
+    parser.add_argument("--role", choices=ROLES, nargs="+")
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL)
+    parser.add_argument(
+        "--nsys", action="store_true",
+        help="Profile only model workers with Nsight Systems and NVTX; timings are diagnostic",
+    )
+    parser.add_argument("--nvtx", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--source-root",
+        type=Path,
+        default=ROOT,
+        help="Validate and run the worker from this frozen checkout; manage services from the current project",
+    )
+    parser.add_argument("--worker", choices=ROLES, help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--summarize",
+        action="store_true",
+        help="Summarize an existing successful run without inference",
+    )
     args = parser.parse_args()
+    output = args.output.resolve()
+    source_root = args.source_root.resolve()
+    if args.summarize:
+        summarize(output)
+        print(output / "summary.json")
+        return
     if args.worker:
-        return worker(args.worker, args.output)
-    out = args.output.resolve()
-    out.mkdir(parents=True, exist_ok=False)
-    protocol, cfg, _ = validate()
-    before = services.state(services.ORDER, cfg)
-    if (
-        before["status"] != "READY"
-        or before["services"]["app"]["health"]["phase"] != "idle"
-    ):
-        raise RuntimeError("Managed stack must be ready and idle")
-    environment(out)
-    runtime.write_json(out / "effective-config.json", cfg.effective())
+        if source_root != ROOT or args.nsys:
+            parser.error("--source-root is only supported by the coordinating process")
+        worker(args.worker, output, args.protocol.resolve(), nvtx=args.nvtx)
+        return
+    if args.nvtx:
+        parser.error("--nvtx is an internal worker option; use --nsys")
+    if args.nsys and source_root != ROOT:
+        parser.error("--nsys requires the current worker checkout")
+    tools = profiling_tools() if args.nsys else None
+    protocol = validate_locks(args.protocol.resolve(), source_root=source_root)
+    worker_script = source_root / "01_src/benchmarks/vision_modules.py"
+    if source_root != ROOT:
+        # Historical B2 checkouts also contain a different B0 vision_modules.py.
+        # Their selected ten-model worker must take precedence.
+        historical = source_root / "01_src/benchmarks/vision_b1_modules.py"
+        if historical.is_file():
+            worker_script = historical
+    if not worker_script.is_file():
+        parser.error("Source checkout is missing the module worker")
+    output.mkdir(parents=True, exist_ok=False)
+    environment(output, source_root=source_root)
+    runtime.write_json(output / "protocol-used.json", protocol)
+    before = runtime.config()
+    before = runtime.config(services.profile_path(before))
     report = {
         "created_at": runtime.stamp(),
         "status": "RUNNING",
-        "before": before,
-        "protocol_sha256": runtime.sha256(
-            ROOT / "benchmarks/manifests/b0-sw-v1.json"
-        ),
+        "protocol_sha256": runtime.sha256(args.protocol),
+        "runtime_source_root": str(source_root),
+        "worker_source_sha256": runtime.sha256(worker_script),
+        "profiling": tools,
         "modules": {},
     }
-    error = None
     try:
-        with services.operation(cfg):
-            report["stopped"] = services.stop(list(services.ORDER), cfg)
-        for module in ("body", "face", "hands"):
-            print("V1 measuring: " + module, flush=True)
-            folder = out / module
-            folder.mkdir()
-            with (folder / "process.log").open("w") as log:
-                exit_code = run_worker(
-                    [
-                        sys.executable,
-                        __file__,
-                        "--worker",
-                        module,
-                        "--output",
-                        str(folder),
-                    ],
-                    log,
+        exclusive = (
+            exclusive_build(before, output, allow_failed_stop=True)
+            if args.nsys else exclusive_build(before, output)
+        )
+        with exclusive:
+            for role in args.role or ROLES:
+                folder = output / role
+                folder.mkdir()
+                command = [
+                    sys.executable,
+                    str(worker_script),
+                    "--worker",
+                    role,
+                    "--output",
+                    str(folder),
+                    "--protocol",
+                    str(args.protocol.resolve()),
+                ]
+                if args.nsys:
+                    command = profile_command(command, folder, tools["nsys"])
+                    print("Profiling worker: " + shlex.join(command), flush=True)
+                runtime.write_json(folder / "worker-command.json", command)
+                with (folder / "worker.log").open("w") as log:
+                    code = run_worker(command, log, seconds=300)
+                result = (
+                    json.loads((folder / "report.json").read_text())
+                    if (folder / "report.json").exists()
+                    else {}
                 )
-            report["modules"][module] = {
-                "exit_code": exit_code,
-                "result": str(folder / "result.json"),
-            }
-            runtime.write_json(out / "report.json", report)
-            if exit_code:
-                raise RuntimeError("Module measurement failed: " + module)
+                report["modules"][role] = {
+                    "returncode": code,
+                    "status": result.get("status"),
+                    "report": str((folder / "report.json").relative_to(ROOT)),
+                }
+                runtime.write_json(output / "report.json", report)
+                if code or result.get("status") != "MEASURED":
+                    raise RuntimeError("B1 module measurement failed: " + role)
+                if args.nsys:
+                    trace = folder / "timeline.nsys-rep"
+                    if not trace.is_file():
+                        raise RuntimeError("Nsight did not produce the expected report")
+                    print(role, "PROFILED", str(trace), flush=True)
+                else:
+                    print(role, "MEASURED", flush=True)
+        report["status"] = (
+            "PROFILED_MODULES_ONLY_PIPELINE_PENDING" if args.nsys
+            else "MEASURED_MODULES_ONLY_PIPELINE_PENDING"
+        )
     except BaseException as exc:
-        error = exc
-        report["error"] = repr(exc)
+        report.update(status="FAILED", error=repr(exc))
+        raise
     finally:
-        try:
-            with services.operation(cfg):
-                report["restored"] = services.start(list(services.ORDER), cfg, 240)
-        except BaseException as exc:
-            error = error or exc
-            report["restore_error"] = repr(exc)
-        report["status"] = "FAIL" if error else "MEASURED"
-        report["finished_at"] = runtime.stamp()
-        runtime.write_json(out / "report.json", report)
-    if error:
-        raise error
-    print(json.dumps({"status": report["status"], "report": str(out / "report.json")}))
+        runtime.write_json(output / "report.json", report)
+    summarize(output)
 
 
 if __name__ == "__main__":

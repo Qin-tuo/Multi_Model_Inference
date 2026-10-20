@@ -11,7 +11,7 @@ from probe_b1_motion import RecordedMovieCamera
 
 
 def test_recorded_camera_waits_for_consumer_and_keeps_selected_media_frames(tmp_path):
-    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
+    cfg = Config.load("02_config/settings.orin-nx.yaml")
     log = tmp_path / "events.jsonl"
     rows = []
     for i, source in enumerate((0, 2)):

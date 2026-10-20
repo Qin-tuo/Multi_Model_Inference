@@ -107,7 +107,7 @@ def main():
     parser.add_argument("--recording", type=Path, action="append", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--config", type=Path, default=ROOT / "02_config/settings.orin-nx-b2.yaml"
+        "--config", type=Path, default=ROOT / "02_config/settings.orin-nx.yaml"
     )
     args = parser.parse_args()
     output = args.output.resolve()

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.config import Config
-from app.perception_b1 import B1Perception
+from app.vision_pipeline import VisionPipeline
 from app.vision_models import VisionModels
 from app.visual_tracks import VisualTracks
 import app.vision_models as models
@@ -94,9 +94,9 @@ def test_tracking_reset_cannot_reuse_old_frame_order_or_target_ids():
 
 
 def test_pipeline_release_attempts_gallery_even_if_model_cleanup_fails():
-    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
+    cfg = Config.load("02_config/settings.orin-nx.yaml")
     camera = SimpleNamespace(source_epoch="test", stale_after=1.5)
-    owner = B1Perception(camera, cfg.perception)
+    owner = VisionPipeline(camera, cfg.perception)
     calls = []
 
     def failure():
@@ -107,7 +107,7 @@ def test_pipeline_release_attempts_gallery_even_if_model_cleanup_fails():
     owner.gallery = SimpleNamespace(close=lambda: calls.append("gallery"))
     owner._selected = "old-target"
     owner._selected_last = {"old": True}
-    with pytest.raises(ExceptionGroup, match="B1 resource release"):
+    with pytest.raises(ExceptionGroup, match="resource release"):
         owner.close()
     assert calls == ["networks", "gallery"]
     assert owner.gallery is None
@@ -115,8 +115,8 @@ def test_pipeline_release_attempts_gallery_even_if_model_cleanup_fails():
 
 
 def test_duplicate_pipeline_load_preserves_current_resource_owner():
-    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
-    owner = B1Perception(
+    cfg = Config.load("02_config/settings.orin-nx.yaml")
+    owner = VisionPipeline(
         SimpleNamespace(source_epoch="test", stale_after=1.5), cfg.perception
     )
     closed = []

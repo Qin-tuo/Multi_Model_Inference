@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Frozen B1 inputs/contracts and array-aware observer parity helpers."""
+"""Frozen inputs/contracts and array-aware observer parity helpers."""
 
 import json
 import math
@@ -9,18 +9,29 @@ from app.config import Config
 from deploy import runtime
 from project_paths import ROOT
 
-PROTOCOL = ROOT / "benchmarks/manifests/b1-vision-measurements-v2.json"
+PROTOCOL = ROOT / "benchmarks/manifests/vision-measurements.json"
 
 
-def validate(protocol_path=PROTOCOL, *, source_root=None):
+def validate_locks(protocol_path=PROTOCOL, *, source_root=None):
+    """Check recorded bytes without interpreting another checkout's config.
+
+    Historical workers use their own configuration schema. The coordinator
+    validates their source/input hashes and retains ownership of local services.
+    """
     root = ROOT if source_root is None else Path(source_root).resolve()
     protocol = json.loads(Path(protocol_path).read_text())
     for path, expected in protocol["locked_files"].items():
         if runtime.sha256(root / path) != expected:
-            raise ValueError("B1 frozen file changed: " + path)
+            raise ValueError("Vision frozen file changed: " + path)
     for row in protocol["inputs"].values():
         if runtime.sha256(root / row["path"]) != row["sha256"]:
-            raise ValueError("B1 input changed: " + row["path"])
+            raise ValueError("Vision input changed: " + row["path"])
+    return protocol
+
+
+def validate(protocol_path=PROTOCOL, *, source_root=None):
+    root = ROOT if source_root is None else Path(source_root).resolve()
+    protocol = validate_locks(protocol_path, source_root=root)
     return protocol, relocated_config(
         root / protocol["effective_config"], source_root=root
     )

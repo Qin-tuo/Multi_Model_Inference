@@ -28,7 +28,7 @@ from app.face_tasks import normalize_embedding
 
 
 class IdentityGallery:
-    def __init__(self, path, capacity=32, threshold=0.363, margin=0.05, dimensions=128):
+    def __init__(self, path, capacity=32, threshold=0.5, margin=0.05, dimensions=512):
         if (
             dimensions not in (128, 512)
             or not -1 <= threshold <= 1

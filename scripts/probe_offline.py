@@ -266,7 +266,7 @@ def inside(args):
                 out / "application-audio.json",
             ],
         )
-        if cfg.perception.backend == "tensorrt_b1":
+        if cfg.perception.backend == "tensorrt":
             base = "http://127.0.0.1:" + str(runtime.ports(cfg)["app"])
             state = (
                 httpx.get(base + "/api/state", timeout=5, trust_env=False)
@@ -281,7 +281,7 @@ def inside(args):
             if not (
                 state["camera"].get("depth_ready")
                 and scene.get("ready")
-                and scene.get("backend") == "tensorrt_b1"
+                and scene.get("backend") == "tensorrt"
                 and scene.get("processed", 0) >= 10
                 and set(scene["model_metrics"]) == set(expected)
                 and scene["failures"] == 0

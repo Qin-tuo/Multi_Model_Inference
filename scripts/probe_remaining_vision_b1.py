@@ -37,7 +37,7 @@ def write(path, value):
 
 
 def source_fixtures(output):
-    from probe_face_tasks_b1 import fixtures
+    from deploy.vision.reference_inputs import fixtures
     from app.vision_roi import crop_roi
 
     rows = []

@@ -39,7 +39,7 @@ def test_new_face_dimension_keeps_old_labels_and_refuses_cross_space_matching(tm
     path = tmp_path / "identities.sqlite"
     old_vector = np.eye(1, 128, dtype=np.float32)[0]
     new_vector = np.eye(1, 512, dtype=np.float32)[0]
-    old = IdentityGallery(path)
+    old = IdentityGallery(path, dimensions=128, threshold=0.363)
     old.enroll("old-label", "sface:old-hash", old_vector)
     old.close()
     replacement = IdentityGallery(path, dimensions=512, threshold=0.5)
@@ -57,7 +57,7 @@ def test_new_face_dimension_keeps_old_labels_and_refuses_cross_space_matching(tm
             replacement.match("sface:old-hash", new_vector)
     finally:
         replacement.close()
-    restored = IdentityGallery(path)
+    restored = IdentityGallery(path, dimensions=128, threshold=0.363)
     try:
         assert restored.match("sface:old-hash", old_vector)["label"] == "old-label"
     finally:
