@@ -12,7 +12,10 @@ case "${1:-}" in
         ;;
 esac
 if [[ ! -x "$PROJECT_PYTHON" ]]; then
-    echo "缺少项目运行环境：请先运行 scripts/import_runtime.py 或恢复运行依赖包。" >&2
+    echo "缺少项目运行环境：请按 01_src/deploy/dependencies-layout.md 恢复匹配的 B1 运行依赖包。" >&2
     exit 1
 fi
+# Explicit --config and an existing environment override retain priority.
+# Direct Python entrypoints can still select the historical B0 profile.
+export EDGE_ASSISTANT_CONFIG="${EDGE_ASSISTANT_CONFIG:-$PROJECT_DIR/02_config/settings.orin-nx-b1.yaml}"
 exec "$PROJECT_PYTHON" "$PROJECT_DIR/main.py" "$@"

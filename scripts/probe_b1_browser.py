@@ -76,6 +76,20 @@ def probe(base, webdriver, output):
             base64.b64decode(call("GET", f"/session/{session}/screenshot"))
         )
         value["debug_text"] = js("return document.body.textContent")
+        value["model_panel"] = js("""return {
+            rows: document.querySelector('#debugModels').children.length,
+            legacy_hidden: document.querySelector('#debugLegacyStages').hidden,
+            b1_hidden: document.querySelector('#debugB1Models').hidden,
+            counter_label: document.querySelector('#debugB1Models').textContent.includes('拒绝/失败')
+        };""")
+        model_panel = value["model_panel"]
+        if model_panel != {
+            "rows": 10,
+            "legacy_hidden": True,
+            "b1_hidden": False,
+            "counter_label": True,
+        }:
+            raise RuntimeError("B1 diagnostics panel does not match the deployed models")
         value["status"] = "B1_BROWSER_RENDER_PASS"
         (output / "browser.json").write_text(
             json.dumps(value, ensure_ascii=False, indent=2) + "\n"

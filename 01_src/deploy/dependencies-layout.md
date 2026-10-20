@@ -2,7 +2,7 @@
 
 当前服务使用仓库内 `05_runtime/`。原 `/home/nvidia/AI_Stack` 保留为回退来源；当前启动路径、模型读取和数据库写入不再依赖它。独立性通过私有 mount/network namespace 验证：隐藏原 AI_Stack，网络只保留 lo，真实启动四个后端并完成文字、相机、语音接口及完整文件语音对话。主机目录和网络保持原状。
 
-上述旧运行包记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包约 7.14 GB，索引见 [B1 运行包锁](project-runtime-b1.lock.json)。在另一个 Git 副本中恢复后，已通过隐藏原项目和 AI_Stack、网络仅保留 lo 的真实启动验证；默认启动切换与阶段交接仍单独跟踪。
+上述旧运行包记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包约 7.14 GB，索引见 [B1 运行包锁](project-runtime-b1.lock.json)。在另一个 Git 副本中恢复后，已通过隐藏原项目和 AI_Stack、网络仅保留 lo 的真实启动验证；R2 默认启动切换已通过，实时手势验收仍单独跟踪。历史 R1 包索引保存在 [R1 运行包锁](project-runtime-b1-r1.lock.json)。
 
 ## 目录
 
@@ -16,7 +16,7 @@
 | `models/` | 4B/ASR GGUF、视觉 ONNX/TRT、Silero、Matcha/Vocos 工件 |
 | `datasets/` | 当前 B0 固定图像和合成语音输入 |
 | `baselines/b0/effective-config.json` | 原冻结配置的原字节副本 |
-| `baselines/b1-vision-v1/` | B1 固定图像、配置与输入契约；恢复到新目录时只在内存中转换运行路径 |
+| `baselines/b1-vision-v1/`、`baselines/b1-vision-v2/` | R1/R2 固定图像、配置与输入契约；恢复到新目录时只在内存中转换运行路径 |
 | `models/b1/`、`frameworks/b1/` | 当前公开视觉引擎、模型卡和所需固定版本上游代码；完整开发目录还包含独立参考工件 |
 | `runtime-data/edge-assistant/` | 当前冻结运行配置、systemd 文件与服务日志 |
 | `runtime-data/actions/`、`runtime-data/audio/` | 工具数据库和回复音频 |
@@ -31,6 +31,8 @@
 在项目根目录执行 `./run.sh services up`。不需要激活旧 `.venv`；开发时可使用 `source ./05_runtime/environments/edge-assistant/bin/activate`。原生程序通过启动器设置本地 `LD_LIBRARY_PATH`，不修改已锁定的 ELF 文件或模型引擎字节。
 
 ## 导入、校验和打包
+
+以下是历史 B0 导入流程，不能补齐 B1 视觉模型。当前 B1 新副本请使用下一节的 R2 运行包。
 
 从这台机器原有、版本匹配的 AI_Stack 导入（目标 05_runtime 必须不存在）：
 
@@ -54,16 +56,16 @@ python3 scripts/runtime_bundle.py pack --output 05_runtime/exports/runtime-new.t
 
 ```bash
 python3 scripts/runtime_bundle.py unpack --archive /path/to/runtime-edge-assistant-20261019.tar --sha256 <包的SHA256>
-./run.sh services check
-./run.sh services up
+./run.sh services check --config 02_config/settings.orin-nx-headless.yaml
+./run.sh services up --config 02_config/settings.orin-nx-headless.yaml
 ```
 
-上例恢复的是 B0。恢复当前 B1 使用对应运行包与锁中的 SHA256，并显式选择配置：
+上例恢复的是 B0。当前 B1 R2 使用下列运行包与锁中的 SHA256；`run.sh` 已默认选择 B1，显式参数可避免已有环境变量覆盖：
 
 ```bash
 python3 scripts/runtime_bundle.py unpack \
-  --archive /path/to/runtime-b1-20261020.tar \
-  --sha256 663ddefbf7f5b478ab38855fcbc1933e3db1666923f738e9fd8b9af48b1df52f
+  --archive /path/to/runtime-b1-r2-20261020.tar \
+  --sha256 2cf89c7f3d4756b957fd42d123418f98311893d89250158a82b1d1879d38599c
 ./run.sh services check --config 02_config/settings.orin-nx-b1.yaml
 ./run.sh services up --config 02_config/settings.orin-nx-b1.yaml
 ```

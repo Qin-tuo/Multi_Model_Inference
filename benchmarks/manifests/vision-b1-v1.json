@@ -126,12 +126,13 @@
     {
       "id": "B1.4",
       "name": "Bounded resource ownership, stale data, cancellation and recovery",
-      "status": "IN_PROGRESS",
+      "status": "PASS_BOUNDED_LIFECYCLE_AND_R1_SHORT_SOAK_SCOPE",
       "evidence": [
         "benchmarks/results/b1-integration-20261019.json",
-        "benchmarks/results/b1-soak-replay-summary.json"
+        "benchmarks/results/b1-soak-replay-summary.json",
+        "benchmarks/results/b1-soak-live-summary.json"
       ],
-      "scope": "Lifecycle/recovery probes and 20-minute replay completed; live soak and final handoff review pending. Resource drift and thermal transitions retained."
+      "scope": "Controlled lifecycle/stale-data/cancellation/recovery probes pass. R1 20-minute replay and 10-minute live windows complete; measured resource drift, delayed exit and thermal transitions retained for follow-up. No claim of R2 long soak, zero leaks or industrial endurance."
     },
     {
       "id": "B1.5",
@@ -142,7 +143,7 @@
         "benchmarks/results/b1-motion-summary.json",
         "benchmarks/results/b1-wave-fix-summary.json"
       ],
-      "scope": "Real stationary-palm cancellation passes; three public motion videos did not admit a wave greeting. Resolve compatibility and retain non-passing examples."
+      "scope": "Actual-model fixed-observation wave-to-4B/TTS and stationary-palm cancellation pass. Latest-frame realtime motion replay still misses; live wave and broader person/gesture accuracy remain open. Fixed-observation backpressure is not a production fix."
     },
     {
       "id": "B1.6",
@@ -161,13 +162,16 @@
     {
       "id": "B1.7",
       "name": "Startup, architecture, diagnostics and user profiling handoff",
-      "status": "IN_PROGRESS_ISOLATED_RESTORE_PASS_DEFAULT_SWITCH_PENDING",
+      "status": "PASS_SOFTWARE_HANDOFF_READY_USER_OPTIMIZATION_NOT_STARTED",
       "evidence": [
         "01_src/deploy/project-runtime-b1.lock.json",
         "docs/b1-handoff.md",
         "docs/visual-baseline.md",
-        "01_src/deploy/dependencies-layout.md"
-      ]
+        "01_src/deploy/dependencies-layout.md",
+        "benchmarks/results/b1-default-cutover-20261020.json",
+        "docs/project-overview.md"
+      ],
+      "scope": "R2 runtime restored in source-hidden loopback-only same-host checkout; default B1 startup, file response and Firefox camera/model panel verified. Startup/config/rollback and first reproducible profiling steps documented. Functional gate B1.5 remains open; no user learning or optimization completion asserted."
     }
   ],
   "contract_requirements": [
@@ -193,7 +197,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-20T01:55:08.108500+00:00",
+  "updated_at": "2026-10-20T02:37:54.566158+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",

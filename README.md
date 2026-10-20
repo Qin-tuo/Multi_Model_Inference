@@ -2,7 +2,7 @@
 
 本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
 
-当前软件框架与 B0 基线已交付，正在推进 **B1：公开视觉模型的 TensorRT 部署与链路复现**。10 个视觉 TensorRT 模型已接通，单模块、完整视觉管线及与 4B/语音共存的基线已测量，运行包已通过独立副本离线恢复。持续稳定性与手势覆盖仍在验证：张掌已取消真实生成轮次，但三段公开动态视频尚未触发挥手问候。默认服务仍使用 B0；B1 使用独立配置，当前验收状态以验证记录为准。
+当前默认启动 **B1 R2：公开视觉模型的 TensorRT 部署与链路复现**。10 个视觉 TensorRT 模型已接通，单模块及七组整链路/共存基线已测量，R2 运行包已通过独立副本离线恢复，默认启动、相机和调试页面已验证。张掌已取消真实生成轮次；固定选帧回放完成了挥手问候，但实时采样仍有漏触发，保持未验收。B0 工件与历史数据继续保留。
 
 B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT 用于视觉神经网络。神经双目深度按用户决定后置，不作为本阶段验收项。
 
@@ -22,7 +22,7 @@ B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT �
 ./run.sh services down
 ```
 
-`run.sh` 使用项目自带的 Python 环境；原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
+`run.sh` 使用项目自带的 Python 环境，默认选择 `02_config/settings.orin-nx-b1.yaml`；已有 `EDGE_ASSISTANT_CONFIG` 或显式 `--config` 可覆盖。原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
 
 运行依赖存放在 `05_runtime/` 并排除出普通 Git 提交。旧 B0 包约 6 GB，包含新增视觉模型的 B1 包约 7.14 GB。本机项目已具备这些依赖；**单独克隆 Git 仓库后，需要恢复匹配的运行包**。运行包不包含笔记数据库、录音、回复和日志，恢复步骤见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)。
 
@@ -43,6 +43,8 @@ B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT �
 ```bash
 cd /home/nvidia/Multi_Model_Inference
 source ./05_runtime/environments/edge-assistant/bin/activate
+# 直接调用 Python 时显式选择 B1；run.sh 已设置此默认值。
+export EDGE_ASSISTANT_CONFIG="$PWD/02_config/settings.orin-nx-b1.yaml"
 
 # 结束当前对话后，停止本项目四个服务，确认 STOPPED。
 python main.py services down
@@ -131,13 +133,13 @@ references/                原有学习参考子模块
 |---|---|---|
 | 1 | [main.py](main.py) → [01_src/app/cli.py](01_src/app/cli.py) → [01_src/deploy/services.py](01_src/deploy/services.py) → [01_src/deploy/runtime.py](01_src/deploy/runtime.py) | 一个启动命令如何变成四个受管理服务？ |
 | 2 | [run_web_vision_chat.py](run_web_vision_chat.py) | 谁创建相机、模型接口、感知线程和轮次控制器？谁负责退出？ |
-| 3 | [01_src/app/camera.py](01_src/app/camera.py) → [01_src/app/perception.py](01_src/app/perception.py) → [01_src/app/gestures.py](01_src/app/gestures.py) | 一帧如何得到三类识别结果？为什么目标频率为 5 FPS？ |
+| 3 | [01_src/app/camera.py](01_src/app/camera.py) → [01_src/app/perception_b1.py](01_src/app/perception_b1.py) → [01_src/app/gestures.py](01_src/app/gestures.py) | 同帧 RGBD 如何触发检测、姿态和属性模型？为什么目标频率为 5 FPS？ |
 | 4 | [01_src/app/turn_control.py](01_src/app/turn_control.py) | 请求如何接纳、选帧、调用模型/工具、提交输出和取消？ |
 | 5 | [01_src/app/llm.py](01_src/app/llm.py)、[01_src/app/stt.py](01_src/app/stt.py)、[01_src/app/tts.py](01_src/app/tts.py)、[01_src/app/request_io.py](01_src/app/request_io.py) | 后端契约、超时和取消由谁保证？ |
 | 6 | [01_src/app/pipeline.py](01_src/app/pipeline.py)、[01_src/app/audio.py](01_src/app/audio.py) | VAD、文本分块、PCM 队列和文件提交如何协作？ |
 | 7 | [01_src/app/web.py](01_src/app/web.py)、[01_src/app/web_limits.py](01_src/app/web_limits.py)、[01_src/app/diagnostics.py](01_src/app/diagnostics.py)、[04_web/](04_web) | 网页输入、慢客户端和板端观测如何接入？ |
 
-配置由 [01_src/app/config.py](01_src/app/config.py) 加载 `02_config/settings.yaml`，默认叠加 `02_config/settings.orin-nx-headless.yaml`。启动后四个服务共用一份冻结配置，位置见部署说明。
+配置由 [01_src/app/config.py](01_src/app/config.py) 加载基础 `02_config/settings.yaml` 和所选 overlay。`run.sh` 默认选择 B1；直接执行 Python 且没有配置环境变量/参数时仍沿用历史 B0 overlay，因此请按上面的命令显式设置。启动后四个服务共用一份冻结配置，位置见部署说明。
 
 ## 网页调试与基线
 
@@ -161,7 +163,7 @@ python -m pytest -q
 
 `tests/` 为软件回归；真实模型/设备验证位于 `scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
 
-当前目标及剩余项见 [任务清单](benchmarks/manifests/headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/gap-ledger-v3.json)。性能优化由用户执行和判断，助手提供指导与审查。
+当前目标及剩余项见 [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)；[原 B0 任务清单](benchmarks/manifests/headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/gap-ledger-v3.json)保留为历史记录。性能优化由用户执行和判断，助手提供指导与审查。
 
 旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前验证证据、模型数据、许可证及固定旧运行快照保持保留。
 

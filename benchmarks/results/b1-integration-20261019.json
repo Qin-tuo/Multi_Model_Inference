@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20T01:55:08.107835+00:00",
+  "updated_at": "2026-10-20T02:37:54.566158+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
-  "default_services": "B0 restored READY; B1 not default",
+  "default_services": "B1 R2 default via run.sh; actual four services READY",
   "architecture": {
     "neural_inference": "10 in-process TensorRT models; serial latest-frame worker",
     "depth": "D435i SDK native depth registered to color",
@@ -60,8 +60,11 @@
     "b0_frozen_protocol_and_inputs": "validate() PASS; original bytes preserved",
     "after_final_flag_guard": "30 targeted tests passed, including 2 new partial-pipeline rejection cases",
     "latest_full_suite": {
-      "passed": 268,
-      "junit": "05_runtime/validation/b1-gesture-revision-tests-20261020.xml"
+      "passed": 270,
+      "junit": "05_runtime/validation/b1-r2-final-software-20261020.xml",
+      "sha256": "24ec788d2479ef6334ed321e5dc8ea15e88617e36afd6a126b4af5a3b582d3c9",
+      "warnings": 1,
+      "warning_scope": "Upstream FastAPI/Starlette TestClient httpx deprecation; locked dependencies unchanged."
     },
     "latest_targeted": {
       "passed": 36,
@@ -89,10 +92,8 @@
     }
   ],
   "remaining": [
-    "Resolve and verify B1 wave-to-greeting coverage; three inspected public demonstrations did not admit a greeting",
-    "Broader live person, wave, occlusion, crossing and distance-gate coverage; previously deferred user-assisted cases remain separate",
-    "Sustained bounded resource acceptance; short stale-source/failure recovery probes already pass",
-    "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance"
+    "Resolve and verify realtime wave-to-greeting admission; fixed-observation TensorRT chain passes but latest-frame motion replay still misses.",
+    "User-assisted positive/negative gestures, occlusion, crossing and physical distance-gate coverage; deferred cases remain explicitly unverified."
   ],
   "not_claimed": [
     "Industrial qualification",
@@ -182,7 +183,7 @@
   },
   "deployment_restore": {
     "status": "PASS",
-    "index": "01_src/deploy/project-runtime-b1.lock.json",
+    "index": "01_src/deploy/project-runtime-b1-r1.lock.json",
     "raw_report": "05_runtime/validation/b1-restore-20261020/report.json",
     "source_isolation": [
       "/home/nvidia/Multi_Model_Inference",
@@ -197,7 +198,8 @@
   "motion_coverage": {
     "status": "WAVE_COVERAGE_INCOMPLETE_PALM_CANCEL_PASS",
     "summary": "benchmarks/results/b1-motion-summary.json",
-    "production_changes": "None; original B1 model parameters and gesture rules unchanged"
+    "production_changes": "None; original B1 model parameters and gesture rules unchanged",
+    "runtime_revision": "Historical B1 R1; see wave_fix for current R2"
   },
   "bundled_input_pipeline": {
     "status": "COMPLETE_PIPELINE_PUBLIC_REPLAY_PASS_LIMITED_SCOPE",
@@ -213,5 +215,12 @@
     "scope": "benchmarks/results/b1-r2-scope.json",
     "baseline_status": "R2_PIPELINE_WINDOWS_MEASURED",
     "pipeline_summary": "benchmarks/results/b1-vision-stream-r2-summary.json"
-  }
+  },
+  "deployment_restore_r2": {
+    "status": "PASS",
+    "index": "01_src/deploy/project-runtime-b1.lock.json",
+    "raw_report": "05_runtime/validation/b1-r2-restore-20261020/report.json",
+    "scope": "Same host, new Git checkout, original project and AI_Stack hidden, only loopback networking; all four native processes exited zero and original services restored READY."
+  },
+  "default_cutover": "benchmarks/results/b1-default-cutover-20261020.json"
 }

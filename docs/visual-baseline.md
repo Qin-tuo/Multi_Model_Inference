@@ -26,7 +26,7 @@ R2 将挥手的有效运动历史与连续静止张掌证据分开：保持原�
 
 原始数据、逐阶段耗时、资源、完整请求数与摘要见 [R2 汇总](../benchmarks/results/b1-vision-stream-r2-summary.json)。本次测量不证明实时手势召回率，也没有使用量化、并发或频率调优。
 
-2026-10-20：B1 的运行代码与输入契约已冻结，10 个视觉 TensorRT 模型的单模块、连续管线和多模型共存基线已测量；默认服务仍使用 B0 配置，B1 尚未完成部署交接。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的参考核验，包括 RTMW3D 原始权重与预后处理。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。独立运行包恢复已通过，持续稳定性和手势覆盖仍在进行；真实人物和复杂手势覆盖单列，不能据固定图片与无人场景声明通过。
+2026-10-20：B1 的运行代码与输入契约已冻结，10 个视觉 TensorRT 模型的单模块、连续管线和多模型共存基线已测量；默认启动已切换为 B1 R2，运行包恢复、默认服务、浏览器及文字轮次通过；实时挥手验收仍未完成。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的参考核验，包括 RTMW3D 原始权重与预后处理。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。R1 的 20 分钟回放/10 分钟实拍持续窗口与 R2 独立恢复已通过，证据范围分别记录；真人和复杂手势精度仍需单独补测。
 
 ### 集成结构与当前资源边界
 
@@ -49,7 +49,7 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 
 运行依赖是在根目录 `requirements.lock` 上增加 [vision/requirements-runtime.lock](../01_src/deploy/vision/requirements-runtime.lock)；恢复时使用两个锁文件共同约束，避免升级已有 NumPy/OpenCV。Norfair 2.3.0 使用 BSD-3-Clause，FilterPy 使用 MIT；生产环境不加载 Torch/OpenVINO 参考模型。
 
-固定公开图像回放使用真实 TensorRT 模型和明确标注的均匀 1.5 m 模拟深度，仅验证管线、数据归属、登记持久化和规则触发。完整服务探针使用真实 D435i，并执行文字→4B→TTS、生成的 WAV→VAD/ASR→4B→TTS 和取消操作。当前镜头无人物，因此后者仅覆盖场景检测/物体特征与对话共存。所有命令自动恢复之前的服务配置，输出目录必须是新目录：
+固定公开图像回放使用真实 TensorRT 模型和明确标注的均匀 1.5 m 模拟深度，仅验证管线、数据归属、登记持久化和规则触发。完整服务探针使用真实 D435i，并执行文字→4B→TTS、生成的 WAV→VAD/ASR→4B→TTS 和取消操作。2026-10-19 该服务探针运行时镜头无人物，因此那次证据仅覆盖场景检测/物体特征与对话共存；后续 R2 实拍及网页验证另行记录。所有命令自动恢复之前的服务配置，输出目录必须是新目录：
 
 ```bash
 ./05_runtime/environments/edge-assistant/bin/python scripts/probe_b1_pipeline.py \
@@ -87,7 +87,7 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 | 表情 | 3.32 | 3.41 |
 | 物体特征 | 20.54 | 20.81 |
 
-这些数据不代表整机帧率，各行或不同阶段的分位数不能直接相加。输入与运行代码契约在 [冻结协议](../benchmarks/manifests/b1-vision-measurements-v1.json)，协议记录的是冻结时状态；当前进度以 B1 验收清单为准。实际测量脚本源码、每次原始耗时、CUDA 事件区间、预测样本、进程/系统资源和 tegrastats 都保存在 `05_runtime/validation/b1-modules-20261019/`。完整管线数据见下一节，持续稳定性及部署交接仍待完成。
+这些数据不代表整机帧率，各行或不同阶段的分位数不能直接相加。输入与运行代码契约在 [冻结协议](../benchmarks/manifests/b1-vision-measurements-v1.json)，协议记录的是冻结时状态；当前进度以 B1 验收清单为准。实际测量脚本源码、每次原始耗时、CUDA 事件区间、预测样本、进程/系统资源和 tegrastats 都保存在 `05_runtime/validation/b1-modules-20261019/`。完整管线数据与持续窗口、部署恢复范围见本文对应章节。
 
 ```bash
 ./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
@@ -129,15 +129,19 @@ Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连�
 
 ### 持续运行与独立恢复
 
-独立的 20 分钟回放共存窗口处理 4,793 帧，完成 416 个完整文件语音请求，未观察到整帧失败、过期结果、无结果采样或相机重连；处理约 3.99 FPS。JPEG 历史峰值约 5.45 MiB，低于 16 MiB 配置限额。视觉测试进程首尾一分钟平均 PSS 增加约 13.4 MiB，RSS 增加约 5.9 MiB；进程还持有基准观测样本，不能将变化全部归因为业务泄漏，也不能声明长期无泄漏。内核在测量窗口内记录了 `hot-surface-alert` 的 0/1 状态切换；是否影响时钟或吞吐尚未建立因果证据。完整记录见 [持续回放汇总](../benchmarks/results/b1-soak-replay-summary.json)。
+R1 独立的 20 分钟回放共存窗口处理 4,793 帧，完成 416 个完整文件语音请求，未观察到整帧失败、过期结果、无结果采样或相机重连；处理约 3.99 FPS。JPEG 历史峰值约 5.45 MiB，低于 16 MiB 配置限额。视觉测试进程首尾一分钟平均 PSS 增加约 13.4 MiB，RSS 增加约 5.9 MiB；进程还持有基准观测样本，不能将变化全部归因为业务泄漏，也不能声明长期无泄漏。内核在测量窗口内记录了 `hot-surface-alert` 的 0/1 状态切换；是否影响时钟或吞吐尚未建立因果证据。完整记录见 [持续回放汇总](../benchmarks/results/b1-soak-replay-summary.json)。
 
-该窗口使用 [独立工作负载](../benchmarks/manifests/b1-soak-replay-v1.json)，不覆盖上述 60 秒基线，也不代替工业长时验收。复现时向 `vision_b1_stream.py` 传入 `--workload benchmarks/manifests/b1-soak-replay-v1.json` 与新的输出目录；实拍版本在 `b1-soak-live-v1.json`。
+该窗口使用 [独立工作负载](../benchmarks/manifests/b1-soak-replay-v1.json)，不覆盖上述 60 秒基线，也不代替工业长时验收。复现历史 R1 时先恢复 `before-gesture-wave-fix-20261020`，再向 `vision_b1_stream.py` 传入 `--workload benchmarks/manifests/b1-soak-replay-v1.json` 与新的输出目录；实拍版本在 `b1-soak-live-v1.json`。当前 R2 不应绕过旧协议的代码哈希检查。
 
-B1 运行包在新 Git 副本解包后，通过了隐藏原项目与 AI_Stack、仅有 loopback 网络的真实服务验证：四个服务退出码均为 0，文本、相机、文件语音接口及应用音频轮次通过，原服务恢复 READY。副本 B1 处理 90 帧、无整帧失败、原生深度可用；当时无人场景不证明全部人物属性的实际精度。恢复协议、包摘要和系统依赖见 [B1 运行包锁](../01_src/deploy/project-runtime-b1.lock.json)。
+R1 的 10 分钟 D435i 实拍共存窗口处理 2,996 帧，完成 265 个文件语音轮次，未记录整帧失败/过期或相机重连，约 4.99 FPS。首尾一分钟平均 PSS 增加约 11.0 MiB，RSS 增加约 5.5 MiB；这些观察不证明长期零泄漏。窗口中有 1,019 帧预测到人物、未预测到人脸，场景工作量与 R2 不同，详见 [实拍持续窗口](../benchmarks/results/b1-soak-live-summary.json)。
+
+B1 运行包在新 Git 副本解包后，通过了隐藏原项目与 AI_Stack、仅有 loopback 网络的真实服务验证：四个服务退出码均为 0，文本、相机、文件语音接口及应用音频轮次通过，原服务恢复 READY。副本 B1 处理 90 帧、无整帧失败、原生深度可用；当时无人场景不证明全部人物属性的实际精度。该次 R1 恢复协议、包摘要和系统依赖见 [R1 运行包锁](../01_src/deploy/project-runtime-b1-r1.lock.json)。
+
+R2 新包约 7.145 GB，另一次新 Git 副本恢复在同样的源目录隐藏/仅回环网络条件下通过；副本处理 71 帧、0 整帧失败、原生深度可用，四个原生进程均正常退出，原服务恢复 READY。此后主项目完成默认 B1 启动、文字→4B→TTS 和实际 Firefox 调试面板验证。当前包与验证索引见 [R2 运行包锁](../01_src/deploy/project-runtime-b1.lock.json) 和 [默认切换记录](../benchmarks/results/b1-default-cutover-20261020.json)。这些测试仍依赖同一台主机的驱动及系统库，不是跨硬件或干净操作系统部署验证。
 
 ### 动态手势覆盖缺口
 
-`scripts/probe_b1_motion.py` 使用当前 B1 模型、原始媒体时序和真实 TurnController/4B/TTS。固定张掌图片成功取消正在执行的真实轮次，取消后没有发布音频 URL。三段公开动态演示均没有触发挥手问候，结果保留为未通过：远景检测与手掌尺寸、关键点置信度、五指张开判断间断都影响了连续证据，尚未确认完整修复方案。没有修改门限、模型或冻结基线来消除失败。
+`scripts/probe_b1_motion.py` 使用当前 B1 模型、原始媒体时序和真实 TurnController/4B/TTS。固定张掌图片成功取消正在执行的真实轮次，取消后没有发布音频 URL。R1 三段公开动态演示均没有触发挥手问候，失败记录完整保留：远景检测与手掌尺寸、关键点置信度、五指张开判断间断影响连续证据。R2 修复了短暂转掌清空运动历史的问题并建立独立协议；固定选帧已问候成功，普通实时回放仍漏检，详见本文开头。未降低质量门限或改变模型来掩盖失败。
 
 输入来源与摘要在 [动态输入清单](../benchmarks/manifests/b1-public-motion-v1.json)，观测和失败摘要在 [动态覆盖结果](../benchmarks/results/b1-motion-summary.json)。这些有上游标注的视频使用模拟深度，不是 D435i 真人或手势准确率基准；运行包不携带这些外部演示文件。准备清单中的原文件并核对 SHA256 后，可用 `scripts/probe_b1_motion.py --output 新目录` 复查，或通过 `--case` 选择单个样本。未满足预期交互时命令返回非零。
 

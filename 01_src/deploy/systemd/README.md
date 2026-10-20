@@ -11,25 +11,25 @@
 
 当前软件配置采用语音文件输入/输出，不要求接入麦克风或扬声器。相机使用已连接的 D435i。物理录播、AEC、双讲与实际停播继续待验。
 
-当前新增 B1 配置使用原生 RGBD 和 10 个进程内 TensorRT 视觉模型；四个服务的职责与端口不变。R2 为手势时序修复版本，正式复测与配套运行包正在更新，默认配置切换尚未完成。当前状态与覆盖范围见 [B1 验收清单](../../../benchmarks/manifests/vision-b1-v1.json) 和 [启动/阅读入口](../../../docs/b1-handoff.md)。
+当前新增 B1 配置使用原生 RGBD 和 10 个进程内 TensorRT 视觉模型；四个服务的职责与端口不变。R2 为手势时序修复版本，七组基线、配套运行包与独立恢复已完成。`run.sh` 默认选择 B1，实际四服务和网页已验证；实时挥手仍有漏触发，未完成该功能验收。当前状态与覆盖范围见 [B1 验收清单](../../../benchmarks/manifests/vision-b1-v1.json) 和 [启动/阅读入口](../../../docs/b1-handoff.md)。
 
 ## 操作
 
 在 `/home/nvidia/Multi_Model_Inference` 主目录执行；使用独立环境，不使用旧 `.venv`：
 
 ```bash
-./05_runtime/environments/edge-assistant/bin/python main.py services check
-./05_runtime/environments/edge-assistant/bin/python main.py services up
-./05_runtime/environments/edge-assistant/bin/python main.py services status
-./05_runtime/environments/edge-assistant/bin/python main.py services logs --components app --lines 50
-./05_runtime/environments/edge-assistant/bin/python main.py services down
+./run.sh services check
+./run.sh services up
+./run.sh services status
+./run.sh services logs --components app --lines 50
+./run.sh services down
 ```
 
 `up --components app` 按依赖启动全部四个组件；`down --components app` 只停止应用，三个模型服务保持驻留。停止 ASR 会先停止其语音服务与应用消费者。当前不设置开机自启。
 
 `up` 加载 `02_config/settings.yaml` 和平台 overlay，或显式 `--config PATH`，把完整有效配置冻结为 `项目/05_runtime/runtime-data/edge-assistant/systemd/settings.json`。所有服务使用同一份冻结配置。运行时更换配置或源码入口会被拒绝，应先 `down` 再 `up`。`status/down/logs/wait` 默认读取已安装的冻结配置；`up` 默认重新读取源码配置。
 
-本阶段使用 B1 时显式选择配置；先结束当前请求和测量，再停止四个服务：
+`run.sh` 使用 B1 默认配置，保留已有 `EDGE_ASSISTANT_CONFIG` 和显式参数的优先级。直接调用 Python 时仍需显式指定 B1；若要排除环境覆盖，可按以下命令启动。先结束当前请求和测量，再停止四个服务：
 
 ```bash
 ./run.sh services down
@@ -52,7 +52,7 @@
 - 模型清单、感知/VAD 锁及 `01_src/deploy/runtime-artifacts.lock.json` 校验现有权重、原生程序/库、TTS 工件和感知源码。OVS 源码要求固定提交且无未记录改动。全量校验会读取数 GiB 文件，请等待命令完成。
 - 日志位于 `项目/05_runtime/runtime-data/edge-assistant/logs`，每组件按 5 MiB 轮转并保留 4 份备份。实验 trace 和测试输出有各自目录。
 
-`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、正式性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。B0 的 [隔离网络启动验证](../../../benchmarks/results/r4-offline-summary.json) 和 B1 R1 的 [独立运行包恢复](../project-runtime-b1.lock.json) 均有真实进程与请求证据；后者隐藏了原项目和 AI_Stack。整机重启、自启动及干净机器重部署仍分别待验。
+`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、正式性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。B0 的 [隔离网络启动验证](../../../benchmarks/results/r4-offline-summary.json) 和 B1 R2 的 [独立运行包恢复](../project-runtime-b1.lock.json) 均有真实进程与请求证据；后者隐藏了原项目和 AI_Stack。整机重启、自启动及干净机器重部署仍分别待验。
 
 ## 历史七服务切换与回退
 

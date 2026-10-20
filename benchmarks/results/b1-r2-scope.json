@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "R2_PIPELINE_WINDOWS_MEASURED_DEPLOYMENT_HANDOFF_PENDING",
+  "status": "R2_PIPELINE_MEASURED_RESTORE_DEFAULT_READY_REALTIME_WAVE_OPEN",
   "runtime_source_commit": "a90ab28dc4bfbbd168d97da3afd7f6c7e6549212",
   "protocol": "benchmarks/manifests/b1-vision-measurements-v2.json",
   "workload": "benchmarks/manifests/b1-vision-stream-v2.json",
@@ -30,5 +30,7 @@
     "whole_frame_failure_events": 0,
     "expired_frames": 0,
     "note": "All 28 unavailable samples are observer deadline misses in live-conversation; they are not recorded failed perception frames. Missing samples remain in the conservative freshness statistic; no interpolation or removal."
-  }
+  },
+  "deployment_restore": "01_src/deploy/project-runtime-b1.lock.json",
+  "default_cutover": "benchmarks/results/b1-default-cutover-20261020.json"
 }
