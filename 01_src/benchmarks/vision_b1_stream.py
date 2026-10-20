@@ -31,7 +31,7 @@ from benchmarks.vision_b1_support import validate
 from benchmarks.vision_stream import BackgroundLLM
 from deploy import runtime, services
 from deploy.resource_guard import hold_model_lease
-from probe_coexistence import backend_identity
+from deploy.operations import backend_identity
 
 WORKLOAD = ROOT / "benchmarks/manifests/b1-vision-stream-v2.json"
 

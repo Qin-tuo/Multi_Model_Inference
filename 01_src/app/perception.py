@@ -7,7 +7,8 @@ import time
 from pathlib import Path
 from project_paths import MODEL_DIR, load_artifact_manifest
 import numpy as np
-from app.body_detector import BodyDetector, checked_file, load_source
+from app.body_detector import BodyDetector
+from app.model_artifacts import checked_file, load_source
 
 
 _MANIFEST = MODEL_DIR / "perception.json"

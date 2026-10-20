@@ -19,7 +19,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from deploy import runtime, services
-from validation_inputs import input_path
+from deploy.validation_inputs import input_path
 
 CRITERIA = {
     "input_atol": 1e-6,
@@ -152,7 +152,8 @@ def worker(output, kind):
 
 
 def compare(output, rows):
-    from app.wholebody_pose import WholeBodyPose, prepare_pose
+    from app.wholebody_pose import WholeBodyPose
+    from app.pose_geometry import prepare_pose
 
     entries = json.loads((ROOT / "03_models/candidates/vision-b1.json").read_text())[
         "models"
@@ -232,7 +233,7 @@ def main():
         worker(output, args.worker)
         return
     output.mkdir(parents=True, exist_ok=False)
-    from build_vision_b1 import exclusive_build
+    from deploy.operations import exclusive_build
 
     cfg = runtime.config()
     cfg = runtime.config(services.profile_path(cfg))

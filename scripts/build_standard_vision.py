@@ -17,11 +17,12 @@ sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
 from app.appearance import AppearanceFeatures, prepare_appearance
 from app.face_tasks import ArcFaceIdentity, aligned_bgr, sface_transform
 from app.vision_models import contract_hash
-from app.wholebody_pose import prepare_pose
+from app.pose_geometry import prepare_pose
 from app.wholebody_pose2d import WholeBodyPose2D
-from build_vision_b1 import build, exclusive_build
+from build_vision_b1 import build
+from deploy.operations import exclusive_build
 from deploy import runtime, services
-from validation_inputs import input_path
+from deploy.validation_inputs import input_path
 
 MANIFEST = ROOT / "03_models/candidates/vision-b2.json"
 ROLES = ("body_hand_pose", "face_identity", "person_reid")

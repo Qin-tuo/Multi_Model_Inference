@@ -299,7 +299,7 @@ def main():
         return 0
     if not args.reference_python.is_file():
         parser.error("Provide the pinned CPU reference environment")
-    from build_vision_b1 import exclusive_build
+    from deploy.operations import exclusive_build
     from deploy import runtime, services
 
     output.mkdir(parents=True, exist_ok=False)

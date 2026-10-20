@@ -27,32 +27,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
 from deploy import runtime, services  # noqa: E402
+from deploy.operations import backend_identity
 
 
-def backend_identity(name, cfg):
-    row = services.properties(name)
-    port = runtime.ports(cfg)[name]
-    listeners = {
-        c.pid
-        for c in psutil.net_connections(kind="tcp")
-        if c.status == psutil.CONN_LISTEN
-        and c.laddr.ip == "127.0.0.1"
-        and c.laddr.port == port
-    }
-    if len(listeners) != 1 or not listeners <= set(row["cgroup_pids"]):
-        raise RuntimeError("Native listener has no unambiguous owned process")
-    stable = sorted({row["main_pid"], *listeners})
-    return {
-        "identity": {
-            "main_pid": row["main_pid"],
-            "restarts": row["NRestarts"],
-            "processes": {
-                str(pid): psutil.Process(pid).create_time() for pid in stable
-            },
-        },
-        "stable_pids": stable,
-        "observed_cgroup_pids": row["cgroup_pids"],
-    }
 
 
 def process_sample(groups):

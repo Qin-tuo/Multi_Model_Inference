@@ -10,7 +10,7 @@ CPU operations here are geometric/image transforms, never neural inference.
 import cv2
 import numpy as np
 
-from app.body_detector import load_source
+from app.model_artifacts import load_source
 from app.tensorrt_runner import TensorRTModel
 from project_paths import ROOT
 

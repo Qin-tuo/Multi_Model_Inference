@@ -12,7 +12,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import Camera
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 from deploy import runtime, services
 
 

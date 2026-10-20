@@ -19,9 +19,9 @@ sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
 from app.config import Config
 from app.gestures import GestureRecognizer
 from app.vision_models import VisionModels
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 from deploy import runtime, services
-from validation_inputs import input_path, is_local_input
+from deploy.validation_inputs import input_path, is_local_input
 
 
 def replay(recording, models, cfg, output):

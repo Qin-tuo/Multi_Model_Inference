@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Reference inputs survive removal of disposable validation directories."""
 
-from validation_inputs import input_path, is_local_input
+from deploy.validation_inputs import input_path, is_local_input
 
 
 def test_retained_input_resolves_without_rewriting_old_metadata(tmp_path):

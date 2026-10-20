@@ -166,7 +166,7 @@ def worker(condition, out):
     from app.face_tracker import FaceTracker
     from app.perception import Perception
     from deploy.resource_guard import hold_model_lease
-    from probe_coexistence import backend_identity
+    from deploy.operations import backend_identity
 
     protocol, cfg, _ = validate()
     _lease = hold_model_lease(runtime.paths(cfg)["stack"] / "cache")

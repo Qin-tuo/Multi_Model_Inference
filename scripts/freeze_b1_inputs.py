@@ -22,9 +22,9 @@ from app.vision_models import ROLES, VisionModels
 from benchmarks.baseline_support import jsonable
 from benchmarks.vision_b1_support import PROTOCOL, outputs_match
 from benchmarks.vision_b1_timing import TensorRTTrace
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 from deploy import runtime, services
-from validation_inputs import input_path
+from deploy.validation_inputs import input_path
 
 
 def letterbox(image):

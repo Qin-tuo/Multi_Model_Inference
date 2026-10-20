@@ -27,10 +27,10 @@ from app.face_tracker import FaceTracker
 from app.perception_b1 import B1Perception
 from app.gestures import GestureRecognizer
 from app.identity_gallery import IdentityGallery
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 from benchmarks.vision_b1_support import PROTOCOL, validate
 from deploy import runtime, services
-from validation_inputs import input_path, is_local_input
+from deploy.validation_inputs import input_path, is_local_input
 
 
 def held_palm_images(fixture_path):

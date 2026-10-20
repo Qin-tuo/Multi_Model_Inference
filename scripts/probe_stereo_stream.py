@@ -124,7 +124,7 @@ def main():
     output = args.output.resolve()
     if args.worker:
         return int(not capture(output, args.groups))
-    from build_vision_b1 import exclusive_build
+    from deploy.operations import exclusive_build
     from deploy import runtime, services
 
     output.mkdir(parents=True, exist_ok=False)

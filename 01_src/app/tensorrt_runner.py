@@ -14,7 +14,7 @@ import threading
 
 import numpy as np
 
-from project_paths import MODEL_DIR, load_artifact_manifest
+from project_paths import ROOT, MODEL_DIR, load_artifact_manifest
 
 _LOGGER = None
 _LOGGER_LOCK = threading.Lock()
@@ -65,13 +65,12 @@ class TensorRTModel:
         self.runtime = self.engine = self.context = self.stream = None
         self.inputs, self.outputs = [], []
         self.input_specs, self.output_specs = {}, {}
-        lock = load_artifact_manifest(MODEL_DIR / "perception.json")["body"]
+        lock = load_artifact_manifest(MODEL_DIR / "runtime-components.json")["tensorrt"]
         if trt.__version__ != lock["tensorrt_version"]:
             raise ValueError("TensorRT version differs from the pinned host runtime")
-        checked_bytes(lock["runtime_helper"], lock["runtime_helper_sha256"])
-        spec = importlib.util.spec_from_file_location(
-            "assistant_trt_buffers", lock["runtime_helper"]
-        )
+        helper = ROOT / lock["runtime_helper"]
+        checked_bytes(helper, lock["runtime_helper_sha256"])
+        spec = importlib.util.spec_from_file_location("assistant_trt_buffers", helper)
         self.common = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.common)
         self.logger = runtime_logger(trt)

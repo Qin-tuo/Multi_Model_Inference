@@ -164,7 +164,7 @@ def main():
     if args.worker:
         worker(args.role[0], output)
         return 0
-    from build_vision_b1 import exclusive_build
+    from deploy.operations import exclusive_build
     from deploy import runtime, services
 
     output.mkdir(parents=True, exist_ok=False)

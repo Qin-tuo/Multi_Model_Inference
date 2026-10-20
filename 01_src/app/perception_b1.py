@@ -8,11 +8,10 @@ and target limits. Scheduling/precision optimizations belong after B1 capture.
 
 from copy import deepcopy
 import time
-import threading
 
 import numpy as np
 
-from app.perception import Perception
+from app.frame_worker import FrameWorker
 from app.vision_models import VisionModels
 from app.visual_tracks import VisualTracks
 from app.identity_gallery import IdentityGallery
@@ -53,7 +52,7 @@ def range_from_mask(frame, mask, min_fraction=0.15, min_pixels=25):
     }
 
 
-class B1Perception(Perception):
+class B1Perception(FrameWorker):
     def __init__(self, camera, config, tracker=None, on_result=None):
         super().__init__(camera, config, tracker, on_result)
         self.networks = VisionModels(
@@ -95,22 +94,8 @@ class B1Perception(Perception):
 
     def start(self):
         if not self.networks.models:
-            raise RuntimeError("B1 models have not loaded")
-        if self._thread and self._thread.is_alive():
-            return
-        self._stop.clear()
-        self._thread = threading.Thread(
-            target=self._loop, name="perception-b1", daemon=True
-        )
-        self._thread.start()
-
-    def _fresh(self, frame):
-        return (
-            not self._stop.is_set()
-            and frame.source_epoch == self.camera.source_epoch
-            and not (frame.invalidated and frame.invalidated.is_set())
-            and time.monotonic() - frame.received_monotonic <= self.camera.stale_after
-        )
+            raise RuntimeError("Visual models have not loaded")
+        super().start()
 
     def _eligible(self, row):
         distance = row["range"]

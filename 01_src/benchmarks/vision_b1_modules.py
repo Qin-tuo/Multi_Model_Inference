@@ -32,7 +32,7 @@ from benchmarks.vision_b1_support import (
 )
 from benchmarks.vision_b1_timing import TensorRTTrace
 from benchmarks.vision_nvtx import model_annotations, profile_command, profiling_tools
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 from deploy import runtime, services
 
 

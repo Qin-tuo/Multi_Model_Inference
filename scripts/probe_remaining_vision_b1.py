@@ -16,7 +16,7 @@ import sys
 
 import cv2
 import numpy as np
-from validation_inputs import input_path
+from deploy.validation_inputs import input_path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
@@ -451,7 +451,7 @@ def main():
     if args.worker:
         native_worker(args.worker, output)
         return 0
-    from build_vision_b1 import exclusive_build
+    from deploy.operations import exclusive_build
     from deploy import runtime, services
 
     output.mkdir(parents=True, exist_ok=False)

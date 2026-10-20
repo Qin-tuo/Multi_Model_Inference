@@ -37,8 +37,27 @@
     {
       "id": "C3",
       "requirement": "解除新旧实现耦合",
-      "status": "pending",
-      "evidence": []
+      "status": "in_progress",
+      "evidence": [
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/shared-components-tests.xml",
+          "sha256": "ab0f2978e495c08e9437f40563b6803fb5f4ab5e0303a66c1de63c2e6a2c1b63"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-components/parity.json",
+          "sha256": "e5f8353ccd671a0ea990b5632e64895d8559c0df0c28a18a6ca1ca33b4b7e68a"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-components/pipeline/report.json",
+          "sha256": "b6cbe3616149c39f78f174ccbc2694632bb5e9808d43ede868ca32c9808c1006"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/native-components/services-restored.json",
+          "sha256": "528ce863e232d207718d834683814f80712e0496fe5788288c4bdea8d51896b7"
+        }
+      ],
+      "common_components_extracted": true,
+      "remaining": "Remove obsolete adapter choices and stage-specific names with C6; then audit the complete current import graph."
     },
     {
       "id": "C4",
@@ -49,8 +68,13 @@
     {
       "id": "C5",
       "requirement": "整合构建、验证和基准工具",
-      "status": "pending",
-      "evidence": []
+      "status": "in_progress",
+      "evidence": [
+        "tests/test_module_boundaries.py",
+        "01_src/deploy/operations.py",
+        "01_src/deploy/validation_inputs.py"
+      ],
+      "source_imports_scripts": 0
     },
     {
       "id": "C6",

@@ -27,10 +27,10 @@ from app.face_tasks import (
     expression_scores,
     normalize_embedding,
 )
-from app.body_detector import load_source
-from build_vision_b1 import exclusive_build
+from app.model_artifacts import load_source
+from deploy.operations import exclusive_build
 from deploy import runtime, services
-from validation_inputs import input_path
+from deploy.validation_inputs import input_path
 from prepare_vision_b1 import MANIFEST, prepare
 
 CRITERIA = {

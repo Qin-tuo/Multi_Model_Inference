@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "01_src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 from benchmarks.baseline_support import Events, Resources, environment, validate  # noqa: E402
 from deploy import runtime, services  # noqa: E402
-from probe_coexistence import backend_identity  # noqa: E402
+from deploy.operations import backend_identity  # noqa: E402
 
 
 class Server:

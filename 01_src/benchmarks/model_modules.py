@@ -31,7 +31,7 @@ from benchmarks.baseline_support import (  # noqa: E402
 from benchmarks.http_observer import Observer  # noqa: E402
 from benchmarks.text_metrics import character_errors  # noqa: E402
 from deploy import runtime, services  # noqa: E402
-from probe_coexistence import backend_identity  # noqa: E402
+from deploy.operations import backend_identity  # noqa: E402
 
 ROLES = ("s1", "t1", "l1-text", "l1-image")
 

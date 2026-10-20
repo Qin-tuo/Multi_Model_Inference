@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import Camera, FrameSnapshot
 from app.config import Config
 from app.perception_b1 import B1Perception
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 from deploy import runtime, services
 
 

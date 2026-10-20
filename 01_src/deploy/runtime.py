@@ -215,10 +215,10 @@ def artifact_files(cfg, components):
             for role in ("body_hand_pose", "expression"):
                 for row in sources[role]["prepost_source"]["files"].values():
                     add(ROOT / row["path"], row["sha256"])
-            add(
-                perception["body"]["runtime_helper"],
-                perception["body"]["runtime_helper_sha256"],
-            )
+            trt = load_artifact_manifest(ROOT / "03_models/runtime-components.json")[
+                "tensorrt"
+            ]
+            add(ROOT / trt["runtime_helper"], trt["runtime_helper_sha256"])
         if cfg.face.enabled and not b1:
             row = perception["face"]
             add(

@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from app.wholebody_pose import prepare_pose
+from app.pose_geometry import prepare_pose
 
 
 def test_fractional_person_roi_matches_original_mmpose_preprocessing():

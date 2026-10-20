@@ -11,33 +11,12 @@ TensorRT allocation/copies use NVIDIA's pinned common_runtime sample.
 # __init__() 和 close() 负责模型加载与资源管理。
 # 数据流：原图 BGR → RGB 浮点张量 → TensorRT → 候选框 → 原图中的人体框。
 
-import hashlib
-import importlib.util
-from pathlib import Path
+from app.model_artifacts import checked_file, load_source
+
 import threading
 import time
 import cv2
 import numpy as np
-
-
-def load_source(path, expected_sha, name):
-    # 核对辅助代码的 SHA256，确保运行的是清单锁定的版本。
-    path = Path(path)
-    if hashlib.sha256(path.read_bytes()).hexdigest() != expected_sha:
-        raise ValueError(f"Source hash mismatch: {path.name}")
-    # 从指定文件动态导入模块，使用其中的 CUDA 缓冲区和推理辅助函数。
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def checked_file(path, expected):
-    # 校验模型或引擎文件内容；文件名相同并不代表权重内容相同。
-    path = Path(path)
-    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
-        raise ValueError(f"Model artifact hash mismatch: {path.name}")
-    return path
 
 
 class BodyDetector:

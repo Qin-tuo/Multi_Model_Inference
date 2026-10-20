@@ -141,7 +141,7 @@ def main():
         return 0
     if not args.python.is_file():
         parser.error("Provide the pinned CPU export environment using --python")
-    from build_vision_b1 import exclusive_build
+    from deploy.operations import exclusive_build
     from deploy import runtime, services
 
     output.mkdir(parents=True, exist_ok=False)

@@ -12,7 +12,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
 from deploy import runtime, services
-from build_vision_b1 import exclusive_build
+from deploy.operations import exclusive_build
 
 MANIFEST = ROOT / "03_models/candidates/vision-b2.json"
 ROLES = ("body_hand_pose", "face_identity", "person_reid")
