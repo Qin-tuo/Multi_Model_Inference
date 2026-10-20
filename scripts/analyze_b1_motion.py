@@ -164,6 +164,7 @@ def analyze(folder):
     results = {}
     for name, policy in policies.items():
         events, rejection_counts = [], Counter()
+        sample_gates, evidence_windows = Counter(), []
         longest = []
         seen = set()
         for row in rows:
@@ -180,6 +181,41 @@ def analyze(folder):
                 "hands": row["hands"],
             }
             produced = policy.update(scene, now=row["observed_monotonic"])
+            if name == "current_runtime":
+                # Inspect the unchanged runtime's own decisions. Retain every
+                # window, including failures; this is not a threshold sweep.
+                for hand in row["hands"]:
+                    sample, reason = policy._sample(hand, frame)
+                    sample_gates["hand_observations"] += 1
+                    gate = reason or ("open" if sample["open"] else "non_open")
+                    sample_gates[gate] += 1
+                windows = []
+                for track in policy._tracks.values():
+                    samples = list(track.samples)
+                    if (
+                        track.seen != frame["received_monotonic"]
+                        or not samples
+                        or samples[-1]["frame_id"] != frame["frame_id"]
+                    ):
+                        continue
+                    windows.append(
+                        {
+                            "handedness": track.handedness,
+                            "latched": track.latched,
+                            "open_observations": sum(s["open"] for s in samples),
+                            "required_open_observations": cfg.gestures.min_observations,
+                            "wave_predicate": policy._wave(samples),
+                            "samples": samples,
+                        }
+                    )
+                evidence_windows.append(
+                    {
+                        "frame_id": frame["frame_id"],
+                        "media_frame_index": frame["sensor"].get("media_frame_index"),
+                        "media_seconds": frame["sensor"].get("media_timestamp_seconds"),
+                        "windows": windows,
+                    }
+                )
             for event in produced:
                 events.append(
                     {
@@ -200,6 +236,9 @@ def analyze(folder):
             "rejected_hand_observations": dict(rejection_counts),
             "longest_wave_evidence": longest,
         }
+        if name == "current_runtime":
+            results[name]["sample_gate_counts"] = dict(sample_gates)
+            results[name]["evidence_windows"] = evidence_windows
     return {
         "input_directory": str(folder.relative_to(ROOT)),
         "events_sha256": runtime.sha256(folder / "events.jsonl"),

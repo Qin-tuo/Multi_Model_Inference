@@ -73,16 +73,16 @@
   "limits": [
     "Controlled fixed-observation inference/interaction passes; real-time wave recall is still sensitive to selected frames at the current processing rate.",
     "Do not label the controlled replay as camera timing, live robustness or accuracy acceptance. Original non-passing examples remain retained.",
-    "R2 integrated performance remeasurement, compatible package update/default startup and final handoff are still pending."
+    "R2 seven-condition pipeline remeasurement, independent runtime restore, default B1 startup and software handoff preparation completed; realtime gesture acceptance remains open."
   ],
-  "updated_at": "2026-10-20T01:31:58.451741+00:00",
+  "updated_at": "2026-10-20T02:52:50.320525+00:00",
   "recorded_neural_chain": {
     "report": "05_runtime/validation/b1-motion-r2-recorded-20261020/report.json",
     "sha256": "ec4c8f7116812f5c93e7b5422b0045211ce4e0de285e6ffb0bd79817be2d2af4",
     "status": "RECORDED_OBSERVATION_CHAIN_PASS",
     "observations_processed": 57,
     "frame_failures": 0,
-    "greeting_text": "\u4f60\u597d\uff01",
+    "greeting_text": "你好！",
     "tts_receipt": "file_written",
     "scope": "Complete original observation selection replayed with producer backpressure; all 57 selected RGB observations inferred again through real TensorRT and real 4B/TTS. Delivery lag median about 1009.8 ms, max about 2118.3 ms; explicitly not a real-time/throughput pass."
   },
@@ -147,5 +147,6 @@
       "interpretation": "Runtime pose outputs agree on matched input frames. Real-time scheduling selected different video frames, including a motion extremum; fixed observation replay is needed for the rule before/after check. This does not establish robust wave recall at the current processing rate."
     }
   },
-  "revision_protocol": "benchmarks/manifests/b1-vision-measurements-v2.json"
+  "revision_protocol": "benchmarks/manifests/b1-vision-measurements-v2.json",
+  "further_diagnosis": "benchmarks/results/b1-live-gesture-readiness-20261020.json"
 }

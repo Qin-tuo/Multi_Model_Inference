@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20T02:37:54.566158+00:00",
+  "updated_at": "2026-10-20T02:52:50.320525+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -222,5 +222,6 @@
     "raw_report": "05_runtime/validation/b1-r2-restore-20261020/report.json",
     "scope": "Same host, new Git checkout, original project and AI_Stack hidden, only loopback networking; all four native processes exited zero and original services restored READY."
   },
-  "default_cutover": "benchmarks/results/b1-default-cutover-20261020.json"
+  "default_cutover": "benchmarks/results/b1-default-cutover-20261020.json",
+  "live_gesture_readiness": "benchmarks/results/b1-live-gesture-readiness-20261020.json"
 }
