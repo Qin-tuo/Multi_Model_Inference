@@ -136,22 +136,24 @@
     {
       "id": "B1.5",
       "name": "Fixed-input and live-camera functional acceptance with explicit coverage",
-      "status": "INCOMPLETE_PUBLIC_WAVE_COVERAGE",
+      "status": "IN_PROGRESS_FIXED_OBSERVATION_CHAIN_PASS_REALTIME_WAVE_LIMITED",
       "evidence": [
         "benchmarks/results/b1-integration-20261019.json",
-        "benchmarks/results/b1-motion-summary.json"
+        "benchmarks/results/b1-motion-summary.json",
+        "benchmarks/results/b1-wave-fix-summary.json"
       ],
       "scope": "Real stationary-palm cancellation passes; three public motion videos did not admit a wave greeting. Resolve compatibility and retain non-passing examples."
     },
     {
       "id": "B1.6",
       "name": "Frozen B1 module/pipeline/coexistence measurements and raw evidence",
-      "status": "PASS_MODULE_PIPELINE_AND_COEXISTENCE_WINDOWS",
+      "status": "R1_MEASURED_R2_REMEASUREMENT_PENDING",
       "evidence": [
         "benchmarks/manifests/b1-vision-measurements-v1.json",
         "benchmarks/results/b1-vision-modules-summary.json",
         "benchmarks/manifests/b1-vision-stream-v1.json",
-        "benchmarks/results/b1-vision-stream-summary.json"
+        "benchmarks/results/b1-vision-stream-summary.json",
+        "benchmarks/results/b1-r2-scope.json"
       ]
     },
     {
@@ -189,7 +191,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-20T00:46:34.475904+00:00",
+  "updated_at": "2026-10-20T01:31:58.458808+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",
@@ -204,5 +206,6 @@
       "parent_capability": "gaze",
       "status": "TRT_REFERENCE_AND_INTEGRATED_PUBLIC_REPLAY_PASS_BROADER_ACCEPTANCE_PENDING"
     }
-  ]
+  ],
+  "current_measurement_protocol": "benchmarks/manifests/b1-vision-measurements-v2.json"
 }

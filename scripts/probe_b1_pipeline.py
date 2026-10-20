@@ -27,7 +27,7 @@ from app.perception_b1 import B1Perception
 from app.gestures import GestureRecognizer
 from app.identity_gallery import IdentityGallery
 from build_vision_b1 import exclusive_build
-from benchmarks.vision_b1_support import validate
+from benchmarks.vision_b1_support import PROTOCOL, validate
 from deploy import runtime, services
 
 
@@ -50,7 +50,7 @@ def probe(output):
         "scope": __doc__,
         "available_before_bytes": psutil.virtual_memory().available,
         "frames": [],
-        "input_protocol": "benchmarks/manifests/b1-vision-measurements-v1.json",
+        "input_protocol": str(PROTOCOL.relative_to(ROOT)),
     }
     try:
         perception.load()

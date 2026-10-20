@@ -32,6 +32,7 @@ DIRECTORIES = (
     "datasets/b0-sw-v1",
     "baselines/b0",
     "baselines/b1-vision-v1",
+    "baselines/b1-vision-v2",
 )
 
 

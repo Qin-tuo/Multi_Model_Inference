@@ -165,7 +165,79 @@ class MovieCamera(Camera):
         )
 
 
-def case(output, cfg, name, rows, duration, expect_stop=False):
+class RecordedMovieCamera(MovieCamera):
+    """Replay a complete recorded selection with consumer backpressure.
+
+    This fixes the RGB observations used for a functional before/after check.
+    It deliberately prevents latest-frame dropping and is not a real-time or
+    throughput test. Actual delivery lag is recorded, never hidden as speedup.
+    """
+
+    def __init__(self, cfg, rows, duration, name, observations):
+        super().__init__(cfg, rows, duration, name)
+        available = {index: (stamp, image) for stamp, index, image in rows}
+        self.selection = []
+        seen = set()
+        for line in observations.read_text().splitlines():
+            row = json.loads(line)
+            if row["kind"] != "scene" or not row.get("frame"):
+                continue
+            frame = row["frame"]
+            key = frame["source_epoch"], frame["frame_id"]
+            if key in seen:
+                continue
+            seen.add(key)
+            sensor = frame["sensor"]
+            if sensor["source"] != name or sensor["media_frame_index"] not in available:
+                raise ValueError("Recorded observation does not belong to this source")
+            if self.selection and (
+                frame["source_epoch"] != self.selection[0]["source_epoch"]
+                or frame["received_monotonic"]
+                <= self.selection[-1]["received_monotonic"]
+            ):
+                raise ValueError("Recorded source must be one ordered epoch")
+            self.selection.append(frame)
+        if not self.selection:
+            raise ValueError("No recorded source observations")
+        self.available = available
+        self.source_origin = self.selection[0]["received_monotonic"]
+        self.cursor, self.awaiting_frame = 0, None
+        self.consumed = threading.Event()
+        self.consumed.set()
+
+    def mark_processed(self, frame_id):
+        if frame_id == self.awaiting_frame:
+            self.consumed.set()
+
+    def _read_frame(self):
+        while not self.consumed.wait(0.05):
+            if self._stop.is_set():
+                return False, None, None
+        if self.cursor == len(self.selection):
+            self.ended.set()
+            self._stop.wait()
+            return False, None, None
+        selected = self.selection[self.cursor]
+        due = self.origin + selected["received_monotonic"] - self.source_origin
+        if self._stop.wait(max(0, due - time.monotonic())):
+            return False, None, None
+        received = time.monotonic()
+        sensor = dict(selected["sensor"])
+        stamp, image = self.available[sensor["media_frame_index"]]
+        sensor.update(
+            received_monotonic=received,
+            source_kind="recorded_selection_with_backpressure",
+            media_timestamp_seconds=stamp,
+            delivery_lag_ms=(received - due) * 1000,
+            original_frame_id=selected["frame_id"],
+        )
+        self.awaiting_frame = self._frame_id + 1
+        self.cursor += 1
+        self.consumed.clear()
+        return True, image, (self.depth, self.valid, sensor)
+
+
+def case(output, cfg, name, rows, duration, expect_stop=False, recorded=None):
     cfg = deepcopy(cfg)
     task = ROOT / "05_runtime/runtime-data/motion-probe" / output.parent.name / name
     cfg.perception.identity_gallery = str(
@@ -178,7 +250,11 @@ def case(output, cfg, name, rows, duration, expect_stop=False):
     cfg.validate()
     runtime.write_json(output / "effective-config.json", cfg.effective())
     events = Events(output / "events.jsonl")
-    camera = MovieCamera(cfg.vision, rows, duration, name)
+    camera = (
+        RecordedMovieCamera(cfg.vision, rows, duration, name, recorded)
+        if recorded
+        else MovieCamera(cfg.vision, rows, duration, name)
+    )
     tracker = FaceTracker(camera, None)
     gestures = GestureRecognizer(
         cfg.gestures, cfg.perception.hand_threshold, cfg.perception.pose_joint_threshold
@@ -200,6 +276,8 @@ def case(output, cfg, name, rows, duration, expect_stop=False):
             decision = controls.control.handle_gesture(event)
             decisions.append(decision)
             events.write(kind="gesture_dispatch", decision=decision)
+        if recorded and scene.get("frame") and scene.get("ready"):
+            camera.mark_processed(scene["frame"]["frame_id"])
 
     perception = B1Perception(camera, cfg.perception, tracker, observed)
     report = {
@@ -207,6 +285,9 @@ def case(output, cfg, name, rows, duration, expect_stop=False):
         "status": "RUNNING",
         "media_seconds": duration,
         "source_samples": len(rows),
+        "replay_mode": "recorded_selection_with_backpressure"
+        if recorded
+        else "real_time_latest_frame",
         "expectation": "stationary_palm_cancel" if expect_stop else "wave_greeting",
     }
     try:
@@ -228,6 +309,8 @@ def case(output, cfg, name, rows, duration, expect_stop=False):
             if last.get("turn_id") and state["phase"] == "idle":
                 results[last["turn_id"]] = deepcopy(last)
             scene = perception.snapshot()
+            if recorded and scene["failures"]:
+                raise RuntimeError("A required recorded observation failed inference")
             if scene["callback_error"]:
                 scene_errors.append(scene["callback_error"])
                 raise RuntimeError(scene["callback_error"])
@@ -296,6 +379,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--protocol", type=Path, default=PROTOCOL)
+    parser.add_argument(
+        "--recorded-observations",
+        type=Path,
+        help="Reproduce a complete prior event log's input selection; requires one video case; not a throughput test",
+    )
     case_names = [Path(name).stem for name, _ in SOURCES] + ["stationary-public-palm"]
     parser.add_argument(
         "--case",
@@ -309,6 +397,10 @@ def main():
     protocol, cfg = validate(args.protocol.resolve())
     root = ROOT / "05_runtime/datasets/b1-motion-candidates"
     selected = set(args.case or case_names)
+    if args.recorded_observations and (
+        len(selected) != 1 or "stationary-public-palm" in selected
+    ):
+        raise ValueError("Recorded observations require exactly one video case")
     clips = []
     for name, digest in SOURCES:
         path = root / name
@@ -334,6 +426,12 @@ def main():
         "runtime_protocol": str(args.protocol.resolve().relative_to(ROOT)),
         "requested_cases": sorted(selected),
     }
+    if args.recorded_observations:
+        report["recorded_selection"] = {
+            "path": str(args.recorded_observations),
+            "sha256": runtime.sha256(args.recorded_observations),
+            "scope": RecordedMovieCamera.__doc__,
+        }
     (output / "probe-source.py").write_bytes(Path(__file__).read_bytes())
     runtime.write_json(
         output / "sources.json", json.loads((root / "sources.json").read_text())
@@ -361,21 +459,26 @@ def main():
                 folder = output / name
                 folder.mkdir()
                 report["cases"][name] = case(
-                    folder, cfg, name, rows, duration, stopping
+                    folder,
+                    cfg,
+                    name,
+                    rows,
+                    duration,
+                    stopping,
+                    args.recorded_observations,
                 )
                 runtime.write_json(output / "report.json", report)
-            report["status"] = (
-                (
-                    "PUBLIC_MOTION_INTERACTIONS_PASS"
-                    if selected == set(case_names)
-                    else "PUBLIC_MOTION_SUBSET_PASS"
-                )
-                if all(
-                    r["status"] == "EXPECTED_INTERACTION_PASS"
-                    for r in report["cases"].values()
-                )
-                else "PUBLIC_MOTION_COVERAGE_INCOMPLETE"
-            )
+            if not all(
+                r["status"] == "EXPECTED_INTERACTION_PASS"
+                for r in report["cases"].values()
+            ):
+                report["status"] = "PUBLIC_MOTION_COVERAGE_INCOMPLETE"
+            elif args.recorded_observations:
+                report["status"] = "RECORDED_OBSERVATION_CHAIN_PASS"
+            elif selected == set(case_names):
+                report["status"] = "PUBLIC_MOTION_INTERACTIONS_PASS"
+            else:
+                report["status"] = "PUBLIC_MOTION_SUBSET_PASS"
         except BaseException as exc:
             report.update(status="FAILED", error=repr(exc))
             raise
@@ -391,6 +494,7 @@ def main():
     if report["status"] not in {
         "PUBLIC_MOTION_INTERACTIONS_PASS",
         "PUBLIC_MOTION_SUBSET_PASS",
+        "RECORDED_OBSERVATION_CHAIN_PASS",
     }:
         raise SystemExit(1)
 

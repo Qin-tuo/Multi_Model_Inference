@@ -33,7 +33,7 @@ from deploy import runtime, services
 from deploy.resource_guard import hold_model_lease
 from probe_coexistence import backend_identity
 
-WORKLOAD = ROOT / "benchmarks/manifests/b1-vision-stream-v1.json"
+WORKLOAD = ROOT / "benchmarks/manifests/b1-vision-stream-v2.json"
 
 
 def protocol_path(spec):

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "created_at": "2026-10-20T01:08:26.500151+00:00",
-  "status": "SOFTWARE_AND_RECORDED_POLICY_REGRESSION_PASS_END_TO_END_AND_REVISION_BASELINE_PENDING",
+  "status": "RECORDED_NEURAL_CHAIN_PASS_LATEST_FRAME_RECALL_LIMITED",
   "before_tag": "before-gesture-wave-fix-20261020",
   "problem": "Every non-open observation cleared all wave history; valid motion during a short palm turn was lost, including motion extrema.",
   "change": "Wave accumulates qualified hand positions through a brief palm turn, requires at least five actual open observations and a currently open hand, and discards history after the existing neutral/rearm interval. Stationary stop still resets immediately on a non-open frame.",
@@ -71,8 +71,81 @@
   },
   "new_regression_fixture": "tests/fixtures/b1-rotating-wave.json",
   "limits": [
-    "Recorded model outputs prove policy behavior, not new TensorRT/video inference or a completed greeting.",
-    "Distant and other low-quality public clips still do not establish wave coverage; retain their results.",
-    "Freeze a new B1 runtime revision and remeasure the integrated pipeline before handoff; original B1/B0 artifacts remain unchanged."
-  ]
+    "Controlled fixed-observation inference/interaction passes; real-time wave recall is still sensitive to selected frames at the current processing rate.",
+    "Do not label the controlled replay as camera timing, live robustness or accuracy acceptance. Original non-passing examples remain retained.",
+    "R2 integrated performance remeasurement, compatible package update/default startup and final handoff are still pending."
+  ],
+  "updated_at": "2026-10-20T01:31:58.451741+00:00",
+  "recorded_neural_chain": {
+    "report": "05_runtime/validation/b1-motion-r2-recorded-20261020/report.json",
+    "sha256": "ec4c8f7116812f5c93e7b5422b0045211ce4e0de285e6ffb0bd79817be2d2af4",
+    "status": "RECORDED_OBSERVATION_CHAIN_PASS",
+    "observations_processed": 57,
+    "frame_failures": 0,
+    "greeting_text": "\u4f60\u597d\uff01",
+    "tts_receipt": "file_written",
+    "scope": "Complete original observation selection replayed with producer backpressure; all 57 selected RGB observations inferred again through real TensorRT and real 4B/TTS. Delivery lag median about 1009.8 ms, max about 2118.3 ms; explicitly not a real-time/throughput pass."
+  },
+  "latest_frame_recheck": {
+    "report": "05_runtime/validation/b1-motion-r2-20261020/report.json",
+    "status": "PUBLIC_MOTION_COVERAGE_INCOMPLETE",
+    "palm_cancel": "PASS",
+    "wave_greeting": "NOT_TRIGGERED",
+    "comparison": "05_runtime/validation/b1-motion-selection-comparison-20261020.json",
+    "comparison_summary": {
+      "scope": "Compare actual sampled source frame indices and observed TensorRT hand outputs; ignore generated track UUIDs.",
+      "source_logs": [
+        {
+          "path": "05_runtime/validation/b1-motion-20261020/handwave-example/events.jsonl",
+          "sha256": "09c174d66978f3815cbae532474a7b10575b835a07d0de4bb29f029d0016fc0d"
+        },
+        {
+          "path": "05_runtime/validation/b1-motion-r2-20261020/handwave-example/events.jsonl",
+          "sha256": "554a7c74de74d0e9e305185ffefdc5821f04732b23752cbefd9c84e09c374336"
+        }
+      ],
+      "common_source_frames": 41,
+      "paired_hand_outputs": 80,
+      "unequal_hand_outputs": [],
+      "different_hand_presence": [],
+      "indices_only_before": [
+        99,
+        159,
+        225,
+        261,
+        267,
+        273,
+        279,
+        285,
+        291,
+        297,
+        303,
+        309,
+        315,
+        321,
+        327,
+        333
+      ],
+      "indices_only_after": [
+        102,
+        162,
+        228,
+        264,
+        270,
+        276,
+        282,
+        288,
+        294,
+        300,
+        306,
+        312,
+        318,
+        324,
+        330,
+        336
+      ],
+      "interpretation": "Runtime pose outputs agree on matched input frames. Real-time scheduling selected different video frames, including a motion extremum; fixed observation replay is needed for the rule before/after check. This does not establish robust wave recall at the current processing rate."
+    }
+  },
+  "revision_protocol": "benchmarks/manifests/b1-vision-measurements-v2.json"
 }

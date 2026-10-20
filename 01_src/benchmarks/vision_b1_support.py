@@ -9,7 +9,7 @@ from app.config import Config
 from deploy import runtime
 from project_paths import ROOT
 
-PROTOCOL = ROOT / "benchmarks/manifests/b1-vision-measurements-v1.json"
+PROTOCOL = ROOT / "benchmarks/manifests/b1-vision-measurements-v2.json"
 
 
 def validate(protocol_path=PROTOCOL):

@@ -205,7 +205,12 @@
     "scope": "Probe now uses bundled frozen inputs rather than an ignored segmentation-reference artifact; all 10 models executed, gallery reopen and public palm events pass."
   },
   "wave_fix": {
-    "status": "REGRESSION_PASS_END_TO_END_AND_NEW_BASELINE_PENDING",
+    "status": "RECORDED_NEURAL_CHAIN_PASS_LATEST_FRAME_RECALL_LIMITED",
     "summary": "benchmarks/results/b1-wave-fix-summary.json"
+  },
+  "runtime_revision": {
+    "name": "B1 R2",
+    "scope": "benchmarks/results/b1-r2-scope.json",
+    "baseline_status": "FROZEN_REMEASUREMENT_PENDING"
   }
 }

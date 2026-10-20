@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "status": "R2_FROZEN_PIPELINE_MEASUREMENTS_PENDING",
+  "runtime_source_commit": "a90ab28dc4bfbbd168d97da3afd7f6c7e6549212",
+  "protocol": "benchmarks/manifests/b1-vision-measurements-v2.json",
+  "workload": "benchmarks/manifests/b1-vision-stream-v2.json",
+  "changed_shared_runtime_files": {
+    "01_src/app/gestures.py": {
+      "before": "d7f6955f0ea598263ce25b811d177f52162f274a983070b10c64caa5da6f5b2b",
+      "after": "e131f2fc761d7762fb091469af09785ce30902b374c9e8fa43bb06b7f03659db"
+    }
+  },
+  "same_input_hashes": true,
+  "same_module_cases": true,
+  "same_effective_config_bytes": true,
+  "observer_parity_cases": 22,
+  "module_metrics_inherited_from": "benchmarks/results/b1-vision-modules-summary.json",
+  "inheritance_scope": "Every shared runtime file except gestures.py is byte-identical, as are selected engine contracts, inputs, module ROI cases and effective configuration. Isolated adapters do not invoke gestures.py. No new per-module performance measurement or speedup is claimed; integrated pipeline is remeasured.",
+  "gesture_evidence": "benchmarks/results/b1-wave-fix-summary.json",
+  "original_baselines_preserved": [
+    "benchmarks/manifests/b1-vision-measurements-v1.json",
+    "benchmarks/manifests/b1-vision-stream-v1.json",
+    "B0 artifacts"
+  ],
+  "rollback_tag": "before-gesture-wave-fix-20261020"
+}
