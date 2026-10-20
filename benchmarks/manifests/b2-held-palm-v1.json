@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "recording": "05_runtime/validation/b1-live-palm-20261020-01.json",
+  "recording_sha256": "d4fc57ef5e86c81482c46a5e08e45018156c999e592fe75987bbc4c2c63ab50c",
+  "frame_interval_inclusive": [
+    28265,
+    28329
+  ],
+  "frame_count": 29,
+  "label": "stationary open palm, complete wrist and five fingers visible",
+  "annotation_basis": "Operator confirmed the held-palm action in the original session; first/middle/last preview frames 28265, 28298 and 28329 were visually reviewed. Segment is selected by observed action, not candidate predictions.",
+  "expected_events": {
+    "required": "stop",
+    "forbidden": "wave"
+  },
+  "scope": "Local lossy JPEG segment. Re-run all selected detection/pose models; use explicit synthetic aligned 1.5m depth to activate tasks. Fresh host frame times and 150ms inter-frame delay test temporal policy; not original sensor replay, field-accuracy, response-time or FPS acceptance. No automatic enrollment or external image upload.",
+  "historical_public_photo": "Retain old model-response comparison separately: bent fingers and cropped hand make that posed photo an ambiguous strict open-palm positive."
+}

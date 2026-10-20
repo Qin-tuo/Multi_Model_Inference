@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Freeze B1 public inputs and runtime contracts after model/observer smoke tests.
+"""Freeze selected visual inputs and runtime contracts after observer smoke tests.
 
 Module ROI arguments come from the selected TensorRT models. Pipeline replay
 uses explicit synthetic aligned depth; live RGBD will be reported separately.
@@ -297,7 +297,7 @@ def main():
     inputs_from = args.inputs_from.resolve() if args.inputs_from else None
     if protocol_path.exists():
         raise FileExistsError(
-            "B1 protocol already exists; do not overwrite a frozen baseline"
+            "Protocol already exists; do not overwrite a frozen baseline"
         )
     if not protocol_path.is_relative_to(ROOT / "benchmarks/manifests") or (
         inputs_from is not None and not inputs_from.is_relative_to(ROOT)
@@ -328,7 +328,7 @@ def main():
         protocol = prepare(output, cfg, inputs_from, config_path)
     protocol["unrelated_worktree_changes"] = dirty.splitlines()
     runtime.write_json(protocol_path, protocol)
-    print("B1 inputs and runtime contracts frozen:", protocol_path, flush=True)
+    print("Visual inputs and runtime contracts frozen:", protocol_path, flush=True)
 
 
 if __name__ == "__main__":

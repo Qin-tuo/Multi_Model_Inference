@@ -166,7 +166,7 @@ previous source/model notices.
 `03_models/candidates/vision-b2.json` pins the three standard model replacements.
 The other seven B1 visual models retain their original artifacts and notices.
 
-- RTMPose-l COCO-WholeBody 2D uses the unmodified MMPose CSPNeXt/RTMCC
+- RTMW-l COCO-WholeBody 2D uses the unmodified MMPose CSPNeXt/PAFPN/RTMW
   network, official 133-point checkpoint and Apache-2.0 sources at revision
   `759b39c13fea6ba094afc1fa932f51dc1b11cbf9`. The runtime NumPy decoder is
   extracted verbatim from `mmpose/codecs/utils/post_processing.py` so unused

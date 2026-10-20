@@ -113,6 +113,7 @@ def pose_model(entry):
     namespaces = (
         "mmpose.models",
         "mmpose.models.backbones",
+        "mmpose.models.necks",
         "mmpose.models.heads",
         "mmpose.models.heads.coord_cls_heads",
         "mmpose.evaluation",
@@ -131,6 +132,8 @@ def pose_model(entry):
     sys.modules["mmpose.models.heads"].BaseHead = BaseHead
     from mmpose.models.backbones.cspnext import CSPNeXt
     from mmpose.models.heads.coord_cls_heads.rtmcc_head import RTMCCHead
+    from mmpose.models.heads.coord_cls_heads.rtmw_head import RTMWHead
+    from mmpose.models.necks.cspnext_pafpn import CSPNeXtPAFPN
     from mmpose.models.data_preprocessors import PoseDataPreprocessor
     from mmpose.datasets.transforms.common_transforms import GetBBoxCenterScale
     from mmpose.datasets.transforms.topdown_transforms import TopdownAffine
@@ -150,14 +153,21 @@ def pose_model(entry):
         def __init__(self):
             super().__init__()
             self.backbone = CSPNeXt(**options("backbone"))
+            if "neck" in config:
+                self.neck = CSPNeXtPAFPN(**options("neck"))
             head = options("head")
             # Training loss and decoding have no inference parameters. Strict
             # state loading verifies that no learned state was omitted.
             head.update(loss=[], decoder=None)
-            self.head = RTMCCHead(**head)
+            self.head = {"RTMCCHead": RTMCCHead, "RTMWHead": RTMWHead}[
+                config["head"]["type"]
+            ](**head)
 
         def forward(self, inputs):
-            return self.head(self.backbone(inputs))
+            features = self.backbone(inputs)
+            if hasattr(self, "neck"):
+                features = self.neck(features)
+            return self.head(features)
 
     model = Network()
     processor = PoseDataPreprocessor(**options("data_preprocessor"))

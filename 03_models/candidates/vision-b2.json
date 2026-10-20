@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "THREE_STANDARD_REPLACEMENTS_PREPARING",
+  "status": "STANDARD_EXPORTS_AND_ADAPTERS_REFERENCE_CHECKED",
   "replaces": [
     "body_hand_pose",
     "face_identity",
@@ -20,20 +20,21 @@
   "rollback_tag": "before-upstream-standard-20261020",
   "models": {
     "body_hand_pose": {
-      "name": "RTMPose-l COCO-WholeBody 2D 133, 384x288",
+      "name": "RTMW-l Cocktail14 COCO-WholeBody 2D 133, 384x288",
       "repository": "https://github.com/open-mmlab/mmpose",
       "revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
       "native_repository_revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
       "source_directory": "05_runtime/frameworks/b1/mmpose",
-      "config_file": "05_runtime/frameworks/b1/mmpose/configs/wholebody_2d_keypoint/rtmpose/coco-wholebody/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py",
+      "config_file": "05_runtime/frameworks/b1/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py",
       "source_checkpoint": {
-        "path": "05_runtime/models/upstream-standard/rtmpose-l_simcc-coco-wholebody_pt-aic-coco_270e-384x288-eaeb96c8_20230125.pth",
-        "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/rtmpose-l_simcc-coco-wholebody_pt-aic-coco_270e-384x288-eaeb96c8_20230125.pth",
-        "sha256": "13ce77ad08808333e2d4f850c632ac6068c837108e15f1c3902dcbcf30842db9",
-        "bytes": 134731115,
-        "origin_etag": "f753c1972ae17ee93cc8bb2fd0c565d7-53",
+        "path": "05_runtime/models/upstream-standard/rtmw-dw-x-l_simcc-cocktail14_270e-384x288-20231122.pth",
+        "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmw/rtmw-dw-x-l_simcc-cocktail14_270e-384x288-20231122.pth",
+        "sha256": "afa589fa16bf8b9bab0807c806538a43bead39ed0151b79f41adcf551e3bcfb0",
+        "bytes": 230299153,
+        "origin_etag": "\"AA9ACBA4D32A93913012C33A1F05252A\"",
         "source_revision": "759b39c13fea6ba094afc1fa932f51dc1b11cbf9",
-        "config": "05_runtime/frameworks/b1/mmpose/configs/wholebody_2d_keypoint/rtmpose/coco-wholebody/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py"
+        "seconds": 41.772566247032955,
+        "config": "05_runtime/frameworks/b1/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py"
       },
       "native_sources": {
         "LICENSE": {
@@ -96,17 +97,26 @@
           "bytes": 17070,
           "url": "https://raw.githubusercontent.com/open-mmlab/mmpose/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/mmpose/structures/bbox/transforms.py"
         },
-        "configs/wholebody_2d_keypoint/rtmpose/coco-wholebody/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py": {
-          "path": "05_runtime/frameworks/b1/mmpose/configs/wholebody_2d_keypoint/rtmpose/coco-wholebody/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py",
-          "sha256": "e2734805f6940dd6c6c4113243416e412e470e4c63e7db8307feb9f28440ee49",
-          "bytes": 6676,
-          "url": "https://raw.githubusercontent.com/open-mmlab/mmpose/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/configs/wholebody_2d_keypoint/rtmpose/coco-wholebody/rtmpose-l_8xb32-270e_coco-wholebody-384x288.py"
+        "configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py": {
+          "path": "05_runtime/frameworks/b1/mmpose/configs/wholebody_2d_keypoint/rtmpose/cocktail14/rtmw-l_8xb320-270e_cocktail14-384x288.py",
+          "sha256": "a0021a3d5201fbc1927c59adbac4e8c91c336b8014a492eb629269df16545904",
+          "bytes": 17512
+        },
+        "mmpose/models/heads/coord_cls_heads/rtmw_head.py": {
+          "path": "05_runtime/frameworks/b1/mmpose/mmpose/models/heads/coord_cls_heads/rtmw_head.py",
+          "sha256": "1524b6706738ae5046d1b763ae3a316be0569e0be450ab2f9b64f7a2cd51e75c",
+          "bytes": 12124
+        },
+        "mmpose/models/necks/cspnext_pafpn.py": {
+          "path": "05_runtime/frameworks/b1/mmpose/mmpose/models/necks/cspnext_pafpn.py",
+          "sha256": "4cd1961e5a54ee6489fe3546eabf15826f79ac34ff5f64fb1a4ae0652d8031b6",
+          "bytes": 6797
         }
       },
       "license": "Apache-2.0",
       "adapter": "rtmpose2d",
-      "path": "05_runtime/models/b2/body_hand_pose-l/model.onnx",
-      "sha256": "89083ea7e961eb7a80da31de277e55839c6711450ac418c6d82497d208bcbb83",
+      "path": "05_runtime/models/b2/body_hand_pose-rtmw-l/model.onnx",
+      "sha256": "b3a6524ff48ad048a3f2ddcf807922d3174e52d88afe5f9a9f95f60b477d2aff",
       "input_size_wh": [
         288,
         384
@@ -170,7 +180,7 @@
       },
       "output_semantics": "COCO-WholeBody 133 xy keypoints and SimCC peak scores. Hands 91:112 and 112:133. No learned z; native D435i distance remains separate.",
       "input_contract_status": "EXPORTED_NATIVE_ONNX_FIXED_INPUT_PARITY_PASS",
-      "bytes": 134451152,
+      "bytes": 229411368,
       "observed_onnx_contract": {
         "inputs": [
           {
@@ -205,7 +215,7 @@
           }
         ]
       },
-      "export_report": "05_runtime/validation/b2-export-l-20261020/body_hand_pose/export.json"
+      "export_report": "05_runtime/validation/b2-export-rtmw-l-20261020/body_hand_pose/export.json"
     },
     "face": {
       "name": "YuNet 2023mar",

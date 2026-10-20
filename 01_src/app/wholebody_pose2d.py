@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Official RTMPose whole-body xy output; metric depth belongs to the camera."""
+"""Official RTMPose/RTMW xy output; metric depth belongs to the camera."""
 
 import cv2
 import numpy as np

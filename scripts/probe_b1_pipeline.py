@@ -32,7 +32,42 @@ from benchmarks.vision_b1_support import PROTOCOL, validate
 from deploy import runtime, services
 
 
-def probe(output, protocol_path=PROTOCOL, config_path=None):
+def held_palm_images(fixture_path):
+    """Load an independently labeled segment; never select frames by predictions."""
+    fixture = json.loads(fixture_path.read_text())
+    recording = ROOT / fixture["recording"]
+    if runtime.sha256(recording) != fixture["recording_sha256"]:
+        raise ValueError("Held-palm recording changed")
+    record = json.loads(recording.read_text())
+    first, last = fixture["frame_interval_inclusive"]
+    rows = [
+        row
+        for row in record["preview"]["frames"]
+        if first <= row["frame"]["frame_id"] <= last
+    ]
+    if len(rows) != fixture["frame_count"] or not 5 <= len(rows) <= 300:
+        raise ValueError("Held-palm segment is incomplete or unbounded")
+    images = []
+    for row in rows:
+        path = (ROOT / row["path"]).resolve()
+        if (
+            not path.is_relative_to(ROOT / "05_runtime/validation")
+            or runtime.sha256(path) != row["sha256"]
+        ):
+            raise ValueError("Held-palm preview changed")
+        image = cv2.imread(str(path))
+        if image is None or image.shape != (480, 640, 3):
+            raise ValueError("Held-palm preview geometry changed")
+        images.append(image)
+    return images, {
+        "path": str(fixture_path.relative_to(ROOT)),
+        "sha256": runtime.sha256(fixture_path),
+        "frames": len(images),
+        "scope": fixture["scope"],
+    }
+
+
+def probe(output, protocol_path=PROTOCOL, config_path=None, gesture_fixture=None):
     if config_path is None:
         protocol, cfg = validate(protocol_path)
     else:
@@ -69,14 +104,26 @@ def probe(output, protocol_path=PROTOCOL, config_path=None):
     try:
         perception.load()
         report["after_load_available_bytes"] = psutil.virtual_memory().available
+        sequences = []
         for name in ("public-person", "bus"):
             # Frozen inputs ship with the runtime bundle. A fresh checkout must
             # not depend on another experiment's ignored validation directory.
             image = np.load(ROOT / protocol["inputs"][name]["path"], allow_pickle=False)
+            sequences.append((name, [image] * (7 if name == "public-person" else 3)))
+        if gesture_fixture:
+            images, report["gesture_fixture"] = held_palm_images(gesture_fixture)
+            sequences.append(("recorded-held-palm", images))
+            report["public_palm_scope"] = (
+                "Historical B1 response retained as a comparison, not a gesture "
+                "label: the posed photo has bent fingers and a cropped hand. "
+                "The separately labeled complete held-palm segment must emit stop "
+                "and no wave. Gesture rules and thresholds are unchanged."
+            )
+        for name, images in sequences:
             camera.source_epoch = name
             tracker._reset()
             events_seen = []
-            for index in range(7 if name == "public-person" else 3):
+            for index, image in enumerate(images):
                 stamp = time.monotonic()
                 _, jpeg = cv2.imencode(".jpg", image)
                 frame = FrameSnapshot(
@@ -146,11 +193,19 @@ def probe(output, protocol_path=PROTOCOL, config_path=None):
                 # this delay is not part of a throughput measurement.
                 time.sleep(0.15)
             if name == "public-person":
-                if not any(e["kind"] == "stop" for e in events_seen):
+                report["public_palm_events"] = events_seen
+                if not gesture_fixture and not any(
+                    e["kind"] == "stop" for e in events_seen
+                ):
                     raise RuntimeError(
                         "Repeated public open-palm pose did not trigger stop"
                     )
-                report["public_palm_events"] = events_seen
+            if name == "recorded-held-palm":
+                report["recorded_palm_events"] = events_seen
+                if not any(e["kind"] == "stop" for e in events_seen) or any(
+                    e["kind"] == "wave" for e in events_seen
+                ):
+                    raise RuntimeError("Labeled held-palm segment must stop, not wave")
         report["models"] = perception.networks.snapshot()
         if not all(row["calls"] > 0 for row in report["models"].values()):
             raise RuntimeError("Some B1 models were never exercised")
@@ -191,13 +246,23 @@ def main():
         type=Path,
         help="Candidate integration using only the protocol's input pixels",
     )
+    parser.add_argument(
+        "--gesture-fixture",
+        type=Path,
+        help="Pinned operator-confirmed held-palm segment for explicit gesture acceptance",
+    )
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     cfg = runtime.config()
     cfg = runtime.config(services.profile_path(cfg))
     with exclusive_build(cfg, output):
-        probe(output, args.protocol, args.config)
+        probe(
+            output,
+            args.protocol,
+            args.config,
+            args.gesture_fixture.resolve() if args.gesture_fixture else None,
+        )
 
 
 if __name__ == "__main__":

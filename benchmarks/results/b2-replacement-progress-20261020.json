@@ -1,19 +1,25 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20T06:50:57.483273+00:00",
-  "status": "THREE_REPLACEMENTS_REFERENCE_CHECKED_L_POSE_REPLAY_OBSERVED_INTEGRATION_PENDING",
+  "updated_at": "2026-10-20T07:11:47.357115+00:00",
+  "status": "B2_DEFAULT_READY_FUNCTIONAL_PASS_BASELINE_PENDING",
   "authorized_replacements": [
     "body_hand_pose",
     "face_identity",
     "person_reid"
   ],
+  "selected_models": {
+    "body_hand_pose": "RTMW-l Cocktail14 COCO-WholeBody 2D 133, 384x288",
+    "face_identity": "ArcFace MobileNetV1 official CASIA-WebFace v1.1",
+    "person_reid": "OSNet x1.0 MSMT17 combineall official"
+  },
   "retained_model_count": 7,
-  "default_profile": "B1; B2 not selected by default",
+  "retained_sources_and_engines_identical": true,
+  "default_profile": "02_config/settings.orin-nx-b2.yaml; four services READY",
   "rollback_tag": "before-upstream-standard-20261020",
   "export_reports": {
     "body_hand_pose": {
-      "path": "05_runtime/validation/b2-export-l-20261020/body_hand_pose/export.json",
-      "sha256": "079e768f5e2ca6c787e987220d63e5b35079b4027a2324e9825a79eddd5fcd39"
+      "path": "05_runtime/validation/b2-export-rtmw-l-20261020/body_hand_pose/export.json",
+      "sha256": "967b8c2aaddf866d111f807ea2f9ab90822d23f8af7435abc629734ff2b37c88"
     },
     "face_identity": {
       "path": "05_runtime/validation/b2-export-20261020/face_identity/export.json",
@@ -26,8 +32,8 @@
   },
   "trt_parity": {
     "body_hand_pose": {
-      "path": "05_runtime/validation/b2-build-l-20261020/body_hand_pose/parity.json",
-      "sha256": "d24436e84e37d5a22c2978837e72a2c470fa57bcb790a9871648ddb342bacb1f"
+      "path": "05_runtime/validation/b2-build-rtmw-l-20261020/body_hand_pose/parity.json",
+      "sha256": "5ca7162ff8ec6fa3930474aff8b7cc4668c61a4df566737c6471f75f0615e767"
     },
     "face_identity": {
       "path": "05_runtime/validation/b2-build-20261020/face_identity/parity.json",
@@ -38,63 +44,74 @@
       "sha256": "7ef66e939721288b93ca4dae028a4bea8d046cd2219ac475d070954f9a81da67"
     }
   },
-  "known_failure": "RTMPose-m is rejected for the saved held-palm miss. RTMPose-l now emits stop on that sequence; event timing/counts differ from B1 and do not establish field accuracy. Full integration remains pending.",
-  "software_tests": {
-    "passed": 276,
-    "junit": {
-      "path": "05_runtime/validation/b2-software-tests-l-20261020.xml",
-      "sha256": "5b2e6e566a9909a9003226e013f738910e1b2ea89202175d250d4631c5fe69e3"
-    },
-    "scope": "276 tests passed before concurrent unrelated benchmark-coordinator edits; selected-runtime inventory subsequently verified for all 10 models and 17 artifacts."
+  "pipeline_probe": {
+    "path": "05_runtime/validation/b2-pipeline-rtmw-l-20261020/report.json",
+    "sha256": "90635c728d94f8b8390887f044bcc6091489d79c680246be8ec7a2acc58cad5a"
   },
-  "not_claimed": [
-    "Model accuracy or runtime performance improvement",
-    "Live human gesture validation of the replacement",
-    "B2 deployment acceptance"
-  ],
+  "service_probe": {
+    "path": "05_runtime/validation/b2-services-20261020/report.json",
+    "sha256": "5e1ca39cb26f6a4de5c81734ff07342b945b840d4bc60520b5e2dafddcf8d15b"
+  },
+  "gesture_oracle_revision": {
+    "fixture": {
+      "path": "benchmarks/manifests/b2-held-palm-v1.json",
+      "sha256": "8202f62a87ca5963df5acfab9b82d76f02c6f44d88f4c3cf6399b3318fd0a9f4"
+    },
+    "reason": "Public posed photo has bent fingers and a cropped hand; old model output is not gesture ground truth. Preserve differences, and require stop with no wave on a separately labeled complete held-palm segment.",
+    "rules_or_thresholds_changed": false,
+    "held_palm_pipeline_result": "stop at frame 6; no wave; all 10 models exercised"
+  },
   "rejected_candidate": {
     "name": "RTMPose-m 256x192",
-    "reason": "Unchanged gesture rules produced no stop on the saved real held-palm sequence; do not deploy based on numerical parity alone.",
+    "reason": "No stop on the saved real held-palm sequence",
     "recorded_regression": {
       "path": "05_runtime/validation/b2-pose-recorded-regression-20261020/summary.json",
       "sha256": "0737177f6a5c8374578d456fb80e98991340e646b225abe8ce3bac863ca56001"
+    }
+  },
+  "retained_candidate_evidence": {
+    "rtmpose_l": {
+      "path": "05_runtime/validation/b2-pose-recorded-l-20261020/summary.json",
+      "sha256": "224c5ea61199d2bb0da39b80724927efea069dc8bc52e11323b9dcb636818037"
     },
-    "public_pipeline_probe": {
+    "old_public_probe_m": {
       "path": "05_runtime/validation/b2-pipeline-20261020/report.json",
       "sha256": "6f2c43aac15461b7193afe1fe143c2633b42331ce45d5f9b11b7465e434fd782"
+    },
+    "old_public_probe_l": {
+      "path": "05_runtime/validation/b2-pipeline-l-20261020/report.json",
+      "sha256": "75c466b619cb8a6ac2585e79910309537e35b35b1f1f8615545c4825d6aa875a"
     }
   },
   "recorded_pose_regression": {
-    "path": "05_runtime/validation/b2-pose-recorded-l-20261020/summary.json",
-    "sha256": "224c5ea61199d2bb0da39b80724927efea069dc8bc52e11323b9dcb636818037",
-    "scope": "Saved lossy JPEGs with recorded detector ROIs, times and target associations; no fresh live accuracy or performance acceptance.",
-    "observations": [
-      {
-        "recording": "05_runtime/validation/b1-live-wave-20261020-01.json",
-        "events": [
-          "wave",
-          "wave",
-          "wave",
-          "wave",
-          "wave"
-        ],
-        "missing_previews": 1
-      },
-      {
-        "recording": "05_runtime/validation/b1-live-palm-20261020-01.json",
-        "events": [
-          "stop"
-        ],
-        "missing_previews": 1
-      },
-      {
-        "recording": "05_runtime/validation/b1-live-wave-20261020-02.json",
-        "events": [
-          "stop",
-          "stop"
-        ],
-        "missing_previews": 0
-      }
-    ]
+    "path": "05_runtime/validation/b2-pose-recorded-rtmw-l-20261020/summary.json",
+    "sha256": "a8e2a7da61ad84e3d389673086fe41900fc8640a5c00d44129edc0876095eba7"
+  },
+  "software_tests": {
+    "passed": 280,
+    "junit": {
+      "path": "05_runtime/validation/b2-software-tests-final-20261020.xml",
+      "sha256": "3091604aa9c893a086d9b2441b7af911fd9edff3d144d67d8eb6c3fb742d0c33"
+    },
+    "scope": "Current worktree suite including three unrelated benchmark-coordinator tests; deployment/model code and tests committed independently."
+  },
+  "baseline": {
+    "status": "PENDING",
+    "comparison_rule": "Model revision, not same-model performance optimization"
+  },
+  "not_claimed": [
+    "Field gesture precision or recall; complete multi-person/occlusion coverage",
+    "Live human gesture revalidation of the replacement",
+    "Calibrated face FAR/FRR",
+    "Physical microphone/speaker validation",
+    "Industrial long-duration acceptance"
+  ],
+  "default_switch": {
+    "path": "05_runtime/validation/b2-default-switch-20261020/after.json",
+    "sha256": "5cddff63cb1c5949c22162cbeb9dced96f826bffb3815e517160c7687b05a20b"
+  },
+  "browser_probe": {
+    "path": "05_runtime/validation/b2-browser-20261020/browser.json",
+    "sha256": "cdd5f560bdf1615a69f4aefaf42beb2d5f58acefc058efcb65273f1ed812a16e"
   }
 }

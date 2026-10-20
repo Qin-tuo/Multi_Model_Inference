@@ -1,4 +1,4 @@
-# B2: standard RTMPose 2D, ArcFace-MobileNetV1, OSNet x1.0; seven B1 models retained.
+# B2: standard RTMW-l 2D, ArcFace-MobileNetV1, OSNet x1.0; seven B1 models retained.
 llm:
   model: assistant-vlm
   base_url: http://127.0.0.1:8088

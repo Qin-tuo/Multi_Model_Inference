@@ -90,7 +90,12 @@ def native_cases(role, model, extras, folder):
             extra["decoded_xy"] = (
                 points / np.array(extras["input_size"]) * scale + center - 0.5 * scale
             )
-            extra["decoded_scores"] = scores
+            # RTMW's official codec additionally returns visibility. The
+            # application uses the original peak score for its existing gate.
+            if isinstance(scores, tuple):
+                extra["decoded_scores"], extra["decoded_visibility"] = scores
+            else:
+                extra["decoded_scores"] = scores
         target = folder / f"case-{index}.npz"
         np.savez(
             target,

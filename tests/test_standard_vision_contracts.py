@@ -13,8 +13,11 @@ from app.vision_models import contract_hash
 from test_gesture_rules import hand, scene
 
 
-def test_two_dimensional_hand_coordinates_preserve_temporal_policy():
-    positions = [0, 50, 100, 50, 0, 50, 100]
+@pytest.mark.parametrize(
+    "positions, expected",
+    [([0, 50, 100, 50, 0, 50, 100], "wave"), ([0] * 8, "stop")],
+)
+def test_two_dimensional_hand_coordinates_preserve_temporal_policy(positions, expected):
     observed = []
     for dimensions in (2, 3):
         recognizer = GestureRecognizer(GestureConfig())
@@ -29,7 +32,7 @@ def test_two_dimensional_hand_coordinates_preserve_temporal_policy():
             [(e["kind"], e["first_frame_id"], e["frame_id"]) for e in events]
         )
     assert observed[0] == observed[1]
-    assert [kind for kind, *_ in observed[0]] == ["wave"]
+    assert [kind for kind, *_ in observed[0]] == [expected]
 
 
 def test_new_face_dimension_keeps_old_labels_and_refuses_cross_space_matching(tmp_path):

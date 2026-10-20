@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "REPLACEMENTS_REFERENCE_CHECKED_INTEGRATION_PENDING",
+  "status": "REFERENCE_AND_FUNCTIONAL_CHECKED_LIMITED_SCOPE",
   "tensorrt_version": "10.16.2.10",
   "runtime_versions": {
     "numpy": "1.26.4",
@@ -15,9 +15,9 @@
   "models": {
     "body_hand_pose": {
       "role": "body_hand_pose",
-      "engine_path": "05_runtime/models/b2/runtime/body_hand_pose-89083ea7e961.fp32.engine",
-      "engine_sha256": "26796ba37c0c6eddf0ff9401a69adb98b2c0c851d08643950611f9f0346c797e",
-      "onnx_sha256": "89083ea7e961eb7a80da31de277e55839c6711450ac418c6d82497d208bcbb83",
+      "engine_path": "05_runtime/models/b2/runtime/body_hand_pose-b3a6524ff48a.fp32.engine",
+      "engine_sha256": "262fa74964f47429566602e1686965601da4e343b091b47082b56d7442240ccf",
+      "onnx_sha256": "b3a6524ff48ad048a3f2ddcf807922d3174e52d88afe5f9a9f95f60b477d2aff",
       "input_shapes": {
         "input": [
           1,
@@ -26,10 +26,10 @@
           288
         ]
       },
-      "engine_bytes": 150283484,
+      "engine_bytes": 254061980,
       "precision": "FP32; TF32 disabled",
-      "candidate_contract_sha256": "7055c0d7d6ee4ce3b5462ff60447bde3aebed75dfa9eeab244ec49a54fb8eadb",
-      "source_build": "05_runtime/validation/b2-build-l-20261020/body_hand_pose/build.json"
+      "candidate_contract_sha256": "fef36543de143989d09d6fe5457d255bc6e0eb2f696105af873939d68f9b9f99",
+      "source_build": "05_runtime/validation/b2-build-rtmw-l-20261020/body_hand_pose/build.json"
     },
     "face": {
       "role": "face",

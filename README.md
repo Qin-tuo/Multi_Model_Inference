@@ -2,13 +2,13 @@
 
 本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
 
-当前默认启动 **B1 R2：公开视觉模型的 TensorRT 部署与链路复现**。10 个视觉 TensorRT 模型已接通，单模块及七组整链路/共存基线已测量，R2 运行包已通过独立副本离线恢复，默认启动、相机和调试页面已验证。张掌已取消真实生成轮次；固定选帧回放完成了挥手问候，但实时采样仍有漏触发，保持未验收。B0 工件与历史数据继续保留。
+当前默认启动 **B2：三个标准视觉模型替换**。人体／手部采用 RTMW-L 2D，人脸特征采用 ArcFace-MobileNetV1，行人 ReID 采用 OSNet x1.0，另外七个视觉模型保持 B1，仍统一使用 TensorRT。参考一致性、十模型回放、张掌正样本与四服务共存通过；新性能基线待测量。真人手势精度与实体声学验收仍开放，B1 历史工件和数据保留。
 
-B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT 用于视觉神经网络。神经双目深度按用户决定后置，不作为本阶段验收项。
+深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT 用于视觉神经网络。神经双目深度按用户决定后置，不作为本阶段验收项。
 
-[B1 当前目标与实施边界](docs/implementation-plan.md#b1-当前阶段目标) · [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)。交付 B1 后由用户亲自使用专业工具分析和优化；实物声学、机身控制、导航及长期记忆继续后置。
+[B2 替换说明与回退](docs/b2-model-replacements.md) · [B2 验证进度](benchmarks/results/b2-replacement-progress-20261020.json) · [B1 能力范围](benchmarks/manifests/vision-b1-v1.json)。后续由用户亲自使用专业工具分析和优化；实物声学、机身控制、导航及长期记忆继续后置。
 
-[B1 启动、代码阅读与首次视觉实验](docs/b1-handoff.md) · [B1 实测数据和复现口径](docs/visual-baseline.md)。B1 交接尚未完成，不把已有基线数据当作整体验收通过。
+[B1 历史交接入口](docs/b1-handoff.md) · [B1 历史实测数据和复现口径](docs/visual-baseline.md)。B1 数据对应旧模型和源码，不能充当 B2 的当前性能指标。
 
 [项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)
 
@@ -22,9 +22,9 @@ B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT �
 ./run.sh services down
 ```
 
-`run.sh` 使用项目自带的 Python 环境，默认选择 `02_config/settings.orin-nx-b1.yaml`；已有 `EDGE_ASSISTANT_CONFIG` 或显式 `--config` 可覆盖。原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
+`run.sh` 使用项目自带的 Python 环境，默认选择 `02_config/settings.orin-nx-b2.yaml`；已有 `EDGE_ASSISTANT_CONFIG` 或显式 `--config` 可覆盖。原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
 
-运行依赖存放在 `05_runtime/` 并排除出普通 Git 提交。旧 B0 包约 6 GB，包含新增视觉模型的 B1 包约 7.14 GB。本机项目已具备这些依赖；**单独克隆 Git 仓库后，需要恢复匹配的运行包**。运行包不包含笔记数据库、录音、回复和日志，恢复步骤见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)。
+运行依赖存放在 `05_runtime/` 并排除出普通 Git 提交。本机已准备 B2 所需模型与环境；**单独克隆 Git 仓库不会取得这些工件**。已有 B1 R2 运行包不含三个新增 B2 模型，不能直接作为 B2 完整恢复包。历史恢复说明见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)，新增模型来源与验证见 [B2 说明](docs/b2-model-replacements.md)。
 
 ## 在 VS Code 中阅读和跳转代码
 
@@ -43,8 +43,8 @@ B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT �
 ```bash
 cd /home/nvidia/Multi_Model_Inference
 source ./05_runtime/environments/edge-assistant/bin/activate
-# 直接调用 Python 时显式选择 B1；run.sh 已设置此默认值。
-export EDGE_ASSISTANT_CONFIG="$PWD/02_config/settings.orin-nx-b1.yaml"
+# 直接调用 Python 时显式选择 B2；run.sh 已设置此默认值。
+export EDGE_ASSISTANT_CONFIG="$PWD/02_config/settings.orin-nx-b2.yaml"
 
 # 结束当前对话后，停止本项目四个服务，确认 STOPPED。
 python main.py services down
@@ -139,7 +139,7 @@ references/                原有学习参考子模块
 | 6 | [01_src/app/pipeline.py](01_src/app/pipeline.py)、[01_src/app/audio.py](01_src/app/audio.py) | VAD、文本分块、PCM 队列和文件提交如何协作？ |
 | 7 | [01_src/app/web.py](01_src/app/web.py)、[01_src/app/web_limits.py](01_src/app/web_limits.py)、[01_src/app/diagnostics.py](01_src/app/diagnostics.py)、[04_web/](04_web) | 网页输入、慢客户端和板端观测如何接入？ |
 
-配置由 [01_src/app/config.py](01_src/app/config.py) 加载基础 `02_config/settings.yaml` 和所选 overlay。`run.sh` 默认选择 B1；直接执行 Python 且没有配置环境变量/参数时仍沿用历史 B0 overlay，因此请按上面的命令显式设置。启动后四个服务共用一份冻结配置，位置见部署说明。
+配置由 [01_src/app/config.py](01_src/app/config.py) 加载基础 `02_config/settings.yaml` 和所选 overlay。`run.sh` 默认选择 B2；直接执行 Python 且没有配置环境变量/参数时仍沿用历史 B0 overlay，因此请按上面的命令显式设置。启动后四个服务共用一份冻结配置，位置见部署说明。
 
 ## 网页调试与基线
 
@@ -163,7 +163,7 @@ python -m pytest -q
 
 `tests/` 为软件回归；真实模型/设备验证位于 `scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
 
-当前目标及剩余项见 [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)；[原 B0 任务清单](benchmarks/manifests/headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/gap-ledger-v3.json)保留为历史记录。性能优化由用户执行和判断，助手提供指导与审查。
+当前替换状态见 [B2 记录](benchmarks/results/b2-replacement-progress-20261020.json)，原能力范围和未完成项见 [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)；[原 B0 任务清单](benchmarks/manifests/headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/gap-ledger-v3.json)保留为历史记录。性能优化由用户执行和判断，助手提供指导与审查。
 
 旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前验证证据、模型数据、许可证及固定旧运行快照保持保留。
 
