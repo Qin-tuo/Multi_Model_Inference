@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-20T00:43:59.768013+00:00",
+  "updated_at": "2026-10-20T01:07:30.246188+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -60,8 +60,8 @@
     "b0_frozen_protocol_and_inputs": "validate() PASS; original bytes preserved",
     "after_final_flag_guard": "30 targeted tests passed, including 2 new partial-pipeline rejection cases",
     "latest_full_suite": {
-      "passed": 256,
-      "junit": "05_runtime/validation/b1-lifecycle-tests-20261019.xml"
+      "passed": 268,
+      "junit": "05_runtime/validation/b1-gesture-revision-tests-20261020.xml"
     },
     "latest_targeted": {
       "passed": 36,
@@ -170,7 +170,14 @@
       "no_result_samples": 0,
       "restored": "READY"
     },
-    "live": "PENDING",
+    "live": {
+      "summary": "benchmarks/results/b1-soak-live-summary.json",
+      "seconds": 600,
+      "completed_frames": 2996,
+      "complete_conversation_turns_inside_window": 265,
+      "restored": "READY",
+      "runtime_revision": "before-gesture-wave-fix-20261020"
+    },
     "scope": "Short bounded stability evidence; not industrial long-term qualification; resource drift recorded without a zero-leak claim"
   },
   "deployment_restore": {
@@ -196,5 +203,9 @@
     "status": "COMPLETE_PIPELINE_PUBLIC_REPLAY_PASS_LIMITED_SCOPE",
     "raw_report": "05_runtime/validation/b1-pipeline-bundled-inputs-20261020/report.json",
     "scope": "Probe now uses bundled frozen inputs rather than an ignored segmentation-reference artifact; all 10 models executed, gallery reopen and public palm events pass."
+  },
+  "wave_fix": {
+    "status": "REGRESSION_PASS_END_TO_END_AND_NEW_BASELINE_PENDING",
+    "summary": "benchmarks/results/b1-wave-fix-summary.json"
   }
 }

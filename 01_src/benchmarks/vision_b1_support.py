@@ -12,8 +12,8 @@ from project_paths import ROOT
 PROTOCOL = ROOT / "benchmarks/manifests/b1-vision-measurements-v1.json"
 
 
-def validate():
-    protocol = json.loads(PROTOCOL.read_text())
+def validate(protocol_path=PROTOCOL):
+    protocol = json.loads(Path(protocol_path).read_text())
     for path, expected in protocol["locked_files"].items():
         if runtime.sha256(ROOT / path) != expected:
             raise ValueError("B1 frozen file changed: " + path)

@@ -56,6 +56,9 @@ class _Track:
 
     def clear_evidence(self):
         self.samples.clear()
+        self.clear_stationary()
+
+    def clear_stationary(self):
         self.stationary_anchor = None
         self.stationary_since = None
         self.stationary_count = 0
@@ -192,6 +195,14 @@ class GestureRecognizer:
         return result
 
     def _wave(self, samples):
+        # Natural waving can briefly turn the palm away from the camera. Its
+        # valid motion still counts, but the gesture needs enough actual open
+        # observations and a currently open hand. A closed fist cannot greet.
+        if (
+            not samples[-1]["open"]
+            or sum(s["open"] for s in samples) < self.config.min_observations
+        ):
+            return False
         amplitude = self.config.wave_swing_palm_widths * float(
             np.median([x["scale"] for x in samples])
         )
@@ -276,12 +287,36 @@ class GestureRecognizer:
                 sample["handedness"],
             )
             track.seen = stamp
-            if not sample["open"]:
+            # A neutral interval rearms a latched gesture and also discards
+            # earlier motion. This check includes the first reopened frame.
+            if (
+                track.neutral_since is not None
+                and stamp - track.neutral_since >= cfg.rearm_seconds
+            ):
                 track.clear_evidence()
+                track.latched = False
+            if not track.latched:
+                track.samples.append(
+                    {
+                        "time": stamp,
+                        "frame_id": index,
+                        "x": sample["motion_x"],
+                        "scale": sample["scale"],
+                        "open": sample["open"],
+                    }
+                )
+                while (
+                    track.samples
+                    and stamp - track.samples[0]["time"] > cfg.wave_window_seconds
+                ):
+                    track.samples.popleft()
+            if not sample["open"]:
+                # Stop must be continuously open and stationary. Wave keeps
+                # only a brief, observed turn of the palm; missing or invalid
+                # observations still clear both histories below.
+                track.clear_stationary()
                 if track.neutral_since is None:
                     track.neutral_since = stamp
-                if stamp - track.neutral_since >= cfg.rearm_seconds:
-                    track.latched = False
                 status.append(
                     {
                         "source_id": track.id,
@@ -292,19 +327,6 @@ class GestureRecognizer:
                 continue
             track.neutral_since = None
             if not track.latched:
-                track.samples.append(
-                    {
-                        "time": stamp,
-                        "frame_id": index,
-                        "x": sample["motion_x"],
-                        "scale": sample["scale"],
-                    }
-                )
-                while (
-                    track.samples
-                    and stamp - track.samples[0]["time"] > cfg.wave_window_seconds
-                ):
-                    track.samples.popleft()
                 if (
                     track.stationary_anchor is None
                     or np.max(

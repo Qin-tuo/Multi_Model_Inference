@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-20T01:08:26.500151+00:00",
+  "status": "SOFTWARE_AND_RECORDED_POLICY_REGRESSION_PASS_END_TO_END_AND_REVISION_BASELINE_PENDING",
+  "before_tag": "before-gesture-wave-fix-20261020",
+  "problem": "Every non-open observation cleared all wave history; valid motion during a short palm turn was lost, including motion extrema.",
+  "change": "Wave accumulates qualified hand positions through a brief palm turn, requires at least five actual open observations and a currently open hand, and discards history after the existing neutral/rearm interval. Stationary stop still resets immediately on a non-open frame.",
+  "unchanged": [
+    "Model weights, TensorRT engines and precision",
+    "Input/score/size/association/range thresholds",
+    "Wave amplitude, reversal count, time window and minimum open observation count",
+    "Stationary hold duration and whole-turn cancellation owner",
+    "Bounded queues and source/target/expiry guards"
+  ],
+  "diagnostic_raw": "05_runtime/validation/b1-motion-analysis-20261020-fixed-policy.json",
+  "diagnostic_sha256": "407a8b1387fe71017de7f7fec8503f980b0bc9084122d8b738c80216e99f41cf",
+  "legacy_policy_regression": {
+    "scope": "Policy-only regression on recorded B0 D435i/MediaPipe landmarks. No RGB exists for B1 model replay; no new real-person accuracy claim. Missing observer timestamps use last completion for invalid snapshots; next valid frame resets temporal ownership.",
+    "source_sha256": "628f13c52111498c6d595abc2b1822684d742c81da59b53a1c4e6da503120b29",
+    "sample_count": 738,
+    "events": {
+      "original": [
+        {
+          "kind": "stop",
+          "frame_id": 155
+        },
+        {
+          "kind": "wave",
+          "frame_id": 329
+        },
+        {
+          "kind": "wave",
+          "frame_id": 401
+        },
+        {
+          "kind": "stop",
+          "frame_id": 899
+        },
+        {
+          "kind": "stop",
+          "frame_id": 1243
+        }
+      ],
+      "fixed": [
+        {
+          "kind": "stop",
+          "frame_id": 155
+        },
+        {
+          "kind": "wave",
+          "frame_id": 329
+        },
+        {
+          "kind": "wave",
+          "frame_id": 401
+        },
+        {
+          "kind": "stop",
+          "frame_id": 899
+        },
+        {
+          "kind": "stop",
+          "frame_id": 1243
+        }
+      ]
+    }
+  },
+  "software_tests": {
+    "passed": 268,
+    "junit": "05_runtime/validation/b1-gesture-revision-tests-20261020.xml"
+  },
+  "new_regression_fixture": "tests/fixtures/b1-rotating-wave.json",
+  "limits": [
+    "Recorded model outputs prove policy behavior, not new TensorRT/video inference or a completed greeting.",
+    "Distant and other low-quality public clips still do not establish wave coverage; retain their results.",
+    "Freeze a new B1 runtime revision and remeasure the integrated pipeline before handoff; original B1/B0 artifacts remain unchanged."
+  ]
+}

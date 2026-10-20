@@ -126,8 +126,8 @@ def save_prediction(path, prediction):
     np.savez(path, metadata=np.asarray(json.dumps(tree)), **arrays)
 
 
-def worker(role, output):
-    protocol, cfg = validate()
+def worker(role, output, protocol_path=PROTOCOL):
+    protocol, cfg = validate(protocol_path)
     owner = VisionModels()
     resources = Resources(output, {"module": [os.getpid()]}).start()
     events = Events(output / "events.jsonl")
@@ -216,6 +216,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--role", choices=ROLES, nargs="+")
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL)
     parser.add_argument("--worker", choices=ROLES, help=argparse.SUPPRESS)
     parser.add_argument(
         "--summarize",
@@ -229,10 +230,10 @@ def main():
         print(output / "summary.json")
         return
     if args.worker:
-        worker(args.worker, output)
+        worker(args.worker, output, args.protocol.resolve())
         return
     output.mkdir(parents=True, exist_ok=False)
-    protocol, cfg = validate()
+    protocol, cfg = validate(args.protocol.resolve())
     environment(output)
     runtime.write_json(output / "protocol-used.json", protocol)
     before = runtime.config()
@@ -240,7 +241,7 @@ def main():
     report = {
         "created_at": runtime.stamp(),
         "status": "RUNNING",
-        "protocol_sha256": runtime.sha256(PROTOCOL),
+        "protocol_sha256": runtime.sha256(args.protocol),
         "modules": {},
     }
     try:
@@ -257,6 +258,8 @@ def main():
                             role,
                             "--output",
                             str(folder),
+                            "--protocol",
+                            str(args.protocol.resolve()),
                         ],
                         log,
                         seconds=300,

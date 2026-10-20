@@ -27,7 +27,7 @@ from benchmarks.baseline_support import (
     run_worker,
 )
 from benchmarks.vision_b1_load import ConversationLoad
-from benchmarks.vision_b1_support import PROTOCOL, validate
+from benchmarks.vision_b1_support import validate
 from benchmarks.vision_stream import BackgroundLLM
 from deploy import runtime, services
 from deploy.resource_guard import hold_model_lease
@@ -36,9 +36,17 @@ from probe_coexistence import backend_identity
 WORKLOAD = ROOT / "benchmarks/manifests/b1-vision-stream-v1.json"
 
 
+def protocol_path(spec):
+    # Older workload bytes stay unchanged. Each revision identifies its own
+    # runtime lock; a newer implementation cannot silently reuse an old lock.
+    return ROOT / spec.get(
+        "module_protocol", "benchmarks/manifests/b1-vision-measurements-v1.json"
+    )
+
+
 def workload():
     spec = json.loads(WORKLOAD.read_text())
-    if runtime.sha256(PROTOCOL) != spec["module_protocol_sha256"]:
+    if runtime.sha256(protocol_path(spec)) != spec["module_protocol_sha256"]:
         raise ValueError("Frozen module protocol changed")
     audio = spec["audio_input"]
     if runtime.sha256(ROOT / audio["path"]) != audio["sha256"]:
@@ -142,8 +150,8 @@ class MeasuredCamera(Camera):
 
 
 def worker(condition, output):
-    protocol, frozen = validate()
     spec = workload()
+    protocol, frozen = validate(protocol_path(spec))
     cfg = deepcopy(frozen)
     task = (
         ROOT
@@ -428,7 +436,7 @@ def main():
         worker(args.worker, output)
         return
     output.mkdir(parents=True, exist_ok=False)
-    _, cfg = validate()
+    _, cfg = validate(protocol_path(spec))
     environment(output)
     runtime.write_json(output / "workload.json", spec)
     prior = runtime.config()
@@ -438,6 +446,7 @@ def main():
         "status": "RUNNING",
         "conditions": {},
         "workload_sha256": runtime.sha256(WORKLOAD),
+        "module_protocol": str(protocol_path(spec).relative_to(ROOT)),
     }
     with services.operation(prior):
         before = services.state(list(services.ORDER), prior)

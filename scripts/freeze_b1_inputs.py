@@ -7,6 +7,7 @@ uses explicit synthetic aligned depth; live RGBD will be reported separately.
 """
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -37,8 +38,37 @@ def letterbox(image):
     return result
 
 
-def prepare(output, cfg):
+def input_images(output, parent_path=None):
     inputs, images = {}, {}
+    if parent_path is not None:
+        parent = json.loads(parent_path.read_text())
+        if set(parent["inputs"]) != {
+            "public-person",
+            "public-person-dimmed",
+            "bus",
+            "bus-dimmed",
+            "blank",
+        }:
+            raise ValueError("Expected the five established B1 input names")
+        for name, recorded in parent["inputs"].items():
+            source = (ROOT / recorded["path"]).resolve()
+            if (
+                not source.is_relative_to(ROOT / "05_runtime")
+                or runtime.sha256(source) != recorded["sha256"]
+            ):
+                raise ValueError("Parent input missing or changed: " + name)
+            image = np.load(source, allow_pickle=False)
+            if image.shape != (480, 640, 3) or image.dtype != np.uint8:
+                raise ValueError("Parent input is not uint8 BGR 640x480")
+            path = output / (name + ".npy")
+            np.save(path, image, allow_pickle=False)
+            inputs[name] = {
+                **recorded,
+                "path": str(path.relative_to(ROOT)),
+                "sha256": runtime.sha256(path),
+            }
+            images[name] = image
+        return inputs, images
     public = ROOT / "05_runtime/datasets/b0-sw-v1/public-original.png"
     bus = (
         ROOT
@@ -75,6 +105,11 @@ def prepare(output, cfg):
         "sha256": runtime.sha256(path),
         "source": "synthetic black negative",
     }
+    return inputs, images
+
+
+def prepare(output, cfg, inputs_from=None):
+    inputs, images = input_images(output, inputs_from)
     models = VisionModels()
     cases, smoke = {role: [] for role in ROLES}, []
     try:
@@ -195,6 +230,12 @@ def prepare(output, cfg):
         },
         "preservation": "B0 remains immutable; B1 model/config changes are not same-model optimization improvements",
     }
+    if inputs_from is not None:
+        protocol["input_parent"] = {
+            "path": str(inputs_from.relative_to(ROOT)),
+            "sha256": runtime.sha256(inputs_from),
+            "scope": "Reuse verified pixel bytes only; runtime lock and observer parity are generated for this revision.",
+        }
     runtime.write_json(output / "protocol.json", protocol)
     return protocol
 
@@ -204,12 +245,24 @@ def main():
     parser.add_argument(
         "--output", type=Path, default=ROOT / "05_runtime/baselines/b1-vision-v1"
     )
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL)
+    parser.add_argument(
+        "--inputs-from",
+        type=Path,
+        help="Reuse an existing immutable input protocol, including in a restored runtime bundle",
+    )
     args = parser.parse_args()
     output = args.output.resolve()
-    if PROTOCOL.exists():
+    protocol_path = args.protocol.resolve()
+    inputs_from = args.inputs_from.resolve() if args.inputs_from else None
+    if protocol_path.exists():
         raise FileExistsError(
             "B1 protocol already exists; do not overwrite a frozen baseline"
         )
+    if not protocol_path.is_relative_to(ROOT / "benchmarks/manifests") or (
+        inputs_from is not None and not inputs_from.is_relative_to(ROOT)
+    ):
+        raise ValueError("Keep protocols in the project benchmark manifest directory")
     if not output.is_relative_to(ROOT / "05_runtime"):
         raise ValueError("Inputs must stay in project runtime storage")
     dirty = subprocess.check_output(
@@ -224,9 +277,9 @@ def main():
     prior = runtime.config()
     prior = runtime.config(services.profile_path(prior))
     with exclusive_build(prior, output):
-        protocol = prepare(output, cfg)
-    runtime.write_json(PROTOCOL, protocol)
-    print("B1 inputs and runtime contracts frozen:", PROTOCOL, flush=True)
+        protocol = prepare(output, cfg, inputs_from)
+    runtime.write_json(protocol_path, protocol)
+    print("B1 inputs and runtime contracts frozen:", protocol_path, flush=True)
 
 
 if __name__ == "__main__":

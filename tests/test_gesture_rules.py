@@ -92,6 +92,69 @@ def test_one_way_motion_vertical_motion_and_short_hold_do_not_trigger():
     assert not feed(GestureRecognizer(GestureConfig()),[0]*4)
 
 
+def test_wave_keeps_motion_during_brief_palm_turn_but_requires_five_open_observations():
+    recognizer = GestureRecognizer(GestureConfig())
+    # Brief valid turns of the palm include motion extrema. Four genuinely
+    # open observations remain insufficient even with two direction changes.
+    xs = [0, 50, 100, 50, 0, 50, 100, 50]
+    opened = {0, 1, 3, 5, 7}
+    for i, x in enumerate(xs):
+        events = recognizer.update(scene(i, 1000 + i * .2, [hand(x=x, closed=i not in opened)]), now=1000 + i * .2)
+        if i < 7:
+            assert not events
+        else:
+            assert [e["kind"] for e in events] == ["wave"]
+
+
+def test_recorded_b1_rotating_open_hand_produces_one_wave():
+    import json
+    from pathlib import Path
+
+    recorded = json.loads((Path(__file__).parent / "fixtures/b1-rotating-wave.json").read_text())
+    cfg = Config.load("02_config/settings.orin-nx-b1.yaml")
+    recognizer = GestureRecognizer(cfg.gestures, cfg.perception.hand_threshold, cfg.perception.pose_joint_threshold)
+    events = []
+    for row in recorded["frames"]:
+        events += recognizer.update({"ready": True, "frame": row["frame"], "hands": row["hands"]}, now=row["observed_monotonic"])
+    assert [(e["kind"], e["frame_id"]) for e in events] == [("wave", recorded["expected_wave_frame_id"])]
+
+
+def test_moving_fist_and_neutral_gap_do_not_reuse_open_wave_evidence():
+    assert not feed(GestureRecognizer(GestureConfig()), [0, 100, 0, 100, 0, 100, 0], step=.2, closed=True)
+    recognizer = GestureRecognizer(GestureConfig())
+    assert not feed(recognizer, [0, 50, 100, 50], step=.2)
+    assert not feed(recognizer, [0, 50, 100], start=1000.8, offset=4, step=.2, closed=True)
+    assert not feed(recognizer, [50, 0, 50], start=1001.4, offset=7, step=.2)
+
+
+def test_brief_closed_frame_still_breaks_stationary_stop():
+    recognizer = GestureRecognizer(GestureConfig())
+    assert not feed(recognizer, [0] * 4)
+    assert not recognizer.update(scene(4, 1001, [hand(closed=True)]), now=1001)
+    assert not feed(recognizer, [0] * 4, start=1001.25, offset=5)
+    events = recognizer.update(scene(9, 1002.25), now=1002.25)
+    assert [e["kind"] for e in events] == ["stop"]
+    assert events[0]["first_frame_id"] == 5
+
+
+@pytest.mark.parametrize("interruption", ["low_confidence", "occlusion", "owner"])
+def test_invalid_observation_or_changed_owner_breaks_wave_history(interruption):
+    recognizer = GestureRecognizer(GestureConfig())
+    xs = [0, 50, 100, 50, 0]
+    for i, x in enumerate(xs):
+        assert not recognizer.update(scene(i, 1000+i*.2, [hand(x=x, closed=i==2)]), now=1000+i*.2)
+    value = hand(x=50)
+    if interruption == "low_confidence":
+        value["score"] = .1
+    elif interruption == "owner":
+        value["person_track_id"] = "new-person"
+    assert not recognizer.update(scene(5, 1001, [] if interruption == "occlusion" else [value]), now=1001)
+    value = hand(x=100)
+    if interruption == "owner":
+        value["person_track_id"] = "new-person"
+    assert not recognizer.update(scene(6, 1001.2, [value]), now=1001.2)
+
+
 @pytest.mark.parametrize('interruption',['occlusion','expired','epoch','out_of_order','gap'])
 def test_interruption_cannot_count_as_a_continuous_hold(interruption):
     recognizer=GestureRecognizer(GestureConfig())

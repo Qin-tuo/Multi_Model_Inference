@@ -29,7 +29,7 @@ from app.gestures import GestureRecognizer
 from app.perception_b1 import B1Perception
 from benchmarks.baseline_support import Events
 from benchmarks.vision_b1_load import ConversationLoad
-from benchmarks.vision_b1_support import validate
+from benchmarks.vision_b1_support import PROTOCOL, validate
 from deploy import runtime, services
 from deploy.resource_guard import hold_model_lease
 from freeze_b1_inputs import letterbox
@@ -295,6 +295,7 @@ def case(output, cfg, name, rows, duration, expect_stop=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL)
     case_names = [Path(name).stem for name, _ in SOURCES] + ["stationary-public-palm"]
     parser.add_argument(
         "--case",
@@ -305,7 +306,7 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    protocol, cfg = validate()
+    protocol, cfg = validate(args.protocol.resolve())
     root = ROOT / "05_runtime/datasets/b1-motion-candidates"
     selected = set(args.case or case_names)
     clips = []
@@ -330,7 +331,7 @@ def main():
         "scope": __doc__,
         "cases": {},
         "probe_sha256": runtime.sha256(__file__),
-        "runtime_protocol": "benchmarks/manifests/b1-vision-measurements-v1.json",
+        "runtime_protocol": str(args.protocol.resolve().relative_to(ROOT)),
         "requested_cases": sorted(selected),
     }
     (output / "probe-source.py").write_bytes(Path(__file__).read_bytes())
