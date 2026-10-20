@@ -140,6 +140,17 @@ def inside(args):
             "directory_empty": True,
             "read_only_mount": True,
         }
+    # A restore controller may additionally hide the original project tree.
+    # Only its private namespace sees these mounts; the host tree stays intact.
+    if initial.get("hidden_sources"):
+        mount_namespace = os.readlink("/proc/self/ns/mnt")
+        if mount_namespace == initial["mount_namespace"]:
+            raise RuntimeError("Source hiding requires a private mount namespace")
+        for source in initial["hidden_sources"]:
+            if list(Path(source).iterdir()):
+                raise RuntimeError("Original source remains visible: " + source)
+        report["hidden_sources"] = initial["hidden_sources"]
+        report["mount_namespace"] = mount_namespace
     children = {}
     logs = []
     error = None
@@ -255,6 +266,34 @@ def inside(args):
                 out / "application-audio.json",
             ],
         )
+        if cfg.perception.backend == "tensorrt_b1":
+            base = "http://127.0.0.1:" + str(runtime.ports(cfg)["app"])
+            state = (
+                httpx.get(base + "/api/state", timeout=5, trust_env=False)
+                .raise_for_status()
+                .json()
+            )
+            runtime.write_json(out / "b1-state.json", state)
+            scene = state["perception"]
+            expected = json.loads((ROOT / cfg.perception.model_manifest).read_text())[
+                "models"
+            ]
+            if not (
+                state["camera"].get("depth_ready")
+                and scene.get("ready")
+                and scene.get("backend") == "tensorrt_b1"
+                and scene.get("processed", 0) >= 10
+                and set(scene["model_metrics"]) == set(expected)
+                and scene["failures"] == 0
+            ):
+                raise RuntimeError("Restored B1 RGBD pipeline is not healthy")
+            report["b1"] = {
+                "processed": scene["processed"],
+                "failures": scene["failures"],
+                "models": list(scene["model_metrics"]),
+                "depth_ready": True,
+                "scope": "Observed current scene; loaded models do not prove real-person attribute accuracy",
+            }
         report["status"] = "PASS"
     except BaseException as exc:
         error = exc

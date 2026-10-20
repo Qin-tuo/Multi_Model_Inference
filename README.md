@@ -2,11 +2,13 @@
 
 本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
 
-当前软件框架与 B0 基线已交付，正在推进 **B1：公开视觉模型的 TensorRT 部署与链路复现**。默认复用现有应用、采用进程内 TensorRT；4B 与语音后端保持现状。新模型尚未完成接入，当前运行状态以验证记录为准。
+当前软件框架与 B0 基线已交付，正在推进 **B1：公开视觉模型的 TensorRT 部署与链路复现**。10 个视觉 TensorRT 模型已接通，单模块、完整视觉管线及与 4B/语音共存的基线已测量，正在补持续稳定性和部署交接。默认服务仍使用 B0；B1 使用独立配置，当前验收状态以验证记录为准。
 
 B1 深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT 用于视觉神经网络。神经双目深度按用户决定后置，不作为本阶段验收项。
 
 [B1 当前目标与实施边界](docs/implementation-plan.md#b1-当前阶段目标) · [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)。交付 B1 后由用户亲自使用专业工具分析和优化；实物声学、机身控制、导航及长期记忆继续后置。
+
+[B1 启动、代码阅读与首次视觉实验](docs/b1-handoff.md) · [B1 实测数据和复现口径](docs/visual-baseline.md)。B1 交接尚未完成，不把已有基线数据当作整体验收通过。
 
 [项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)
 

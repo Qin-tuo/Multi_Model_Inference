@@ -2,6 +2,8 @@
 
 当前服务使用仓库内 `05_runtime/`。原 `/home/nvidia/AI_Stack` 保留为回退来源；当前启动路径、模型读取和数据库写入不再依赖它。独立性通过私有 mount/network namespace 验证：隐藏原 AI_Stack，网络只保留 lo，真实启动四个后端并完成文字、相机、语音接口及完整文件语音对话。主机目录和网络保持原状。
 
+上述运行包与独立性记录属于 B0。B1 已增加 10 个视觉引擎、SDK 深度、Norfair 等依赖；原 B0 包不能单独恢复 B1。B1 采用 `scripts/package_b1_runtime.py` 从当前已核验工件选择性打包，保留 B0 回退资产与 B1 固定输入，排除参考模型环境、未启用候选、业务状态及验证输出。B1 包的实际恢复验证完成前，不声明交接通过。
+
 ## 目录
 
 | 路径（相对 05_runtime） | 内容 |
@@ -14,6 +16,8 @@
 | `models/` | 4B/ASR GGUF、视觉 ONNX/TRT、Silero、Matcha/Vocos 工件 |
 | `datasets/` | 当前 B0 固定图像和合成语音输入 |
 | `baselines/b0/effective-config.json` | 原冻结配置的原字节副本 |
+| `baselines/b1-vision-v1/` | B1 固定图像、配置与输入契约；恢复到新目录时只在内存中转换运行路径 |
+| `models/b1/`、`frameworks/b1/` | 当前公开视觉引擎、模型卡和所需固定版本上游代码；完整开发目录还包含独立参考工件 |
 | `runtime-data/edge-assistant/` | 当前冻结运行配置、systemd 文件与服务日志 |
 | `runtime-data/actions/`、`runtime-data/audio/` | 工具数据库和回复音频 |
 | `validation/` | 本机验证过程及诊断记录 |
@@ -55,6 +59,8 @@ python3 scripts/runtime_bundle.py unpack --archive /path/to/runtime-edge-assista
 ```
 
 恢复器验证包和文件摘要，重建已声明的系统 Python/TensorRT 链接，并调整环境脚本中的项目路径。源码和模型哈希保持可查。服务注册仍执行归属检查；同一台机器更换项目位置前应先停止并卸载旧注册，不覆盖其他实例。
+
+B1 恢复测试使用 `scripts/probe_b1_restore.py --checkout 副本路径 --output 新的输出目录`，要求副本已恢复 B1 运行包，且两条路径均在原项目和 AI_Stack 之外。它复用既有离线探针，在私有命名空间隐藏两处源目录、仅启用 loopback，以普通用户启动副本的四个原生进程并执行真实请求，结束后恢复原服务；副本不注册 systemd。此测试仍使用同一台机器的驱动和系统库，不是干净系统安装验证。
 
 ## 项目命名与历史兼容
 

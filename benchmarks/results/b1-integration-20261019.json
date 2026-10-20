@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-19T23:42:12.065960+00:00",
+  "updated_at": "2026-10-20T00:09:20.378117+00:00",
   "status": "INTEGRATED_FUNCTIONAL_PROBES_PASS_B1_NOT_ACCEPTED",
   "runtime_profile": "02_config/settings.orin-nx-b1.yaml",
   "runtime_manifest": "03_models/vision-b1-runtime.json",
@@ -80,14 +80,13 @@
   ],
   "remaining": [
     "Broader live person, wave, occlusion, crossing and distance-gate coverage; previously deferred user-assisted cases remain separate",
-    "Stale-source/failure recovery and sustained bounded resource acceptance",
-    "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance",
-    "Interpret input-quality rejections separately from frame failures; finish bounded soak and deployment/handoff acceptance"
+    "Sustained bounded resource acceptance; short stale-source/failure recovery probes already pass",
+    "Reproducible B1 runtime packaging, startup/architecture handoff and default switch after acceptance"
   ],
   "not_claimed": [
     "Industrial qualification",
     "Accuracy of real-world face recognition or universal object instance ReID",
-    "Performance baseline or optimization improvement",
+    "Optimization improvement",
     "Physical audio/AEC",
     "Neural stereo depth"
   ],
@@ -118,14 +117,14 @@
     "scope": "Controlled SDK stream restart, explicit fault injection, synthetic-depth gate tests. Short repeated lifecycle check, not physical USB disconnect or long soak."
   },
   "module_baseline": {
-    "status": "MODULE_BASELINE_MEASURED_PIPELINE_PENDING",
+    "status": "MODULE_BASELINE_MEASURED",
     "summary": "benchmarks/results/b1-vision-modules-summary.json",
     "protocol": "benchmarks/manifests/b1-vision-measurements-v1.json",
     "modules": 10,
     "paired_calls": 440,
     "raw_directory": "05_runtime/validation/b1-modules-20261019",
     "all_observer_pairs_match": true,
-    "pipeline_fps_measured": false
+    "pipeline_fps_measured": true
   },
   "stream_baseline": {
     "status": "STREAM_CONDITIONS_MEASURED",
@@ -137,6 +136,30 @@
     "periodic_samples": 4200,
     "no_result_samples": 0,
     "expired_frames": 0,
-    "scope": "Controlled replay and live scene measured separately; no browser transport or physical audio. Some gaze adapter calls were rejected; counters are retained and the exact input-quality causes still need separate inspection. Frame success does not imply complete attribute accuracy."
+    "scope": "Controlled replay and live scene measured separately; no browser transport or physical audio. Some gaze adapter calls were rejected for sub-4-pixel eye ROIs before engine execution; see gaze_input_coverage. Frame success does not imply complete attribute accuracy."
+  },
+  "gaze_input_coverage": {
+    "status": "GAZE_INPUT_COVERAGE_INSPECTED",
+    "raw_report": "05_runtime/validation/b1-gaze-coverage-20261020/report.json",
+    "raw_report_sha256": "414a653875ae3c2a2ffff27e0cc9f15658bc24cd3cd8ca6dae05f0385703da64",
+    "faces_checked": 6,
+    "inferred": 3,
+    "input_rejected": 3,
+    "rejected_engine_calls": 0,
+    "reason": "At least one 3-pixel eye ROI; existing minimum side 4 pixels. All inspected crops inside source image. Frozen runtime and threshold unchanged.",
+    "scope": "Frozen 640x480 fixture/face ROI coverage; actual TensorRT adapters, no field-accuracy claim"
+  },
+  "bounded_soak": {
+    "replay": {
+      "summary": "benchmarks/results/b1-soak-replay-summary.json",
+      "seconds": 1200,
+      "completed_frames": 4793,
+      "complete_conversation_turns_inside_window": 416,
+      "unexpected_frame_errors": 0,
+      "no_result_samples": 0,
+      "restored": "READY"
+    },
+    "live": "PENDING",
+    "scope": "Short bounded stability evidence; not industrial long-term qualification; resource drift recorded without a zero-leak claim"
   }
 }
