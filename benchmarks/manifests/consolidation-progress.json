@@ -62,19 +62,28 @@
     {
       "id": "C4",
       "requirement": "按职责拆分核心模块",
-      "status": "in_progress",
+      "status": "complete",
       "evidence": [
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/application-stages-tests.xml",
           "sha256": "9574bcc516f7bfd13e375747b1e656d8b89cd54e491adcf6893d348078710f88"
-        }
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/application-stages/report.json",
+          "sha256": "8940c6e11066e9dc36ac98c914b8fc2a84ed397dd0b100ff94af062d3cee95d8"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/application-stages/services-restored.json",
+          "sha256": "76480989b3f5d0615d0e7ad6b6711cbaa4fc01fcf1840d79e6a0e3357302f5cd"
+        },
+        "tests/test_turn_execution.py"
       ],
       "implemented": [
         "Speech ownership split into devices, capture, VAD, playback, output and typed events",
         "Web entry delegates to app.application and app.broadcast",
         "Single controller worker delegates per-turn stages to TurnExecution"
       ],
-      "remaining": "Native text/WAV/cancellation regression and final architecture review."
+      "remaining": null
     },
     {
       "id": "C5",
@@ -118,12 +127,27 @@
     {
       "id": "B2-EXIT-01",
       "status": "OPEN",
-      "description": "Intermittent app/speech stop timeout; preserve observations and disposition separately."
+      "description": "Intermittent app/speech stop timeout; preserve observations and disposition separately.",
+      "latest_observation": {
+        "prior_main_app_clean_shutdown": false,
+        "candidate_application_exit_code": 0,
+        "candidate_clean_shutdown": true,
+        "scope": "Candidate HTTP/RGBD/file-speech/tool/notification probe; does not establish an intermittent shutdown fix.",
+        "evidence": {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/application-stages/report.json",
+          "sha256": "8940c6e11066e9dc36ac98c914b8fc2a84ed397dd0b100ff94af062d3cee95d8"
+        }
+      }
     }
   ],
   "completion_audit": "Every C1-C8 requirement needs current artifacts and verification. Partial stages do not complete this Goal.",
   "incoming_tests": {
     "passed": 295,
     "scope": "Snapshotted pending tooling changes; isolated worktree runtime-data."
-  }
+  },
+  "next_work": [
+    "Consolidate current build/validation/benchmark entrypoints and remove retired mainline branches",
+    "Build and independently restore the current runtime package before deleting superseded runtime artifacts",
+    "Run and compare final frozen B2 inputs, document and integrate the reviewed branch without losing concurrent main-worktree edits"
+  ]
 }
