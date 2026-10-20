@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "R2_FROZEN_PIPELINE_MEASUREMENTS_PENDING",
+  "status": "R2_PIPELINE_WINDOWS_MEASURED_DEPLOYMENT_HANDOFF_PENDING",
   "runtime_source_commit": "a90ab28dc4bfbbd168d97da3afd7f6c7e6549212",
   "protocol": "benchmarks/manifests/b1-vision-measurements-v2.json",
   "workload": "benchmarks/manifests/b1-vision-stream-v2.json",
@@ -22,5 +22,13 @@
     "benchmarks/manifests/b1-vision-stream-v1.json",
     "B0 artifacts"
   ],
-  "rollback_tag": "before-gesture-wave-fix-20261020"
+  "rollback_tag": "before-gesture-wave-fix-20261020",
+  "pipeline_measurement": "benchmarks/results/b1-vision-stream-r2-summary.json",
+  "measurement_quality": {
+    "total_periodic_samples": 4200,
+    "observer_deadline_misses": 28,
+    "whole_frame_failure_events": 0,
+    "expired_frames": 0,
+    "note": "All 28 unavailable samples are observer deadline misses in live-conversation; they are not recorded failed perception frames. Missing samples remain in the conservative freshness statistic; no interpolation or removal."
+  }
 }

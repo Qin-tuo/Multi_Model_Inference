@@ -117,16 +117,29 @@ def verify(root):
 def pack(root, output):
     manifest = verify(root)
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("xb") as stream, tarfile.open(fileobj=stream, mode="w") as archive:
+    if output.exists():
+        raise FileExistsError("Archive already exists")
+    partial = output.with_name(output.name + ".partial")
+    # An interrupted write must not look like a finished archive. Keep the
+    # partial file for inspection; a second attempt cannot overwrite it.
+    with (
+        partial.open("xb") as stream,
+        tarfile.open(fileobj=stream, mode="w") as archive,
+    ):
         archive.add(root / MANIFEST, arcname=MANIFEST, recursive=False)
         for path in entries(root, include_git=True):
             # Restore these explicit host links after data-filtered extraction.
             if path.is_symlink() and path.readlink().is_absolute():
                 continue
             archive.add(path, arcname=str(path.relative_to(root)), recursive=False)
+    sha = digest(partial)
+    # Publish atomically without replacing another writer's output. Both paths
+    # are in the same directory/filesystem, and all archive writes are closed.
+    os.link(partial, output)
+    partial.unlink()
     return {
         "archive": str(output),
-        "sha256": digest(output),
+        "sha256": sha,
         "artifact_bytes": manifest["bytes"],
         "archive_bytes": output.stat().st_size,
     }

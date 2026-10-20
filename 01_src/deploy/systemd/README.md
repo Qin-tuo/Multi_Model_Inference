@@ -1,6 +1,6 @@
 # 多模型端侧助手服务部署
 
-当前部署使用 systemd 用户服务。本项目 应用负责会话、相机、感知和语音数据流；llama.cpp 与 OpenVoiceStream 负责推理；systemd 负责启动顺序、重启和进程组清理。
+当前部署使用 systemd 用户服务。应用负责会话、相机、感知和语音数据流；llama.cpp 与 OpenVoiceStream 负责推理；systemd 负责启动顺序、重启和进程组清理。
 
 | 组件 | 实际入口与职责 | 默认端口 |
 |---|---|---|
@@ -10,6 +10,8 @@
 | `app` | 本项目 Web、单一相机采集、人体/脸/手、VAD、整轮控制、笔记/提醒 | 8090 |
 
 当前软件配置采用语音文件输入/输出，不要求接入麦克风或扬声器。相机使用已连接的 D435i。物理录播、AEC、双讲与实际停播继续待验。
+
+当前新增 B1 配置使用原生 RGBD 和 10 个进程内 TensorRT 视觉模型；四个服务的职责与端口不变。R2 为手势时序修复版本，正式复测与配套运行包正在更新，默认配置切换尚未完成。当前状态与覆盖范围见 [B1 验收清单](../../../benchmarks/manifests/vision-b1-v1.json) 和 [启动/阅读入口](../../../docs/b1-handoff.md)。
 
 ## 操作
 
@@ -27,6 +29,17 @@
 
 `up` 加载 `02_config/settings.yaml` 和平台 overlay，或显式 `--config PATH`，把完整有效配置冻结为 `项目/05_runtime/runtime-data/edge-assistant/systemd/settings.json`。所有服务使用同一份冻结配置。运行时更换配置或源码入口会被拒绝，应先 `down` 再 `up`。`status/down/logs/wait` 默认读取已安装的冻结配置；`up` 默认重新读取源码配置。
 
+本阶段使用 B1 时显式选择配置；先结束当前请求和测量，再停止四个服务：
+
+```bash
+./run.sh services down
+./run.sh services check --config 02_config/settings.orin-nx-b1.yaml
+./run.sh services up --config 02_config/settings.orin-nx-b1.yaml
+./run.sh services status
+```
+
+回到 B0 视觉配置时同样先停止，再用 `--config 02_config/settings.orin-nx-headless.yaml` 启动。配置切换保留当前源码；复现旧基线还需使用对应源码版本和原始工件。B1 R1 的手势修复前恢复点为 `before-gesture-wave-fix-20261020`，B1 接入前的 B0 恢复点为 `before-vision-b1-20261019`。
+
 新单元为 `edge-assistant-{llama,asr,speech,app}.service`，生成文件位于上述 systemd 目录，以链接注册到 `~/.config/systemd/user`。旧 `mmassistant-*` 不由此命令接管；启动前必须明确停止旧项目持有的端口和相机。占用冲突会报告并退出，不终止外部进程。
 
 ## 运行约束与状态口径
@@ -39,9 +52,9 @@
 - 模型清单、感知/VAD 锁及 `01_src/deploy/runtime-artifacts.lock.json` 校验现有权重、原生程序/库、TTS 工件和感知源码。OVS 源码要求固定提交且无未记录改动。全量校验会读取数 GiB 文件，请等待命令完成。
 - 日志位于 `项目/05_runtime/runtime-data/edge-assistant/logs`，每组件按 5 MiB 轮转并保留 4 份备份。实验 trace 和测试输出有各自目录。
 
-`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、B0 性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。当前已另行通过 [隔离网络启动验证](../../../benchmarks/results/r4-offline-summary.json)：四个原生入口在只有 lo 的临时网络空间中冷启动并完成交互；整机重启、自启动及干净机器重部署仍分别待验。
+`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、正式性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。B0 的 [隔离网络启动验证](../../../benchmarks/results/r4-offline-summary.json) 和 B1 R1 的 [独立运行包恢复](../project-runtime-b1.lock.json) 均有真实进程与请求证据；后者隐藏了原项目和 AI_Stack。整机重启、自启动及干净机器重部署仍分别待验。
 
-## 切换与回退
+## 历史七服务切换与回退
 
 2026-10-16：默认服务已切换到主目录的 本项目 四服务；旧七服务停止。演练完成后又从主目录完成正式启动和交互验证，最新状态见 [切换报告](../../../benchmarks/results/r4-cutover.json)。
 

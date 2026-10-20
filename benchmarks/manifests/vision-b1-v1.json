@@ -147,14 +147,16 @@
     {
       "id": "B1.6",
       "name": "Frozen B1 module/pipeline/coexistence measurements and raw evidence",
-      "status": "R1_MEASURED_R2_REMEASUREMENT_PENDING",
+      "status": "PASS_R1_MODULES_AND_R2_PIPELINE_WINDOWS_WITH_RECORDED_MISSING_SAMPLES",
       "evidence": [
         "benchmarks/manifests/b1-vision-measurements-v1.json",
         "benchmarks/results/b1-vision-modules-summary.json",
         "benchmarks/manifests/b1-vision-stream-v1.json",
         "benchmarks/results/b1-vision-stream-summary.json",
-        "benchmarks/results/b1-r2-scope.json"
-      ]
+        "benchmarks/results/b1-r2-scope.json",
+        "benchmarks/results/b1-vision-stream-r2-summary.json"
+      ],
+      "scope": "Neural module paths/engines/inputs unchanged; inherit original isolated measurements. R2 pipeline measured separately. 28 observer deadline misses retained, with bounded scope and no performance improvement claim."
     },
     {
       "id": "B1.7",
@@ -191,7 +193,7 @@
   ],
   "completion_rule": "Every locked in-scope module and gate requires inspected real evidence; interfaces, empty placeholders or server startup alone do not prove completion. Handoff B1 then wait for user-led optimization.",
   "measurement_rule": "Preserve B0; measure actual performance without promising all models at 30 FPS. Separate model changes from same-model optimization, reference validation from production inference, and fixed/public replay from real-person quality qualification.",
-  "updated_at": "2026-10-20T01:31:58.458808+00:00",
+  "updated_at": "2026-10-20T01:55:08.108500+00:00",
   "scope_updates": [
     {
       "date": "2026-10-19",

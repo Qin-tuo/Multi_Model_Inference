@@ -153,6 +153,10 @@ def main():
     destination, archive = args.stage.resolve(), args.output.resolve()
     if archive.exists():
         raise FileExistsError("Archive already exists")
+    if archive.with_name(archive.name + ".partial").exists():
+        raise FileExistsError(
+            "Inspect the interrupted partial archive before packaging"
+        )
     if archive.is_relative_to(destination):
         raise ValueError("Archive must be outside its own stage directory")
     stage_assets(destination)

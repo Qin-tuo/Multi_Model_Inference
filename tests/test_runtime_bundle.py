@@ -9,6 +9,7 @@ import pytest
 from app.config import Config
 from project_paths import LEGACY_STACK_DIR, RUNTIME_DIR, ROOT, load_artifact_manifest
 from runtime_bundle import digest, inventory, pack, unpack, verify
+import runtime_bundle
 
 
 @pytest.mark.parametrize(
@@ -133,3 +134,31 @@ def test_inventory_rejects_links_back_to_external_stack(tmp_path):
     (tmp_path / "escape").symlink_to(LEGACY_STACK_DIR / "models")
     with pytest.raises(ValueError, match="external"):
         inventory(tmp_path)
+
+
+def test_interrupted_pack_does_not_publish_a_finished_archive(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    prepared(source)
+    inventory(source)
+    archive = tmp_path / "runtime.tar"
+    real_entries = runtime_bundle.entries
+
+    def interrupted(root, **kwargs):
+        for path in real_entries(root, **kwargs):
+            yield path
+            raise RuntimeError("injected archive interruption")
+
+    monkeypatch.setattr(runtime_bundle, "entries", interrupted)
+    with pytest.raises(RuntimeError, match="injected archive interruption"):
+        pack(source, archive)
+    partial = archive.with_name(archive.name + ".partial")
+    assert partial.is_file() and not archive.exists()
+    preserved = partial.read_bytes()
+    monkeypatch.setattr(runtime_bundle, "entries", real_entries)
+    with pytest.raises(FileExistsError):
+        pack(source, archive)
+    assert partial.read_bytes() == preserved and not archive.exists()
+    alternate = tmp_path / "complete.tar"
+    result = pack(source, alternate)
+    assert alternate.is_file() and digest(alternate) == result["sha256"]
+    assert not alternate.with_name(alternate.name + ".partial").exists()
