@@ -2,6 +2,7 @@
 """A new runtime revision must preserve old inputs and reject changed evidence."""
 
 import json
+import subprocess
 import numpy as np
 import pytest
 
@@ -77,3 +78,37 @@ def test_explicit_protocol_checks_its_own_runtime_lock(tmp_path, monkeypatch):
     code.write_text("revision two\n")
     with pytest.raises(ValueError, match="frozen file changed"):
         support.validate(protocol)
+
+
+def test_freeze_allows_unrelated_drafts_but_rejects_uncommitted_sources(
+    tmp_path, monkeypatch
+):
+    def git(*args):
+        return subprocess.run(
+            ["git", *args], cwd=tmp_path, check=True, capture_output=True, text=True
+        )
+
+    git("init")
+    (tmp_path / "01_src").mkdir()
+    source = tmp_path / "01_src/runtime.py"
+    source.write_text("original\n")
+    (tmp_path / "README.md").write_text("original\n")
+    git("add", ".")
+    git(
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.invalid",
+        "commit",
+        "-m",
+        "fixture",
+    )
+    monkeypatch.setattr(freezing, "ROOT", tmp_path)
+    (tmp_path / "README.md").write_text("unrelated user edit\n")
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs/draft.md").write_text("user draft\n")
+    (tmp_path / "01_src/layout.md").write_text("deployment prose only\n")
+    assert freezing.uncommitted_sources() == []
+    source.write_text("changed\n")
+    (tmp_path / "01_src/new.py").write_text("untracked implementation\n")
+    assert freezing.uncommitted_sources() == ["01_src/new.py", "01_src/runtime.py"]

@@ -22,6 +22,7 @@ import psutil
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import FrameSnapshot
+from app.config import Config
 from app.face_tracker import FaceTracker
 from app.perception_b1 import B1Perception
 from app.gestures import GestureRecognizer
@@ -31,8 +32,17 @@ from benchmarks.vision_b1_support import PROTOCOL, validate
 from deploy import runtime, services
 
 
-def probe(output):
-    protocol, cfg = validate()
+def probe(output, protocol_path=PROTOCOL, config_path=None):
+    if config_path is None:
+        protocol, cfg = validate(protocol_path)
+    else:
+        # Candidate integration precedes baseline freezing. Reuse only the
+        # checked input pixels; do not claim the old runtime lock is applicable.
+        protocol = json.loads(Path(protocol_path).read_text())
+        cfg = Config.load(config_path)
+        for value in protocol["inputs"].values():
+            if runtime.sha256(ROOT / value["path"]) != value["sha256"]:
+                raise ValueError("Functional probe input bytes changed")
     cfg.perception.identity_gallery = (
         "05_runtime/runtime-data/vision-probes/" + output.name + "/identities.sqlite"
     )
@@ -50,7 +60,11 @@ def probe(output):
         "scope": __doc__,
         "available_before_bytes": psutil.virtual_memory().available,
         "frames": [],
-        "input_protocol": str(PROTOCOL.relative_to(ROOT)),
+        "input_protocol": str(Path(protocol_path).resolve().relative_to(ROOT)),
+        "config_override": str(config_path) if config_path else None,
+        "runtime_scope": "Candidate model integration; inherited input pixels only"
+        if config_path
+        else "Frozen runtime and inputs",
     }
     try:
         perception.load()
@@ -150,7 +164,11 @@ def probe(output):
         finally:
             report["available_after_close_bytes"] = psutil.virtual_memory().available
             runtime.write_json(output / "report.json", report)
-    reopened = IdentityGallery(ROOT / cfg.perception.identity_gallery)
+    policy = perception.networks.entries["face_identity"].get("gallery_policy", {})
+    reopened = IdentityGallery(
+        ROOT / cfg.perception.identity_gallery,
+        **{k: policy[k] for k in ("dimensions", "threshold", "margin") if k in policy},
+    )
     try:
         report["reopened_gallery"] = reopened.list()
         assert report["reopened_gallery"][0]["label"] == "public-fixture"
@@ -167,13 +185,19 @@ def probe(output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL)
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="Candidate integration using only the protocol's input pixels",
+    )
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     cfg = runtime.config()
     cfg = runtime.config(services.profile_path(cfg))
     with exclusive_build(cfg, output):
-        probe(output)
+        probe(output, args.protocol, args.config)
 
 
 if __name__ == "__main__":

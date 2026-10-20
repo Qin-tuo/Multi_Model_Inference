@@ -27,7 +27,7 @@ def geometry_helper(path=None, sha256=None):
     return load_source(str(ROOT / path), sha256, "assistant_pose_geometry")
 
 
-def prepare_pose(image, box, geometry=None):
+def prepare_pose(image, box, geometry=None, input_size=(288, 384)):
     box = np.asarray(box, np.float32)
     if box.shape != (4,) or not np.isfinite(box).all() or min(box[2:] - box[:2]) <= 0:
         raise ValueError("Invalid pose person box")
@@ -37,14 +37,14 @@ def prepare_pose(image, box, geometry=None):
     # A mathematically equivalent hand-written matrix changed interpolation
     # rounding for fractional ROIs, so use the pinned upstream warp function.
     width, height = np.hsplit(scale[None], [1])
-    aspect = 288 / 384
+    aspect = input_size[0] / input_size[1]
     scale = np.where(
         width > height * aspect,
         np.hstack([width, width / aspect]),
         np.hstack([height * aspect, height]),
     )[0]
-    matrix = geometry.get_warp_matrix(center, scale, 0, output_size=(288, 384))
-    crop = cv2.warpAffine(image, matrix, (288, 384), flags=cv2.INTER_LINEAR)
+    matrix = geometry.get_warp_matrix(center, scale, 0, output_size=input_size)
+    crop = cv2.warpAffine(image, matrix, input_size, flags=cv2.INTER_LINEAR)
     rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB).astype(np.float32)
     values = (rgb - np.array([123.675, 116.28, 103.53], np.float32)) / np.array(
         [58.395, 57.12, 57.375], np.float32

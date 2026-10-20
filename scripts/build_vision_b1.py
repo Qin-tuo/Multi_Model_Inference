@@ -62,10 +62,10 @@ def exclusive_build(cfg, output):
             runtime.write_json(output / "services-restored.json", restored)
 
 
-def build(role, entry, output, timeout, workspace_mib=512):
+def build(role, entry, output, timeout, workspace_mib=512, *, prepare_candidate=None):
     import psutil
 
-    prepare(role, entry, check_only=True)
+    (prepare_candidate or prepare)(role, entry, check_only=True)
     folder = output / role
     folder.mkdir(parents=True, exist_ok=True)
     engine = folder / "model.fp32.engine"

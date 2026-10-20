@@ -111,7 +111,7 @@ class GestureRecognizer:
 
     def _sample(self, hand, frame):
         points = np.asarray(hand["landmarks"], dtype=float)
-        if points.shape != (21, 3) or not np.isfinite(points).all():
+        if points.shape not in ((21, 2), (21, 3)) or not np.isfinite(points).all():
             return None, "invalid_landmarks"
         if hand.get("score_kind") == "simcc_peak":
             scores = np.asarray(hand.get("landmark_scores"), dtype=float)

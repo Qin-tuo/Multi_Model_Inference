@@ -13,11 +13,12 @@ import psutil
 
 from project_paths import ROOT
 from app.appearance import AppearanceFeatures
-from app.face_tasks import FaceIdentity, FaceExpression
+from app.face_tasks import ArcFaceIdentity, FaceIdentity, FaceExpression
 from app.face_trt import TensorRTFace
 from app.head_gaze import HeadPose, GazeLandmarks, Gaze
 from app.segmentation import DetectionSegmentation
 from app.wholebody_pose import WholeBodyPose
+from app.wholebody_pose2d import WholeBodyPose2D
 
 ROLES = (
     "detection_segmentation",
@@ -42,10 +43,21 @@ def contract_hash(entry):
         "decoder_source",
         "prepost_source",
     )
+    values = {k: entry.get(k) for k in keys}
+    # Preserve historical B1 hashes. New adapters also lock shape, dimensions
+    # and matching policy so a model replacement cannot silently reuse them.
+    if "adapter" in entry:
+        for key in (
+            "adapter",
+            "input_size_wh",
+            "input_shapes",
+            "output_names",
+            "embedding_space_suffix",
+            "gallery_policy",
+        ):
+            values[key] = entry.get(key)
     return hashlib.sha256(
-        json.dumps(
-            {k: entry.get(k) for k in keys}, sort_keys=True, separators=(",", ":")
-        ).encode()
+        json.dumps(values, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
 
 
@@ -108,11 +120,23 @@ class VisionModels:
                 elif role == "face":
                     model = TensorRTFace(spec)
                 elif role == "body_hand_pose":
-                    model = WholeBodyPose(spec, self.entries[role])
+                    adapter = self.entries[role].get("adapter", "rtmw3d")
+                    if adapter not in ("rtmw3d", "rtmpose2d"):
+                        raise ValueError("Unknown whole-body adapter")
+                    model = (
+                        WholeBodyPose2D if adapter == "rtmpose2d" else WholeBodyPose
+                    )(spec, self.entries[role])
                 elif role in ("person_reid", "object_embedding"):
                     model = AppearanceFeatures(spec, role)
                 elif role == "face_identity":
-                    model = FaceIdentity(spec)
+                    adapter = self.entries[role].get("adapter", "sface")
+                    if adapter not in ("sface", "arcface_mobilenet_v1"):
+                        raise ValueError("Unknown face identity adapter")
+                    model = (
+                        ArcFaceIdentity
+                        if adapter == "arcface_mobilenet_v1"
+                        else FaceIdentity
+                    )(spec)
                 elif role == "expression":
                     model = FaceExpression(spec, self.entries[role])
                 else:
@@ -124,6 +148,7 @@ class VisionModels:
                 self.models[role] = model
                 stats = {
                     "provider": model.provider,
+                    "model_name": self.entries[role].get("name", role),
                     "calls": 0,
                     "errors": 0,
                     "last_error": None,

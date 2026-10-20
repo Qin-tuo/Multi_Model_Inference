@@ -209,6 +209,9 @@ def artifact_files(cfg, components):
             ]
             for role, row in selected["models"].items():
                 add(ROOT / row["engine_path"], row["engine_sha256"])
+                decoder = sources[role].get("decoder_source", {})
+                if "path" in decoder and "sha256" in decoder:
+                    add(ROOT / decoder["path"], decoder["sha256"])
             for role in ("body_hand_pose", "expression"):
                 for row in sources[role]["prepost_source"]["files"].values():
                     add(ROOT / row["path"], row["sha256"])

@@ -80,7 +80,15 @@ class B1Perception(Perception):
             )
         try:
             self.networks.load()
-            self.gallery = IdentityGallery(ROOT / self.config.identity_gallery)
+            policy = self.networks.entries["face_identity"].get("gallery_policy", {})
+            self.gallery = IdentityGallery(
+                ROOT / self.config.identity_gallery,
+                **{
+                    k: policy[k]
+                    for k in ("dimensions", "threshold", "margin")
+                    if k in policy
+                },
+            )
         except BaseException:
             self.networks.close()
             raise
@@ -216,7 +224,10 @@ class B1Perception(Perception):
                         + self.networks.manifest["models"]["face_identity"][
                             "onnx_sha256"
                         ]
-                        + ":sface-aligned112-v1"
+                        + ":"
+                        + self.networks.entries["face_identity"].get(
+                            "embedding_space_suffix", "sface-aligned112-v1"
+                        )
                     )
                     face["_embedding"] = identity["embedding"]
                     face["_embedding_space"] = space
@@ -360,6 +371,7 @@ class B1Perception(Perception):
             "failures": self.failures,
             "callback_error": self.callback_error,
             "backend": "tensorrt_b1",
+            "model_set": self.networks.manifest.get("model_set", "B1"),
             "model_metrics": self.networks.snapshot(),
         }
 

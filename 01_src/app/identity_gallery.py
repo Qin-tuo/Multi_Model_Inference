@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Small local SFace gallery backed by the application's SQLAlchemy dependency.
+"""Small versioned face gallery backed by the application's SQLAlchemy dependency.
 
 Enrollment is explicit. Matching labels do not authorize conversation or tools.
 Embedding spaces are versioned so a replacement model cannot reuse incompatible
@@ -28,11 +28,18 @@ from app.face_tasks import normalize_embedding
 
 
 class IdentityGallery:
-    def __init__(self, path, capacity=32, threshold=0.363, margin=0.05):
+    def __init__(self, path, capacity=32, threshold=0.363, margin=0.05, dimensions=128):
+        if (
+            dimensions not in (128, 512)
+            or not -1 <= threshold <= 1
+            or not 0 <= margin <= 2
+        ):
+            raise ValueError("Invalid face gallery feature contract")
         self.lock = threading.RLock()
         self.capacity = capacity
         self.threshold = threshold
         self.margin = margin
+        self.dimensions = dimensions
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         self.engine = create_engine(
@@ -54,7 +61,7 @@ class IdentityGallery:
         label = label.strip()
         if not 1 <= len(label) <= 64 or not space or len(space) > 200:
             raise ValueError("Invalid identity label or model space")
-        vector = normalize_embedding(embedding)
+        vector = normalize_embedding(embedding, self.dimensions)
         with self.lock, self.engine.connect() as connection:
             connection.exec_driver_sql("BEGIN IMMEDIATE")
             exists = connection.execute(
@@ -78,7 +85,7 @@ class IdentityGallery:
         return {"label": label, "space": space}
 
     def match(self, space, embedding):
-        vector = normalize_embedding(embedding)
+        vector = normalize_embedding(embedding, self.dimensions)
         with self.lock, self.engine.connect() as connection:
             rows = connection.execute(
                 select(self.table.c.label, self.table.c.embedding)
@@ -93,7 +100,8 @@ class IdentityGallery:
                             np.dot(
                                 vector,
                                 normalize_embedding(
-                                    np.frombuffer(row.embedding, np.float32)
+                                    np.frombuffer(row.embedding, np.float32),
+                                    self.dimensions,
                                 ),
                             ),
                             -1,

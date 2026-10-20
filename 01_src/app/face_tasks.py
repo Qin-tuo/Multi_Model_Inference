@@ -87,16 +87,16 @@ def face_tensor(crop, *, expression=False):
     return {"data": np.ascontiguousarray(rgb.transpose(2, 0, 1)[None])}
 
 
-def normalize_embedding(value):
+def normalize_embedding(value, dimensions=128):
     vector = np.asarray(value, np.float32).reshape(-1)
     norm = float(np.linalg.norm(vector))
     if (
-        vector.shape != (128,)
+        vector.shape != (dimensions,)
         or not np.isfinite(vector).all()
         or not np.isfinite(norm)
         or norm <= 1e-8
     ):
-        raise ValueError("Invalid SFace embedding")
+        raise ValueError("Invalid face embedding")
     result = vector / norm
     result.flags.writeable = False
     return result
@@ -133,6 +133,34 @@ class FaceIdentity:
             "embedding": vector,
             "alignment_source_to_crop": matrix.tolist(),
             "space": "SFace128_L2",
+        }
+
+    def close(self):
+        self.model.close()
+
+
+class ArcFaceIdentity:
+    """Original MobileNetV1 ArcFace checkpoint, with explicit RGB normalization."""
+
+    def __init__(self, build):
+        self.model = TensorRTModel(
+            build["engine_path"], build["engine_sha256"], {"images": [1, 3, 112, 112]}
+        )
+        self.provider = self.model.provider
+
+    def infer(self, image, landmarks):
+        matrix = sface_transform(landmarks)
+        crop = aligned_bgr(image, matrix)
+        # Both upstream FER and ArcFace use (RGB/255 - .5)/.5. Alignment
+        # remains the existing, independently checked five-point frontend.
+        values = face_tensor(crop, expression=True)["data"]
+        vector = normalize_embedding(
+            self.model.infer({"images": values})["embedding"], dimensions=512
+        )
+        return {
+            "embedding": vector,
+            "alignment_source_to_crop": matrix.tolist(),
+            "space": "ArcFaceMobileNetV1_512_L2",
         }
 
     def close(self):

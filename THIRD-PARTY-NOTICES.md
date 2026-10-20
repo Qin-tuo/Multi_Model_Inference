@@ -160,3 +160,26 @@ Runtime paths in this table are relative to `05_runtime/`. PyTorch, ONNX Runtime
 and OpenVINO reference environments are development-only and excluded from the
 prepared B1 runtime bundle. The existing 4B and speech backends retain their
 previous source/model notices.
+
+## B2 standard replacements
+
+`03_models/candidates/vision-b2.json` pins the three standard model replacements.
+The other seven B1 visual models retain their original artifacts and notices.
+
+- RTMPose-l COCO-WholeBody 2D uses the unmodified MMPose CSPNeXt/RTMCC
+  network, official 133-point checkpoint and Apache-2.0 sources at revision
+  `759b39c13fea6ba094afc1fa932f51dc1b11cbf9`. The runtime NumPy decoder is
+  extracted verbatim from `mmpose/codecs/utils/post_processing.py` so unused
+  Torch helpers are not application dependencies; its source and derived
+  hashes are retained.
+- OSNet x1.0 uses the official Torchreid MSMT17 combine-all checkpoint and
+  model definition at `f8cd150fdf77e8d9e1ed143b7f308c2c609ded50`, under
+  the existing Torchreid MIT notice.
+- ArcFace-MobileNetV1 uses the published v1.1 checkpoint and unmodified
+  inference source at `92ec13d5768d46614fbcac4c6de7c9d94a9d32ae` from
+  `bubbliiiing/arcface-pytorch`. Its MIT notice is retained in
+  `licenses/ArcFace-Pytorch-MIT.txt`. The existing OpenCV five-point alignment
+  frontend remains separately attributed above.
+
+These are public pretrained checkpoints, not the uploaded customized ONNX
+files. No retraining or learned-layer replacement is performed.

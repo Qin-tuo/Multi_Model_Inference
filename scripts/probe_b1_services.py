@@ -78,10 +78,10 @@ def wait_turn(base, turn_id, seconds=90):
     raise TimeoutError("Turn did not settle: " + turn_id)
 
 
-def probe(output, webdriver=None):
+def probe(output, webdriver=None, config_path=None):
     cfg = runtime.config()
     cfg = runtime.config(services.profile_path(cfg))
-    b1 = runtime.config(ROOT / "02_config/settings.orin-nx-b1.yaml")
+    b1 = runtime.config(config_path or ROOT / "02_config/settings.orin-nx-b1.yaml")
     # Automated greetings could take admission while the probe submits a turn.
     # This test-specific override is saved in services-started.json.
     b1.gestures.greetings_enabled = False
@@ -222,10 +222,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--webdriver", help="Optional local Firefox WebDriver URL")
+    parser.add_argument("--config", type=Path, help="Visual model profile to validate")
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    print(json.dumps(probe(output, args.webdriver), ensure_ascii=False), flush=True)
+    print(
+        json.dumps(probe(output, args.webdriver, args.config), ensure_ascii=False),
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

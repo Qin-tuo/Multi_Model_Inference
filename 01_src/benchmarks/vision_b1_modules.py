@@ -128,7 +128,7 @@ def save_prediction(path, prediction):
 
 def worker(role, output, protocol_path=PROTOCOL):
     protocol, cfg = validate(protocol_path)
-    owner = VisionModels()
+    owner = VisionModels(cfg.perception.model_manifest)
     resources = Resources(output, {"module": [os.getpid()]}).start()
     events = Events(output / "events.jsonl")
     report = {

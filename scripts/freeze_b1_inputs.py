@@ -108,9 +108,9 @@ def input_images(output, parent_path=None):
     return inputs, images
 
 
-def prepare(output, cfg, inputs_from=None):
+def prepare(output, cfg, inputs_from=None, config_path=None):
     inputs, images = input_images(output, inputs_from)
-    models = VisionModels()
+    models = VisionModels(cfg.perception.model_manifest)
     cases, smoke = {role: [] for role in ROLES}, []
     try:
         models.load()
@@ -181,8 +181,8 @@ def prepare(output, cfg, inputs_from=None):
                     runtime.write_json(output / "observer-smoke.json", smoke)
     finally:
         models.close()
-    config_path = output / "effective-config.json"
-    runtime.write_json(config_path, cfg.effective())
+    effective_path = output / "effective-config.json"
+    runtime.write_json(effective_path, cfg.effective())
     paths = [
         p
         for folder in ("01_src/app", "01_src/deploy")
@@ -195,15 +195,20 @@ def prepare(output, cfg, inputs_from=None):
             "01_src/project_paths.py",
             "requirements.lock",
             "01_src/deploy/vision/requirements-runtime.lock",
-            "03_models/candidates/vision-b1.json",
-            "03_models/vision-b1-runtime.json",
             "03_models/manifest.json",
             "03_models/perception.json",
             "03_models/speech.json",
-            "02_config/settings.orin-nx-b1.yaml",
+            "02_config/settings.yaml",
         )
     ]
-    paths.append(config_path)
+    selected_manifest = ROOT / cfg.perception.model_manifest
+    selected_sources = json.loads(selected_manifest.read_text())["source_manifest"]
+    paths += [
+        selected_manifest,
+        ROOT / selected_sources,
+        Path(config_path or ROOT / "02_config/settings.orin-nx-b1.yaml"),
+    ]
+    paths.append(effective_path)
     protocol = {
         "schema_version": 1,
         "created_at": runtime.stamp(),
@@ -211,7 +216,7 @@ def prepare(output, cfg, inputs_from=None):
         "runtime_source_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
         ).strip(),
-        "effective_config": str(config_path.relative_to(ROOT)),
+        "effective_config": str(effective_path.relative_to(ROOT)),
         "locked_files": {
             str(p.relative_to(ROOT)): runtime.sha256(p) for p in sorted(set(paths))
         },
@@ -228,7 +233,7 @@ def prepare(output, cfg, inputs_from=None):
             "live_scope": "D435i native RGBD reported separately; configured FPS is not measured throughput",
             "benchmark_source": "Exact harness source hashes/copies and environment recorded for every measurement; runtime locks stay unchanged",
         },
-        "preservation": "B0 remains immutable; B1 model/config changes are not same-model optimization improvements",
+        "preservation": "B0/B1 inputs and measurements remain immutable; model/config revisions are not same-model optimization improvements",
     }
     if inputs_from is not None:
         protocol["input_parent"] = {
@@ -240,12 +245,47 @@ def prepare(output, cfg, inputs_from=None):
     return protocol
 
 
+def uncommitted_sources():
+    """Ignore prose drafts, while rejecting edited, renamed or untracked code."""
+    paths = [
+        "01_src",
+        "02_config",
+        "03_models",
+        "04_web",
+        "scripts",
+        "run.sh",
+        "main.py",
+        "run_web_vision_chat.py",
+        "requirements.lock",
+    ]
+    changed = subprocess.check_output(
+        ["git", "diff", "--name-only", "-z", "HEAD", "--", *paths],
+        cwd=ROOT,
+        text=True,
+    )
+    untracked = subprocess.check_output(
+        ["git", "ls-files", "--others", "--exclude-standard", "-z", "--", *paths],
+        cwd=ROOT,
+        text=True,
+    )
+    return sorted(
+        {
+            path
+            for path in (changed + untracked).split("\0")
+            if path and Path(path).suffix.lower() not in (".md", ".rst")
+        }
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--output", type=Path, default=ROOT / "05_runtime/baselines/b1-vision-v1"
     )
     parser.add_argument("--protocol", type=Path, default=PROTOCOL)
+    parser.add_argument(
+        "--config", type=Path, default=ROOT / "02_config/settings.orin-nx-b1.yaml"
+    )
     parser.add_argument(
         "--inputs-from",
         type=Path,
@@ -270,14 +310,23 @@ def main():
         cwd=ROOT,
         text=True,
     )
-    if dirty:
-        raise RuntimeError("Commit reviewed source changes before freezing B1")
+    # Unrelated drafts must not be stashed, deleted or silently committed just
+    # to measure a reviewed runtime. All executable/config/model sources must
+    # still match the committed revision.
+    relevant_dirty = uncommitted_sources()
+    if relevant_dirty:
+        raise RuntimeError(
+            "Commit runtime/harness/config/model changes before freezing: "
+            + repr(relevant_dirty)
+        )
     output.mkdir(parents=True, exist_ok=False)
-    cfg = Config.load(ROOT / "02_config/settings.orin-nx-b1.yaml")
+    config_path = args.config.resolve()
+    cfg = Config.load(config_path)
     prior = runtime.config()
     prior = runtime.config(services.profile_path(prior))
     with exclusive_build(prior, output):
-        protocol = prepare(output, cfg, inputs_from)
+        protocol = prepare(output, cfg, inputs_from, config_path)
+    protocol["unrelated_worktree_changes"] = dirty.splitlines()
     runtime.write_json(protocol_path, protocol)
     print("B1 inputs and runtime contracts frozen:", protocol_path, flush=True)
 

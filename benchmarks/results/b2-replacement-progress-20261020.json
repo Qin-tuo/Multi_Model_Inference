@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-20T06:50:57.483273+00:00",
+  "status": "THREE_REPLACEMENTS_REFERENCE_CHECKED_L_POSE_REPLAY_OBSERVED_INTEGRATION_PENDING",
+  "authorized_replacements": [
+    "body_hand_pose",
+    "face_identity",
+    "person_reid"
+  ],
+  "retained_model_count": 7,
+  "default_profile": "B1; B2 not selected by default",
+  "rollback_tag": "before-upstream-standard-20261020",
+  "export_reports": {
+    "body_hand_pose": {
+      "path": "05_runtime/validation/b2-export-l-20261020/body_hand_pose/export.json",
+      "sha256": "079e768f5e2ca6c787e987220d63e5b35079b4027a2324e9825a79eddd5fcd39"
+    },
+    "face_identity": {
+      "path": "05_runtime/validation/b2-export-20261020/face_identity/export.json",
+      "sha256": "0e18c754f43f6e694051177fc4f65368ae14a3287e0d556273712ebf8290a772"
+    },
+    "person_reid": {
+      "path": "05_runtime/validation/b2-export-20261020/person_reid/export.json",
+      "sha256": "0cd3e62e0ab01cdb3586554163ed4bcf0b63c48bb0cb0b31f3cc23ecf803b057"
+    }
+  },
+  "trt_parity": {
+    "body_hand_pose": {
+      "path": "05_runtime/validation/b2-build-l-20261020/body_hand_pose/parity.json",
+      "sha256": "d24436e84e37d5a22c2978837e72a2c470fa57bcb790a9871648ddb342bacb1f"
+    },
+    "face_identity": {
+      "path": "05_runtime/validation/b2-build-20261020/face_identity/parity.json",
+      "sha256": "0ba3771b228ee0f3ade81d4b30a95d1c4f09248d6015fe48f888461106eeb631"
+    },
+    "person_reid": {
+      "path": "05_runtime/validation/b2-build-20261020/person_reid/parity.json",
+      "sha256": "7ef66e939721288b93ca4dae028a4bea8d046cd2219ac475d070954f9a81da67"
+    }
+  },
+  "known_failure": "RTMPose-m is rejected for the saved held-palm miss. RTMPose-l now emits stop on that sequence; event timing/counts differ from B1 and do not establish field accuracy. Full integration remains pending.",
+  "software_tests": {
+    "passed": 276,
+    "junit": {
+      "path": "05_runtime/validation/b2-software-tests-l-20261020.xml",
+      "sha256": "5b2e6e566a9909a9003226e013f738910e1b2ea89202175d250d4631c5fe69e3"
+    },
+    "scope": "276 tests passed before concurrent unrelated benchmark-coordinator edits; selected-runtime inventory subsequently verified for all 10 models and 17 artifacts."
+  },
+  "not_claimed": [
+    "Model accuracy or runtime performance improvement",
+    "Live human gesture validation of the replacement",
+    "B2 deployment acceptance"
+  ],
+  "rejected_candidate": {
+    "name": "RTMPose-m 256x192",
+    "reason": "Unchanged gesture rules produced no stop on the saved real held-palm sequence; do not deploy based on numerical parity alone.",
+    "recorded_regression": {
+      "path": "05_runtime/validation/b2-pose-recorded-regression-20261020/summary.json",
+      "sha256": "0737177f6a5c8374578d456fb80e98991340e646b225abe8ce3bac863ca56001"
+    },
+    "public_pipeline_probe": {
+      "path": "05_runtime/validation/b2-pipeline-20261020/report.json",
+      "sha256": "6f2c43aac15461b7193afe1fe143c2633b42331ce45d5f9b11b7465e434fd782"
+    }
+  },
+  "recorded_pose_regression": {
+    "path": "05_runtime/validation/b2-pose-recorded-l-20261020/summary.json",
+    "sha256": "224c5ea61199d2bb0da39b80724927efea069dc8bc52e11323b9dcb636818037",
+    "scope": "Saved lossy JPEGs with recorded detector ROIs, times and target associations; no fresh live accuracy or performance acceptance.",
+    "observations": [
+      {
+        "recording": "05_runtime/validation/b1-live-wave-20261020-01.json",
+        "events": [
+          "wave",
+          "wave",
+          "wave",
+          "wave",
+          "wave"
+        ],
+        "missing_previews": 1
+      },
+      {
+        "recording": "05_runtime/validation/b1-live-palm-20261020-01.json",
+        "events": [
+          "stop"
+        ],
+        "missing_previews": 1
+      },
+      {
+        "recording": "05_runtime/validation/b1-live-wave-20261020-02.json",
+        "events": [
+          "stop",
+          "stop"
+        ],
+        "missing_previews": 0
+      }
+    ]
+  }
+}
