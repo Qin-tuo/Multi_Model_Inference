@@ -61,6 +61,14 @@ def selection():
         for notice in card.parent.glob("*LICENSE*"):
             if notice.is_file():
                 selected[str(notice)] = runtime.sha256(notice)
+    # OpenCV Zoo is imported by model subdirectory, not as a complete checkout.
+    for relative in (
+        "frameworks/b1/mmpose/LICENSE",
+        "frameworks/opencv-zoo/palm_detection_mediapipe-233e619d/LICENSE",
+        "frameworks/opencv-zoo/handpose_estimation_mediapipe-4b2a0b44/LICENSE",
+    ):
+        path = ROOT / "05_runtime" / relative
+        selected[str(path)] = runtime.sha256(path)
     return configs, selected
 
 
@@ -105,10 +113,6 @@ def stage_assets(destination):
             target.symlink_to(path.readlink())
         else:
             shutil.copy2(path, target)
-    for relative in ("frameworks/b1/mmpose/LICENSE", "frameworks/opencv-zoo/LICENSE"):
-        target = destination / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source / relative, target)
     changes = relocate_environments(destination, source)
     metadata = {
         "created_at": runtime.stamp(),
