@@ -25,8 +25,14 @@
     {
       "id": "C2",
       "requirement": "统一当前版本启动与配置",
-      "status": "pending",
-      "evidence": []
+      "status": "complete",
+      "evidence": [
+        "tests/test_config_profiles.py",
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/defaults-tests.xml",
+          "sha256": "38d21c17ac2caab756eb3bd5ffa451807635a73e189d1678537405d61570dcae"
+        }
+      ]
     },
     {
       "id": "C3",

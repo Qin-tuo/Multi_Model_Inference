@@ -67,7 +67,7 @@ def test_partial_load_failure_releases_successfully_loaded_models(monkeypatch):
 
     monkeypatch.setattr(models, "ROLES", ("face", "body_hand_pose"))
     monkeypatch.setattr(models, "TensorRTFace", face)
-    monkeypatch.setattr(models, "WholeBodyPose", broken)
+    monkeypatch.setattr(models, "WholeBodyPose2D", broken)
     with pytest.raises(RuntimeError, match="injected load failure"):
         owner.load()
     assert len(created) == 1 and created[0].closed

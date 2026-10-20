@@ -64,11 +64,15 @@ def contract_hash(entry):
 class VisionModels:
     def __init__(
         self,
-        manifest="03_models/vision-b1-runtime.json",
+        manifest=None,
         threshold=0.25,
         iou=0.45,
         max_detections=10,
     ):
+        if manifest is None:
+            from app.config import Config
+
+            manifest = Config.load().perception.model_manifest
         self.manifest = json.loads((ROOT / manifest).read_text())
         self.entries = json.loads(
             (ROOT / self.manifest["source_manifest"]).read_text()

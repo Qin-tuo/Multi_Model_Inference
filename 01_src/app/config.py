@@ -19,7 +19,7 @@ import os
 from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional, get_args, get_origin, get_type_hints, Union
 from pathlib import Path
-from project_paths import CONFIG_DIR, RUNTIME_DIR, ROOT, artifact_path
+from project_paths import CONFIG_DIR, DEFAULT_CONFIG, RUNTIME_DIR, ROOT, artifact_path
 import yaml
 
 
@@ -263,7 +263,7 @@ class Config:
 
     @classmethod
     def load(cls, config_path: Optional[str] = None) -> "Config":
-        """加载基础配置，再叠加指定 profile；默认使用 Orin NX 无机身配置。
+        """加载基础配置与当前 Orin NX 配置；参数、环境变量优先。
 
         启动管理器会保存最终有效配置；运行中的服务共同读取该冻结副本。
         """
@@ -276,9 +276,7 @@ class Config:
         # A named profile must exist; invalid config must never silently boot
         # an English/robot default. Preserve upstream dataclasses and overlays.
         if not profile_path:
-            config_paths.append(
-                default_path.with_name("settings.orin-nx-headless.yaml")
-            )
+            config_paths.append(DEFAULT_CONFIG)
         config = cls()
         sections = {key: (attr, kind) for key, attr, kind in _SECTIONS}
         for path in config_paths:

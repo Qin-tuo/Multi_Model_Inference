@@ -21,6 +21,8 @@ def test_default_profile_is_local_4b_without_robot_or_rag(monkeypatch):
     assert config.vision.frames == 1
     assert not hasattr(config, "reachy") and not hasattr(config, "rag")
     assert config.face.enabled
+    assert config.vision.backend == "realsense"
+    assert config.perception.model_manifest == "03_models/vision-b2-runtime.json"
 
 
 @pytest.mark.parametrize(
@@ -81,3 +83,39 @@ def test_cli_import_does_not_initialize_robot_memory_or_models():
         "kokoro_onnx",
     ]:
         assert not any(m == forbidden or m.startswith(forbidden + ".") for m in loaded)
+
+
+def test_shell_python_and_service_defaults_match_outside_repository(
+    monkeypatch, tmp_path
+):
+    from project_paths import ROOT, DEFAULT_CONFIG
+    from deploy import runtime
+    from app.vision_models import VisionModels
+
+    monkeypatch.delenv("EDGE_ASSISTANT_CONFIG", raising=False)
+    expected = Config.load(str(DEFAULT_CONFIG)).effective()
+    assert runtime.config().effective() == expected
+    assert VisionModels().manifest["model_set"] == "B2-standard-2d"
+    for command in (
+        [str(ROOT / "run.sh"), "config"],
+        [sys.executable, str(ROOT / "main.py"), "config"],
+    ):
+        value = subprocess.check_output(command, cwd=tmp_path, text=True)
+        assert json.loads(value) == expected
+
+
+def test_explicit_profile_overrides_environment_without_changing_defaults(
+    monkeypatch, tmp_path
+):
+    import yaml
+    from project_paths import DEFAULT_CONFIG
+
+    base = yaml.safe_load(DEFAULT_CONFIG.read_text())
+    environment, explicit = tmp_path / "environment.yaml", tmp_path / "explicit.yaml"
+    base["llm"]["max_tokens"] = 64
+    environment.write_text(yaml.safe_dump(base))
+    base["llm"]["max_tokens"] = 96
+    explicit.write_text(yaml.safe_dump(base))
+    monkeypatch.setenv("EDGE_ASSISTANT_CONFIG", str(environment))
+    assert Config.load().llm.max_tokens == 64
+    assert Config.load(str(explicit)).llm.max_tokens == 96

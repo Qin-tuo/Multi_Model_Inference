@@ -11,6 +11,7 @@ import json
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIR = ROOT / "01_src"
 CONFIG_DIR = ROOT / "02_config"
+DEFAULT_CONFIG = CONFIG_DIR / "settings.orin-nx.yaml"
 MODEL_DIR = ROOT / "03_models"
 WEB_DIR = ROOT / "04_web"
 BENCHMARK_DATA_DIR = ROOT / "benchmarks"
