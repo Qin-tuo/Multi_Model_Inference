@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "CURRENT_SOURCE_CLASSIFIED_RUNTIME_ARTIFACT_CLEANUP_AWAITS_RESTORE",
+  "status": "CURRENT_SOURCE_AND_RUNTIME_DISPOSITIONS_COMPLETE",
   "base_commit": "9b24ca038680a436743545202481bd38eb00476f",
   "classification": {
     ".gitattributes": "current_documentation_or_project_metadata",
@@ -520,7 +520,10 @@
     "tests/test_tool_workflows.py": "build_validation_deployment_or_measurement_required",
     "tests/test_turn_execution.py": "build_validation_deployment_or_measurement_required",
     "tests/test_validation_inputs.py": "build_validation_deployment_or_measurement_required",
-    "tests/test_vision_nvtx.py": "build_validation_deployment_or_measurement_required"
+    "tests/test_vision_nvtx.py": "build_validation_deployment_or_measurement_required",
+    "benchmarks/results/vision-stream.json": "current_benchmark_result",
+    "benchmarks/results/consolidation-comparison.json": "current_benchmark_comparison",
+    "docs/consolidation-handoff.md": "current_handoff_documentation"
   },
   "current_runtime_assets": {
     "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/current-runtime-assets.json",
@@ -2044,9 +2047,49 @@
     "01_src/deploy/dependencies-layout.md": {
       "action": "rewrite_current_entry_and_remove_old_daily_options",
       "source_recovery": "before-historical-file-retirement-20261021"
+    },
+    "05_runtime/exports/runtime-b1-r2-20261020.tar": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Superseded by independently restored consolidated runtime package; record SHA and preserve old sidecar/selection metadata before deleting.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/exports/runtime-b1-r2-20261020.json": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Sidecar for superseded archive; copy to cleanup evidence.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/models/b2/body_hand_pose/model.onnx": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Unselected RTMPose-m export; no current or B1/B2 frozen runtime reference; upstream source checkpoint remains.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/models/b2/body_hand_pose-l/model.onnx": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Unselected RTMPose-l export; no current or B1/B2 frozen runtime reference; upstream source checkpoint remains.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/models/b2/runtime/body_hand_pose.fp32.engine": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Unselected RTMPose-m candidate engine; current RTMW-l and B2 original engines retained.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/models/b2/runtime/body_hand_pose-89083ea7e961.fp32.engine": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Unselected RTMPose-l candidate engine; current RTMW-l and B2 original engines retained.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/exports/b1-runtime-stage-20261020": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Superseded packaging copy; keep bundle manifest and selection in cleanup evidence.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
+    },
+    "05_runtime/exports/b1-r2-runtime-stage-20261020": {
+      "action": "retire_superseded_or_unreferenced_runtime_artifact",
+      "reason": "Superseded packaging copy; keep bundle manifest and selection in cleanup evidence.",
+      "evidence": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json"
     }
   },
-  "artifact_cleanup_gate": "No original models, engines, archives or baseline inputs removed in this stage; independently restored current bundle required first.",
+  "artifact_cleanup_gate": "Independent current package restore passed before deletion. The final cleanup protected current runtime, original B2 dependencies and uploaded ONNX.",
   "resumed_pending_edit_snapshot": {
     "path": "05_runtime/refactor-checkpoints/consolidation-20261021-incoming/snapshot.json",
     "sha256": "8eb4751bfc8e027a88ded17aa039bd454673296a227c357aad87a3a6b9374b10"
@@ -2265,5 +2308,48 @@
     "path": "05_runtime/refactor-checkpoints/consolidation-20261021-preintegration/snapshot.json",
     "sha256": "47767fef2e3d1c225dbdda18ef10aeba3778ab6e0635d098a21d1849dbdcf677"
   },
-  "concurrent_doc_merge": "Preserved latest user-led COCO exercise and scene/trigger planning; resolved introductory link/scope conflicts without modifying runtime parameters."
+  "concurrent_doc_merge": "Preserved latest user-led COCO exercise and scene/trigger planning; resolved introductory link/scope conflicts without modifying runtime parameters.",
+  "runtime_artifact_cleanup": {
+    "status": "CLEANUP_COMPLETE",
+    "logical_bytes_retired": 7596067385,
+    "protected_assets_present": 498,
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json",
+      "sha256": "772839c474eaf758d7bd71ebfdd932365102b2d9c8099291afe429d05004005f"
+    },
+    "deleted": [
+      "05_runtime/exports/runtime-b1-r2-20261020.tar",
+      "05_runtime/exports/runtime-b1-r2-20261020.json",
+      "05_runtime/models/b2/body_hand_pose/model.onnx",
+      "05_runtime/models/b2/body_hand_pose-l/model.onnx",
+      "05_runtime/models/b2/runtime/body_hand_pose.fp32.engine",
+      "05_runtime/models/b2/runtime/body_hand_pose-89083ea7e961.fp32.engine",
+      "05_runtime/exports/b1-runtime-stage-20261020",
+      "05_runtime/exports/b1-r2-runtime-stage-20261020"
+    ],
+    "metadata_recovery": "05_runtime/refactor-checkpoints/consolidation-20261021-final/retired-package-metadata/",
+    "retained_experiments": [
+      "05_runtime/builds/segmentation-repeat: raw export checksum differs; retained, links still point to selected model files",
+      "05_runtime/models/b1/depth: deferred stereo experiment",
+      "05_runtime/models/upstream-standard: native reference checkpoints and unselected experiments"
+    ],
+    "retained_historical_dependencies": [
+      "Shared models/frameworks/build environments for the existing .worktrees/b1-body-baseline checkout",
+      "Frozen B2 checkout and required runtime/input/raw result files"
+    ],
+    "safety_dispositions": [
+      {
+        "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup-first-attempt.json",
+        "sha256": "57f0b3095abdb769e60b1a3ca39e5a1f381ddb42638bf79ba5bc7756e9c8b2ab"
+      },
+      {
+        "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup-second-attempt.json",
+        "sha256": "031a5afecab7f3aed5cccd5998eb4e719ed62abf86c00abc35bf2ca5c7566bb8"
+      },
+      {
+        "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup-third-attempt.json",
+        "sha256": "68ce27af1b75dd7df6eb2712609f570ae140a2c3b2d3da96253221a57303adae"
+      }
+    ]
+  }
 }

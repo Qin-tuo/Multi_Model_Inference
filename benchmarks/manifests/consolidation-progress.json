@@ -2,7 +2,7 @@
   "schema_version": 1,
   "objective_file": "docs/consolidation-goal.md",
   "goal_text_sha256": "1e8efc0764fb97e7d65c0a1ed6344bdf4e76756444ec2e367169cda49005ecac",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "source_before": "9b24ca038680a436743545202481bd38eb00476f",
   "recovery_tag": "before-mainline-consolidation-20261020",
   "work_branch": "refactor/b2-mainline",
@@ -12,15 +12,20 @@
     {
       "id": "C1",
       "requirement": "恢复点、未提交改动与工件清单",
-      "status": "in_progress",
+      "status": "complete",
       "evidence": [
         "benchmarks/manifests/consolidation-inventory.json",
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/incoming-tests-isolated.xml",
           "sha256": "89f2c7d1988ac294e7c2b4daf0e2ada1d1a15222eb68ffa94061001235940698"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261021-preintegration/snapshot.json",
+          "sha256": "47767fef2e3d1c225dbdda18ef10aeba3778ab6e0635d098a21d1849dbdcf677"
         }
       ],
-      "checkpoint_ready": true
+      "checkpoint_ready": true,
+      "remaining": null
     },
     {
       "id": "C2",
@@ -32,7 +37,8 @@
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/defaults-tests.xml",
           "sha256": "38d21c17ac2caab756eb3bd5ffa451807635a73e189d1678537405d61570dcae"
         }
-      ]
+      ],
+      "remaining": null
     },
     {
       "id": "C3",
@@ -157,16 +163,20 @@
     {
       "id": "C6",
       "requirement": "旧版专用实现退出主线",
-      "status": "in_progress",
+      "status": "complete",
       "evidence": [
         "benchmarks/manifests/consolidation-inventory.json",
         "tests/test_module_boundaries.py",
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/historical-retirement-tests.xml",
           "sha256": "afb15c9e74f2d2b2db7828ac8d9f57e64a60b7aa16512a2156e5de30c2b251c7"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json",
+          "sha256": "772839c474eaf758d7bd71ebfdd932365102b2d9c8099291afe429d05004005f"
         }
       ],
-      "remaining": "Remove superseded runtime archive and proven unused artifacts only after independent current package restore; final source integration remains C8.",
+      "remaining": null,
       "source_retirement_complete": true
     },
     {
@@ -189,7 +199,7 @@
     {
       "id": "C8",
       "requirement": "回归、性能对照、文档与推送",
-      "status": "in_progress",
+      "status": "complete",
       "evidence": [
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/frozen-comparability.json",
@@ -198,9 +208,38 @@
         {
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/current-freeze/services-restored.json",
           "sha256": "3665a9b37fa40522fc940b79c7e9d3cddee0b8fac78ccc897cf879358a4cf33b"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261021-preintegration/integration.json",
+          "sha256": "e2ab92b269b8ecb18d4daefd8c8c8a99e7ec033511fc7b77b42cd33e3bcdbf41"
+        },
+        "benchmarks/evidence/consolidation-verification.json",
+        "benchmarks/results/consolidation-comparison.json",
+        "docs/consolidation-handoff.md",
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/final-tests-serial.xml",
+          "sha256": "b40c55e51f0c69850d60581cc4bd01c852a522c41cd9c88ab8ea730d0e3ea050"
+        },
+        {
+          "path": "05_runtime/validation/consolidated-browser-20261021/browser.json",
+          "sha256": "5a1928a27edcfdaa2ddb3467d7023443f368c7bc0e7d551bf152e4c77e9728c4"
+        },
+        {
+          "path": "05_runtime/validation/consolidated-final-pipeline-20261021/report.json",
+          "sha256": "5751fbd1a5811bf18e7f19510645daf364946875387f99106e92716657f6524a"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/services-final.json",
+          "sha256": "ba61f334e2f2f77e4386d487158ee60943285e0a8eb444e6541d2c154ea8e45c"
         }
       ],
-      "remaining": "Current module and seven-condition measurements, independent restore/functional final checks, final docs and main integration."
+      "remaining": null,
+      "main_integration": {
+        "commit": "714290ebe5d3bd5437d5f51b05d7abf672a15cf8",
+        "pending_files_preserved": 28,
+        "services": "READY",
+        "remote_main_pushed": true
+      }
     }
   ],
   "invariants": [
@@ -243,6 +282,11 @@
         },
         "no_remaining_owned_processes": true,
         "scope": "One isolated complete application run; original intermittent shutdown issue remains OPEN."
+      },
+      "latest_current_checks": {
+        "status": "OPEN",
+        "observation": "Current main module, stream, repeat and native-pipeline stop/restore completed; independent restored processes all exited 0. Intermittent original shutdown cause not established.",
+        "evidence": "benchmarks/evidence/consolidation-verification.json"
       }
     }
   ],
@@ -251,15 +295,19 @@
     "passed": 295,
     "scope": "Snapshotted pending tooling changes; isolated worktree runtime-data."
   },
-  "next_work": [
-    "Consolidate current build/validation/benchmark entrypoints and remove retired mainline branches",
-    "Build and independently restore the current runtime package before deleting superseded runtime artifacts",
-    "Run and compare final frozen B2 inputs, document and integrate the reviewed branch without losing concurrent main-worktree edits"
-  ],
+  "next_work": [],
   "latest_current_tests": {
     "passed": 302,
-    "legacy_test_disposition": "Removed exclusive B0 detector/hand and deferred neural stereo cases with their implementations. Current ten-model frame ownership, epoch invalidation, artifacts, cancellation and lifecycle checks retained."
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/final-tests-serial.xml",
+      "sha256": "b40c55e51f0c69850d60581cc4bd01c852a522c41cd9c88ab8ea730d0e3ea050"
+    },
+    "initial_attempt_failure_preserved": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/final-tests.xml",
+      "sha256": "6fec564f4c62d10bbd6c6d2eb5d9f04ce9c344cf5b474b32a2dc13ea963907e5"
+    }
   },
-  "progress_estimate_percent": 78,
-  "progress_basis": "Milestone estimate for consolidation only, not performance or product accuracy."
+  "progress_estimate_percent": 100,
+  "progress_basis": "All C1-C8 deliverables verified; completion is software consolidation, not deferred hardware/accuracy or performance optimization.",
+  "handoff": "docs/consolidation-handoff.md"
 }

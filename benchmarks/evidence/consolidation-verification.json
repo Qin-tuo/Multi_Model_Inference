@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "status": "FINAL_SOFTWARE_CHECKS_PASS_WITH_DECLARED_LIMITS",
+  "source_commit": "714290ebe5d3bd5437d5f51b05d7abf672a15cf8",
+  "package_runtime_sources_unchanged_since": "590c110b40b4484ae6625aa1b3ab35b62512104f",
+  "tests": {
+    "final_passed": 302,
+    "failures": 0,
+    "errors": 0,
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/final-tests-serial.xml",
+      "sha256": "b40c55e51f0c69850d60581cc4bd01c852a522c41cd9c88ab8ea730d0e3ea050"
+    },
+    "initial_attempt": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/final-tests.xml",
+      "sha256": "6fec564f4c62d10bbd6c6d2eb5d9f04ce9c344cf5b474b32a2dc13ea963907e5"
+    },
+    "initial_failure": "One 150 ms simulated LLM control-health success check timed out while native replay ran concurrently. No timeout or runtime-code change. Exact causal mechanism unproven.",
+    "isolated_repeat": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/control-health-repeat.xml",
+      "sha256": "0c1e7d0822a6e3f6a9ccc3b12dbba19277c776d0671623118ef2dd630b9ce768"
+    }
+  },
+  "model_parity": {
+    "cases": 22,
+    "models": 10,
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/model-parity.json",
+      "sha256": "17589a9f41decf7e2db5d0d6765a13a24e288caeeabf2cdad4f440b1d728c1ef"
+    }
+  },
+  "native_pipeline": {
+    "frames": 39,
+    "all_ten_models_called": true,
+    "labeled_palm_stop_without_wave": true,
+    "gallery_reopened": true,
+    "evidence": {
+      "path": "05_runtime/validation/consolidated-final-pipeline-20261021/report.json",
+      "sha256": "5751fbd1a5811bf18e7f19510645daf364946875387f99106e92716657f6524a"
+    },
+    "services_restored": {
+      "path": "05_runtime/validation/consolidated-final-pipeline-20261021/services-restored.json",
+      "sha256": "cd05e09b121a4fce3250e47bfebf448e65b4d288fcfc753edc700f1afe74abb5"
+    }
+  },
+  "browser": {
+    "status": "BROWSER_RENDER_PASS",
+    "model_rows": 10,
+    "evidence": {
+      "path": "05_runtime/validation/consolidated-browser-20261021/browser.json",
+      "sha256": "5a1928a27edcfdaa2ddb3467d7023443f368c7bc0e7d551bf152e4c77e9728c4"
+    },
+    "screenshot": {
+      "path": "05_runtime/validation/consolidated-browser-20261021/browser-debug.png",
+      "sha256": "79d1483bea954659fd22210e4ae014f42c8764675ab505979d212f6f4e94fd4d"
+    }
+  },
+  "runtime_artifacts": {
+    "status": "ARTIFACTS_VERIFIED",
+    "verified_files": 439,
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifacts-after-cleanup.json",
+      "sha256": "aee4f94e68140045def3926f1708468204e17149c13f1442815c8d764f512e27"
+    }
+  },
+  "independent_restore": {
+    "checkout": "/home/nvidia/mmi-restore-20261021",
+    "hidden_sources": [
+      "/home/nvidia/Multi_Model_Inference",
+      "/home/nvidia/AI_Stack"
+    ],
+    "namespace_exit_code": 0,
+    "checks": {
+      "text": 0,
+      "camera": 0,
+      "file-speech": 0,
+      "application-audio": 0
+    },
+    "vision": {
+      "processed": 101,
+      "failures": 0,
+      "models": [
+        "detection_segmentation",
+        "face",
+        "body_hand_pose",
+        "person_reid",
+        "head_pose",
+        "gaze_landmarks",
+        "gaze",
+        "face_identity",
+        "expression",
+        "object_embedding"
+      ],
+      "depth_ready": true,
+      "scope": "Observed current scene; loaded models do not prove real-person attribute accuracy"
+    },
+    "shutdown": {
+      "app": 0,
+      "speech": 0,
+      "asr": 0,
+      "llama": 0
+    },
+    "remaining_owned_processes": [],
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/independent-restore/report.json",
+      "sha256": "a14e95ddd51c9f57d3a4353acada7c0946bb2dcc4572939fd516fb675cb3c5db"
+    }
+  },
+  "performance": {
+    "modules": 10,
+    "conditions": 7,
+    "frames": 1997,
+    "frame_failure_events": 0,
+    "observer_missed_deadlines": 0,
+    "comparison": "benchmarks/results/consolidation-comparison.json"
+  },
+  "cleanup": {
+    "logical_bytes_retired": 7596067385,
+    "protected_assets_present": 498,
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/artifact-cleanup.json",
+      "sha256": "772839c474eaf758d7bd71ebfdd932365102b2d9c8099291afe429d05004005f"
+    }
+  },
+  "main_integration": {
+    "path": "05_runtime/refactor-checkpoints/consolidation-20261021-preintegration/integration.json",
+    "sha256": "e2ab92b269b8ecb18d4daefd8c8c8a99e7ec033511fc7b77b42cd33e3bcdbf41"
+  },
+  "limits": [
+    "B2-EXIT-01 remains OPEN; clean current runs do not establish an intermittent shutdown fix.",
+    "RealSense live scene, physical audio, field gesture accuracy and long-run load are separate scopes.",
+    "Initial timing outliers, the failed supplemental coordinator and cleanup guard stops are preserved; only successful measurements are summarized with their scope."
+  ],
+  "final_services": {
+    "status": "READY",
+    "services": [
+      "llama",
+      "asr",
+      "speech",
+      "app"
+    ],
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/services-final.json",
+      "sha256": "ba61f334e2f2f77e4386d487158ee60943285e0a8eb444e6541d2c154ea8e45c"
+    }
+  }
+}

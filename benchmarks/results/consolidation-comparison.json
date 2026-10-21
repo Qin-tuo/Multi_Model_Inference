@@ -1,0 +1,496 @@
+{
+  "schema_version": 1,
+  "status": "MEASURED_WITH_DECLARED_SCOPE",
+  "before_commit": "45af3ed6a8487f580f2e50dabff96931bad9ebab",
+  "after_commit": "714290ebe5d3bd5437d5f51b05d7abf672a15cf8",
+  "models": {
+    "detection_segmentation": {
+      "p50": {
+        "before": 27.926481096073985,
+        "after": 27.879315079189837,
+        "absolute_change": -0.04716601688414812,
+        "percent_change": -0.16889351981685952
+      },
+      "p95": {
+        "before": 34.17805698700249,
+        "after": 34.08144193235785,
+        "absolute_change": -0.09661505464464426,
+        "percent_change": -0.2826815306715247
+      }
+    },
+    "face": {
+      "p50": {
+        "before": 8.06799903512001,
+        "after": 8.087447960861027,
+        "absolute_change": 0.019448925741016865,
+        "percent_change": 0.24106256900076062
+      },
+      "p95": {
+        "before": 8.661878993734717,
+        "after": 8.889943012036383,
+        "absolute_change": 0.22806401830166578,
+        "percent_change": 2.6329624145826624
+      }
+    },
+    "body_hand_pose": {
+      "p50": {
+        "before": 58.81179706193507,
+        "after": 58.728471980430186,
+        "absolute_change": -0.08332508150488138,
+        "percent_change": -0.14168089680567375
+      },
+      "p95": {
+        "before": 59.295977000147104,
+        "after": 59.17415302246809,
+        "absolute_change": -0.1218239776790142,
+        "percent_change": -0.20545066266250966
+      }
+    },
+    "person_reid": {
+      "p50": {
+        "before": 7.795347948558629,
+        "after": 7.639941992238164,
+        "absolute_change": -0.1554059563204646,
+        "percent_change": -1.9935730559557552
+      },
+      "p95": {
+        "before": 8.175938972271979,
+        "after": 8.269247016869485,
+        "absolute_change": 0.09330804459750652,
+        "percent_change": 1.1412517255076526
+      }
+    },
+    "head_pose": {
+      "p50": {
+        "before": 1.0265690507367253,
+        "after": 1.5131790423765779,
+        "absolute_change": 0.4866099916398525,
+        "percent_change": 47.401584071780945
+      },
+      "p95": {
+        "before": 1.2787380255758762,
+        "after": 1.7360029742121696,
+        "absolute_change": 0.4572649486362934,
+        "percent_change": 35.759079615260944
+      }
+    },
+    "gaze_landmarks": {
+      "p50": {
+        "before": 2.6340880431234837,
+        "after": 2.6284209452569485,
+        "absolute_change": -0.005667097866535187,
+        "percent_change": -0.2151445879468472
+      },
+      "p95": {
+        "before": 2.6806500973179936,
+        "after": 2.6537979720160365,
+        "absolute_change": -0.02685212530195713,
+        "percent_change": -1.0017019874702382
+      }
+    },
+    "gaze": {
+      "p50": {
+        "before": 1.598975039087236,
+        "after": 1.606557983905077,
+        "absolute_change": 0.007582944817841053,
+        "percent_change": 0.4742378481511267
+      },
+      "p95": {
+        "before": 1.9154029432684183,
+        "after": 1.7080340767279267,
+        "absolute_change": -0.20736886654049158,
+        "percent_change": -10.826383412914675
+      }
+    },
+    "face_identity": {
+      "p50": {
+        "before": 5.390933016315103,
+        "after": 5.222026025876403,
+        "absolute_change": -0.16890699043869972,
+        "percent_change": -3.1331680421092245
+      },
+      "p95": {
+        "before": 5.8526149950921535,
+        "after": 5.630968953482807,
+        "absolute_change": -0.22164604160934687,
+        "percent_change": -3.7871283485281904
+      }
+    },
+    "expression": {
+      "p50": {
+        "before": 3.7615890614688396,
+        "after": 3.7661930546164513,
+        "absolute_change": 0.004603993147611618,
+        "percent_change": 0.12239489939960269
+      },
+      "p95": {
+        "before": 3.8134310161694884,
+        "after": 3.9084709715098143,
+        "absolute_change": 0.09503995534032583,
+        "percent_change": 2.492242679553991
+      }
+    },
+    "object_embedding": {
+      "p50": {
+        "before": 20.563308033160865,
+        "after": 20.604377961717546,
+        "absolute_change": 0.04106992855668068,
+        "percent_change": 0.19972432689550068
+      },
+      "p95": {
+        "before": 20.8958659786731,
+        "after": 20.85753995925188,
+        "absolute_change": -0.038326019421219826,
+        "percent_change": -0.1834143627277074
+      }
+    }
+  },
+  "stream": {
+    "replay-only": {
+      "matched_inputs": true,
+      "fps": {
+        "before": 4.999992336012761,
+        "after": 4.983325535839161,
+        "absolute_change": -0.016666800173600116,
+        "percent_change": -0.33333651440936585
+      },
+      "processing_p95_ms": {
+        "before": 169.15821004658937,
+        "after": 174.99492689967155,
+        "absolute_change": 5.83671685308218,
+        "percent_change": 3.4504484597434715
+      },
+      "latest_age_p95_ms": {
+        "before": 399.9845120124519,
+        "after": 442.6768929697573,
+        "absolute_change": 42.69238095730543,
+        "percent_change": 10.67350851724389
+      },
+      "after_completed_frames": 299,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 9.863636016845703,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 449,
+        "face": 449,
+        "body_hand_pose": 340,
+        "person_reid": 358,
+        "head_pose": 509,
+        "gaze_landmarks": 509,
+        "gaze": 260,
+        "face_identity": 536,
+        "expression": 509,
+        "object_embedding": 178
+      }
+    },
+    "replay-resident": {
+      "matched_inputs": true,
+      "fps": {
+        "before": 4.983325457685371,
+        "after": 4.983325542984486,
+        "absolute_change": 8.529911443844185e-08,
+        "percent_change": 1.7116906114722497e-06
+      },
+      "processing_p95_ms": {
+        "before": 177.94501897878945,
+        "after": 167.69291693344712,
+        "absolute_change": -10.252102045342326,
+        "percent_change": -5.761387480345459
+      },
+      "latest_age_p95_ms": {
+        "before": 452.6608509477228,
+        "after": 410.41680390480906,
+        "absolute_change": -42.244047042913735,
+        "percent_change": -9.332383605621875
+      },
+      "after_completed_frames": 299,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 3.316905975341797,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 449,
+        "face": 449,
+        "body_hand_pose": 342,
+        "person_reid": 360,
+        "head_pose": 513,
+        "gaze_landmarks": 513,
+        "gaze": 261,
+        "face_identity": 540,
+        "expression": 513,
+        "object_embedding": 180
+      }
+    },
+    "replay-4b": {
+      "matched_inputs": true,
+      "fps": {
+        "before": 4.583326985732835,
+        "after": 4.566659222397244,
+        "absolute_change": -0.016667763335591168,
+        "percent_change": -0.3636607946034709
+      },
+      "processing_p95_ms": {
+        "before": 254.24752500839531,
+        "after": 265.52354102022946,
+        "absolute_change": 11.276016011834145,
+        "percent_change": 4.435054387043413
+      },
+      "latest_age_p95_ms": {
+        "before": 514.373074984178,
+        "after": 532.5983429793268,
+        "absolute_change": 18.225267995148897,
+        "percent_change": 3.543200233742705
+      },
+      "after_completed_frames": 274,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 3.2288284301757812,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 506,
+        "face": 506,
+        "body_hand_pose": 378,
+        "person_reid": 400,
+        "head_pose": 549,
+        "gaze_landmarks": 549,
+        "gaze": 293,
+        "face_identity": 582,
+        "expression": 549,
+        "object_embedding": 182
+      }
+    },
+    "replay-conversation": {
+      "matched_inputs": true,
+      "fps": {
+        "before": 4.366659847042606,
+        "after": 4.383327766218043,
+        "absolute_change": 0.016667919175437085,
+        "percent_change": 0.3817086688518989
+      },
+      "processing_p95_ms": {
+        "before": 299.6033459203318,
+        "after": 296.272685052827,
+        "absolute_change": -3.3306608675047755,
+        "percent_change": -1.1116901439379934
+      },
+      "latest_age_p95_ms": {
+        "before": 592.3216810915619,
+        "after": 577.4003420956433,
+        "absolute_change": -14.921338995918632,
+        "percent_change": -2.5191276078938674
+      },
+      "after_completed_frames": 263,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 3.0921783447265625,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 396,
+        "face": 396,
+        "body_hand_pose": 290,
+        "person_reid": 308,
+        "head_pose": 420,
+        "gaze_landmarks": 420,
+        "gaze": 228,
+        "face_identity": 447,
+        "expression": 420,
+        "object_embedding": 139
+      }
+    },
+    "replay-vision-chat": {
+      "matched_inputs": true,
+      "fps": {
+        "before": 4.416660422169112,
+        "after": 4.433326346928967,
+        "absolute_change": 0.016665924759855066,
+        "percent_change": 0.3773422261807102
+      },
+      "processing_p95_ms": {
+        "before": 283.9125090977177,
+        "after": 284.3842919683084,
+        "absolute_change": 0.4717828705906868,
+        "percent_change": 0.1661719210928947
+      },
+      "latest_age_p95_ms": {
+        "before": 571.4337360113859,
+        "after": 573.2243700185791,
+        "absolute_change": 1.7906340071931481,
+        "percent_change": 0.31335811912187594
+      },
+      "after_completed_frames": 266,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 3.138416290283203,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 397,
+        "face": 397,
+        "body_hand_pose": 292,
+        "person_reid": 310,
+        "head_pose": 423,
+        "gaze_landmarks": 423,
+        "gaze": 229,
+        "face_identity": 450,
+        "expression": 423,
+        "object_embedding": 140
+      }
+    },
+    "live-resident": {
+      "matched_inputs": false,
+      "fps": {
+        "before": 4.98327403436699,
+        "after": 4.983327274609337,
+        "absolute_change": 5.324024234720781e-05,
+        "percent_change": 0.001068378780288981
+      },
+      "processing_p95_ms": {
+        "before": 128.48073698114604,
+        "after": 103.06912800297141,
+        "absolute_change": -25.411608978174627,
+        "percent_change": -19.77853612553894
+      },
+      "latest_age_p95_ms": {
+        "before": 380.2597370231524,
+        "after": 374.6115519898012,
+        "absolute_change": -5.648185033351183,
+        "percent_change": -1.4853492188175776
+      },
+      "after_completed_frames": 299,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 3.4881515502929688,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 403,
+        "face": 402,
+        "body_hand_pose": 0,
+        "person_reid": 0,
+        "head_pose": 0,
+        "gaze_landmarks": 0,
+        "gaze": 0,
+        "face_identity": 0,
+        "expression": 0,
+        "object_embedding": 402
+      }
+    },
+    "live-conversation": {
+      "matched_inputs": false,
+      "fps": {
+        "before": 4.249680064968137,
+        "after": 4.949985749243633,
+        "absolute_change": 0.700305684275496,
+        "percent_change": 16.4790213279443
+      },
+      "processing_p95_ms": {
+        "before": 292.716413969174,
+        "after": 146.4498599525541,
+        "absolute_change": -146.26655401661992,
+        "percent_change": -49.96868881839447
+      },
+      "latest_age_p95_ms": {
+        "before": 573.6653049243614,
+        "after": 396.45968296099454,
+        "absolute_change": -177.20562196336687,
+        "percent_change": -30.890071343382296
+      },
+      "after_completed_frames": 297,
+      "after_frame_failures": 0,
+      "after_observer_missed_deadlines": 0,
+      "after_min_available_GiB": 3.0973968505859375,
+      "after_model_calls_including_warmup": {
+        "detection_segmentation": 400,
+        "face": 400,
+        "body_hand_pose": 5,
+        "person_reid": 8,
+        "head_pose": 0,
+        "gaze_landmarks": 0,
+        "gaze": 0,
+        "face_identity": 4,
+        "expression": 0,
+        "object_embedding": 399
+      }
+    }
+  },
+  "investigations": {
+    "head_pose": {
+      "initial_current_p50_ms": 1.5131790423765779,
+      "repeat_sequence": [
+        {
+          "run": "1-old",
+          "n": 40,
+          "plain_p50_ms": 1.5134980203583837,
+          "plain_p95_ms": 1.7786279786378145,
+          "cuda_p50_ms": 1.0291839838027954,
+          "parity": true
+        },
+        {
+          "run": "2-current",
+          "n": 40,
+          "plain_p50_ms": 1.0188550222665071,
+          "plain_p95_ms": 1.0606169234961271,
+          "cuda_p50_ms": 0.6082879900932312,
+          "parity": true
+        },
+        {
+          "run": "3-current",
+          "n": 40,
+          "plain_p50_ms": 1.0112060699611902,
+          "plain_p95_ms": 1.0810650419443846,
+          "cuda_p50_ms": 0.6119999885559082,
+          "parity": true
+        },
+        {
+          "run": "4-old",
+          "n": 40,
+          "plain_p50_ms": 1.0281670838594437,
+          "plain_p95_ms": 1.3100020587444305,
+          "cuda_p50_ms": 0.6152639985084534,
+          "parity": true
+        }
+      ],
+      "finding": "The initial ~1.51 ms result also occurs in the old source. Two current repeats are ~1.01-1.02 ms and the final old repeat ~1.03 ms. A version-specific slowdown was not reproduced. Exact cause of the two timing regimes remains unproven; coarse clock snapshots are not per-kernel evidence.",
+      "report": {
+        "path": "05_runtime/validation/consolidated-head-abba-20261021/report.json",
+        "sha256": "6d2072773bb29a44fb1f0c5b7af65a47e883ecbe395b44f8b32e88c4f647aa8a"
+      }
+    },
+    "replay_age": {
+      "old_repeat": {
+        "fps": 4.98332583342886,
+        "processing_p95_ms": 174.15514402091503,
+        "latest_age_p95_ms": 441.2178110796958
+      },
+      "current_repeat": {
+        "fps": 4.983323658708212,
+        "processing_p95_ms": 174.85315504018217,
+        "latest_age_p95_ms": 443.75662703532726
+      },
+      "finding": "Old and current repeat windows both show ~441-444 ms latest-age P95 and ~4.98 FPS. The original ~400 ms value is not stable across old-source repetitions. No version-specific large age regression reproduced; a single window is not a confidence interval.",
+      "discarded_attempt": {
+        "report": {
+          "path": "05_runtime/validation/consolidated-replay-ab-20261021/report.json",
+          "sha256": "93b06d843ee57fa2bd94885e77463dd5b042f6ebfc392af750ebbf7cfec5af79"
+        },
+        "status": "FAILED_CURRENT_WORKER_ADMISSION",
+        "reason": "Diagnostic coordinator held the build lease; current stream worker correctly refused to acquire its model lease. No current inference occurred. The successful old worker is retained; current repeat used the formal stream coordinator."
+      },
+      "current_repeat_report": {
+        "path": "05_runtime/validation/consolidated-replay-repeat-20261021/report.json",
+        "sha256": "e59469cc6cd7f66fac616bc05aebe1cf281801708a847d402b59ef13620cfbf0"
+      }
+    }
+  },
+  "totals": {
+    "measured_seconds": 420.00070192990825,
+    "frames": 1997,
+    "frame_failure_events": 0,
+    "observer_missed_deadlines": 0
+  },
+  "limitations": [
+    "Single 60-second windows per main condition; not a statistical non-inferiority or soak test.",
+    "Five replay conditions use the same fixed input bytes, model bytes and numerical settings. Scheduling and asynchronous background completions still vary.",
+    "Replay-4b processing P95 increased about 4.4% in the original windows; retained without filtering. No performance tuning was performed.",
+    "Both current live windows had zero pose/person detections and zero face-attribute work; they are not equivalent to the original populated live scenes or evidence of full-load speedup.",
+    "Module GPU samples are too short for some 1-second telemetry; do not infer GPU frequency or memory guarantees from missed samples.",
+    "Physical audio and real-person gesture accuracy remain deferred; B2-EXIT-01 remains OPEN."
+  ],
+  "parity": {
+    "path": "05_runtime/refactor-checkpoints/consolidation-20261021-final/model-parity.json",
+    "sha256": "17589a9f41decf7e2db5d0d6765a13a24e288caeeabf2cdad4f440b1d728c1ef"
+  }
+}

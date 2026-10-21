@@ -67,5 +67,13 @@
       "sha256": "a14e95ddd51c9f57d3a4353acada7c0946bb2dcc4572939fd516fb675cb3c5db"
     }
   },
-  "scope": "Same compatible host; current models and native processes work without original project paths or external network. Physical audio, field accuracy and long-run stability remain separate."
+  "scope": "Same compatible host; current models and native processes work without original project paths or external network. Physical audio, field accuracy and long-run stability remain separate.",
+  "verified_main_integration": {
+    "commit": "714290ebe5d3bd5437d5f51b05d7abf672a15cf8",
+    "runtime_sources": "Same frozen app/config/model and tool source bytes as the independently restored package; subsequent changes are documentation, locks and recorded results.",
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261021-preintegration/integration.json",
+      "sha256": "e2ab92b269b8ecb18d4daefd8c8c8a99e7ec033511fc7b77b42cd33e3bcdbf41"
+    }
+  }
 }

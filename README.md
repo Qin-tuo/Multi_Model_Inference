@@ -2,7 +2,7 @@
 
 在 Orin NX 16GB 上连接 D435i、十模型视觉、中文语音和 4B 图文模型。重点是同帧数据流、板载资源边界、可观察性和可复现测量。性能优化由用户接手逐项完成。
 
-> 整合分支验收进行中：工具与核心模块已完成阶段验证，当前运行包已通过独立恢复，最终性能对照和主分支交付仍待完成。实际进度见 [执行清单](benchmarks/manifests/consolidation-progress.json)，完整范围见 [本轮 Goal](docs/consolidation-goal.md)。
+> 本轮整合验收已完成：当前主线、独立恢复、同条件性能对照和有依据的工件清理均已验证。交付范围、结果与开放问题见 [交接说明](docs/consolidation-handoff.md)。实际进度见 [执行清单](benchmarks/manifests/consolidation-progress.json)，完整范围见 [本轮 Goal](docs/consolidation-goal.md)。
 
 [架构与代码地图](docs/project-overview.md) · [模型与接口](docs/models.md) · [基准与复现](docs/visual-baseline.md) · [依赖与恢复](01_src/deploy/dependencies-layout.md) · [服务管理](01_src/deploy/systemd/README.md)
 
@@ -87,7 +87,7 @@ python -m pytest -q
 
 入口只选择任务，公共代码不导入 `scripts/`。构建/导出写候选清单，验证后再选择为运行配置。原生参考需要额外开发环境，见模型说明；恢复运行包不自动安装训练/导出环境。部分验证和基准会停止并恢复本项目服务，运行前查看任务帮助和适用范围。
 
-已完成的阶段证据包括十模型固定输出对照、完整管线回放、文字/文件语音与取消/动作链路，以及工具整合回归。最新计数和证据摘要位于执行清单，最终交付还需同输入性能对照和独立恢复。
+已完成的阶段证据包括十模型固定输出对照、完整管线回放、文字/文件语音与取消/动作链路，以及工具整合回归。最新计数和证据摘要位于执行清单，独立恢复、同输入性能对照、清理审计和最终 302 项串行回归均已通过；首次短时限测试超时及其他失败记录在交接说明中保留。
 
 ## 如何接手优化
 
