@@ -2260,5 +2260,10 @@
   "preserved_B2_raw_package_copy": {
     "path": "05_runtime/baselines/b2-original-measurements/preservation.json",
     "sha256": "82d9794641767e124534f72acb1aae7d089dc770b6ca7eb4964e8a0deae638b0"
-  }
+  },
+  "preintegration_pending_snapshot": {
+    "path": "05_runtime/refactor-checkpoints/consolidation-20261021-preintegration/snapshot.json",
+    "sha256": "47767fef2e3d1c225dbdda18ef10aeba3778ab6e0635d098a21d1849dbdcf677"
+  },
+  "concurrent_doc_merge": "Preserved latest user-led COCO exercise and scene/trigger planning; resolved introductory link/scope conflicts without modifying runtime parameters."
 }
