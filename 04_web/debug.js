@@ -8,7 +8,7 @@
   const labels = {vad:'VAD 分段',asr:'ASR 调用',llm:'LLM 迭代',tool:'工具执行',tts:'TTS 合成',release:'资源释放'};
   const card = (label,id,unit='') => `<div class="debug-card"><label>${label}</label><strong id="${id}">—</strong><small>${unit}</small></div>`;
   panel.innerHTML = `
-    <div class="debug-top"><strong>板端链路观测</strong><button class="debug-button" id="debugExport" disabled>导出观测 JSON</button></div>
+    <div class="debug-top"><strong>板端实时状态</strong></div>
     <div class="debug-live stale" id="debugFresh" role="status">等待板端采样</div>
     <div class="debug-note">板端约 2 秒采样一次 · 趋势保留最近 60 个样本 · 每帧耗时展示最新有效结果</div>
     <div class="debug-section">视觉链路</div>
@@ -52,12 +52,7 @@
     <div class="debug-section">传输与采样</div>
     <div class="debug-note" id="debugTransport"></div>
     <div class="debug-note">浏览器接收 FPS 仅反映预览传输；板端帧龄不含曝光时间，也不含网络与屏幕显示延迟。缺失指标显示 —。</div>
-    <details><summary>十模型基准与测量口径</summary>
-      <p class="debug-note">单模型固定输入的普通调用分布；各模型使用自己的固定 ROI 和样本集。当前实拍任务与共存负载不同，不自动计算加速比。正式比较使用冻结协议。</p>
-      <p class="debug-note" id="debugBaselineSource"></p>
-      <table class="debug-table"><thead><tr><th>单模块调用</th><th>P50 / ms</th><th>P95 / ms</th></tr></thead><tbody id="debugBaseline"></tbody></table>
-      <p class="debug-note">本面板增加轻量计时和资源读取，观测开销仍需纳入实验条件。逐层／算子分析使用 Nsight，正式性能对比使用基准脚本。</p>
-    </details>`;
+    `;
   let enabled = location.pathname === '/debug', latest = null, history = [];
   let receivedAt = 0, connected = false, session = null, sequence = -1;
   let frameCount = 0, frameSince = performance.now(), browserFPS = null;
@@ -148,13 +143,6 @@
     requestAnimationFrame(render);
   }
   toggle.addEventListener('click',()=>setEnabled(!enabled));
-  $('debugExport').addEventListener('click',()=>{
-    const data={schema_version:1,scope:'live sampled diagnostics, not a frozen benchmark',latest,history,
-      browser_received_fps:browserFPS,connection_fresh:connected&&(performance.now()-receivedAt)/1000+(latest?.cache_age_seconds||0)<=6};
-    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
-    const a=document.createElement('a');a.href=url;a.download='board-debug-'+new Date().toISOString().replaceAll(':','-')+'.json';a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-  });
   window.boardDebug={
     disconnect(){connected=false;frameCount=0;frameSince=performance.now();browserFPS=null;freshness();},
     receive(msg){
@@ -169,16 +157,9 @@
       history.push({time:data.sampled_monotonic,capture:data.vision.capture_fps,perception:data.vision.perception_fps,
         processing:data.vision.processing_ms,age:data.vision.frame_age_ms,cpu:data.resources.cpu_percent,
         gpu:data.resources.gpu_percent,available_gib:data.resources.ram_available_gib,power_w:data.resources.module_input_w});
-      if(history.length>60)history.shift();$('debugExport').disabled=false;render();
+      if(history.length>60)history.shift();render();
     }
   };
-  fetch('/api/debug/baseline').then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(data=>{
-    $('debugBaselineSource').textContent=`基准源码 ${(data.runtime_source_commit||'未记录').slice(0,12)} · ${data.created_at||''}`;
-    for(const [key,value] of Object.entries(data.modules)){
-      const sample=value.plain_adapter_ms;
-      $('debugBaseline').append(row([modelNames[key]||key,f(sample.p50,2),f(sample.p95,2)]));
-    }
-  }).catch(()=>{$('debugBaseline').append(row(['基准读取失败','—','—']));});
   window.addEventListener('resize',()=>{if(enabled)render();});
   setInterval(()=>{if(enabled)freshness();},1000);
   setEnabled(enabled);

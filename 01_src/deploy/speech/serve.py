@@ -5,14 +5,13 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 import argparse
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
-from deploy.runtime import config, paths, port, sha256, write_json  # noqa: E402 — direct script entrypoint
+from deploy.runtime import config, paths, port, sha256, write_json, verify_speech_sources  # noqa: E402 — direct script entrypoint
 
 
 def main():
@@ -23,13 +22,9 @@ def main():
     p = paths(cfg)
     from deploy.resource_guard import hold_model_lease
 
-    _model_lease = hold_model_lease(p["stack"] / "cache")
+    _model_lease = hold_model_lease(p["data"] / "systemd")
     upstream = p["ovs"]
-    actual = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=upstream, text=True
-    ).strip()
-    if actual != "18a459761647a641926f04d7d36c17035c11f8b7":
-        raise RuntimeError("OVS source revision differs from the lock")
+    verify_speech_sources(cfg)
     model = p["models"] / "matcha-host"
     manifest = json.loads((model / "host-manifest.json").read_text())
     import tensorrt as trt

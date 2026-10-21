@@ -451,13 +451,6 @@ def create_app(
         value = await read_state()
         return value.get("diagnostics", {"ready": False})
 
-    @app.get("/api/debug/baseline")
-    async def _debug_baseline():
-        return FileResponse(
-            STATIC_DIR.parent / "benchmarks/results/vision-modules.json",
-            media_type="application/json",
-        )
-
     @app.get("/static/{asset}")
     async def _debug_asset(asset: str):
         if asset not in {"app.js", "app.css", "debug.js", "debug.css"}:

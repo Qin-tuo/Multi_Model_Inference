@@ -290,7 +290,7 @@ def render(name, cfg):
         f"PartOf={PREFIX}.target\nAfter={' '.join(unit(d) for d in deps)}\nWants={' '.join(unit(d) for d in deps)}\n"
         "StartLimitIntervalSec=120\nStartLimitBurst=3\n\n[Service]\nType=exec\n"
         f"WorkingDirectory={str(ROOT).replace('%', '%%')}\n{pre}ExecStart={' '.join(quote(a, True) for a in argv)}\n"
-        'Environment="PYTHONUNBUFFERED=1" "HF_HUB_OFFLINE=1" "TRANSFORMERS_OFFLINE=1" "OTEL_SDK_DISABLED=true"\n'
+        'Environment="PYTHONUNBUFFERED=1" "PYTHONDONTWRITEBYTECODE=1" "HF_HUB_OFFLINE=1" "TRANSFORMERS_OFFLINE=1" "OTEL_SDK_DISABLED=true"\n'
         "Restart=on-failure\nRestartSec=5\nSuccessExitStatus=130\nKillMode=control-group\nKillSignal=SIGINT\n"
         "TimeoutStartSec=240\nTimeoutStopSec=30\nSendSIGKILL=yes\nMemoryAccounting=yes\nCPUAccounting=yes\nUMask=0077\n"
         f"StandardOutput=journal\nStandardError=journal\nSyslogIdentifier={PREFIX}-{name}\n"

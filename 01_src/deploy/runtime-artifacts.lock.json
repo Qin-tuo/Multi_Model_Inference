@@ -1,6 +1,6 @@
 {
   "created_at": "2026-10-16T08:30:30.505957+00:00",
-  "scope": "Existing local native build and Matcha bundle; observed hashes, no rebuild or performance tuning",
+  "scope": "Current deployed native libraries and required speech model files",
   "llama_source_commit": "08ffba21e5c2f1728b6b405c05ff3913f65706d4",
   "native_files": {
     "builds/llama/bin/llama-server": {
@@ -49,33 +49,17 @@
       "sha256": "657991c43b7b1435b2334509ad8f00c437bd9e4e65d2f17b7b398a222408cb05",
       "bytes": 37630316
     },
-    "models/matcha-host/engines/matcha_estimator_step0_bf16.engine.host.json": {
-      "sha256": "05873702278e141a5dda232838b214adcc9a5d50b57f07e26473829fad1d03e2",
-      "bytes": 1072
-    },
     "models/matcha-host/engines/matcha_estimator_step1_bf16.engine": {
       "sha256": "937931f0293eba0293c48a6016a99dd2140e8777083317018ad1312d075a18d3",
       "bytes": 36181372
-    },
-    "models/matcha-host/engines/matcha_estimator_step1_bf16.engine.host.json": {
-      "sha256": "828954d669ee1b6d5d07465fd8cd3227a71909de648d77a549d5e342cf39d8bf",
-      "bytes": 1072
     },
     "models/matcha-host/engines/matcha_estimator_step2_bf16.engine": {
       "sha256": "5f7cf0c39c69db38da0ff2e0194e6cd70124eda0c3c9602f6aebf79fe11b6fd1",
       "bytes": 37718308
     },
-    "models/matcha-host/engines/matcha_estimator_step2_bf16.engine.host.json": {
-      "sha256": "9cc5b392288740d4d81303136482a6b83487f137fb04d19c028564fdb04e18c1",
-      "bytes": 1072
-    },
     "models/matcha-host/engines/vocos_fp16.engine": {
       "sha256": "a9818327244cf2c1b03ebcd5b802c1b3b2c274c4a3e8632c7b26bba0098aefa1",
       "bytes": 29288092
-    },
-    "models/matcha-host/engines/vocos_fp16.engine.host.json": {
-      "sha256": "adc391ed71078f5ce6901e5289e2c0a73e0cd877108a25daa4d026d8fa257217",
-      "bytes": 912
     },
     "models/matcha-host/espeak-ng-data/af_dict": {
       "sha256": "25729d3bf4c4a0f08da60aea9eb5a0cf352630f83fab1ab0c3955b7740da1776",
@@ -1521,29 +1505,13 @@
       "sha256": "5da91ecbc2f96e2694071431a934c7e0537f8dda8ce2edd2500c16369cd15bec",
       "bytes": 44377678
     },
-    "models/matcha-host/onnx/matcha_estimator_step1_trt.onnx": {
-      "sha256": "d50b33c009eaf887625fc305098a76428aa2e36451f479162c715cbaab7614de",
-      "bytes": 44392494
-    },
-    "models/matcha-host/onnx/matcha_estimator_step2_trt.onnx": {
-      "sha256": "1b9f49b1b2925343de83d2d49e76bedb34c311c6691bf6be83af14928448fc38",
-      "bytes": 44392592
-    },
     "models/matcha-host/phone-zh.fst": {
       "sha256": "1ac2b6fa56b1442320c4de7db08353bab8963a2b57f365eebcdd3a2d3562f8d7",
       "bytes": 88630
     },
-    "models/matcha-host/split-regression.json": {
-      "sha256": "1e1ce4dda94b2d4d2dba59d4aa656bfa6db9d5ba616523593000a79b067d01a5",
-      "bytes": 280
-    },
     "models/matcha-host/tokens.txt": {
       "sha256": "77fee8e5e5dd96b3547119e6159292c648e99e065c54c97777722e3ce710b9a4",
       "bytes": 21146
-    },
-    "models/matcha-host/vocos-16khz-univ.onnx": {
-      "sha256": "b599142a1fb8ff03de3e84ac35ff537c619e56f4267a6fe894851a42844acf9e",
-      "bytes": 53882848
     }
   }
 }

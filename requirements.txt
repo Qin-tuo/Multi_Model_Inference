@@ -1,4 +1,4 @@
-# Headless core and CPU Silero VAD; GPU inference runs in existing local services.
+# Current application runtime; CUDA and TensorRT are host-provided.
 PyYAML==6.0.3
 httpx==0.28.1
 fastapi==0.143.0
@@ -14,3 +14,8 @@ onnxruntime==1.24.4
 cuda-bindings==13.2.0
 SQLAlchemy==2.1.4
 APScheduler==3.11.3
+Pillow==12.3.0
+pyrealsense2==2.58.4.10922
+norfair==2.3.0
+scipy==1.16.3
+filterpy==1.4.5

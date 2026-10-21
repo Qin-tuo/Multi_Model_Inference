@@ -1,4 +1,4 @@
-"""Shared runtime / exclusive heavy-build admission on this Jetson."""
+"""Shared ownership lease for the running model processes."""
 
 import fcntl
 import os
@@ -6,19 +6,19 @@ import os
 from pathlib import Path
 
 
-def hold_model_lease(cache=None):
+def hold_model_lease(directory=None):
     """Keep a shared lease across exec; the last model process exit releases it."""
     from project_paths import RUNTIME_DIR
 
-    cache = Path(cache or RUNTIME_DIR / "cache")
-    cache.mkdir(parents=True, exist_ok=True)
-    lease = open(cache / "ort-build.owner.lock", "a+b")
+    directory = Path(directory or RUNTIME_DIR / "runtime-data/edge-assistant/systemd")
+    directory.mkdir(parents=True, exist_ok=True)
+    lease = open(directory / "model-access.lock", "a+b")
     try:
         fcntl.flock(lease, fcntl.LOCK_SH | fcntl.LOCK_NB)
     except OSError:
         lease.close()
         raise RuntimeError(
-            "A heavy model build owns the deployment lease; start model services after it finishes"
+            "The model runtime is exclusively held by another operation"
         ) from None
     os.set_inheritable(lease.fileno(), True)
     return lease

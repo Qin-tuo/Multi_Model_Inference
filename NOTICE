@@ -3,4 +3,4 @@ Copyright (c) 2023-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
 This product includes software developed by NVIDIA Corporation.
 
-Third-party software licenses and attribution notices are documented in THIRD-PARTY-NOTICES.md. Candidate JetPack wheel license texts and notices are preserved under packaging/releases/ for review and release bundling.
+Third-party software licenses and attribution notices are documented in THIRD-PARTY-NOTICES.md. Current redistributed notices are retained in licenses/ and the runtime dependency directories.

@@ -11,7 +11,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 from urllib.parse import urlsplit
 
@@ -227,6 +226,22 @@ def artifact_files(cfg, components):
     return files
 
 
+def verify_speech_sources(cfg):
+    """Verify the deployed OVS files without retaining its development checkout."""
+    lock = json.loads((ROOT / "01_src/deploy/speech/source-lock.json").read_text())
+    upstream = paths(cfg)["ovs"]
+    files = lock["runtime_files"]
+    if not files:
+        raise RuntimeError("Speech runtime source lock is empty")
+    for name, expected in files.items():
+        relative = Path(name)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise RuntimeError("Invalid speech runtime source path")
+        path = upstream / relative
+        if not path.is_file() or sha256(path) != expected:
+            raise RuntimeError("Speech runtime source differs from lock: " + name)
+
+
 def verify(cfg, components):
     p = paths(cfg)
     ports(cfg)
@@ -244,18 +259,7 @@ def verify(cfg, components):
             raise RuntimeError("Prepared artifact hash mismatch: " + name)
         result[name] = {"sha256": actual, "bytes": file.stat().st_size}
     if "speech" in components:
-        expected = json.loads(
-            (ROOT / "01_src/deploy/speech/source-lock.json").read_text()
-        )["upstream"]["commit"]
-        observed = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=p["ovs"], text=True
-        ).strip()
-        if observed != expected:
-            raise RuntimeError("OVS revision mismatch")
-        if subprocess.check_output(
-            ["git", "status", "--porcelain"], cwd=p["ovs"], text=True
-        ).strip():
-            raise RuntimeError("OVS source has unrecorded local modifications")
+        verify_speech_sources(cfg)
     return result
 
 
@@ -268,7 +272,7 @@ def main():
     if args.component in {"llama", "asr", "app"}:
         from deploy.resource_guard import hold_model_lease
 
-        _lease = hold_model_lease(paths(cfg)["stack"] / "cache")
+        _lease = hold_model_lease(paths(cfg)["data"] / "systemd")
     verify(cfg, [args.component])
     os.environ.update(
         HF_HUB_OFFLINE="1",

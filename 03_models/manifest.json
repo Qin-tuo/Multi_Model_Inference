@@ -2,7 +2,6 @@
   "schema_version": 1,
   "models": {
     "vlm": {
-      "role": "phase_one_provisional_main",
       "backend": "llama.cpp",
       "repository": "unsloth/Qwen3.5-4B-GGUF",
       "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
@@ -28,8 +27,7 @@
       "parallel": 1,
       "chat_template_kwargs": {
         "enable_thinking": false
-      },
-      "status": "selected_by_user_pending_stage_acceptance"
+      }
     },
     "asr": {
       "model": "Qwen3-ASR-0.6B",
@@ -50,27 +48,13 @@
       ],
       "context_tokens": 2048,
       "max_output_tokens": 256,
-      "port": 8089,
-      "status": "local_file_transcription_verified",
-      "reason": "OVS JP6.2 ASR artifact contains serialized TRT10.3 engines without rebuild ONNX; probe mature llama.cpp audio backend for same model"
+      "port": 8089
     },
     "tts": {
       "model": "Matcha",
       "backend": "ovs_voxedge_matcha_tensorrt_host",
-      "status": "host_build_and_file_synthesis_verified",
       "source_revision": "737422aea690cd7604eae893a2168d0840a094dc"
     }
   },
-  "selection": {
-    "updated_at": "2026-10-14T10:45:46.525704+00:00",
-    "reason": "User requested using a 4B main model for now. Select already measured Qwen3.5-4B to proceed with phase-one integration.",
-    "known_limits": [
-      "Development visual MCQ canonical75/100, circular58/100; below80percent screening target",
-      "Native quote-long adds surrounding quotation marks; 13/14checks passed",
-      "Full conversation/tool/physical voice/latency/stability qualification still required"
-    ],
-    "memory_phase": "Long-term memory-specific work deferred by user; retain existing data and integration.",
-    "historical_selection_record": "before-mainline-consolidation-20261020:03_models/candidates/qwen3.5-4b.json",
-    "known_limits_scope": "Historical development screening, not current framework acceptance or industrial quality qualification."
-  }
+  "status": "CURRENT_RUNTIME"
 }

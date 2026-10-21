@@ -2,7 +2,7 @@
 """OpenCV Zoo open-hand predicate and bounded anonymous temporal gestures.
 
 open_palm adapts GestureClassification's 'Five' predicate from the pinned
-OpenCV Zoo handpose demo (models/perception.json). Temporal rules are local
+OpenCV Zoo handpose demo (upstream attribution in THIRD-PARTY-NOTICES.md). Temporal rules are local
 interaction policy. They require real positive/negative gesture validation.
 """
 

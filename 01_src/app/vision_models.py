@@ -43,8 +43,8 @@ def contract_hash(entry):
         "prepost_source",
     )
     values = {k: entry.get(k) for k in keys}
-    # Preserve historical B1 hashes. New adapters also lock shape, dimensions
-    # and matching policy so a model replacement cannot silently reuse them.
+    # Adapters also lock shape, dimensions and matching policy so a model
+    # replacement cannot silently reuse another model's semantics.
     if "adapter" in entry:
         for key in (
             "adapter",
@@ -87,7 +87,7 @@ class VisionModels:
         }
 
     def load(self, roles=None):
-        """Load the full app set, or an explicit subset for isolated measurements."""
+        """Load the selected models and retain a single resource owner."""
         if self.models:
             raise RuntimeError("Visual models are already loaded")
         roles = tuple(ROLES if roles is None else roles)

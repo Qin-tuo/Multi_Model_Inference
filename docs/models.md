@@ -1,32 +1,29 @@
-# 当前模型与接口边界
+# 现用模型
 
-当前十个视觉网络均由应用内的 TensorRT 后端驱动，使用已锁定的 FP32 引擎并关闭 TF32。D435i 原生深度由相机与 SDK 提供，不计为神经网络模型。本轮只整理代码与工件，不更换权重、精度、预后处理或调度参数。
+模型来源和输入输出契约在 `03_models/vision-models.json`，引擎路径、SHA256、输入形状和精度在 `03_models/vision-runtime.json`。视觉引擎统一放在 `05_runtime/models/vision/`，均通过 TensorRT 推理。
 
-| 模块角色 | 当前公开模型 | 对外能力 |
+| 角色 | 模型 | 主要输出 |
 |---|---|---|
-| `detection_segmentation` | YOLOv8n-seg COCO | 人体/物体检测与实例分割 |
-| `face` | YuNet 2023mar | 人脸框与五点 |
-| `body_hand_pose` | RTMW-l Cocktail14 COCO-WholeBody 2D 133, 384x288 | 133 个二维全身关键点，含双手 |
-| `person_reid` | OSNet x1.0 MSMT17 combineall official | 512 维行人外观特征 |
-| `face_identity` | ArcFace MobileNetV1 official CASIA-WebFace v1.1 | 512 维人脸特征与可选匹配 |
-| `expression` | Progressive Teacher MobileFaceNet 2022july | 公开模型的表情类别与分值 |
-| `head_pose` | head-pose-estimation-adas-0001 | 头部姿态角 |
-| `gaze_landmarks` | facial-landmarks-35-adas-0002 | 视线网络需要的面部关键点 |
-| `gaze` | gaze-estimation-adas-0002 | 视线向量/角度 |
-| `object_embedding` | OpenAI CLIP ViT-B/32 image encoder | 物体图像特征 |
+| 检测与分割 | YOLOv8n-seg | 类别、框、置信度和实例 mask |
+| 人脸检测 | YuNet | 人脸框、置信度和 5 点关键点 |
+| 人体/双手姿态 | RTMW-l，384×288 | COCO-WholeBody 133 个二维关键点，含双手 |
+| 行人特征 | OSNet x1.0 | 512 维特征 |
+| 头部姿态 | OMZ head-pose-estimation-adas-0001 | yaw / pitch / roll |
+| 视线辅助点 | OMZ facial-landmarks-35-adas-0002 | 35 点面部关键点 |
+| 视线 | OMZ gaze-estimation-adas-0002 | 视线向量及角度 |
+| 人脸特征 | ArcFace MobileNet V1 | 512 维特征，用于可选图库匹配 |
+| 表情 | ProgressiveTeacher MobileFaceNet | 7 类表情分值 |
+| 物体特征 | CLIP ViT-B/32 | 512 维视觉特征 |
 
-来源、固定提交、权重哈希、模型卡、许可证和预后处理契约见 [vision-models.json](../03_models/vision-models.json)；实际引擎哈希和输入形状见 [vision-runtime.json](../03_models/vision-runtime.json)。共有十个网络，因为头姿、视线辅助关键点和视线估计是三个独立的级联模型。
+当前视觉引擎采用既定 FP32 设置。距离来自 D435i 原生深度；姿态模型只输出二维坐标，视线不是经过标定的世界坐标射线，表情分值不等同于真实情绪判定。
 
-人体/手部使用 RTMW-L 二维姿态。它不输出原定制 70 点模型的相对 z；D435i 距离也不冒充模型预测的 z。手势由人体模型中的手部关键点和时序规则得到，当前定义为挥手问候、静止张掌取消整轮。原环境自定义的完整十类手势、70/52 点协议和 `exaggeration` 分值没有被声称为等价复现。
+| 其他能力 | 当前后端与模型 |
+|---|---|
+| 图文/语言理解 | llama.cpp；Qwen3.5-4B Q4_K_M，F16 视觉投影 |
+| 语音识别 | llama.cpp；Qwen3-ASR-0.6B Q8_0，BF16 音频投影 |
+| 语音合成 | OpenVoiceStream / VoxEdge；Matcha BF16 TensorRT、Vocos FP16 TensorRT，保留其 ONNX 编码器与词典 |
+| 语音活动检测 | Silero VAD v6，CPU ONNX Runtime |
 
-人脸特征使用 ArcFace-MobileNetV1，行人特征使用 OSNet x1.0。特征空间绑定模型哈希，旧图库与新特征不混用。物体特征表达外观相似性，不能据此保证任意物体的永久身份识别。
+语言、语音模型的文件摘要在 `03_models/manifest.json` 和 `03_models/speech.json`。语音框架保留实际服务代码与配置，使用 `01_src/deploy/speech/source-lock.json` 逐文件校验。所有运行文件都在本项目或主机系统库中。
 
-语言模型为 Qwen3.5-4B Q4_K_M 与 F16 视觉投影，由 llama.cpp 提供 OpenAI 兼容接口；ASR 为 Qwen3-ASR-0.6B，TTS 为 OpenVoiceStream 的 Matcha/Vocos。语音与语言模型的来源及文件摘要在 [manifest.json](../03_models/manifest.json)，VAD 和语音接口在 [speech.json](../03_models/speech.json)。本轮仍保留这些后端。
-
-## 验证与后续替换
-
-`python scripts/build.py artifacts --check-only` 校验当前视觉文件。原生参考入口为 `scripts/validate.py` 的 `face`、`expression`、`segmentation`、`attributes`、`standard-models` 任务；相关导出、原生框架及参考样本属于开发依赖，需要相应的隔离环境。它们不是运行时推理回退。
-
-`python scripts/build.py engines` 构建候选引擎并在输出目录写入候选清单；导出任务也只写候选记录。后续模型替换需重新检查形状、坐标、预后处理、任务质量、资源占用与图库特征空间，再完成管线和取消回归。接口一致不等于模型能力已等价。
-
-整合前的三模型替换记录保存在 [B2 证据](../benchmarks/evidence/b2-replacement-progress-20261020.json)。当前阶段完成度以 [执行清单](../benchmarks/manifests/consolidation-progress.json) 为准。
+当前目录不保留候选模型、未使用的原始 ONNX、导出 checkpoint、旧引擎、基准样本和模型备份。替换模型时必须同时满足适配器、输入输出契约及引擎清单；仅替换文件名不能完成兼容替换。

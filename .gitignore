@@ -1,11 +1,6 @@
-.worktrees/
-.venv
-.venv-*
-build/
+05_runtime/
 __pycache__/
 *.py[cod]
-.pytest_cache/
-.ruff_cache/
 *.gguf
 *.onnx
 *.engine
@@ -15,13 +10,3 @@ __pycache__/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
-*.snapshot
-backups/
-backup.owner.lock
-*.wav
-*.pcm
-*.nsys-rep
-*.qdrep
-*.mcap
-benchmarks/raw/
-05_runtime/

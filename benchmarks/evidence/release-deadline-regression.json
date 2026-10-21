@@ -1,9 +1,0 @@
-{
-  "scope": "Real local HTTP socket trickles bytes below per-read timeout; synthetic service, no models or B0",
-  "per_read_timeout_seconds": 0.08,
-  "elapsed_seconds": 0.4133462790050544,
-  "response_status": 200,
-  "response_bytes": 12,
-  "request_adapter_idle": true,
-  "source_sha256": "922c76242144c73a5b7cfdbd0bb69a826e700788fa8603199d4e235608146815"
-}

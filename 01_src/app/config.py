@@ -295,7 +295,7 @@ class Config:
                             f"Invalid configuration value: {section}.{key}"
                         )
                     setattr(obj, key, value)
-        # Rebase historical filesystem locations; keep model parameters intact.
+        # Resolve the current deployment paths without altering model parameters.
         for section, field in (
             ("backends", "stack_root"),
             ("audio", "output_directory"),
