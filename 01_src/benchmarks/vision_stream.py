@@ -403,7 +403,7 @@ def worker(condition, output):
         runtime.write_json(output / "result.json", report)
     if failure or report["errors"]:
         raise RuntimeError(
-            "B1 stream measurement failed; inspect result.json"
+            "Vision stream measurement failed; inspect result.json"
         ) from failure
 
 
@@ -473,7 +473,7 @@ def main():
                         folder / "services-started.json",
                         services.start(["llama", "asr", "speech"], cfg, 240),
                     )
-                print("B1 measuring:", condition, flush=True)
+                print("Measuring vision:", condition, flush=True)
                 with (folder / "worker.log").open("w") as log:
                     code = run_worker(
                         [

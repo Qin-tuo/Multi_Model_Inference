@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Exercise public motion -> B1 TensorRT -> real greeting/cancellation.
+"""Exercise public motion -> current TensorRT -> real greeting/cancellation.
 
 Annotated public demonstration videos retain their original media timing and
 are letterboxed to 640x480. Uniform 1.5 m depth is explicitly synthetic. This

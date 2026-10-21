@@ -209,7 +209,7 @@ def probe(output, protocol_path=PROTOCOL, config_path=None, gesture_fixture=None
                     raise RuntimeError("Labeled held-palm segment must stop, not wave")
         report["models"] = perception.networks.snapshot()
         if not all(row["calls"] > 0 for row in report["models"].values()):
-            raise RuntimeError("Some B1 models were never exercised")
+            raise RuntimeError("Some selected models were never exercised")
         report["status"] = "MODELS_EXECUTED_PERSISTENCE_CHECK_PENDING"
     except Exception as exc:
         report.update(status="FAILED", error=repr(exc))

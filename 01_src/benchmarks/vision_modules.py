@@ -326,7 +326,7 @@ def main():
                 }
                 runtime.write_json(output / "report.json", report)
                 if code or result.get("status") != "MEASURED":
-                    raise RuntimeError("B1 module measurement failed: " + role)
+                    raise RuntimeError("Vision module measurement failed: " + role)
                 if args.nsys:
                     trace = folder / "timeline.nsys-rep"
                     if not trace.is_file():

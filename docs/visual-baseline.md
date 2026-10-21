@@ -1,279 +1,73 @@
-# 视觉基线复现入口
+# 视觉基准与复现
 
-2026-10-20：按用户要求清理本机旧 `05_runtime/validation/` 测试目录。下文旧原始目录为历史记录；仓库内的版本化汇总、冻结协议和 `05_runtime/baselines/` 输入保持保留。仍需使用的参考样本迁入 `05_runtime/datasets/validation-inputs/`。
+当前模型和参数沿用整合前 B2。本轮完成代码整理后，必须重新冻结当前源码并用相同输入、模型和测量规则对照；在新结果完成前，下列数字只代表整合前的已测 B2，不能宣称为整合后的新性能。
 
-## B1 模型接入验证
+## 已保留的整合前 B2
 
-当前新增了 **R2 规则修复版本**，冻结协议为 [v2](../benchmarks/manifests/b1-vision-measurements-v2.json)。相对原 R1，只有运行文件 `gestures.py` 改变；模型、引擎、输入像素、模块 ROI 参数和有效配置均相同，22 组普通/计时调用的一致性重新核验通过。R1 的协议和数据保持原字节；R2 单模块沿用相同推理路径的已测数据，整链路七组窗口已单独复测，见 [版本范围](../benchmarks/results/b1-r2-scope.json)。R1/R2 数据分别列出，不将规则修复记作性能优化收益。
+原始源码为 `45af3ed`，单模型使用固定 640×480 图片及各自的固定 ROI；预热后普通调用与插桩调用交替配对。各阶段分位数不能直接相加。固定回放使用明确标记的模拟 1.5 米深度，真实 D435i 窗口单独报告。
 
-R2 将挥手的有效运动历史与连续静止张掌证据分开：保持原有质量、幅度和时序门限，要求窗口内至少 5 次真实张掌观察且当前张掌；短暂转掌的位置可以参与运动判断，闭拳持续达到原复位时间则清空历史。静止停止遇到非张掌帧仍立即重新计时。268 项软件回归及旧真人关键点记录的事件对照通过。
-
-完整固定选帧回放已重新执行 57 帧 TensorRT 推理，并由真实 4B/TTS 完成“你好！”问候。该模式等待消费者处理每一帧，交付延迟中位数约 1.01 秒、最大约 2.12 秒，**不能作为实时性能或鲁棒性通过证据**。普通最新帧回放仍有漏检：两次选中了不同的转折帧，而 41 个共同输入帧中的 80 组手部输出逐值一致。当前处理频率与采样相位的限制继续记录，真人补测仍待用户配合。前后证据均在 [修复记录](../benchmarks/results/b1-wave-fix-summary.json)。
-
-### 当前 R2 整链路测量
-
-七组各 60 秒，配置及五张固定回放输入与 R1 相同。前五行可按相同工作负载观察，两个实拍窗口单列。本次实拍每个完成帧都有模型输出人体/人脸并执行姿态任务；这是预测计数，不是真人标注精度。不能与早先无人场景的较低耗时计算加速比。
-
-| 条件 | 处理 FPS | 整帧 P50 / P95，ms | 结果帧龄 P95，ms | 最低可用内存，GiB |
-|---|---:|---:|---:|---:|
-| 回放，仅视觉 | 4.97 | 149.20 / 199.96 | 409.37 | 9.29 |
-| 回放，后端驻留 | 4.95 | 151.25 / 201.73 | 420.97 | 2.70 |
-| 回放，4B 连续生成 | 3.95 | 236.65 / 321.72 | 625.04 | 2.40 |
-| 回放，文件语音→ASR→4B→TTS | 3.93 | 234.26 / 343.32 | 658.66 | 2.25 |
-| 回放，带图问答→TTS | 3.85 | 243.00 / 347.49 | 659.72 | 2.32 |
-| 实拍，后端驻留 | 4.70 | 201.68 / 231.79 | 486.00 | 2.47 |
-| 实拍，完整文件语音请求 | 3.17 | 322.27 / 371.42 | 833.61 | 2.23 |
-
-七组未记录整帧推理失败或过期帧。实拍语音组的 600 次、10 Hz 观测中，有 28 次因观测线程未赶上采样时刻而缺失；不是 28 次已确认的推理失败，也不能按零延迟或插值填补。该组有效观测调用耗时 P50/P95 约 9.67/21.20 ms，最大约 146.67 ms，测量开销及采样扰动需要保留在解释中。表中帧龄采用将缺失样本排在有限值之后的保守分位数口径。
-
-原始数据、逐阶段耗时、资源、完整请求数与摘要见 [R2 汇总](../benchmarks/results/b1-vision-stream-r2-summary.json)。本次测量不证明实时手势召回率，也没有使用量化、并发或频率调优。
-
-2026-10-20：B1 的运行代码与输入契约已冻结，10 个视觉 TensorRT 模型的单模块、连续管线和多模型共存基线已测量；默认启动已切换为 B1 R2，运行包恢复、默认服务、浏览器及文字轮次通过；实时挥手验收仍未完成。按用户最新决定，本阶段深度直接采用 D435i 原生深度和 RealSense SDK 对齐。9 类所选视觉神经模型及 1 个视线辅助模型已完成有限固定输入的参考核验，包括 RTMW3D 原始权重与预后处理。模型证据见 [可部署性记录](../benchmarks/results/b1-feasibility-20261019.json)，集成证据见 [集成记录](../benchmarks/results/b1-integration-20261019.json)。R1 的 20 分钟回放/10 分钟实拍持续窗口与 R2 独立恢复已通过，证据范围分别记录；真人和复杂手势精度仍需单独补测。
-
-### 集成结构与当前资源边界
-
-独立配置是 [settings.orin-nx-b1.yaml](../02_config/settings.orin-nx-b1.yaml)，启动仍走现有四个 systemd 服务。视觉只有一个最新帧工作线程；每个模型持有一个执行上下文和固定形状缓冲区，按顺序执行，未引入额外推理服务。
-
-| 文件 | 职责 |
-|---|---|
-| `01_src/app/perception_b1.py` | 同一组 RGBD 的检测、距离门控、人物/物体/人脸关联、按目标调用模型与结果发布 |
-| `01_src/app/vision_models.py` | 加载 10 个锁定引擎、核验版本与模型语义、统计调用、统一释放 |
-| `01_src/app/wholebody_pose.py` | 复用固定 MMPose SimCC 解码，输出 133 点与左右手 21 点；相对 z 不当作米制距离 |
-| `01_src/app/visual_tracks.py` | Norfair 运动/外观关联，限定目标数、有效期和源标识；不自行实现跟踪算法 |
-| `01_src/app/identity_gallery.py` | SQLAlchemy 本地人脸标签库，显式登记、未知/歧义结果和模型空间隔离 |
-| `03_models/vision-b1-runtime.json` | 当前板端引擎、源图与语义契约校验值；仍标为集成配置而非已验收基线 |
-
-检测与分割每帧最多 10 个目标；当前配置处理最近的 1 个有效距离内人物、1 个物体特征目标及最多 2 张人脸属性。距离门限为 0.35–3 m，使用同帧对齐原生深度的目标 mask/ROI 中位数；无效深度不触发后续任务。实例 mask 供本帧测距使用，不长期缓存；网页当前展示框、距离、目标编号、手部关键点和人脸属性。显示未触发与模型异常的含义需要分别理解。
-
-Norfair 目标最多 20 个，按真实接收时间在 2 秒后失效，重连更换源标识；预测位置不作为新检测发布。网页可选择当前观察目标，目标丢失后不会自动替换为另一个人/物。外观特征只对选定预算内目标计算，不能据此宣称多人交叉或长时遮挡重识别已通过。人脸登记最多 32 个标签，仅保存特征和模型空间，不保存人像，也不控制对话授权。
-
-关键点输入已接回现有手势规则。SimCC 峰值允许大于 1，不能按概率裁剪；同一手的连续证据同时绑定人物编号。公开静止张掌图片连续回放已触发 stop，软件规则覆盖换人、低置信度和断帧，但不替代真实挥手、遮挡和多手补测。
-
-运行依赖是在根目录 `requirements.lock` 上增加 [vision/requirements-runtime.lock](../01_src/deploy/vision/requirements-runtime.lock)；恢复时使用两个锁文件共同约束，避免升级已有 NumPy/OpenCV。Norfair 2.3.0 使用 BSD-3-Clause，FilterPy 使用 MIT；生产环境不加载 Torch/OpenVINO 参考模型。
-
-固定公开图像回放使用真实 TensorRT 模型和明确标注的均匀 1.5 m 模拟深度，仅验证管线、数据归属、登记持久化和规则触发。完整服务探针使用真实 D435i，并执行文字→4B→TTS、生成的 WAV→VAD/ASR→4B→TTS 和取消操作。2026-10-19 该服务探针运行时镜头无人物，因此那次证据仅覆盖场景检测/物体特征与对话共存；后续 R2 实拍及网页验证另行记录。所有命令自动恢复之前的服务配置，输出目录必须是新目录：
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_b1_pipeline.py \
-  --output 05_runtime/validation/b1-pipeline-new
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_b1_services.py \
-  --output 05_runtime/validation/b1-services-new
-```
-
-完整服务探针可加 `--webdriver http://127.0.0.1:4445`，连接已运行的本地 Firefox WebDriver，检查相机页和 `/debug`。浏览器运行在板上会额外占用资源，这些功能测试读数不是 B1 性能结论。正式基线已固定输入、预热、负载和采样条件；现阶段不开展量化/并发调优。
-
-### 恢复与测量流程
-
-`scripts/probe_b1_recovery.py --output 新目录` 先用公开人物图片和显式模拟深度验证距离门控，再执行三轮真实 D435i SDK 关闭/重开、单次推理异常注入、恢复和全部模型释放。过近、过远、无效或缺失深度时，只运行基础检测；过期/旧源帧在推理前被拒绝，推理途中失效的帧不能发布，人脸登记和目标选择也拒绝过期观察。这不等于物理 USB 拔插或长期稳定性验收。
-
-模型重新加载会重置耗时样本，跟踪重置会清空帧顺序和目标状态。重复加载被拒绝，保留现有资源归属。释放过程中即使某个模型报错，仍尝试关闭其他资源；对于底层辅助代码会吞掉的 CUDA 释放错误，适配器检查缓冲区/流的真实状态，未确认释放就保留归属并禁止后续推理，允许再次关闭。
-
-正式单模块测量入口为 `01_src/benchmarks/vision_b1_modules.py`。准备程序 `scripts/freeze_b1_inputs.py` 要求代码已提交，先把公开图片固定为 640×480、保存模型产生的 ROI 参数，并在真实 TensorRT 上验证普通调用与计时调用输出一致，再写入不可覆盖的输入/运行代码协议。每个模块在独立进程中加载一个引擎，按固定输入预热 5 次，普通/计时调用交替执行 20 对；保存每次原始耗时、预测样本、资源数据和执行源码。
-
-计时只在测量进程中安装，继续调用项目锁定的 NVIDIA 推理辅助代码。主机预处理、同步原生调用和后处理属于连续墙钟区间；H2D、引擎执行、D2H 由同一 CUDA 流上的事件计时，包含可能的主机提交间隙，不等于单个 kernel 的执行时间，也不能与主机区间相加。配对数据用于展示观测开销，完整管线与 4B/语音共存数据另测，B0 原始记录保持不变。
-
-### B1 单模块初始数据
-
-2026-10-19 已完成 10 个模块、22 组固定输入的测量，共 440 对普通/计时调用，全部输出一致；资源采样无错误。测量为 Orin NX 16GB、MAXN 模式、FP32/关闭 TF32，每个进程只加载一个视觉引擎，4B/语音服务停止。下表是每模块不同固定输入合并后的普通调用耗时，包含该适配器的预处理和后处理；检测/人脸包含黑色负样本，各输入分别统计的数据保留在 [完整汇总](../benchmarks/results/b1-vision-modules-summary.json)。
-
-| 模块 | P50 / ms | P95 / ms |
+| 模型角色 | 普通适配器调用 P50 / ms | P95 / ms |
 |---|---:|---:|
-| 检测与实例分割 | 28.55 | 39.35 |
-| 人脸检测 | 8.02 | 8.77 |
-| 人体与手部关键点 | 88.53 | 89.06 |
-| 行人特征 | 4.05 | 4.66 |
-| 头部姿态 | 1.02 | 1.25 |
-| 视线辅助关键点 | 2.64 | 2.68 |
-| 视线 | 1.59 | 1.65 |
-| 人脸特征 | 5.74 | 6.39 |
-| 表情 | 3.32 | 3.41 |
-| 物体特征 | 20.54 | 20.81 |
+| `detection_segmentation` | 27.926 | 34.178 |
+| `face` | 8.068 | 8.662 |
+| `body_hand_pose` | 58.812 | 59.296 |
+| `person_reid` | 7.795 | 8.176 |
+| `head_pose` | 1.027 | 1.279 |
+| `gaze_landmarks` | 2.634 | 2.681 |
+| `gaze` | 1.599 | 1.915 |
+| `face_identity` | 5.391 | 5.853 |
+| `expression` | 3.762 | 3.813 |
+| `object_embedding` | 20.563 | 20.896 |
 
-这些数据不代表整机帧率，各行或不同阶段的分位数不能直接相加。输入与运行代码契约在 [冻结协议](../benchmarks/manifests/b1-vision-measurements-v1.json)，协议记录的是冻结时状态；当前进度以 B1 验收清单为准。实际测量脚本源码、每次原始耗时、CUDA 事件区间、预测样本、进程/系统资源和 tegrastats 都保存在 `05_runtime/validation/b1-modules-20261019/`。完整管线数据与持续窗口、部署恢复范围见本文对应章节。
+| 条件 | 实际处理 FPS | 整帧处理 P50 / P95，ms | 最新结果帧龄 P95，ms |
+|---|---:|---:|---:|
+| `replay-only` | 5.00 | 121.26 / 169.16 | 399.98 |
+| `replay-resident` | 4.98 | 120.62 / 177.95 | 452.66 |
+| `replay-4b` | 4.58 | 185.42 / 254.25 | 514.37 |
+| `replay-conversation` | 4.37 | 194.96 / 299.60 | 592.32 |
+| `replay-vision-chat` | 4.42 | 199.61 / 283.91 | 571.43 |
+| `live-resident` | 4.98 | 92.36 / 128.48 | 380.26 |
+| `live-conversation` | 4.25 | 223.26 / 292.72 | 573.67 |
 
-```bash
-./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
-  --output 05_runtime/validation/b1-modules-new
-# 已有结果重新汇总，无推理和服务切换：
-./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_modules.py \
-  --output 05_runtime/validation/b1-modules-20261019 --summarize
-```
+[完整单模块结果](../benchmarks/results/b2-vision-modules-v1.json) · [完整链路结果](../benchmarks/results/b2-vision-stream-v1.json) · [原协议](../benchmarks/manifests/b2-vision-measurements-v1.json) · [原负载定义](../benchmarks/manifests/b2-vision-stream-v1.json)
 
-### B1 连续视觉与共存数据
+此前清理过的 B2 原始测量已从冻结副本恢复到 `benchmarks/raw/b2-before-consolidation/`，此目录不进入普通 Git；相同原始文件已逐一校验复制到 `05_runtime/baselines/b2-original-measurements/`，供独立运行包携带。固定输入在 `05_runtime/baselines/b2-vision-v1/`。必要模型参考样本在 `05_runtime/datasets/validation-inputs/`；标签、像素和旧协议不因改目录而重写。
 
-已完成 [固定共存协议](../benchmarks/manifests/b1-vision-stream-v1.json) 的 7 组测量，每组预热后测 60 秒，共 4,200 次周期采样，均有有效结果，无整帧处理失败、过期丢弃或后端进程重启。采集目标 10 FPS，处理目标上限 5 FPS；最新帧策略主动跳过部分采集帧以避免积压，这与异常掉帧分开计数。全部原始结果见 [整链路汇总](../benchmarks/results/b1-vision-stream-summary.json)。
+两组 live 的人体/人脸触发次数不同，不能用它们直接计算同负载并发开销。整帧失败为零也不表示所有属性有效；视线输入质量拒绝与 TensorRT 故障分开解释。`capture_fps`、处理完成计数 FPS、延迟和帧龄是不同指标，配置的 5 FPS 上限不是实测 FPS。
 
-下表前五行使用相同的五份固定图片、模拟对齐深度和相同的回放时序。后两行为 D435i 实拍，当时没有人体/人脸进入画面，条件触发的任务较少，不能与前五行直接比较加速比。
+## 冻结当前源码与输入
 
-| 条件 | 处理 FPS | 整帧处理 P50 / P95，ms | 最新结果帧龄 P95，ms | 系统最低可用内存，GiB |
-|---|---:|---:|---:|---:|
-| 回放，仅视觉 | 4.95 | 150.45 / 201.69 | 428.40 | 9.27 |
-| 回放，4B/语音后端驻留 | 4.93 | 151.58 / 205.66 | 439.62 | 2.54 |
-| 回放，4B 连续生成 | 3.95 | 238.73 / 315.62 | 622.90 | 2.46 |
-| 回放，文件语音→ASR→4B→TTS | 3.98 | 226.42 / 335.95 | 649.62 | 2.34 |
-| 回放，带图问答→TTS | 3.88 | 242.23 / 336.24 | 656.37 | 2.35 |
-| 实拍，后端驻留 | 4.98 | 43.76 / 61.74 | 348.77 | 2.55 |
-| 实拍，完整文件语音请求 | 4.98 | 63.01 / 79.47 | 365.73 | 2.33 |
-
-帧龄来自接收单调时钟，不含传感器曝光到主机接收的时间；周期采样会观察到一帧在下次结果产生前逐渐变旧，因此它与单次处理耗时不同。原始数据同时给出接收→开始、JPEG 完成→开始、接收→完成和各阶段耗时。GUI/WebSocket 传输未计入本次性能窗口，相关功能已由独立服务/浏览器探针验证。
-
-所有后端驻留条件都加载相同的客户端、VAD、动作库和 TurnController；请求负载使用隔离存储，逐轮清空会话，但保留服务器原有提示缓存策略。回放语音组有 20 个完整请求落在测量窗口内，请求 P50/P95 为 2.97/3.15 秒；实拍语音组为 25 个、2.35/2.41 秒。带图问答组只有 7 个完整请求，P50/P95 为 7.78/8.57 秒，样本数较少，不能据此作长期 SLA 承诺。窗口边缘及终止时取消的请求保留原始记录，不混入这些完整请求统计；各阶段、排队时间和缓存 token 数也已汇总。
-
-整帧失败为零不代表每个属性均可用：回放中的部分视线适配器调用被拒绝，原始累计错误计数保留在 `model_adapter_counters_total_including_warmup`。独立检查已在同一组固定图片上定位原因：6 张选中人脸中，3 张的至少一个眼部 ROI 边长只有 3 像素，低于既有的 4 像素门限，均在进入视线 TensorRT 引擎前被拒绝；另 3 张正常推理。没有放宽门限或修改冻结代码。检查入口为 `scripts/probe_b1_gaze_coverage.py`，原始结果在 `05_runtime/validation/b1-gaze-coverage-20261020/report.json`。该计数包含输入质量拒绝，不能直接当作 GPU 故障数，也不能据此推断真人准确率。真人准确率、手势补测和长期稳定性依旧按原边界单列。板端 GPU 负载为 1 秒采样；当前 tegrastats 未提供 GPU MHz 字段，汇总保留缺失标记，不推算频率。
+以下命令使用项目 Python 环境。先提交运行源码、配置和模型清单，再冻结；已存在的协议和输出目录不会被覆盖。
 
 ```bash
-./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_stream.py \
-  --output 05_runtime/validation/b1-stream-new
-# 仅重新读取原始数据，不启动模型：
-./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_b1_stream_summary.py \
-  --output 05_runtime/validation/b1-stream-20261019
+source ./05_runtime/environments/edge-assistant/bin/activate
+python scripts/benchmark.py freeze --inputs-from benchmarks/manifests/b2-vision-measurements-v1.json
+python scripts/benchmark.py freeze-models
 ```
 
-### 持续运行与独立恢复
+默认生成 `benchmarks/manifests/vision-measurements.json` 与 `model-measurements.json`，输入目录为 `05_runtime/baselines/current-vision/`。整链路负载在 `benchmarks/manifests/vision-stream.json` 固定条件、时长、输入和背景请求。当前整合的冻结/测量完成状态以执行清单为准。
 
-R1 独立的 20 分钟回放共存窗口处理 4,793 帧，完成 416 个完整文件语音请求，未观察到整帧失败、过期结果、无结果采样或相机重连；处理约 3.99 FPS。JPEG 历史峰值约 5.45 MiB，低于 16 MiB 配置限额。视觉测试进程首尾一分钟平均 PSS 增加约 13.4 MiB，RSS 增加约 5.9 MiB；进程还持有基准观测样本，不能将变化全部归因为业务泄漏，也不能声明长期无泄漏。内核在测量窗口内记录了 `hot-surface-alert` 的 0/1 状态切换；是否影响时钟或吞吐尚未建立因果证据。完整记录见 [持续回放汇总](../benchmarks/results/b1-soak-replay-summary.json)。
-
-该窗口使用 [独立工作负载](../benchmarks/manifests/b1-soak-replay-v1.json)，不覆盖上述 60 秒基线，也不代替工业长时验收。复现历史 R1 时先恢复 `before-gesture-wave-fix-20261020`，再向 `vision_b1_stream.py` 传入 `--workload benchmarks/manifests/b1-soak-replay-v1.json` 与新的输出目录；实拍版本在 `b1-soak-live-v1.json`。当前 R2 不应绕过旧协议的代码哈希检查。
-
-R1 的 10 分钟 D435i 实拍共存窗口处理 2,996 帧，完成 265 个文件语音轮次，未记录整帧失败/过期或相机重连，约 4.99 FPS。首尾一分钟平均 PSS 增加约 11.0 MiB，RSS 增加约 5.5 MiB；这些观察不证明长期零泄漏。窗口中有 1,019 帧预测到人物、未预测到人脸，场景工作量与 R2 不同，详见 [实拍持续窗口](../benchmarks/results/b1-soak-live-summary.json)。
-
-B1 运行包在新 Git 副本解包后，通过了隐藏原项目与 AI_Stack、仅有 loopback 网络的真实服务验证：四个服务退出码均为 0，文本、相机、文件语音接口及应用音频轮次通过，原服务恢复 READY。副本 B1 处理 90 帧、无整帧失败、原生深度可用；当时无人场景不证明全部人物属性的实际精度。该次 R1 恢复协议、包摘要和系统依赖见 [R1 运行包锁](../01_src/deploy/project-runtime-b1-r1.lock.json)。
-
-R2 新包约 7.145 GB，另一次新 Git 副本恢复在同样的源目录隐藏/仅回环网络条件下通过；副本处理 71 帧、0 整帧失败、原生深度可用，四个原生进程均正常退出，原服务恢复 READY。此后主项目完成默认 B1 启动、文字→4B→TTS 和实际 Firefox 调试面板验证。当前包与验证索引见 [R2 运行包锁](../01_src/deploy/project-runtime-b1.lock.json) 和 [默认切换记录](../benchmarks/results/b1-default-cutover-20261020.json)。这些测试仍依赖同一台主机的驱动及系统库，不是跨硬件或干净操作系统部署验证。
-
-### 动态手势覆盖缺口
-
-`scripts/probe_b1_motion.py` 使用当前 B1 模型、原始媒体时序和真实 TurnController/4B/TTS。固定张掌图片成功取消正在执行的真实轮次，取消后没有发布音频 URL。R1 三段公开动态演示均没有触发挥手问候，失败记录完整保留：远景检测与手掌尺寸、关键点置信度、五指张开判断间断影响连续证据。R2 修复了短暂转掌清空运动历史的问题并建立独立协议；固定选帧已问候成功，普通实时回放仍漏检，详见本文开头。未降低质量门限或改变模型来掩盖失败。
-
-输入来源与摘要在 [动态输入清单](../benchmarks/manifests/b1-public-motion-v1.json)，观测和失败摘要在 [动态覆盖结果](../benchmarks/results/b1-motion-summary.json)。这些有上游标注的视频使用模拟深度，不是 D435i 真人或手势准确率基准；运行包不携带这些外部演示文件。准备清单中的原文件并核对 SHA256 后，可用 `scripts/probe_b1_motion.py --output 新目录` 复查，或通过 `--case` 选择单个样本。未满足预期交互时命令返回非零。
-
-### RTMW3D 原始权重与裁剪核验
-
-原始权重采用 [MMPose 固定版本模型页](https://github.com/open-mmlab/mmpose/blob/759b39c13fea6ba094afc1fa932f51dc1b11cbf9/projects/rtmpose3d/README.md) 所列的 RTMW3D-X，完整 SHA-256 为 `b0a0eab7ca501e2c88028fe1cfd78b50c7130e220d39541da7f669e5de25e6ca`。权重地址、本地路径和大小记录在候选清单的 `body_hand_pose.source_checkpoint`。项目内已准备该文件与固定版本 MMPose 仓库。
-
-参考进程直接加载上游 CSPNeXt、CSPNeXtPAFPN、RTMW3DHead，837 项状态严格加载，无缺失或多余键；原始预处理使用 GetBBoxCenterScale、TopdownAffine、PoseDataPreprocessor，解码使用 SimCC3DLabel。仅绕过会额外导入训练数据集的包聚合入口，不替换网络计算或编造缺失算子；所有实际导入的源文件校验值保存在 `native-provenance.json`。参考进程为 CPU PyTorch，应用仍使用 TensorRT。
-
-四个公开人物/镜像/多人裁剪样本上，ONNX/TensorRT 相对原始权重的最大张量差为 `1.16e-5`，三轴取峰位置无差异；最终原图关键点最大数值误差约 `6.11e-5` 像素，相对 z 一致。这是参考实现一致性，不是人体关键点真实精度。
-
-此次核验发现并修复了一个预处理问题：手写仿射矩阵与上游 float32 数组运算及 `get_warp_matrix` 的舍入不同，一个小数人物框有 129 个输入值变化，造成约 0.826 像素的关键点变化。正式适配器现复用上游纯 NumPy/OpenCV 几何函数，修复后四个输入张量逐值相同，验收阈值未放宽。失败原始记录和修复后的记录都保留，另有独立的合成渐变图张量哈希回归测试。
+## 单模型、整链路与只读观察
 
 ```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_pose_source_b1.py \
-  --output 05_runtime/validation/b1-pose-source-new
+python scripts/benchmark.py vision --output 05_runtime/validation/vision-modules-new
+python scripts/benchmark.py stream --output 05_runtime/validation/vision-stream-new
+python scripts/benchmark.py stream-summary --output 05_runtime/validation/vision-stream-new
+python scripts/benchmark.py live --seconds 120 --condition resident-idle --note "固定可见场景、对话空闲" --output 05_runtime/validation/live-observation-new
 ```
 
-该探针临时停止并恢复原有项目服务，原始 CPU 参考和 ONNX 参考分进程执行，随后验证 TensorRT。参考环境锁文件增加了 MMEngine/MMCV-lite，并将 ContourPy、ml-dtypes 固定到支持 NumPy 1.26 的版本；仅供可视化/ONNX 类型支持的这些依赖不进入生产视觉环境。`pip check` 对参考环境仍会报告上游要求的 `opencv-python` 名称未安装，因为这里明确使用同版本 `opencv-python-headless`，不在一个环境中混装两个 OpenCV 发行包。
+前两个测量会协调本项目服务并保留前后快照。单模型逐个隔离引擎；整链路使用最新帧管线和固定的驻留/4B/语音/带图压力条件。记录预热、失败、取消、未完成请求、任务触发、主机/进程资源及板端采样，不筛掉不利样本。
 
-原生深度复现入口使用应用的 `Camera` 类，检查时间对应、SDK 对齐、米制单位、无效点和关闭后的释放。输出目录每次使用新名称：
+`live` 只读取已有服务，没有生成测试负载。它按帧号去重并核对完成计数，漏采、重启和 HTTP 异常均标出；只能代表被观察的窗口。调试面板同样不替代正式基准。
+
+## 定位与历史复现
 
 ```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_rgbd_camera.py \
-  --output 05_runtime/validation/b1-sdk-rgbd-new
+python scripts/benchmark.py vision --role detection_segmentation --nsys --output 05_runtime/validation/vision-profile-new
 ```
 
-`vision.backend: realsense` 选择原生 RGBD，`v4l2` 保留 B0 的 RGB 路径。SDK 采集为 640×480、15 FPS，应用发布频率受 `capture_fps` 控制；这些配置值不是模型处理帧率。只有最新一组保留原始深度，历史环形缓存继续仅保存 JPEG。深度无效点保持 NaN 和独立掩码，不当作零距离；SDK 非零值仍需结合工作距离、目标区域和场景样本验证。依赖版本见 [运行依赖](../01_src/deploy/vision/requirements-runtime.lock)，不升级系统 BSP/CUDA/TensorRT。
+带 Nsight/NVTX 的运行是诊断，不能作为普通延迟基准。查看同一输入的 CPU 预处理、传输、CUDA 执行、后处理和等待，再设计单因素实验。性能优化和任务质量评测由用户主导，具体步骤见 [人体检测实操](body-detection-optimization.md)。
 
-模型来源、校验值与预处理在 [候选模型清单](../03_models/candidates/vision-b1.json)。以人脸为例：
+旧协议要求对应的历史源码；当前协调器支持 `vision --source-root <匹配的冻结源码目录> --protocol <旧协议>`，并从原项目管理服务。不要修改旧协议的哈希来绕过校验。历史源码及报告的恢复点为 `before-mainline-consolidation-20261020` 和 `before-historical-file-retirement-20261021`。
 
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/prepare_vision_b1.py --role face
-./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
-  --role face --workspace-mib 512 --output 05_runtime/validation/b1-face-new
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_vision_b1.py \
-  --role face --build-root 05_runtime/validation/b1-face-new \
-  --output 05_runtime/validation/b1-face-new/parity
-```
-
-构建和核验会独占本项目的构建锁，暂时停止本项目服务，并在结束或失败后恢复原先运行的组件。当前模型验证采用 FP32、关闭 TF32；编译 workspace 上限不等于运行时内存。CPU ONNX Runtime 和 OpenCV FaceDetectorYN 仅作为独立核验参考，正式视觉神经网络使用 TensorRT。YuNet 的检测框及五点解码另与 OpenCV 官方实现比较，覆盖有人脸、镜像和黑色负样本。
-
-人脸特征和表情复用同一份人脸框及五点来源，各自遵循上游的 112×112 对齐方法。SFace 输出 128 维特征，匹配前做 L2 归一化；表情输出七类分值，包含 `happy`，不提供原始私有模型的 `exaggeration`。复现时先完成上面的人脸检测核验：
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
-  --role face_identity expression --output 05_runtime/validation/b1-face-tasks-new
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_face_tasks_b1.py \
-  --build-root 05_runtime/validation/b1-face-tasks-new \
-  --face-build-root 05_runtime/validation/b1-face-new \
-  --output 05_runtime/validation/b1-face-tasks-new/parity
-```
-
-检测分割复用官方 YOLOv8n-seg 权重，输出 80 类检测与原图大小的实例 mask。当前帧最多输出 10 个目标，输入像素和 mask 分配均有上限。已通过原始 Ultralytics PyTorch 的框、类别、置信度和 mask 对照，覆盖普通人物、多人公交场景、奇数尺寸及空白负样本。
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
-  --role detection_segmentation --output 05_runtime/validation/b1-segmentation-new
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_segmentation_b1.py \
-  --build-root 05_runtime/validation/b1-segmentation-new \
-  --output 05_runtime/validation/b1-segmentation-new/parity
-```
-
-CPU 导出／参考环境为项目内 `05_runtime/builds/vision-export`，完整版本在 [requirements-export.lock](../01_src/deploy/vision/requirements-export.lock)。首次恢复可用 Python 3.12 创建该 venv，然后执行 `./05_runtime/builds/vision-export/bin/python -m pip install --no-deps -r 01_src/deploy/vision/requirements-export.lock`；`--no-deps` 用于保留完整锁文件指定的 headless OpenCV。应用环境不安装 Torch。需要独立复核 ONNX 导出时，将锁定的 `yolov8n-seg.pt` 复制到 `05_runtime/` 下的新目录，再用应用 Python 运行 `scripts/export_segmentation_b1.py --weights 新目录/yolov8n-seg.pt --output 新验证目录`。已有 ONNX 不会被覆盖；导出脚本只移除日期元数据并排序描述字段，检查推理图字节不变。新的项目内环境已独立重复导出，部署 ONNX 的 SHA-256 与原记录完全相同。
-
-本次定位到一个参考环境问题：原工具环境使用 OpenCV 5.0、NumPy 2.5，而应用使用 OpenCV 4.11、NumPy 1.26。对同一输入张量，ONNX/TensorRT 已一致，但缩放图像存在一个灰度级的差异，影响了端到端框和 mask。固定参考环境后，原先的验收阈值全部通过；失败数据和修正记录均保留在可部署性报告中。后续优化比较必须同时固定模型、输入和预处理库版本。
-
-## 头姿、视线与外观特征
-
-新增部署候选及边界：
-
-| 能力 | 已核验模型 | 接口与边界 |
-|---|---|---|
-| 头姿 | OMZ head-pose-estimation-adas-0001 | BGR 60×60；yaw/pitch/roll 度；采用模型公开的角度范围 |
-| 视线辅助关键点 | OMZ facial-landmarks-35-adas-0002 | 同一人脸 ROI 的 35 点，用前四点构造左右眼区域；不对应私有 70／52 点定义 |
-| 视线 | OMZ gaze-estimation-adas-0002 | 左眼、右眼及同帧头姿三路输入；包含 roll 对齐和补偿；没有估计闭眼状态，也没有标定到世界坐标 |
-| 行人 ReID 特征 | OSNet x0.25 MSMT17 | RGB 256×128，512 维归一化特征；已接 Norfair 有界关联，真实遮挡/交叉仍需验证 |
-| 物体特征 | OpenAI CLIP ViT-B/32 图像编码器 | RGB 224×224，512 维特征；不把语义相似度当作通用物体身份认证 |
-
-视线默认选用 OMZ 配套级联。L2CS 的 Gaze360 权重来源当前失效，且 Gaze360 的许可明确限制训练模型的商业应用；选择依据与来源保存在候选清单。6DRepNet 保留为未启用的替代候选。OpenVINO 只存在于隔离的转换／参考环境，正式应用使用 TensorRT。
-
-当前所选模型的 ONNX 已准备。重建引擎和复核固定样本时，使用新的输出目录：
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/build_vision_b1.py \
-  --role head_pose gaze gaze_landmarks person_reid object_embedding \
-  --output 05_runtime/validation/b1-attributes-new
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_remaining_vision_b1.py \
-  --build-root 05_runtime/validation/b1-attributes-new \
-  --attribute-root 05_runtime/validation/b1-attributes-new \
-  --output 05_runtime/validation/b1-attributes-new/parity
-```
-
-该检查使用已准备的人脸检测和检测分割固定样本。它覆盖原始 PyTorch 外观特征、原始 OpenVINO FP32 头姿／关键点／视线，以及 TensorRT 完整级联；这是参考一致性，不能当作真实人脸身份错误率、视线真值精度或目标重识别准确率。
-
-源模型与导出配方在候选清单的 `export_sources` 中。首次导出入口是 `scripts/export_remaining_vision_b1.py`，仅在目标 ONNX 不存在时运行。PyTorch 使用 `05_runtime/builds/vision-export`；OpenVINO 使用独立的 `05_runtime/builds/openvino-tools`，版本在 [requirements-openvino.lock](../01_src/deploy/vision/requirements-openvino.lock)。所有现有源模型和已验证图均保留，不覆盖旧的失败记录。
-
-OMZ 转换中实际遇到两类兼容问题：TensorRT 不接收未使用的 MaxPool 索引输出，以及转换图未显式填写部分 Slice 的轴。`deploy/vision/onnx_compat.py` 使用 NVIDIA ONNX GraphSurgeon，只删除确认没有消费者的可选输出，并核对原始 StridedSlice 掩码后补齐轴；原始 IR 与修正 ONNX 的数值检查通过后才构建引擎。未改变精度或模型权重。
-
-多模型运行器统一持有进程级 TensorRT logger，遵守其生命周期要求；已验证其余模型驻留时关闭、回收和重新加载头姿模型。B1 统一管线的共存与资源基线见本文数据表，三轮关闭/重开与故障恢复证据见集成记录；长期运行覆盖另列。
-
-相机元数据探针使用独立工具环境，不启动视频流：
-
-```bash
-./05_runtime/builds/vision-tools/bin/python scripts/probe_stereo_metadata.py \
-  --output 05_runtime/validation/b1-camera-new/profiles.json
-```
-
-工具环境版本在 [requirements-tools.lock](../01_src/deploy/vision/requirements-tools.lock)。已完成 60 组四路采集检查及应用内 30 帧 RGBD 检查；短窗口不等于长期稳定性或绝对测距精度。IR 和 RGB 内参、外参不同，正式应用直接使用 `rs.align(stream.color)` 的结果，并保留每路原始时间戳。相近 SDK 全局时间不代表硬件同时曝光。
-
-神经双目深度已移至后续对照实验，代码在 `01_src/benchmarks/stereo_depth_experiment.py` 与 `stereo_geometry.py`。已有引擎和失败的红外域比较记录保留：转换一致性通过，但真实样本相对 SDK 的尾部偏差较大；SDK 本身也不是地面真值。该实验不参与当前 B1 完成判定，准备／构建脚本默认跳过它，只有显式 `--role depth` 才会运行。姿态模型的相对 z 始终不冒充相机测距。
-
-## 已冻结的 B0
-
-先从项目根目录启动完整程序，确认相机与四个服务正常，再理解各模块职责。当前名称为“多模型端侧助手”，服务前缀为 `edge-assistant`。
-
-```bash
-./run.sh services up
-./run.sh services status
-```
-
-下面两个脚本分别测量 V1 单视觉模块和 V2 连续视觉链路。它们会临时停止或切换本项目服务，结束后恢复原配置；每次使用新的输出目录，测量期间不要同时运行其他测试、构建或下载任务。
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_modules.py \
-  --output 05_runtime/validation/vision-v1-new
-./05_runtime/environments/edge-assistant/bin/python 01_src/benchmarks/vision_stream.py \
-  --output 05_runtime/validation/vision-v2-new
-```
-
-固定输入在 `05_runtime/datasets/b0-sw-v1/`。脚本校验 [B0 协议](../benchmarks/manifests/b0-sw-v1.json)、原始配置、模型及输入哈希，路径兼容层将历史目录映射到当前目录；冻结记录保持原字节。
-
-对照 [原始视觉汇总](../benchmarks/results/b0-vision-summary.json) 阅读结果，关注分模块 P50/P95、感知完成率、结果帧龄、无结果比例与资源占用。当前相机配置 10 FPS、感知配置 5 FPS；不要将配置值当作最大吞吐，也不要把网页刷新速度当作板端推理速度。后续由你亲自复现、提出假设，再逐项分析和优化。
+当前界面基准数据文件为 `benchmarks/results/vision-modules.json`，其 `runtime_source_commit` 和时间随结果显示。完成新测量后更新该文件，整合前 B2 的版本化文件仍保持原字节。退出超时 `B2-EXIT-01`、未取得的真人/实体声学与长稳证据单独保留，不用新的耗时数字替代功能验收。

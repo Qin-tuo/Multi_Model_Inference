@@ -14,7 +14,7 @@ def main():
     parser.add_argument('--base-url',default='http://127.0.0.1:8093')
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args();report={'created_at':datetime.now(timezone.utc).isoformat(),
-        'scope':'Actual model and Web session; no persistent memory, physical voice or B0'}
+        'scope':'Actual model and Web session; no persistent memory or physical voice'}
     try:
         with httpx.Client(base_url=args.base_url,timeout=5,trust_env=False) as client:
             def state():return client.get('/api/state').raise_for_status().json()

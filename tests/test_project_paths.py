@@ -12,19 +12,20 @@ from project_paths import ROOT, repo_path
 
 
 def test_frozen_baseline_locks_resolve_without_rewriting_records():
-    protocol = json.loads(
-        repo_path("benchmarks/manifests/b0-sw-v1.json").read_text()
-    )
-    for name, digest in protocol["locks"].items():
-        # Historical evidence belongs to its preserved source revision. Current
-        # manifests can evolve without rewriting the old benchmark's locks.
-        saved = subprocess.check_output(
+    def historical(name):
+        return subprocess.check_output(
             ["git", "show", "before-mainline-consolidation-20261020:" + str(repo_path(name).relative_to(ROOT))],
             cwd=ROOT,
         )
+
+    protocol = json.loads(historical("benchmarks/manifests/b0-sw-v1.json"))
+    for name, digest in protocol["locks"].items():
+        # Historical evidence belongs to its preserved source revision. Current
+        # manifests can evolve without rewriting the old benchmark's locks.
+        saved = historical(name)
         assert hashlib.sha256(saved).hexdigest() == digest
     assert (
-        hashlib.sha256(repo_path(protocol["input_manifest"]).read_bytes()).hexdigest()
+        hashlib.sha256(historical(protocol["input_manifest"])).hexdigest()
         == protocol["input_manifest_sha256"]
     )
 

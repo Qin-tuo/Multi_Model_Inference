@@ -21,7 +21,7 @@ def probe(output):
     report = {
         "created_at": runtime.stamp(),
         "status": "RUNNING",
-        "scope": "Application RGBD capture, SDK alignment, provenance and lifecycle; not absolute distance accuracy or B1 performance",
+        "scope": "Application RGBD capture, SDK alignment, provenance and lifecycle; not absolute distance accuracy or pipeline performance",
         "script_sha256": runtime.sha256(Path(__file__)),
         "frames": [],
     }

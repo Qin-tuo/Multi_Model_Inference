@@ -2,6 +2,7 @@
 // One existing WebSocket; bounded browser history, all inference timing from board.
 (() => {
   'use strict';
+  const modelNames={detection_segmentation:'检测分割',body_hand_pose:'人体/手部关键点',face:'人脸检测',face_identity:'人脸特征',expression:'表情',head_pose:'头姿',gaze_landmarks:'视线辅助关键点',gaze:'视线',person_reid:'行人特征',object_embedding:'物体特征'};
   const panel = document.getElementById('debugPanel');
   const toggle = document.getElementById('debugToggle');
   const labels = {vad:'VAD 分段',asr:'ASR 调用',llm:'LLM 迭代',tool:'工具执行',tts:'TTS 合成',release:'资源释放'};
@@ -51,8 +52,9 @@
     <div class="debug-section">传输与采样</div>
     <div class="debug-note" id="debugTransport"></div>
     <div class="debug-note">浏览器接收 FPS 仅反映预览传输；板端帧龄不含曝光时间，也不含网络与屏幕显示延迟。缺失指标显示 —。</div>
-    <details><summary>冻结 B0 参考与测量口径</summary>
-      <p class="debug-note">B0 · 2026-10-16 · 固定 640×480 图片 · 预热后每模块 20 次。当前实拍与固定输入不同，不自动计算加速比。正式优化对比仍使用基准脚本。</p>
+    <details><summary>十模型基准与测量口径</summary>
+      <p class="debug-note">单模型固定输入的普通调用分布；各模型使用自己的固定 ROI 和样本集。当前实拍任务与共存负载不同，不自动计算加速比。正式比较使用冻结协议。</p>
+      <p class="debug-note" id="debugBaselineSource"></p>
       <table class="debug-table"><thead><tr><th>单模块调用</th><th>P50 / ms</th><th>P95 / ms</th></tr></thead><tbody id="debugBaseline"></tbody></table>
       <p class="debug-note">本面板增加轻量计时和资源读取，观测开销仍需纳入实验条件。逐层／算子分析使用 Nsight，正式性能对比使用基准脚本。</p>
     </details>`;
@@ -104,8 +106,7 @@
     put('debugVisionMeta',`目标：采集 ${f(v.capture_target_fps,0)} / 识别 ${f(v.perception_target_fps,0)} FPS · 帧 ${v.frame_id??'—'} · 已处理 ${v.processed??'—'} · 跳过采集帧 ${v.skipped_capture_frames??'—'} · 失败 ${v.failures??'—'} · 重连 ${v.reconnects??'—'}`);
     put('debugVisionError',v.ready?'':v.error||'暂无新鲜感知结果');
     const models=$('debugModels');models.replaceChildren();
-    const names={detection_segmentation:'检测分割',body_hand_pose:'人体/手部关键点',face:'人脸检测',face_identity:'人脸特征',expression:'表情',head_pose:'头姿',gaze_landmarks:'视线辅助关键点',gaze:'视线',person_reid:'行人特征',object_embedding:'物体特征'};
-    for(const [name,data] of Object.entries(v.model_metrics||{}))models.append(row([names[name]||name,data.calls,f(data.last_ms,2),f(data.p50_ms,2)+' / '+f(data.p95_ms,2),data.errors||0]));
+    for(const [name,data] of Object.entries(v.model_metrics||{}))models.append(row([modelNames[name]||name,data.calls,f(data.last_ms,2),f(data.p50_ms,2)+' / '+f(data.p95_ms,2),data.errors||0]));
     put('debugLoad',`${f(r.cpu_percent)} / ${f(r.gpu_percent)}`);
     put('debugMemory',`${f(r.ram_available_gib,2)} / ${f(r.ram_total_gib,2)}`);
     put('debugTemp',`${f(r.temperatures_c['cpu-thermal'])} / ${f(r.temperatures_c['gpu-thermal'])}`);
@@ -148,7 +149,7 @@
   }
   toggle.addEventListener('click',()=>setEnabled(!enabled));
   $('debugExport').addEventListener('click',()=>{
-    const data={schema_version:1,scope:'live sampled diagnostics, not frozen B0',latest,history,
+    const data={schema_version:1,scope:'live sampled diagnostics, not a frozen benchmark',latest,history,
       browser_received_fps:browserFPS,connection_fresh:connected&&(performance.now()-receivedAt)/1000+(latest?.cache_age_seconds||0)<=6};
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
     const a=document.createElement('a');a.href=url;a.download='board-debug-'+new Date().toISOString().replaceAll(':','-')+'.json';a.click();
@@ -172,11 +173,12 @@
     }
   };
   fetch('/api/debug/baseline').then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(data=>{
-    for(const [key,label] of [['body','人体'],['face','人脸'],['hands','手部']]){
-      const sample=data.modules[key].fixtures.find(x=>x.input==='public-camera-shape.png').plain_ms;
-      $('debugBaseline').append(row([label,f(sample.p50,2),f(sample.p95,2)]));
+    $('debugBaselineSource').textContent=`基准源码 ${(data.runtime_source_commit||'未记录').slice(0,12)} · ${data.created_at||''}`;
+    for(const [key,value] of Object.entries(data.modules)){
+      const sample=value.plain_adapter_ms;
+      $('debugBaseline').append(row([modelNames[key]||key,f(sample.p50,2),f(sample.p95,2)]));
     }
-  }).catch(()=>{$('debugBaseline').append(row(['B0 读取失败','—','—']));});
+  }).catch(()=>{$('debugBaseline').append(row(['基准读取失败','—','—']));});
   window.addEventListener('resize',()=>{if(enabled)render();});
   setInterval(()=>{if(enabled)freshness();},1000);
   setEnabled(enabled);

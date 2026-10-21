@@ -171,7 +171,7 @@ def main():
     suite = ET.parse(args.tests_xml).find("testsuite")
     report = {
         "created_at": runtime.stamp(),
-        "status": "S1_T1_L1_COLLECTED_END_TO_END_B0_PENDING",
+        "status": "MODEL_INTERFACES_MEASURED",
         "summarizer_sha256": runtime.sha256(__file__),
         "roles": roles,
         "raw_directory": str(args.run.resolve()),
@@ -195,7 +195,7 @@ def main():
             "L1 client first-content includes native input-token preflight and stream setup. Native predicted_per_second is reported by pinned llama.cpp and has a different denominator from completion_tokens/client_total_seconds.",
             "Image PNG decode/JPEG encoding is fixture preparation outside L1 inference timing; each call separately records base64 time. Exact JPEG and request hashes and SSE bytes are preserved. Image semantic correctness is not scored here.",
             "Resource samples include input-first/warmup/measured calls and release checks, with stable native/listener PIDs. 1Hz snapshots can miss short GPU activity; sampled maxima are not exact allocation peaks. New clock anchors permit time alignment, subject to wall-clock adjustments.",
-            "One development workload/run, not 5-run optimization statistics, production QoS, long-run stability or complete B0. E1 full application and handoff remain pending.",
+            "One development workload/run; complete application, repeated optimization statistics, task quality and long-run stability need separate evidence.",
         ],
     }
     runtime.write_json(args.output, report)

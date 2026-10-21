@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Attribute input coverage on frozen B1 images; not an accuracy benchmark."""
+"""Attribute input coverage on frozen visual images; not an accuracy benchmark."""
 
 import argparse
 from pathlib import Path

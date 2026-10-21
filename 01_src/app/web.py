@@ -420,7 +420,7 @@ def create_app(
 
     async def vision_call(name, *args):
         if vision is None or name not in vision:
-            raise HTTPException(503, "B1 vision operation unavailable")
+            raise HTTPException(503, "Vision operation unavailable")
         try:
             return await app.state.calls.run(
                 lambda: vision[name](*args), config.read_timeout, True
@@ -454,7 +454,7 @@ def create_app(
     @app.get("/api/debug/baseline")
     async def _debug_baseline():
         return FileResponse(
-            STATIC_DIR.parent / "benchmarks/results/b0-vision-summary.json",
+            STATIC_DIR.parent / "benchmarks/results/vision-modules.json",
             media_type="application/json",
         )
 

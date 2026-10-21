@@ -1,77 +1,78 @@
-# 项目总览：无机身陪伴场景的端侧多模型部署
+# 软件架构与代码地图
 
-> 2026-10-20｜默认配置更新为 B2：RTMW-L 2D、ArcFace-MobileNetV1、OSNet x1.0，另外七个视觉模型及四服务架构保留。参考核验、视觉回放和软件共存通过，十模块及七组整链路基线已测量，偶发退出超时仍待定位，见 [B2 说明](b2-model-replacements.md)。
+当前目标是在 Orin NX 16GB 上运行陪伴场景的端侧多模型服务，建立可复现的数据流、资源边界和性能基准。应用基于已固定版本的 NVIDIA 开源助手代码演进；模型运行复用 llama.cpp、OpenVoiceStream、TensorRT 和 RealSense SDK。当前没有 ROS、机器人运动控制或 Triton 服务层。
 
-以下 B1 状态、模型表与测量数据记录替换前的阶段结果。B2 仅替换上述三个模型，不改变项目定位和优化教学分工；真人手势完整准确率验收仍开放。
+## 四个服务
 
-本阶段深度按用户最新决定使用 D435i 自带输出，复用 RealSense SDK 完成 RGB 对齐；神经双目深度后置。视觉神经网络仍统一使用 TensorRT，原生相机深度不属于该推理后端约束。
-> 本机负责Orin NX16GB项目；RK项目独立维护，本轮不改动其实现。
-
-## 1 项目定位
-
-目标是在陪伴交互场景下掌握端侧模型部署、数据流、资源管理、性能分析与可靠交付。当前复用固定版本的开源应用源码，做没有机器人运动载体的派生工程；原始来源见 [第三方说明](../THIRD-PARTY-NOTICES.md)。
-
-原 B0 功能是人体/人脸/手部感知、中文语音、4B语义理解、图文问答和文件语音回应；挥手问候，静止举掌取消整轮。主模型为 Qwen3.5-4B＋llama.cpp。B1 扩展公开视觉模型和条件触发，具体范围及未定义输出见 [当前目标](implementation-plan.md#b1-当前阶段目标)；身份匹配作为视觉能力，语音授权验证仍不启用，长期记忆后置。
-
-用户已确认本阶段暂时跳过麦克风、扬声器实物接入。当前交接范围为软件框架、D435i视觉实机、文件/受控PCM语音链路及B0-SW；物理录播、AEC、双讲与实际停播验收后置。用户接手后先做视觉优化。
-
-## 2 复用与分工
-
-直接复用固定上游的模块组织、主流程、相机缓冲、模型接口、网页及监控。裁掉机身连接、运动表达和默认RAG依赖，补齐中文、独立感知、取消及工程可靠性。旧项目只选择性迁入已验证的后端与必要机制，不把旧Pipecat/ROS2主控整体复制到新应用。
-
-| 阶段 | 助手 | 用户 |
+| 服务 | 职责 | 本机端口 |
 |---|---|---|
-| 工程框架 | 搭建、适配、修复、验证，提供代码与架构导读 | 明确业务，理解结构，亲自验收 |
-| 当前软件基线 | 交付公开视觉模型的 B1；保存已完成的 B0 与各修订的输入、配置和真实数据 | 理解口径，在指导下复现 |
-| 先视觉、再扩展的优化 | 讲解专业工具、帮助读证据、审查假设与修改，按需协助 | 从相机、视觉模型和数据流开始实际测量、定位、修改、回归及对比 |
-| 最终交付 | 核验部署/稳定性/报告及来源 | 独立解释、复现和呈现个人掌握的工程案例 |
+| `llama` | Qwen3.5-4B 图文推理、流式文本和工具调用 | 8088 |
+| `asr` | llama.cpp 承载 Qwen3-ASR-0.6B | 8089 |
+| `speech` | OpenVoiceStream 语音 API、ASR 适配、Matcha/Vocos 合成 | 8621 |
+| `app` | 相机、十模型视觉、手势、请求控制、动作存储、Web 和诊断 | 8090 |
 
-不以助手后台自动跑完优化替代学习。每次实验先有问题和假设，再由用户完成操作与解释；保留无收益和退化结果。
+systemd 负责进程、启动依赖、重启和进程组回收。视觉模型在 `app` 内通过 TensorRT 顺序执行，模型适配器保留各自的预后处理；它们没有独立网络服务。现有后端、线程数、上下文、精度和调度参数在本轮保持不变。
 
-## 3 文档入口
+## 数据如何流动
 
-| 文件 | 用途 |
+```mermaid
+flowchart LR
+    D[D435i / RealSense SDK] --> C[Camera / FrameSnapshot]
+    C --> V[VisionPipeline]
+    V --> M[VisionModels / TensorRT adapters]
+    M --> V
+    V --> G[GestureRecognizer]
+    G --> T[TurnController]
+    C --> W[Web preview]
+    V --> W
+    I[文字 / PCM WAV / 可选设备输入] --> T
+    T --> E[TurnExecution]
+    E --> S[VAD / ASR]
+    S --> L[4B llama.cpp]
+    E --> L
+    L --> A[ActionStore / SQLite / Scheduler]
+    L --> O[SpeechOutput / TTS]
+    O --> W
+    T --> Q[Diagnostics]
+    V --> Q
+    Q --> W
+```
+
+相机发布带 `source_epoch`、`frame_id`、主机接收时间和失效标记的 RGBD 快照。深度通过 SDK 对齐到 RGB；无效深度保持未知。视觉工作线程只选择最新帧，同一轮检测、姿态、特征和属性结果携带同一个帧标识，过期或重连前的结果不再发布。图文问答从同一份感知预览中取得图像与辅助观察，避免把不同帧的信息拼在一起。
+
+检测分割先提供人体和物体候选、mask 及距离。只有满足深度有效性与距离条件的目标，才进入姿态、ReID、物体特征及人脸属性处理。Norfair 负责轨迹关联；人脸特征图库只提供可选的登记/匹配能力，不作为语音指令的身份授权关卡。
+
+挥手触发问候；静止张掌达到既定证据要求后取消整轮。取消会传播到生成、语音输出和待执行工具；已提交的笔记或提醒保留。`TurnController` 管理接纳、状态和取消边界，`TurnExecution` 负责一轮内的输入准备、模型调用、提交、清理和结束。确认后端资源释放后才能接纳后续工作。
+
+## 谁拥有资源
+
+| 模块 | 负责的资源与边界 |
 |---|---|
-| [完整新版计划书](implementation-plan.md) | 目标、模块、代码结构、迁移、R0～R6、功能和性能验收、教学路线及Goal |
-| [上游审查锁](../01_src/deploy/upstream.lock.json) | 固定commit、关键源码哈希和审查范围 |
-| [B1 验收清单](../benchmarks/manifests/vision-b1-v1.json) | 当前目标、模型、门限、覆盖范围和未完成项 |
-| [B1 启动与代码阅读](b1-handoff.md) | 默认 B1 启动、配置覆盖、代码阅读顺序和用户第一次视觉实验 |
-| [B1 测量与局限](visual-baseline.md) | 单模块/整链路口径、基线修订、恢复与失败证据 |
-| [B0 历史任务清单](../benchmarks/manifests/headless-roadmap-v3.json) | 原 B0 阶段的工程/学习验收；不作为当前 B1 进度 |
-| [迁移缺口](../benchmarks/manifests/gap-ledger-v3.json) | 机身耦合、中文、打断、资源和兼容差异 |
-| [旧项目恢复索引](archive/repository-cleanup-20261019.json) | 旧实现、进度和实验数据的逐文件恢复入口 |
-| [岗位资料](../benchmarks/manifests/target-jd-20261014.json) | 端侧部署相关JD来源与能力对照 |
-| [历史计划](archive/02-plan-v2.1-before-framework-20261015.md) | 旧设计和角色约定 |
-| [旧运行说明](archive/README-pre-framework-20261015.md) | 固定旧源码快照的使用说明及历史结果 |
+| `app/application.py` | 组装组件、启动顺序、应用生命周期和释放顺序 |
+| `app/camera.py`、`realsense_source.py` | 唯一相机采集者、RGBD 时间匹配、JPEG 与有界帧历史 |
+| `app/frame_worker.py`、`vision_pipeline.py` | 最新帧处理、目标预算、模型调用和结果关联 |
+| `app/vision_models.py` 及适配器 | 引擎/缓冲区所有权、模型契约、预后处理与调用指标 |
+| `app/turn_control.py`、`turn_execution.py` | 单轮执行状态、取消、工具执行边界、后端释放确认 |
+| `app/speech/` | 设备、采集、VAD、播放、文件发布与类型化语音事件 |
+| `app/actions/` | SQLite 事务、幂等回执、笔记、提醒与调度 |
+| `app/web.py`、`broadcast.py` | HTTP/WebSocket、预览、消息发布和有界客户端队列 |
+| `app/diagnostics.py`、`monitor.py` | 板端采样、轮次/模型时间与资源快照 |
+| `deploy/` | 后端命令、服务归属、构建租约、工件校验、运行包 |
+| `validation/`、`benchmarks/` | 功能/故障检查，以及有明确条件和统计范围的测量 |
 
-## 4 当前真实状态
+当前采集目标 10 FPS，视觉处理上限 5 FPS，帧有效期 1.5 秒；这三个是配置，不是实测吞吐。距离触发区间 0.35–3.0 米，单帧最多处理 1 人姿态、2 张人脸、1 个物体特征，最多发布 2 只手。全部参数以 `./run.sh config` 和 `02_config/settings.orin-nx.yaml` 为准。
 
-本项目派生实现位于 `/home/nvidia/Multi_Model_Inference` 的 `main`，由四个 `edge-assistant-*` 服务运行。B1 在应用进程中顺序调用 10 个视觉 TensorRT 引擎，采用原生 RGBD、Norfair 目标关联及 SQLAlchemy 本地人脸标签库。4B、ASR、TTS、整轮取消、笔记和提醒继续使用现有后端与控制器。固定上游来源及审查副本路径保留在导入锁中；实际运行依赖位于本项目的 `05_runtime/`。
+## 阅读顺序
 
-R1 已有 10 个模块、7 种共存条件、20 分钟固定回放及 10 分钟 D435i 实拍窗口的数据，并通过隐藏原项目/AI_Stack、仅有回环网络的独立副本恢复。R2 只修改手势时序逻辑，最终 270 项软件回归通过；固定选帧的真实模型链路已完成问候，张掌取消已完成真实轮次验证。普通实时回放仍有漏检，选帧相位与当前处理频率的影响保留在 [修复记录](../benchmarks/results/b1-wave-fix-summary.json)。R2 七组共存复测、配套运行包与独立恢复已完成；`run.sh` 已默认选择 B1，实际四服务 READY，浏览器与文字轮次通过。
+1. `main.py` / `run.sh` → `app/cli.py`：启动与配置。
+2. `app/application.py`：组件在哪里创建、由谁关闭。
+3. `app/camera.py` → `app/vision_pipeline.py` → `app/vision_models.py`：一帧如何经过十模型。
+4. `app/segmentation.py` / `tensorrt_runner.py`：先从用户准备优化的人体检测模块看预处理、传输、执行和后处理。
+5. `app/turn_control.py` → `turn_execution.py` → `speech/output.py`：一轮对话的执行和取消。
+6. `benchmarks/vision_modules.py` / `vision_stream.py`：隔离模块与共存场景如何测量。
 
-新数据流的模型、取消、持久回执、服务退出恢复与D435i断流重连已有独立证据，入口见计划和任务清单。ReSpeaker Lite及扬声器按用户要求后置，当前软件基线与视觉交接继续推进，不把文件输出计作物理播放。
+公共代码不导入 `scripts/`。四个脚本入口只选择任务，正式实现分别位于部署、验证和基准包。模型版本由 `03_models/` 的清单表达，历史实现通过 Git 恢复点查阅。
 
-## 5 B1 模块与数据流
+## 交付边界
 
-| 层 | 实现与入口 | 输出与边界 |
-|---|---|---|
-| 采集 | `app/camera.py`、RealSense SDK | 同组 RGB/对齐原生深度、时间戳与源标识；最新原始帧与有界 JPEG 历史 |
-| 检测与条件触发 | `app/perception_b1.py`、YOLOv8n-seg、YuNet | 检测框、类别、mask 测距；按范围、可见性和目标预算选择后续任务 |
-| 人体/手部与外观 | RTMW3D、OSNet、CLIP | 133 点及左右手 21 点、人员/物体特征；姿态相对 z 不当作米制距离 |
-| 人脸属性 | SFace、OMZ 头姿/35 点/视线、公开表情模型 | 标签匹配、头姿/视线与公开类别分值；输入质量不足时返回不可用 |
-| 关联与状态 | `app/visual_tracks.py`、`identity_gallery.py` | 有限目标编号、有效期与特征空间；身份标签不控制对话权限 |
-| 交互 | `app/gestures.py`、`turn_control.py` | 手势事件、当前轮次、生成/工具/输出与取消边界 |
-| 推理服务 | llama.cpp、OpenVoiceStream | 本地 4B、ASR、TTS；systemd 负责生命周期与恢复 |
-
-源码表中的路径均相对 `01_src/`。模型锁在 `03_models/`，实际工件在 `05_runtime/`。每个视觉模型一个执行上下文；一个工作线程处理最新帧，默认每轮最多 1 个人物姿态、2 张人脸属性、1 个物体特征目标。增大预算或改变频率会改变工作量，需建立新的实验记录。
-
-## 6 完成判定与求职呈现
-
-工程目标是结构简洁、完整功能、可观测、有界资源、异常可恢复、可重复部署；学习目标是用户能独立使用专业工具分析一个真实系统并形成可信优化。两者共同决定项目完成。
-
-简历围绕实际模型落地、数据/资源策略、根因与优化证据组织。上游已有能力与本地适配明确区分；使用成熟后端不等于自研引擎。C++/CUDA工作以实际定位出的部署或热点问题为依据。
-
-原 references/、模型和数据保留；旧方案报告保存在清理前 Git 标签及校验过的归档中。RK跨平台对照、Edge-LLM和长期记忆为后续独立工作，不占当前关键路径。旧JT、SF/DP与新版E/K分别记录，不能混算通过率。
-
-2026-10-19：当前运行依赖已收拢到项目内 `05_runtime/`，四个服务使用本地环境与工件。已通过隐藏旧 AI_Stack 且断网的实际模型验证；系统 Jetson/CUDA/TensorRT 依赖仍由主机提供。详见 [依赖与恢复说明](../01_src/deploy/dependencies-layout.md)。
+本轮工作清单见 [整合 Goal](consolidation-goal.md)。实体麦克风/扬声器、AEC、真人手势完整准确率、长时间稳定性和长期记忆仍需要后续证据。已知退出超时 `B2-EXIT-01` 的状态单独保留；软件回放与文件语音通过不能代替这些验收。

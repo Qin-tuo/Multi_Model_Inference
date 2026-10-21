@@ -1,196 +1,96 @@
 # Orin NX 端侧多模型陪伴服务
 
-> 当前为 `refactor/b2-mainline` 整合分支，尚未完成独立恢复包、最终性能对照和主分支交付。完成范围与验证证据见 [整合 Goal](docs/consolidation-goal.md) 和 [执行清单](benchmarks/manifests/consolidation-progress.json)。当前默认配置为 `02_config/settings.orin-nx.yaml`；下方历史 B0/B1/B2 文档中的旧版命令需在相应 Git 恢复点执行。
+在 Orin NX 16GB 上连接 D435i、十模型视觉、中文语音和 4B 图文模型。重点是同帧数据流、板载资源边界、可观察性和可复现测量。性能优化由用户接手逐项完成。
 
-本项目在 Orin NX 16GB 上连接相机、人体/人脸/手部感知、中文语音和 4B 图文模型。没有机器人机身控制；身份验证已移除，长期记忆留到后续阶段。
+> 整合分支验收进行中：工具与核心模块已完成阶段验证，当前运行包独立恢复、最终性能对照和主分支交付仍待完成。实际进度见 [执行清单](benchmarks/manifests/consolidation-progress.json)，完整范围见 [本轮 Goal](docs/consolidation-goal.md)。
 
-当前默认启动 **B2：三个标准视觉模型替换**。人体／手部采用 RTMW-L 2D，人脸特征采用 ArcFace-MobileNetV1，行人 ReID 采用 OSNet x1.0，另外七个视觉模型保持 B1，仍统一使用 TensorRT。参考一致性、十模型回放、张掌正样本与四服务共存通过；十模块及七组整链路基线已测量。已记录一次应用／语音退出超时，根因待定位。真人手势精度与实体声学验收仍开放，B1 历史工件和数据保留。
+[架构与代码地图](docs/project-overview.md) · [模型与接口](docs/models.md) · [基准与复现](docs/visual-baseline.md) · [依赖与恢复](01_src/deploy/dependencies-layout.md) · [服务管理](01_src/deploy/systemd/README.md)
 
-深度采用 D435i 自带输出和 RealSense SDK 的 RGB 对齐；TensorRT 用于视觉神经网络。神经双目深度按用户决定后置，不作为本阶段验收项。
+## 从停止状态启动完整程序
 
-[B2 替换说明与回退](docs/b2-model-replacements.md) · [B2 验证进度](benchmarks/results/b2-replacement-progress-20261020.json) · [B1 能力范围](benchmarks/manifests/vision-b1-v1.json)。后续由用户亲自使用专业工具分析和优化；实物声学、机身控制、导航及长期记忆继续后置。
-
-[B1 历史交接入口](docs/b1-handoff.md) · [B1 历史实测数据和复现口径](docs/visual-baseline.md)。B1 数据对应旧模型和源码，不能充当 B2 的当前性能指标。
-
-[多模型推理优化学习指南](docs/inference-optimization-guide.md)：优化职责、量化与剪枝、指标与工具、YOLO 代码阅读、单模型与整体迭代、实机验收及实验记录。
-
-[人体检测完整优化实操](docs/body-detection-optimization.md)：以 YOLOv8n-seg 走通质量与性能基线、部署优化、FP16、INT8、结构化剪枝与微调，以及多模型共存对照。
-
-[项目定位与分工](docs/project-overview.md) · [完整实施计划](docs/implementation-plan.md) · [部署说明](01_src/deploy/systemd/README.md) · [B0 总清单](benchmarks/results/b0-sw.json) · [阶段验证记录](docs/migration-history.md)
-
-
-## 项目内直接运行
+本机项目运行依赖在 `05_runtime/`，普通 Git 克隆不含模型、引擎和 Python 环境。新副本先按恢复说明取得经过验收的匹配运行包，再使用兼容的 Jetson Linux、CUDA、TensorRT 和 Python 3.12 主机环境。
 
 ```bash
+cd /home/nvidia/Multi_Model_Inference
+./run.sh config
+./run.sh services check
 ./run.sh services up
 ./run.sh services status
+```
+
+`run.sh`、直接 Python 入口和服务管理器共享默认配置 `02_config/settings.orin-nx.yaml`。优先级为显式 `--config`、`EDGE_ASSISTANT_CONFIG`、项目默认配置；基础字段来自 `02_config/settings.yaml`。使用 `./run.sh config` 核对实际生效参数，避免环境变量影响判断。
+
+`services up` 启动 `llama`、`asr`、`speech`、`app` 四个服务。看到 `READY` 后，在板端打开 `http://127.0.0.1:8090/`。远程电脑可建立端口转发：
+
+```bash
+# 在电脑上运行，将 <板端IP> 换为实际地址。
+ssh -L 8090:127.0.0.1:8090 nvidia@<板端IP>
+```
+
+随后在电脑浏览器打开同一地址。`/debug` 显示相机预览、实际采集/处理 FPS、帧龄、各模型耗时和板端资源；无需给板子连接显示器。面板是实时采样，正式性能比较使用冻结输入基准。
+
+先确认相机有新鲜画面，再提交一句文字问题，检查回复与生成的语音文件。当前音频默认使用文件输入/输出；没有连接麦克风或扬声器仍可运行软件链路。ReSpeaker Lite 实物录播、AEC 和双讲尚需后续验收。
+
+```bash
+./run.sh ask "你好" --json-output
 ./run.sh services logs --components app --lines 80
 ./run.sh services down
 ```
 
-`run.sh` 使用项目自带的 Python 环境，默认选择 `02_config/settings.orin-nx.yaml`；已有 `EDGE_ASSISTANT_CONFIG` 或显式 `--config` 可覆盖。原生分析工具可用 `./run.sh llama-bench --help` 和 `./run.sh llama-cli --help`，启动器会设置项目内共享库搜索路径。
+`ask` 直接检查模型接口。完整对话、工具、取消和语音发布通过 Web 应用验证。结束一轮后再停止服务；`B2-EXIT-01` 退出超时仍是开放问题，不能把强制回收记作正常退出。
 
-运行依赖存放在 `05_runtime/` 并排除出普通 Git 提交。本机已准备 B2 所需模型与环境；**单独克隆 Git 仓库不会取得这些工件**。已有 B1 R2 运行包不含三个新增 B2 模型，不能直接作为 B2 完整恢复包。历史恢复说明见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)，新增模型来源与验证见 [B2 说明](docs/b2-model-replacements.md)。
+## 当前能力与边界
 
-## 构建、验证、基准和运行包工具
+- 视觉：检测分割、二维全身/双手姿态、人脸检测/特征、表情、头姿/视线、行人/物体外观特征和轨迹关联。
+- 深度：D435i 原生输出及 SDK 对齐；十个视觉网络均使用 TensorRT，精度和模型文件保持既定方案。
+- 交互：挥手问候、静止张掌取消整轮；停止生成与输出，阻止未执行工具，保留已提交的笔记或提醒。
+- 对话：Qwen3.5-4B、文件语音 ASR/TTS、短会话上下文、笔记/提醒与幂等回执。
 
-工具入口分为四类，入口只分发任务，实现在 `01_src/deploy/`、`01_src/validation/` 和 `01_src/benchmarks/`。运行 `--help` 查看任务，`<任务> --help` 查看参数：
+身份匹配是可选视觉能力，语音指令没有身份授权关卡。机器人运动、导航、长期记忆和神经双目深度继续后置。软件回放通过不等于真人手势精度、真实声音或长期稳定性已验收。
 
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/build.py --help
-./05_runtime/environments/edge-assistant/bin/python scripts/validate.py --help
-./05_runtime/environments/edge-assistant/bin/python scripts/benchmark.py --help
-./05_runtime/environments/edge-assistant/bin/python scripts/runtime.py --help
-```
-
-例如 `scripts/build.py artifacts --check-only` 校验当前十个 ONNX 和辅助源代码；`scripts/validate.py pipeline` 验证同帧管线；`scripts/benchmark.py vision` 测量单模型，`stream` 测量整链路。基准先通过 `freeze`、`freeze-models` 固定当前源码和输入，旧协议仍对应其原始源码版本。
-
-构建和导出结果写入输出目录中的候选清单，通过一致性与集成验证后再选择为运行配置。运行包命令会校验当前协议和输入，并排除业务数据库、缓存及普通验证输出。**当前新包的独立恢复验收尚未完成**；整合进度以执行清单为准。
-
-
-## 在 VS Code 中阅读和跳转代码
-
-通过 Remote SSH 打开整个 `Multi_Model_Inference/` 文件夹，并在远端安装推荐的 **Python** 和 **Pylance** 扩展。仓库的 `.vscode/settings.json` 已声明 `01_src/` 源码搜索路径，以及项目内 Python 解释器；运行时的 `sys.path.insert(...)` 不会自动成为编辑器的搜索路径。
-
-如果 VS Code 已经选过解释器，请执行 `Ctrl+Shift+P` → `Python: Select Interpreter` → `Enter interpreter path`，选择项目下的 `05_runtime/environments/edge-assistant/bin/python`。根目录的 `.venv` 是保留的旧环境链接，不用于当前开发。默认解释器设置不会覆盖已经保存的选择。
-
-执行 `Developer: Reload Window` 后，打开 `main.py`，在 `from app.cli import main` 的 `main` 上按 **F12** 或 **Ctrl+鼠标左键**，应跳到 `01_src/app/cli.py`。macOS 使用 **Cmd+鼠标左键**。如果 F12 可以跳转但鼠标不行，检查 `Editor: Multi Cursor Modifier`：设为 `alt` 时，Ctrl/Cmd+点击用于跳转，Alt+点击用于多光标。
-
-运行工件与参考仓库不参与默认批量分析，避免在板端扫描大量外部文件；被源码导入的依赖仍可参与分析。
-
-## 从停止状态亲自启动
-
-以下命令在板端以 `nvidia` 用户执行。模型、推理程序和 Python 环境均已准备在本项目 `05_runtime/`。系统层仍需要兼容的 Jetson Linux、CUDA、TensorRT 和 Python 3.12。
-
-```bash
-cd /home/nvidia/Multi_Model_Inference
-source ./05_runtime/environments/edge-assistant/bin/activate
-# Python 与 run.sh 共用同一默认配置；显式覆盖时可设置：
-export EDGE_ASSISTANT_CONFIG="$PWD/02_config/settings.orin-nx.yaml"
-
-# 结束当前对话后，停止本项目四个服务，确认 STOPPED。
-python main.py services down
-python main.py services status
-
-# 查看有效配置；check 校验工件，并列出各服务实际启动命令。
-python main.py config
-python main.py services check
-
-# 第一次按顺序启动，理解每个服务；每条成功返回后再执行下一条。
-python main.py services up --components llama
-python main.py services up --components asr
-python main.py services up --components speech
-python main.py services up --components app
-python main.py services status
-```
-
-最后应为 `READY`，四个服务均就绪，摄像头持续出图。以后用 `python main.py services up` 一次启动全部服务。失败时查看对应组件日志，例如 `python main.py services logs --components app --lines 80`。
-
-`up` 会复用已运行的依赖。退出终端不会停止 systemd 服务；完整停止使用 `services down`，仅停止应用使用 `services down --components app`。详细生命周期、冻结配置与回退方式见 [部署说明](01_src/deploy/systemd/README.md)。
-
-## 四个服务与数据流
-
-| 服务 | 职责 | 板端端口 |
-|---|---|---:|
-| `llama` | llama.cpp，Qwen3.5-4B 图文理解 | 8088 |
-| `asr` | 独立 llama.cpp，Qwen3-ASR-0.6B 语音识别 | 8089 |
-| `speech` | OpenVoiceStream，ASR 接口及 Matcha/Vocos TensorRT TTS | 8621 |
-| `app` | 网页、相机、视觉小模型、手势、对话轮次、工具与诊断 | 8090 |
-
-人体、人脸、手部模型由 `app` 内的感知 worker 调用。systemd 管进程，`TurnController` 管当前请求，模型后端执行推理。
-
-```mermaid
-flowchart LR
-  Camera[D435i / Camera] --> Perception[Perception：人体 / 脸 / 手]
-  Perception --> Gesture[GestureRecognizer]
-  Gesture --> Turn[TurnController]
-  Camera --> Frame[最新帧与来源时间戳]
-  Frame --> Turn
-  Web[网页：文字 / WAV] --> Turn
-  Turn --> VAD[文件 VAD]
-  VAD --> OVS[OpenVoiceStream]
-  OVS --> ASR[ASR llama.cpp]
-  ASR --> Turn
-  Turn --> LLM[4B llama.cpp]
-  LLM --> Turn
-  Turn --> Actions[SQLite 笔记 / APScheduler 提醒]
-  Turn --> Output[SpeechOutput]
-  Output --> OVS
-  OVS --> TTS[Matcha / Vocos]
-  TTS --> Output
-  Output --> WAV[回复 WAV]
-```
-
-视觉始终保留帧来源；挥手触发问候，静止举掌取消整轮。取消阻止新输出和未开始的工具，等待后端释放后才接纳下一轮；已提交的笔记/提醒保留。
-
-## 代码仓地图
+## 代码怎么读
 
 ```text
-main.py                    统一 CLI
-run.sh                     使用项目内环境的启动器
-run_web_vision_chat.py      应用组装与生命周期入口
-01_src/                    核心源码
-  app/                     感知、对话、语音、工具、网页后端与诊断
-  deploy/                  服务管理、推理启动、工件锁与语音接入
-  benchmarks/              性能采集、汇总和绘图代码
-  project_paths.py         公共位置和历史路径解析
-02_config/                 运行配置
-03_models/                 模型清单与哈希；实际权重在 05_runtime/models
-04_web/                    网页与调试界面
-05_runtime/                必需框架、模型、环境和运行数据（不进 Git）
-benchmarks/                固定语料、测量协议和结果
-scripts/                   工件准备与功能验证脚本
-tests/                     自动化测试
-docs/                      文档与历史索引
-patches/                   上游补丁
-licenses/                  第三方许可证
-references/                原有学习参考子模块
+01_src/
+  app/          应用、采集、视觉、轮次控制、语音、动作和诊断
+  deploy/       服务归属、原生后端、工件、构建和运行包
+  validation/   功能、原生参考、回放、故障与恢复检查
+  benchmarks/   冻结输入、单模型、共存与只读观察
+  tooling.py    工具任务分发
+02_config/      基础字段与唯一当前平台配置
+03_models/      当前模型、引擎和辅助组件清单
+04_web/         Web 交互与调试界面
+05_runtime/     本机运行工件、状态、验证和基准数据；不进入普通 Git
+scripts/        build.py、validate.py、benchmark.py、runtime.py 四个薄入口
+tests/          软件回归与固定契约样本
+benchmarks/     输入协议、测量结果、必要失败证据和整合清单
+docs/           当前架构、交接与优化学习材料
+licenses/       第三方许可证
+references/     用户保留的参考材料与仓库
 ```
 
-当前框架源码、权重、原生程序、环境、数据库与日志位于 `05_runtime/`，见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)。旧 `AI_Stack` 和 `.venv*` 链接仅保留用于回退，不参与当前服务启动。
+阅读顺序：`main.py` → `app/cli.py` → `app/application.py` → `camera.py` → `vision_pipeline.py` → `vision_models.py`。视觉优化先读 `segmentation.py` 与 `tensorrt_runner.py`；对话控制读 `turn_control.py`、`turn_execution.py` 和 `speech/output.py`。详细所有权和数据流见架构文档。
 
-## 按运行顺序阅读
+VS Code Remote SSH 打开项目根目录，远端安装 Python/Pylance，并选择 `05_runtime/environments/edge-assistant/bin/python`。`.vscode/settings.json` 已声明 `01_src/` 搜索路径；若之前手动选过解释器，需要重新选择，再用 F12 或 Ctrl+点击跳转。
 
-| 顺序 | 文件 | 先回答的问题 |
-|---|---|---|
-| 1 | [main.py](main.py) → [01_src/app/cli.py](01_src/app/cli.py) → [01_src/deploy/services.py](01_src/deploy/services.py) → [01_src/deploy/runtime.py](01_src/deploy/runtime.py) | 一个启动命令如何变成四个受管理服务？ |
-| 2 | [run_web_vision_chat.py](run_web_vision_chat.py) | 谁创建相机、模型接口、感知线程和轮次控制器？谁负责退出？ |
-| 3 | [01_src/app/camera.py](01_src/app/camera.py) → [01_src/app/perception_b1.py](01_src/app/perception_b1.py) → [01_src/app/gestures.py](01_src/app/gestures.py) | 同帧 RGBD 如何触发检测、姿态和属性模型？为什么目标频率为 5 FPS？ |
-| 4 | [01_src/app/turn_control.py](01_src/app/turn_control.py) | 请求如何接纳、选帧、调用模型/工具、提交输出和取消？ |
-| 5 | [01_src/app/llm.py](01_src/app/llm.py)、[01_src/app/stt.py](01_src/app/stt.py)、[01_src/app/tts.py](01_src/app/tts.py)、[01_src/app/request_io.py](01_src/app/request_io.py) | 后端契约、超时和取消由谁保证？ |
-| 6 | [01_src/app/pipeline.py](01_src/app/pipeline.py)、[01_src/app/audio.py](01_src/app/audio.py) | VAD、文本分块、PCM 队列和文件提交如何协作？ |
-| 7 | [01_src/app/web.py](01_src/app/web.py)、[01_src/app/web_limits.py](01_src/app/web_limits.py)、[01_src/app/diagnostics.py](01_src/app/diagnostics.py)、[04_web/](04_web) | 网页输入、慢客户端和板端观测如何接入？ |
-
-配置由 [01_src/app/config.py](01_src/app/config.py) 加载基础 `02_config/settings.yaml` 和所选 overlay。`run.sh` 默认选择 B2；直接执行 Python 且没有配置环境变量/参数时仍沿用历史 B0 overlay，因此请按上面的命令显式设置。启动后四个服务共用一份冻结配置，位置见部署说明。
-
-## 网页调试与基线
-
-在你的电脑上执行端口转发：
+## 工具与验证
 
 ```bash
-ssh -N -L 18090:127.0.0.1:8090 nvidia@板子IP
-```
-
-然后打开 `http://127.0.0.1:18090/debug`，或在主网页点击“板端调试”。面板约每 2 秒显示板端实际采集/识别 FPS、最新帧的模型耗时/帧龄、资源和当前轮次时间线，支持导出最近 60 个样本；浏览器接收 FPS 单独标注。
-
-第一轮操作是启动后完成一次文字问答、一次当前画面问答和一次取消。当前音频验收以文件输入/输出为范围。随后再按 [视觉基线复现命令](docs/visual-baseline.md)复现视觉基线，使用新的实验输出目录。
-
-冻结标签为 `b0-sw-20261016`。正式前后对比需要固定版本、输入、配置和观测条件，实时面板读数与固定 B0 分开解释。[视觉](benchmarks/results/b0-vision-summary.json)、[模型接口](benchmarks/results/b0-models-summary.json)、[完整应用](benchmarks/results/b0-e1-summary.json)和 [原始包索引](benchmarks/results/b0-archive.json)均保留。
-
-## 验证与历史恢复
-
-```bash
+source ./05_runtime/environments/edge-assistant/bin/activate
+python scripts/build.py --help
+python scripts/validate.py --help
+python scripts/benchmark.py --help
+python scripts/runtime.py --help
+python scripts/build.py artifacts --check-only
 python -m pytest -q
 ```
 
-`tests/` 为软件回归；真实模型/设备验证位于 `scripts/probe_*`，其中故障、回退和基准脚本会切换服务，运行前阅读对应脚本说明及部署文档。
+入口只选择任务，公共代码不导入 `scripts/`。构建/导出写候选清单，验证后再选择为运行配置。原生参考需要额外开发环境，见模型说明；恢复运行包不自动安装训练/导出环境。部分验证和基准会停止并恢复本项目服务，运行前查看任务帮助和适用范围。
 
-当前替换状态见 [B2 记录](benchmarks/results/b2-replacement-progress-20261020.json)，原能力范围和未完成项见 [B1 验收清单](benchmarks/manifests/vision-b1-v1.json)；[原 B0 任务清单](benchmarks/manifests/headless-roadmap-v3.json)和 [迁移缺口](benchmarks/manifests/gap-ledger-v3.json)保留为历史记录。性能优化由用户执行和判断，助手提供指导与审查。
+已完成的阶段证据包括十模型固定输出对照、完整管线回放、文字/文件语音与取消/动作链路，以及工具整合回归。最新计数和证据摘要位于执行清单，最终交付还需同输入性能对照和独立恢复。
 
-旧 ROS/长期记忆部署、旧评测及无调用兼容入口已从当前工作树移出。完整恢复点为 `before-repository-cleanup-20261019`；[逐文件归档索引](docs/archive/repository-cleanup-20261019.json)包含原路径、哈希和本地归档位置。历史文档中的旧路径按对应历史版本解释。参考资料、当前验证证据、模型数据、许可证及固定旧运行快照保持保留。
+## 如何接手优化
 
-仅五类核心目录保留编号并排在前面；脚本、测试、基准、文档、补丁和许可证目录使用普通名称。Python 包仍使用 `app`、`deploy`、`benchmarks`；主入口和直接运行的脚本会加入 `01_src` 搜索路径。交互式导入可使用 `PYTHONPATH=01_src python`。测试路径已在 `pytest.ini` 配置，无需额外设置。
+先自己完成一次停止、启动、观察、提交请求和关闭，确认理解数据流及资源所有者。随后按 [人体检测优化实操](docs/body-detection-optimization.md) 和 [推理优化学习指南](docs/inference-optimization-guide.md) 建立任务质量与性能基准，用 Nsight Systems/NVTX、trtexec 和应用指标定位瓶颈，再一次只改一个因素并比较。
 
-冻结清单和历史报告保持原字节，其中旧路径由 `01_src/project_paths.py` 解析。迁移前恢复点为 `before-numbered-layout-20261019`；旧命令中的脚本路径应使用当前编号路径，例如 `python 01_src/benchmarks/vision_modules.py --help`。
-
-应用基底、固定上游版本及本地适配的来源见 [第三方说明](THIRD-PARTY-NOTICES.md) 和 [导入清单](01_src/deploy/upstream-import.json)。项目名称为“多模型端侧助手”，运行服务统一使用 `edge-assistant-*`。
+历史源码和计划从 Git 标签 `before-mainline-consolidation-20261020`、`before-historical-file-retirement-20261021` 恢复；主线不再提供旧版日常启动选项。整合前 B2 的固定输入、引擎、基准和关键失败证据继续保留；用户原始 ONNX、`references/` 和第三方许可证不随旧版本清理删除。

@@ -66,7 +66,7 @@ def arguments(protocol, case):
         ROOT / protocol["inputs"][case["input"]]["path"], allow_pickle=False
     )
     if image.shape != (480, 640, 3) or image.dtype != np.uint8:
-        raise ValueError("Frozen B1 image is not uint8 BGR 640x480")
+        raise ValueError("Frozen visual image is not uint8 BGR 640x480")
     image.flags.writeable = False
     return (image, *case.get("arguments", []))
 

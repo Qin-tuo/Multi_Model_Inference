@@ -21,7 +21,7 @@ def main():
     parser.add_argument('--config',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--seed-note-result',type=Path);parser.add_argument('--port',type=int,default=8093)
     args=parser.parse_args();args.output.parent.mkdir(parents=True,exist_ok=True)
-    report={'created_at':datetime.now(timezone.utc).isoformat(),'scope':'Actual local LLM tools, SQLAlchemy/SQLite and APScheduler with file speech; not physical audio or B0'}
+    report={'created_at':datetime.now(timezone.utc).isoformat(),'scope':'Actual local LLM tools, SQLAlchemy/SQLite and APScheduler with file speech; file speech; physical audio is outside this probe'}
     process=None;log=args.output.with_suffix('.log').open('w');client=httpx.Client(base_url=f'http://127.0.0.1:{args.port}',timeout=5,trust_env=False)
     def state():return client.get('/api/state').raise_for_status().json()
     def wait(predicate,seconds=90):

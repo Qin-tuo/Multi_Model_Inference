@@ -1,5 +1,8 @@
 # 人体检测完整优化实操
 
+> 整合说明（2026-10-21）：当前入口为 `scripts/benchmark.py`，管线为 `01_src/app/vision_pipeline.py`，当前模型清单为 `03_models/vision-models.json`。下文带日期的旧测量和 B0/B1 案例保留作学习证据；旧协议必须使用对应源码副本，不能套用于已整合源码。当前启动和基准入口见 [README](../README.md) 与 [视觉基线](visual-baseline.md)。
+
+
 以 YOLOv8n-seg 为切入口，完整实践部署效率优化与模型压缩。以正式应用的质量、时效和资源指标选择问题，以受控实验验证原因，最后回到正式应用验收收益。
 
 2026-10-20 调整实操顺序：先确定本轮真实场景和可验收要求，用当前服务基线核对可行性，再决定第一项优化。已有单模块 benchmark 和 Nsight 时间线继续作为内部成本参考；它们不直接决定整机优化优先级，也不能换算成实际应用延迟。本文后面的单模块命令保留作诊断复现入口。
@@ -15,8 +18,8 @@
 | 原始浮点权重 | `05_runtime/models/b1/detection_segmentation/yolov8n-seg.pt` |
 | 部署 ONNX | `05_runtime/models/b1/detection_segmentation/yolov8n-seg-deploy.onnx` |
 | 原始 FP32 引擎 | `05_runtime/models/b1/runtime/detection_segmentation.fp32.engine` |
-| 来源与导出契约 | [vision-b1.json](../03_models/candidates/vision-b1.json) 中的 `detection_segmentation` |
-| 引擎与版本锁 | [vision-b1-runtime.json](../03_models/vision-b1-runtime.json) |
+| 来源与导出契约 | [vision-b1.json](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/03_models/candidates/vision-b1.json) 中的 `detection_segmentation` |
+| 引擎与版本锁 | [vision-b1-runtime.json](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/03_models/vision-b1-runtime.json) |
 | 预后处理入口 | [segmentation.py](../01_src/app/segmentation.py) |
 | TensorRT 执行入口 | [tensorrt_runner.py](../01_src/app/tensorrt_runner.py) |
 
@@ -43,7 +46,7 @@
 
 要求由业务是否够用、目标硬件的能力证据和实现成本共同决定。历史性能可以帮助提出第一版门槛，但不能只为了让当前版本通过而降低业务要求。可参考 [Google SRE：Implementing SLOs](https://sre.google/workbook/implementing-slos/) 中从用户任务选择指标、区分指标定义与测量实现、逐步验证目标的方法。
 
-已确认的项目边界继续沿用 [实施计划](implementation-plan.md)：Orin NX 16GB 本地计算，D435i 视觉及文字/图像/受控文件语音链路；物理录播/AEC、运动机身和长期记忆后置。当前十个视觉模型及实际门控保留，不能通过少跑功能来隐瞒退化。姿态上限 1 人、人脸属性 2 个目标、物体特征 1 个目标是当前任务预算，不等同于只检测 1 人。
+已确认的项目边界继续沿用 [实施计划](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/docs/implementation-plan.md)：Orin NX 16GB 本地计算，D435i 视觉及文字/图像/受控文件语音链路；物理录播/AEC、运动机身和长期记忆后置。当前十个视觉模型及实际门控保留，不能通过少跑功能来隐瞒退化。姿态上限 1 人、人脸属性 2 个目标、物体特征 1 个目标是当前任务预算，不等同于只检测 1 人。
 
 以下使用 [2026-10-20 B2 历史汇总](../benchmarks/results/b2-vision-stream-v1.json) 作可行性参考：每组约 60 秒，未包含浏览器/WebSocket；原始逐帧目录已清理，短窗口不能证明当前版本或长期达标。室内具体距离、照明和遮挡覆盖，以及正常请求频率，仍需登记。此前建议的 4～4.8 FPS、500～650 ms 已被用户的新目标替代，不再作为当前视觉验收门槛。
 

@@ -1,5 +1,22 @@
 # Third-Party Software Notices
 
+## Current runtime provenance
+
+Current visual models, helper source pins and licenses are recorded in
+`03_models/vision-models.json` and `03_models/runtime-components.json`.
+The 4B/ASR/TTS model identities are in `03_models/manifest.json`; native speech
+source and host adaptation records are in `01_src/deploy/speech/source-lock.json`.
+Runtime dependencies are pinned in `requirements.lock` and
+`01_src/deploy/vision/requirements-runtime.lock`. Copied notices in `licenses/`
+and model/framework directories remain part of the project and runtime package.
+
+The earlier upstream notices below are retained for attribution and provenance.
+They include packages and historical layouts that are no longer the current
+application. References to retired files resolve in Git at
+`before-historical-file-retirement-20261021` (or
+`before-mainline-consolidation-20261020` for retired application adapters).
+
+
 This project uses the following third-party open source software.
 
 ## Direct Dependencies

@@ -160,9 +160,14 @@
       "status": "in_progress",
       "evidence": [
         "benchmarks/manifests/consolidation-inventory.json",
-        "tests/test_module_boundaries.py"
+        "tests/test_module_boundaries.py",
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/historical-retirement-tests.xml",
+          "sha256": "afb15c9e74f2d2b2db7828ac8d9f57e64a60b7aa16512a2156e5de30c2b251c7"
+        }
       ],
-      "remaining": "Current runtime retired old adapters and profiles; construction/validation tools, historical catalogs/reports and runtime artifact disposition still require consolidation."
+      "remaining": "Remove superseded runtime archive and proven unused artifacts only after independent current package restore; final source integration remains C8.",
+      "source_retirement_complete": true
     },
     {
       "id": "C7",
@@ -230,6 +235,6 @@
     "passed": 302,
     "legacy_test_disposition": "Removed exclusive B0 detector/hand and deferred neural stereo cases with their implementations. Current ten-model frame ownership, epoch invalidation, artifacts, cancellation and lifecycle checks retained."
   },
-  "progress_estimate_percent": 58,
+  "progress_estimate_percent": 60,
   "progress_basis": "Milestone estimate for consolidation only, not performance or product accuracy."
 }

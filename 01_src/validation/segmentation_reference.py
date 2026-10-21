@@ -158,7 +158,7 @@ def compare(build_root, output):
         "adapter_sha256": runtime.sha256(ROOT / "01_src/app/segmentation.py"),
         "reference": references,
         "cases": [],
-        "scope": "Four fixed-input conversion/semantic checks; not COCO accuracy or B1 performance",
+        "scope": "Four fixed-input conversion/semantic checks; not COCO accuracy or pipeline performance",
     }
 
     def save():

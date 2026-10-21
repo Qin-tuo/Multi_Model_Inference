@@ -50,7 +50,7 @@ def input_images(output, parent_path=None):
             "bus-dimmed",
             "blank",
         }:
-            raise ValueError("Expected the five established B1 input names")
+            raise ValueError("Expected the five established visual input names")
         for name, recorded in parent["inputs"].items():
             source = (ROOT / recorded["path"]).resolve()
             if (
@@ -235,7 +235,7 @@ def prepare(output, cfg, inputs_from=None, config_path=None):
             "live_scope": "D435i native RGBD reported separately; configured FPS is not measured throughput",
             "benchmark_source": "Exact harness source hashes/copies and environment recorded for every measurement; runtime locks stay unchanged",
         },
-        "preservation": "B0/B1 inputs and measurements remain immutable; model/config revisions are not same-model optimization improvements",
+        "preservation": "Previous inputs and measurements remain immutable; model/config revisions are not same-model optimization improvements",
     }
     if inputs_from is not None:
         protocol["input_parent"] = {

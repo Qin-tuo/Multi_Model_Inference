@@ -27,11 +27,11 @@
   "asr": {
     "model_id": "qwen3-asr",
     "backend": "llama_qwen3_asr",
-    "artifact_reference": "models/manifest.json#/models/asr"
+    "artifact_reference": "03_models/manifest.json#/models/asr"
   },
   "tts": {
     "model_id": "matcha-icefall-zh-en",
     "backend": "matcha_trt",
-    "artifact_reference": "models/manifest.json#/models/tts"
+    "artifact_reference": "03_models/manifest.json#/models/tts"
   }
 }

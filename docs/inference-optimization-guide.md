@@ -1,10 +1,13 @@
 # 多模型推理优化学习指南
 
+> 整合说明（2026-10-21）：当前入口为 `scripts/benchmark.py`，管线为 `01_src/app/vision_pipeline.py`，当前模型清单为 `03_models/vision-models.json`。下文带日期的旧测量和 B0/B1 案例保留作学习证据；旧协议必须使用对应源码副本，不能套用于已整合源码。当前启动和基准入口见 [README](../README.md) 与 [视觉基线](visual-baseline.md)。
+
+
 多模型推理优化的目标，是让完整应用在指定硬件、功耗、内存和负载下，持续、正确、及时地完成任务。工作同时涉及模型效果、模型压缩、推理部署、数据处理、任务调度和工程稳定性。
 
 本指南按初学者在当前 Jetson 项目中的实际工作组织：从真实应用的任务与负载出发，建立质量与系统性能基线，按证据定位问题，用受控实验验证改动，再回到同一真实环境验收。由用户亲自执行实验，助手负责解释、审查和按明确要求协助。
 
-整理日期：2026-10-20。当前默认是 [B2 模型集合](b2-model-replacements.md)，复用 B1 管线。文中的 B0/B1 数据仅作对应版本的历史案例；当前下一步以 [人体检测实操](body-detection-optimization.md#当前进度与下一步)为准。
+整理日期：2026-10-20。当前默认是 [B2 模型集合](models.md)，复用 B1 管线。文中的 B0/B1 数据仅作对应版本的历史案例；当前下一步以 [人体检测实操](body-detection-optimization.md#当前进度与下一步)为准。
 
 当前用户指定的视觉目标为 **10 Hz、帧龄 150 ms**；帧龄统计口径、观察位置与聊天共存范围尚待明确。旧文中的 5 FPS 是现有运行配置，历史 500 ms 示例不作为当前要求。目标的可实现性需要按真实负载验证。
 
@@ -250,10 +253,10 @@ flowchart TD
 
 | 范围 | 代码与数据入口 | 阅读重点 |
 |---|---|---|
-| B0 人体检测 YOLOv8n | [body_detector.py](../01_src/app/body_detector.py)、[perception.py](../01_src/app/perception.py)、[模型清单](../03_models/perception.json) | 单模型预处理、同步调用、后处理，以及在感知周期中的使用 |
-| B0 单模块测量 | [vision_modules.py](../01_src/benchmarks/vision_modules.py)、[冻结结果](../benchmarks/results/b0-vision-summary.json) | 普通与计时调用的配对、分阶段耗时与输出一致性 |
-| B1 检测分割与扩展视觉 | [segmentation.py](../01_src/app/segmentation.py)、[vision_models.py](../01_src/app/vision_models.py)、[perception_b1.py](../01_src/app/perception_b1.py) | 检测、测距、按条件调用后续模型、目标预算与发布 |
-| B1 单模块与连续管线测量 | [vision_b1_modules.py](../01_src/benchmarks/vision_b1_modules.py)、[vision_b1_stream.py](../01_src/benchmarks/vision_b1_stream.py) | 单模块成本、真实调用次数和共存影响 |
+| B0 人体检测 YOLOv8n | [body_detector.py](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-mainline-consolidation-20261020/01_src/app/body_detector.py)、[perception.py](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-mainline-consolidation-20261020/01_src/app/perception.py)、[模型清单](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/03_models/perception.json) | 单模型预处理、同步调用、后处理，以及在感知周期中的使用 |
+| B0 单模块测量 | [vision_modules.py](../01_src/benchmarks/vision_modules.py)、[冻结结果](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/benchmarks/results/b0-vision-summary.json) | 普通与计时调用的配对、分阶段耗时与输出一致性 |
+| B1 检测分割与扩展视觉 | [segmentation.py](../01_src/app/segmentation.py)、[vision_models.py](../01_src/app/vision_models.py)、[perception_b1.py](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-mainline-consolidation-20261020/01_src/app/perception_b1.py) | 检测、测距、按条件调用后续模型、目标预算与发布 |
+| B1 单模块与连续管线测量 | [vision_b1_modules.py](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-mainline-consolidation-20261020/01_src/benchmarks/vision_b1_modules.py)、[vision_b1_stream.py](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-mainline-consolidation-20261020/01_src/benchmarks/vision_b1_stream.py) | 单模块成本、真实调用次数和共存影响 |
 
 最初加中文注释的是 B0 的 `body_detector.py`。B1 使用检测分割和不同的后续任务，比较两套方案时应分别说明任务和质量范围；不能把不同工作量的耗时差直接解释成一次实现优化收益。
 
@@ -284,7 +287,7 @@ B0 在 2026-10-16 的固定 `public-camera-shape.png` 上记录了：
 | 插桩同步原生调用 | 11.14 ms |
 | 插桩后处理 | 41.97 ms |
 
-数据来自 [B0 视觉汇总](../benchmarks/results/b0-vision-summary.json)。普通调用与插桩调用分别测量，各阶段分位数不能直接相加；这些固定图片也不提供代表性检测精度结论。
+数据来自 [B0 视觉汇总](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/benchmarks/results/b0-vision-summary.json)。普通调用与插桩调用分别测量，各阶段分位数不能直接相加；这些固定图片也不提供代表性检测精度结论。
 
 这组数据支持优先调查 CPU 后处理。下一步可以用 cProfile 检查逐候选框筛选、重复调用与 NMS 等部分的成本，再决定具体修改。量化引擎的收益也应结合后处理占比评估。
 
@@ -296,7 +299,7 @@ B0 在 2026-10-16 的固定 `public-camera-shape.png` 上记录了：
 
 第一轮交付是一张场景对照表：检测 P50/P95、整帧 P50/P95、结果帧龄、有效更新率、失败/跳过数、下游任务次数、对话响应和资源。后续同路径回放必须保留输入时序和真实门控条件；旧的固定图片加模拟深度实验用于对应范围的诊断。
 
-`vision_b1_stream.py` 是复用正式 Camera 和 B1Perception 的集成测量入口，但不覆盖浏览器/WebSocket，也不等同于直接观察原 systemd 应用。使用时明确协议/工作负载版本及其边界；当前 B2 复现命令见 [B2 基线说明](b2-model-replacements.md)。不要因脚本名称带 B1 就默认选择旧模型，也不要用旧协议直接描述当前服务。
+`vision_b1_stream.py` 是复用正式 Camera 和 B1Perception 的集成测量入口，但不覆盖浏览器/WebSocket，也不等同于直接观察原 systemd 应用。使用时明确协议/工作负载版本及其边界；当前 B2 复现命令见 [B2 基线说明](models.md)。不要因脚本名称带 B1 就默认选择旧模型，也不要用旧协议直接描述当前服务。
 
 ### 冻结源码校验报错
 
@@ -363,7 +366,7 @@ B1 R2 的 2026-10-20 固定回放记录如下，两组使用相同的视觉输�
 | 仅视觉 | 4.97 | 409.37 ms |
 | 视觉与文件语音 ASR 4B TTS 共存 | 3.93 | 658.66 ms |
 
-假设业务要求 P95 帧龄不超过 **500 ms**，则第一组满足这一项，第二组不满足。这是解释验收方法的示例门槛，项目的正式门槛需要在优化前确定。固定回放不能代替真人手势召回率和长期稳定性验收。[B1 R2 测量说明](visual-baseline.md)、[原始汇总](../benchmarks/results/b1-vision-stream-r2-summary.json)
+假设业务要求 P95 帧龄不超过 **500 ms**，则第一组满足这一项，第二组不满足。这是解释验收方法的示例门槛，项目的正式门槛需要在优化前确定。固定回放不能代替真人手势召回率和长期稳定性验收。[B1 R2 测量说明](visual-baseline.md)、[原始汇总](https://github.com/Qin-tuo/Multi_Model_Inference/blob/before-historical-file-retirement-20261021/benchmarks/results/b1-vision-stream-r2-summary.json)
 
 当前语音范围以文件或受控 PCM 为主，首 PCM 和文件输出时间按软件链路解释。实体麦克风、扬声器的实际录播时延与可听回应，按项目既定范围后续单独验收。
 

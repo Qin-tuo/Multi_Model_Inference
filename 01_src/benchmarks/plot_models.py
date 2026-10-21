@@ -66,12 +66,12 @@ def main():
         ax.grid(axis="y", alpha=0.2)
         ax.spines[["top", "right"]].set_visible(False)
         ax.set_ylim(top=ax.get_ylim()[1] * 1.2)
-    fig.suptitle("B0-SW · Model interface measurements", fontsize=17, fontweight="bold")
+    fig.suptitle("Model interface measurements", fontsize=17, fontweight="bold")
     fig.text(
         0.5,
         0.035,
         "20 fixed cases per role; cache and model settings unchanged. File audio, no physical playback.\n"
-        "First input calls may share cached prefixes. These are component timings; complete-application B0 is pending.",
+        "First input calls may share cached prefixes. These are component timings; complete-application measurements are separate.",
         ha="center",
         fontsize=9,
     )

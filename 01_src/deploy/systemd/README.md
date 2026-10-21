@@ -1,94 +1,25 @@
-# 多模型端侧助手服务部署
+# 四服务部署与状态口径
 
-当前部署使用 systemd 用户服务。应用负责会话、相机、感知和语音数据流；llama.cpp 与 OpenVoiceStream 负责推理；systemd 负责启动顺序、重启和进程组清理。
-
-| 组件 | 实际入口与职责 | 默认端口 |
-|---|---|---|
-| `llama` | 原生 llama-server，Qwen3.5-4B 图文理解 | 8088 |
-| `asr` | 原生 llama-server，Qwen3-ASR-0.6B | 8089 |
-| `speech` | OpenVoiceStream，ASR 适配与 Matcha/Vocos TTS | 8621 |
-| `app` | 本项目 Web、单一相机采集、人体/脸/手、VAD、整轮控制、笔记/提醒 | 8090 |
-
-当前软件配置采用语音文件输入/输出，不要求接入麦克风或扬声器。相机使用已连接的 D435i。物理录播、AEC、双讲与实际停播继续待验。
-
-当前新增 B1 配置使用原生 RGBD 和 10 个进程内 TensorRT 视觉模型；四个服务的职责与端口不变。R2 为手势时序修复版本，七组基线、配套运行包与独立恢复已完成。`run.sh` 默认选择 B1，实际四服务和网页已验证；实时挥手仍有漏触发，未完成该功能验收。当前状态与覆盖范围见 [B1 验收清单](../../../benchmarks/manifests/vision-b1-v1.json) 和 [启动/阅读入口](../../../docs/b1-handoff.md)。
-
-## 操作
-
-在 `/home/nvidia/Multi_Model_Inference` 主目录执行；使用独立环境，不使用旧 `.venv`：
+`app` 管理相机、视觉、会话、语音数据流及 Web；`llama` 提供 4B 接口，`asr` 承载 Qwen3-ASR，`speech` 提供 OpenVoiceStream 语音 API。默认端口分别为 8090、8088、8089、8621。
 
 ```bash
 ./run.sh services check
 ./run.sh services up
 ./run.sh services status
-./run.sh services logs --components app --lines 50
+./run.sh services logs --components app --lines 80
 ./run.sh services down
 ```
 
-`up --components app` 按依赖启动全部四个组件；`down --components app` 只停止应用，三个模型服务保持驻留。停止 ASR 会先停止其语音服务与应用消费者。当前不设置开机自启。
+四种入口统一读取 `02_config/settings.orin-nx.yaml`，显式配置与环境覆盖优先。`up` 读取源码配置并保存完整生效配置到 `05_runtime/runtime-data/edge-assistant/systemd/settings.json`；`status/down/logs/wait` 默认使用已安装配置。更新配置前先停止服务。
 
-`up` 加载 `02_config/settings.yaml` 和平台 overlay，或显式 `--config PATH`，把完整有效配置冻结为 `项目/05_runtime/runtime-data/edge-assistant/systemd/settings.json`。所有服务使用同一份冻结配置。运行时更换配置或源码入口会被拒绝，应先 `down` 再 `up`。`status/down/logs/wait` 默认读取已安装的冻结配置；`up` 默认重新读取源码配置。
+`up --components app` 会启动它的后端依赖；`down --components app` 只关闭应用。停止提供者时管理器先停止依赖它的消费者。每个单元都检查源码目录、冻结配置和进程归属；不会接管外部服务或占用端口的陌生进程。
 
-`run.sh` 使用 B1 默认配置，保留已有 `EDGE_ASSISTANT_CONFIG` 和显式参数的优先级。直接调用 Python 时仍需显式指定 B1；若要排除环境覆盖，可按以下命令启动。先结束当前请求和测量，再停止四个服务：
+## 所有权与恢复
 
-```bash
-./run.sh services down
-./run.sh services check --config 02_config/settings.orin-nx-b1.yaml
-./run.sh services up --config 02_config/settings.orin-nx-b1.yaml
-./run.sh services status
-```
+服务名为 `edge-assistant-{llama,asr,speech,app}.service`。生成单元位于项目运行数据目录，并链接到用户 systemd。操作使用文件锁串行化；模型服务持共享构建租约，重型构建/验证持独占租约。
 
-回到 B0 视觉配置时同样先停止，再用 `--config 02_config/settings.orin-nx-headless.yaml` 启动。配置切换保留当前源码；复现旧基线还需使用对应源码版本和原始工件。B1 R1 的手势修复前恢复点为 `before-gesture-wave-fix-20261020`，B1 接入前的 B0 恢复点为 `before-vision-b1-20261019`。
+`READY` 同时检查原生监听进程、模型/语音能力、有效配置和新鲜相机状态。`STOPPED` 要求受管理进程组为空，正常停止与超时后被 systemd 回收分别记录。`B2-EXIT-01` 的原应用退出超时仍开放；工具保存停止/恢复快照，不用一次成功退出证明偶发问题已修复。
 
-新单元为 `edge-assistant-{llama,asr,speech,app}.service`，生成文件位于上述 systemd 目录，以链接注册到 `~/.config/systemd/user`。旧 `mmassistant-*` 不由此命令接管；启动前必须明确停止旧项目持有的端口和相机。占用冲突会报告并退出，不终止外部进程。
+日志在 `05_runtime/runtime-data/edge-assistant/logs/`。应用状态、动作数据库、图库和语音文件有明确所有者；运行包不携带这些可变业务数据。更换项目目录前先停止原实例，按管理器的归属检查重新注册。
 
-## 运行约束与状态口径
-
-- 安装时先用本机 `systemd-analyze verify` 检查单元，拒绝覆盖同名外部单元或已被人工修改的托管单元。部署写操作使用文件锁串行执行。
-- 就绪同时检查单元归属、实际监听进程、模型别名、上下文/槽位、语音能力及应用有效配置。应用还须有新鲜相机帧和已启用感知/语音模块；PID 存在不等于就绪。
-- 依赖等待使用 `ExecStartPre`；失败重启等待 5 秒，120 秒内最多启动 3 次。停止向整个 cgroup 发 SIGINT，30 秒未退出由 systemd 强制收尾，随后核验无残留进程。
-- 启动保留旧部署的 2 GiB 可用内存下限。这只是启动准入条件，不能代替峰值资源测量或共存容量验收。未修改推理线程、并发、量化、上下文或缓存参数。
-- 模型入口持有共享构建租约，避免与持独占租约的重型 ORT 构建重叠。运行时不自动下载模型。
-- 模型清单、感知/VAD 锁及 `01_src/deploy/runtime-artifacts.lock.json` 校验现有权重、原生程序/库、TTS 工件和感知源码。OVS 源码要求固定提交且无未记录改动。全量校验会读取数 GiB 文件，请等待命令完成。
-- 日志位于 `项目/05_runtime/runtime-data/edge-assistant/logs`，每组件按 5 MiB 轮转并保留 4 份备份。实验 trace 和测试输出有各自目录。
-
-`READY` 仅表示当前软件配置就绪；真实手势质量、物理声音、正式性能和长稳分别需要证据。离线环境变量与本地工件校验本身不能证明断网可用。B0 的 [隔离网络启动验证](../../../benchmarks/results/r4-offline-summary.json) 和 B1 R2 的 [独立运行包恢复](../project-runtime-b1.lock.json) 均有真实进程与请求证据；后者隐藏了原项目和 AI_Stack。整机重启、自启动及干净机器重部署仍分别待验。
-
-## 历史七服务切换与回退
-
-2026-10-16：默认服务已切换到主目录的 本项目 四服务；旧七服务停止。演练完成后又从主目录完成正式启动和交互验证，最新状态见 [切换报告](../../../benchmarks/results/r4-cutover.json)。
-
-旧源码固定在 `/home/nvidia/AI_Stack/archives/legacy-runtime-972de50`，独立环境、模型和用户数据保留。演练脚本先核对旧七服务归属和就绪，切换到新四服务，测试文字/画面/文件语音及完整应用循环，最后恢复旧七服务并检查新鲜 RGB 与对齐深度：
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_deployment.py \
-  --legacy-root /home/nvidia/AI_Stack/archives/legacy-runtime-972de50 \
-  --output 05_runtime/validation/deployment-new-run --cycles 20
-```
-
-输出目录必须是新目录。脚本只接受旧系统运行、新四服务停止的初始状态；当前默认运行新系统，需要先按回退步骤准备旧系统后再演练。该脚本会临时中断本项目服务；结束时保留旧系统运行。演练记录不能替代后续正式切换状态。
-
-正式回退顺序：当前入口执行 `main.py services down`，再到旧快照执行 `python3 tools/project.py up --components all`。旧管理器会将旧单元入口指向快照，避免回退依赖被更新的主目录。恢复后必须检查旧服务状态和 `scripts/probe_legacy_camera.py` 的新鲜 RGB/深度，不能只看进程。
-
-[旧部署文档](../../../docs/archive/README-systemd-legacy.md)只解释历史方案。当前准备工件的可运行性与干净环境重建是两个验收范围；完整重部署仍在 R6。
-
-
-## 当前软件压力与离线复现
-
-两项命令都需要当前四服务就绪、没有正在处理的用户请求。它们使用新的独立数据库/音频目录；结束后恢复原冻结配置与默认服务。输出路径必须是尚不存在的目录。
-
-```bash
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_coexistence.py \
-  --output 05_runtime/validation/pressure-new-run \
-  --input 05_runtime/datasets/b0-sw-v1/zh-20.wav
-
-./05_runtime/environments/edge-assistant/bin/python scripts/probe_offline.py \
-  --output 05_runtime/validation/offline-new-run \
-  --input 05_runtime/datasets/b0-sw-v1/zh-20.wav
-```
-
-压力探针暂时替换应用，保留三个原生模型服务。离线探针暂时停止四服务，用 `sudo unshare --net` 创建只有回环接口的临时网络空间，再降回原普通用户执行推理；不改主机网络接口和路由。当前机器需要可用的 `sudo -n`、`unshare`、`ip`。离线探针验证的是准备工件上的原生入口，不声称在该空间内验证了用户级 systemd 或从零安装。
-
-压力检查保存全部请求、拒绝、取消、周期状态与资源曲线。辅助 watchdog 子进程可以正常出现/消失；原生模型身份通过监听者、创建时间、主进程和重启计数核对。短时间 PSS/FD 变化保留在报告，不能据此宣称长期无泄漏。
-
-当前模型、Python 环境、运行数据和单元文件均使用项目 `05_runtime`。全套命令也可通过根目录 `./run.sh services ...` 调用；系统的 `~/.config/systemd/user/` 中只保留指向项目内单元文件的注册链接。运行包与恢复方法见 [依赖说明](../dependencies-layout.md)。
+当前保持文件语音配置，不设置开机自启。物理声音、真人准确率、长稳和性能目标分别验收。运行包独立恢复与源码交付状态见 [执行清单](../../../benchmarks/manifests/consolidation-progress.json)。

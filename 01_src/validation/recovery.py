@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Verify B1 distance gates, stale frames, SDK restarts and repeated release.
+"""Verify visual distance gates, stale frames, SDK restarts and repeated release.
 
 Public-image tests use explicit synthetic depth. Live tests reopen the SDK
 stream; they do not claim physical USB disconnect or real-person accuracy.
@@ -306,7 +306,7 @@ def main():
         with exclusive_build(previous, output):
             replay_gates(cfg, output)
             live_recovery(cfg, output)
-        report["status"] = "B1_RECOVERY_PROBE_PASS_LIMITED_SCOPE"
+        report["status"] = "VISION_RECOVERY_PROBE_PASS_LIMITED_SCOPE"
     except BaseException as exc:
         report.update(status="FAILED", error=repr(exc))
         raise

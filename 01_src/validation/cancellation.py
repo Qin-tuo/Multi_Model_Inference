@@ -68,7 +68,7 @@ def main():
     stt=STT(**asdict(cfg.stt))
     tts=LocalTTS(**{key:value for key,value in asdict(cfg.tts).items() if key not in {'first_chunk_chars','max_chunk_chars'}})
     report={'created_at':datetime.now(timezone.utc).isoformat(),
-            'scope':'Actual local HTTP/native drain and recovery; no physical audio, gesture or performance B0',
+            'scope':'Actual local HTTP/native drain and recovery; no physical audio, gesture or performance qualification',
             'results':{},'input_sha256':hashlib.sha256(args.input.read_bytes()).hexdigest()}
     try:
         for adapter in (llm,stt,tts):

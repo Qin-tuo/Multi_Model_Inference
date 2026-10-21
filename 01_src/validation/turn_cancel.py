@@ -13,7 +13,7 @@ from websockets.asyncio.client import connect
 
 async def probe(args):
     report={'created_at':datetime.now(timezone.utc).isoformat(),
-            'scope':'Real local Web and models; file I/O, no camera/physical audio/gestures or B0', 'cases':[]}
+            'scope':'Real local Web and models; file I/O, no camera/physical audio/gestures', 'cases':[]}
     async with httpx.AsyncClient(timeout=3,trust_env=False) as client:
         async def state():return (await client.get(args.base_url+'/api/state')).raise_for_status().json()
         async def wait(predicate,seconds=30):

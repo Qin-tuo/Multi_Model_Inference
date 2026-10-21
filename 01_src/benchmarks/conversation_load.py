@@ -64,7 +64,7 @@ class ConversationLoad:
         if mode not in {"audio", "vision"} or self.thread is not None:
             raise ValueError("Invalid pressure mode or duplicate start")
         self.thread = threading.Thread(
-            target=self._loop, args=(mode,), name="b1-pressure", daemon=True
+            target=self._loop, args=(mode,), name="conversation-pressure", daemon=True
         )
         self.thread.start()
 

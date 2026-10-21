@@ -1,8 +1,0 @@
-{
-  "messages": "\n        \n      查询最近的笔记。查询笔记已执行：查询完成最近的笔记有两条：\n1. 标题：取消边界测试，内容预览：已提交内容应该保留\n2. 标题：部署检查，内容预览：先测基线再优化TTFT 7.1s · 总计 7.3s · 42 tok 下载语音文件",
-  "actions": "已保存 2 条笔记；最近提醒：检查部署记录（已取消）、站起来活动（已取消）、喝水（已输出）、喝水（已输出）",
-  "error": "",
-  "audio_links": 1,
-  "status": "PASSED",
-  "scope": "Actual Firefox local tool receipt, database status and audio download link; no physical playback"
-}

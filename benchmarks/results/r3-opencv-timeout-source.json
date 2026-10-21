@@ -1,8 +1,0 @@
-{
-  "version": "4.11.0",
-  "url": "https://github.com/opencv/opencv/blob/4.11.0/modules/videoio/src/cap_v4l.cpp#L926-L983",
-  "local_reference": "/home/nvidia/AI_Stack/research/opencv-4.11.0-cap_v4l.cpp",
-  "sha256": "1285ed71d70c95bdef150ddfaa87b8f68e33a3c8d242c2d7bd7f2965d320e811",
-  "parameter": "OPENCV_VIDEOIO_V4L_SELECT_TIMEOUT",
-  "scope": "Select wait only; not a guarantee for all driver ioctls"
-}

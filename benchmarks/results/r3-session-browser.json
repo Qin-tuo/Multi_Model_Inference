@@ -1,9 +1,0 @@
-{
-  "clear_http_reply_still_pending": true,
-  "messages": 2,
-  "text": "请只回复：新会话开始。新会话开始。TTFT 0.3s · 总计 0.7s · 5 tok",
-  "session_label": "本次会话保留 1 轮文字，关闭应用后清空",
-  "error": "",
-  "status": "PASSED",
-  "scope": "Actual Firefox session clear and delayed HTTP response; local model text output"
-}

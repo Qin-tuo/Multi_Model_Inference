@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Summarize recorded B1 stream windows without running models or services."""
+"""Summarize recorded vision stream windows without running models or services."""
 
 import argparse
 import csv

@@ -120,7 +120,8 @@ def test_debug_routes_share_index_and_only_serve_allowed_assets():
     with TestClient(create_app(Broadcaster(), state=lambda: {"diagnostics": {"ready": True, "source": "board"}})) as client:
         assert client.get("/debug").content == client.get("/").content
         assert client.get("/api/debug").json() == {"ready": True, "source": "board"}
-        assert "body" in client.get("/api/debug/baseline").json()["modules"]
+        from app.vision_models import ROLES
+        assert set(client.get("/api/debug/baseline").json()["modules"]) == set(ROLES)
         assert client.get("/static/debug.js").status_code == 200
         assert client.get("/static/debug.css").status_code == 200
         assert client.get("/static/unknown.txt").status_code == 404

@@ -30,6 +30,7 @@ DIRECTORIES = (
     "frameworks/tensorrt-samples-16ed0636",
     "datasets/b0-sw-v1",
     "baselines/b2-vision-v1",
+    "baselines/b2-original-measurements",
     "baselines/current-vision",
 )
 

@@ -158,6 +158,9 @@ def environment(out, *, source_root=None):
         for p in (source_root / folder).glob("**/*.py")
     ]
     sources += list((source_root / "02_config").glob("*.yaml"))
+    sources += list((source_root / "scripts").glob("*.py"))
+    if (source_root / "01_src/tooling.py").is_file():
+        sources.append(source_root / "01_src/tooling.py")
     sources += [
         source_root / "01_src/project_paths.py",
         source_root / "run_web_vision_chat.py",
