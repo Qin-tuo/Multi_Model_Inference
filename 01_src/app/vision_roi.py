@@ -1,10 +1,14 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Explicit source-pixel crops shared by the small visual model adapters."""
+"""为视觉小模型提供统一的原图像素坐标裁剪与输入边界校验。"""
 
 import numpy as np
 
 
 def crop_roi(image, box):
+    """从 uint8 BGR 原图按 xyxy 框裁剪，返回图像视图和实际整数边界。
+
+    先将坐标截断为整数并限制到图像范围；空区域、非有限坐标或超预算区域会报错。
+    """
     if (
         image.ndim != 3
         or image.shape[2] != 3

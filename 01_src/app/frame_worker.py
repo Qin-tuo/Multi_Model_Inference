@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Latest-frame ownership, freshness, bounded cadence and worker teardown.
+"""最新帧工作线程的公共生命周期：去重、限频、失效检查和发布状态。
 
-Model loading and frame processing belong to the concrete perception pipeline.
+具体模型加载与单帧算法由子类实现，公共层只管理线程及结果归属。
 """
 
 import threading
@@ -9,9 +9,10 @@ import time
 
 
 class FrameWorker:
-    """One writer publishes results from its own source frame; subclasses infer."""
+    """由一个工作线程写入结果，所有发布结果均关联其实际处理的源帧。"""
 
     def __init__(self, camera, config, tracker=None, on_result=None):
+        """绑定相机、配置和结果回调，初始化线程、状态锁及处理/跳帧/失败计数。"""
         self.camera, self.config, self.tracker = camera, config, tracker
         self._stop = threading.Event()
         self._lock = threading.Lock()
@@ -24,6 +25,7 @@ class FrameWorker:
 
     @staticmethod
     def _empty(error=None):
+        """构造未就绪的空感知状态，用于缺帧、过期、失败或关闭时替换旧结果。"""
         return {
             "ready": False,
             "error": error,
@@ -37,6 +39,10 @@ class FrameWorker:
     def _loop(self):
         # 一轮包括处理和等待，目标周期为 1/fps。处理变快会增加等待时间；
         # 这也是单模块耗时降低后，配置为 5 FPS 的输出不自动升高的原因。
+        """反复读取最新帧，按来源批次和帧号去重后处理并发布，再等待剩余周期。
+
+        跳过的采集帧单独计数；推理异常清空本帧状态，回调异常单独记录，不积累无限待处理队列。
+        """
         previous = None
         while not self._stop.is_set():
             start = time.monotonic()
@@ -71,6 +77,7 @@ class FrameWorker:
             self._stop.wait(max(0, 1 / self.config.fps - (time.monotonic() - start)))
 
     def snapshot(self):
+        """返回状态副本及累计计数，读取时再次屏蔽过期或相机重连前的结果。"""
         with self._lock:
             result = dict(self._state)
         frame = result["frame"]
@@ -88,6 +95,7 @@ class FrameWorker:
         }
 
     def preview(self):
+        """成对返回预览帧和对应结果；来源批次变化或帧龄超限时返回空预览。"""
         with self._lock:
             frame = self._preview
             result = dict(self._state)
@@ -100,6 +108,7 @@ class FrameWorker:
         return frame, result
 
     def close(self):
+        """通知线程退出并等待结束，确认退出后清空状态；超时则报错并保留资源所有权。"""
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=5)
@@ -111,6 +120,7 @@ class FrameWorker:
             self._preview = None
 
     def _fresh(self, frame):
+        """检查帧的来源批次、显式失效事件和主机接收时间，判断能否继续使用。"""
         return (
             not self._stop.is_set()
             and frame.source_epoch == self.camera.source_epoch
@@ -119,6 +129,7 @@ class FrameWorker:
         )
 
     def start(self):
+        """启动唯一感知工作线程；已有存活线程时直接返回，避免重复消费者。"""
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()

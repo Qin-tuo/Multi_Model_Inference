@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""One owner for the selected in-process visual models and bounded call metrics."""
+"""统一持有当前视觉引擎，检查模型契约并采集有界的逐模型调用统计。"""
 
 from collections import deque
 from importlib.metadata import version
@@ -34,6 +34,7 @@ ROLES = (
 
 
 def contract_hash(entry):
+    """对影响输入输出解释的清单字段生成稳定摘要，防止权重与适配器契约错配。"""
     keys = (
         "sha256",
         "preprocessing",
@@ -61,6 +62,8 @@ def contract_hash(entry):
 
 
 class VisionModels:
+    """视觉引擎集合的资源所有者，维护清单契约和有界调用统计。"""
+
     def __init__(
         self,
         manifest=None,
@@ -68,6 +71,7 @@ class VisionModels:
         iou=0.45,
         max_detections=10,
     ):
+        """读取引擎与源模型清单，初始化模型容器、统计锁和检测参数，不立即加载 GPU 资源。"""
         if manifest is None:
             from app.config import Config
 
@@ -87,7 +91,10 @@ class VisionModels:
         }
 
     def load(self, roles=None):
-        """Load the selected models and retain a single resource owner."""
+        """校验运行依赖版本、模型摘要和语义契约后逐个加载所选适配器。
+
+        加载前检查可用内存；部分加载失败时统一关闭成功创建的模型，禁止重复加载覆盖所有权。
+        """
         if self.models:
             raise RuntimeError("Visual models are already loaded")
         roles = tuple(ROLES if roles is None else roles)
@@ -159,6 +166,7 @@ class VisionModels:
             raise
 
     def run(self, role, *args, **kwargs):
+        """调用指定模型并记录成功耗时或异常信息，保留最近 120 次成功耗时样本。"""
         tick = time.monotonic()
         try:
             result = self.models[role].infer(*args, **kwargs)
@@ -176,6 +184,7 @@ class VisionModels:
         return result
 
     def snapshot(self):
+        """在统计锁内生成各模型调用数、最近耗时和 P50/P95 快照。"""
         with self.lock:
             return {
                 role: {
@@ -192,6 +201,7 @@ class VisionModels:
             }
 
     def close(self):
+        """按加载的逆序尝试关闭全部模型，仅移除已释放实例，汇总仍未释放的异常。"""
         errors = []
         for role, model in reversed(list(self.models.items())):
             try:

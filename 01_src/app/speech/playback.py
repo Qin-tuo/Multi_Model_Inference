@@ -13,10 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Owned cancellable physical audio playback.
-
-Extracted from the upstream-derived audio pipeline; behavior is preserved.
-"""
+"""可取消的物理音频播放，始终只管理当前轮次拥有的播放器进程。"""
 
 import time
 import subprocess
@@ -26,14 +23,16 @@ import numpy as np
 
 
 class Playback:
-    """Own only this turn's player; cancellation and process launch share a lock."""
+    """以同一把锁协调播放器创建与中断，避免取消操作误伤其他轮次或系统播放器。"""
 
     def __init__(self, event):
+        """绑定取消事件，初始化进程引用和所有权锁。"""
         self.event = event
         self._lock = threading.Lock()
         self._process = None
 
     def start(self, cmd):
+        """在锁内检查取消状态后启动播放器，返回持有 stdin 管道的子进程。"""
         from app.request_io import TurnCancelled
 
         with self._lock:
@@ -45,6 +44,7 @@ class Playback:
             return self._process
 
     def cancel(self):
+        """请求终止当前拥有的播放进程；取消事件由上层设置，不操作其他播放器。"""
         with self._lock:
             process = self._process
             if process is not None and process.poll() is None:
@@ -54,6 +54,7 @@ class Playback:
                     pass
 
     def clear(self, process):
+        """仅当传入进程仍是本实例所有者时清除引用，避免旧清理覆盖新进程。"""
         with self._lock:
             if self._process is process:
                 self._process = None
@@ -66,7 +67,10 @@ def play_audio(
     playback=None,
     on_start=None,
 ):
-    """Return a device-process receipt; physical audibility is a separate check."""
+    """将 16 kHz 单声道 PCM16 送往明确指定的 ALSA/PulseAudio 输出，并等待受时限约束的进程回执。
+
+    持续响应取消，只回收自己启动的进程；进程完成不等于已经验证扬声器实际可听。
+    """
     if not sink:
         raise ValueError("Explicit speaker device is required")
     if audio.ndim != 1 or audio.dtype != np.int16 or sample_rate != 16000:

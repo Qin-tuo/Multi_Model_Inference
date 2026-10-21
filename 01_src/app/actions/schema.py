@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Finite model-facing schemas; no arbitrary code, shell, file or network tool."""
+"""面向模型的有限本地工具契约：只开放笔记与提醒操作，并严格校验参数。"""
 
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -7,25 +7,30 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
 
 
+# 工具参数基类：严格类型校验，禁止模型附加未声明字段。
 class Arguments(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
 
+# 创建笔记的参数：限制标题和正文长度。
 class CreateNote(Arguments):
     title: str = Field(min_length=1, max_length=80)
     body: str = Field(min_length=1, max_length=500)
 
 
+# 无参数查询工具的输入结构，额外字段同样被拒绝。
 class Empty(Arguments):
     pass
 
 
+# 提醒文本与两种时间形式；二选一规则由 validate 统一检查。
 class CreateReminder(Arguments):
     text: str = Field(min_length=1, max_length=160)
     delay_seconds: StrictInt | None = Field(default=None, ge=1, le=31536000)
     due_at: str | None = Field(default=None, max_length=40)
 
 
+# 取消提醒只接受完整的十六进制记录 ID。
 class CancelReminder(Arguments):
     reminder_id: str = Field(pattern=r"^[0-9a-f]{32}$")
 
@@ -49,6 +54,7 @@ DEFINITIONS = {
 
 
 def tools():
+    """将固定工具定义转换为 OpenAI 兼容的函数清单，参数结构由 Pydantic 模型生成。"""
     return [
         {
             "type": "function",
@@ -63,6 +69,7 @@ def tools():
 
 
 def validate(name, arguments):
+    """检查工具名称、严格参数类型和非空文本，提醒时间必须在相对/绝对形式中二选一。"""
     if name not in DEFINITIONS:
         raise ValueError("Unknown local tool")
     values = (
@@ -79,7 +86,9 @@ def validate(name, arguments):
 
 
 def parse(name, raw):
+    """解析模型返回的 JSON 参数，拒绝重复键后执行对应工具的语义校验。"""
     def unique(pairs):
+        """构造 JSON 对象时检查重复参数名，避免后一个值悄悄覆盖前一个值。"""
         result = {}
         for key, value in pairs:
             if key in result:
@@ -91,6 +100,7 @@ def parse(name, raw):
 
 
 def instruction(zone):
+    """按配置时区生成当前时间及工具使用约束，供模型区分用户授权、持久操作和成功回执。"""
     now = (
         datetime.now(timezone.utc)
         .astimezone(ZoneInfo(zone))
@@ -108,6 +118,7 @@ def instruction(zone):
 
 
 def receipts_text(receipts):
+    """将已提交的工具回执转成简短中文说明，用于请求重放而不再次执行工具。"""
     lines = []
     for item in receipts:
         value = item["result"]

@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""TensorRT face features/expression with the upstream alignment contracts.
+"""人脸特征与表情适配：进行几何对齐、TensorRT 推理和输出校验。
 
-SFace alignment is a direct vectorized translation of OpenCV 4.11.0
-face_recognize.cpp (31b0eeea0b44b370fd0712312df4214d4ae1b158, Apache-2.0).
-Expression alignment reuses the pinned OpenCV Zoo FaceAlignment class.
-CPU operations here are geometric/image transforms, never neural inference.
+ArcFace 对齐遵循 OpenCV 4.11.0 的 face_recognize.cpp（31b0eeea0b44b370fd0712312df4214d4ae1b158）；表情复用固定 OpenCV Zoo 对齐实现。
 """
 
 import cv2
@@ -36,6 +33,7 @@ FACE_TEMPLATE = np.array(
 
 
 def checked_landmarks(landmarks):
+    """将人脸五点转为 float32，检查形状、有限值及双眼间距，拒绝退化输入。"""
     points = np.asarray(landmarks, np.float32)
     if (
         points.shape != (5, 2)
@@ -47,6 +45,10 @@ def checked_landmarks(landmarks):
 
 
 def sface_transform(landmarks):
+    """从原图五点计算对齐到标准 112×112 人脸模板的相似变换矩阵。
+
+    保留 OpenCV 参考实现的浮点累积顺序，通过 SVD 求旋转与尺度，退化协方差会报错。
+    """
     points = checked_landmarks(landmarks)
     source_mean = points.sum(axis=0, dtype=np.float32) / np.float32(5)
     target_mean = np.array([56.0262, 71.9008], np.float32)
@@ -68,6 +70,7 @@ def sface_transform(landmarks):
 
 
 def aligned_bgr(image, matrix):
+    """校验 BGR 原图后按仿射矩阵生成 112×112 对齐人脸。"""
     if (
         image.ndim != 3
         or image.shape[2] != 3
@@ -79,6 +82,7 @@ def aligned_bgr(image, matrix):
 
 
 def face_tensor(crop, *, expression=False):
+    """将对齐人脸转为连续 RGB NCHW 张量；expression=True 时归一化到 [-1, 1]，ArcFace 也复用此路径。"""
     if crop.shape != (112, 112, 3) or crop.dtype != np.uint8:
         raise ValueError("Expected an aligned uint8 112x112 BGR face")
     rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB).astype(np.float32)
@@ -88,6 +92,7 @@ def face_tensor(crop, *, expression=False):
 
 
 def normalize_embedding(value, dimensions=512):
+    """校验指定维数的人脸特征并进行 L2 归一化，返回有限的只读向量。"""
     vector = np.asarray(value, np.float32).reshape(-1)
     norm = float(np.linalg.norm(vector))
     if (
@@ -103,6 +108,7 @@ def normalize_embedding(value, dimensions=512):
 
 
 def expression_scores(logits):
+    """将合法的七类 logits 稳定地转成 softmax 分值，并返回类别相关结果。"""
     values = np.asarray(logits, np.float32).reshape(-1)
     if values.shape != (7,) or not np.isfinite(values).all():
         raise ValueError("Invalid expression logits")
@@ -111,6 +117,7 @@ def expression_scores(logits):
 
 
 def expression_alignment(entry):
+    """加载清单锁定的 OpenCV Zoo 辅助模块，取得表情模型的人脸对齐器。"""
     source = entry["prepost_source"]["files"]["facial_fer_model.py"]
     module = load_source(
         str(ROOT / source["path"]), source["sha256"], "assistant_expression_source"
@@ -119,15 +126,17 @@ def expression_alignment(entry):
 
 
 class ArcFaceIdentity:
-    """Original MobileNetV1 ArcFace checkpoint, with explicit RGB normalization."""
+    """使用原版 MobileNet V1 ArcFace 特征引擎，显式完成五点对齐及 RGB 归一化。"""
 
     def __init__(self, build):
+        """创建 ArcFace 人脸特征引擎并保存其执行后端标识。"""
         self.model = TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"images": [1, 3, 112, 112]}
         )
         self.provider = self.model.provider
 
     def infer(self, image, landmarks):
+        """五点对齐后执行 ArcFace 推理，返回归一化 512 维特征及对齐矩阵。"""
         matrix = sface_transform(landmarks)
         crop = aligned_bgr(image, matrix)
         # Both upstream FER and ArcFace use (RGB/255 - .5)/.5. Alignment
@@ -143,11 +152,15 @@ class ArcFaceIdentity:
         }
 
     def close(self):
+        """释放人脸特征引擎资源。"""
         self.model.close()
 
 
 class FaceExpression:
+    """使用固定人脸对齐契约执行七类表情推理。"""
+
     def __init__(self, build, entry):
+        """加载表情对齐器与 TensorRT 引擎，保留两者各自的输入约定。"""
         self.aligner = expression_alignment(entry)
         self.model = TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"data": [1, 3, 112, 112]}
@@ -155,6 +168,7 @@ class FaceExpression:
         self.provider = self.model.provider
 
     def infer(self, image, landmarks):
+        """按五点对齐人脸并执行表情分类，返回七类分值与对应几何信息。"""
         points = checked_landmarks(landmarks)
         matrix, _ = self.aligner.get_similarity_transform_for_cv2(
             points, self.aligner._std_points
@@ -171,4 +185,5 @@ class FaceExpression:
         }
 
     def close(self):
+        """释放表情引擎资源。"""
         self.model.close()

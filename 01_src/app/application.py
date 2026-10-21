@@ -15,7 +15,10 @@
 # limitations under the License.
 
 
-"""Compose application resources and own their startup/shutdown lifecycle."""
+"""Web 应用资源组装和生命周期入口。
+
+在输入与后端可用后启动消费者，统一关闭采集、广播、轮次、感知和模型接口。
+"""
 
 import argparse
 import asyncio
@@ -127,6 +130,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
     if gestures:
 
         def consume_scene(scene):
+            """把同帧感知结果交给手势识别器，再由轮次控制器统一接纳问候或执行取消。"""
             for event in gestures.update(scene):
                 control.handle_gesture(event)
 
@@ -134,6 +138,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
     threads = []
 
     def action_state():
+        """读取动作存储状态；服务关闭或读取失败时返回可见错误，而不阻断整个状态接口。"""
         if control.actions is None:
             return {"enabled": False}
         try:
@@ -142,6 +147,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
             return {"enabled": True, "error": str(exc)}
 
     def state():
+        """汇总对话、相机、视觉、语音、动作和板端诊断，生成 Web/服务健康检查使用的状态。"""
         camera_state = cam.status() if cam else {"ready": False, "state": "disabled"}
         echo_ready = bool(mic and mic.aec and mic.aec.active)
         return {
@@ -199,9 +205,11 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         }
 
     def listen():
+        """消费实时 VAD 语段并交给轮次控制器，丢弃旧输入批次；退出时关闭所拥有的麦克风。"""
         quiet_until = 0.0
 
         def gate():
+            """根据打断配置、AEC 可用性和对话忙闲决定半双工门控，并保留一段静音恢复时间。"""
             nonlocal quiet_until
             duplex = config.audio.voice_interruptions and (
                 config.audio.output_mode != "device" or bool(mic.aec and mic.aec.active)
@@ -243,6 +251,10 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
 
     @asynccontextmanager
     async def lifespan(app):
+        """异步管理应用资源的加载、线程启动和有序释放。
+
+        先检查模型/设备，再启动感知和消费者；退出时先停输入与广播，再等待轮次和原生资源释放，未确认释放会汇总报错。
+        """
         nonlocal mic, live_vad
         try:
             # 先确认后端与输入可用，再启动消费者；加载失败也进入 finally 回收。
@@ -305,6 +317,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
                     # once during startup, never concurrently in Web readers.
                     await asyncio.to_thread(broadcaster.get_speaker_state)
                     broadcaster._input_setter = (
+                        # 监听开关只切换已有采集者，不创建第二条录音链路。
                         lambda active: mic.resume() if active else mic.pause()
                     )
                     broadcaster.set_ptt(True)
@@ -387,8 +400,10 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
         cancel=control.cancel,
         clear_history=control.clear_history,
         vision={
+            # 图库在生命周期中加载，回调执行时再取得当前实例。
             "identities": lambda: perception.gallery.list(),
             "enroll": perception.enroll,
+            # 删除操作限定在本应用图库内，复用其事务和锁。
             "remove": lambda label: perception.gallery.remove(label),
             "target": perception.select_target,
         }
@@ -399,6 +414,7 @@ def build_app(config, *, no_camera=False, no_audio=False, no_actions=False):
 
 
 def main(default_no_camera=False):
+    """解析运行参数、加载并验证配置，组装应用后启动带连接与消息预算的 Uvicorn 服务。"""
     parser = argparse.ArgumentParser(description="Orin NX headless Web Vision Chat")
     parser.add_argument("--config")
     parser.add_argument("--host")

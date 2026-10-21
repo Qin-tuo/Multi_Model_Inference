@@ -13,10 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Timestamped audio frames and speech boundaries.
-
-Extracted from the upstream-derived audio pipeline; behavior is preserved.
-"""
+"""采集帧、语音起点与完整语句的数据结构，统一携带时间和输入失效信息。"""
 
 import threading
 from dataclasses import dataclass
@@ -25,7 +22,7 @@ import numpy as np
 
 @dataclass
 class SpeechSegment:
-    """A completed speech utterance from the VAD."""
+    """VAD 完成的一段语音，包含音频、原始块、时长、输入批次与结束原因。"""
 
     audio: np.ndarray
     raw_chunks: list
@@ -41,6 +38,8 @@ class SpeechSegment:
 
 @dataclass(frozen=True)
 class SpeechOnset:
+    """已确认的语音起点；记录起始/确认时刻及话语身份，用于申请轮次和打断。"""
+
     utterance_id: str
     started_monotonic: float
     confirmed_monotonic: float
@@ -50,6 +49,8 @@ class SpeechOnset:
 
 @dataclass(frozen=True)
 class AudioChunk:
+    """一块带顺序号与输入批次的 PCM 数据；失效事件可使下游丢弃已排队的旧输入。"""
+
     data: bytes
     input_epoch: int
     received_monotonic: float

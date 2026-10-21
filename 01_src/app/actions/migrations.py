@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""One-time naming migration for this application's existing action database."""
+"""在已有动作数据库上迁移固定旧表名，保留业务记录并拒绝混入无关数据表。"""
 
 from sqlalchemy import inspect
 
@@ -13,7 +13,10 @@ LEGACY_TABLES = {
 
 
 def migrate_legacy_schema(db):
-    """Run under ActionStore's owner lock; preserve rows and reject mixed stores."""
+    """在 ActionStore 的数据库所有权锁内，把已知旧表和索引改为当前名称。
+
+    使用显式 SQLite 事务保证重命名整体提交；旧新表混用或包含无关表时拒绝迁移。
+    """
     with db.connect() as connection:
         # SQLite DDL needs an explicit transaction for all renames to roll back
         # together. Fixed identifiers below never include caller-supplied text.

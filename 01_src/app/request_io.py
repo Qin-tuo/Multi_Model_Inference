@@ -1,11 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Cancellation and a total deadline for one owned local HTTP operation.
+"""本机 HTTP 请求的单次所有权、取消与总时限。
 
-The trace exposes the connected socket before response headers arrive. Shutting
-that socket down interrupts a blocked read without closing unrelated requests.
-HTTPX retains ownership of closing the connection itself. A bounded per-operation
-timer interrupts slow trickles as well as silent reads; it is joined before the
-adapter accepts another operation. Backend release is observed separately.
+通过连接 trace 获取套接字，取消时中断阻塞读取；HTTPX 仍拥有连接关闭职责，后端是否空闲由另一路观测确认。
 """
 
 from contextlib import contextmanager
@@ -18,11 +14,16 @@ import httpx
 
 
 class TurnCancelled(RuntimeError):
+    """标识主动轮次取消，与网络失败和超时区分。"""
+
     pass
 
 
 class Operation:
+    """拥有一次 HTTP 操作的取消事件、连接引用和总时限计时器。"""
+
     def __init__(self, event, timeout=None):
+        """校验总超时并记录单调时钟截止点，初始化连接与结束状态。"""
         if timeout is not None and (not math.isfinite(timeout) or timeout <= 0):
             raise ValueError("Operation timeout must be finite and positive")
         self.event = event
@@ -33,6 +34,7 @@ class Operation:
         self._finished = False
 
     def start(self):
+        """有截止时间时启动守护计时器，到期中断该操作的套接字读取。"""
         if self.deadline is not None:
             timer = threading.Timer(
                 max(0, self.deadline - time.monotonic()), self.abort
@@ -43,6 +45,7 @@ class Operation:
             self._timer = timer
 
     def check(self):
+        """先检查主动取消，再检查总时限，分别抛出取消或 HTTP 超时异常。"""
         if self.event.is_set():
             raise TurnCancelled("Turn cancelled")
         if self.deadline is not None and time.monotonic() >= self.deadline:
@@ -51,6 +54,7 @@ class Operation:
             )
 
     def trace(self, name, info):
+        """在 TCP 建连完成时登记套接字；若已经取消或超时，立即中断该连接。"""
         if name.endswith("connect_tcp.complete"):
             stream = info.get("return_value")
             with self._lock:
@@ -62,9 +66,11 @@ class Operation:
 
     @property
     def extensions(self):
+        """提供 HTTPX trace 扩展参数，使请求连接归属于本次操作。"""
         return {"trace": self.trace}
 
     def abort(self):
+        """关闭本次连接的读写方向以唤醒阻塞读取，不接管 HTTPX 的最终 close。"""
         with self._lock:
             sock = self._socket if not self._finished else None
         if sock is not None:
@@ -74,6 +80,7 @@ class Operation:
                 pass  # The HTTPX owner may already have closed it.
 
     def finish(self):
+        """撤销连接引用并取消、等待计时器结束，防止旧定时器影响后续请求。"""
         with self._lock:
             self._finished = True
             self._socket = None
@@ -83,12 +90,16 @@ class Operation:
 
 
 class RequestIO:
+    """限制适配器同一时刻只有一个在途 HTTP 操作。"""
+
     def __init__(self):
+        """初始化单请求互斥锁和当前操作引用。"""
         self._lock = threading.Lock()
         self._active = None
 
     @contextmanager
     def operation(self, event=None, *, timeout=None):
+        """在上下文中登记唯一操作，执行前后检查取消/超时，退出时清理计时器并释放槽位。"""
         op = Operation(event if event is not None else threading.Event(), timeout)
         with self._lock:
             if self._active is not None:
@@ -109,6 +120,7 @@ class RequestIO:
                     self._active = None
 
     def cancel(self, event):
+        """仅中断取消事件对象与当前操作一致的连接，避免旧轮次取消影响新请求。"""
         with self._lock:
             op = self._active
             if op is None or op.event is not event:
@@ -116,12 +128,16 @@ class RequestIO:
         op.abort()
 
     def idle(self):
+        """在锁内判断适配器是否已经没有在途 HTTP 操作。"""
         with self._lock:
             return self._active is None
 
 
 def control_json(url, timeout, max_bytes=65536):
-    """Small control-plane GET: independent connection, total time and byte cap."""
+    """以独立连接读取小型控制接口 JSON，同时限制总时间和响应字节数。
+
+    既检查声明长度也检查实际累计数据，避免缓慢分块或未声明长度绕过上限。
+    """
     with (
         RequestIO().operation(timeout=timeout) as operation,
         httpx.Client(
@@ -148,6 +164,7 @@ def control_json(url, timeout, max_bytes=65536):
 
 
 def llama_slots_idle(base_url, timeout=0.5):
+    """校验 llama.cpp 原生槽位响应结构，仅在全部槽位未处理请求时返回 True。"""
     slots = control_json(base_url.rstrip("/") + "/slots", timeout)
     if (
         not isinstance(slots, list)

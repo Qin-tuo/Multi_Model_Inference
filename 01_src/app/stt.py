@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Upstream STT contract adapted to the existing local Qwen3-ASR service."""
+"""通过本机语音服务执行受时限约束的整句 ASR，严格统一 WAV/PCM 输入格式。"""
 
 from pathlib import Path
 import time
@@ -25,6 +25,8 @@ from app.audio import local_speech_url, speech_capability, pcm_wav, wav_pcm
 
 
 class STT:
+    """拥有一个语音识别 HTTP 客户端，原生 ASR 模型由独立服务管理。"""
+
     def __init__(
         self,
         model="qwen3-asr",
@@ -35,6 +37,7 @@ class STT:
         max_seconds=15,
         native_base_url="http://127.0.0.1:8089",
     ):
+        """保存识别模型、接口地址、语言和输入时长限制，初始化单请求控制器。"""
         self.model_name, self.backend, self.language = model, backend, language
         self.base_url = local_speech_url(base_url)
         self.native_base_url = local_speech_url(
@@ -47,6 +50,7 @@ class STT:
         self.requests = RequestIO()
 
     def load(self):
+        """建立本机 HTTP 客户端并核验识别能力、模型和音频契约，失败时回收客户端。"""
         self.unload()
         self._client = httpx.Client(
             timeout=self.timeout,
@@ -65,6 +69,10 @@ class STT:
             return False
 
     def transcribe(self, audio, sample_rate=16000, cancel_event=None):
+        """将 WAV 文件或一维 PCM/归一化浮点数组转为 16 kHz 单声道输入，提交整句识别。
+
+        限制输入时长与输出文本长度，传播轮次取消，并以错误字段返回格式或网络失败。
+        """
         if self._client is None:
             return {"text": "", "error": "ASR is not loaded"}
         start = time.monotonic()
@@ -128,6 +136,7 @@ class STT:
             return {"text": "", "error": str(exc)}
 
     def get_info(self):
+        """返回识别后端、模型及整句文件接口的采样格式信息。"""
         return {
             "backend": self.backend,
             "model": self.model_name,
@@ -137,6 +146,7 @@ class STT:
         }
 
     def health_check(self):
+        """以较短时限重新检查语音能力接口，不创建新的识别请求。"""
         if self._client is None:
             return False
         try:
@@ -152,9 +162,11 @@ class STT:
             return False
 
     def cancel(self, event):
+        """中断属于指定取消事件的在途识别 HTTP 操作。"""
         self.requests.cancel(event)
 
     def idle(self):
+        """确认本地请求、语音服务并发计数及原生 llama.cpp 槽位均空闲后才允许释放完成。"""
         if not self.requests.idle():
             return False
         capability = speech_capability(
@@ -166,6 +178,7 @@ class STT:
         return active == 0 and llama_slots_idle(self.native_base_url)
 
     def unload(self):
+        """关闭本地 HTTP 客户端并清空能力缓存，不终止原生 ASR 服务。"""
         if self._client:
             self._client.close()
         self._client = None

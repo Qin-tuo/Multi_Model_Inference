@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
-"""TensorRT adapters for the official OMZ head/landmark/gaze cascade.
+"""OMZ 头姿、面部关键点和视线级联适配。
 
-Eye-box sizing, roll alignment/compensation and gaze angle formulas follow
-Open Model Zoo 2c9b5c563ab3a202d085a42e2bbfc48f77961f4b (Apache-2.0).
-The gaze angles use the demo convention, not a calibrated world-space ray.
+眼部裁剪、roll 补偿和角度公式遵循 Open Model Zoo 的固定版本
+2c9b5c563ab3a202d085a42e2bbfc48f77961f4b（Apache-2.0）；视线未经世界坐标标定。
 """
 
 import cv2
@@ -14,6 +13,7 @@ from app.vision_roi import crop_roi
 
 
 def image_blob(image):
+    """把有效 uint8 BGR 区域缩放到 60×60，转换为连续 float32 NCHW 张量。"""
     if (
         image.ndim != 3
         or image.shape[2] != 3
@@ -26,11 +26,13 @@ def image_blob(image):
 
 
 def prepare_face_attribute(image, box):
+    """按原图人脸框裁剪并构造头姿或关键点输入，返回张量及实际裁剪边界。"""
     crop, roi = crop_roi(image, box)
     return {"data": image_blob(crop)}, roi
 
 
 def landmark_pixels(values, roi):
+    """将 35 个归一化面部关键点映射回原图整数像素坐标，并拒绝异常输出。"""
     if values.size != 70 or not np.isfinite(values).all():
         raise ValueError("Expected 35 finite face landmarks")
     x1, y1, x2, y2 = roi
@@ -42,6 +44,10 @@ def landmark_pixels(values, roi):
 
 
 def prepare_gaze(image, landmarks, angles):
+    """使用同一人脸的 35 点关键点和头姿构造双眼图像及视线网络输入。
+
+    按照 roll 旋转对齐眼部区域；区域过小、越界或输入非有限时拒绝推理。
+    """
     points = np.asarray(landmarks)
     angles = np.asarray(angles, np.float32)
     if (
@@ -85,6 +91,7 @@ def prepare_gaze(image, landmarks, angles):
 
 
 def decode_gaze(vector, roll):
+    """归一化三维视线向量，补偿头部 roll 并按 OMZ 约定计算 yaw、pitch 角度。"""
     vector = np.asarray(vector, np.float64).reshape(-1)
     norm = float(np.linalg.norm(vector))
     if (
@@ -111,13 +118,17 @@ def decode_gaze(vector, roll):
 
 
 class HeadPose:
+    """从人脸区域估计 OMZ 约定的 yaw、pitch、roll。"""
+
     def __init__(self, build):
+        """加载输入为 60×60 BGR 图像的头姿引擎。"""
         self.model = TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"data": [1, 3, 60, 60]}
         )
         self.provider = self.model.provider
 
     def infer(self, image, box):
+        """预测 yaw、pitch、roll，返回角度、原图裁剪框和模型支持范围内的标记。"""
         inputs, roi = prepare_face_attribute(image, box)
         out = self.model.infer(inputs)
         values = [float(out[name].item()) for name in ("fc_y", "fc_p", "fc_r")]
@@ -131,11 +142,15 @@ class HeadPose:
         }
 
     def close(self):
+        """释放头姿引擎资源。"""
         self.model.close()
 
 
 class GazeLandmarks:
+    """为视线估计提供同一人脸的 35 个原图关键点。"""
+
     def __init__(self, build):
+        """加载面部 35 点引擎，并记录其实际输出张量名称。"""
         self.model = TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"data": [1, 3, 60, 60]}
         )
@@ -143,6 +158,7 @@ class GazeLandmarks:
         self.output_name = next(iter(self.model.output_specs))
 
     def infer(self, image, box):
+        """预测同一人脸的关键点，将结果还原到原图像素坐标。"""
         inputs, roi = prepare_face_attribute(image, box)
         return {
             "landmarks": landmark_pixels(
@@ -153,11 +169,15 @@ class GazeLandmarks:
         }
 
     def close(self):
+        """释放面部关键点引擎资源。"""
         self.model.close()
 
 
 class Gaze:
+    """使用双眼图像和头姿估计视线，并补偿头部 roll。"""
+
     def __init__(self, build):
+        """按清单加载双眼图像与头姿联合输入的视线引擎。"""
         self.model = TensorRTModel(
             build["engine_path"], build["engine_sha256"], build["input_shapes"]
         )
@@ -165,6 +185,7 @@ class Gaze:
         self.output_name = next(iter(self.model.output_specs))
 
     def infer(self, image, landmarks, angles):
+        """对齐双眼后执行视线推理，返回补偿后的向量、角度和眼部变换信息。"""
         inputs, transform = prepare_gaze(image, landmarks, angles)
         return {
             **decode_gaze(self.model.infer(inputs)[self.output_name], angles[2]),
@@ -172,4 +193,5 @@ class Gaze:
         }
 
     def close(self):
+        """释放视线引擎资源。"""
         self.model.close()

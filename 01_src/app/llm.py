@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""LLM — Ollama or OpenAI-compatible backend (llama.cpp)."""
+"""语言/图文模型接口适配，当前部署使用 OpenAI 兼容的 llama.cpp 服务。
+
+负责模型身份检查、消息组织、上下文预算和流解析；后端进程由服务管理器拥有。
+"""
 
 import httpx
 import json
@@ -22,6 +25,8 @@ from typing import Optional, Iterator, Dict, Any
 
 
 class LLM:
+    """持有模型连接配置及单请求取消控制，不在本进程加载大模型权重。"""
+
     def __init__(
         self,
         model: str = "",
@@ -34,6 +39,7 @@ class LLM:
         context_tokens: int = 2048,
         chat_template_kwargs: Optional[dict] = None,
     ):
+        """保存后端地址、生成参数和上下文上限，创建单请求 I/O 控制器。"""
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.backend = (backend or "openai").lower()
@@ -48,6 +54,7 @@ class LLM:
         self.requests = RequestIO()
 
     def load(self) -> bool:
+        """以有限时间读取模型列表并确认目标身份，记录就绪状态或连接错误。"""
         self._loaded = False
         self.last_error = None
         try:
@@ -60,6 +67,7 @@ class LLM:
             return False
 
     def _verify_identity(self, timeout, allow_select=False):
+        """检查模型列表结构与目标模型是否匹配，首次连接允许为未指定的 OpenAI 模型选择首项。"""
         path = "/v1/models" if self.backend == "openai" else "/api/tags"
         payload = control_json(self.base_url + path, timeout)
         key, field = ("data", "id") if self.backend == "openai" else ("models", "name")
@@ -91,6 +99,7 @@ class LLM:
         system_prompt: Optional[str] = None,
         few_shot: Optional[list[dict]] = None,
     ) -> list:
+        """按系统提示、历史示例和当前用户文本的顺序构造消息列表。"""
         msgs = []
         sp = system_prompt or self.system_prompt
         if sp:
@@ -107,6 +116,7 @@ class LLM:
         system_prompt: Optional[str] = None,
         few_shot: Optional[list[dict]] = None,
     ) -> list:
+        """将 JPEG Base64 包装为 image_url 数据地址，与文本及历史消息组成图文请求。"""
         msgs = []
         sp = system_prompt or self.system_prompt
         if sp:
@@ -138,7 +148,10 @@ class LLM:
         tool_messages=None,
         history_group_sizes=None,
     ) -> Iterator[tuple]:
-        """Yields (content, metadata) tuples. Pass images_b64 for multimodal VLM requests."""
+        """构造请求并逐步产出文本与元数据，按后端选择流式实现。
+
+        可裁剪历史必须是完整用户/助手轮次或闭合工具组；工具调用及结果不能被截成不配对消息。
+        """
         if not self._loaded:
             raise RuntimeError("LLM is not loaded")
         mt = max_tokens if max_tokens is not None else self.max_tokens
@@ -218,6 +231,10 @@ class LLM:
         history_group_sizes=None,
     ) -> Iterator[tuple]:
         # Use one payload for native multimodal token counting and inference.
+        """使用同一请求载荷预估原生输入 token，再在预算内解析 SSE 文本和工具流。
+
+        只按完整历史组裁剪；检查总时限、取消、工具字段和响应大小，并要求 finish_reason 与 [DONE] 完整结束后确认结果。
+        """
         payload = {
             "model": self.model,
             "messages": messages,
@@ -365,6 +382,7 @@ class LLM:
             raise RuntimeError("Model stream disconnected before [DONE]")
 
     def _stream_ollama(self, messages, max_tokens, temperature) -> Iterator[tuple]:
+        """读取 Ollama 的逐行 JSON 响应，产出内容和完成元数据；连接异常时返回空结果并打印原因。"""
         try:
             with httpx.Client(timeout=self.timeout) as client:
                 with client.stream(
@@ -408,6 +426,7 @@ class LLM:
             yield ("", {})
 
     def health_check(self) -> bool:
+        """重新校验当前模型身份，成功时清除旧错误，失败时记录原因并返回 False。"""
         if not self._loaded:
             return False
         try:
@@ -419,9 +438,11 @@ class LLM:
             return False
 
     def cancel(self, event):
+        """中断与给定轮次事件对应的在途 HTTP 操作。"""
         self.requests.cancel(event)
 
     def require_tools(self):
+        """检查原生聊天模板是否同时声明工具与工具调用能力，不满足时拒绝启用本地动作。"""
         props = control_json(self.base_url + "/props", min(5, self.timeout))
         caps = props.get("chat_template_caps", {})
         if (
@@ -431,7 +452,9 @@ class LLM:
             raise RuntimeError("Configured model template does not support local tools")
 
     def idle(self):
+        """同时检查本地请求槽位和 llama.cpp 原生推理槽位，确认后端已停止处理。"""
         return self.requests.idle() and llama_slots_idle(self.base_url)
 
     def unload(self):
+        """清除适配器就绪标记；大模型服务进程仍由外部生命周期管理。"""
         self._loaded = False

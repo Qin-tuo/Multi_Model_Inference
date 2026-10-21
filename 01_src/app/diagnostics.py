@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Bounded board-side observations, independent of inference decisions.
+"""基于板端单调时钟的轻量运行观测，不参与模型调度决策。
 
-Durations use the board's monotonic clock. The live window is an operational
-sample, not the frozen benchmark and not a CUDA kernel profile.
+展示调用墙钟时间与资源采样；采样窗口不等同于 CUDA kernel 计时或持续性能保证。
 """
 
 from collections import deque
@@ -17,9 +16,10 @@ import psutil
 
 
 class TurnTrace:
-    """One turn, at most 64 completed spans; parallel TTS spans may overlap LLM."""
+    """记录一轮对话的阶段和时刻，保留最多 64 个已完成区间；并行阶段可以重叠。"""
 
     def __init__(self, turn_id, admitted, clock=time.monotonic):
+        """记录轮次接纳时刻作为时间原点，初始化有界阶段记录、活动区间和累计统计。"""
         self.clock, self.origin, self.turn_id = clock, admitted, turn_id
         self._lock = threading.Lock()
         self._spans = deque(maxlen=64)
@@ -31,11 +31,13 @@ class TurnTrace:
         self._end = None
 
     def mark(self, name):
+        """以毫秒记录某个关键事件首次出现的相对时刻，后续同名标记不覆盖。"""
         with self._lock:
             self._marks.setdefault(name, max(0, (self.clock() - self.origin) * 1000))
 
     @contextmanager
     def span(self, name):
+        """以上下文管理器测量阶段时长，异常退出标为 interrupted，并维护有界明细与累计值。"""
         start = self.clock()
         with self._lock:
             self._sequence += 1
@@ -63,10 +65,12 @@ class TurnTrace:
                 total["duration_ms"] += span["duration_ms"]
 
     def finish(self, status):
+        """保存轮次最终状态和结束时刻，使后续快照的总时长保持稳定。"""
         with self._lock:
             self._status, self._end = status, self.clock()
 
     def snapshot(self):
+        """返回已完成/仍运行的阶段、累计值和省略数量；重叠阶段耗时不能直接相加当作总延迟。"""
         with self._lock:
             elapsed = max(0, ((self._end or self.clock()) - self.origin) * 1000)
             active = [
@@ -89,6 +93,7 @@ class TurnTrace:
 
 
 def _number(path, divisor=1):
+    """读取 sysfs 数字并按给定比例换算；缺失、不可读或格式异常时返回 None。"""
     try:
         return int(path.read_text().strip()) / divisor
     except (OSError, ValueError, AttributeError):
@@ -96,9 +101,10 @@ def _number(path, divisor=1):
 
 
 class BoardDiagnostics:
-    """Sampled by the existing stats worker, shared by all viewers."""
+    """由现有状态线程统一采样板端指标，所有浏览器读取同一份缓存。"""
 
     def __init__(self, config, sysfs=Path("/sys")):
+        """定位温度、GPU/EMC 频率和 VDD_IN 电源节点，建立当前采样会话标识。"""
         self.config = config
         self.session = uuid.uuid4().hex
         self._lock = threading.Lock()
@@ -129,6 +135,10 @@ class BoardDiagnostics:
                 pass
 
     def sample(self, current, stats, now=None):
+        """用相邻有效计数计算实际采集/处理 FPS，汇总新鲜帧、轮次和板载资源指标。
+
+        相机来源变化时不跨批次计算速率；仅在帧仍有效时展示延迟及任务计数，缺失传感器值保持未知。
+        """
         started = time.monotonic()
         now = started if now is None else now
         camera, scene = current.get("camera", {}), current.get("perception", {})
@@ -251,6 +261,7 @@ class BoardDiagnostics:
         return value
 
     def snapshot(self):
+        """返回最近采样的深拷贝及缓存年龄，供界面判断当前数据是否已陈旧。"""
         with self._lock:
             value = deepcopy(self._latest)
         if value.get("ready"):

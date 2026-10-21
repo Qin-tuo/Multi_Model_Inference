@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Pinned MMPose crop geometry shared by runtime and reference validation."""
+"""人体姿态裁剪与坐标变换：复用已校验的 MMPose 几何实现，保持像素插值规则一致。"""
 
 import cv2
 from functools import lru_cache
@@ -11,6 +11,7 @@ from project_paths import ROOT
 
 @lru_cache(maxsize=2)
 def geometry_helper(path=None, sha256=None):
+    """从显式路径或当前姿态清单加载带摘要校验的几何模块，并缓存少量加载结果。"""
     if path is None:
         from app.config import Config
 
@@ -26,6 +27,10 @@ def geometry_helper(path=None, sha256=None):
 
 
 def prepare_pose(image, box, geometry=None, input_size=(288, 384)):
+    """按人体框生成仿射裁剪和归一化张量，同时返回原图到模型输入的仿射矩阵。
+
+    框采用原图像素坐标，输入尺寸为宽、高；固定 padding、长宽比修正及上游插值顺序，便于将预测反变换回原图。
+    """
     box = np.asarray(box, np.float32)
     if box.shape != (4,) or not np.isfinite(box).all() or min(box[2:] - box[:2]) <= 0:
         raise ValueError("Invalid pose person box")

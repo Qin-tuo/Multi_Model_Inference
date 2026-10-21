@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Upstream CLI adapted for local text/image requests; no RAG initialization."""
+"""当前应用命令行入口：查看配置与状态、管理服务、发送单次文字或图像请求。"""
 
 import base64
 import json
@@ -36,6 +36,7 @@ app = typer.Typer(
 
 
 def _load_llm(config: Config) -> LLM:
+    """用有效配置构建并连接语言模型适配器，后端不可用时抛出明确错误。"""
     llm = LLM(
         model=config.llm.model,
         base_url=config.llm.base_url,
@@ -53,6 +54,7 @@ def _load_llm(config: Config) -> LLM:
 
 
 def _image(path: Path, config: Config) -> str:
+    """限制输入图片文件大小，按配置边界缩放后生成 JPEG Base64，拒绝不可解码图像。"""
     import cv2
 
     if path.stat().st_size > 10 * 1024 * 1024:
@@ -73,6 +75,7 @@ def _image(path: Path, config: Config) -> str:
 
 
 def _stream(llm: LLM, question: str, *, images=None, system_prompt=None, display=True):
+    """消费模型流并累计文本与元数据，可选实时打印；记录总耗时及首个内容时间。"""
     t0 = time.monotonic()
     first = None
     text = ""
@@ -104,7 +107,7 @@ def ask(
     image: Optional[Path] = typer.Option(None, "--image", exists=True, dir_okay=False),
     json_output: bool = typer.Option(False, "--json-output"),
 ):
-    """Ask one text/image question. Physical audio is not exercised by this command."""
+    """执行一次文字或文件图像问答，按选项输出正文或 JSON，结束时卸载本地适配器。"""
     llm = None
     try:
         config = Config.load(config_path)
@@ -138,7 +141,7 @@ def services(
     ctx: typer.Context,
     action: str = typer.Argument(..., help="check, install, up, down, status or logs"),
 ):
-    """Manage native backends and the Web app through user systemd."""
+    """把服务操作及剩余参数交给 systemd 管理入口，复用同一套启动与归属校验。"""
     from deploy.services import main as service_main
 
     raise typer.Exit(service_main([action, *ctx.args]))
@@ -146,7 +149,7 @@ def services(
 
 @app.command()
 def config(config_path: Optional[str] = typer.Option(None, "--config", "-c")):
-    """Print the effective typed configuration."""
+    """加载并输出最终有效配置，便于检查参数覆盖结果。"""
     typer.echo(
         json.dumps(Config.load(config_path).effective(), ensure_ascii=False, indent=2)
     )
@@ -154,7 +157,7 @@ def config(config_path: Optional[str] = typer.Option(None, "--config", "-c")):
 
 @app.command()
 def info():
-    """Show host statistics and configured model readiness."""
+    """展示主机资源快照，并检查配置中的语言模型是否就绪。"""
     console.print(format_stats(get_system_stats()))
     llm = _load_llm(Config.load())
     console.print(f"Ready: {llm.model}")
@@ -162,6 +165,7 @@ def info():
 
 
 def main():
+    """启动 Typer 命令分发器，交由各命令解析参数和处理退出码。"""
     app()
 
 

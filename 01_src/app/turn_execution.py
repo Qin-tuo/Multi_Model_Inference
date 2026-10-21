@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Per-turn stages executed synchronously by the controller's single worker.
+"""由控制器单工作线程执行的单轮阶段对象。
 
-The controller keeps admission, cancellation, session state and resource locks.
-This object owns only one turn's transient input/output and cleanup progress.
+控制器保留轮次身份、取消锁和会话；本对象只拥有本轮临时输入、输出及清理进度。
 """
 
 import json
@@ -13,11 +12,13 @@ from app.request_io import TurnCancelled
 
 
 def _notice_output_callback(owner, event, notice):
-    # Capture only notification state, not the execution/output object. This
-    # avoids a per-turn callback cycle while retaining the shared commit lock.
+    # 闭包只捕获通知所需状态，避免执行对象与输出对象互相引用；
+    # 实际交付仍在控制器的同一提交锁内完成。
+    """为提醒构造只捕获必要状态的输出开始回调，避免回调反向持有整个执行/输出对象形成循环引用。"""
     started = False
 
     def begin():
+        """在控制器提交锁内检查取消，并且最多一次将通知标记为开始交付。"""
         nonlocal started
         with owner._lock:
             if event.is_set() or owner._stop.is_set():
@@ -32,7 +33,10 @@ def _notice_output_callback(owner, event, notice):
 
 
 class TurnExecution:
+    """依次执行输入准备、选图、生成、提交、清理和释放确认的一轮执行上下文。"""
+
     def __init__(self, owner, request):
+        """绑定请求和控制器，初始化本轮结果、阶段计时、已使用后端和通知回调。"""
         self.owner, self.request = owner, request
         self.result = {
             "turn_id": self.request["turn_id"],
@@ -59,10 +63,12 @@ class TurnExecution:
         )
 
     def check(self):
+        """检查本轮取消及应用停止，禁止后续阶段继续消费或提交。"""
         if self.event.is_set() or self.owner._stop.is_set():
             raise TurnCancelled("Turn cancelled")
 
     def send(self, kind, **values):
+        """为广播消息附加轮次身份，给可丢弃内容绑定取消事件，保留结束/释放状态通知。"""
         discard = kind in {"token", "transcript"} or (
             kind == "status"
             and values.get("stage") not in {"idle", "releasing", "release_unconfirmed"}
@@ -73,6 +79,7 @@ class TurnExecution:
         )
 
     def run(self):
+        """按阶段执行一轮，将异常区分为取消或失败，并无条件进入清理与释放确认。"""
         try:
             self.prepare_input()
             self.select_image()
@@ -92,7 +99,10 @@ class TurnExecution:
             self.finish()
 
     def prepare_input(self):
-        """Register durable requests and prepare text or ASR input."""
+        """登记持久请求并准备文本或 ASR 输入，重复请求直接使用已有提交回执。
+
+        文件语音先经 VAD 分段，实时语段复用采集结果；记录输入时间口径，避免把文件偏移当作设备时间。
+        """
         self.check()
         if self.request["input_kind"] == "microphone":
             segment = self.request["segment"]
@@ -172,7 +182,10 @@ class TurnExecution:
         self.result["prompt"] = self.prompt
 
     def select_image(self):
-        """Pair the image and auxiliary observations from the selected frame."""
+        """优先取得感知结果对应的同一帧图像与辅助观察，必要时取相机新鲜快照。
+
+        过期图像会被拒绝，辅助观测明确可能漏检；本轮保留帧元数据，不把旧图像沿用到历史轮次。
+        """
         self.images = None
         self.vision_prompt = self.owner.config.vision.system_prompt
         if self.request["use_image"] and self.fixed is None:
@@ -209,7 +222,10 @@ class TurnExecution:
             self.images = [self.owner.camera._base64_jpeg(frame.jpeg)]
 
     def generate(self):
-        """Consume model output and bounded speech chunks on the controller worker."""
+        """消费模型或固定回执文本，发送增量并将有界文本段交给独立语音输出线程。
+
+        工具回执重放和提醒无需再次推理；普通轮次可使用短历史，结束前等待合成完成但暂不发布文件。
+        """
         if not self.notice:
             self.send("transcript", text=self.prompt)
         self.send("status", stage="thinking")
@@ -306,7 +322,10 @@ class TurnExecution:
             self.output.close(success=True)
 
     def commit(self):
-        """Serialize publication, cancellation and session updates under the owner lock."""
+        """在控制器锁内串行完成取消检查、文件发布、通知回执和短会话更新。
+
+        只有成功提交后才设置完成状态与音频 URL，随后进入资源释放阶段。
+        """
         with self.owner._lock:
             self.check()
             if self.output:
@@ -349,7 +368,10 @@ class TurnExecution:
         self.output = None
 
     def cleanup(self):
-        """Close uncommitted output and finalize durable request/delivery receipts."""
+        """关闭未提交输出，并终结持久请求或未完成通知的状态。
+
+        已提交工具回执保留；台账收尾失败会暴露恢复错误，阻止后续请求把不确定状态当作成功。
+        """
         if self.output:
             try:
                 self.output.close(success=False)
@@ -379,7 +401,10 @@ class TurnExecution:
                 self.result["notification_error"] = str(exc)
 
     def finish(self):
-        """Report the turn and release admission only after every used backend settles."""
+        """发布轮次结果并等待所有已使用后端及输出对象释放，确认后清除活动轮次。
+
+        未成功提交的取消文本会丢弃；done 消息与 resources_released 是不同完成边界。
+        """
         self.result.update(
             elapsed_seconds=time.monotonic() - self.start,
             first_content_seconds=self.first - self.start if self.first else None,

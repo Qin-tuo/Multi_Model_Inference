@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Durable finite actions using SQLAlchemy transactions and APScheduler dates.
+"""以 SQLAlchemy 事务持久化笔记、提醒和幂等回执，使用 APScheduler 标记提醒到期。
 
-Adapted from the previous project's SQLAlchemy/ReminderService contracts, with
-memory, identity and visual-notice policy removed. Only this optional service
-owns its database. Former names of these same tables migrate in one transaction;
-databases containing unrelated tables are refused.
+数据库状态与真实输出交付分开记录，进程重启后不自动重播无法确认的通知。
 """
 
 from datetime import datetime, timedelta, timezone
@@ -84,10 +81,12 @@ REMINDERS = Table(
 
 
 def now():
+    """返回带 UTC 时区的当前时间，用于统一持久化时间比较。"""
     return datetime.now(timezone.utc)
 
 
 def fingerprint(value):
+    """将值规范化为稳定 JSON 后生成 SHA256，用于识别重复请求和重复工具参数。"""
     return hashlib.sha256(
         json.dumps(
             value, sort_keys=True, ensure_ascii=False, separators=(",", ":")
@@ -96,6 +95,7 @@ def fingerprint(value):
 
 
 def engine(path):
+    """创建供应用及调度回调使用的 SQLite 引擎，并绑定连接级持久化设置。"""
     result = create_engine(
         "sqlite:///" + str(path),
         connect_args={"timeout": 0.25, "check_same_thread": False},
@@ -103,6 +103,7 @@ def engine(path):
 
     @event.listens_for(result, "connect")
     def configure(connection, _):
+        """每个 SQLite 连接启用 WAL、完整同步和有限忙等待，控制事务可靠性与锁等待时间。"""
         for setting in ["journal_mode=WAL", "synchronous=FULL", "busy_timeout=250"]:
             connection.execute("PRAGMA " + setting)
 
@@ -110,7 +111,7 @@ def engine(path):
 
 
 def mark_due(path, reminder_id):
-    """Serializable APScheduler callback: make a notice durable, never play audio."""
+    """可序列化的调度回调：将到期提醒标为 due 或 expired，仅更新数据库而不直接播放音频。"""
     db = engine(path)
     try:
         with db.begin() as connection:
@@ -142,7 +143,13 @@ def mark_due(path, reminder_id):
 
 
 class ActionStore:
+    """单实例持有数据库与调度器，统一控制请求、工具事务及通知投递状态。"""
+
     def __init__(self, config):
+        """获取独占数据库文件锁，初始化/迁移表并恢复中断请求及通知状态，再启动调度器。
+
+        已开始但未确认输出的通知转为 uncertain，避免重启后重复播报；初始化失败时关闭已取得的资源。
+        """
         self.config = config
         self.path = str(Path(config.database).expanduser().resolve())
         Path(self.path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -217,11 +224,12 @@ class ActionStore:
             raise
 
     def close(self):
+        """先标记关闭，再在不持业务锁时等待调度线程退出，最后释放连接池和文件所有权锁。"""
         with self._lock:
             if self._closed:
                 return
             self._closed = True
-        # Never wait for an executor while holding the lock it may be acquiring.
+        # 等待调度线程前先释放业务锁，否则线程可能正等这把锁而无法退出。
         if self.scheduler and self.scheduler.running:
             self.scheduler.shutdown(wait=True)
         if self.db:
@@ -229,10 +237,12 @@ class ActionStore:
         self.owner.close()
 
     def _open(self):
+        """检查存储服务尚未关闭，阻止在资源释放后继续操作数据库。"""
         if self._closed:
             raise RuntimeError("Action store is closed")
 
     def reconcile(self):
+        """定期以数据库为准清理过期提醒，并修复、移除或重建不匹配的调度任务。"""
         with self._lock:
             if self._closed:
                 return
@@ -282,6 +292,7 @@ class ActionStore:
                 self.last_error = str(exc)
 
     def _receipts(self, c, key):
+        """使用给定数据库连接，按工具调用顺序读取某请求的已提交回执。"""
         return [
             {
                 "name": r["name"],
@@ -296,6 +307,7 @@ class ActionStore:
         ]
 
     def begin_request(self, key, digest):
+        """登记新请求或返回同一输入的已有回执；同 ID 不同摘要会报错，台账满时拒绝新增。"""
         if (
             not isinstance(key, str)
             or not re.fullmatch(r"[0-9a-f]{32}", key)
@@ -334,6 +346,7 @@ class ActionStore:
             return {"replay": False}
 
     def knows_request(self, key, digest):
+        """检查请求是否已持久登记，并拒绝相同 ID 被不同输入重用。"""
         with self._lock, self.db.connect() as c:
             self._open()
             row = (
@@ -346,6 +359,7 @@ class ActionStore:
             return row is not None
 
     def finish_request(self, key, status):
+        """只把仍为 running 的请求改为指定结束状态，避免覆盖已终结结果。"""
         with self._lock, self.db.begin() as c:
             self._open()
             c.execute(
@@ -355,10 +369,15 @@ class ActionStore:
             )
 
     def receipts(self, key):
+        """在存储锁下读取请求的有序工具回执。"""
         with self._lock, self.db.connect() as c:
             return self._receipts(c, key)
 
     def execute(self, key, position, name, arguments):
+        """在一个事务中完成受限工具操作及回执登记，保证幂等键与参数一致。
+
+        先执行参数、调用次数和容量校验；提醒持久提交与调度确认分开处理，调度失败不会把已保存记录谎报成回滚。
+        """
         if (
             type(position) is not int
             or not 0 <= position < self.config.max_calls_per_turn
@@ -522,8 +541,8 @@ class ActionStore:
                     result=json.dumps(result, ensure_ascii=False),
                 )
             )
-        # If scheduling fails after the durable commit, the periodic reconciler
-        # owns retry. Never report the committed note/reminder as rolled back.
+        # 业务事务提交后再修复调度；调度失败由周期校正器重试，
+        # 不能把已持久化的提醒或笔记描述为回滚。
         if name in {"create_reminder", "cancel_reminder"}:
             self.reconcile()
         if name == "create_reminder" and self.last_error:
@@ -541,6 +560,7 @@ class ActionStore:
         return result
 
     def claim_due(self):
+        """按到期顺序原子领取一个未过期、允许重试的通知，生成本次投递 attempt 标识。"""
         with self._lock, self.db.begin() as c:
             self._open()
             stamp = now().isoformat()
@@ -570,6 +590,7 @@ class ActionStore:
             return {**row, "attempt": attempt}
 
     def begin_delivery(self, notice, channel):
+        """按通知 ID 与 attempt 校验领取仍有效，提交 delivering 状态后才允许实际输出。"""
         with self._lock, self.db.begin() as c:
             self._open()
             changed = c.execute(
@@ -591,6 +612,10 @@ class ActionStore:
     def finish_delivery(
         self, notice, receipt=None, *, cancelled=False, error=None, release=False
     ):
+        """根据当前 attempt 的回执、取消及失败情况结束投递或安排有限重试。
+
+        已开始输出但无法确认完成时标为 uncertain；释放未开始的领取不会消耗重试次数。
+        """
         with self._lock, self.db.begin() as c:
             self._open()
             row = (
@@ -636,6 +661,7 @@ class ActionStore:
     def snapshot(self):
         # Monitoring reads must not hold the writer/notification mutex. The
         # application joins monitoring and Web readers before closing this DB.
+        """返回存储/调度状态、笔记计数和最近提醒摘要；数据库读取不长期占用写入互斥锁。"""
         with self._lock:
             self._open()
             status = {

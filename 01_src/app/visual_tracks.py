@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Bounded Norfair association; the library owns motion and track matching."""
+"""基于 Norfair 的有界轨迹关联，组合框几何与可选外观特征，管理来源和时间失效。"""
 
 import uuid
 import numpy as np
@@ -8,6 +8,7 @@ from norfair.distances import iou
 
 
 def appearance_distance(first, second):
+    """同一特征空间内计算余弦距离；任一特征缺失或空间不同则返回 None。"""
     if (
         first.embedding is None
         or second.embedding is None
@@ -18,11 +19,15 @@ def appearance_distance(first, second):
 
 
 class VisualTracks:
+    """将同帧检测交给 Norfair 关联，并限制轨迹容量与跨帧有效时间。"""
+
     def __init__(self, namespace, capacity=20, ttl=2.0):
+        """设置轨迹命名空间、数量上限和有效期，并创建初始跟踪器。"""
         self.namespace, self.capacity, self.ttl = namespace, capacity, ttl
         self.reset()
 
     def reset(self):
+        """重建 Norfair 跟踪器及随机代次标识，避免重连后复用旧轨迹身份。"""
         self.epoch = self.stamp = self.frame_id = None
         self.generation = uuid.uuid4().hex[:8]
         self.tracker = Tracker(
@@ -38,6 +43,7 @@ class VisualTracks:
 
     @staticmethod
     def _distance(detection, tracked):
+        """组合框的 IoU 距离和兼容外观距离，明显不相符的候选直接拒绝关联。"""
         geometric = float(
             iou(detection.points.reshape(1, 4), tracked.estimate.reshape(1, 4))[0, 0]
         )
@@ -51,6 +57,7 @@ class VisualTracks:
         return geometric
 
     def _reid_distance(self, first, second):
+        """为同类别的新旧轨迹计算外观重识别距离，并拒绝存在近似替代候选的歧义匹配。"""
         a, b = first.last_detection, second.last_detection
         if a.label != b.label:
             return 1.0
@@ -75,6 +82,10 @@ class VisualTracks:
         return distance
 
     def update(self, rows, frame):
+        """将当前帧目标送入 Norfair，返回带轨迹 ID 和确认标记的目标副本。
+
+        来源变化或长时间中断会重置；乱序帧报错，旧轨迹按时间失效并受容量限制。
+        """
         epoch, index, stamp = (
             frame.source_epoch,
             frame.frame_id,
@@ -117,6 +128,7 @@ class VisualTracks:
                 current[data["index"]] = self.key(obj)
         self.tracker.tracked_objects = sorted(
             self.tracker.tracked_objects,
+            # 容量裁剪优先保留近期确实被观察到的轨迹。
             key=lambda o: o.last_detection.data["stamp"],
             reverse=True,
         )[: self.capacity]
@@ -126,7 +138,9 @@ class VisualTracks:
         ]
 
     def key(self, obj):
+        """组合来源批次、跟踪代次、命名空间和 Norfair ID，生成不会跨重置混用的标识。"""
         return f"{self.epoch}:{self.generation}:{self.namespace}:{obj.id}"
 
     def known_ids(self):
+        """返回仍在跟踪器内且已分配 ID 的轨迹标识集合。"""
         return {self.key(o) for o in self.tracker.tracked_objects if o.id is not None}

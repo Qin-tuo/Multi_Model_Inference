@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Single-owner RGB/native-depth capture using the RealSense SDK.
+"""使用 RealSense SDK 采集 RGB 与原生深度，保留传感器时间戳及计数信息。
 
-The SDK owns synchronization and align-to-color. We retain each stream's timestamp
-and counter: a frameset does not prove simultaneous RGB/stereo exposure. The
-consumer can use a valid stereo pair even when RGB cannot be time-matched.
-No model, worker queue, sensor reset or camera-option changes live here.
+SDK 帧组不等于同时曝光；时间匹配只比较可信时钟域，返回数组与 SDK 内存池脱离。
 """
 
 from dataclasses import dataclass
@@ -17,6 +14,7 @@ import numpy as np
 
 
 def intrinsics(profile):
+    """把 SDK 视频配置的内参、畸变参数和实际图像尺寸转成普通字典。"""
     value = profile.as_video_stream_profile().get_intrinsics()
     return {
         "width": value.width,
@@ -31,7 +29,10 @@ def intrinsics(profile):
 
 
 def correspondence(streams, max_rgb_skew_ms):
-    """Fail closed for missing views, stereo counter mismatch and clock changes."""
+    """检查红外双目计数/时间一致性，以及 RGB 与深度在全局时钟域内的时间接近程度。
+
+    缺帧、时钟域不兼容或超出偏差预算时将相应匹配标记置为 False，不假定帧组已经同步曝光。
+    """
     left, right, color = (streams.get(n) for n in ("left_ir", "right_ir", "color"))
     stereo = bool(
         left
@@ -69,6 +70,8 @@ def correspondence(streams, max_rgb_skew_ms):
 
 @dataclass(frozen=True)
 class SensorFrame:
+    """保存一个 SDK 帧组的独立数组、流元数据和时间对应关系。"""
+
     source_epoch: str
     group_id: int
     received_monotonic: float
@@ -77,6 +80,7 @@ class SensorFrame:
     correspondence: dict
 
     def metadata(self):
+        """返回帧组身份与各流对应关系，明确主机接收时刻不是传感器曝光时刻。"""
         return {
             "source_epoch": self.source_epoch,
             "group_id": self.group_id,
@@ -88,9 +92,10 @@ class SensorFrame:
 
 
 class RealSenseSource:
-    """One caller owns open/read/close; returned arrays own their memory."""
+    """由单一调用方拥有 open/read/close，负责设备采集和标定数据。"""
 
     def __init__(self, width=640, height=480, fps=15, serial=None, with_ir=False):
+        """限定已支持的 640×480@15 采集配置，设置可选设备序列号与红外输出开关。"""
         if (width, height, fps) != (640, 480, 15):
             raise ValueError("Only the verified 640x480@15 capture contract is enabled")
         self.width, self.height, self.fps = width, height, fps
@@ -103,6 +108,10 @@ class RealSenseSource:
         self.max_rgb_skew_ms = 1000 / fps / 2
 
     def open(self):
+        """选择唯一设备、启动所需流并检查实际模式，记录内外参和深度单位。
+
+        创建对齐到彩色图的 SDK 对象；任一步失败都会关闭已启动的管线。
+        """
         import pyrealsense2 as rs
 
         if self.pipeline is not None:
@@ -193,6 +202,10 @@ class RealSenseSource:
             raise
 
     def read(self, timeout_ms=1000):
+        """等待 SDK 帧组、将深度对齐到 RGB，复制各流数组并标记只读后返回。
+
+        同时记录帧号、传感器时间域和主机接收时间，供上层拒绝失配或重复帧。
+        """
         if self.pipeline is None:
             raise RuntimeError("Stereo capture is closed")
         frames = self.pipeline.wait_for_frames(timeout_ms)
@@ -233,6 +246,7 @@ class RealSenseSource:
         )
 
     def close(self):
+        """停止 SDK 管线并清空对齐对象；即使停止抛错也不保留已关闭句柄。"""
         if self.pipeline is not None:
             try:
                 self.pipeline.stop()
@@ -241,8 +255,10 @@ class RealSenseSource:
                 self.align = None
 
     def __enter__(self):
+        """进入 with 作用域时打开相机并返回采集对象。"""
         self.open()
         return self
 
     def __exit__(self, *_):
+        """退出 with 作用域时停止相机采集。"""
         self.close()

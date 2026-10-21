@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""System monitor — CPU, RAM, GPU stats for Jetson."""
+"""读取 Jetson 的 CPU、内存和 GPU 基本状态，为命令行及实时页面提供资源快照。"""
 
 import subprocess
 from dataclasses import dataclass
@@ -23,6 +23,8 @@ from typing import Optional
 
 @dataclass
 class SystemStats:
+    """一次主机资源快照；内存字段使用 MiB 换算，GPU 数据不可读时允许为空。"""
+
     cpu_percent: float
     ram_used_mb: float
     ram_total_mb: float
@@ -31,6 +33,7 @@ class SystemStats:
 
 
 def get_system_stats() -> SystemStats:
+    """采集 CPU、内存和可选 GPU 占用，封装为统一状态对象。"""
     cpu = _cpu()
     used, total, pct = _ram()
     return SystemStats(
@@ -43,6 +46,7 @@ def get_system_stats() -> SystemStats:
 
 
 def format_stats(s: SystemStats) -> str:
+    """将资源快照格式化为简短文本，缺失 GPU 数据时省略该项。"""
     parts = [
         f"CPU: {s.cpu_percent:.1f}%",
         f"RAM: {s.ram_used_mb:.0f}/{s.ram_total_mb:.0f}MB ({s.ram_percent:.1f}%)",
@@ -53,6 +57,7 @@ def format_stats(s: SystemStats) -> str:
 
 
 def _cpu() -> float:
+    """优先用 psutil 做短窗口 CPU 采样；未安装时退回 /proc/stat 累计比例，口径并不相同。"""
     try:
         import psutil
 
@@ -68,6 +73,7 @@ def _cpu() -> float:
 
 
 def _ram() -> tuple[float, float, float]:
+    """读取已用/总内存和占用比例，内存按 1024² 字节换算；缺少 psutil 时读取 /proc/meminfo。"""
     try:
         import psutil
 
@@ -96,7 +102,7 @@ _GPU_SYSFS_PATHS = [
 
 @lru_cache(maxsize=1)
 def get_jetson_model() -> str:
-    """Return a clean Jetson model name like 'Jetson Orin Nano Super'."""
+    """从设备树取得简化的 Jetson 型号并缓存，读取失败时使用通用名称。"""
     try:
         with open("/proc/device-tree/model") as f:
             raw = f.read().strip().rstrip("\x00")
@@ -109,6 +115,7 @@ def get_jetson_model() -> str:
 
 
 def _gpu() -> Optional[float]:
+    """优先读取 Jetson sysfs GPU 负载，必要时尝试 nvidia-smi；均不可用时返回 None。"""
     for path in _GPU_SYSFS_PATHS:
         try:
             with open(path) as f:

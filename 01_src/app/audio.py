@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Audio formats, local service capabilities and scoped device discovery."""
+"""音频容器、采样格式校验、本机语音能力检查和 ALSA 设备查询。"""
 
 import subprocess
 import io
@@ -27,7 +27,7 @@ def find_alsa_device(
     name_hint: str = "USB Audio",
     direction: str = "input",
 ) -> Optional[tuple[int, int, str]]:
-    """Find ALSA device by name substring. Returns (card, device, name) or None."""
+    """按名称片段查找 ALSA 输入或输出设备，返回声卡号、设备号和名称；找不到时返回 None。"""
     cmd = "arecord" if direction == "input" else "aplay"
     try:
         r = subprocess.run([cmd, "-l"], capture_output=True, text=True, timeout=5)
@@ -48,6 +48,7 @@ def find_alsa_device(
 
 
 def local_speech_url(url: str) -> str:
+    """校验语音服务只能使用无凭据的本机 HTTP /v1 地址，并规范末尾斜杠。"""
     parsed = urlsplit(url)
     if (
         parsed.scheme != "http"
@@ -63,6 +64,7 @@ def local_speech_url(url: str) -> str:
 
 
 def speech_capability(url, kind, model, backend, timeout):
+    """读取受时限与大小约束的能力接口，确认指定模型、后端及 16 kHz 单声道 PCM16 格式就绪。"""
     from app.request_io import control_json
 
     payload = control_json(url + "/capabilities", timeout)
@@ -86,7 +88,10 @@ def speech_capability(url, kind, model, backend, timeout):
 
 
 def wav_pcm(data: bytes, max_seconds: float = 15) -> bytes:
-    """Strict PCM16/16kHz/mono; never silently reinterpret or resample bytes."""
+    """从 WAV 容器提取严格的 16 kHz、单声道、PCM16 数据。
+
+    限制文件大小和时长，拒绝截断数据或其他采样格式，不隐式重采样。
+    """
     if len(data) > int(max_seconds * 32000) + 4096:
         raise ValueError("WAV exceeds input size limit")
     try:
@@ -112,6 +117,7 @@ def wav_pcm(data: bytes, max_seconds: float = 15) -> bytes:
 
 
 def pcm_wav(pcm: bytes) -> bytes:
+    """将非空、按双字节样本对齐的 PCM16 包装成 16 kHz 单声道 WAV 字节。"""
     if not pcm or len(pcm) % 2:
         raise ValueError("Invalid PCM16 sample boundary")
     buffer = io.BytesIO()
@@ -124,5 +130,6 @@ def pcm_wav(pcm: bytes) -> bytes:
 
 
 def chunk_rms(raw: bytes) -> float:
+    """把 PCM16 音频归一化到浮点范围，计算此块的均方根幅值。"""
     pcm = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
     return float(np.sqrt(np.mean(pcm**2)))

@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""OpenCV Zoo open-hand predicate and bounded anonymous temporal gestures.
+"""依据手部关键点执行有界的挥手/张掌时序规则。
 
-open_palm adapts GestureClassification's 'Five' predicate from the pinned
-OpenCV Zoo handpose demo (upstream attribution in THIRD-PARTY-NOTICES.md). Temporal rules are local
-interaction policy. They require real positive/negative gesture validation.
+开掌判定改编自 OpenCV Zoo 的五指角度与腕距规则；连续证据按人物、手和帧来源隔离。
 """
 
 from collections import deque
@@ -14,7 +12,7 @@ import numpy as np
 
 
 def open_palm(points):
-    """The upstream five-finger angle + wrist-distance rule, with NaN guards."""
+    """用五指角度和指尖相对腕距判定开掌，退化向量或非有限角度按未开掌处理。"""
     xy = np.asarray(points, dtype=float)[:, :2]
     vectors = [
         (xy[0] - xy[base], xy[joint] - xy[tip])
@@ -40,7 +38,10 @@ def open_palm(points):
 
 
 class _Track:
+    """保存单只手的最近观察、运动证据、静止证据和一次触发锁存状态。"""
+
     def __init__(self, sample, stamp):
+        """为新手部观察分配身份，保存掌心/尺度/所属人物并初始化触发状态。"""
         self.id = uuid.uuid4().hex
         self.center, self.scale, self.handedness = (
             sample["center"],
@@ -55,19 +56,22 @@ class _Track:
         self.clear_evidence()
 
     def clear_evidence(self):
+        """清除挥动历史与静止证据，不把中断前的动作接到新观察上。"""
         self.samples.clear()
         self.clear_stationary()
 
     def clear_stationary(self):
+        """清空静止锚点、起始时间和有效帧数，重新积累举掌停止证据。"""
         self.stationary_anchor = None
         self.stationary_since = None
         self.stationary_count = 0
 
 
 class GestureRecognizer:
-    """One writer (perception); readers only receive compact status copies."""
+    """感知线程作为单写入者，按帧更新手势证据并向其他线程提供状态副本。"""
 
     def __init__(self, config, min_hand_score=0.8, min_pose_joint_score=0.2):
+        """保存配置和质量阈值，初始化手部轨迹、帧序及线程安全状态。"""
         self.config, self.min_hand_score = config, min_hand_score
         self.min_pose_joint_score = min_pose_joint_score
         self._lock = threading.Lock()
@@ -79,6 +83,7 @@ class GestureRecognizer:
         self._last_event = None
 
     def snapshot(self):
+        """返回当前手势摘要，超过事件有效期时标为陈旧，同时保留最近事件供观察。"""
         with self._lock:
             frame = self._state.get("frame")
             if (
@@ -95,10 +100,12 @@ class GestureRecognizer:
             return {**self._state, "last_event": self._last_event}
 
     def update(self, scene, now=None):
+        """在锁内把场景交给时序状态机，默认使用板端单调时钟。"""
         with self._lock:
             return self._update(scene, time.monotonic() if now is None else now)
 
     def _invalid(self, reason, now):
+        """使当前证据失效并清理超时手轨迹，返回不触发任何动作的空事件列表。"""
         for track in self._tracks.values():
             track.clear_evidence()
         self._tracks = {
@@ -110,6 +117,10 @@ class GestureRecognizer:
         return []
 
     def _sample(self, hand, frame):
+        """校验 21 点、得分、左右手类别、图像边界和掌宽，生成可关联的手部观察。
+
+        SimCC 峰值按关键点阈值检查，不当作概率；人物轨迹 ID 用于阻止跨人继承证据。
+        """
         points = np.asarray(hand["landmarks"], dtype=float)
         if points.shape not in ((21, 2), (21, 3)) or not np.isfinite(points).all():
             return None, "invalid_landmarks"
@@ -152,7 +163,7 @@ class GestureRecognizer:
         }, None
 
     def _associate(self, samples):
-        """Mutual nearest matches; ambiguous crossings restart evidence."""
+        """按人物归属、左右手、尺度和位置做双向最近关联；歧义候选不继承旧证据。"""
         tracks = list(self._tracks.values())
         candidates = {}
         reverse = {}
@@ -180,6 +191,7 @@ class GestureRecognizer:
                     reverse.setdefault(track.id, []).append((distance, i))
 
         def clear_best(options):
+            """只返回与第二候选有足够距离差的最佳匹配，无候选或歧义时返回 None。"""
             options = sorted(options)
             if not options or (
                 len(options) > 1 and options[1][0] - options[0][0] < 0.35
@@ -198,6 +210,7 @@ class GestureRecognizer:
         # Natural waving can briefly turn the palm away from the camera. Its
         # valid motion still counts, but the gesture needs enough actual open
         # observations and a currently open hand. A closed fist cannot greet.
+        """检查最近运动是否包含足够横向摆幅和反向次数，且有足够开掌观察及当前开掌状态。"""
         if (
             not samples[-1]["open"]
             or sum(s["open"] for s in samples) < self.config.min_observations
@@ -224,6 +237,10 @@ class GestureRecognizer:
         return reversals >= self.config.wave_reversals
 
     def _update(self, scene, now):
+        """校验帧新鲜度/顺序后关联双手，累计挥手或静止张掌证据并生成带有效期的事件。
+
+        同一帧不重复计数；触发后锁存，经过中性间隔才重新启用；同帧停止事件排序在问候之前。
+        """
         cfg = self.config
         frame = scene.get("frame")
         if not cfg.enabled:
@@ -398,4 +415,5 @@ class GestureRecognizer:
             "rejected_hands": rejected,
         }
         # A valid stop from either anonymous hand takes precedence in this frame.
+        # 同一帧多只手同时触发时，先处理停止，再处理问候。
         return sorted(events, key=lambda e: e["kind"] != "stop")

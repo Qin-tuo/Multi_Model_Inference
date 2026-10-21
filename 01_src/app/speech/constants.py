@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Shared audio sample geometry and routing identifiers.
+"""语音采样和路由常量。
 
-Extracted from the upstream-derived audio pipeline; behavior is preserved.
+输入输出采用 16 kHz 单声道；Silero 每次接收 512 个样本，即 32 ms。AEC 名称作为每个实例的命名前缀。
 """
 
 SAMPLE_RATE = 16000
 
 
-SILERO_CHUNK_SAMPLES = 512  # Silero VAD requires exactly 512 samples (32ms) at 16kHz
+SILERO_CHUNK_SAMPLES = 512  # 16 kHz 下每次必须输入 512 个样本，即 32 ms。
 
 
 CHANNELS = 1

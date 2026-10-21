@@ -1,9 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""TensorRT appearance features with upstream Pillow/Torchvision transforms.
-
-OSNet follows Torchreid's evaluation transform. CLIP follows OpenAI CLIP's
-image preprocessing. PyTorch/text encoders are not runtime dependencies.
-"""
+"""行人和物体外观特征适配：保留 OSNet、CLIP 的图像变换约定，使用 TensorRT 提取特征。"""
 
 import cv2
 import numpy as np
@@ -14,6 +10,10 @@ from app.vision_roi import crop_roi
 
 
 def prepare_appearance(image, box, role):
+    """按角色裁剪并归一化 RGB 图像，返回连续的 NCHW 张量和变换说明。
+
+    OSNet 缩放到 256×128；CLIP 先保持比例缩放再中心裁剪到 224×224，分别使用各自均值和标准差。
+    """
     crop, roi = crop_roi(image, box)
     photo = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
     if role == "person_reid":
@@ -50,6 +50,7 @@ def prepare_appearance(image, box, role):
 
 
 def normalized_features(values):
+    """校验并 L2 归一化 512 维特征，返回只读数组；拒绝非有限值和近零向量。"""
     values = np.asarray(values, np.float32).reshape(-1)
     norm = float(np.linalg.norm(values))
     if (
@@ -65,7 +66,10 @@ def normalized_features(values):
 
 
 class AppearanceFeatures:
+    """持有一个外观特征引擎，用模型摘要区分不可混用的特征空间。"""
+
     def __init__(self, build, role):
+        """根据行人或物体角色加载固定输入形状的引擎，并以 ONNX 摘要标识特征空间。"""
         if role not in ("person_reid", "object_embedding"):
             raise ValueError("Unknown appearance role")
         self.role = role
@@ -77,6 +81,7 @@ class AppearanceFeatures:
         self.provider = self.model.provider
 
     def infer(self, image, box):
+        """对一个原图目标区域执行预处理、推理和归一化，返回特征、空间标识及裁剪信息。"""
         inputs, transform = prepare_appearance(image, box, self.role)
         vector = normalized_features(self.model.infer(inputs)["embedding"])
         return {
@@ -86,4 +91,5 @@ class AppearanceFeatures:
         }
 
     def close(self):
+        """释放本实例持有的 TensorRT 执行上下文、流和缓冲区。"""
         self.model.close()

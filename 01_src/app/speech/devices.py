@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""PulseAudio device selection and echo-cancellation routing.
+"""PulseAudio 设备发现、扬声器选择和 WebRTC 回声消除路由。
 
-Extracted from the upstream-derived audio pipeline; behavior is preserved.
+只管理本应用创建的路由与模块，不通过停止系统音频服务争抢设备。
 """
 
 import subprocess
@@ -38,6 +38,7 @@ try:
         ctypes.c_int,
         ctypes.c_char_p,
     )
+    # 此回调仅抑制 ALSA 库的噪声日志；实际采集错误仍由设备接口返回。
     _alsa_handler = _ALSA_ERR_T(lambda *_: None)
     ctypes.cdll.LoadLibrary("libasound.so.2").snd_lib_error_set_handler(_alsa_handler)
 except Exception:
@@ -45,14 +46,14 @@ except Exception:
 
 
 def _pa_match(needle: str, haystack: str) -> bool:
-    """Match a name hint against a PulseAudio device name, ignoring space/underscore differences."""
+    """将空格与下划线规范化后进行不区分大小写的设备名称片段匹配。"""
     n = needle.lower().replace(" ", "_")
     h = haystack.lower().replace(" ", "_")
     return n in h
 
 
 def find_pa_source(name_hint: str) -> Optional[str]:
-    """Find a PulseAudio input source matching name_hint."""
+    """查找匹配名称的 PulseAudio 输入源，排除扬声器 monitor 回录源。"""
     try:
         r = subprocess.run(
             ["pactl", "list", "short", "sources"],
@@ -74,7 +75,7 @@ def find_pa_source(name_hint: str) -> Optional[str]:
 
 
 def find_pa_sink(name_hint: str) -> Optional[str]:
-    """Find a PulseAudio output sink matching name_hint."""
+    """从可用物理输出列表中查找匹配名称的 sink，未找到时返回 None。"""
     for sink in list_pa_sinks():
         if _pa_match(name_hint, sink["id"]):
             return sink["id"]
@@ -82,7 +83,7 @@ def find_pa_sink(name_hint: str) -> Optional[str]:
 
 
 def _pa_sink_label(sink_name: str) -> str:
-    """Return a concise, user-facing label for a PulseAudio sink."""
+    """将已知设备名称转成简短显示标签，未知设备保留原名。"""
     normalized = sink_name.lower()
     if "anker_powerconf" in normalized:
         return "Anker PowerConf"
@@ -92,7 +93,7 @@ def _pa_sink_label(sink_name: str) -> str:
 
 
 def list_pa_sinks() -> list[dict[str, str]]:
-    """List available PulseAudio output sinks for the web speaker selector."""
+    """查询可供选择的输出设备，排除本应用创建的 AEC 虚拟输出。"""
     try:
         r = subprocess.run(
             ["pactl", "list", "short", "sinks"],
@@ -111,7 +112,7 @@ def list_pa_sinks() -> list[dict[str, str]]:
 
 
 def get_default_pa_sink() -> Optional[str]:
-    """Return PulseAudio's current default sink, if available."""
+    """读取 PulseAudio 当前默认输出设备；查询失败或结果为空时返回 None。"""
     try:
         r = subprocess.run(
             ["pactl", "get-default-sink"], capture_output=True, text=True, timeout=5
@@ -123,7 +124,7 @@ def get_default_pa_sink() -> Optional[str]:
 
 
 def get_pa_sink_volume(sink_name: str) -> Optional[int]:
-    """Return the average PulseAudio sink volume as a percentage."""
+    """读取输出设备各声道百分比音量，返回平均值，查询失败返回 None。"""
     try:
         r = subprocess.run(
             ["pactl", "get-sink-volume", sink_name],
@@ -145,9 +146,10 @@ def get_pa_sink_volume(sink_name: str) -> Optional[int]:
 
 
 class SpeakerSelector:
-    """Thread-safe, live-selectable PulseAudio output routing."""
+    """以锁保护当前扬声器选择，并在设备变化时刷新可用输出。"""
 
     def __init__(self, preferred_hint: Optional[str], fallback_hint: Optional[str]):
+        """保存首选和备用设备提示，初始化选择状态并立即查询可用扬声器。"""
         self._lock = threading.Lock()
         self._preferred_hint = preferred_hint
         self._fallback_hint = fallback_hint
@@ -159,6 +161,7 @@ class SpeakerSelector:
     def _matching_sink(
         speakers: list[dict[str, str]], hint: Optional[str]
     ) -> Optional[str]:
+        """在设备 ID 或显示标签中匹配给定提示，返回首个匹配的设备 ID。"""
         if not hint:
             return None
         for speaker in speakers:
@@ -167,6 +170,10 @@ class SpeakerSelector:
         return None
 
     def refresh(self) -> dict:
+        """刷新设备列表并保留仍有效的选择，再按首选/备用/系统默认规则选取输出。
+
+        配置了明确首选时不会悄悄改用不匹配的默认设备。
+        """
         speakers = list_pa_sinks()
         available = {speaker["id"] for speaker in speakers}
         default_sink = get_default_pa_sink()
@@ -185,6 +192,7 @@ class SpeakerSelector:
             return self._state_unlocked()
 
     def _state_unlocked(self) -> dict:
+        """在调用方持锁时组装设备列表、选择结果和可用音量快照。"""
         state = {
             "speakers": [dict(speaker) for speaker in self._speakers],
             "selected": self._sink,
@@ -196,13 +204,16 @@ class SpeakerSelector:
         return state
 
     def state(self) -> dict:
+        """重新查询当前输出设备并返回最新路由状态。"""
         return self.refresh()
 
     def get_sink(self) -> Optional[str]:
+        """在锁内读取当前选中的物理输出 ID。"""
         with self._lock:
             return self._sink
 
     def select(self, sink_id: str) -> dict:
+        """校验用户选择的设备仍存在，更新首选路由并返回状态；设备消失时返回错误。"""
         speakers = list_pa_sinks()
         available = {speaker["id"] for speaker in speakers}
         if sink_id not in available:
@@ -217,7 +228,7 @@ class SpeakerSelector:
             return self._state_unlocked()
 
     def set_volume(self, volume: int) -> dict:
-        """Set the selected physical sink volume and return refreshed state."""
+        """将音量限制在 0–100%，设置当前选中输出并返回刷新后的设备状态。"""
         volume = max(0, min(100, int(volume)))
         sink_id = self.get_sink()
         if not sink_id:
@@ -245,7 +256,7 @@ class SpeakerSelector:
 
 
 class PulseAudioAEC:
-    """Managed WebRTC echo-cancellation route for one mic and selected speaker."""
+    """拥有单个麦克风/扬声器组合的回声消除模块及虚拟设备名称。"""
 
     def __init__(
         self,
@@ -253,6 +264,7 @@ class PulseAudioAEC:
         source_name: Optional[str] = None,
         sink_name: Optional[str] = None,
     ):
+        """保存物理输入源并生成实例独有的虚拟输入/输出名称，此时不加载模块。"""
         self.source_master = source_master
         suffix = uuid.uuid4().hex[:8]
         self.source_name = source_name or f"{AEC_SOURCE_NAME}_{suffix}"
@@ -263,9 +275,11 @@ class PulseAudioAEC:
 
     @property
     def active(self) -> bool:
+        """根据是否持有 PulseAudio 模块 ID 判断 AEC 路由是否已创建。"""
         return self.module_id is not None
 
     def start(self, sink_master: str) -> bool:
+        """先释放旧路由，再为指定物理扬声器加载 WebRTC AEC 模块，记录成功 ID 或失败原因。"""
         self.stop()
         self.last_error = None
         args = [
@@ -300,6 +314,7 @@ class PulseAudioAEC:
             return False
 
     def stop(self):
+        """卸载本实例拥有的 AEC 模块；卸载失败时保留所有权并抛出错误。"""
         if self.module_id is None:
             return
         result = subprocess.run(

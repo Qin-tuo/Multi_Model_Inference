@@ -1,11 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""YuNet TensorRT inference with the OpenCV 4.11.0 decoding contract.
-
-Decoder translated from OpenCV modules/objdetect/src/face_detect.cpp,
-commit 31b0eeea0b44b370fd0712312df4214d4ae1b158 (Apache-2.0).
-The original model is MIT licensed. OpenCV is used only for image transforms
-and NMS here; neural-network execution always uses TensorRT.
-"""
+"""YuNet 人脸检测的 TensorRT 预后处理：将网络多尺度输出还原为原图人脸框和五点。"""
 
 import cv2
 import numpy as np
@@ -14,6 +8,10 @@ from app.tensorrt_runner import TensorRTModel
 
 
 def prepare_face(image):
+    """将原图等比例缩小至最长边不超过 640，右下补零后构造 BGR float32 NCHW 输入。
+
+    返回实际缩放信息；小图不会被放大，后处理据此还原原图坐标。
+    """
     if (
         image.dtype != np.uint8
         or image.ndim != 3
@@ -37,6 +35,7 @@ def prepare_face(image):
 
 
 def decode_yunet(outputs, threshold=0.5, nms_threshold=0.3, top_k=5000):
+    """解码 YuNet 各尺度的分类、目标性、框与关键点输出，按阈值和 NMS 筛选人脸。"""
     expected = {
         f"{kind}_{stride}"
         for kind in ("cls", "obj", "bbox", "kps")
@@ -88,7 +87,10 @@ def decode_yunet(outputs, threshold=0.5, nms_threshold=0.3, top_k=5000):
 
 
 class TensorRTFace:
+    """负责 YuNet 的固定输入处理、多尺度解码与原图坐标还原。"""
+
     def __init__(self, build, threshold=0.5, nms_threshold=0.3, max_faces=4):
+        """加载 YuNet 引擎并保存检测阈值、NMS 阈值和最大人脸数。"""
         if (
             not 0 < threshold <= 1
             or not 0 < nms_threshold <= 1
@@ -108,6 +110,7 @@ class TensorRTFace:
         self.provider = "YuNet " + self.model.provider
 
     def infer(self, image):
+        """执行人脸检测，将有效框和五点映射回原图，并按数量预算返回结果。"""
         inputs, transform = prepare_face(image)
         faces = decode_yunet(
             self.model.infer(inputs), self.threshold, self.nms_threshold
@@ -117,6 +120,7 @@ class TensorRTFace:
         faces[:, 1:14:2] /= sy
         height, width = transform["source_hw"]
         result = []
+        # 按置信度降序处理，使数量上限优先保留更可靠的人脸。
         for row in sorted(faces, key=lambda f: -float(f[14])):
             x, y, w, h = row[:4]
             if (
@@ -140,4 +144,5 @@ class TensorRTFace:
         return result
 
     def close(self):
+        """释放 YuNet 引擎资源。"""
         self.model.close()

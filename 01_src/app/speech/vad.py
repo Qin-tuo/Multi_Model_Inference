@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Silero state, utterance segmentation and freshness checks.
+"""Silero 有状态判定、语句分段与采集新鲜度检查。
 
-Extracted from the upstream-derived audio pipeline; behavior is preserved.
+实时麦克风和文件输入共享分段规则，慢速 ASR/LLM 工作交给独立对话线程。
 """
 
 import time
@@ -33,9 +33,10 @@ from app.speech.types import SpeechOnset, SpeechSegment
 
 
 class SileroVAD:
-    """Stateful streaming wrapper for faster-whisper's Silero VAD model."""
+    """持有 CPU ONNX 会话、循环状态及上下文样本的流式 VAD。"""
 
     def __init__(self):
+        """核验 VAD 模型摘要，创建单线程 CPU ONNX 会话并初始化循环状态。"""
         import onnxruntime as ort
 
         entry = load_artifact_manifest(MODEL_DIR / "speech.json")["vad"]
@@ -59,7 +60,7 @@ class SileroVAD:
         self.reset()
 
     def __call__(self, raw_audio: bytes) -> float:
-        """Return speech probability for raw int16 PCM audio at 16 kHz."""
+        """处理一块 512 样本的 16 kHz PCM16 音频，更新循环状态并返回语音概率。"""
         pcm = np.frombuffer(raw_audio, dtype=np.int16).astype(np.float32) / 32768.0
         if pcm.size != SILERO_CHUNK_SAMPLES:
             raise ValueError(
@@ -76,15 +77,17 @@ class SileroVAD:
         return float(output.reshape(-1)[0])
 
     def reset(self):
+        """清零隐藏状态、细胞状态和前置上下文，防止跨语句或跨采集批次累积证据。"""
         self._h = np.zeros((1, 1, 128), dtype=np.float32)
         self._c = np.zeros((1, 1, 128), dtype=np.float32)
         self._context = np.zeros((1, 64), dtype=np.float32)
 
 
 class SpeechSegmenter:
-    """Upstream Silero/RMS/lookback/end-silence rules, independent of the source."""
+    """组合能量、Silero 概率、回看缓存和尾部静音，形成有界语句。"""
 
     def __init__(self, config, silero):
+        """建立回看与当前语句缓冲，重置起点确认、静音及超长语句排空状态。"""
         self.config, self.silero = config, silero
         self.lookback = deque(maxlen=int(config.lookback_ms / config.chunk_ms))
         self.speech_raw = []
@@ -101,6 +104,10 @@ class SpeechSegmenter:
         silero.reset()
 
     def feed(self, raw, received_time):
+        """逐块更新语音/静音证据，产生起点通知、完整语段或丢弃原因。
+
+        确认起点需要持续语音，结束由尾部静音或时长上限触发；超长输入进入等待安静状态，短或低能量语句被拒绝。
+        """
         self.onset = self.discarded = None
         cfg = self.config
         if len(raw) != SILERO_CHUNK_SAMPLES * 2:
@@ -184,7 +191,10 @@ class SpeechSegmenter:
 
 
 def segment_pcm(pcm: bytes, vad_cfg, silero):
-    """File replay using the same segmenter; timestamps are file offsets, not device time."""
+    """用同一分段器遍历有限 PCM 文件，时间戳采用文件偏移秒数。
+
+    仅在文件边界补齐块及尾部静音；超出语句时长预算时报错，补齐不代表真实声学端点。
+    """
     segmenter = SpeechSegmenter(vad_cfg, silero)
     frame_bytes = SILERO_CHUNK_SAMPLES * 2
     # Pad only for the finite file boundary; this is never a measured acoustic endpoint.
@@ -215,7 +225,10 @@ def vad_loop(
     capture_gate=None,
     max_age_seconds=1.0,
 ):
-    """Continuous bounded input; slow inference runs in the conversation worker."""
+    """从有界麦克风队列消费音频，检查批次、顺序和帧龄后输出已接纳的语段。
+
+    处理门控或输入切换后要求重新积累静音，失效语句通知控制器丢弃；本循环不执行慢速模型推理。
+    """
     if silero is None:
         raise RuntimeError("Prepared Silero VAD is required")
     segmenter = SpeechSegmenter(vad_cfg or VADConfig(), silero)
@@ -227,6 +240,7 @@ def vad_loop(
     quiet_frames = 0
 
     def discard(reason):
+        """通知上层放弃已登记的当前话语，并清除本地起点通知身份。"""
         nonlocal notified
         if notified and on_discard:
             on_discard(notified, reason)

@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Small versioned face gallery backed by the application's SQLAlchemy dependency.
+"""保存标签和人脸特征的 SQLite 图库，不保存原始图像。
 
-Enrollment is explicit. Matching labels do not authorize conversation or tools.
-Embedding spaces are versioned so a replacement model cannot reuse incompatible
-profiles silently. No images or camera frames are persisted in this store.
+只在相同模型特征空间内匹配；匹配标签不授予对话或工具执行权限。
 """
 
 from pathlib import Path
@@ -28,7 +26,10 @@ from app.face_tasks import normalize_embedding
 
 
 class IdentityGallery:
+    """持久化有限数量的标签和特征，按模型空间隔离相似度匹配。"""
+
     def __init__(self, path, capacity=32, threshold=0.5, margin=0.05, dimensions=512):
+        """校验特征维数和匹配阈值，打开数据库并确保身份表存在。"""
         if (
             dimensions not in (128, 512)
             or not -1 <= threshold <= 1
@@ -58,6 +59,7 @@ class IdentityGallery:
         metadata.create_all(self.engine)
 
     def enroll(self, label, space, embedding):
+        """显式登记或替换一个标签的归一化特征，并在事务内检查图库容量。"""
         label = label.strip()
         if not 1 <= len(label) <= 64 or not space or len(space) > 200:
             raise ValueError("Invalid identity label or model space")
@@ -85,6 +87,7 @@ class IdentityGallery:
         return {"label": label, "space": space}
 
     def match(self, space, embedding):
+        """在同一模型空间内按余弦相似度匹配，区分匹配成功、未知和候选间距不足的歧义状态。"""
         vector = normalize_embedding(embedding, self.dimensions)
         with self.lock, self.engine.connect() as connection:
             rows = connection.execute(
@@ -131,6 +134,7 @@ class IdentityGallery:
         }
 
     def list(self):
+        """按标签返回有容量上限的身份摘要，不暴露特征二进制数据。"""
         with self.lock, self.engine.connect() as connection:
             return [
                 dict(row._mapping)
@@ -142,6 +146,7 @@ class IdentityGallery:
             ]
 
     def remove(self, label):
+        """在事务内删除指定标签，返回是否确实删除了记录。"""
         with self.lock, self.engine.begin() as connection:
             return bool(
                 connection.execute(
@@ -150,4 +155,5 @@ class IdentityGallery:
             )
 
     def close(self):
+        """释放 SQLAlchemy 连接池；已提交的身份记录仍保留在磁盘。"""
         self.engine.dispose()

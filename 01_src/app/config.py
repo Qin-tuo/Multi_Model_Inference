@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Configuration — loads settings.yaml into typed dataclasses."""
+"""类型化配置与覆盖规则：基础字段、当前平台配置、显式参数和环境变量。
+
+所有入口共享同一校验器，限制资源预算并检查各模块之间的参数约束。
+"""
 
 import os
 from dataclasses import asdict, dataclass, field
@@ -25,6 +28,8 @@ import yaml
 
 @dataclass
 class LLMConfig:
+    """图文/语言请求参数，包含 token 预算、生成设置和以秒为单位的时限。"""
+
     model: str = ""
     base_url: str = "http://localhost:8080"
     backend: str = "openai"
@@ -33,6 +38,7 @@ class LLMConfig:
     timeout: float = 120.0
     context_tokens: int = 2048
     chat_template_kwargs: Dict[str, bool] = field(
+        # 每个配置对象独享模板参数字典，避免可变默认值相互影响。
         default_factory=lambda: {"enable_thinking": False}
     )
     system_prompt: str = "You are a helpful AI assistant."
@@ -43,6 +49,8 @@ class LLMConfig:
 
 @dataclass
 class STTConfig:
+    """语音识别接口、原生后端地址及输入时长预算。"""
+
     model: str = "qwen3-asr"
     base_url: str = "http://127.0.0.1:8621/v1"
     backend: str = "llama_qwen3_asr"
@@ -54,6 +62,8 @@ class STTConfig:
 
 @dataclass
 class TTSConfig:
+    """语音合成接口、音色和分段字符上限，区分单次合成与整轮输出预算。"""
+
     model: str = "matcha-icefall-zh-en"
     base_url: str = "http://127.0.0.1:8621/v1"
     backend: str = "matcha_trt"
@@ -68,6 +78,8 @@ class TTSConfig:
 
 @dataclass
 class AudioConfig:
+    """文件/设备音频模式、路由、输出保留数量和语音打断设置。"""
+
     enabled: bool = True
     input_mode: str = "file"
     output_mode: str = "file"
@@ -86,6 +98,8 @@ class AudioConfig:
 
 @dataclass
 class VADConfig:
+    """VAD 概率/能量判定及时间参数；字段名分别标明毫秒或秒。"""
+
     speech_threshold: float = 0.008
     silence_duration_ms: int = 500
     lookback_ms: int = 250
@@ -99,6 +113,8 @@ class VADConfig:
 
 @dataclass
 class VisionConfig:
+    """相机后端、图像几何、采集频率、缓存字节预算和图文提示。"""
+
     backend: str = "v4l2"
     serial: Optional[str] = None
     camera_device: Union[int, str] = 0
@@ -120,6 +136,8 @@ class VisionConfig:
 
 @dataclass
 class FaceConfig:
+    """基于归一化图像位置的人脸居中/尺寸规则及连续稳定帧数。"""
+
     enabled: bool = True
     dead_zone: float = 0.12
     good_frame_zone: float = 0.18
@@ -129,6 +147,8 @@ class FaceConfig:
 
 @dataclass
 class PerceptionConfig:
+    """视觉模型清单、距离门控、每帧目标数量、轨迹有效期及处理频率。"""
+
     backend: str = "tensorrt"
     model_manifest: str = "03_models/vision-runtime.json"
     max_pose_people: int = 1
@@ -156,6 +176,8 @@ class PerceptionConfig:
 
 @dataclass
 class GestureConfig:
+    """挥手和静止张掌的时间证据、掌宽归一化位移阈值及重触发规则。"""
+
     enabled: bool = True
     greetings_enabled: bool = True
     stop_hold_seconds: float = 1.0
@@ -175,12 +197,16 @@ class GestureConfig:
 
 @dataclass
 class SessionConfig:
+    """短会话历史开关和保留的完整轮次数量。"""
+
     enabled: bool = True
     max_turns: int = 4
 
 
 @dataclass
 class ActionsConfig:
+    """本地动作数据库、请求/记录容量、单轮调用预算及提醒时区。"""
+
     enabled: bool = False
     database: str = str(RUNTIME_DIR / "runtime-data/actions/actions.sqlite")
     max_calls_per_turn: int = 2
@@ -193,6 +219,8 @@ class ActionsConfig:
 
 @dataclass
 class WebConfig:
+    """Web 连接、队列、消息、请求体和线程池预算；时限以秒计，容量以字节或条数计。"""
+
     ui_fps: float = 10.0
     host: str = "0.0.0.0"
     port: int = 8090
@@ -213,6 +241,8 @@ class WebConfig:
 
 @dataclass
 class BackendsConfig:
+    """本机运行目录和原生推理进程参数，显式约束线程、槽位及缓存大小。"""
+
     stack_root: str = str(RUNTIME_DIR)
     llm_threads: int = 4
     llm_gpu_layers: int = 99
@@ -246,6 +276,8 @@ _SECTIONS = [
 
 @dataclass
 class Config:
+    """聚合所有模块配置，并提供统一的加载、验证和有效配置快照。"""
+
     backends: BackendsConfig = field(default_factory=BackendsConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     stt: STTConfig = field(default_factory=STTConfig)
@@ -311,6 +343,10 @@ class Config:
         return config
 
     def validate(self):
+        """检查各模块参数类型之外的取值范围及跨模块约束。
+
+        覆盖后端并发、网络端点、音视频格式、时间预算、目标数量和手势新鲜度；非法组合立即报错。
+        """
         b = self.backends
         if not (
             1 <= b.llm_threads <= 8
@@ -547,10 +583,12 @@ class Config:
             raise ValueError("Invalid gesture size/cooldown")
 
     def effective(self) -> dict:
+        """将嵌套配置数据类展开为普通字典，供服务快照和界面核对。"""
         return asdict(self)
 
 
 def _matches_type(value, expected) -> bool:
+    """递归校验配置值是否符合声明类型；严格区分 bool 与 int，仅 float 字段兼容整数。"""
     origin, args = get_origin(expected), get_args(expected)
     if origin is Union:
         return any(_matches_type(value, arg) for arg in args)

@@ -15,7 +15,7 @@
 # limitations under the License.
 
 
-"""Publish paired camera/results and bounded board diagnostics to Web viewers."""
+"""把同帧图像/感知结果和板端采样状态推送给现有 WebSocket 观看者。"""
 
 import logging
 from app.monitor import get_system_stats, get_jetson_model
@@ -24,6 +24,10 @@ log = logging.getLogger(__name__)
 
 
 def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None, perception=None):
+    """按界面频率读取共享预览，去重后发布 JPEG 和帧身份一致的检测结果。
+
+    检测结果无法对应当前图像时不叠加旧框；无客户端时避免编码传输载荷，来源失效事件随消息传递。
+    """
     last_key = None
     while not stop.wait(1 / fps):
         frame = cam.snapshot()
@@ -92,6 +96,7 @@ def _frame_broadcast_thread(cam, broadcaster, stop, fps, tracker=None, perceptio
 
 
 def _stats_broadcast_thread(broadcaster, stop, state, diagnostics, interval=2):
+    """周期汇总系统资源、视觉、手势、动作及语音状态，通过广播器发送有界状态更新。"""
     while not stop.is_set():
         try:
             stats = get_system_stats()

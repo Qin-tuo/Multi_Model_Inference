@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""One latest-frame worker, shared RGBD, TensorRT models and Norfair IDs.
+"""串行、限量的同帧 RGBD 感知管线。
 
-This deliberately starts with a serial, bounded baseline. Every result in a
-published scene belongs to the same frame; expensive work is gated by range
-and target limits. Scheduling/precision optimizations belong after vision capture.
+检测、姿态、外观和人脸属性共享一帧；按距离、目标数量和帧龄控制工作量，输出始终携带来源身份。
 """
 
 from copy import deepcopy
@@ -19,6 +17,10 @@ from project_paths import ROOT
 
 
 def range_from_mask(frame, mask, min_fraction=0.15, min_pixels=25):
+    """从目标 mask 内有效对齐深度估计距离，返回米制中位数、MAD 和有效像素比例。
+
+    这是沿相机深度轴的 z 值；深度不足时返回不可用原因，不将缺失值当作零距离。
+    """
     if frame.depth_m is None or frame.depth_valid is None:
         return {"available": False, "reason": "depth_unavailable"}
     if mask.shape != frame.depth_m.shape or mask.dtype != np.bool_:
@@ -53,7 +55,10 @@ def range_from_mask(frame, mask, min_fraction=0.15, min_pixels=25):
 
 
 class VisionPipeline(FrameWorker):
+    """拥有十模型、实体/人脸轨迹及身份图库的具体感知工作线程。"""
+
     def __init__(self, camera, config, tracker=None, on_result=None):
+        """组装模型集合、实体和人脸跟踪器，初始化目标选择与登记用特征缓存。"""
         super().__init__(camera, config, tracker, on_result)
         self.networks = VisionModels(
             config.model_manifest,
@@ -73,6 +78,7 @@ class VisionPipeline(FrameWorker):
         self._selected_last = None
 
     def load(self):
+        """加载全部视觉模型并按当前特征维数打开图库；失败时回收已加载模型。"""
         if self.networks.models or self.gallery is not None:
             raise RuntimeError(
                 "vision resources are already loaded; close before reloading"
@@ -93,11 +99,13 @@ class VisionPipeline(FrameWorker):
             raise
 
     def start(self):
+        """确认模型已加载后启动最新帧工作线程。"""
         if not self.networks.models:
             raise RuntimeError("Visual models have not loaded")
         super().start()
 
     def _eligible(self, row):
+        """检查目标深度是否可用且位于配置距离区间内，决定是否触发后续小模型。"""
         distance = row["range"]
         return (
             distance["available"]
@@ -107,6 +115,10 @@ class VisionPipeline(FrameWorker):
         )
 
     def process_frame(self, frame):
+        """对一帧依次执行检测分割、距离估计、特征/轨迹关联、姿态和人脸属性。
+
+        只处理预算内目标，公开结果不携带大 mask 或内部特征数组；发布前再次检查帧龄，属性输入质量错误与整帧失败分开记录。
+        """
         if not self._fresh(frame):
             raise RuntimeError("vision input frame expired")
         started = time.monotonic()
@@ -115,6 +127,7 @@ class VisionPipeline(FrameWorker):
         errors = {}
 
         def run(role, *args, **kwargs):
+            """每次模型调用前确认源帧仍有效，并累计该角色的本帧墙钟耗时。"""
             if not self._fresh(frame):
                 raise RuntimeError("vision frame expired before " + role)
             tick = time.monotonic()
@@ -125,6 +138,7 @@ class VisionPipeline(FrameWorker):
                     stages.get(role + "_ms", 0) + (time.monotonic() - tick) * 1000
                 )
 
+        # 检测先提供同帧框和 mask；随后只在有效深度与目标预算内触发附加模型。
         detections = run("detection_segmentation", frame.bgr)
         for row in detections:
             row["range"] = range_from_mask(
@@ -135,10 +149,12 @@ class VisionPipeline(FrameWorker):
             )
         people = sorted(
             (r for r in detections if r["class_id"] == 0 and self._eligible(r)),
+            # 优先处理距离较近的有效人体，受单帧姿态数量预算限制。
             key=lambda r: r["range"]["meters"],
         )[: self.config.max_pose_people]
         objects = sorted(
             (r for r in detections if r["class_id"] != 0 and self._eligible(r)),
+            # 物体特征预算优先分配给置信度较高的检测。
             key=lambda r: -r["score"],
         )[: self.config.max_object_targets]
         for role, items in (("person_reid", people), ("object_embedding", objects)):
@@ -150,7 +166,7 @@ class VisionPipeline(FrameWorker):
                 except ValueError as exc:
                     errors.setdefault(role, []).append(str(exc))
         tracked = self.entities.update(detections, frame)
-        # Only arrays needed by this one frame remain in local variables.
+        # mask 和特征向量只保留在本帧局部变量中，公开场景不携带这些大数组。
         public = []
         for row in tracked:
             value = {
@@ -171,8 +187,10 @@ class VisionPipeline(FrameWorker):
             public.append(value)
         persons = [r for r in public if r["class_id"] == 0]
         object_rows = [r for r in public if r["class_id"] != 0]
+        # 姿态需关联到已确认的人物轨迹，手势证据才不会跨人继承。
         pose_targets = sorted(
             (r for r in persons if r["track_id"] and self._eligible(r)),
+            # 优先处理距离较近的有效人体，受单帧姿态数量预算限制。
             key=lambda r: r["range"]["meters"],
         )[: self.config.max_pose_people]
         poses = []
@@ -268,6 +286,7 @@ class VisionPipeline(FrameWorker):
             except ValueError as exc:
                 item["expression"] = {"available": False, "error": str(exc)}
             attributes.append(item)
+        # 即使每次模型调用前都检查过，整轮完成时仍可能过期，发布前再次把关。
         if not self._fresh(frame):
             raise RuntimeError("vision result expired before publication")
         prominent = public_faces[0]["box_xyxy"] if public_faces else None
@@ -341,6 +360,7 @@ class VisionPipeline(FrameWorker):
         }
 
     def snapshot(self):
+        """返回深拷贝的当前场景、处理计数与模型指标，并屏蔽过期场景。"""
         with self._lock:
             result = deepcopy(self._state)
         frame = result.get("frame")
@@ -361,6 +381,7 @@ class VisionPipeline(FrameWorker):
         }
 
     def enroll(self, target, label):
+        """使用当前可见且仍新鲜的人脸特征登记标签，拒绝跨帧失效或已消失目标。"""
         with self._lock:
             value = (
                 self._face_vectors.get(target)
@@ -379,6 +400,7 @@ class VisionPipeline(FrameWorker):
         return self.gallery.enroll(label, space, vector)
 
     def select_target(self, target):
+        """选择当前观察到的实体轨迹，或以 None 取消选择，并清空旧选择快照。"""
         with self._lock:
             observed = self._state.get("frame")
             if target is not None and (
@@ -396,7 +418,11 @@ class VisionPipeline(FrameWorker):
         return {"track_id": target}
 
     def close(self):
-        # If the worker cannot join, its native contexts must remain owned.
+        # 工作线程还未退出时，不能先释放它可能正在访问的原生上下文。
+        """先确认感知线程退出，再释放模型、图库和轨迹状态。
+
+        线程未退出时不释放仍可能被调用的原生上下文；各资源释放异常会汇总上报。
+        """
         super().close()
         errors = []
         try:

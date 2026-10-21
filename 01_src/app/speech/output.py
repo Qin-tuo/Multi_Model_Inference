@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Bounded per-turn TTS output and atomic publication.
+"""单轮语音合成与输出所有权。
 
-Extracted from the upstream-derived audio pipeline; behavior is preserved.
+有界文本队列对生成端施加背压，文件先暂存再原子发布；取消和发布由轮次控制统一协调。
 """
 
 import wave
@@ -30,14 +30,16 @@ from app.speech.playback import Playback, play_audio
 
 
 class TextChunker:
-    """Chinese punctuation and bounded characters; no English word-count gate."""
+    """按中文标点和字符预算切分流式文本，首段采用较小阈值。"""
 
     def __init__(self, first_chars=8, max_chars=40):
+        """设置首段与后续段的字符上限，并初始化文本余量。"""
         self.first_chars, self.max_chars = first_chars, max_chars
         self.buffer = ""
         self.started = False
 
     def feed(self, text):
+        """逐字符接收增量文本，遇句末标点或达到上限时输出非空可读文本段。"""
         chunks = []
         for char in text:
             self.buffer += char
@@ -51,17 +53,13 @@ class TextChunker:
         return chunks
 
     def finish(self):
+        """取出剩余非空文本作为最后一段，并清空内部缓冲。"""
         text, self.buffer = self.buffer.strip(), ""
         return [text] if text and any(c.isalnum() for c in text) else []
 
 
 class SpeechOutput:
-    """One turn's bounded synthesis worker, with explicit output ownership.
-
-    中文导读：队列最多容纳两段文字，满时向生成端施加背压。文件先写
-    .partial，由 TurnController 在取消检查与提交锁内发布；已提交文件
-    与尚未交付的 PCM 分开处理，避免取消后留下可访问的半份回复。
-    """
+    """拥有一轮 TTS 工作线程及其播放器/临时文件，区分待交付输出和已提交回执。"""
 
     def __init__(
         self,
@@ -75,7 +73,9 @@ class SpeechOutput:
         on_output_start=None,
         trace=None,
     ):
+        """创建容量为两段的队列、取消事件和播放器所有者，并启动独立合成线程。"""
         self.tts, self.config, self.turn_id = tts, audio_config, turn_id
+        # 播放时再取得设备路由，允许扬声器选择在运行期间更新。
         self.output_sink = output_sink or (lambda: audio_config.output_device)
         self.queue = queue.Queue(maxsize=2)
         self.error = None
@@ -99,6 +99,7 @@ class SpeechOutput:
         self._thread.start()
 
     def submit(self, text):
+        """将文本段送入有界队列，队列满时等待并持续检查取消或线程失败。"""
         while self._thread.is_alive():
             self._check()
             if self.error:
@@ -111,21 +112,27 @@ class SpeechOutput:
         raise RuntimeError(self.error or "Speech worker stopped")
 
     def _check(self):
+        """检查本地中断与轮次取消事件，任何一个成立都拒绝继续交付输出。"""
         from app.request_io import TurnCancelled
 
         if self._abort.is_set() or self.cancel_event.is_set():
             raise TurnCancelled("Speech output cancelled")
 
     def cancel(self):
+        """设置本地中断事件，通知 TTS 中断当前请求并终止本轮播放器。"""
         self._abort.set()
         self.tts.cancel(self._abort)
         self._playback.cancel()
 
     def idle(self):
+        """仅在线程已经退出时报告本地语音输出空闲。"""
         return not self._thread.is_alive()
 
     def publish(self):
-        """Caller serializes this commit with turn cancellation."""
+        """确认合成完成后将暂存 WAV 原子替换为正式文件，并生成交付回执。
+
+        调用方必须在轮次提交锁内与取消串行化；仅清理符合本应用命名规则且超出保留数量的旧回复。
+        """
         self._check()
         if self._thread.is_alive():
             raise RuntimeError("Speech output is still running")
@@ -139,6 +146,7 @@ class SpeechOutput:
                     for p in path.parent.glob("reply-*.wav")
                     if p != path and re.fullmatch(r"reply-[0-9a-f]{32}\.wav", p.name)
                 ),
+                # 按修改时间及文件名稳定排序，保留最近的完整回复文件。
                 key=lambda p: (p.stat().st_mtime_ns, p.name),
                 reverse=True,
             )
@@ -155,6 +163,7 @@ class SpeechOutput:
         return self.receipt
 
     def _begin_output(self):
+        """在首次实际输出前检查取消并调用开始回调，避免重复标记交付开始。"""
         self._check()
         if not self._output_started:
             if self.on_output_start:
@@ -162,6 +171,10 @@ class SpeechOutput:
             self._output_started = True
 
     def _run(self):
+        """依次合成队列文本，校验 PCM 格式与整轮时长预算，再写暂存文件或播放。
+
+        文件发布留给提交阶段；失败时保存错误并清理未交出的临时文件。
+        """
         writer = None
         temporary = None
         path = None
@@ -242,6 +255,10 @@ class SpeechOutput:
                 temporary.unlink()
 
     def close(self, success=True):
+        """正常结束时发送队列结束标记，失败时取消，再等待工作线程释放。
+
+        未提交的临时输出在失败路径删除；成功且未延迟提交时调用 publish。
+        """
         if not success:
             self.cancel()
         elif self._thread.is_alive():

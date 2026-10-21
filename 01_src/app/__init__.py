@@ -13,4 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Edge Multimodal Assistant."""
+"""端侧多模型应用包：统一组织采集、感知、对话、动作和 Web 运行逻辑。"""

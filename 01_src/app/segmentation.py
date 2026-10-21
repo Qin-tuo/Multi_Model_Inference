@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-"""YOLOv8n-seg TensorRT adapter with bounded native-resolution masks.
+"""YOLOv8n-seg 的 TensorRT 适配：输出原图检测框和有内存预算的实例 mask。
 
-LetterBox, box scaling and mask decoding follow Ultralytics 8.4.175,
-commit 69c95d1add13a232382e53b3aa5094ec0c7738db (AGPL-3.0).
-OpenCV/NumPy implement those image/geometry operations; the neural network
-runs only through the shared TensorRT runner. Masks remain internal arrays.
+LetterBox、框缩放和 mask 解码遵循 Ultralytics 8.4.175（69c95d1add13a232382e53b3aa5094ec0c7738db）的约定。
 """
 
 import math
@@ -16,6 +13,10 @@ from app.tensorrt_runner import TensorRTModel
 
 
 def prepare_segmentation(image):
+    """把 uint8 BGR 原图等比例缩放、填充到 640×640，并转换为归一化 RGB NCHW 输入。
+
+    同时记录实际缩放比例和填充量，供检测框与 mask 精确还原；拒绝超出像素预算的源图。
+    """
     if (
         image.ndim != 3
         or image.shape[2] != 3
@@ -52,6 +53,10 @@ def prepare_segmentation(image):
 
 
 def native_masks(prototypes, coefficients, boxes, shape, pixel_budget):
+    """将 mask 系数与原型相乘，去除填充后还原至原图，再按检测框裁剪实例 mask。
+
+    批量 mask 的总像素数受预算限制；返回只读布尔数组，避免下游修改共享结果。
+    """
     height, width = shape
     count, channels = coefficients.shape
     if count * height * width > pixel_budget:
@@ -92,6 +97,10 @@ def decode_segmentation(
     max_detections=10,
     mask_pixel_budget=1920 * 1080 * 10,
 ):
+    """筛选类别置信度、执行 NMS 并还原原图框，然后生成对应实例 mask。
+
+    阈值、最大检测数和 mask 像素预算共同限制单帧后处理开销。
+    """
     if (
         set(outputs) != {"output0", "output1"}
         or outputs["output0"].shape != (1, 116, 8400)
@@ -135,7 +144,10 @@ def decode_segmentation(
 
 
 class DetectionSegmentation:
+    """拥有检测分割引擎和后处理预算，向共享感知管线返回原图目标及 mask。"""
+
     def __init__(self, build, entry, threshold=0.25, iou=0.45, max_detections=10):
+        """核对类别清单并加载分割引擎，保存阈值和单帧检测数量预算。"""
         if not 0 < threshold < 1 or not 0 < iou < 1 or not 1 <= max_detections <= 10:
             raise ValueError("Invalid detection thresholds or capacity")
         classes = entry["class_names"]
@@ -153,6 +165,7 @@ class DetectionSegmentation:
         self.provider = self.model.provider
 
     def infer(self, image):
+        """串联图像预处理、引擎推理和框/mask 解码，返回带类别语义的原图目标。"""
         inputs, transform = prepare_segmentation(image)
         detections, masks = decode_segmentation(
             self.model.infer(inputs),
@@ -177,4 +190,5 @@ class DetectionSegmentation:
         return result
 
     def close(self):
+        """释放检测分割引擎资源。"""
         self.model.close()

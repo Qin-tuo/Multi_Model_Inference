@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""One bounded request worker around the upstream VLM streaming sequence.
+"""当前轮次的唯一接纳、取消和资源释放协调者。
 
-Owns text, file/live audio, VLM, session context, local actions, bounded TTS
-output and whole-turn cancellation.
+文字、文件语音、实时语句及提醒共享一个有界工作线程；短会话和工具提交状态也由此管理。
 """
 
 import queue
@@ -42,6 +41,7 @@ class TurnController:
         perception=None,
         actions=None,
     ):
+        """绑定模型与应用资源，创建单元素请求队列、轮次锁及有界历史/手势状态。"""
         self.config, self.llm, self.broadcaster, self.camera = (
             config,
             llm,
@@ -70,6 +70,7 @@ class TurnController:
         self._last_voice = None
 
     def start(self):
+        """在上一轮释放已确认后启动唯一对话线程，并重建短会话身份和实时语音状态。"""
         if self._thread and self._thread.is_alive():
             return
         with self._lock:
@@ -87,6 +88,7 @@ class TurnController:
         self._thread.start()
 
     def submit(self, text, use_image=False, request_id=None):
+        """校验用户文本长度和非空性，再交给统一接纳逻辑生成轮次。"""
         if not isinstance(text, str) or not text.strip() or len(text) > 4000:
             raise ValueError("Text must contain 1–4000 characters")
         return self._admit(
@@ -94,6 +96,7 @@ class TurnController:
         )
 
     def submit_audio(self, data, use_image=False, request_id=None):
+        """校验语音功能和 WAV 格式/时长，将提取的 PCM 作为文件语音请求接纳。"""
         if self.stt is None or self.vad is None:
             raise ValueError("Speech input is not enabled")
         pcm = wav_pcm(data, self.config.stt.max_seconds)
@@ -102,6 +105,10 @@ class TurnController:
         )
 
     def submit_segment(self, segment):
+        """把实时完整语段交给已预留的话语身份，核对批次、失效事件、结束原因和帧龄。
+
+        语段可在旧轮次释放期间暂存，但不会绕过单轮接纳限制。
+        """
         if self.stt is None:
             raise ValueError("Speech input is not enabled")
         with self._lock:
@@ -131,6 +138,7 @@ class TurnController:
             }
 
     def _voice_state_locked(self):
+        """在调用方持锁时生成待处理话语摘要及最近处理结果，不复制大音频数组。"""
         voice = self._voice
         return {
             "pending": None
@@ -150,9 +158,11 @@ class TurnController:
         }
 
     def _notify_voice_locked(self):
+        """广播当前实时话语的捕获/等待/丢弃状态，调用方需持轮次锁。"""
         self.broadcaster.send({"type": "voice_state", **self._voice_state_locked()})
 
     def _discard_voice_locked(self, reason):
+        """放弃已预留话语并记录原因、发送状态更新，返回是否确实有话语被丢弃。"""
         if self._voice is None:
             return False
         self._last_voice = {
@@ -165,6 +175,7 @@ class TurnController:
         return True
 
     def _expire_voice_locked(self):
+        """检查待处理话语的输入失效事件及等待期限，及时清除已不可用的预约。"""
         if self._voice is not None:
             if self._voice["invalidated"].is_set():
                 self._discard_voice_locked("input_epoch_changed")
@@ -172,13 +183,17 @@ class TurnController:
                 self._discard_voice_locked("pending_voice_expired")
 
     def discard_voice(self, utterance_id, reason="input_discarded"):
+        """只丢弃身份与指定 utterance_id 相同的预约，避免迟到通知影响新话语。"""
         with self._lock:
             if self._voice is not None and self._voice["turn_id"] == utterance_id:
                 return self._discard_voice_locked(reason)
             return False
 
     def begin_voice(self, onset: SpeechOnset):
-        """Reserve one utterance; cancel only the turn observed at confirmation."""
+        """确认一个新鲜语音起点并预留唯一话语；需要打断时只绑定当时观察到的活动轮次。
+
+        旧输入、较早话语和未启用的打断被拒绝；锁外执行取消，防止把延迟取消施加给后续请求。
+        """
         target = None
         with self._lock:
             self._expire_voice_locked()
@@ -238,6 +253,7 @@ class TurnController:
         }
 
     def _dispatch_voice(self):
+        """在旧轮次释放且完整语段已到达后，将仍有效的预约转为正式麦克风请求。"""
         with self._lock:
             self._expire_voice_locked()
             voice = self._voice
@@ -258,11 +274,15 @@ class TurnController:
                 self._discard_voice_locked(str(exc))
 
     def conversation_busy(self):
+        """在锁内检查是否仍有活动轮次，包括取消及释放确认阶段。"""
         with self._lock:
             return self._active is not None
 
     def _admit(self, data, use_image, request_id=None, *, _voice_id=None):
-        """为请求分配身份与取消事件；当前轮次未释放时不接纳下一轮。"""
+        """校验请求身份、输入摘要和资源状态后，原子分配轮次及取消事件并放入有界队列。
+
+        同 ID 同输入可返回已有接纳回执；当前轮次或语音预约未释放时拒绝新请求，图像请求必须有新鲜图像或可重放回执。
+        """
         if type(use_image) is not bool:
             raise ValueError("use_image must be boolean")
         if request_id is not None and (
@@ -349,6 +369,10 @@ class TurnController:
             }
 
     def cancel(self, turn_id=None, reason="user"):
+        """标记目标轮次取消并阻止后续输出/工具开始，随后中断匹配的模型请求和本轮播放器。
+
+        返回仅表示取消已接纳，资源释放另行确认；已结束轮次及其他轮次不会被误取消。
+        """
         with self._lock:
             discarded = False
             if self._voice is not None and (
@@ -393,7 +417,10 @@ class TurnController:
         }
 
     def handle_gesture(self, event):
-        """Route fresh perception events through the same admission/cancel owner."""
+        """对感知事件去重并校验来源/时效，将挥手接入问候轮次、张掌接入统一取消。
+
+        问候受忙闲、静音和冷却限制；停止绑定事件确认时的轮次，不能误取消之后到来的新请求。
+        """
         now = time.monotonic()
         with self._lock:
             decision = {"type": "gesture", "event": event, "accepted": False}
@@ -467,6 +494,7 @@ class TurnController:
         return decision
 
     def audio_file(self, turn_id):
+        """将合法轮次 ID 映射到已发布 WAV，仅允许真实普通文件，拒绝任意路径与符号链接。"""
         if not re.fullmatch(r"[0-9a-f]{32}", turn_id):
             return None
         folder = Path(self.config.audio.output_directory).expanduser().resolve()
@@ -474,6 +502,7 @@ class TurnController:
         return path if path.is_file() and not path.is_symlink() else None
 
     def session_state(self):
+        """返回短会话身份和保留轮数，明确历史仅在进程内保存且不保留图片。"""
         with self._lock:
             return {
                 "id": self._session_id,
@@ -485,6 +514,7 @@ class TurnController:
             }
 
     def clear_history(self, session_id):
+        """仅在会话身份匹配且没有活动轮次/语音预约时清空历史，并生成新的会话 ID。"""
         with self._lock:
             if session_id != self._session_id:
                 raise RuntimeError("Session changed; refresh before clearing")
@@ -500,6 +530,7 @@ class TurnController:
             return {"cleared": True, "session": state}
 
     def _context_messages(self):
+        """将已完成历史重建为配对文本和闭合工具消息；图像轮只保留文字及图像已丢弃的说明。"""
         messages = []
         for item in self._history:
             text = item["user"]
@@ -511,6 +542,7 @@ class TurnController:
         return messages
 
     def state(self):
+        """在锁内汇总就绪、活动阶段、释放观测、会话及最近结果，释放未确认时不宣称可接纳。"""
         with self._lock:
             self._expire_voice_locked()
             return {
@@ -539,7 +571,7 @@ class TurnController:
             }
 
     def _run(self):
-        """Own admission order; a per-turn executor owns input/generation/commit."""
+        """按队列顺序交由 TurnExecution 执行一轮，空闲时尝试派发实时语段和到期提醒。"""
         while not self._stop.is_set() or not self._queue.empty():
             self._dispatch_voice()
             try:
@@ -561,7 +593,10 @@ class TurnController:
         send,
         registered,
     ):
-        """At most two serial tool executions, still owned by the same turn."""
+        """在同一轮内组织模型与有限次串行工具交互，验证参数并收集已提交回执。
+
+        工具开始边界与取消共用轮次锁，已完成操作保留；模型流未完整结束时不执行不完整工具调用。
+        """
         if not registered:
             if self.actions is None and not request.get("gesture"):
                 system_prompt = (
@@ -589,6 +624,7 @@ class TurnController:
         result["model_rounds"] = []
 
         def check():
+            """在下一次模型或工具操作前检查轮次取消与应用停止信号。"""
             if request["cancel_event"].is_set() or self._stop.is_set():
                 raise TurnCancelled("Turn cancelled before next tool/model operation")
 
@@ -683,10 +719,12 @@ class TurnController:
 
     def _traced_model(self, request, *args, **kwargs):
         # Host iterator lifetime includes consumer backpressure; not GPU decode time.
+        """为模型迭代器整个消费周期计时，包括消费端背压，不能将其当作纯 GPU 解码耗时。"""
         with request["trace"].span("llm"):
             yield from self.llm.generate_stream(*args, **kwargs)
 
     def _dispatch_notice(self):
+        """仅在应用空闲且允许通知时领取到期提醒并接入普通输出轮次，接纳失败则释放领取。"""
         if (
             self.actions is None
             or self._stop.is_set()
@@ -725,7 +763,10 @@ class TurnController:
             )
 
     def _wait_for_release(self, request, adapters):
-        """Keep admission closed until local output and native workers are idle."""
+        """持续观测本地输出和已使用后端是否空闲，全部确认后才开放下一轮接纳。
+
+        观察超过阈值仍未确认时暴露 release_unconfirmed；停止请求可结束等待，但不会伪造已释放状态。
+        """
         started = time.monotonic()
         warned = False
         while True:
@@ -763,6 +804,7 @@ class TurnController:
                 return False
 
     def close(self):
+        """停止接纳并取消当前轮次，等待对话线程退出；线程或后端释放未确认时明确报错。"""
         self._stop.set()
         self.cancel(reason="shutdown")
         if self._thread:

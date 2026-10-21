@@ -13,11 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Camera — shared latest RGB/RGBD frame and a bounded JPEG history.
+"""相机唯一采集者与共享 RGBD 快照。
 
-The background thread owns hardware reads and publishes frames into a
-timestamped ring buffer. Consumers such as the web UI, face tracker, and VLM
-capture use the latest buffered frame instead of competing for VideoCapture.
+最新原始图像供推理使用，语音回看窗口只保存有字节预算的 JPEG；消费者不竞争底层设备读取。
 """
 
 import base64
@@ -38,6 +36,8 @@ PRE_SPEECH_SECS = 0.5
 
 @dataclass(frozen=True)
 class FrameSnapshot:
+    """一帧 RGB/JPEG、可选米制深度及失效事件的不可变容器；默认数组由消费者只读共享。"""
+
     frame_id: int
     source_epoch: str
     received_monotonic: float
@@ -50,6 +50,7 @@ class FrameSnapshot:
     sensor: dict | None = None
 
     def metadata(self):
+        """生成可序列化的帧身份、主机接收时间和图像几何信息，不携带大图像数组。"""
         result = {
             "frame_id": self.frame_id,
             "source_epoch": self.source_epoch,
@@ -66,12 +67,7 @@ class FrameSnapshot:
 
 
 class Camera:
-    """One owner reads V4L2 RGB or native RealSense RGBD. Consumers share frames.
-
-    Raw depth stays attached to the latest RGB frame; only JPEG is retained
-    for the speech lookback window. The two backends share invalidation and
-    recovery behavior, with no fallback from a failed RGBD source to RGB-only.
-    """
+    """统一管理 V4L2 或 RealSense 的采集、重连、帧失效和有界图像缓存。"""
 
     _backend_config_lock = threading.Lock()
     _configured_select_timeout = None
@@ -90,6 +86,7 @@ class Camera:
         backend: str = "v4l2",
         serial: str | None = None,
     ):
+        """保存采集模式、帧龄和缓存预算，初始化来源批次及线程状态；此时不打开设备。"""
         if min(width, height, capture_fps, stale_after, buffer_bytes_limit) <= 0:
             raise ValueError("Camera sizes, rates and limits must be positive")
         self.stale_after = stale_after
@@ -127,10 +124,8 @@ class Camera:
         self._state = "stopped"
         self._open_attempts = self._failures = self._reconnects = 0
         self._ever_streamed = False
-        # The camera can ignore the requested 640x480 mode and return
-        # 1920x1080 BGR frames. Keeping a 16.5 second raw ring at 10 FPS would
-        # retain about 979 MiB. Preserve the temporal window as JPEG bytes and
-        # keep only the newest frame raw for face tracking.
+        # 相机可能返回比请求更大的图像；以原始帧保存长回看窗口会占用大量板载内存。
+        # 因此历史只存 JPEG，原始 RGBD 仅保留最新一帧，并同时限制帧数和字节数。
         self._ring: deque[tuple[float, bytes]] = deque(
             maxlen=max(1, int(capture_fps * (MAX_SPEECH_SECS + PRE_SPEECH_SECS)))
         )
@@ -142,6 +137,7 @@ class Camera:
         self._actual_fps: float = 0.0
 
     def _open(self) -> bool:
+        """按显式后端打开设备并检查资源状态；RealSense 打开失败时回收其半初始化对象。"""
         if self.backend == "realsense":
             if self._source is None:
                 from app.realsense_source import RealSenseSource
@@ -176,6 +172,10 @@ class Camera:
         return True
 
     def _read_frame(self):
+        """读取一帧 BGR 或经过时间匹配的 RGBD，返回成功标记、图像和可选深度信息。
+
+        RealSense 拒绝重复计数和失配帧，将深度单位转换为米，无效值设为 NaN。
+        """
         if self.backend == "v4l2":
             ok, frame = self._cap.read()
             return ok, frame, None
@@ -221,6 +221,7 @@ class Camera:
         return False, None, None
 
     def _release_capture(self):
+        """关闭当前 RealSense/V4L2 句柄并清除引用，由采集生命周期的所有者调用。"""
         if self._source is not None:
             self._source.close()
             self._source = None
@@ -229,7 +230,7 @@ class Camera:
             self._cap = None
 
     def _sync_actual_frame_geometry(self) -> None:
-        """Record the mode accepted by the camera and calibrate for that mode."""
+        """读取 V4L2 实际接受的宽高，避免把请求尺寸误当作真实采集尺寸。"""
         if self._cap is None:
             return
         actual_width = int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -240,6 +241,7 @@ class Camera:
             self.height = actual_height
 
     def _invalidate(self, state, error=None):
+        """使当前来源的所有快照失效，更新批次标识并清空 RGBD/JPEG 缓存。"""
         with self._lock:
             self._source_invalidated.set()
             self._source_invalidated = threading.Event()
@@ -254,7 +256,10 @@ class Camera:
                 self.last_error = error
 
     def start(self) -> bool:
-        """One owner opens, reads, releases and retries; start needs a fresh frame."""
+        """启动唯一采集线程，并在限定时间内等待首个新鲜帧。
+
+        统一设置进程内 V4L2 等待时限；旧句柄未释放或启动超时会拒绝进入可用状态。
+        """
         with self._lifecycle_lock:
             if self._thread and self._thread.is_alive():
                 return self.health_check()
@@ -296,6 +301,10 @@ class Camera:
             return False
 
     def _capture_loop(self):
+        """由同一线程完成打开、读取、JPEG 缓存、失败重连和设备释放。
+
+        原始数组只发布最新帧，JPEG 历史同时受帧数和字节预算约束；重连会更换来源批次。
+        """
         interval = 1.0 / self.capture_fps
         try:
             while not self._stop.is_set():
@@ -355,7 +364,7 @@ class Camera:
                     self._failures += 1
                     self._invalidate("retrying", str(exc))
                 finally:
-                    # Only this owner releases the handle, after read returns.
+                    # 仅采集所有者在 read 返回后释放设备，避免关闭与读取相互竞争。
                     self._release_capture()
                 if self._stop.wait(self.reconnect_seconds):
                     break
@@ -366,6 +375,7 @@ class Camera:
             self._invalidate("stopped" if self._stop.is_set() else "failed")
 
     def snapshot(self, *, copy: bool = False) -> Optional[FrameSnapshot]:
+        """在锁内取得仍新鲜的 RGBD 快照；copy=True 时复制图像和深度数组，否则共享只读数据。"""
         with self._lock:
             if self._stop.is_set() or self._latest is None or self._latest_jpeg is None:
                 return None
@@ -389,6 +399,7 @@ class Camera:
             )
 
     def _encode_frame_bytes(self, frame: np.ndarray) -> Optional[bytes]:
+        """按配置质量编码 JPEG 字节，编码失败返回 None。"""
         ok, jpg = cv2.imencode(
             ".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, self.jpeg_quality]
         )
@@ -397,6 +408,7 @@ class Camera:
         return jpg.tobytes()
 
     def _encode_frame(self, frame: np.ndarray) -> Optional[str]:
+        """把 BGR 图像编码成 JPEG 的 Base64 字符串，供需要文本图像载荷的接口使用。"""
         jpg = self._encode_frame_bytes(frame)
         if jpg is None:
             return None
@@ -404,6 +416,7 @@ class Camera:
 
     @staticmethod
     def _base64_jpeg(jpg: bytes) -> str:
+        """将已编码的 JPEG 字节转成 ASCII Base64 文本。"""
         return base64.b64encode(jpg).decode("ascii")
 
     def get_speech_frames(
@@ -412,11 +425,9 @@ class Camera:
         speech_end: float,
         max_frames: int = 3,
     ) -> list[str]:
-        """Return frames from the speech window [speech_start, speech_end].
+        """从指定语音时间窗口选取 JPEG，并返回 Base64 列表。
 
-        When max_frames == 1, returns the most recent frame (best context).
-        When max_frames > 1, evenly samples across the window including
-        PRE_SPEECH_SECS lookback for temporal context.
+        只取一帧时选窗口内最新图像；多帧模式包含预语音回看区间并抽样，来源失效或窗口无图像时返回空列表。
         """
         if max_frames > 1:
             window_start = speech_start - PRE_SPEECH_SECS
@@ -429,7 +440,7 @@ class Camera:
                 (t, jpg) for t, jpg in self._ring if window_start <= t <= speech_end
             ]
 
-        # No fallback to a different time window or stale pre-restart image.
+        # 所需时间窗口没有图像时返回空，不借用另一窗口或重连前的旧图。
         if not self.health_check() or not candidates:
             return []
 
@@ -445,37 +456,46 @@ class Camera:
         return [] if invalidated.is_set() else encoded
 
     def capture_single(self) -> Optional[str]:
+        """返回当前新鲜帧的 Base64 JPEG，没有可用帧则返回 None。"""
         frame = self.snapshot()
         return self._base64_jpeg(frame.jpeg) if frame else None
 
     def latest_raw(self, *, copy: bool = True) -> Optional[np.ndarray]:
+        """返回最新 BGR 数组，默认复制以免调用方修改共享帧。"""
         frame = self.snapshot(copy=copy)
         return frame.bgr if frame else None
 
     def read_live(self) -> Optional[str]:
+        """为实时预览提供最新 Base64 JPEG，复用同一个采集缓存。"""
         return self.capture_single()
 
     def read_raw_live(self) -> Optional[np.ndarray]:
+        """为原始图像消费者返回最新帧副本，不直接读取底层设备。"""
         return self.latest_raw()
 
     @property
     def buffer_count(self) -> int:
+        """在锁内返回语音回看 JPEG 环形缓冲区的当前帧数。"""
         with self._lock:
             return len(self._ring)
 
     @property
     def actual_fps(self) -> float:
+        """返回当前连接周期内依据真实采集计数计算的平均 FPS。"""
         return self._actual_fps
 
     @property
     def buffer_bytes(self) -> int:
+        """统计回看缓冲区实际占用的 JPEG 字节数。"""
         with self._lock:
             return sum(len(data) for _, data in self._ring)
 
     def health_check(self) -> bool:
+        """仅在采集所有者存活且能够取得新鲜帧时报告健康。"""
         return self._alive and self.snapshot() is not None
 
     def status(self):
+        """汇总当前采集状态、帧龄、重连次数、缓存用量和深度可用性。"""
         with self._lock:
             age = time.monotonic() - self._latest[0] if self._latest else None
             ready = (
@@ -508,6 +528,10 @@ class Camera:
             }
 
     def close(self):
+        """通知采集退出并使旧帧失效，确认线程结束后释放设备。
+
+        线程仍阻塞时标记关闭未确认并报错，避免新所有者与旧读取操作竞争。
+        """
         with self._lifecycle_lock:
             self._stop.set()
             self._invalidate("stopping")

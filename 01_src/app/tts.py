@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Upstream TTS contract adapted to local Matcha/Vocos with bounded PCM output."""
+"""本机 TTS 适配器：接收文本并收集受大小、时长和取消约束的 PCM16 音频。"""
 
 import time
 from pathlib import Path
@@ -24,6 +24,8 @@ from app.audio import local_speech_url, speech_capability, pcm_wav
 
 
 class LocalTTS:
+    """拥有单个语音合成 HTTP 客户端，实际合成由语音服务承载。"""
+
     def __init__(
         self,
         voice="0",
@@ -35,6 +37,7 @@ class LocalTTS:
         timeout=60.0,
         max_audio_seconds=30.0,
     ):
+        """保存语音模型、音色、速度和单次音频时长上限，初始化请求控制器。"""
         self.voice, self.speed, self.lang = voice, speed, lang
         self.model, self.backend_name = model, backend
         self.base_url = local_speech_url(base_url)
@@ -45,6 +48,7 @@ class LocalTTS:
         self.requests = RequestIO()
 
     def load(self):
+        """连接语音服务并确认模型、后端、PCM 输出和目标音色均可用。"""
         self.unload()
         self._client = httpx.Client(
             timeout=self.timeout,
@@ -69,6 +73,10 @@ class LocalTTS:
             return False
 
     def synthesize(self, text, cancel_event=None):
+        """流式读取合成的 PCM16 字节，记录首块到达时间并在总时限与音频预算内收集结果。
+
+        返回一维 int16 数组、采样率和耗时；主动取消异常向上传播，已捕获的格式或网络错误写入 error 字段。
+        """
         if self._client is None:
             return {"audio": None, "error": "TTS is not loaded"}
         start = time.monotonic()
@@ -115,6 +123,7 @@ class LocalTTS:
             return {"audio": None, "error": str(exc)}
 
     def synthesize_to_file(self, text, path):
+        """合成文本后直接写出 WAV，并返回是否成功；轮次级暂存/提交由 SpeechOutput 另行管理。"""
         result = self.synthesize(text)
         if result.get("audio") is None:
             return False
@@ -122,6 +131,7 @@ class LocalTTS:
         return True
 
     def health_check(self):
+        """在短时限内检查 TTS 能力与格式契约，避免把接口可连接等同于模型正确。"""
         if self._client is None:
             return False
         try:
@@ -137,9 +147,11 @@ class LocalTTS:
             return False
 
     def cancel(self, event):
+        """中断与指定事件对应的合成 HTTP 操作。"""
         self.requests.cancel(event)
 
     def idle(self):
+        """同时确认本地 HTTP 操作结束和语音服务 active 计数为零。"""
         if not self.requests.idle():
             return False
         capability = speech_capability(
@@ -151,6 +163,7 @@ class LocalTTS:
         return active == 0
 
     def unload(self):
+        """关闭本地客户端并清空能力缓存，不停止独立 TTS 服务进程。"""
         if self._client:
             self._client.close()
         self._client = None
@@ -158,4 +171,5 @@ class LocalTTS:
 
 
 def create_tts(**kwargs):
+    """使用统一构造入口创建当前的本机语音合成适配器。"""
     return LocalTTS(**kwargs)
