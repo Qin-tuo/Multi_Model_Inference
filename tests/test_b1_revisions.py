@@ -9,7 +9,7 @@ import pytest
 from app.config import Config
 from benchmarks import vision_protocol as support
 from deploy import runtime
-import freeze_b1_inputs as freezing
+from benchmarks import freeze as freezing
 
 
 def test_input_revision_reuses_identical_pixels_without_reference_experiment(

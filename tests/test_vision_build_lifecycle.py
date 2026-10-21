@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-import build_vision_b1 as workflow
+from deploy import operations as workflow
 
 
 def setup(tmp_path, monkeypatch):

@@ -7,7 +7,7 @@ import time
 import numpy as np
 
 from app.config import Config
-from probe_b1_motion import RecordedMovieCamera
+from benchmarks.motion import RecordedMovieCamera
 
 
 def test_recorded_camera_waits_for_consumer_and_keeps_selected_media_frames(tmp_path):

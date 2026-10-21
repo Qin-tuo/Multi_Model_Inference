@@ -1,8 +1,7 @@
 {
   "python.defaultInterpreterPath": "${workspaceFolder}/05_runtime/environments/edge-assistant/bin/python",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/01_src",
-    "${workspaceFolder}/scripts"
+    "${workspaceFolder}/01_src"
   ],
   "python.analysis.exclude": [
     "**/node_modules",

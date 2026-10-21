@@ -20,14 +20,13 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "01_src"))
 # Shared native-process identity checks live with the functional probes.
-sys.path.insert(0, str(ROOT / "scripts"))
 from benchmarks.baseline_support import (  # noqa: E402
     Events,
     Resources,
     environment,
     run_worker,
-    validate,
 )
+from benchmarks.model_protocol import PROTOCOL, validate
 from benchmarks.http_observer import Observer  # noqa: E402
 from benchmarks.text_metrics import character_errors  # noqa: E402
 from deploy import runtime, services  # noqa: E402
@@ -177,8 +176,8 @@ def llm_case(model, cfg, case, phase, out, observed):
         return row
 
 
-def worker(role, out):
-    protocol, cfg, fixtures = validate()
+def worker(role, out, protocol_path=PROTOCOL):
+    protocol, cfg, fixtures = validate(protocol_path)
     names = ["llama"] if role.startswith("l1") else ["asr", "speech"]
     before = {name: backend_identity(name, cfg) for name in names}
     groups = {name: value["stable_pids"] for name, value in before.items()}
@@ -230,7 +229,7 @@ def worker(role, out):
             cases = [
                 c
                 for c in json.loads(
-                    (ROOT / "benchmarks/corpora/b0-llm-v1.json").read_text()
+                    (ROOT / protocol["corpora"]["llm"]["path"]).read_text()
                 )["cases"]
                 if c["kind"] == role.removeprefix("l1-")
             ]
@@ -253,7 +252,7 @@ def worker(role, out):
                     (out / (case["id"] + ".jpg")).write_bytes(case["jpeg"])
         else:
             cases = json.loads(
-                (ROOT / "benchmarks/corpora/b0-speech-v1.json").read_text()
+                (ROOT / protocol["corpora"]["speech"]["path"]).read_text()
             )["cases"]
             for case in cases:
                 case["path"] = str(
@@ -350,12 +349,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--worker", choices=ROLES)
+    parser.add_argument("--protocol", type=Path, default=PROTOCOL)
     args = parser.parse_args()
     if args.worker:
-        return worker(args.worker, args.output)
+        return worker(args.worker, args.output, args.protocol)
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
-    _, cfg, _ = validate()
+    protocol, cfg, _ = validate(args.protocol)
     before = services.state(services.ORDER, cfg)
     if (
         before["status"] != "READY"
@@ -364,10 +364,8 @@ def main():
         raise RuntimeError("Managed services must be ready and idle")
     environment(out)
     runtime.write_json(out / "effective-config.json", cfg.effective())
-    for filename in ("b0-llm-v1.json", "b0-speech-v1.json"):
-        (out / filename).write_bytes(
-            (ROOT / "benchmarks/corpora" / filename).read_bytes()
-        )
+    for name, entry in protocol["corpora"].items():
+        (out / (name + "-corpus.json")).write_bytes((ROOT / entry["path"]).read_bytes())
     workload = {
         "speech_profile": "ASR and TTS resident together; one role requested, other idle; no 4B/perception",
         "llm_profile": "Only native 4B server; production adapter, no tools/history, current 128-token limit and caches unchanged",
@@ -375,8 +373,7 @@ def main():
         "timestamps": "File PCM is already available; VAD offsets can include appended silence; no physical endpoint or playback metric",
         "tts_first_pcm": "First nonempty block from production iter_bytes(4096), not necessarily first byte on wire",
         "corpus_sha256": {
-            name: runtime.sha256(out / name)
-            for name in ("b0-llm-v1.json", "b0-speech-v1.json")
+            name: entry["sha256"] for name, entry in protocol["corpora"].items()
         },
     }
     runtime.write_json(out / "workload.json", workload)
@@ -407,6 +404,8 @@ def main():
                         __file__,
                         "--worker",
                         role,
+                        "--protocol",
+                        str(args.protocol.resolve()),
                         "--output",
                         str(folder),
                     ],

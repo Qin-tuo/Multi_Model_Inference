@@ -3,13 +3,15 @@ import io
 import json
 from pathlib import Path
 import tarfile
+import shutil
 
 import pytest
 
 from app.config import Config
 from project_paths import LEGACY_STACK_DIR, RUNTIME_DIR, ROOT, load_artifact_manifest
-from runtime_bundle import digest, inventory, pack, unpack, verify
-import runtime_bundle
+from deploy.bundle import digest, inventory, pack, unpack, verify
+from deploy import bundle as runtime_bundle
+from deploy.environments import relocate_environments
 
 
 @pytest.mark.parametrize(
@@ -65,6 +67,19 @@ def prepared(root):
     (root / "models/test.bin").write_bytes(b"immutable-model")
     (root / "runtime-data").mkdir()
     (root / "runtime-data/private.db").write_bytes(b"private-state")
+
+
+def test_copy_from_shared_worktree_relocates_physical_environment_paths(tmp_path):
+    original, workspace, staged = (tmp_path / name for name in ("original", "workspace", "staged"))
+    prepared(original)
+    workspace.mkdir()
+    (workspace / "environments").symlink_to(original / "environments")
+    site = original / "environments/edge-assistant/lib/python3.12/site-packages"
+    (site / "sources.pth").write_text(str(original / "frameworks/library") + "\n")
+    shutil.copytree(original, staged, symlinks=True)
+    relocate_environments(staged, workspace)
+    assert str(original) not in (staged / "environments/edge-assistant/bin/activate").read_text()
+    assert (staged / "environments/edge-assistant/lib/python3.12/site-packages/sources.pth").read_text() == str(staged / "frameworks/library") + "\n"
 
 
 def test_archive_roundtrip_preserves_artifacts_and_excludes_private_state(tmp_path):

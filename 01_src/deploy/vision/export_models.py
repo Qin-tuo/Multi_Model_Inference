@@ -24,29 +24,6 @@ def torch_model(role, recipe):
 
     checked_sources(recipe)
     weights = ROOT / recipe["source_files"][0]["path"]
-    if role == "person_reid":
-        path = (
-            ROOT
-            / recipe["prepost_source"]["files"]["torchreid/models/osnet.py"]["path"]
-        )
-        spec = importlib.util.spec_from_file_location("verified_osnet", path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        # The official checkpoint includes a historical NumPy scalar metric;
-        # only these scalar/dtype constructors are permitted in addition to tensors.
-        import numpy as np
-
-        with torch.serialization.safe_globals(
-            [np.core.multiarray.scalar, np.dtype, type(np.dtype(np.float64))]
-        ):
-            checkpoint = torch.load(weights, map_location="cpu", weights_only=True)
-        state = checkpoint.get("state_dict", checkpoint)
-        state = {name.removeprefix("module."): value for name, value in state.items()}
-        model = module.osnet_x0_25(
-            num_classes=state["classifier.weight"].shape[0], pretrained=False
-        )
-        model.load_state_dict(state, strict=True)
-        return model.float().eval()
     if role == "object_embedding":
         folder = ROOT / "05_runtime/frameworks/b1/clip"
         sys.path.insert(0, str(folder))

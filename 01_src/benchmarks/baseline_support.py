@@ -14,7 +14,6 @@ import time
 import psutil
 
 from deploy import runtime
-from project_paths import repo_path, RUNTIME_DIR, relocate_artifact_values
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -141,39 +140,6 @@ class NativeProxy:
 
 
 
-def validate():
-    protocol = json.loads(
-        (ROOT / "benchmarks/manifests/b0-sw-v1.json").read_text()
-    )
-    for file, expected in protocol["locks"].items():
-        if runtime.sha256(repo_path(file)) != expected:
-            raise RuntimeError("Baseline artifact lock changed: " + file)
-    frozen_config = RUNTIME_DIR / "baselines/b0/effective-config.json"
-    if runtime.sha256(frozen_config) != protocol["effective_config_sha256"]:
-        raise RuntimeError("Frozen baseline config changed")
-    baseline_cfg = runtime.config(frozen_config)
-    installed = runtime.paths(baseline_cfg)["data"] / "systemd/settings.json"
-    if runtime.config(installed).effective() != baseline_cfg.effective():
-        raise RuntimeError(
-            "Installed baseline parameters changed after path normalization"
-        )
-    protocol = relocate_artifact_values(protocol)
-    protocol["effective_config_path"] = str(frozen_config)
-    manifest = json.loads(repo_path(protocol["input_manifest"]).read_text())
-    if (
-        runtime.sha256(repo_path(protocol["input_manifest"]))
-        != protocol["input_manifest_sha256"]
-    ):
-        raise RuntimeError("Baseline input manifest changed")
-    for entry in manifest["files"]:
-        if (
-            runtime.sha256(Path(protocol["input_directory"]) / entry["filename"])
-            != entry["sha256"]
-        ):
-            raise RuntimeError("Baseline input changed: " + entry["filename"])
-    return protocol, baseline_cfg, manifest
-
-
 def environment(out, *, source_root=None):
     source_root = ROOT if source_root is None else Path(source_root).resolve()
 
@@ -230,7 +196,7 @@ def environment(out, *, source_root=None):
             Path(__file__),
             ROOT / "01_src/benchmarks/vision_modules.py",
             ROOT / "01_src/benchmarks/vision_protocol.py",
-            ROOT / "scripts/build_vision_b1.py",
+            ROOT / "01_src/deploy/vision/build.py",
         ]
     if coordinator_sources:
         result["coordinator_source_sha256"] = {

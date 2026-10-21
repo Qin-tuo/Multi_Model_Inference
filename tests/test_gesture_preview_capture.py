@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import pytest
 
-from probe_gestures import PreviewCapture
+from validation.gestures import PreviewCapture
 
 
 def frame_event(index=1, epoch="camera-a"):

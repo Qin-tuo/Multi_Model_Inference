@@ -221,7 +221,7 @@ def artifact_files(cfg, components):
         if cfg.audio.enabled:
             row = load_artifact_manifest(ROOT / "03_models/speech.json")["vad"]
             add(
-                Path(row["directory"]) / row["filename"],
+                ROOT / row["directory"] / row["filename"],
                 row["files"][row["filename"]]["sha256"],
             )
     return files

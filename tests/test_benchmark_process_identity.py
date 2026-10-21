@@ -7,7 +7,7 @@ import sys
 
 from app.config import Config
 from deploy import services
-from probe_coexistence import backend_identity
+from deploy.operations import backend_identity
 
 
 def test_real_listener_identity_survives_auxiliary_child_churn(monkeypatch):

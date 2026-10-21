@@ -2,7 +2,7 @@
   "schema_version": 1,
   "vad": {
     "model": "Silero VAD v6 (faster-whisper asset)",
-    "directory": "/home/nvidia/AI_Stack/models/vad/faster-whisper-1.2.1",
+    "directory": "05_runtime/models/vad/faster-whisper-1.2.1",
     "filename": "silero_vad_v6.onnx",
     "provider": "CPUExecutionProvider",
     "source": {

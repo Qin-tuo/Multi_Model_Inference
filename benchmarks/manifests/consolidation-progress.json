@@ -108,19 +108,51 @@
     {
       "id": "C5",
       "requirement": "整合构建、验证和基准工具",
-      "status": "in_progress",
+      "status": "complete",
       "evidence": [
         "tests/test_module_boundaries.py",
         "01_src/deploy/operations.py",
-        "01_src/deploy/validation_inputs.py"
+        "01_src/deploy/validation_inputs.py",
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-tools-final.xml",
+          "sha256": "0e7b8745daaf69e7dda73e0e4132bb8f294087e1a95bfd81fd252ff4fb53a20e"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/tool-entrypoints.json",
+          "sha256": "377493b8ca01dbdcf711decc5f816f49ae68e9f244a1f27b83614c99f3ed7ed0"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-web-transport.json",
+          "sha256": "e634f27a4a7a4ae78060682d5a7fe19f6a519901b45bb894556a051b183911f2"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-summary-replay.json",
+          "sha256": "bba9338e28aaa9cfdd7a5a27296eb22cb406d3a35ea0900bd0a801acae013e4f"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-expression-verified/native/report.json",
+          "sha256": "d891abe15b9765bf2a17eb865fce737d10647585922c94a13ebdb08a6a4baf19"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-expression-verified/services-restored.json",
+          "sha256": "327f95aee85b5d2cda98fd1926e82d13978695a3e293b0a9d7290413b6d285ce"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-live-observer/report.json",
+          "sha256": "8e26f6ce9ee2a934106b68a495076ef0564530f5adf5fe620f021eebe685ff3d"
+        }
       ],
       "source_imports_scripts": 0,
       "implemented": [
         "Current visual benchmark and timing modules use responsibility-based names",
         "4B pressure and fixed-clock replay extracted from obsolete benchmark implementation",
-        "Frozen-checkout coordinator validates source/input hashes without parsing historical config in current runtime"
+        "Frozen-checkout coordinator validates source/input hashes without parsing historical config in current runtime",
+        "Four thin grouped command scripts; implementations in deploy, validation and benchmarks",
+        "One engine builder for the ten selected models; export/build candidates do not activate themselves",
+        "All ten native reference capabilities retained; expression reference separated from retired SFace workflow",
+        "Read-only live observer and updated user learning guides preserved from the resumed main workspace"
       ],
-      "remaining": "Move and consolidate build/validation/restore commands into formal modules; freeze current protocols before final comparisons."
+      "remaining": null
     },
     {
       "id": "C6",
@@ -135,8 +167,14 @@
     {
       "id": "C7",
       "requirement": "当前运行包与独立恢复验证",
-      "status": "pending",
-      "evidence": []
+      "status": "in_progress",
+      "evidence": [
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/current-bundle-selection.json",
+          "sha256": "2b9923cfb508a355c8ecdcaabf8f97eda6ae7d5013cadf9dd2c4ce631b756ea4"
+        }
+      ],
+      "remaining": "Freeze current inputs, build package, independently restore and run the native complete application before any old artifact deletion."
     },
     {
       "id": "C8",
@@ -167,6 +205,14 @@
           "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/application-stages/report.json",
           "sha256": "8940c6e11066e9dc36ac98c914b8fc2a84ed397dd0b100ff94af062d3cee95d8"
         }
+      },
+      "latest_original_service_stop": {
+        "status": "OPEN",
+        "evidence": {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/formal-expression-verified/services-stopped.json",
+          "sha256": "ed775c5c13c256b50381238a26713a90da95d2f9a3ec7d1424b4c56f44a0dd15"
+        },
+        "disposition": "Original B2 app again timed out. Native diagnostic ran only after every owned cgroup was confirmed empty; prior four services restored READY. Does not qualify shutdown reliability."
       }
     }
   ],
@@ -181,9 +227,9 @@
     "Run and compare final frozen B2 inputs, document and integrate the reviewed branch without losing concurrent main-worktree edits"
   ],
   "latest_current_tests": {
-    "passed": 289,
+    "passed": 302,
     "legacy_test_disposition": "Removed exclusive B0 detector/hand and deferred neural stereo cases with their implementations. Current ten-model frame ownership, epoch invalidation, artifacts, cancellation and lifecycle checks retained."
   },
-  "progress_estimate_percent": 50,
+  "progress_estimate_percent": 58,
   "progress_basis": "Milestone estimate for consolidation only, not performance or product accuracy."
 }

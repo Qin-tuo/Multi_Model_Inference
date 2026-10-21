@@ -32,9 +32,25 @@
 
 运行依赖存放在 `05_runtime/` 并排除出普通 Git 提交。本机已准备 B2 所需模型与环境；**单独克隆 Git 仓库不会取得这些工件**。已有 B1 R2 运行包不含三个新增 B2 模型，不能直接作为 B2 完整恢复包。历史恢复说明见 [依赖与恢复说明](01_src/deploy/dependencies-layout.md)，新增模型来源与验证见 [B2 说明](docs/b2-model-replacements.md)。
 
+## 构建、验证、基准和运行包工具
+
+工具入口分为四类，入口只分发任务，实现在 `01_src/deploy/`、`01_src/validation/` 和 `01_src/benchmarks/`。运行 `--help` 查看任务，`<任务> --help` 查看参数：
+
+```bash
+./05_runtime/environments/edge-assistant/bin/python scripts/build.py --help
+./05_runtime/environments/edge-assistant/bin/python scripts/validate.py --help
+./05_runtime/environments/edge-assistant/bin/python scripts/benchmark.py --help
+./05_runtime/environments/edge-assistant/bin/python scripts/runtime.py --help
+```
+
+例如 `scripts/build.py artifacts --check-only` 校验当前十个 ONNX 和辅助源代码；`scripts/validate.py pipeline` 验证同帧管线；`scripts/benchmark.py vision` 测量单模型，`stream` 测量整链路。基准先通过 `freeze`、`freeze-models` 固定当前源码和输入，旧协议仍对应其原始源码版本。
+
+构建和导出结果写入输出目录中的候选清单，通过一致性与集成验证后再选择为运行配置。运行包命令会校验当前协议和输入，并排除业务数据库、缓存及普通验证输出。**当前新包的独立恢复验收尚未完成**；整合进度以执行清单为准。
+
+
 ## 在 VS Code 中阅读和跳转代码
 
-通过 Remote SSH 打开整个 `Multi_Model_Inference/` 文件夹，并在远端安装推荐的 **Python** 和 **Pylance** 扩展。仓库的 `.vscode/settings.json` 已声明 `01_src/`、`scripts/` 源码搜索路径，以及项目内 Python 解释器；运行时的 `sys.path.insert(...)` 不会自动成为编辑器的搜索路径。
+通过 Remote SSH 打开整个 `Multi_Model_Inference/` 文件夹，并在远端安装推荐的 **Python** 和 **Pylance** 扩展。仓库的 `.vscode/settings.json` 已声明 `01_src/` 源码搜索路径，以及项目内 Python 解释器；运行时的 `sys.path.insert(...)` 不会自动成为编辑器的搜索路径。
 
 如果 VS Code 已经选过解释器，请执行 `Ctrl+Shift+P` → `Python: Select Interpreter` → `Enter interpreter path`，选择项目下的 `05_runtime/environments/edge-assistant/bin/python`。根目录的 `.venv` 是保留的旧环境链接，不用于当前开发。默认解释器设置不会覆盖已经保存的选择。
 

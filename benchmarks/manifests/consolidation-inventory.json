@@ -661,10 +661,11 @@
     },
     "scripts/probe_face_tasks_b1.py": {
       "action": "extract_and_retire",
-      "reason": "Old SFace comparison removed; native fixture loading preserved for retained head/gaze/expression models.",
+      "reason": "Retired SFace 128D reference; retain expression and shared pinned public image fixtures. Current ArcFace reference belongs to the standard model validator.",
       "replacements": [
         "01_src/deploy/vision/reference_inputs.py",
-        "scripts/build_standard_vision.py"
+        "01_src/validation/expression_reference.py",
+        "01_src/validation/standard_reference.py"
       ],
       "source_recovery": "before-mainline-consolidation-20261020"
     },
@@ -745,7 +746,271 @@
       ],
       "reason": "Keep fixed-clock replay and 4B pressure; run the current ten-model production pipeline.",
       "source_recovery": "before-mainline-consolidation-20261020"
+    },
+    "scripts/prepare_vision_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/vision/artifacts.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/build_vision_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/vision/build.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/build_standard_vision.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/standard_reference.py",
+      "reason": "Keep native parity as a validation task. All ten engines use deploy/vision/build.py; remove automatic replacement/activation workflow.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/export_standard_vision.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/vision/export_standard.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/export_remaining_vision_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/vision/export_attributes.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/export_segmentation_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/vision/export_segmentation.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/prepare_speech.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/speech/prepare_vad.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/runtime_bundle.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/bundle.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/package_b1_runtime.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/deploy/package.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/freeze_b1_inputs.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/benchmarks/freeze.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/prepare_baseline_inputs.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/benchmarks/fixtures.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/analyze_b1_motion.py": {
+      "action": "retire_historical_counterfactual",
+      "reason": "Pinned pre-fix B1 gesture analysis is historical evidence, not the current gesture algorithm. Current motion replay and raw failure observations remain.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_motion.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/benchmarks/motion.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_gaze_coverage.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/benchmarks/gaze_coverage.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_pipeline.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/pipeline.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_recovery.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/recovery.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_services.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/services.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_browser.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/browser.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_b1_restore.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/restore.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_offline.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/offline.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_actions.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/actions.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_action_cancel.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/action_cancel.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_session.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/session.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_turn_cancel.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/turn_cancel.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_cancellation.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/cancellation.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_coexistence.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/coexistence.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_web.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/web.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_service_recovery.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/service_recovery.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_speech_session.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/speech_session.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_speech.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/speech.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_voice_interruptions.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/voice_interruptions.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_web_transport.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/web_transport.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_gestures.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/gestures.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_gesture_replay.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/gesture_replay.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_standard_pose_replay.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/pose_replay.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_rgbd_camera.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/rgbd.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_browser_session.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/browser_session.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_browser_cancel.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/browser_cancel.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_remaining_vision_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/attribute_reference.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_segmentation_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/segmentation_reference.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_vision_b1.py": {
+      "action": "move_to_formal_module",
+      "replacement": "01_src/validation/face_reference.py",
+      "reason": "Shared code lives under its responsibility package; grouped script only selects a task.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_deployment.py": {
+      "action": "retire_legacy_service_probe",
+      "reason": "Assumes the retired ROS camera/legacy stack owner. Current validation/recovery and service_recovery cover native camera and backend lifecycle.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/probe_camera_recovery.py": {
+      "action": "retire_legacy_service_probe",
+      "reason": "Assumes the retired ROS camera/legacy stack owner. Current validation/recovery and service_recovery cover native camera and backend lifecycle.",
+      "source_recovery": "dab106a"
+    },
+    "scripts/import_runtime.py": {
+      "action": "retire_legacy_copy_preserve_relocation",
+      "replacement": "01_src/deploy/environments.py",
+      "source_recovery": "dab106a"
     }
   },
-  "artifact_cleanup_gate": "No original models, engines, archives or baseline inputs removed in this stage; independently restored current bundle required first."
+  "artifact_cleanup_gate": "No original models, engines, archives or baseline inputs removed in this stage; independently restored current bundle required first.",
+  "resumed_pending_edit_snapshot": {
+    "path": "05_runtime/refactor-checkpoints/consolidation-20261021-incoming/snapshot.json",
+    "sha256": "8eb4751bfc8e027a88ded17aa039bd454673296a227c357aad87a3a6b9374b10"
+  }
 }

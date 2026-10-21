@@ -16,7 +16,13 @@ def test_frozen_baseline_locks_resolve_without_rewriting_records():
         repo_path("benchmarks/manifests/b0-sw-v1.json").read_text()
     )
     for name, digest in protocol["locks"].items():
-        assert hashlib.sha256(repo_path(name).read_bytes()).hexdigest() == digest
+        # Historical evidence belongs to its preserved source revision. Current
+        # manifests can evolve without rewriting the old benchmark's locks.
+        saved = subprocess.check_output(
+            ["git", "show", "before-mainline-consolidation-20261020:" + str(repo_path(name).relative_to(ROOT))],
+            cwd=ROOT,
+        )
+        assert hashlib.sha256(saved).hexdigest() == digest
     assert (
         hashlib.sha256(repo_path(protocol["input_manifest"]).read_bytes()).hexdigest()
         == protocol["input_manifest_sha256"]

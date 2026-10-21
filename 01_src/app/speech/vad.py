@@ -25,7 +25,7 @@ import uuid
 from collections import deque
 import numpy as np
 from pathlib import Path
-from project_paths import MODEL_DIR, load_artifact_manifest
+from project_paths import ROOT, MODEL_DIR, load_artifact_manifest
 from app.config import VADConfig
 from app.audio import chunk_rms
 from app.speech.constants import SILERO_CHUNK_SAMPLES
@@ -39,7 +39,7 @@ class SileroVAD:
         import onnxruntime as ort
 
         entry = load_artifact_manifest(MODEL_DIR / "speech.json")["vad"]
-        model_path = Path(entry["directory"]) / entry["filename"]
+        model_path = ROOT / entry["directory"] / entry["filename"]
         if (
             hashlib.sha256(model_path.read_bytes()).hexdigest()
             != entry["files"][entry["filename"]]["sha256"]

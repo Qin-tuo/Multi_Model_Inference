@@ -15,7 +15,7 @@ import time
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
+sys.path.insert(0, str(ROOT / "01_src"))
 from app.camera import Camera
 from app.face_state import FaceState
 from app.gestures import GestureRecognizer
@@ -39,9 +39,7 @@ WORKLOAD = ROOT / "benchmarks/manifests/vision-stream.json"
 def protocol_path(spec):
     # Older workload bytes stay unchanged. Each revision identifies its own
     # runtime lock; a newer implementation cannot silently reuse an old lock.
-    return ROOT / spec.get(
-        "module_protocol", "benchmarks/manifests/b1-vision-measurements-v1.json"
-    )
+    return ROOT / spec["module_protocol"]
 
 
 def workload():

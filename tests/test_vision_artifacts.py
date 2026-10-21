@@ -6,7 +6,7 @@ import io
 
 import pytest
 
-import prepare_vision_b1 as prepare
+from deploy.vision import artifacts as prepare
 
 
 def fixture(tmp_path, monkeypatch):

@@ -6,20 +6,26 @@ import cv2
 import numpy as np
 from project_paths import ROOT
 from app.face_trt import TensorRTFace
+from deploy import runtime
 from deploy.validation_inputs import input_path
 
 
 def fixtures(face_root):
     face_root = input_path(face_root, ROOT)
     build = json.loads((face_root / "face/build.json").read_text())
-    build["engine_path"] = str(input_path(ROOT / build["engine_path"], ROOT))
     passed = json.loads((face_root / "parity/face/report.json").read_text())
+    # The accepted engine already has a current runtime location. Historical
+    # reports keep their original bytes even after disposable build paths move.
+    selected = json.loads((ROOT / "03_models/vision-runtime.json").read_text())
+    spec = dict(selected["models"]["face"])
     if (
         passed["status"] != "PARITY_PASS_LIMITED_FIXTURES"
         or passed["engine_sha256"] != build["engine_sha256"]
+        or spec["engine_sha256"] != build["engine_sha256"]
     ):
         raise ValueError("Face detector reference gate is not verified")
-    detector = TensorRTFace(build)
+    spec["engine_path"] = str(ROOT / spec["engine_path"])
+    detector = TensorRTFace(spec)
     result = []
     try:
         for name, relative, factor in (

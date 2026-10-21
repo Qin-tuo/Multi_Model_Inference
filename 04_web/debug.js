@@ -19,16 +19,8 @@
     </div>
     <div class="debug-note" id="debugVisionMeta"></div>
     <div class="debug-error debug-note" id="debugVisionError"></div>
-    <table class="debug-table" id="debugLegacyStages"><thead><tr><th>阶段</th><th>最新耗时 / ms</th></tr></thead><tbody>
-      <tr><td>人体检测</td><td id="debugBody">—</td></tr>
-      <tr class="debug-subrow"><td>↳ 预处理</td><td id="debugBodyPre">—</td></tr>
-      <tr class="debug-subrow"><td>↳ 原生调用（含传输／同步）</td><td id="debugBodyNative">—</td></tr>
-      <tr class="debug-subrow"><td>↳ 后处理</td><td id="debugBodyPost">—</td></tr>
-      <tr><td>人脸检测</td><td id="debugFace">—</td></tr>
-      <tr><td>掌检测＋手部关键点</td><td id="debugHands">—</td></tr>
-    </tbody></table>
-    <div id="debugB1Models">
-    <div class="debug-note">B1 各模型：最近 120 次成功调用的板端墙钟耗时，包含预处理／推理／后处理；未触发时显示 —。拒绝/失败包含输入质量检查，不等于 GPU 故障次数。</div>
+    <div id="debugModelPanel">
+    <div class="debug-note">各模型：最近 120 次成功调用的板端墙钟耗时，包含预处理／推理／后处理；未触发时显示 —。拒绝/失败包含输入质量检查，不等于 GPU 故障次数。</div>
     <table class="debug-table"><thead><tr><th>模型模块</th><th>成功调用</th><th>最新 ms</th><th>P50 / P95 ms</th><th>拒绝/失败</th></tr></thead><tbody id="debugModels"></tbody></table>
     </div>
     <canvas id="debugRateChart" class="debug-chart" aria-label="板端实际帧率趋势"></canvas>
@@ -111,11 +103,7 @@
     put('debugProcessing',f(v.processing_ms));put('debugAge',f(v.frame_age_ms));
     put('debugVisionMeta',`目标：采集 ${f(v.capture_target_fps,0)} / 识别 ${f(v.perception_target_fps,0)} FPS · 帧 ${v.frame_id??'—'} · 已处理 ${v.processed??'—'} · 跳过采集帧 ${v.skipped_capture_frames??'—'} · 失败 ${v.failures??'—'} · 重连 ${v.reconnects??'—'}`);
     put('debugVisionError',v.ready?'':v.error||'暂无新鲜感知结果');
-    for(const [id,key] of [['debugBody','body_ms'],['debugFace','face_ms'],['debugHands','hands_ms']])put(id,f(v.stages_ms[key],2));
-    for(const [id,key] of [['debugBodyPre','preprocess_ms'],['debugBodyNative','native_sync_ms'],['debugBodyPost','postprocess_ms']])put(id,f(v.body_stages_ms[key],2));
     const models=$('debugModels');models.replaceChildren();
-    const b1=Object.keys(v.model_metrics||{}).length>0;
-    $('debugLegacyStages').hidden=b1;$('debugB1Models').hidden=!b1;
     const names={detection_segmentation:'检测分割',body_hand_pose:'人体/手部关键点',face:'人脸检测',face_identity:'人脸特征',expression:'表情',head_pose:'头姿',gaze_landmarks:'视线辅助关键点',gaze:'视线',person_reid:'行人特征',object_embedding:'物体特征'};
     for(const [name,data] of Object.entries(v.model_metrics||{}))models.append(row([names[name]||name,data.calls,f(data.last_ms,2),f(data.p50_ms,2)+' / '+f(data.p95_ms,2),data.errors||0]));
     put('debugLoad',`${f(r.cpu_percent)} / ${f(r.gpu_percent)}`);

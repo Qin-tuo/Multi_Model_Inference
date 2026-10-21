@@ -14,7 +14,7 @@ import shlex
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(ROOT / "01_src"), str(ROOT / "scripts")]
+sys.path.insert(0, str(ROOT / "01_src"))
 from app.vision_models import ROLES, VisionModels
 from benchmarks.baseline_support import (
     Events,
