@@ -184,8 +184,18 @@
     {
       "id": "C8",
       "requirement": "回归、性能对照、文档与推送",
-      "status": "pending",
-      "evidence": []
+      "status": "in_progress",
+      "evidence": [
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/frozen-comparability.json",
+          "sha256": "8ec38568b4b87cb1fe00448e4a92902bb9cc47aff5b763e055c7c0dd66d1ddde"
+        },
+        {
+          "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/current-freeze/services-restored.json",
+          "sha256": "3665a9b37fa40522fc940b79c7e9d3cddee0b8fac78ccc897cf879358a4cf33b"
+        }
+      ],
+      "remaining": "Current module and seven-condition measurements, independent restore/functional final checks, final docs and main integration."
     }
   ],
   "invariants": [
@@ -235,6 +245,6 @@
     "passed": 302,
     "legacy_test_disposition": "Removed exclusive B0 detector/hand and deferred neural stereo cases with their implementations. Current ten-model frame ownership, epoch invalidation, artifacts, cancellation and lifecycle checks retained."
   },
-  "progress_estimate_percent": 60,
+  "progress_estimate_percent": 65,
   "progress_basis": "Milestone estimate for consolidation only, not performance or product accuracy."
 }

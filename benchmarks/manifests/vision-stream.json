@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "purpose": "B2 standard-model pipeline/coexistence baseline; no autonomous tuning",
+  "module_protocol_sha256": "11d8bd3af058dd1ba82052b1b2298baf1a43a287784be3b52f22271af88ed894",
+  "conditions": [
+    "replay-only",
+    "replay-resident",
+    "replay-4b",
+    "replay-conversation",
+    "replay-vision-chat",
+    "live-resident",
+    "live-conversation"
+  ],
+  "window_seconds": 60,
+  "sample_hz": 10,
+  "warmup_min_seconds": 20,
+  "warmup_background_completions": 3,
+  "warmup_deadline_seconds": 180,
+  "worker_timeout_seconds": 420,
+  "replay_inputs": [
+    "public-person",
+    "public-person-dimmed",
+    "bus",
+    "bus-dimmed",
+    "blank"
+  ],
+  "hold_source_frames": 20,
+  "depth": "uniform synthetic aligned 1.5m only for fixed replay; live uses D435i SDK depth",
+  "audio_input": {
+    "path": "05_runtime/datasets/b0-sw-v1/zh-20.wav",
+    "sha256": "3ddb03114ed0ecab642a7341a24f49b2499a9f3cf3345321d8a4d233bbb0c7eb",
+    "reference_text": "请只回答，测试成功。",
+    "kind": "B0 synthesized fixture, no physical microphone"
+  },
+  "vision_prompt": "请简短描述当前画面，最多两句话，不要调用工具。",
+  "background_policy": "Single backlogged caller, no queued requests. Audio and image chat use production TurnController/VAD/ASR/LLM/TTS/actions with isolated stores; session cleared between requests, native prompt cache preserved. LLM-only pressure reuses the B0 BackgroundLLM workload. End-window in-flight request is cancelled and reported as censored.",
+  "llm_only_prompt": "用中文分点介绍如何分析程序的性能，先测量再定位瓶颈，回答尽量具体。",
+  "llm_only_suffix": "这是第{index}个请求。",
+  "backend_lifecycle": "Fresh backend processes for each resident condition; stable PID/create-time checked before and after. Same clients/VAD/actions/control loaded in all resident conditions.",
+  "gesture_policy": "Execute unchanged gesture rules but log events without dispatching to load requests. Gesture interaction acceptance is separate.",
+  "scope": "Production Camera source publication, JPEG, bounded ring, B1Perception and tracking. Websocket/browser excluded. App control included as resident/pressure owner. Sources are not ground-truth pose/distance labels.",
+  "statistics": "nearest-rank; report raw counts and missing results; unavailable samples rank after finite frame ages; pipeline compute, receive-to-start, post-JPEG wait, receive-to-complete and periodic latest-result age reported separately",
+  "isolation": "No other tests/builds/downloads during timed windows. Preserve platform power/DVFS; record nvpmodel/tegrastats/source hashes. Restore prior services/profile in finally.",
+  "module_protocol": "benchmarks/manifests/vision-measurements.json",
+  "revision_note": "Exactly three visual model replacements; B1 R2 input pixels, workload and seven unchanged models retained. Cross-model differences are not optimization gains.",
+  "revision_scope": "Code consolidation only; same B2 inputs, numerical parameters, durations, conditions and request workload."
+}

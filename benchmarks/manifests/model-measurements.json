@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "scope": "Same frozen speech/text/image fixtures; current runtime parameters. Historical results retain their original runtime identity.",
+  "runtime_protocol": {
+    "path": "benchmarks/manifests/vision-measurements.json",
+    "sha256": "11d8bd3af058dd1ba82052b1b2298baf1a43a287784be3b52f22271af88ed894"
+  },
+  "input_manifest": {
+    "path": "05_runtime/datasets/b0-sw-v1/manifest.json",
+    "sha256": "449d9eca007d88fe837642e0c1fc7b52749d98c991864e170c6391627ce5f878"
+  },
+  "input_directory": "05_runtime/datasets/b0-sw-v1",
+  "corpora": {
+    "llm": {
+      "path": "benchmarks/corpora/b0-llm-v1.json",
+      "sha256": "fdaabefd62d5fbee986166efc6c3c228ce7ae585f8249833f4373559aeaf4408"
+    },
+    "speech": {
+      "path": "benchmarks/corpora/b0-speech-v1.json",
+      "sha256": "6a66a55f059bcddf0be8d796fad0847b0d822fc416f86dcf83e59a1a177739c2"
+    }
+  }
+}
