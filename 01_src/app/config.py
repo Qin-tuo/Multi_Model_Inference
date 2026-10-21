@@ -446,7 +446,7 @@ class Config:
             raise ValueError("The verified RealSense profile requires 640x480")
         if self.vision.frames != 1:
             raise ValueError("The initial 4B profile supports one image per request")
-        from app.audio import local_speech_url
+        from app.speech.audio import local_speech_url
 
         local_speech_url(self.stt.native_base_url.rstrip("/") + "/v1")
         for audio_config in (self.stt, self.tts):

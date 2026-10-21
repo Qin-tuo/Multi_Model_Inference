@@ -17,7 +17,7 @@
 
 import threading
 import time
-from app.camera import Camera
+from app.vision.camera import Camera
 
 
 class FaceState:

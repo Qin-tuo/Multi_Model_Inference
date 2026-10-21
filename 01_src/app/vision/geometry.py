@@ -5,7 +5,7 @@ import cv2
 from functools import lru_cache
 import json
 import numpy as np
-from app.model_artifacts import load_source
+from app.inference.model_artifacts import load_source
 from project_paths import ROOT
 
 

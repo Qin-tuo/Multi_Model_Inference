@@ -22,7 +22,7 @@ from sqlalchemy import (
     delete,
 )
 
-from app.face_tasks import normalize_embedding
+from app.vision.models.face_tasks import normalize_embedding
 
 
 class IdentityGallery:

@@ -18,7 +18,7 @@
 """把同帧图像/感知结果和板端采样状态推送给现有 WebSocket 观看者。"""
 
 import logging
-from app.monitor import get_system_stats, get_jetson_model
+from app.monitoring.monitor import get_system_stats, get_jetson_model
 
 log = logging.getLogger(__name__)
 

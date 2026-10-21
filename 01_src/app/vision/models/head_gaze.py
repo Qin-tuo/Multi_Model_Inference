@@ -8,8 +8,8 @@
 import cv2
 import numpy as np
 
-from app.tensorrt_runner import TensorRTModel
-from app.vision_roi import crop_roi
+from app.inference.tensorrt_runner import TensorRTModel
+from app.vision.roi import crop_roi
 
 
 def image_blob(image):

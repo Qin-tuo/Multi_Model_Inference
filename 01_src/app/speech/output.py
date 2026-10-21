@@ -113,7 +113,7 @@ class SpeechOutput:
 
     def _check(self):
         """检查本地中断与轮次取消事件，任何一个成立都拒绝继续交付输出。"""
-        from app.request_io import TurnCancelled
+        from app.inference.request_io import TurnCancelled
 
         if self._abort.is_set() or self.cancel_event.is_set():
             raise TurnCancelled("Speech output cancelled")

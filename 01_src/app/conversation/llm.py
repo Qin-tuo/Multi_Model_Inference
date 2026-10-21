@@ -20,7 +20,7 @@
 
 import httpx
 import json
-from app.request_io import RequestIO, llama_slots_idle, control_json
+from app.inference.request_io import RequestIO, llama_slots_idle, control_json
 from typing import Optional, Iterator, Dict, Any
 
 

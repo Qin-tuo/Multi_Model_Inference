@@ -14,11 +14,11 @@ import hashlib
 from copy import deepcopy
 from collections import deque
 from pathlib import Path
-from app.audio import wav_pcm
+from app.speech.audio import wav_pcm
 from app.speech.types import SpeechOnset
-from app.request_io import TurnCancelled
-from app.diagnostics import TurnTrace
-from app.turn_execution import TurnExecution
+from app.inference.request_io import TurnCancelled
+from app.monitoring.diagnostics import TurnTrace
+from app.conversation.turn_execution import TurnExecution
 
 
 class TurnController:

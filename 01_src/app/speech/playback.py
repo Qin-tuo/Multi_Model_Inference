@@ -33,7 +33,7 @@ class Playback:
 
     def start(self, cmd):
         """在锁内检查取消状态后启动播放器，返回持有 stdin 管道的子进程。"""
-        from app.request_io import TurnCancelled
+        from app.inference.request_io import TurnCancelled
 
         with self._lock:
             if self.event.is_set():
@@ -99,7 +99,7 @@ def play_audio(
             "--channels=1",
             "--raw",
         ]
-    from app.request_io import TurnCancelled
+    from app.inference.request_io import TurnCancelled
 
     playback = playback or Playback(threading.Event())
     process = playback.start(cmd)

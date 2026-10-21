@@ -21,7 +21,7 @@ The application retains NVIDIA copyright and Apache-2.0 notices from its upstrea
 
 The expression model's own LICENSE link was absent in the selected model subdirectory; its declaration and upstream root notice are retained rather than replaced with a stronger license claim.
 
-The temporal open-hand rules in `01_src/app/gestures.py` adapt the OpenCV Zoo hand-pose demo's five-finger angle/wrist-distance predicate (revision `4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7`, Apache-2.0). Local adaptations add finite-value guards and temporal interaction rules.
+The temporal open-hand rules in `01_src/app/vision/gestures.py` adapt the OpenCV Zoo hand-pose demo's five-finger angle/wrist-distance predicate (revision `4b2a0b446e5cf2f11fb6b2c7251091c035d2c1f7`, Apache-2.0). Local adaptations add finite-value guards and temporal interaction rules.
 
 Runtime Python dependencies include NumPy, SciPy, OpenCV, Pillow, ONNX Runtime, FastAPI/Starlette, Uvicorn, Pydantic, HTTPX, PyYAML, Typer, Rich, psutil, Norfair, FilterPy and RealSense bindings. Installed distribution licenses remain in the two environment directories; version pins are in `requirements.lock` and `01_src/deploy/speech/requirements.lock`.
 

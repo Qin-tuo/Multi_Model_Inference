@@ -21,7 +21,7 @@ import threading
 import queue
 from typing import Optional
 from rich.console import Console
-from app.audio import chunk_rms
+from app.speech.audio import chunk_rms
 from app.speech.constants import CHANNELS, SAMPLE_RATE
 from app.speech.devices import (
     PulseAudioAEC,

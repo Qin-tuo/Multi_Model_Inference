@@ -26,8 +26,8 @@ import typer
 from rich.console import Console
 
 from app.config import Config
-from app.llm import LLM
-from app.monitor import get_system_stats, format_stats
+from app.conversation.llm import LLM
+from app.monitoring.monitor import get_system_stats, format_stats
 
 console = Console()
 app = typer.Typer(

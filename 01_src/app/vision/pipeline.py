@@ -9,10 +9,10 @@ import time
 
 import numpy as np
 
-from app.frame_worker import FrameWorker
-from app.vision_models import VisionModels
-from app.visual_tracks import VisualTracks
-from app.identity_gallery import IdentityGallery
+from app.vision.frame_worker import FrameWorker
+from app.vision.models.manager import VisionModels
+from app.vision.tracking import VisualTracks
+from app.vision.identity_gallery import IdentityGallery
 from project_paths import ROOT
 
 

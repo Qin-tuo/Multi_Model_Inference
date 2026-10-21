@@ -1,6 +1,6 @@
 # 现用模型
 
-模型来源和输入输出契约在 `03_models/vision-models.json`，引擎路径、SHA256、输入形状和精度在 `03_models/vision-runtime.json`。视觉引擎统一放在 `05_runtime/models/vision/`，均通过 TensorRT 推理。
+模型来源和输入输出契约在 `03_models/vision-models.json`，引擎路径、SHA256、输入形状和精度在 `03_models/vision-runtime.json`。视觉引擎统一放在 `05_runtime/models/vision/`，均通过 TensorRT 推理。适配器位于 `01_src/app/vision/models/`，由 `manager.py` 统一加载；底层执行与工件校验位于 `01_src/app/inference/`。
 
 | 角色 | 模型 | 主要输出 |
 |---|---|---|

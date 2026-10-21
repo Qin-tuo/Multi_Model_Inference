@@ -18,9 +18,9 @@
 import time
 from pathlib import Path
 import httpx
-from app.request_io import RequestIO
+from app.inference.request_io import RequestIO
 import numpy as np
-from app.audio import local_speech_url, speech_capability, pcm_wav
+from app.speech.audio import local_speech_url, speech_capability, pcm_wav
 
 
 class LocalTTS:

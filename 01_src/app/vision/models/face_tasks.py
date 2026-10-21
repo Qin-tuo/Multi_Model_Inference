@@ -7,8 +7,8 @@ ArcFace 对齐遵循 OpenCV 4.11.0 的 face_recognize.cpp（31b0eeea0b44b370fd07
 import cv2
 import numpy as np
 
-from app.model_artifacts import load_source
-from app.tensorrt_runner import TensorRTModel
+from app.inference.model_artifacts import load_source
+from app.inference.tensorrt_runner import TensorRTModel
 from project_paths import ROOT
 
 EXPRESSION_CLASSES = (

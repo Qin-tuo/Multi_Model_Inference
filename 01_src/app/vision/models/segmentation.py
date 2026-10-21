@@ -9,7 +9,7 @@ import math
 import cv2
 import numpy as np
 
-from app.tensorrt_runner import TensorRTModel
+from app.inference.tensorrt_runner import TensorRTModel
 
 
 def prepare_segmentation(image):

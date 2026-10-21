@@ -138,7 +138,7 @@ def owns_port(port, pids):
 
 
 def health(name, cfg):
-    from app.request_io import control_json
+    from app.inference.request_io import control_json
 
     listen = runtime.ports(cfg)
     if name in {"llama", "asr"}:

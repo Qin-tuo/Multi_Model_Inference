@@ -19,9 +19,9 @@ from pathlib import Path
 import time
 import wave
 import httpx
-from app.request_io import RequestIO, llama_slots_idle
+from app.inference.request_io import RequestIO, llama_slots_idle
 import numpy as np
-from app.audio import local_speech_url, speech_capability, pcm_wav, wav_pcm
+from app.speech.audio import local_speech_url, speech_capability, pcm_wav, wav_pcm
 
 
 class STT:

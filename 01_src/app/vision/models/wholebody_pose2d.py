@@ -4,9 +4,9 @@
 import cv2
 import numpy as np
 
-from app.model_artifacts import load_source
-from app.tensorrt_runner import TensorRTModel
-from app.pose_geometry import geometry_helper, prepare_pose
+from app.inference.model_artifacts import load_source
+from app.inference.tensorrt_runner import TensorRTModel
+from app.vision.geometry import geometry_helper, prepare_pose
 from project_paths import ROOT
 
 

@@ -25,7 +25,7 @@ import math
 from collections import deque
 from dataclasses import replace
 from app.config import WebConfig
-from app.web_limits import (
+from app.web.limits import (
     ClientBuffer,
     BoundedCalls,
     BusyRead,

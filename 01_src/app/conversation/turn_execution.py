@@ -8,7 +8,7 @@ import json
 import time
 from app.speech.vad import segment_pcm
 from app.speech.output import SpeechOutput, TextChunker
-from app.request_io import TurnCancelled
+from app.inference.request_io import TurnCancelled
 
 
 def _notice_output_callback(owner, event, notice):

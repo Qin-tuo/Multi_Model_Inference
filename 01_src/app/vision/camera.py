@@ -140,7 +140,7 @@ class Camera:
         """按显式后端打开设备并检查资源状态；RealSense 打开失败时回收其半初始化对象。"""
         if self.backend == "realsense":
             if self._source is None:
-                from app.realsense_source import RealSenseSource
+                from app.vision.realsense_source import RealSenseSource
 
                 self._source = RealSenseSource(
                     self.width, self.height, serial=self.serial

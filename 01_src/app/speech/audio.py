@@ -65,7 +65,7 @@ def local_speech_url(url: str) -> str:
 
 def speech_capability(url, kind, model, backend, timeout):
     """读取受时限与大小约束的能力接口，确认指定模型、后端及 16 kHz 单声道 PCM16 格式就绪。"""
-    from app.request_io import control_json
+    from app.inference.request_io import control_json
 
     payload = control_json(url + "/capabilities", timeout)
     if not isinstance(payload, dict) or not isinstance(payload.get(kind), dict):

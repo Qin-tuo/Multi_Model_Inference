@@ -27,22 +27,22 @@ import logging
 import threading
 import time
 from app.config import Config
-from app.camera import Camera
-from app.face_state import FaceState
-from app.vision_pipeline import VisionPipeline
-from app.gestures import GestureRecognizer
-from app.llm import LLM
-from app.stt import STT
-from app.tts import create_tts
+from app.vision.camera import Camera
+from app.vision.face_state import FaceState
+from app.vision.pipeline import VisionPipeline
+from app.vision.gestures import GestureRecognizer
+from app.conversation.llm import LLM
+from app.speech.stt import STT
+from app.speech.tts import create_tts
 from app.speech.vad import SileroVAD, vad_loop
 from app.speech.capture import MicRecorder
 from app.speech.devices import find_pa_sink
-from app.audio import find_alsa_device
+from app.speech.audio import find_alsa_device
 from rich.console import Console
-from app.turn_control import TurnController
-from app.web import Broadcaster, create_app
-from app.diagnostics import BoardDiagnostics
-from app.broadcast import _frame_broadcast_thread, _stats_broadcast_thread
+from app.conversation.turn_control import TurnController
+from app.web.server import Broadcaster, create_app
+from app.monitoring.diagnostics import BoardDiagnostics
+from app.web.broadcast import _frame_broadcast_thread, _stats_broadcast_thread
 
 log = logging.getLogger(__name__)
 

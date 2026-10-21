@@ -12,12 +12,12 @@ import numpy as np
 import psutil
 
 from project_paths import ROOT
-from app.appearance import AppearanceFeatures
-from app.face_tasks import ArcFaceIdentity, FaceExpression
-from app.face_trt import TensorRTFace
-from app.head_gaze import HeadPose, GazeLandmarks, Gaze
-from app.segmentation import DetectionSegmentation
-from app.wholebody_pose2d import WholeBodyPose2D
+from app.vision.models.appearance import AppearanceFeatures
+from app.vision.models.face_tasks import ArcFaceIdentity, FaceExpression
+from app.vision.models.face_trt import TensorRTFace
+from app.vision.models.head_gaze import HeadPose, GazeLandmarks, Gaze
+from app.vision.models.segmentation import DetectionSegmentation
+from app.vision.models.wholebody_pose2d import WholeBodyPose2D
 
 ROLES = (
     "detection_segmentation",

@@ -27,7 +27,7 @@ import numpy as np
 from pathlib import Path
 from project_paths import ROOT, MODEL_DIR, load_artifact_manifest
 from app.config import VADConfig
-from app.audio import chunk_rms
+from app.speech.audio import chunk_rms
 from app.speech.constants import SILERO_CHUNK_SAMPLES
 from app.speech.types import SpeechOnset, SpeechSegment
 
