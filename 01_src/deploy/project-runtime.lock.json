@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "status": "SAME_HOST_INDEPENDENT_RESTORE_PASS",
+  "source_git_commit": "590c110b40b4484ae6625aa1b3ab35b62512104f",
+  "profiles": [
+    "02_config/settings.orin-nx.yaml"
+  ],
+  "archive": {
+    "path": "05_runtime/exports/consolidated-runtime-20261021.tar",
+    "sha256": "09d81c80402499f537a5265653b4fb0489cc11d7d0cfc2a23c1227184198e889",
+    "bytes": 7675924480
+  },
+  "artifact_bytes": 7565136797,
+  "files": 17224,
+  "host_requirements": {
+    "architecture": "aarch64",
+    "python": "3.12",
+    "l4t": "# R39 (release), REVISION: 2.1, GCID: 46758480, BOARD: generic, EABI: aarch64, DATE: Fri Aug  7 05:54:22 AM UTC 2026\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia\n",
+    "tensorrt": "10.16.2.10",
+    "cuda": "13.2",
+    "note": "System CUDA/TensorRT, OS libraries and speech system-site packages remain host-provided."
+  },
+  "verification_protocols": {
+    "vision-measurements.json": "11d8bd3af058dd1ba82052b1b2298baf1a43a287784be3b52f22271af88ed894",
+    "model-measurements.json": "f90348c09fa9a69cfe3bb2dd554622c704c4c6cf28041782cbaf590ac23b3de3"
+  },
+  "independent_restore": {
+    "checkout": "/home/nvidia/mmi-restore-20261021",
+    "hidden_sources": [
+      "/home/nvidia/Multi_Model_Inference",
+      "/home/nvidia/AI_Stack"
+    ],
+    "namespace_exit_code": 0,
+    "checks": {
+      "text": 0,
+      "camera": 0,
+      "file-speech": 0,
+      "application-audio": 0
+    },
+    "vision": {
+      "processed": 101,
+      "failures": 0,
+      "models": [
+        "detection_segmentation",
+        "face",
+        "body_hand_pose",
+        "person_reid",
+        "head_pose",
+        "gaze_landmarks",
+        "gaze",
+        "face_identity",
+        "expression",
+        "object_embedding"
+      ],
+      "depth_ready": true,
+      "scope": "Observed current scene; loaded models do not prove real-person attribute accuracy"
+    },
+    "shutdown": {
+      "app": 0,
+      "speech": 0,
+      "asr": 0,
+      "llama": 0
+    },
+    "remaining_owned_processes": [],
+    "evidence": {
+      "path": "05_runtime/refactor-checkpoints/consolidation-20261020-start/independent-restore/report.json",
+      "sha256": "a14e95ddd51c9f57d3a4353acada7c0946bb2dcc4572939fd516fb675cb3c5db"
+    }
+  },
+  "scope": "Same compatible host; current models and native processes work without original project paths or external network. Physical audio, field accuracy and long-run stability remain separate."
+}

@@ -2,7 +2,7 @@
 
 在 Orin NX 16GB 上连接 D435i、十模型视觉、中文语音和 4B 图文模型。重点是同帧数据流、板载资源边界、可观察性和可复现测量。性能优化由用户接手逐项完成。
 
-> 整合分支验收进行中：工具与核心模块已完成阶段验证，当前运行包独立恢复、最终性能对照和主分支交付仍待完成。实际进度见 [执行清单](benchmarks/manifests/consolidation-progress.json)，完整范围见 [本轮 Goal](docs/consolidation-goal.md)。
+> 整合分支验收进行中：工具与核心模块已完成阶段验证，当前运行包已通过独立恢复，最终性能对照和主分支交付仍待完成。实际进度见 [执行清单](benchmarks/manifests/consolidation-progress.json)，完整范围见 [本轮 Goal](docs/consolidation-goal.md)。
 
 [架构与代码地图](docs/project-overview.md) · [模型与接口](docs/models.md) · [基准与复现](docs/visual-baseline.md) · [依赖与恢复](01_src/deploy/dependencies-layout.md) · [服务管理](01_src/deploy/systemd/README.md)
 
