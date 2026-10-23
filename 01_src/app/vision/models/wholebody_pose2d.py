@@ -13,7 +13,7 @@ from project_paths import ROOT
 class WholeBodyPose2D:
     """组合几何裁剪、SimCC 解码和 TensorRT 引擎的全身姿态适配器。"""
 
-    def __init__(self, build, entry):
+    def __init__(self, build, entry, *, runtime=None):
         """校验并加载几何与 SimCC 辅助代码，按清单中的宽、高创建固定形状姿态引擎。"""
         geometry = entry["prepost_source"]["files"]["bbox/transforms.py"]
         self.geometry = geometry_helper(geometry["path"], geometry["sha256"])
@@ -25,7 +25,7 @@ class WholeBodyPose2D:
         if self.input_size not in ((192, 256), (288, 384)):
             raise ValueError("Unsupported standard whole-body input profile")
         width, height = self.input_size
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"],
             build["engine_sha256"],
             {"input": [1, 3, height, width]},
@@ -37,8 +37,18 @@ class WholeBodyPose2D:
 
         返回关键点、峰值分数、阈值有效性和两只手各 21 点；分数不是概率，结果不包含模型预测的 z。
         """
+        inputs, transform = self.prepare(image, box, joint_threshold=joint_threshold)
+        return self.decode(self.model.infer(inputs), transform)
+
+    def prepare(self, image, box, joint_threshold=0.2):
+        """裁剪人体 ROI，记录其仿射矩阵与本次关键点阈值，不执行推理。"""
         inputs, matrix = prepare_pose(image, box, self.geometry, self.input_size)
-        raw = self.model.infer(inputs)
+        return inputs, {"matrix": matrix, "joint_threshold": joint_threshold}
+
+    def decode(self, raw, transform):
+        """解码对应输入的 SimCC 输出，按保存的仿射关系还原人体和双手点。"""
+        matrix = transform["matrix"]
+        joint_threshold = transform["joint_threshold"]
         if raw["simcc_x"].shape != (1, 133, self.input_size[0] * 2) or raw[
             "simcc_y"
         ].shape != (1, 133, self.input_size[1] * 2):

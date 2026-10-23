@@ -128,22 +128,31 @@ def expression_alignment(entry):
 class ArcFaceIdentity:
     """使用原版 MobileNet V1 ArcFace 特征引擎，显式完成五点对齐及 RGB 归一化。"""
 
-    def __init__(self, build):
+    def __init__(self, build, *, runtime=None):
         """创建 ArcFace 人脸特征引擎并保存其执行后端标识。"""
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"images": [1, 3, 112, 112]}
         )
         self.provider = self.model.provider
 
     def infer(self, image, landmarks):
         """五点对齐后执行 ArcFace 推理，返回归一化 512 维特征及对齐矩阵。"""
+        inputs, matrix = self.prepare(image, landmarks)
+        return self.decode(self.model.infer(inputs), matrix)
+
+    def prepare(self, image, landmarks):
+        """对齐并归一化本次人脸，保留其原图到模型输入的变换。"""
         matrix = sface_transform(landmarks)
         crop = aligned_bgr(image, matrix)
         # Both upstream FER and ArcFace use (RGB/255 - .5)/.5. Alignment
         # remains the existing, independently checked five-point frontend.
         values = face_tensor(crop, expression=True)["data"]
+        return {"images": values}, matrix
+
+    def decode(self, outputs, matrix):
+        """归一化 ArcFace 输出并附带本次对齐信息。"""
         vector = normalize_embedding(
-            self.model.infer({"images": values})["embedding"], dimensions=512
+            outputs["embedding"], dimensions=512
         )
         return {
             "embedding": vector,
@@ -159,23 +168,32 @@ class ArcFaceIdentity:
 class FaceExpression:
     """使用固定人脸对齐契约执行七类表情推理。"""
 
-    def __init__(self, build, entry):
+    def __init__(self, build, entry, *, runtime=None):
         """加载表情对齐器与 TensorRT 引擎，保留两者各自的输入约定。"""
         self.aligner = expression_alignment(entry)
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"data": [1, 3, 112, 112]}
         )
         self.provider = self.model.provider
 
     def infer(self, image, landmarks):
         """按五点对齐人脸并执行表情分类，返回七类分值与对应几何信息。"""
+        inputs, matrix = self.prepare(image, landmarks)
+        return self.decode(self.model.infer(inputs), matrix)
+
+    def prepare(self, image, landmarks):
+        """按固定上游对齐器产生表情网络输入及对齐矩阵。"""
         points = checked_landmarks(landmarks)
         matrix, _ = self.aligner.get_similarity_transform_for_cv2(
             points, self.aligner._std_points
         )
         crop = aligned_bgr(image, matrix)
+        return face_tensor(crop, expression=True), matrix
+
+    def decode(self, outputs, matrix):
+        """解释表情 logits 并保留同次人脸对齐信息。"""
         scores = expression_scores(
-            self.model.infer(face_tensor(crop, expression=True))["label"]
+            outputs["label"]
         )
         return {
             "scores": scores,

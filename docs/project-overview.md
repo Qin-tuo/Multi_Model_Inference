@@ -159,10 +159,30 @@ debug展示分支、队列、当前任务、结果年龄、耗时、降级原因
 - 接入约束：当前 Python InferenceOp 构造参数仍为 `pre_processor_map` / `inference_map`；输入需要设备或 CUDA pinned host 内存；进程栈限额按官方提示设为至少 32 MiB。
 - 失败尝试及纠正记录均保留于实验报告，未修改引擎。原引擎已有跨设备型号警告仍保留，不能用此验证宣称性能收益。
 - 20 轮同进程图创建、3 次真实推理、取消和退出通过，输出保持一致，退出后线程数均为 25，停止约 46–51 ms。RSS 从约 899 MiB 增至约 1044 MiB，包含原生库、参考执行与验证数据，不能视为框架独占内存或已证明无泄漏；后续需做稳态长跑及独立开销对照。
-- M0 尚需补充独立资源开销与 Web 共存检查；十模型接入与整机验证尚未开始。
+- 补充 90 秒单模型驻留与 ASGI 共存检查：Holoscan 执行 452 次、19 次输出抽查及 90 次 ASGI 请求，全部通过；暖机 30 秒后 RSS 增量为 56 KiB，ASGI 请求 P95 约 2.72 ms。直接调用对照执行 450 次，RSS 增量 52 KiB。两种接入方式的稳态进程 RSS 相差约 132.6 MiB，包含 SDK、CuPy、线程和缓冲区，不能解释为独占显存或全系统开销。报告为实验目录的 `reports/m0-{holoscan,direct}-web-resources.json`。
+- M0 单模型兼容性和短时生命周期验证通过。这里的 ASGI 检查不包含 TCP、相机或正式四服务，整机长跑及实体交互仍属于后续阶段。
 
 ### M1 数据契约进展
 
 `app/contracts.py` 已定义共享 `FrameSnapshot`、`FrameKey`、`TaskRequest` 和 `ModelObservation`。相机继续返回同一帧元数据格式，旧导入名仍可用；任务期限、缓存原始时间与同帧/同目标依赖检查独立于 Holoscan、TensorRT 和 Web。工作线程的帧有效性检查开始复用公共契约。
 
 实验区 `scripts/check_contracts.py` 的 9 项检查通过，覆盖重连帧号重用、轨迹代次变化、缓存过期、迟到结果、依赖匹配及正式工作线程的失效检查；53 个应用模块导入通过。此阶段尚未替换正式视觉调度路径。
+
+### M2 模型分层与原生图组件进展
+
+十模型适配器已分出 `prepare()` 与 `decode()`，独立的 `infer()` 保留为单模型同步调用入口。由组装层注入 `EngineDescription` 时只加载契约与算法辅助模块，不重复创建 GPU 引擎；执行资源由 Holoscan `InferenceOp` 持有。`VisionModels.load(runtime_factory=...)` 提供注入边界。
+
+`03_models/vision-runtime.json` 的 schema 2 记录从真实引擎读取的有序 I/O 名称、形状和类型。视线模型的三个输入严格按引擎顺序映射，不能依赖普通调用字典的插入顺序。
+
+`app/perception/graphs/model.py` 组装 `Prepare → InferenceOp → Decode`，配对传递请求和几何信息，持有输入所有者直到结果消费；在预处理前后和发布前检查时效。内部输入端口容量为 1；输出使用官方 `BlockMemoryPool`，根据真实输出尺寸分配固定数量的 pinned host 块，并检查单模型池不超过 64 MiB。可恢复输入错误返回明确事件，原生推理错误由图所有者负责停图和上报。`backend_wall_ms` 包含节点等待、执行与输出复制，不称作纯 GPU 时间。
+
+已完成以下组件证据，均使用真实引擎、COCO 图片 461009 的有效人体与人脸输入；不代表实时业务分支和整机验收：
+
+- `m2-adapter-equivalence.json`：与迁移前提交 `6576ea1` 的十模型实现逐一比较，同步接口及拆分接口结果一致，准备的输入逐元素一致。
+- `m2-native-models.json`：十个原生 InferenceOp 分别执行 3 次，所有原始输出最大绝对差均为 0。
+- `m2-model-graphs-bounded.json`：同一图中的十条模型链各完成 3 次，结果一致；另有 1 次过期请求被拒绝、1 次退化人脸输入返回不可用状态。该用例为各分支提供参考输入，不验证实时的头姿/关键点联动。
+- 图串行基线明确使用 `EventBasedScheduler(worker_thread_number=1)`。实验发现 `ThreadPool.add(..., pin_operator=True)` 会为每节点追加专用线程，而 `pin_operator=False` 不构成所需的 GPU 串行约束；最终日志确认只有一个图工作线程。CPU/GPU 并发优化留给后续独立实验。
+
+正式应用仍使用原串行视觉管线；下一步先冻结完整 R0 对照，再接入场景策略、分支发布和四服务生命周期。Holoscan 目前仅安装于独立验证环境。
+
+运行环境检查 `m2-services-preflight.json` 为 `ARTIFACTS_VERIFIED`，58 个应用模块可在原生产环境导入；新图模块只在创建图时要求 Holoscan 依赖。四服务保持实施前的停止状态。以上均不替代整机启动、相机链路或长时间混合负载验收。

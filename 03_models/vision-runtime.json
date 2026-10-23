@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "CURRENT_RUNTIME",
   "tensorrt_version": "10.16.2.10",
   "runtime_versions": {
@@ -29,7 +29,41 @@
       "engine_bytes": 254061980,
       "precision": "FP32; TF32 disabled",
       "candidate_contract_sha256": "53449935f13a619d7fff7ac9a415b8b9723fee88ba841e14a3993c9e7e6d8210",
-      "source_build": "05_runtime/validation/b2-build-rtmw-l-20261020/body_hand_pose/build.json"
+      "source_build": "05_runtime/validation/b2-build-rtmw-l-20261020/body_hand_pose/build.json",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "input",
+            "shape": [
+              1,
+              3,
+              384,
+              288
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "simcc_x",
+            "shape": [
+              1,
+              133,
+              576
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "simcc_y",
+            "shape": [
+              1,
+              133,
+              768
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "face": {
       "role": "face",
@@ -47,7 +81,131 @@
       "source_build": "05_runtime/validation/b1-face-20261019/face/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 686020,
-      "candidate_contract_sha256": "9308780c7fe62f211f2342883f8daaaa9d47eeb3ee3540d696dec81df43ea0ea"
+      "candidate_contract_sha256": "9308780c7fe62f211f2342883f8daaaa9d47eeb3ee3540d696dec81df43ea0ea",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "input",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "cls_8",
+            "shape": [
+              1,
+              6400,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "cls_16",
+            "shape": [
+              1,
+              1600,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "cls_32",
+            "shape": [
+              1,
+              400,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "obj_8",
+            "shape": [
+              1,
+              6400,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "obj_16",
+            "shape": [
+              1,
+              1600,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "obj_32",
+            "shape": [
+              1,
+              400,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "bbox_8",
+            "shape": [
+              1,
+              6400,
+              4
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "bbox_16",
+            "shape": [
+              1,
+              1600,
+              4
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "bbox_32",
+            "shape": [
+              1,
+              400,
+              4
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "kps_8",
+            "shape": [
+              1,
+              6400,
+              10
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "kps_16",
+            "shape": [
+              1,
+              1600,
+              10
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "kps_32",
+            "shape": [
+              1,
+              400,
+              10
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "face_identity": {
       "role": "face_identity",
@@ -65,7 +223,31 @@
       "engine_bytes": 66665996,
       "precision": "FP32; TF32 disabled",
       "candidate_contract_sha256": "22322dc1f820580cbcf7a74487a6c3dc38efa12240fc7f17b8da09fc3f0e9be5",
-      "source_build": "05_runtime/validation/b2-build-20261020/face_identity/build.json"
+      "source_build": "05_runtime/validation/b2-build-20261020/face_identity/build.json",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              112,
+              112
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "embedding",
+            "shape": [
+              1,
+              512
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "expression": {
       "role": "expression",
@@ -83,7 +265,31 @@
       "source_build": "05_runtime/validation/b1-face-tasks-20261019/expression/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 5422532,
-      "candidate_contract_sha256": "f25d92a1dd2e88fa95244b0615679bb35a2b05a133d56e0246f4706e73ec7e8b"
+      "candidate_contract_sha256": "f25d92a1dd2e88fa95244b0615679bb35a2b05a133d56e0246f4706e73ec7e8b",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "data",
+            "shape": [
+              1,
+              3,
+              112,
+              112
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "label",
+            "shape": [
+              1,
+              7
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "detection_segmentation": {
       "role": "detection_segmentation",
@@ -101,7 +307,42 @@
       "source_build": "05_runtime/validation/b1-segmentation-20261019/detection_segmentation/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 21622828,
-      "candidate_contract_sha256": "b7b5b83d6476546f8fb71d2bfb3a5d4547ec7602cde0e28ca90bfe242443e268"
+      "candidate_contract_sha256": "b7b5b83d6476546f8fb71d2bfb3a5d4547ec7602cde0e28ca90bfe242443e268",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "output0",
+            "shape": [
+              1,
+              116,
+              8400
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "output1",
+            "shape": [
+              1,
+              32,
+              160,
+              160
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "head_pose": {
       "role": "head_pose",
@@ -119,7 +360,47 @@
       "source_build": "05_runtime/validation/b1-omz-repaired-20261019/head_pose/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 8374012,
-      "candidate_contract_sha256": "44a986cbf5a66cba246ea5d38ccf3b33356b223836baded7924e8109def6c1c1"
+      "candidate_contract_sha256": "44a986cbf5a66cba246ea5d38ccf3b33356b223836baded7924e8109def6c1c1",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "data",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "fc_r",
+            "shape": [
+              1,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "fc_y",
+            "shape": [
+              1,
+              1
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "fc_p",
+            "shape": [
+              1,
+              1
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "gaze": {
       "role": "gaze",
@@ -147,7 +428,49 @@
       "source_build": "05_runtime/validation/b1-omz-repaired-20261019/gaze/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 8411052,
-      "candidate_contract_sha256": "3b47fc07a1c343dd4b5ed0bee65ffa2326fdb5e3445069107496ce6c44161959"
+      "candidate_contract_sha256": "3b47fc07a1c343dd4b5ed0bee65ffa2326fdb5e3445069107496ce6c44161959",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "left_eye_image",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "right_eye_image",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "head_pose_angles",
+            "shape": [
+              1,
+              3
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "gaze_vector/sink_port_0",
+            "shape": [
+              1,
+              3
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "gaze_landmarks": {
       "role": "gaze_landmarks",
@@ -165,7 +488,31 @@
       "source_build": "05_runtime/validation/b1-remaining-20261019/gaze_landmarks/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 19259908,
-      "candidate_contract_sha256": "c4a002d6e438d7cd66f4f2f2e605481c5e086113fa6bd20d0d2164349b431eaa"
+      "candidate_contract_sha256": "c4a002d6e438d7cd66f4f2f2e605481c5e086113fa6bd20d0d2164349b431eaa",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "data",
+            "shape": [
+              1,
+              3,
+              60,
+              60
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "align_fc3/sink_port_0",
+            "shape": [
+              1,
+              70
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "person_reid": {
       "role": "person_reid",
@@ -183,7 +530,31 @@
       "engine_bytes": 10058812,
       "precision": "FP32; TF32 disabled",
       "candidate_contract_sha256": "aa0d3fe90bf3c6da642d3d38f07233afb42c07cc133d14fd987b6599ec48c0ab",
-      "source_build": "05_runtime/validation/b2-build-20261020/person_reid/build.json"
+      "source_build": "05_runtime/validation/b2-build-20261020/person_reid/build.json",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              256,
+              128
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "embedding",
+            "shape": [
+              1,
+              512
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     },
     "object_embedding": {
       "role": "object_embedding",
@@ -201,7 +572,31 @@
       "source_build": "05_runtime/validation/b1-remaining-20261019/object_embedding/build.json",
       "precision": "FP32; TF32 disabled",
       "engine_bytes": 352200204,
-      "candidate_contract_sha256": "c1f5a23b862a44a802adbd9a908c79f45562d3429e98de73c3895673c48cdd92"
+      "candidate_contract_sha256": "c1f5a23b862a44a802adbd9a908c79f45562d3429e98de73c3895673c48cdd92",
+      "io_tensors": {
+        "inputs": [
+          {
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              224,
+              224
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "embedding",
+            "shape": [
+              1,
+              512
+            ],
+            "dtype": "float32"
+          }
+        ]
+      }
     }
   },
   "model_set": "current-ten-models"

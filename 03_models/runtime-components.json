@@ -4,5 +4,14 @@
     "tensorrt_version": "10.16.2.10",
     "runtime_helper": "05_runtime/frameworks/tensorrt-samples-16ed0636/common_runtime.py",
     "runtime_helper_sha256": "34dc84a443ed96a44f567329c4c421c74693837325fa27e9f87de360f27a9736"
+  },
+  "holoscan": {
+    "runtime_versions": {
+      "holoscan-cu13": "4.6.0",
+      "cupy-cuda13x": "13.6.0"
+    },
+    "minimum_stack_bytes": 33554432,
+    "execution_policy": "single-worker graph baseline; no GPU concurrency tuning",
+    "engine_interface": "native InferenceOp with fixed TensorRT engine artifacts"
   }
 }

@@ -90,9 +90,10 @@ class VisionModels:
             "max_detections": max_detections,
         }
 
-    def load(self, roles=None):
+    def load(self, roles=None, *, runtime_factory=None):
         """校验运行依赖版本、模型摘要和语义契约后逐个加载所选适配器。
 
+        默认独立加载引擎；图模式由 runtime_factory 注入描述对象，实际执行资源归图运行时。
         加载前检查可用内存；部分加载失败时统一关闭成功创建的模型，禁止重复加载覆盖所有权。
         """
         if self.models:
@@ -123,33 +124,35 @@ class VisionModels:
                 if available < 2 * spec["engine_bytes"] + 256 * 1024**2:
                     raise RuntimeError("Insufficient available RAM to load " + role)
                 tick = time.monotonic()
+                runtime = runtime_factory(role, spec) if runtime_factory else None
                 if role == "detection_segmentation":
                     model = DetectionSegmentation(
-                        spec, self.entries[role], **self.detection_options
+                        spec, self.entries[role], runtime=runtime, **self.detection_options
                     )
                 elif role == "face":
-                    model = TensorRTFace(spec)
+                    model = TensorRTFace(spec, runtime=runtime)
                 elif role == "body_hand_pose":
                     if self.entries[role].get("adapter") != "rtmpose2d":
                         raise ValueError("Unsupported current whole-body adapter")
-                    model = WholeBodyPose2D(spec, self.entries[role])
+                    model = WholeBodyPose2D(spec, self.entries[role], runtime=runtime)
                 elif role in ("person_reid", "object_embedding"):
-                    model = AppearanceFeatures(spec, role)
+                    model = AppearanceFeatures(spec, role, runtime=runtime)
                 elif role == "face_identity":
                     if self.entries[role].get("adapter") != "arcface_mobilenet_v1":
                         raise ValueError("Unsupported current face identity adapter")
-                    model = ArcFaceIdentity(spec)
+                    model = ArcFaceIdentity(spec, runtime=runtime)
                 elif role == "expression":
-                    model = FaceExpression(spec, self.entries[role])
+                    model = FaceExpression(spec, self.entries[role], runtime=runtime)
                 else:
                     model = {
                         "head_pose": HeadPose,
                         "gaze_landmarks": GazeLandmarks,
                         "gaze": Gaze,
-                    }[role](spec)
+                    }[role](spec, runtime=runtime)
                 self.models[role] = model
                 stats = {
                     "provider": model.provider,
+                    "execution_owner": "graph" if runtime_factory else "adapter",
                     "model_name": self.entries[role].get("name", role),
                     "calls": 0,
                     "errors": 0,

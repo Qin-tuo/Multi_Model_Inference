@@ -120,17 +120,24 @@ def decode_gaze(vector, roll):
 class HeadPose:
     """从人脸区域估计 OMZ 约定的 yaw、pitch、roll。"""
 
-    def __init__(self, build):
+    def __init__(self, build, *, runtime=None):
         """加载输入为 60×60 BGR 图像的头姿引擎。"""
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"data": [1, 3, 60, 60]}
         )
         self.provider = self.model.provider
 
     def infer(self, image, box):
         """预测 yaw、pitch、roll，返回角度、原图裁剪框和模型支持范围内的标记。"""
-        inputs, roi = prepare_face_attribute(image, box)
-        out = self.model.infer(inputs)
+        inputs, roi = self.prepare(image, box)
+        return self.decode(self.model.infer(inputs), roi)
+
+    def prepare(self, image, box):
+        """生成头姿输入并保留原图裁剪范围。"""
+        return prepare_face_attribute(image, box)
+
+    def decode(self, out, roi):
+        """将三个头姿输出整理为角度与支持范围标记。"""
         values = [float(out[name].item()) for name in ("fc_y", "fc_p", "fc_r")]
         return {
             "angles_degrees": values,
@@ -149,9 +156,9 @@ class HeadPose:
 class GazeLandmarks:
     """为视线估计提供同一人脸的 35 个原图关键点。"""
 
-    def __init__(self, build):
+    def __init__(self, build, *, runtime=None):
         """加载面部 35 点引擎，并记录其实际输出张量名称。"""
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"data": [1, 3, 60, 60]}
         )
         self.provider = self.model.provider
@@ -159,10 +166,18 @@ class GazeLandmarks:
 
     def infer(self, image, box):
         """预测同一人脸的关键点，将结果还原到原图像素坐标。"""
-        inputs, roi = prepare_face_attribute(image, box)
+        inputs, roi = self.prepare(image, box)
+        return self.decode(self.model.infer(inputs), roi)
+
+    def prepare(self, image, box):
+        """生成关键点输入并保留原图裁剪范围。"""
+        return prepare_face_attribute(image, box)
+
+    def decode(self, outputs, roi):
+        """按本次 ROI 将归一化关键点还原到原图像素。"""
         return {
             "landmarks": landmark_pixels(
-                self.model.infer(inputs)[self.output_name], roi
+                outputs[self.output_name], roi
             ),
             "roi_xyxy": roi,
             "order": "OMZ35",
@@ -176,9 +191,9 @@ class GazeLandmarks:
 class Gaze:
     """使用双眼图像和头姿估计视线，并补偿头部 roll。"""
 
-    def __init__(self, build):
+    def __init__(self, build, *, runtime=None):
         """按清单加载双眼图像与头姿联合输入的视线引擎。"""
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], build["input_shapes"]
         )
         self.provider = self.model.provider
@@ -186,10 +201,19 @@ class Gaze:
 
     def infer(self, image, landmarks, angles):
         """对齐双眼后执行视线推理，返回补偿后的向量、角度和眼部变换信息。"""
+        inputs, transform = self.prepare(image, landmarks, angles)
+        return self.decode(self.model.infer(inputs), transform)
+
+    def prepare(self, image, landmarks, angles):
+        """构造双眼与头姿输入，保存解码所需的同次 roll 角。"""
         inputs, transform = prepare_gaze(image, landmarks, angles)
+        return inputs, {"transform": transform, "roll": angles[2]}
+
+    def decode(self, outputs, context):
+        """使用与输入对应的 roll 补偿视线，并返回原眼部几何信息。"""
         return {
-            **decode_gaze(self.model.infer(inputs)[self.output_name], angles[2]),
-            "transform": transform,
+            **decode_gaze(outputs[self.output_name], context["roll"]),
+            "transform": context["transform"],
         }
 
     def close(self):

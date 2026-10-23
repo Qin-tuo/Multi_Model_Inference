@@ -5,7 +5,7 @@
 帧数据由采集者持有，消费者只读共享；缓存结果始终保留真实的观测身份和时间。
 """
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from enum import IntEnum
 import math
 import threading
@@ -168,3 +168,33 @@ class ModelObservation:
             or self.observed_monotonic != other.observed_monotonic
         ):
             raise ValueError("Dependent observations refer to different frames or subjects")
+
+
+@dataclass(frozen=True)
+class ModelCall:
+    """提供模型适配所需的目标参数；原图统一取自请求帧，避免传入另一帧图像。"""
+
+    request: TaskRequest
+    args: tuple = ()
+    kwargs: dict = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class TaskOutcome:
+    """模型任务的完成事件；时延字段明确区分主机墙钟与单独测量的 GPU 时间。"""
+
+    request: TaskRequest
+    status: str
+    completed_monotonic: float
+    payload: Any = None
+    error: str | None = None
+    timings_ms: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        """拒绝未知状态和倒置完成时间，保持调度统计与业务结果含义明确。"""
+        if (
+            self.status not in {"ok", "expired", "unavailable", "cancelled"}
+            or not math.isfinite(self.completed_monotonic)
+            or self.completed_monotonic < self.request.submitted_monotonic
+        ):
+            raise ValueError("Invalid model task outcome")

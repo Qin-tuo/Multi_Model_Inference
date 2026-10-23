@@ -68,13 +68,13 @@ def normalized_features(values):
 class AppearanceFeatures:
     """持有一个外观特征引擎，用模型摘要区分不可混用的特征空间。"""
 
-    def __init__(self, build, role):
+    def __init__(self, build, role, *, runtime=None):
         """根据行人或物体角色加载固定输入形状的引擎，并以 ONNX 摘要标识特征空间。"""
         if role not in ("person_reid", "object_embedding"):
             raise ValueError("Unknown appearance role")
         self.role = role
         shape = [1, 3, 256, 128] if role == "person_reid" else [1, 3, 224, 224]
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"images": shape}
         )
         self.space = role + ":" + build["onnx_sha256"]
@@ -82,8 +82,16 @@ class AppearanceFeatures:
 
     def infer(self, image, box):
         """对一个原图目标区域执行预处理、推理和归一化，返回特征、空间标识及裁剪信息。"""
-        inputs, transform = prepare_appearance(image, box, self.role)
-        vector = normalized_features(self.model.infer(inputs)["embedding"])
+        inputs, transform = self.prepare(image, box)
+        return self.decode(self.model.infer(inputs), transform)
+
+    def prepare(self, image, box):
+        """生成指定目标区域的特征网络输入和几何信息。"""
+        return prepare_appearance(image, box, self.role)
+
+    def decode(self, outputs, transform):
+        """归一化推理特征，并保留特征空间及原始 ROI 的对应关系。"""
+        vector = normalized_features(outputs["embedding"])
         return {
             "embedding": vector,
             "embedding_space": self.space,

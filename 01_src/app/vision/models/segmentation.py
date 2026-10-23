@@ -146,7 +146,7 @@ def decode_segmentation(
 class DetectionSegmentation:
     """拥有检测分割引擎和后处理预算，向共享感知管线返回原图目标及 mask。"""
 
-    def __init__(self, build, entry, threshold=0.25, iou=0.45, max_detections=10):
+    def __init__(self, build, entry, threshold=0.25, iou=0.45, max_detections=10, *, runtime=None):
         """核对类别清单并加载分割引擎，保存阈值和单帧检测数量预算。"""
         if not 0 < threshold < 1 or not 0 < iou < 1 or not 1 <= max_detections <= 10:
             raise ValueError("Invalid detection thresholds or capacity")
@@ -157,7 +157,7 @@ class DetectionSegmentation:
             or any(not isinstance(name, str) or not name for name in classes)
         ):
             raise ValueError("Expected the pinned 80-class COCO label mapping")
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], {"images": [1, 3, 640, 640]}
         )
         self.classes = classes
@@ -166,9 +166,17 @@ class DetectionSegmentation:
 
     def infer(self, image):
         """串联图像预处理、引擎推理和框/mask 解码，返回带类别语义的原图目标。"""
-        inputs, transform = prepare_segmentation(image)
+        inputs, transform = self.prepare(image)
+        return self.decode(self.model.infer(inputs), transform)
+
+    def prepare(self, image):
+        """产生输入张量及原图变换信息，供同步调用或任务图分别执行。"""
+        return prepare_segmentation(image)
+
+    def decode(self, outputs, transform):
+        """仅解释推理输出并还原原图目标，不访问执行上下文或调度状态。"""
         detections, masks = decode_segmentation(
-            self.model.infer(inputs),
+            outputs,
             transform,
             threshold=self.threshold,
             iou=self.iou,

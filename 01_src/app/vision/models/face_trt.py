@@ -89,7 +89,7 @@ def decode_yunet(outputs, threshold=0.5, nms_threshold=0.3, top_k=5000):
 class TensorRTFace:
     """负责 YuNet 的固定输入处理、多尺度解码与原图坐标还原。"""
 
-    def __init__(self, build, threshold=0.5, nms_threshold=0.3, max_faces=4):
+    def __init__(self, build, threshold=0.5, nms_threshold=0.3, max_faces=4, *, runtime=None):
         """加载 YuNet 引擎并保存检测阈值、NMS 阈值和最大人脸数。"""
         if (
             not 0 < threshold <= 1
@@ -99,7 +99,7 @@ class TensorRTFace:
             raise ValueError("Invalid face thresholds or capacity")
         if build["input_shapes"] != {"input": [1, 3, 640, 640]}:
             raise ValueError("Unexpected YuNet engine shape")
-        self.model = TensorRTModel(
+        self.model = runtime if runtime is not None else TensorRTModel(
             build["engine_path"], build["engine_sha256"], build["input_shapes"]
         )
         self.threshold, self.nms_threshold, self.max_faces = (
@@ -111,9 +111,17 @@ class TensorRTFace:
 
     def infer(self, image):
         """执行人脸检测，将有效框和五点映射回原图，并按数量预算返回结果。"""
-        inputs, transform = prepare_face(image)
+        inputs, transform = self.prepare(image)
+        return self.decode(self.model.infer(inputs), transform)
+
+    def prepare(self, image):
+        """生成 YuNet 输入和坐标变换元数据，不执行模型。"""
+        return prepare_face(image)
+
+    def decode(self, outputs, transform):
+        """解码同一输入对应的人脸框与五点，并还原原图坐标。"""
         faces = decode_yunet(
-            self.model.infer(inputs), self.threshold, self.nms_threshold
+            outputs, self.threshold, self.nms_threshold
         )
         sx, sy = transform["scale_xy"]
         faces[:, :14:2] /= sx
