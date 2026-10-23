@@ -101,8 +101,9 @@ class FrameWorker:
             result = dict(self._state)
         if (
             frame is None
-            or frame.source_epoch != self.camera.source_epoch
-            or time.monotonic() - frame.received_monotonic > self.camera.stale_after
+            or not frame.is_fresh(
+                time.monotonic(), self.camera.source_epoch, self.camera.stale_after
+            )
         ):
             return None, self._empty("Perception preview expired")
         return frame, result
@@ -123,9 +124,9 @@ class FrameWorker:
         """检查帧的来源批次、显式失效事件和主机接收时间，判断能否继续使用。"""
         return (
             not self._stop.is_set()
-            and frame.source_epoch == self.camera.source_epoch
-            and not (frame.invalidated and frame.invalidated.is_set())
-            and time.monotonic() - frame.received_monotonic <= self.camera.stale_after
+            and frame.is_fresh(
+                time.monotonic(), self.camera.source_epoch, self.camera.stale_after
+            )
         )
 
     def start(self):

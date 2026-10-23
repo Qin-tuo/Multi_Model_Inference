@@ -23,47 +23,16 @@ import threading
 import time
 import uuid
 import os
-from dataclasses import dataclass
 from collections import deque
 from typing import Optional
 
 import cv2
 import numpy as np
 
+from app.contracts import FrameSnapshot
+
 MAX_SPEECH_SECS = 16
 PRE_SPEECH_SECS = 0.5
-
-
-@dataclass(frozen=True)
-class FrameSnapshot:
-    """一帧 RGB/JPEG、可选米制深度及失效事件的不可变容器；默认数组由消费者只读共享。"""
-
-    frame_id: int
-    source_epoch: str
-    received_monotonic: float
-    bgr: np.ndarray
-    jpeg: bytes
-    time_kind: str = "host_receive_monotonic"
-    invalidated: threading.Event | None = None
-    depth_m: np.ndarray | None = None
-    depth_valid: np.ndarray | None = None
-    sensor: dict | None = None
-
-    def metadata(self):
-        """生成可序列化的帧身份、主机接收时间和图像几何信息，不携带大图像数组。"""
-        result = {
-            "frame_id": self.frame_id,
-            "source_epoch": self.source_epoch,
-            "received_monotonic": self.received_monotonic,
-            "time_kind": self.time_kind,
-            "width": self.bgr.shape[1],
-            "height": self.bgr.shape[0],
-            "stride": self.bgr.strides[0],
-            "encoding": "bgr8",
-        }
-        if self.sensor is not None:
-            result["sensor"] = self.sensor
-        return result
 
 
 class Camera:
